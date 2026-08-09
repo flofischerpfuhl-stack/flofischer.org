@@ -4,95 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aliens und Katholizismus — Seele</title>
-  <meta name="description" content="Drake-Gleichung, Abiogenese, Carter-Argument und katholische Perspektive auf außerirdisches Leben." />
   <link rel="stylesheet" href="/shared/tokens.css" />
   <link rel="stylesheet" href="/shared/base.css" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body class="site-seele">
-  <div class="stripe"></div>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a class="brand" href="/">Seele <span class="dot"></span></a>
-      <nav class="nav">
-        <a href="/">Blog</a>
-        <a class="twin-link" href="https://gehirn.flofischer.org/" data-local="/__gehirn/">Gehirn →</a>
-      </nav>
-    </div>
-  </header>
-
-  <header class="post-hero">
-    <div class="wrap">
-      <a class="back-link" href="/">← Alle Texte</a>
-      <div class="meta-row">
-        <span>Essay · Naturphilosophie</span>
-        <span>Projektnotiz</span>
-      </div>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="/">Seele</a>
+      <nav class="nav"><a href="/">Blog</a></nav>
+    </header>
+    <article class="prose">
+      <p class="meta"><a href="/">←</a> · Essay</p>
       <h1>Aliens und Katholizismus</h1>
-    </div>
-  </header>
-
-  <main class="section" style="padding-top:2rem">
-    <article class="wrap prose">
       <p>
-        Die Frage nach außerirdischem Leben ist nicht nur spekulative Sci‑Fi —
-        sie berührt Schöpfungstheologie, Wahrscheinlichkeit und die Grenzen
-        empirischer Inference.
-      </p>
-
-      <h2>Drake und die spekulativen Variablen</h2>
-      <p>
-        Die Drake-Gleichung multipliziert Faktoren von Sternentstehung bis zur
-        Lebensdauer technischer Zivilisationen. Das Problem: die letzten
-        Variablen sind spekulativ. Vor allem der Anteil von Planeten mit Leben
-        hängt davon ab, wie Leben entsteht.
+        Die Drake-Gleichung multipliziert spekulative Faktoren.
+        Ohne Kenntnis der Abiogenese lassen sich Raten nicht seriös setzen.
       </p>
       <p>
-        Nimmt man direkte Schöpfung an, ist das eine freie Willensentscheidung
-        Gottes — keine berechenbare Wahrscheinlichkeit. Nutzt Gott natürliche
-        Ursachen (Abiogenese), bleibt der Prozess wissenschaftlich ungelöst;
-        ohne ihn lässt sich schlecht eine Rate ansetzen.
-      </p>
-
-      <h2>Ist unsere Existenz Evidence für leichte Abiogenese?</h2>
-      <p>
-        Intuitiv: Leben auf der Erde scheint Evidence dafür, dass Abiogenese
-        „einfach“ ist. Das Carter-Argument bestritt das lange mit einem
-        Bayes-Argument, das <em>P(LoE | AB easy) = P(LoE | AB hard) = 1</em>
-        setzt, weil Leben auf der Erde ein etablierter Fakt sei — und daraus
-        folgert, die Posterior falle auf die Prior zurück.
+        Das Carter-Argument bestritt lange, dass Leben auf der Erde Evidence
+        für leichte Abiogenese sei. Whitmire (2022) zeigt den Fehler
+        (<em>Old Evidence Problem</em>): hypothetische Conditionals statt
+        Likelihood 1 für etablierte Fakten.
       </p>
       <p>
-        Whitmire (2022) identifiziert hier das <em>Old Evidence Problem</em>:
-        man muss hypothetische Conditionals betrachten
-        (<em>P(LoE prior to LoE | …)</em>), nicht den Fakt mit Wahrscheinlichkeit 1
-        in die Likelihood stecken. Eine Bostrom-Parodie mit Urnen macht den
-        Fehlschluss anschaulich. Whitmires Korrektur ergibt eine sehr hohe
-        Wahrscheinlichkeit dafür, dass Abiogenese „einfach“ ist — wobei
-        „einfach“ weiterhin unscharf bleibt.
-      </p>
-      <p>
-        Fazit im Essay: Die Drake-Problematik bleibt; präzise Wahrscheinlichkeiten
-        sind nicht bezifferbar. Für den Glauben ist entscheidend, was aus
-        möglichem außerirdischen Leben <em>theologisch</em> folgt — nicht, ob
-        die Galaxis voll oder leer ist.
-      </p>
-
-      <p style="margin-top:2.5rem;padding-top:1.2rem;border-top:1px solid var(--line);font-family:var(--font-sans);font-size:0.9rem;color:var(--muted)">
-        Quelle: <code>03_Projekte/Aliens und Katholizismus.md</code>
+        Für den Glauben zählt weniger, ob die Galaxis voll oder leer ist,
+        als was aus möglichem außerirdischen Leben theologisch folgt.
       </p>
     </article>
-  </main>
-
-  <footer class="site-footer">
-    <div class="wrap footer-grid">
-      <div><a href="/">← Seele</a></div>
-      <div>flofischer.org</div>
-    </div>
-  </footer>
-  <script>
-    const isLocal = /localhost|127\.0\.0\.1|workers\.dev/.test(location.hostname);
-    if (isLocal) document.querySelectorAll("a[data-local]").forEach((a) => { a.href = a.dataset.local; });
-  </script>
+    <footer class="foot"><a href="/">Seele</a></footer>
+  </div>
 </body>
 </html>

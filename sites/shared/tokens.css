@@ -1,10 +1,4 @@
-/* flofischer design tokens
- * Display face: Marlboro (Typographer Mediengestaltung)
- * https://www.1001fonts.com/marlboro-font.html
- * License: 1001Fonts Free For Commercial Use (FFC) — see fonts/1001fonts-marlboro-eula.txt
- */
-@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=Inter:wght@400;500;600;700&display=swap");
-
+/* Marlboro — https://www.1001fonts.com/marlboro-font.html (FFC) */
 @font-face {
   font-family: "Marlboro";
   src:
@@ -16,35 +10,20 @@
 }
 
 :root {
-  /* Display = echte Marlboro (western slab / narrow) */
-  --font-display: "Marlboro", "Impact", "Arial Narrow", sans-serif;
-  --font-serif: "Source Serif 4", "Georgia", "Times New Roman", serif;
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Marlboro", "Impact", sans-serif;
+  --font-body: "Times New Roman", "Times", "Liberation Serif", serif;
+  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --white: #ffffff;
-  --paper: #f7f5f1;
-  --ink: #121212;
-  --ink-soft: #3a3a3a;
-  --muted: #6b6b6b;
-  --line: #e4e0d8;
+  --bg: #fff;
+  --fg: #111;
+  --muted: #666;
+  --line: #111;
 
-  /* Seele — white / blue */
-  --seele: #1a3a6b;
-  --seele-deep: #0c1f3d;
-  --seele-mid: #2a5a9e;
-  --seele-soft: #d6e4f5;
-  --seele-glow: #4a7ec7;
+  --seele: #123a7a;
+  --gehirn: #b01020;
 
-  /* Gehirn — white / red (Marlboro red family) */
-  --gehirn: #c41230;
-  --gehirn-deep: #7a0a1c;
-  --gehirn-mid: #e02040;
-  --gehirn-soft: #f8d4d9;
-  --gehirn-glow: #ff4d6a;
-
-  --radius: 2px;
-  --max: 1120px;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --max: 36rem;
+  --pad: 1.25rem;
 }
 
 *,
@@ -54,20 +33,17 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  color-scheme: light;
 }
 
 body {
   margin: 0;
-  color: var(--ink);
-  background: var(--white);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-img {
-  max-width: 100%;
-  display: block;
 }
 
 a {
@@ -75,16 +51,16 @@ a {
 }
 
 ::selection {
-  background: var(--ink);
-  color: var(--white);
+  background: var(--fg);
+  color: var(--bg);
 }
 
-.site-seele ::selection {
+body.site-seele ::selection {
   background: var(--seele);
-  color: var(--white);
+  color: #fff;
 }
 
-.site-gehirn ::selection {
+body.site-gehirn ::selection {
   background: var(--gehirn);
-  color: var(--white);
+  color: #fff;
 }

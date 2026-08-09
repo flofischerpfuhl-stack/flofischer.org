@@ -90,31 +90,22 @@ legt die Records i. d. R. automatisch an. Alternativ manuell:
 
 Zone muss Active auf demselben Account sein, in dem der Worker liegt.
 
-## Gehirn — Projekt-Quellen auf dem Laptop
+## Öffentlich auf Gehirn
 
-| Projekt | Pfad | Remote |
-|---------|------|--------|
-| Fernwork | `003_Projekte/17_fernwork` | github.com/flofischerpfuhl-stack/fernwork |
-| HimmelCAD | `003_Projekte/10_himmelcad` | himmelcad / himmelcad-public |
-| SupraBench | `003_Projekte/13_suprabench` | suprabench.com + GitHub |
-| Kapelle Web | `003_Projekte/11_Kapelle Webseite` | — |
-| Vermessung | `003_Projekte/18_Vermessung Webseite` | — |
+Nur **public** Repos / Live-Sites:
 
-## Seele — Text-Quellen
+- SupraBench (suprabench.com)
+- HimmelCAD public mirror
+- Paper2Form Landingpage
+- xivreview
 
-Aus `091_Software/32_Obsidian/`:
-
-- Gottesbeweise, FSSPX-Verteidigung, Aliens und Katholizismus
-- Antwort an Pater Kusmenko, Eucharistische Wunder, Vorsehung und freier Wille
-
-Posts sind **Entwurfs-Exzerpte** — Volltext-Migration folgt.
+Private Projekte (Fernwork, …) werden **nicht** gelistet.
 
 ## Stil
 
-Display-Schrift: **[Marlboro](https://www.1001fonts.com/marlboro-font.html)**  
-(Typographer Mediengestaltung, [FFC – free for commercial use](https://www.1001fonts.com/licenses/ffc.html); Dateien unter `sites/shared/fonts/`).  
-Seele-Body: Source Serif 4. Gehirn-Body: Inter.  
-Farben: Seele `#1a3a6b` / Gehirn `#c41230` auf Weiß.
+Minimal: Weiß, schwarze Linien, keine Gradienten.  
+Display: **[Marlboro](https://www.1001fonts.com/marlboro-font.html)** (FFC).  
+Seele `#123a7a` · Gehirn `#b01020`.
 
 ## Lizenz
 

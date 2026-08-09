@@ -1,260 +1,81 @@
-/* Root portal — split Seele / Gehirn */
+/* Root hub — two columns, no decoration */
 
 body.portal {
-  font-family: var(--font-sans);
   min-height: 100vh;
-  background: var(--ink);
-  color: var(--white);
-  overflow-x: hidden;
+  font-family: var(--font-ui);
 }
 
-.portal-top {
-  position: absolute;
-  inset: 0 0 auto 0;
-  z-index: 5;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem clamp(1.1rem, 3vw, 2.5rem);
-  pointer-events: none;
-}
-
-.portal-top a,
-.portal-top span {
-  pointer-events: auto;
-}
-
-.portal-mark {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  letter-spacing: 0.18em;
-  text-decoration: none;
-  color: var(--white);
-}
-
-.portal-mark em {
-  font-style: normal;
-  opacity: 0.55;
-}
-
-.portal-meta {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  opacity: 0.7;
-}
-
-.split {
+.portal-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   min-height: 100vh;
 }
 
-.half {
-  position: relative;
+.portal-grid a {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: clamp(1.5rem, 4vw, 3.5rem);
-  padding-top: 5.5rem;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 3rem);
   text-decoration: none;
-  color: inherit;
-  overflow: hidden;
-  min-height: 100vh;
-  transition: filter 0.4s var(--ease);
+  color: var(--fg);
+  background: var(--bg);
+  min-height: 50vh;
 }
 
-.half::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.12;
-  background-image: linear-gradient(
-      rgba(255, 255, 255, 0.05) 1px,
-      transparent 1px
-    ),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 48px 48px;
-  pointer-events: none;
+.portal-grid a:first-child {
+  border-right: 1px solid var(--line);
 }
 
-.half::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 20%,
-    rgba(0, 0, 0, 0.55) 100%
-  );
-  pointer-events: none;
+.portal-grid a:hover .name {
+  text-decoration: underline;
 }
 
-.half-seele {
-  background: radial-gradient(
-      120% 80% at 20% 10%,
-      var(--seele-mid) 0%,
-      var(--seele-deep) 55%,
-      #050b16 100%
-    );
+.portal-grid .name {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 10vw, 5.5rem);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 0.6rem;
 }
 
-.half-gehirn {
-  background: radial-gradient(
-      120% 80% at 80% 10%,
-      var(--gehirn-mid) 0%,
-      var(--gehirn-deep) 55%,
-      #140308 100%
-    );
+.portal-grid .seele .name {
+  color: var(--seele);
 }
 
-.half:hover {
-  filter: brightness(1.08);
+.portal-grid .gehirn .name {
+  color: var(--gehirn);
 }
 
-.half-content {
-  position: relative;
+.portal-grid .sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+  max-width: 16rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.portal-mark {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
   z-index: 2;
-  max-width: 28rem;
-}
-
-.half .label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  opacity: 0.75;
-  margin-bottom: 0.85rem;
-}
-
-.half h1 {
-  font-family: var(--font-display);
-  font-size: clamp(3.6rem, 9vw, 7.5rem);
-  letter-spacing: 0.06em;
-  line-height: 0.88;
-  margin: 0 0 1rem;
-  text-transform: uppercase;
-}
-
-.half p {
-  font-size: 1rem;
-  line-height: 1.55;
-  opacity: 0.88;
-  max-width: 26rem;
-  margin: 0 0 1.5rem;
-}
-
-.half .cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.85);
-  padding-bottom: 0.35rem;
-  transition: gap 0.25s var(--ease);
-}
-
-.half:hover .cta {
-  gap: 0.9rem;
-}
-
-.center-brand {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 6;
-  text-align: center;
   pointer-events: none;
 }
 
-.center-brand .ring {
-  width: clamp(5.5rem, 12vw, 7.5rem);
-  height: clamp(5.5rem, 12vw, 7.5rem);
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  background: rgba(10, 10, 10, 0.55);
-  backdrop-filter: blur(8px);
-  display: grid;
-  place-items: center;
-  margin-inline: auto;
-  box-shadow: 0 0 0 8px rgba(0, 0, 0, 0.2);
-}
-
-.center-brand .ring span {
-  font-family: var(--font-display);
-  font-size: clamp(0.95rem, 2vw, 1.15rem);
-  letter-spacing: 0.14em;
-  line-height: 1.1;
-}
-
-.center-brand .ring small {
-  display: block;
-  font-family: var(--font-sans);
-  font-size: 0.55rem;
-  letter-spacing: 0.2em;
-  opacity: 0.65;
-  margin-top: 0.2rem;
-}
-
-.divider {
-  position: fixed;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(255, 255, 255, 0.25);
-  z-index: 4;
-  pointer-events: none;
-}
-
-.watermark {
-  position: absolute;
-  top: 18%;
-  font-family: var(--font-display);
-  font-size: clamp(6rem, 18vw, 14rem);
-  letter-spacing: 0.04em;
-  opacity: 0.07;
-  line-height: 1;
-  pointer-events: none;
-  z-index: 1;
-  user-select: none;
-}
-
-.half-seele .watermark {
-  left: -4%;
-}
-
-.half-gehirn .watermark {
-  right: -4%;
-  text-align: right;
-}
-
-@media (max-width: 820px) {
-  .split {
+@media (max-width: 640px) {
+  .portal-grid {
     grid-template-columns: 1fr;
   }
 
-  .half {
-    min-height: 58vh;
-  }
-
-  .divider {
-    display: none;
-  }
-
-  .center-brand {
-    top: auto;
-    bottom: 1.2rem;
-    transform: translateX(-50%);
-  }
-
-  .center-brand .ring {
-    width: 4.6rem;
-    height: 4.6rem;
+  .portal-grid a:first-child {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
   }
 }
