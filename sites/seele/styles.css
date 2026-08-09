@@ -1,0 +1,154 @@
+/* Seele — white / blue, contemplative Marlboro display + serif body */
+
+body.site-seele {
+  font-family: var(--font-serif);
+  background: var(--white);
+  color: var(--ink);
+}
+
+.hero {
+  padding: 3.5rem 0 2.5rem;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, var(--seele-soft) 0%, transparent 70%),
+    var(--white);
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 2.5rem;
+  align-items: end;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(3.4rem, 9vw, 6.4rem);
+  letter-spacing: 0.05em;
+  line-height: 0.9;
+  margin: 0.55rem 0 1rem;
+  text-transform: uppercase;
+  color: var(--seele-deep);
+}
+
+.hero .lead {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  max-width: 34rem;
+}
+
+.hero-aside {
+  border: 1px solid var(--seele-soft);
+  background: var(--white);
+  padding: 1.25rem 1.3rem 1.4rem;
+}
+
+.hero-aside h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.65rem;
+  color: var(--seele);
+}
+
+.hero-aside p {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.hero-aside .quote {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  font-style: italic;
+  color: var(--seele-deep);
+}
+
+.stripe {
+  height: 4px;
+  background: linear-gradient(90deg, var(--seele-deep), var(--seele-glow));
+}
+
+.about-band {
+  background: var(--seele-deep);
+  color: var(--white);
+  padding: 3.2rem 0;
+}
+
+.about-band .eyebrow {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.about-band h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  letter-spacing: 0.05em;
+  margin: 0.5rem 0 1rem;
+}
+
+.about-band p {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 46rem;
+  opacity: 0.92;
+  margin: 0 0 1rem;
+}
+
+.about-band a {
+  color: #9ec0ef;
+}
+
+.post-hero {
+  padding: 2.8rem 0 1.2rem;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--seele-soft), transparent 80%);
+}
+
+.post-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  letter-spacing: 0.04em;
+  line-height: 0.95;
+  margin: 0.4rem 0 0;
+  color: var(--seele-deep);
+  max-width: 18ch;
+}
+
+.back-link {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--seele);
+}
+
+.topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.topic {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid var(--seele-soft);
+  color: var(--seele);
+  padding: 0.4rem 0.7rem;
+  background: var(--white);
+}
+
+@media (max-width: 800px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+  }
+}

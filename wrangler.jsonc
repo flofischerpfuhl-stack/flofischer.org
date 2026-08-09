@@ -1,0 +1,29 @@
+// Cloudflare Workers + Static Assets
+// Host-based routing:
+//   flofischer.org        → sites/root
+//   seele.flofischer.org  → sites/seele  (Apologetik-Blog, blau)
+//   gehirn.flofischer.org → sites/gehirn (Apps & Projekte, rot)
+//
+// Deploy: push to main (GitHub Action) oder `npm run deploy`
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "flofischer",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "./sites",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+  // Custom domains / routes werden nach dem ersten Deploy
+  // in der Cloudflare-UI oder per API angebunden:
+  //   flofischer.org
+  //   www.flofischer.org
+  //   seele.flofischer.org
+  //   gehirn.flofischer.org
+}

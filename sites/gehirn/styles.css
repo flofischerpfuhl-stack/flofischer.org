@@ -1,0 +1,212 @@
+/* Gehirn — white / Marlboro red, product-forward */
+
+body.site-gehirn {
+  font-family: var(--font-sans);
+  background: var(--white);
+  color: var(--ink);
+}
+
+.stripe {
+  height: 4px;
+  background: linear-gradient(90deg, var(--gehirn-deep), var(--gehirn), var(--gehirn-glow));
+}
+
+.hero {
+  padding: 3.4rem 0 2.6rem;
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse 80% 60% at 100% 0%, var(--gehirn-soft), transparent 55%),
+    var(--white);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(3.4rem, 9vw, 6.4rem);
+  letter-spacing: 0.05em;
+  line-height: 0.9;
+  margin: 0.55rem 0 1rem;
+  text-transform: uppercase;
+  color: var(--gehirn-deep);
+}
+
+.hero .lead {
+  max-width: 36rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.project-card {
+  border: 1px solid var(--line);
+  background: var(--white);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100%;
+  transition: border-color 0.25s var(--ease), transform 0.25s var(--ease),
+    box-shadow 0.25s var(--ease);
+  text-decoration: none;
+  color: inherit;
+}
+
+.project-card:hover {
+  border-color: var(--gehirn);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 44px -28px rgba(196, 18, 48, 0.55);
+}
+
+.project-card .banner {
+  aspect-ratio: 16 / 8;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+
+.project-card .banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.project-card .banner strong {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  letter-spacing: 0.08em;
+  color: var(--white);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.25);
+}
+
+.banner-fernwork {
+  background: linear-gradient(135deg, #1a1a1a, #3d3d3d);
+}
+
+.banner-himmel {
+  background: linear-gradient(135deg, #0b1f3a, #1e5a8c 60%, #4a90c2);
+}
+
+.banner-supra {
+  background: linear-gradient(135deg, #1a0a12, #c41230 70%, #ff6b81);
+}
+
+.banner-misc {
+  background: linear-gradient(135deg, #222, #555);
+}
+
+.project-card .body {
+  padding: 1.25rem 1.3rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.project-card .status {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gehirn);
+}
+
+.project-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  letter-spacing: 0.05em;
+  margin: 0;
+  line-height: 1;
+}
+
+.project-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  flex: 1;
+}
+
+.project-card .links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.project-card .links span {
+  color: var(--gehirn);
+}
+
+.stack-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+
+.stack-item {
+  border: 1px solid var(--line);
+  padding: 1rem 1.1rem;
+  background: var(--paper);
+}
+
+.stack-item h4 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.35rem;
+}
+
+.stack-item p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.bio-panel {
+  border: 1px solid var(--line);
+  padding: 1.5rem 1.4rem;
+  background: linear-gradient(180deg, #fff, var(--paper));
+}
+
+.bio-panel h2 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.75rem;
+  color: var(--gehirn-deep);
+}
+
+.bio-panel p {
+  margin: 0 0 0.85rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.bio-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.bio-meta span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  padding: 0.35rem 0.6rem;
+  background: var(--white);
+}
