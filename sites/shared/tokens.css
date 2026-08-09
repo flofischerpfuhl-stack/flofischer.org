@@ -1,9 +1,23 @@
-/* flofischer design tokens — Marlboro-inspired condensed bold display type */
-@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=Inter:wght@400;500;600;700&display=swap");
+/* flofischer design tokens
+ * Display face: Marlboro (Typographer Mediengestaltung)
+ * https://www.1001fonts.com/marlboro-font.html
+ * License: 1001Fonts Free For Commercial Use (FFC) — see fonts/1001fonts-marlboro-eula.txt
+ */
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=Inter:wght@400;500;600;700&display=swap");
+
+@font-face {
+  font-family: "Marlboro";
+  src:
+    url("/shared/fonts/Marlboro.woff2") format("woff2"),
+    url("/shared/fonts/Marlboro.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
-  /* Display = Marlboro-like condensed caps */
-  --font-display: "Bebas Neue", "Impact", "Arial Narrow", sans-serif;
+  /* Display = echte Marlboro (western slab / narrow) */
+  --font-display: "Marlboro", "Impact", "Arial Narrow", sans-serif;
   --font-serif: "Source Serif 4", "Georgia", "Times New Roman", serif;
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 

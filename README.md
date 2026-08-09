@@ -111,7 +111,8 @@ Posts sind **Entwurfs-Exzerpte** — Volltext-Migration folgt.
 
 ## Stil
 
-Display-Schrift: **Bebas Neue** (Marlboro-ähnliche, kondensierte Caps).  
+Display-Schrift: **[Marlboro](https://www.1001fonts.com/marlboro-font.html)**  
+(Typographer Mediengestaltung, [FFC – free for commercial use](https://www.1001fonts.com/licenses/ffc.html); Dateien unter `sites/shared/fonts/`).  
 Seele-Body: Source Serif 4. Gehirn-Body: Inter.  
 Farben: Seele `#1a3a6b` / Gehirn `#c41230` auf Weiß.
 

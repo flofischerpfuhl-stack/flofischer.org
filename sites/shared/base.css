@@ -27,7 +27,8 @@
 .display {
   font-family: var(--font-display);
   font-weight: 400;
-  letter-spacing: 0.04em;
+  /* Marlboro is already a wide western slab — keep tracking tight */
+  letter-spacing: 0.02em;
   line-height: 0.92;
   text-transform: uppercase;
   margin: 0;
