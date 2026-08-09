@@ -1,0 +1,384 @@
+/* ═══════════════════════════════════════════
+   02 PRODUCER — Khegai inspired
+   Oswald condensed, black field, work index,
+   ALL CAPS navigation, cinematic spacing
+   ═══════════════════════════════════════════ */
+
+html[data-design="2"] {
+  --bg: #0a0a0a;
+  --ink: #f5f5f5;
+  --muted: #8a8a8a;
+  --line: #2a2a2a;
+  --acc: #f5f5f5;
+  --font-d: "Oswald", "Arial Narrow", sans-serif;
+  --font-b: Inter, system-ui, sans-serif;
+  --max: 1100px;
+  --pad: clamp(1.25rem, 3vw, 2.75rem);
+}
+
+html[data-design="2"] body.realm-seele {
+  --acc: #6b9fff;
+}
+
+html[data-design="2"] body.realm-gehirn {
+  --acc: #ff5a6a;
+}
+
+html[data-design="2"] body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-b);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+html[data-design="2"] ::selection {
+  background: var(--acc);
+  color: #000;
+}
+
+html[data-design="2"] .shell {
+  width: min(var(--max), 100% - 2 * var(--pad));
+  margin-inline: auto;
+}
+
+html[data-design="2"] .site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 0 2rem;
+  border-bottom: 1px solid var(--line);
+}
+
+html[data-design="2"] .site-header .mark {
+  font-family: var(--font-d);
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--acc);
+}
+
+html[data-design="2"] .site-header nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+html[data-design="2"] .site-header nav a {
+  font-family: var(--font-d);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+
+html[data-design="2"] .site-header nav a:hover,
+html[data-design="2"] .site-header nav a[aria-current="page"] {
+  color: var(--ink);
+}
+
+html[data-design="2"] .hero {
+  padding: 3rem 0 2rem;
+}
+
+html[data-design="2"] .hero-title {
+  font-family: var(--font-d);
+  font-weight: 500;
+  font-size: clamp(3.5rem, 12vw, 8rem);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--acc);
+}
+
+html[data-design="2"] .hero-title em {
+  font-style: normal;
+  color: var(--ink);
+}
+
+html[data-design="2"] .hero-rule {
+  display: none;
+}
+
+html[data-design="2"] .hero-sub {
+  margin-top: 1.5rem;
+  max-width: 32rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: var(--font-d);
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+/* portal */
+html[data-design="2"] .portal {
+  min-height: calc(100vh - 4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  padding: 4rem 0;
+}
+
+html[data-design="2"] .portal a {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 1rem;
+  padding: 2rem 0;
+  border-top: 1px solid var(--line);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+html[data-design="2"] .portal a:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+html[data-design="2"] .portal a:hover .name {
+  color: var(--ink);
+}
+
+html[data-design="2"] .portal .kicker {
+  font-family: var(--font-d);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+html[data-design="2"] .portal .name {
+  font-family: var(--font-d);
+  font-size: clamp(3rem, 11vw, 7.5rem);
+  font-weight: 500;
+  line-height: 0.88;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+html[data-design="2"] .portal .seele .name {
+  color: #6b9fff;
+}
+
+html[data-design="2"] .portal .gehirn .name {
+  color: #ff5a6a;
+}
+
+html[data-design="2"] .portal .desc {
+  font-family: var(--font-d);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  align-self: end;
+  text-align: right;
+  max-width: 12rem;
+}
+
+html[data-design="2"] .portal .name em {
+  font-style: normal;
+}
+
+/* index list */
+html[data-design="2"] .index {
+  margin-top: 1rem;
+}
+
+html[data-design="2"] .index a {
+  display: grid;
+  grid-template-columns: 3rem 1fr auto;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--line);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+html[data-design="2"] .index a:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+html[data-design="2"] .index a:hover {
+  opacity: 0.7;
+}
+
+html[data-design="2"] .index .num {
+  font-family: var(--font-d);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+html[data-design="2"] .index .title {
+  font-family: var(--font-d);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+html[data-design="2"] .index .title em {
+  font-style: normal;
+}
+
+html[data-design="2"] .index .meta {
+  font-family: var(--font-d);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+html[data-design="2"] .index .blurb {
+  grid-column: 2 / -1;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  max-width: 34rem;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-b);
+}
+
+/* article */
+html[data-design="2"] .article {
+  max-width: 38rem;
+  padding: 2rem 0 3rem;
+}
+
+html[data-design="2"] .article .crumb {
+  font-family: var(--font-d);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2rem;
+}
+
+html[data-design="2"] .article .crumb a {
+  text-decoration: none;
+  color: var(--acc);
+}
+
+html[data-design="2"] .article h1 {
+  font-family: var(--font-d);
+  font-size: clamp(2.4rem, 7vw, 4rem);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 0.95;
+  color: var(--acc);
+  margin-bottom: 1.75rem;
+}
+
+html[data-design="2"] .article h2 {
+  font-family: var(--font-d);
+  font-size: 1.15rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 2.25rem 0 0.75rem;
+  color: var(--acc);
+}
+
+html[data-design="2"] .article p,
+html[data-design="2"] .article li {
+  color: #c8c8c8;
+  margin-bottom: 1rem;
+  line-height: 1.65;
+}
+
+html[data-design="2"] .article ol,
+html[data-design="2"] .article ul {
+  padding-left: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+html[data-design="2"] .article ol {
+  list-style: decimal;
+}
+
+html[data-design="2"] .article ul {
+  list-style: disc;
+}
+
+html[data-design="2"] .article blockquote {
+  border-left: 2px solid var(--acc);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  color: var(--ink);
+  font-family: var(--font-d);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+html[data-design="2"] .site-footer {
+  border-top: 1px solid var(--line);
+  margin-top: 4rem;
+  padding: 1.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-d);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+html[data-design="2"] .site-footer a {
+  text-decoration: none;
+  color: var(--muted);
+}
+
+html[data-design="2"] .site-footer a:hover {
+  color: var(--ink);
+}
+
+/* switcher on dark */
+html[data-design="2"] .ds-inner {
+  background: rgba(20, 20, 20, 0.92);
+  border-color: #333;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
+html[data-design="2"] .ds-label,
+html[data-design="2"] .ds-name {
+  color: #ccc;
+}
+
+html[data-design="2"] .ds-btns button {
+  color: #ddd;
+}
+
+html[data-design="2"] .ds-btns button:hover {
+  background: #222;
+}
+
+html[data-design="2"] .ds-btns button[aria-pressed="true"] {
+  background: #f5f5f5;
+  color: #000;
+  border-color: #f5f5f5;
+}
+
+@media (max-width: 640px) {
+  html[data-design="2"] .portal a,
+  html[data-design="2"] .index a {
+    grid-template-columns: 1fr;
+  }
+  html[data-design="2"] .portal .desc,
+  html[data-design="2"] .index .meta {
+    text-align: left;
+  }
+}

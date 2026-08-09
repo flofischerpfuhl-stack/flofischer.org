@@ -1,0 +1,139 @@
+/* Shared reset + design-switcher chrome */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap");
+
+@font-face {
+  font-family: "Marlboro";
+  src:
+    url("/shared/fonts/Marlboro.woff2") format("woff2"),
+    url("/shared/fonts/Marlboro.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+ul {
+  list-style: none;
+}
+
+/* —— Design switcher (fixed, all themes) —— */
+.design-switcher {
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 1.5rem);
+}
+
+.ds-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.55rem 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.ds-label {
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+}
+
+.ds-btns {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.ds-btns button {
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.72rem;
+  border: 1px solid transparent;
+  color: #333;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ds-btns button:hover {
+  background: #f0f0f0;
+}
+
+.ds-btns button[aria-pressed="true"] {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.ds-name {
+  font-weight: 600;
+  color: #111;
+  min-width: 4.5rem;
+  padding-right: 0.35rem;
+  white-space: nowrap;
+}
+
+/* page padding for switcher */
+body {
+  padding-bottom: 4.5rem;
+}
+
+/* common semantic hooks used by all designs */
+.page {
+  width: 100%;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

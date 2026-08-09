@@ -1,16 +1,35 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-design="1">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>404</title>
-  <link rel="stylesheet" href="/shared/tokens.css" />
-  <link rel="stylesheet" href="/shared/base.css" />
+  <script>
+    try {
+      var d = localStorage.getItem("ff-design");
+      if (d) document.documentElement.setAttribute("data-design", d);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="/shared/designs/base.css" />
+  <link rel="stylesheet" href="/shared/designs/01-atelier.css" />
+  <link rel="stylesheet" href="/shared/designs/02-producer.css" />
+  <link rel="stylesheet" href="/shared/designs/03-campus.css" />
+  <link rel="stylesheet" href="/shared/designs/04-catalog.css" />
+  <link rel="stylesheet" href="/shared/designs/05-ink.css" />
 </head>
-<body>
-  <main class="center wrap">
-    <h1>404</h1>
-    <p class="meta"><a href="/">← flofischer.org</a></p>
-  </main>
+<body class="realm-hub">
+  <div class="page shell">
+    <header class="site-header">
+      <a class="mark" href="/">Hub</a>
+      <nav><a href="/">Home</a></nav>
+    </header>
+    <header class="hero">
+      <h1 class="hero-title">404</h1>
+      <div class="hero-rule"></div>
+      <p class="hero-sub"><a href="/">Zurück</a></p>
+    </header>
+  </div>
+  <div class="design-switcher" data-design-switcher></div>
+  <script src="/shared/switcher.js"></script>
 </body>
 </html>

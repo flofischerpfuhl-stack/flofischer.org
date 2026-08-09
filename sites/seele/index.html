@@ -1,80 +1,89 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-design="1">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Seele — katholische Apologetik." />
   <title>Seele</title>
-  <link rel="stylesheet" href="/shared/tokens.css" />
-  <link rel="stylesheet" href="/shared/base.css" />
-  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    try {
+      var d = localStorage.getItem("ff-design");
+      if (d) document.documentElement.setAttribute("data-design", d);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="/shared/designs/base.css" />
+  <link rel="stylesheet" href="/shared/designs/01-atelier.css" />
+  <link rel="stylesheet" href="/shared/designs/02-producer.css" />
+  <link rel="stylesheet" href="/shared/designs/03-campus.css" />
+  <link rel="stylesheet" href="/shared/designs/04-catalog.css" />
+  <link rel="stylesheet" href="/shared/designs/05-ink.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%23123a7a' width='32' height='32'/%3E%3C/svg%3E" />
 </head>
-<body class="site-seele">
-  <div class="wrap">
-    <header class="top">
-      <a class="brand" href="/">Seele</a>
-      <nav class="nav">
+<body class="realm-seele">
+  <div class="page shell">
+    <header class="site-header">
+      <a class="mark" href="/">Seele</a>
+      <nav>
+        <a href="/" aria-current="page">Texte</a>
         <a href="https://gehirn.flofischer.org/" data-local="/__gehirn/">Gehirn</a>
         <a href="https://flofischer.org/" data-local="/__root/">Hub</a>
       </nav>
     </header>
 
-    <main>
-      <h1>Seele</h1>
-      <p class="lead">Texte zur katholischen Apologetik.</p>
+    <header class="hero">
+      <h1 class="hero-title">Rede und<br />Antw<em>o</em>rt</h1>
+      <div class="hero-rule" aria-hidden="true"></div>
+      <p class="hero-sub">Katholische Apologetik — kurz und argumentierend.</p>
+    </header>
 
-      <ul class="list">
-        <li>
-          <a href="/posts/gottesbeweise.html">
-            <div class="t">Gottesbeweise</div>
-            <div class="d">Kalam, Moral, Teleologie, Auferstehung</div>
-          </a>
-        </li>
-        <li>
-          <a href="/posts/fsspx-verteidigung.html">
-            <div class="t">FSSPX</div>
-            <div class="d">Modernismus und Bischofsweihen</div>
-          </a>
-        </li>
-        <li>
-          <a href="/posts/aliens-katholizismus.html">
-            <div class="t">Aliens und Katholizismus</div>
-            <div class="d">Abiogenese, Drake, Carter</div>
-          </a>
-        </li>
-        <li>
-          <a href="/posts/antwort-kusmenko.html">
-            <div class="t">Antwort an Pater Kusmenko</div>
-            <div class="d">Sonntagspflicht und Novus Ordo</div>
-          </a>
-        </li>
-        <li>
-          <a href="/posts/eucharistische-wunder.html">
-            <div class="t">Eucharistische Wunder</div>
-            <div class="d">Definition, Lanciano</div>
-          </a>
-        </li>
-        <li>
-          <a href="/posts/vorsehung-freier-wille.html">
-            <div class="t">Vorsehung und freier Wille</div>
-            <div class="d">Allwissenheit und Freiheit</div>
-          </a>
-        </li>
-      </ul>
+    <main>
+      <div class="index">
+        <a href="/posts/gottesbeweise.html">
+          <span class="num">01</span>
+          <span class="title">G<em>o</em>ttesbeweise</span>
+          <span class="meta">Vortrag</span>
+          <span class="blurb">Kalam, Moral, Teleologie, Auferstehung.</span>
+        </a>
+        <a href="/posts/fsspx-verteidigung.html">
+          <span class="num">02</span>
+          <span class="title">FSSPX</span>
+          <span class="meta">Ekklesiologie</span>
+          <span class="blurb">Modernismus und Bischofsweihen.</span>
+        </a>
+        <a href="/posts/aliens-katholizismus.html">
+          <span class="num">03</span>
+          <span class="title">Aliens und Kath<em>o</em>lizismus</span>
+          <span class="meta">Essay</span>
+          <span class="blurb">Abiogenese, Drake, Carter.</span>
+        </a>
+        <a href="/posts/antwort-kusmenko.html">
+          <span class="num">04</span>
+          <span class="title">Antwort an Pater Kusmenk<em>o</em></span>
+          <span class="meta">Disputation</span>
+          <span class="blurb">Sonntagspflicht und Novus Ordo.</span>
+        </a>
+        <a href="/posts/eucharistische-wunder.html">
+          <span class="num">05</span>
+          <span class="title">Eucharistische Wunder</span>
+          <span class="meta">Vortrag</span>
+          <span class="blurb">Definition, Lanciano.</span>
+        </a>
+        <a href="/posts/vorsehung-freier-wille.html">
+          <span class="num">06</span>
+          <span class="title">V<em>o</em>rsehung und freier Wille</span>
+          <span class="meta">Philosophie</span>
+          <span class="blurb">Allwissenheit und Freiheit.</span>
+        </a>
+      </div>
     </main>
 
-    <footer class="foot">
+    <footer class="site-footer">
       <span>seele.flofischer.org</span>
       <a href="https://flofischer.org/" data-local="/__root/">flofischer.org</a>
     </footer>
   </div>
-  <script>
-    if (/localhost|127\.0\.0\.1|workers\.dev/.test(location.hostname)) {
-      document.querySelectorAll("a[data-local]").forEach((a) => {
-        a.href = a.dataset.local;
-      });
-    }
-  </script>
+
+  <div class="design-switcher" data-design-switcher></div>
+  <script src="/shared/switcher.js"></script>
 </body>
 </html>

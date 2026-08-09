@@ -1,38 +1,46 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-design="1">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aliens und Katholizismus — Seele</title>
-  <link rel="stylesheet" href="/shared/tokens.css" />
-  <link rel="stylesheet" href="/shared/base.css" />
-  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    try {
+      var d = localStorage.getItem("ff-design");
+      if (d) document.documentElement.setAttribute("data-design", d);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="/shared/designs/base.css" />
+  <link rel="stylesheet" href="/shared/designs/01-atelier.css" />
+  <link rel="stylesheet" href="/shared/designs/02-producer.css" />
+  <link rel="stylesheet" href="/shared/designs/03-campus.css" />
+  <link rel="stylesheet" href="/shared/designs/04-catalog.css" />
+  <link rel="stylesheet" href="/shared/designs/05-ink.css" />
 </head>
-<body class="site-seele">
-  <div class="wrap">
-    <header class="top">
-      <a class="brand" href="/">Seele</a>
-      <nav class="nav"><a href="/">Blog</a></nav>
+<body class="realm-seele">
+  <div class="page shell">
+    <header class="site-header">
+      <a class="mark" href="/">Seele</a>
+      <nav>
+        <a href="/">Texte</a>
+        <a href="https://gehirn.flofischer.org/" data-local="/__gehirn/">Gehirn</a>
+      </nav>
     </header>
-    <article class="prose">
-      <p class="meta"><a href="/">←</a> · Essay</p>
+    <article class="article">
+      <p class="crumb"><a href="/">← Texte</a> · Essay</p>
       <h1>Aliens und Katholizismus</h1>
-      <p>
-        Die Drake-Gleichung multipliziert spekulative Faktoren.
-        Ohne Kenntnis der Abiogenese lassen sich Raten nicht seriös setzen.
-      </p>
-      <p>
-        Das Carter-Argument bestritt lange, dass Leben auf der Erde Evidence
-        für leichte Abiogenese sei. Whitmire (2022) zeigt den Fehler
-        (<em>Old Evidence Problem</em>): hypothetische Conditionals statt
-        Likelihood 1 für etablierte Fakten.
-      </p>
-      <p>
-        Für den Glauben zählt weniger, ob die Galaxis voll oder leer ist,
-        als was aus möglichem außerirdischen Leben theologisch folgt.
-      </p>
+
+      <p>Die Drake-Gleichung multipliziert spekulative Faktoren. Ohne Kenntnis der Abiogenese lassen sich Raten nicht seriös setzen.</p>
+      <p>Das Carter-Argument bestritt lange, dass Leben auf der Erde Evidence für leichte Abiogenese sei. Whitmire (2022) zeigt den Fehler (<em>Old Evidence Problem</em>).</p>
+      <p>Für den Glauben zählt weniger, ob die Galaxis voll oder leer ist, als was aus möglichem außerirdischen Leben theologisch folgt.</p>
+  
     </article>
-    <footer class="foot"><a href="/">Seele</a></footer>
+    <footer class="site-footer">
+      <span>seele.flofischer.org</span>
+      <a href="/">Seele</a>
+    </footer>
   </div>
+  <div class="design-switcher" data-design-switcher></div>
+  <script src="/shared/switcher.js"></script>
 </body>
 </html>

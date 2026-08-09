@@ -1,42 +1,52 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-design="1">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gottesbeweise — Seele</title>
-  <link rel="stylesheet" href="/shared/tokens.css" />
-  <link rel="stylesheet" href="/shared/base.css" />
-  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    try {
+      var d = localStorage.getItem("ff-design");
+      if (d) document.documentElement.setAttribute("data-design", d);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="/shared/designs/base.css" />
+  <link rel="stylesheet" href="/shared/designs/01-atelier.css" />
+  <link rel="stylesheet" href="/shared/designs/02-producer.css" />
+  <link rel="stylesheet" href="/shared/designs/03-campus.css" />
+  <link rel="stylesheet" href="/shared/designs/04-catalog.css" />
+  <link rel="stylesheet" href="/shared/designs/05-ink.css" />
 </head>
-<body class="site-seele">
-  <div class="wrap">
-    <header class="top">
-      <a class="brand" href="/">Seele</a>
-      <nav class="nav"><a href="/">Blog</a></nav>
+<body class="realm-seele">
+  <div class="page shell">
+    <header class="site-header">
+      <a class="mark" href="/">Seele</a>
+      <nav>
+        <a href="/">Texte</a>
+        <a href="https://gehirn.flofischer.org/" data-local="/__gehirn/">Gehirn</a>
+      </nav>
     </header>
-    <article class="prose">
-      <p class="meta"><a href="/">←</a> · Vortrag</p>
+    <article class="article">
+      <p class="crumb"><a href="/">← Texte</a> · Vortrag</p>
       <h1>Gottesbeweise</h1>
-      <p>
-        Apologetik ist keine Entschuldigung. Vom griechischen
-        <em>apologia</em>: Verteidigung. 1&nbsp;Petrus 3,15 gebietet,
-        Rede und Antwort zu stehen.
-      </p>
-      <p>Klassische Schritte: Existenz Gottes → Auferstehung → Kirche.</p>
 
+      <p>Apologetik ist keine Entschuldigung. Vom griechischen <em>apologia</em>: Verteidigung. 1&nbsp;Petrus 3,15 gebietet, Rede und Antwort zu stehen.</p>
+      <p>Klassische Schritte: Existenz Gottes → Auferstehung → Kirche.</p>
       <h2>Kalam</h2>
       <ol>
         <li>Alles, das anfängt zu existieren, hat eine Ursache.</li>
         <li>Das Universum hat angefangen zu existieren.</li>
         <li>Also hat das Universum eine Ursache.</li>
       </ol>
-      <p>
-        Diese Ursache trägt klassisch göttliche Attribute.
-        Weitere Argumente im Manuskript: moralisch, teleologisch,
-        ontologisch; Wunder und die Auferstehung.
-      </p>
+      <p>Diese Ursache trägt klassisch göttliche Attribute. Weitere Argumente: moralisch, teleologisch, ontologisch; Wunder und die Auferstehung.</p>
+  
     </article>
-    <footer class="foot"><a href="/">Seele</a></footer>
+    <footer class="site-footer">
+      <span>seele.flofischer.org</span>
+      <a href="/">Seele</a>
+    </footer>
   </div>
+  <div class="design-switcher" data-design-switcher></div>
+  <script src="/shared/switcher.js"></script>
 </body>
 </html>

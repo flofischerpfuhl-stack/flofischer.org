@@ -101,11 +101,19 @@ Nur **public** Repos / Live-Sites:
 
 Private Projekte (Fernwork, …) werden **nicht** gelistet.
 
-## Stil
+## Designs (umschaltbar)
 
-Minimal: Weiß, schwarze Linien, keine Gradienten.  
-Display: **[Marlboro](https://www.1001fonts.com/marlboro-font.html)** (FFC).  
-Seele `#123a7a` · Gehirn `#b01020`.
+Unten auf jeder Seite: **Design 1–5** (Tasten `1`–`5`, speichert in `localStorage`).
+
+| # | Name | Inspiration |
+|---|------|-------------|
+| 1 | **Atelier** | [Lydia Leiwang](https://lydialeiwang.com/) — Instrument Serif, cream, accent rules |
+| 2 | **Producer** | [Khegai](https://khegai.com/) — Oswald caps, dark index |
+| 3 | **Campus** | [Loyalist](https://loyalistcollege.com/) — bold flat color panels |
+| 4 | **Catalog** | Marlboro display, museum labels |
+| 5 | **Ink** | Literary journal, mono + serif |
+
+Keine Gradienten. Private Projekte bleiben unsichtbar.
 
 ## Lizenz
 

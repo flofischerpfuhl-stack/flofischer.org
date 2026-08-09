@@ -1,0 +1,327 @@
+/* ═══════════════════════════════════════════
+   03 CAMPUS — Loyalist inspired
+   Huge statements, flat solid color blocks
+   (no gradients), confident modern sans
+   ═══════════════════════════════════════════ */
+
+html[data-design="3"] {
+  --bg: #f7f7f5;
+  --ink: #141414;
+  --muted: #5a5a58;
+  --line: #d8d8d4;
+  --acc: #1a3a8f;
+  --acc-soft: #dce6f8;
+  --font-d: Inter, system-ui, sans-serif;
+  --font-b: Inter, system-ui, sans-serif;
+  --max: 1180px;
+  --pad: clamp(1.25rem, 3vw, 2.5rem);
+  --radius: 1rem;
+}
+
+html[data-design="3"] body.realm-seele {
+  --acc: #1a3a8f;
+  --acc-soft: #dce6f8;
+}
+
+html[data-design="3"] body.realm-gehirn {
+  --acc: #c41230;
+  --acc-soft: #f8d5da;
+}
+
+html[data-design="3"] body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-b);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+html[data-design="3"] ::selection {
+  background: var(--acc);
+  color: #fff;
+}
+
+html[data-design="3"] .shell {
+  width: min(var(--max), 100% - 2 * var(--pad));
+  margin-inline: auto;
+}
+
+html[data-design="3"] .site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.15rem 0;
+  gap: 1rem;
+}
+
+html[data-design="3"] .site-header .mark {
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+
+html[data-design="3"] .site-header nav {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+html[data-design="3"] .site-header nav a {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  color: var(--muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+html[data-design="3"] .site-header nav a:hover {
+  background: #ebebe8;
+  color: var(--ink);
+}
+
+html[data-design="3"] .site-header nav a[aria-current="page"] {
+  background: var(--ink);
+  color: #fff;
+}
+
+html[data-design="3"] .hero {
+  padding: 2rem 0 1.5rem;
+}
+
+html[data-design="3"] .hero-title {
+  font-weight: 700;
+  font-size: clamp(2.8rem, 7vw, 5rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  max-width: 14ch;
+}
+
+html[data-design="3"] .hero-title em {
+  font-style: normal;
+  color: var(--acc);
+}
+
+html[data-design="3"] .hero-rule {
+  display: none;
+}
+
+html[data-design="3"] .hero-sub {
+  margin-top: 1.15rem;
+  max-width: 32rem;
+  font-size: 1.15rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* portal — solid color panels */
+html[data-design="3"] .portal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1.5rem 0 2rem;
+  min-height: calc(100vh - 6rem);
+  align-content: center;
+}
+
+html[data-design="3"] .portal a {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 22rem;
+  padding: 1.75rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: #fff;
+  transition: transform 0.2s ease;
+}
+
+html[data-design="3"] .portal a:hover {
+  transform: translateY(-3px);
+}
+
+html[data-design="3"] .portal .seele {
+  background: #1a3a8f;
+}
+
+html[data-design="3"] .portal .gehirn {
+  background: #c41230;
+}
+
+html[data-design="3"] .portal .kicker {
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+html[data-design="3"] .portal .name {
+  font-size: clamp(2.8rem, 6vw, 4.2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-top: auto;
+}
+
+html[data-design="3"] .portal .name em {
+  font-style: normal;
+}
+
+html[data-design="3"] .portal .desc {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  opacity: 0.9;
+  max-width: 18rem;
+  line-height: 1.4;
+}
+
+/* index as soft cards */
+html[data-design="3"] .index {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+}
+
+html[data-design="3"] .index a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.35rem 1.3rem 1.45rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 2px);
+  text-decoration: none;
+  min-height: 10rem;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+html[data-design="3"] .index a:hover {
+  border-color: var(--acc);
+  transform: translateY(-2px);
+}
+
+html[data-design="3"] .index .num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--acc);
+  letter-spacing: 0.04em;
+}
+
+html[data-design="3"] .index .title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+html[data-design="3"] .index .title em {
+  font-style: normal;
+  color: var(--acc);
+}
+
+html[data-design="3"] .index .meta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: auto;
+}
+
+html[data-design="3"] .index .blurb {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* article */
+html[data-design="3"] .article {
+  max-width: 40rem;
+  padding: 1.5rem 0 3rem;
+}
+
+html[data-design="3"] .article .crumb {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 1.25rem;
+}
+
+html[data-design="3"] .article .crumb a {
+  color: var(--acc);
+  text-decoration: none;
+}
+
+html[data-design="3"] .article h1 {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin-bottom: 1.25rem;
+}
+
+html[data-design="3"] .article h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 2rem 0 0.6rem;
+  color: var(--acc);
+}
+
+html[data-design="3"] .article p,
+html[data-design="3"] .article li {
+  margin-bottom: 1rem;
+  color: #2a2a2a;
+  line-height: 1.65;
+}
+
+html[data-design="3"] .article ol,
+html[data-design="3"] .article ul {
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+html[data-design="3"] .article ol {
+  list-style: decimal;
+}
+
+html[data-design="3"] .article ul {
+  list-style: disc;
+}
+
+html[data-design="3"] .article blockquote {
+  background: var(--acc-soft);
+  border-radius: 0.75rem;
+  padding: 1.15rem 1.25rem;
+  margin: 1.5rem 0;
+  font-weight: 500;
+  color: var(--ink);
+  border-left: 0;
+}
+
+html[data-design="3"] .site-footer {
+  margin-top: 3rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+html[data-design="3"] .site-footer a {
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  html[data-design="3"] .portal {
+    grid-template-columns: 1fr;
+  }
+  html[data-design="3"] .portal a {
+    min-height: 14rem;
+  }
+}

@@ -1,0 +1,308 @@
+/* ═══════════════════════════════════════════
+   05 INK — literary journal
+   Mono labels + serif body, high contrast,
+   dense columns, print-magazine discipline
+   ═══════════════════════════════════════════ */
+
+html[data-design="5"] {
+  --bg: #fffef9;
+  --ink: #111;
+  --muted: #555;
+  --line: #111;
+  --acc: #111;
+  --font-d: "Instrument Serif", Georgia, serif;
+  --font-b: "Instrument Serif", Georgia, serif;
+  --font-m: "IBM Plex Mono", ui-monospace, monospace;
+  --max: 720px;
+  --pad: clamp(1.15rem, 3vw, 2rem);
+}
+
+html[data-design="5"] body.realm-seele {
+  --acc: #123a7a;
+}
+
+html[data-design="5"] body.realm-gehirn {
+  --acc: #9b1020;
+}
+
+html[data-design="5"] body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-b);
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+html[data-design="5"] ::selection {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+html[data-design="5"] .shell {
+  width: min(var(--max), 100% - 2 * var(--pad));
+  margin-inline: auto;
+}
+
+html[data-design="5"] .site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 0;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 2.5rem;
+}
+
+html[data-design="5"] .site-header .mark {
+  font-family: var(--font-m);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+html[data-design="5"] .site-header nav {
+  display: flex;
+  gap: 1.25rem;
+}
+
+html[data-design="5"] .site-header nav a {
+  font-family: var(--font-m);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--muted);
+}
+
+html[data-design="5"] .site-header nav a:hover,
+html[data-design="5"] .site-header nav a[aria-current="page"] {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+html[data-design="5"] .hero {
+  margin-bottom: 2rem;
+}
+
+html[data-design="5"] .hero-title {
+  font-size: clamp(2.8rem, 8vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+html[data-design="5"] .hero-title em {
+  font-style: italic;
+  color: var(--acc);
+}
+
+html[data-design="5"] .hero-rule {
+  height: 2px;
+  background: var(--line);
+  margin: 1.25rem 0 1rem;
+}
+
+html[data-design="5"] .hero-sub {
+  font-family: var(--font-m);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  max-width: 28rem;
+  line-height: 1.5;
+}
+
+/* portal — stacked journal covers */
+html[data-design="5"] .portal {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 2px solid var(--line);
+}
+
+html[data-design="5"] .portal a {
+  display: grid;
+  grid-template-columns: 1fr;
+  padding: 2.5rem 0;
+  border-bottom: 2px solid var(--line);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+html[data-design="5"] .portal a:hover {
+  background: #f3f1ea;
+  margin-inline: calc(-1 * var(--pad));
+  padding-inline: var(--pad);
+}
+
+html[data-design="5"] .portal .kicker {
+  font-family: var(--font-m);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.65rem;
+  color: var(--muted);
+}
+
+html[data-design="5"] .portal .name {
+  font-size: clamp(3rem, 10vw, 5rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+html[data-design="5"] .portal .seele .name {
+  color: #123a7a;
+}
+
+html[data-design="5"] .portal .gehirn .name {
+  color: #9b1020;
+}
+
+html[data-design="5"] .portal .name em {
+  font-style: italic;
+}
+
+html[data-design="5"] .portal .desc {
+  margin-top: 0.85rem;
+  font-size: 1.05rem;
+  max-width: 28rem;
+  color: var(--muted);
+}
+
+/* index — numbered run-in */
+html[data-design="5"] .index {
+  border-top: 1px solid var(--line);
+}
+
+html[data-design="5"] .index a {
+  display: block;
+  padding: 1.35rem 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+}
+
+html[data-design="5"] .index a:hover .title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+html[data-design="5"] .index .num {
+  font-family: var(--font-m);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  display: inline;
+  margin-right: 0.65rem;
+}
+
+html[data-design="5"] .index .title {
+  font-size: 1.55rem;
+  line-height: 1.2;
+  display: inline;
+}
+
+html[data-design="5"] .index .title em {
+  font-style: italic;
+  color: var(--acc);
+}
+
+html[data-design="5"] .index .meta {
+  font-family: var(--font-m);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 0.35rem;
+}
+
+html[data-design="5"] .index .blurb {
+  font-size: 1rem;
+  color: var(--muted);
+  margin-top: 0.35rem;
+  max-width: 34rem;
+}
+
+/* article */
+html[data-design="5"] .article {
+  padding-bottom: 3rem;
+}
+
+html[data-design="5"] .article .crumb {
+  font-family: var(--font-m);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 1.75rem;
+  color: var(--muted);
+}
+
+html[data-design="5"] .article .crumb a {
+  color: var(--acc);
+  text-decoration: none;
+}
+
+html[data-design="5"] .article h1 {
+  font-size: clamp(2.4rem, 6vw, 3.4rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 1rem;
+}
+
+html[data-design="5"] .article h2 {
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-style: italic;
+  margin: 2rem 0 0.65rem;
+  color: var(--acc);
+}
+
+html[data-design="5"] .article p,
+html[data-design="5"] .article li {
+  margin-bottom: 1rem;
+  line-height: 1.7;
+}
+
+html[data-design="5"] .article ol,
+html[data-design="5"] .article ul {
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+html[data-design="5"] .article ol {
+  list-style: decimal;
+}
+
+html[data-design="5"] .article ul {
+  list-style: disc;
+}
+
+html[data-design="5"] .article blockquote {
+  margin: 1.75rem 0;
+  padding: 0 0 0 1rem;
+  border-left: 2px solid var(--line);
+  font-style: italic;
+  font-size: 1.25rem;
+}
+
+html[data-design="5"] .site-footer {
+  border-top: 2px solid var(--line);
+  margin-top: 3rem;
+  padding: 1.25rem 0;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-m);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+html[data-design="5"] .site-footer a {
+  text-decoration: none;
+  color: var(--ink);
+}
