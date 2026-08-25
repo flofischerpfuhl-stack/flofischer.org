@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" data-language="en" data-pwa-site="root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta
+    name="description"
+    content="Flo Fischer — a freely rotatable Three.js diorama between Seele and Gehirn."
+    data-description-en="Flo Fischer — a freely rotatable Three.js diorama between Seele and Gehirn."
+    data-description-de="Flo Fischer — ein frei drehbares Three.js-Diorama zwischen Seele und Gehirn."
+  />
+  <meta name="theme-color" content="#0c0b10" />
+  <meta name="application-name" content="Flo Fischer" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Flo Fischer" />
+  <link rel="canonical" href="https://flofischer.org/diorama/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Flo Fischer" />
+  <meta property="og:title" content="Flo Fischer — 3D Diorama" />
+  <meta property="og:description" content="A freely rotatable world between a sunlit Catholic jungle and a nocturnal Japanese dystopia." />
+  <meta property="og:url" content="https://flofischer.org/diorama/" />
+  <meta property="og:image" content="https://flofischer.org/social-preview.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="A sunlit jungle and a nocturnal Japanese city meet at the threshold between Seele and Gehirn." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Flo Fischer — 3D Diorama" />
+  <meta name="twitter:description" content="A freely rotatable world between Seele and Gehirn." />
+  <meta name="twitter:image" content="https://flofischer.org/social-preview.jpg" />
+  <title>Flo Fischer — 3D Diorama</title>
+  <script>
+    try {
+      var language = localStorage.getItem("ff-language");
+      if (language === "de") {
+        document.documentElement.lang = "de";
+        document.documentElement.dataset.language = "de";
+      }
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="/shared/hub/hub.css" />
+  <link rel="stylesheet" href="/shared/hub/diorama.css?v=10" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body class="realm-diorama" data-title-en="Flo Fischer — 3D Diorama" data-title-de="Flo Fischer — 3D-Diorama">
+  <canvas id="diorama-world" aria-label="Freely rotatable diorama between Seele and Gehirn"></canvas>
+  <div class="film-grain" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="diorama-vignette" aria-hidden="true"></div>
+  <div class="diorama-loader" data-diorama-loader aria-hidden="true"></div>
+  <div class="fade-veil" data-fade></div>
+
+  <a class="skip-link" href="#diorama-fallback">
+    <span data-lang-copy="en">Skip to links</span>
+    <span data-lang-copy="de">Zu den Links</span>
+  </a>
+
+  <header class="hud" data-hud>
+    <a class="hud-mark" href="/" data-local="/__root/">flo fischer</a>
+    <p class="hud-zone" data-zone>Seele · Gehirn</p>
+    <nav class="hud-nav" aria-label="Site" id="diorama-fallback">
+      <a href="https://seele.flofischer.org/" data-local="/__seele/">Seele</a>
+      <a href="https://gehirn.flofischer.org/" data-local="/__gehirn/">Gehirn</a>
+      <a class="mode-link" href="/" data-local="/__root/" aria-label="01 — open the immersive first-person version" title="Immersive Hub">01</a>
+      <div class="language-switch" role="group" aria-label="Language / Sprache">
+        <button type="button" data-language-button="en" aria-pressed="true">EN</button>
+        <span aria-hidden="true">/</span>
+        <button type="button" data-language-button="de" aria-pressed="false">DE</button>
+      </div>
+    </nav>
+  </header>
+
+  <p class="hint diorama-hint" data-hint>
+    <span data-lang-copy="en">Drag to orbit · scroll to zoom · click a sign to enter</span>
+    <span data-lang-copy="de">Ziehen zum Drehen · scrollen zum Zoomen · Schild anklicken</span>
+  </p>
+
+  <noscript>
+    <div class="noscript">
+      <p>Seele · Gehirn</p>
+      <p><a href="https://seele.flofischer.org/">seele.flofischer.org</a></p>
+      <p><a href="https://gehirn.flofischer.org/">gehirn.flofischer.org</a></p>
+    </div>
+  </noscript>
+
+  <script type="module" src="/shared/hub/diorama.js?v=10"></script>
+  <script src="/shared/pwa.js" defer></script>
+</body>
+</html>

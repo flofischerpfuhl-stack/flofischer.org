@@ -1,0 +1,9 @@
+Poly Haven model assets
+=======================
+
+The following assets are dedicated to the public domain under CC0 1.0:
+
+- Pachira Aquatica 01 — https://polyhaven.com/a/pachira_aquatica_01
+
+License: https://creativecommons.org/publicdomain/zero/1.0/
+Source: https://polyhaven.com/

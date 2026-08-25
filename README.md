@@ -4,9 +4,9 @@ Persönliche Website von **Florian Fischer** — gesplittet in zwei Subdomains:
 
 | Host | Thema | Stil |
 |------|--------|------|
-| [flofischer.org](https://flofischer.org) | Portal / Hub | Split Seele · Gehirn |
-| [seele.flofischer.org](https://seele.flofischer.org) | Katholische Apologetik (Blog) | Weiß / Blau |
-| [gehirn.flofischer.org](https://gehirn.flofischer.org) | Apps & Projekte | Weiß / Rot (Marlboro-inspiriert) |
+| [flofischer.org](https://flofischer.org) | Portal / Hub | Walkable Three.js landscape: blooming Seele / dystopian Gehirn |
+| [seele.flofischer.org](https://seele.flofischer.org) | Katholische Apologetik (Blog) | Helles Editorial / botanische Lehrtafeln |
+| [gehirn.flofischer.org](https://gehirn.flofischer.org) | Apps & Projekte | Dunkler anaglyphischer Sci-Fi-Look |
 
 ## Architektur
 
@@ -14,13 +14,23 @@ Persönliche Website von **Florian Fischer** — gesplittet in zwei Subdomains:
 sites/
   root/          → flofischer.org
   seele/         → seele.flofischer.org   (Blog + posts/)
-  gehirn/        → gehirn.flofischer.org  (Fernwork, HimmelCAD, SupraBench, …)
+  gehirn/        → gehirn.flofischer.org  (Fernwork, SupraBench, Paper2Form)
   shared/        → globale CSS-Tokens
 worker/index.js  → Host-basiertes Routing
 ```
 
-Static HTML/CSS/JS + Cloudflare Worker (Assets Binding). Kein Build-Schritt.
+Static HTML/CSS/JS + Cloudflare Worker (Assets Binding). Die Seele-Artikel werden aus den Markdown-Quellen als statische HTML-Fragmente erzeugt.
 Deploy: Push auf `main` → GitHub Action → `wrangler deploy`.
+
+Hub, Seele und Gehirn besitzen jeweils ein eigenes Web-App-Manifest, installierbare App-Icons und einen Service Worker. Canonicals, Open-Graph-/Twitter-Metadaten, Social-Cards, `robots.txt` und Sitemaps werden als Teil des statischen Releases ausgeliefert.
+
+Artikel neu erzeugen:
+
+```bash
+python3 scripts/build-seele-content.py
+python3 scripts/build-seele-pages.py
+npm run audit
+```
 
 ## Lokal
 
@@ -71,49 +81,32 @@ npm run deploy
 
 Oder: Push auf `main` (nach Secrets).
 
-### 4. Domains anbinden
+### 4. Domains
 
-Nach dem ersten Deploy im Cloudflare Dashboard unter
-**Workers & Pages → flofischer → Settings → Domains & Routes**:
+Die folgenden Worker Custom Domains sind deklarativ in `wrangler.jsonc` hinterlegt und werden beim Deploy angebunden:
 
 - `flofischer.org`
 - `www.flofischer.org`
 - `seele.flofischer.org`
 - `gehirn.flofischer.org`
 
-DNS (wenn die Domain bereits auf Cloudflare liegt): Workers Custom Domain
-legt die Records i. d. R. automatisch an. Alternativ manuell:
+Cloudflare legt dafür die benötigten DNS-Einträge an. Der API-Token benötigt deshalb `Zone · DNS · Edit` für `flofischer.org`; die Zone muss im selben Account aktiv sein wie der Worker.
 
-| Type | Name | Content |
-|------|------|---------|
-| CNAME / Worker route | `@`, `www`, `seele`, `gehirn` | Worker `flofischer` |
+## Projekte auf Gehirn
 
-Zone muss Active auf demselben Account sein, in dem der Worker liegt.
+In dieser Reihenfolge:
 
-## Öffentlich auf Gehirn
-
-Nur **public** Repos / Live-Sites:
-
+- Fernwork (fernwork.net)
 - SupraBench (suprabench.com)
-- HimmelCAD public mirror
-- Paper2Form Landingpage
-- xivreview
+- Paper2Form (paper2form.com)
 
-Private Projekte (Fernwork, …) werden **nicht** gelistet.
+HimmelCAD folgt, sobald eine eigene Website online ist.
 
-## Designs (umschaltbar)
+## Designs
 
-Unten auf jeder Seite: **Design 1–5** (Tasten `1`–`5`, speichert in `localStorage`).
+**Seele** nutzt einen festen, hellen Editorial-Look, botanisch-christliche Lehrtafeln, eine redaktionelle Volltextsuche und Themenfilter. Sechs zweisprachige Langtexte werden aus den Obsidian-Quellen übernommen; Englisch ist die Standardsprache.
 
-| # | Name | Inspiration |
-|---|------|-------------|
-| 1 | **Atelier** | [Lydia Leiwang](https://lydialeiwang.com/) — Instrument Serif, cream, accent rules |
-| 2 | **Producer** | [Khegai](https://khegai.com/) — Oswald caps, dark index |
-| 3 | **Campus** | [Loyalist](https://loyalistcollege.com/) — bold flat color panels |
-| 4 | **Catalog** | Marlboro display, museum labels |
-| 5 | **Ink** | Literary journal, mono + serif |
-
-Keine Gradienten. Private Projekte bleiben unsichtbar.
+Der **Hub** ist eine kleine, dichte Three.js-Schwelle ohne Splash-Screen: links ein blühender Tagesgarten (Seele), rechts ein nächtlicher Tempelhof mit Kirschblüte und Neon (Gehirn). Nur Umschauen — Ziehen mit der Maus — und Klick auf eine Schwelle. **Gehirn** nutzt einen einzelnen dunklen, anaglyphischen Filmrollen-Look mit Weiß sowie gegeneinander verschobenen Rot- und Cyan-Kanälen. Die drei Projektflächen zeigen loopende Aufnahmen der echten Websites unter einer gemeinsamen visuellen Behandlung.
 
 ## Lizenz
 

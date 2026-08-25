@@ -1,35 +1,39 @@
 <!DOCTYPE html>
-<html lang="de" data-design="1">
+<html lang="en" data-language="en" data-pwa-site="gehirn">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>404</title>
-  <script>
-    try {
-      var d = localStorage.getItem("ff-design");
-      if (d) document.documentElement.setAttribute("data-design", d);
-    } catch (e) {}
-  </script>
+  <meta name="description" content="Page not found" data-description-en="Page not found" data-description-de="Seite nicht gefunden" />
+  <meta name="robots" content="noindex, follow" />
+  <meta name="theme-color" content="#131315" />
+  <title>404 — Gehirn</title>
   <link rel="stylesheet" href="/shared/designs/base.css" />
-  <link rel="stylesheet" href="/shared/designs/01-atelier.css" />
-  <link rel="stylesheet" href="/shared/designs/02-producer.css" />
-  <link rel="stylesheet" href="/shared/designs/03-campus.css" />
-  <link rel="stylesheet" href="/shared/designs/04-catalog.css" />
-  <link rel="stylesheet" href="/shared/designs/05-ink.css" />
+  <link rel="stylesheet" href="/shared/gehirn/gehirn.css" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
 </head>
-<body class="realm-gehirn">
-  <div class="page shell">
-    <header class="site-header">
-      <a class="mark" href="/">Gehirn</a>
-      <nav><a href="/">Home</a></nav>
-    </header>
-    <header class="hero">
-      <h1 class="hero-title">404</h1>
-      <div class="hero-rule"></div>
-      <p class="hero-sub"><a href="/">Zurück</a></p>
-    </header>
-  </div>
-  <div class="design-switcher" data-design-switcher></div>
-  <script src="/shared/switcher.js"></script>
+<body class="realm-gehirn is-404" data-title-en="404 — Gehirn" data-title-de="404 — Gehirn">
+  <div class="film-grain" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+  <header class="site-hud">
+    <a class="hud-mark" href="./">Gehirn</a>
+    <span class="hud-cut">ERR / 404</span>
+    <nav><a href="./"><span data-lang-copy="en">Projects</span><span data-lang-copy="de">Projekte</span></a></nav>
+  </header>
+  <main>
+    <section class="cut error-cut">
+      <div>
+        <h1 class="anaglyph-title" data-text="404">404</h1>
+        <a class="project-link" href="./">
+          <span data-lang-copy="en">Back to projects</span>
+          <span data-lang-copy="de">Zurück zu den Projekten</span>
+          <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </section>
+  </main>
+  <script src="/shared/gehirn/gehirn.js"></script>
+  <script src="/shared/pwa.js" defer></script>
 </body>
 </html>
