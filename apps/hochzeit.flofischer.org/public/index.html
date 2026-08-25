@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#06142d">
+    <meta name="description" content="Anton &amp; Kathis interaktive Hochzeitsshow: Schlag den Ehepartner.">
+    <title>Anton &amp; Kathi · Schlag den Ehepartner</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div id="app"></div>
+    <dialog id="score-dialog">
+      <form method="dialog" class="dialog-card" id="score-form">
+        <p class="eyebrow">SPIELSTAND</p>
+        <h2>Scores setzen</h2>
+        <label class="score-field rosa-label">Rosa <input id="score-rosa" type="number" inputmode="numeric" min="0" max="999"></label>
+        <label class="score-field blau-label">Blau <input id="score-blau" type="number" inputmode="numeric" min="0" max="999"></label>
+        <div class="button-row">
+          <button value="cancel" class="button secondary">Abbrechen</button>
+          <button value="save" class="button gold">Übernehmen</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="session-dialog">
+      <form method="dialog" class="dialog-card" id="session-form">
+        <p class="eyebrow">NEUE SHOW</p>
+        <h2>Alles zurücksetzen</h2>
+        <p>Eine neue Show setzt Punkte, Karten und das laufende Spiel zurück. Die bisherige Show bleibt über „Rückgängig“ wiederherstellbar.</p>
+        <label class="dialog-field">Name der Show<input id="session-label" maxlength="40" required></label>
+        <label class="dialog-field danger-label">Zur Bestätigung <strong>NEU</strong> eingeben<input id="session-confirm" autocomplete="off" required></label>
+        <div class="button-row">
+          <button value="cancel" class="button secondary">Abbrechen</button>
+          <button value="start" class="button gold">Neue Show starten</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

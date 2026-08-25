@@ -1,0 +1,20 @@
+{
+  "name": "hochzeit-spiele",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "dev:node": "node server.mjs",
+    "deploy": "wrangler deploy",
+    "test": "npm run test:game && npm run test:http:local",
+    "test:game": "node --test tests/game-test.mjs",
+    "test:http": "node tests/http-test.mjs",
+    "test:http:local": "node tests/run-http-test.mjs",
+    "check:deploy": "wrangler deploy --dry-run"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "wrangler": "^4.28.0"
+  }
+}

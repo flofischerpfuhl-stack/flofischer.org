@@ -1,0 +1,37 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/hochzeit.flofischer.org/**"
+      - ".github/workflows/checks.yml"
+  pull_request:
+    paths:
+      - "apps/hochzeit.flofischer.org/**"
+      - ".github/workflows/checks.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hochzeit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/hochzeit.flofischer.org
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/hochzeit.flofischer.org/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run check:deploy
