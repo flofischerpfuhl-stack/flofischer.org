@@ -1,0 +1,147 @@
+body.realm-diorama {
+  --diorama-side: 0.5;
+  background: #121013;
+}
+
+#diorama-world {
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+
+body.is-orbiting #diorama-world {
+  cursor: grabbing;
+}
+
+#diorama-world.is-over-portal {
+  cursor: pointer;
+}
+
+.diorama-vignette,
+.diorama-loader {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.diorama-vignette {
+  z-index: 42;
+  background:
+    linear-gradient(to bottom, rgba(4, 4, 6, 0.34), transparent 20%, transparent 68%, rgba(4, 4, 6, 0.58)),
+    radial-gradient(ellipse at center, transparent 46%, rgba(0, 0, 0, 0.12) 68%, rgba(0, 0, 0, 0.68) 100%);
+}
+
+.diorama-vignette::before {
+  content: "";
+  position: absolute;
+  inset: -0.75rem;
+  backdrop-filter: blur(2.8px) saturate(0.9);
+  -webkit-mask-image: radial-gradient(ellipse at center, transparent 0 58%, rgba(0, 0, 0, 0.12) 72%, #000 98%);
+  mask-image: radial-gradient(ellipse at center, transparent 0 58%, rgba(0, 0, 0, 0.12) 72%, #000 98%);
+}
+
+.diorama-loader {
+  z-index: 80;
+  overflow: hidden;
+  opacity: 1;
+  background: #0c0b10;
+  transition: opacity 900ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 900ms;
+}
+
+.diorama-loader::before,
+.diorama-loader::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 50%;
+  background-position: center;
+  background-size: cover;
+  filter: saturate(0.88) contrast(1.03);
+  transition: transform 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.diorama-loader::before {
+  left: 0;
+  background-image:
+    linear-gradient(rgba(9, 13, 7, 0.1), rgba(7, 7, 9, 0.34)),
+    url("/shared/hub/art/seele-jungle-v2.webp");
+}
+
+.diorama-loader::after {
+  right: 0;
+  background-image:
+    linear-gradient(rgba(7, 7, 9, 0.14), rgba(7, 7, 9, 0.42)),
+    url("/shared/hub/art/gehirn-city-v2.webp");
+}
+
+.diorama-loader.is-off {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.diorama-loader.is-off::before { transform: translateX(-8%); }
+.diorama-loader.is-off::after { transform: translateX(8%); }
+
+.realm-diorama .hud {
+  background: linear-gradient(to bottom, rgba(8, 8, 10, 0.72), rgba(8, 8, 10, 0.12) 76%, transparent);
+}
+
+.realm-diorama .hud-zone {
+  transition: color 500ms ease;
+}
+
+.realm-diorama .mode-link {
+  display: grid;
+  min-width: 1.8rem;
+  min-height: 1.8rem;
+  place-items: center;
+  border: 1px solid rgba(239, 237, 232, 0.3);
+}
+
+.realm-diorama .diorama-hint {
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  text-align: center;
+}
+
+.realm-diorama.side-seele .film-grain { opacity: 0.045; }
+.realm-diorama.side-seele .scanlines { opacity: 0; }
+.realm-diorama.side-gehirn .film-grain { opacity: 0.14; }
+.realm-diorama.side-gehirn .scanlines { opacity: 0.05; }
+
+@media (max-width: 720px) {
+  .realm-diorama .hud-nav {
+    gap: 0.55rem;
+  }
+
+  .realm-diorama .hud-nav > a:not(.mode-link) {
+    display: none;
+  }
+
+  .realm-diorama .mode-link {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .realm-diorama .language-switch button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .realm-diorama .diorama-hint {
+    font-size: 0.75rem;
+    letter-spacing: 0.075em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diorama-loader,
+  .diorama-loader::before,
+  .diorama-loader::after {
+    transition: none;
+  }
+}

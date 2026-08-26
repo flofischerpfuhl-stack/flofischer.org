@@ -6,7 +6,7 @@ Worker configuration. A change to one hostname must not deploy another one.
 
 | Hostname | Source | Production |
 | --- | --- | --- |
-| `flofischer.org` | [`apps/flofischer.org`](apps/flofischer.org) | Reserved for the future main site; not deployed from this repo yet |
+| `flofischer.org`, `www`, `seele`, `gehirn` | [`apps/flofischer.org`](apps/flofischer.org) | Cloudflare Worker `flofischer` |
 | `hochzeit.flofischer.org` | [`apps/hochzeit.flofischer.org`](apps/hochzeit.flofischer.org) | Cloudflare Worker `hochzeit-spiele` |
 
 ## Deployment rules
@@ -19,7 +19,15 @@ Worker configuration. A change to one hostname must not deploy another one.
 - Pull requests and pushes to `main` run the same unit, HTTP, privacy, and
   deployment dry-run checks in GitHub Actions.
 
-For `hochzeit.flofischer.org`, the Cloudflare build settings are:
+For the main website, the Cloudflare build settings are:
+
+- Root directory: `/apps/flofischer.org`
+- Build command: `npm ci && npm run audit && npm run check:deploy`
+- Deploy command: `npx wrangler deploy`
+- Production branch: `main`
+- Included build path: `apps/flofischer.org/*`
+
+For `hochzeit.flofischer.org`, the separate Cloudflare build settings are:
 
 - Root directory: `/apps/hochzeit.flofischer.org`
 - Build command: `npm ci && npm test && npm run check:deploy`

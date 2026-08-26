@@ -1,0 +1,1076 @@
+/* Seele — fixed light editorial design */
+
+:root {
+  --paper: #eee8da;
+  --ink: #171410;
+  --line: rgba(23, 20, 16, 0.48);
+  --display: "Marlboro", Impact, sans-serif;
+  --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --sans: "Geist", Inter, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --max: 1460px;
+  --pad: clamp(1rem, 3vw, 3.2rem);
+}
+
+html {
+  background: var(--paper);
+  scrollbar-color: var(--ink) var(--paper);
+  scrollbar-width: thin;
+}
+
+html::-webkit-scrollbar {
+  width: 13px;
+  height: 13px;
+}
+
+html::-webkit-scrollbar-track {
+  border-left: 1px solid var(--line);
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.5px), var(--line) 50%, transparent calc(50% + 0.5px)),
+    var(--paper);
+}
+
+html::-webkit-scrollbar-thumb {
+  min-height: 3.5rem;
+  border: 4px solid var(--paper);
+  border-radius: 0;
+  background: var(--ink);
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  border-width: 3px;
+}
+
+html::-webkit-scrollbar-button {
+  display: none;
+}
+
+body.realm-seele {
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.55;
+  letter-spacing: 0;
+}
+
+body.realm-seele::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.12;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E");
+}
+
+body.realm-seele ::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+[data-lang-copy] {
+  display: none !important;
+}
+
+html[data-language="en"] [data-lang-copy="en"],
+html[data-language="de"] [data-lang-copy="de"] {
+  display: revert !important;
+}
+
+.realm-seele .shell {
+  width: min(var(--max), calc(100% - 2 * var(--pad)));
+  margin-inline: auto;
+}
+
+.realm-seele .site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin: 0;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.realm-seele .site-header .mark {
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: clamp(2.8rem, 5vw, 4.3rem);
+  font-weight: 400;
+  line-height: 0.8;
+  letter-spacing: 0.035em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.realm-seele .site-header nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.25rem, 3vw, 3rem);
+}
+
+.realm-seele .hub-link {
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.realm-seele .hub-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.35rem;
+}
+
+.realm-seele .language-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+}
+
+.realm-seele .language-switch button {
+  display: grid;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.2rem;
+  place-items: center;
+  border-bottom: 1px solid transparent;
+  opacity: 0.7;
+}
+
+.realm-seele .language-switch button:hover,
+.realm-seele .language-switch button[aria-pressed="true"] {
+  border-bottom-color: var(--ink);
+  opacity: 1;
+}
+
+.realm-seele .issue-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.11em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.realm-seele .issue-bar a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.realm-seele .issue-bar a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+
+.realm-seele .version-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.realm-seele .version-switcher select {
+  max-width: 12rem;
+  padding: 0.3rem 1.7rem 0.3rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background-color: transparent;
+  color: var(--ink);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: uppercase;
+}
+
+.realm-seele .hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
+  min-height: min(760px, 76vh);
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.realm-seele .hero-copy {
+  display: flex;
+  align-items: center;
+  padding: clamp(3.5rem, 8vw, 8rem) clamp(2rem, 5vw, 5rem) clamp(3.5rem, 8vw, 8rem) 0;
+}
+
+.realm-seele .hero-title,
+.realm-seele .article h1,
+.realm-seele .article h2,
+.realm-seele .index .title {
+  color: var(--ink);
+  font-family: var(--display);
+  font-style: normal;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.realm-seele .hero-title {
+  max-width: 8.5ch;
+  font-size: clamp(5.2rem, 10vw, 10.5rem);
+  letter-spacing: 0.025em;
+  line-height: 0.76;
+}
+
+.realm-seele .botanical-plate {
+  position: relative;
+  min-width: 0;
+  min-height: min(760px, 76vh);
+  overflow: hidden;
+  border-left: 1px solid var(--line);
+  cursor: crosshair;
+}
+
+.realm-seele .botanical-plate img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 1rem 0 1.5rem 1.4rem;
+  object-fit: contain;
+  object-position: center;
+  opacity: 0;
+  filter: saturate(0.78) contrast(1.03);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  clip-path: inset(0 0 100% 0);
+  transform: scale(0.86) rotate(-1.4deg);
+  transition:
+    clip-path 1.05s cubic-bezier(0.76, 0, 0.24, 1),
+    opacity 0.55s ease,
+    transform 1.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.realm-seele .botanical-plate img.is-active {
+  z-index: 1;
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+  transform: scale(0.9) rotate(0);
+}
+
+.realm-seele main {
+  padding-top: clamp(2rem, 5vw, 4.5rem);
+}
+
+.realm-seele .archive-tools {
+  display: grid;
+  grid-template-columns: minmax(18rem, 1fr) minmax(0, 1.8fr) auto;
+  align-items: stretch;
+  margin-bottom: 1rem;
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.realm-seele .archive-search {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 0.9rem;
+  border-right: 1px solid var(--line);
+}
+
+.realm-seele .archive-search > span:first-child {
+  margin-right: 0.65rem;
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.realm-seele .archive-search input {
+  min-width: 0;
+  width: 100%;
+  padding: 0.85rem 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 0.95rem;
+}
+
+.realm-seele .archive-search input::placeholder {
+  color: var(--ink);
+  opacity: 0.48;
+}
+
+.realm-seele .archive-search:focus-within {
+  outline: 1px solid var(--ink);
+  outline-offset: -1px;
+}
+
+.realm-seele .archive-search kbd {
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--line);
+  font: inherit;
+  opacity: 0.55;
+}
+
+.realm-seele .tag-filters {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  scroll-snap-type: inline proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.realm-seele .tag-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.realm-seele .tag-filters button {
+  flex: 1 0 auto;
+  min-width: 5.4rem;
+  min-height: 2.75rem;
+  padding: 0.85rem 0.75rem;
+  border-right: 1px solid var(--line);
+  opacity: 0.7;
+  scroll-snap-align: start;
+}
+
+.realm-seele .tag-filters button:hover,
+.realm-seele .tag-filters button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  opacity: 1;
+}
+
+.realm-seele .archive-tools output {
+  display: grid;
+  place-items: center;
+  min-width: 6.8rem;
+  padding: 0.85rem;
+  white-space: nowrap;
+}
+
+.realm-seele .index {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+
+.realm-seele .index a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  min-width: 0;
+  min-height: 20rem;
+  padding: 2rem;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 160ms ease;
+}
+
+.realm-seele .index a[hidden] {
+  display: none;
+}
+
+.realm-seele .index a:hover {
+  background: rgba(23, 20, 16, 0.055);
+}
+
+.realm-seele .index .num,
+.realm-seele .index .meta {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.realm-seele .index .title {
+  font-size: clamp(2rem, 3vw, 3rem);
+  letter-spacing: 0.025em;
+  line-height: 0.95;
+}
+
+.realm-seele .index .blurb {
+  max-width: 30rem;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.45;
+  opacity: 0.7;
+}
+
+.realm-seele .index .meta {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.realm-seele .post-image {
+  width: 100%;
+  height: 8.5rem;
+  margin: 0.2rem 0 0.4rem;
+  overflow: hidden;
+  border-block: 1px solid var(--line);
+}
+
+.realm-seele .post-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+  filter: saturate(0.72) contrast(1.04);
+}
+
+.realm-seele .post-image--symbol {
+  height: 11rem;
+}
+
+.realm-seele .post-image--symbol img {
+  object-fit: contain;
+  padding: 0.35rem;
+  mix-blend-mode: multiply;
+}
+
+.realm-seele .site-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding: 1.2rem 0 2rem;
+  border-top: 3px double var(--ink);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.realm-seele .site-footer a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* Articles */
+.realm-seele .article-page {
+  padding-top: 0;
+}
+
+.realm-seele .article {
+  display: grid;
+  grid-template-columns: minmax(12rem, 17rem) minmax(0, 48rem) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  min-height: 70vh;
+  padding: 4rem 0 7rem;
+}
+
+.realm-seele .article-toc {
+  position: sticky;
+  top: 1.5rem;
+  align-self: start;
+  max-height: calc(100vh - 3rem);
+  padding-right: 1rem;
+  overflow-y: auto;
+  scrollbar-color: var(--ink) transparent;
+  scrollbar-width: thin;
+}
+
+.realm-seele .article-toc::-webkit-scrollbar,
+.realm-seele .article table::-webkit-scrollbar,
+.realm-seele .article .math.display::-webkit-scrollbar,
+.realm-seele .article .math.inline::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+.realm-seele .article-toc::-webkit-scrollbar-track,
+.realm-seele .article table::-webkit-scrollbar-track,
+.realm-seele .article .math.display::-webkit-scrollbar-track,
+.realm-seele .article .math.inline::-webkit-scrollbar-track {
+  background: rgba(23, 20, 16, 0.12);
+}
+
+.realm-seele .article-toc::-webkit-scrollbar-thumb,
+.realm-seele .article table::-webkit-scrollbar-thumb,
+.realm-seele .article .math.display::-webkit-scrollbar-thumb,
+.realm-seele .article .math.inline::-webkit-scrollbar-thumb {
+  border: 2px solid var(--paper);
+  border-radius: 0;
+  background: var(--ink);
+}
+
+.realm-seele .article-toc > p {
+  margin-bottom: 1rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 3px double var(--ink);
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.realm-seele .article-toc nav {
+  display: block;
+}
+
+.realm-seele .article .article-toc ol,
+.realm-seele .article .article-toc li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.realm-seele .article .article-toc ol[hidden] {
+  display: none;
+}
+
+.realm-seele .toc-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2rem;
+  align-items: stretch;
+  padding-left: min(calc(var(--toc-depth, 0) * 0.62rem), 2.5rem);
+  border-bottom: 1px solid rgba(23, 20, 16, 0.2);
+}
+
+.realm-seele .toc-toggle,
+.realm-seele .toc-spacer {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  min-height: 2rem;
+  border-left: 1px solid rgba(23, 20, 16, 0.28);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 650;
+  opacity: 0.72;
+}
+
+.realm-seele .toc-toggle:hover,
+.realm-seele .toc-toggle:focus-visible {
+  outline: 0;
+  background: var(--ink);
+  color: var(--paper);
+  opacity: 1;
+}
+
+.realm-seele .toc-toggle::before {
+  content: "+";
+}
+
+.realm-seele .toc-toggle[aria-expanded="true"]::before {
+  content: "−";
+}
+
+.realm-seele .article-toc a {
+  padding: 0.48rem 0.45rem;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 0.83rem;
+  line-height: 1.2;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.58;
+}
+
+.realm-seele .article-toc a:hover {
+  background: rgba(23, 20, 16, 0.1);
+  opacity: 1;
+}
+
+.realm-seele .article-toc a.is-current {
+  background: var(--ink);
+  color: var(--paper);
+  opacity: 1;
+}
+
+.realm-seele .toc-row:has(a.is-current) .toc-toggle {
+  background: var(--paper);
+  color: var(--ink);
+  opacity: 1;
+}
+
+.realm-seele .toc-row:has(a.is-current) .toc-toggle:hover,
+.realm-seele .toc-row:has(a.is-current) .toc-toggle:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.realm-seele .article-content {
+  grid-column: 2;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.realm-seele .article-content[aria-busy="true"] {
+  opacity: 0.55;
+}
+
+.realm-seele .article-loading {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.realm-seele .article-content > section:first-child > h1 {
+  margin: 0 0 4rem;
+  padding-bottom: 2rem;
+  border-bottom: 3px double var(--ink);
+  font-size: clamp(4.3rem, 7vw, 7.4rem);
+  letter-spacing: 0.025em;
+  line-height: 0.82;
+}
+
+.realm-seele .article-content section[id] {
+  scroll-margin-top: 1.5rem;
+}
+
+.realm-seele .article-content .level1 + .level1 {
+  margin-top: clamp(5rem, 9vw, 8rem);
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+}
+
+.realm-seele .article-content .level1 > h1 {
+  margin-bottom: 2rem;
+  font-size: clamp(3.1rem, 5.2vw, 5.4rem);
+  letter-spacing: 0.025em;
+  line-height: 0.9;
+}
+
+.realm-seele .article h2 {
+  margin-top: 3.6rem;
+  margin-bottom: 1.1rem;
+  font-size: clamp(2rem, 3.2vw, 3rem);
+  letter-spacing: 0.035em;
+  line-height: 0.96;
+}
+
+.realm-seele .article h3,
+.realm-seele .article h4,
+.realm-seele .article h5,
+.realm-seele .article h6 {
+  margin: 2.8rem 0 0.8rem;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.45rem;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.realm-seele .article h4,
+.realm-seele .article h5,
+.realm-seele .article h6 {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.realm-seele .article p,
+.realm-seele .article li {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.08rem;
+  line-height: 1.72;
+}
+
+.realm-seele .article p,
+.realm-seele .article ol,
+.realm-seele .article ul {
+  margin-bottom: 1.15rem;
+}
+
+.realm-seele .article ol,
+.realm-seele .article ul {
+  padding-left: 1.45rem;
+}
+
+.realm-seele .article ol {
+  list-style: decimal;
+}
+
+.realm-seele .article ul {
+  list-style: disc;
+}
+
+.realm-seele .article li + li {
+  margin-top: 0.3rem;
+}
+
+.realm-seele .article a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.realm-seele .article blockquote {
+  margin-block: 2rem;
+  padding: 1.2rem 1.4rem;
+  border-block: 1px solid var(--line);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-style: italic;
+}
+
+.realm-seele .article blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.realm-seele .article hr {
+  width: 4.5rem;
+  margin: 3.5rem auto;
+  border: 0;
+  border-top: 3px double var(--ink);
+}
+
+.realm-seele .article table {
+  display: block;
+  width: 100%;
+  margin: 2rem 0;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.realm-seele .article th,
+.realm-seele .article td {
+  min-width: 6.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.realm-seele .article th {
+  background: rgba(23, 20, 16, 0.07);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.realm-seele .article .math.display {
+  display: block;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  overflow-x: auto;
+  border-block: 1px solid var(--line);
+  text-align: center;
+}
+
+.realm-seele .article .math.inline {
+  max-width: 100%;
+}
+
+.realm-seele .article-figure {
+  width: min(100%, 31rem);
+  margin: 2.5rem auto 3rem;
+  padding: 0.7rem;
+  border: 1px solid var(--line);
+}
+
+.realm-seele .article-figure img {
+  width: 100%;
+  max-height: 34rem;
+  object-fit: contain;
+  filter: saturate(0.72) contrast(1.02);
+}
+
+.realm-seele .article-figure figcaption {
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.realm-seele .article-figure--wide {
+  width: 100%;
+}
+
+.realm-seele .article-figure-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  width: 100%;
+  margin: 2.5rem 0 0.8rem;
+  padding: 0.7rem;
+  border: 1px solid var(--line);
+}
+
+.realm-seele .article-figure-pair img {
+  width: 100%;
+  height: min(17rem, 34vw);
+  object-fit: cover;
+  filter: saturate(0.72) contrast(1.02);
+}
+
+.realm-seele .article .footnotes {
+  margin-top: 5rem;
+  padding-top: 1.5rem;
+  border-top: 3px double var(--ink);
+}
+
+.realm-seele .article .footnotes li,
+.realm-seele .article .footnotes p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.realm-seele .article .footnote-ref,
+.realm-seele .article .footnote-back {
+  font-family: var(--mono);
+  font-size: 0.68em;
+  text-decoration: none;
+}
+
+/* 404 */
+.realm-seele .not-found {
+  display: grid;
+  align-content: center;
+  min-height: 65vh;
+  padding: 4rem 0;
+}
+
+.realm-seele .not-found h1 {
+  font-family: var(--display);
+  font-size: clamp(7rem, 20vw, 16rem);
+  font-weight: 400;
+  line-height: 0.75;
+}
+
+.realm-seele .not-found a {
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .realm-seele .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .realm-seele .hero-copy {
+    min-height: 540px;
+    padding-right: 0;
+  }
+
+  .realm-seele .botanical-plate {
+    min-height: 480px;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .realm-seele .index {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .realm-seele .archive-tools {
+    grid-template-columns: 1fr auto;
+  }
+
+  .realm-seele .archive-search {
+    grid-column: 1 / -1;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .realm-seele .tag-filters {
+    mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 1.4rem), transparent 100%);
+  }
+
+  .realm-seele .article {
+    grid-template-columns: minmax(10rem, 13rem) minmax(0, 1fr);
+  }
+
+  .realm-seele .article-content {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 620px) {
+  :root {
+    --pad: 0.75rem;
+  }
+
+  .realm-seele .site-header {
+    align-items: flex-end;
+    gap: 1rem;
+    padding-block: 1rem;
+  }
+
+  .realm-seele .site-header .mark {
+    font-size: 2.55rem;
+  }
+
+  .realm-seele .site-header nav {
+    align-items: flex-end;
+    gap: 0.9rem;
+  }
+
+  .realm-seele .hub-link {
+    max-width: 8.5rem;
+    font-size: 0.56rem;
+    line-height: 1.25;
+    text-align: right;
+  }
+
+  .realm-seele .language-switch {
+    gap: 0.3rem;
+    font-size: 0.56rem;
+  }
+
+  .realm-seele .issue-bar {
+    font-size: 0.56rem;
+  }
+
+  .realm-seele .hero-copy {
+    min-height: 480px;
+    padding: 4rem 1.25rem;
+  }
+
+  .realm-seele .hero-title {
+    max-width: 8ch;
+    font-size: clamp(4.1rem, 19vw, 5.4rem);
+  }
+
+  .realm-seele .botanical-plate {
+    min-height: 420px;
+  }
+
+  .realm-seele main {
+    padding-top: 1.5rem;
+  }
+
+  .realm-seele .archive-tools {
+    display: block;
+  }
+
+  .realm-seele .archive-search {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .realm-seele .tag-filters {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .realm-seele .archive-tools output {
+    justify-content: start;
+    min-width: 0;
+  }
+
+  .realm-seele .index {
+    grid-template-columns: 1fr;
+    border: 0;
+    border-top: 3px double var(--ink);
+  }
+
+  .realm-seele .index a {
+    min-height: 0;
+    padding: 1.4rem;
+    border: 0;
+    border-bottom: 3px double var(--ink);
+  }
+
+  .realm-seele .index .meta {
+    border-top: 1px dashed rgba(23, 20, 16, 0.35);
+  }
+
+  .realm-seele .index .title {
+    font-size: 2.4rem;
+  }
+
+  .realm-seele .post-image {
+    height: 10rem;
+  }
+
+  .realm-seele .article {
+    display: block;
+    padding: 2.5rem 0 4rem;
+  }
+
+  .realm-seele .article-toc {
+    position: relative;
+    top: auto;
+    max-height: 13rem;
+    margin-bottom: 4rem;
+    padding-right: 0;
+  }
+
+  .realm-seele .article-toc nav {
+    display: block;
+  }
+
+  .realm-seele .article-content {
+    width: 100%;
+  }
+
+  .realm-seele .article-content > section:first-child > h1 {
+    margin-bottom: 3rem;
+    font-size: clamp(3.1rem, 15vw, 4.5rem);
+  }
+
+  .realm-seele .article-content .level1 > h1 {
+    font-size: clamp(2.7rem, 12vw, 4rem);
+  }
+
+  .realm-seele .article p,
+  .realm-seele .article li {
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .realm-seele .article .math.inline {
+    display: inline-flex;
+    overflow-x: auto;
+    vertical-align: middle;
+  }
+
+  .realm-seele .article-figure-pair {
+    gap: 0.4rem;
+  }
+
+  .realm-seele .article-figure-pair img {
+    height: 9rem;
+  }
+
+  .realm-seele .site-footer {
+    margin-top: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .realm-seele .botanical-plate img {
+    transition: none;
+  }
+}

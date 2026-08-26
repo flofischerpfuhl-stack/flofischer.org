@@ -1,0 +1,41 @@
+name: Checks - flofischer.org
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/flofischer.org/**"
+      - ".github/workflows/checks-flofischer.yml"
+  pull_request:
+    paths:
+      - "apps/flofischer.org/**"
+      - ".github/workflows/checks-flofischer.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-flofischer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/flofischer.org
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/flofischer.org/package-lock.json
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm run audit
+      - run: npm run check:deploy

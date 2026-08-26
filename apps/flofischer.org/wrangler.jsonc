@@ -1,0 +1,29 @@
+// Cloudflare Workers + Static Assets
+// Host-based routing:
+//   flofischer.org        → sites/root
+//   seele.flofischer.org  → sites/seele  (Apologetics blog)
+//   gehirn.flofischer.org → sites/gehirn (Software projects)
+//
+// Deploy: push to main (GitHub Action) oder `npm run deploy`
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "flofischer",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "routes": [
+    { "pattern": "flofischer.org", "custom_domain": true },
+    { "pattern": "www.flofischer.org", "custom_domain": true },
+    { "pattern": "seele.flofischer.org", "custom_domain": true },
+    { "pattern": "gehirn.flofischer.org", "custom_domain": true }
+  ],
+  "assets": {
+    "directory": "./sites",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}

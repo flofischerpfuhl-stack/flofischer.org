@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-language="en" data-pwa-site="gehirn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta
+    name="description"
+    content="Gehirn — selected software projects by Florian Fischer."
+    data-description-en="Gehirn — selected software projects by Florian Fischer."
+    data-description-de="Gehirn — ausgewählte Softwareprojekte von Florian Fischer."
+  />
+  <meta name="theme-color" content="#131315" />
+  <meta name="application-name" content="Gehirn" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Gehirn" />
+  <link rel="canonical" href="https://gehirn.flofischer.org/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Gehirn" />
+  <meta property="og:title" content="Gehirn — Selected Software Projects" />
+  <meta property="og:description" content="Fernwork, Suprabench and Paper2Form — selected software projects by Florian Fischer." />
+  <meta property="og:url" content="https://gehirn.flofischer.org/" />
+  <meta property="og:image" content="https://gehirn.flofischer.org/social-preview.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Gehirn over a nocturnal Japanese cyberpunk city." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Gehirn — Selected Software Projects" />
+  <meta name="twitter:description" content="Fernwork, Suprabench and Paper2Form by Florian Fischer." />
+  <meta name="twitter:image" content="https://gehirn.flofischer.org/social-preview.jpg" />
+  <title>Gehirn — Projects</title>
+  <script>
+    try {
+      var language = localStorage.getItem("ff-language");
+      if (language === "de") {
+        document.documentElement.lang = "de";
+        document.documentElement.dataset.language = "de";
+      }
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="/shared/designs/base.css" />
+  <link rel="stylesheet" href="/shared/gehirn/gehirn.css" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body class="realm-gehirn" data-title-en="Gehirn — Projects" data-title-de="Gehirn — Projekte">
+  <div class="film-grain" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="site-hud">
+    <a class="hud-mark" href="#gehirn">Gehirn</a>
+    <span class="hud-cut" data-cut-label>00 / GEHIRN</span>
+    <nav aria-label="Site navigation">
+      <a href="https://flofischer.org/" data-local="/__root/">Hub</a>
+      <div class="language-switch" role="group" aria-label="Language / Sprache">
+        <button type="button" data-language-button="en" aria-pressed="true">EN</button>
+        <span aria-hidden="true">/</span>
+        <button type="button" data-language-button="de" aria-pressed="false">DE</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="reel" data-reel>
+    <section id="gehirn" class="cut hero-cut" data-cut="00 / GEHIRN">
+      <div class="hero-copy">
+        <h1 class="hero-title">GEHIRN</h1>
+      </div>
+      <div class="brain-stage" data-brain-stage aria-label="Rotating anaglyph brain">
+        <canvas data-brain-canvas></canvas>
+        <div class="brain-fallback" aria-hidden="true"></div>
+      </div>
+      <a class="next-cut" href="#fernwork" aria-label="Next: Fernwork">↓</a>
+    </section>
+
+    <section id="fernwork" class="cut project-cut" data-cut="01 / FERNWORK">
+      <div class="project-media" aria-hidden="true">
+        <video class="project-video video-main" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/fernwork.mp4?v=3" type="video/mp4" /></video>
+        <video class="project-video video-red" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/fernwork.mp4?v=3" type="video/mp4" /></video>
+        <video class="project-video video-cyan" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/fernwork.mp4?v=3" type="video/mp4" /></video>
+        <div class="project-grade"></div>
+      </div>
+      <div class="project-copy">
+        <p class="frame-caption">01 / FERNWORK</p>
+        <h2>Fernwork</h2>
+        <p class="project-kind">
+          <span data-lang-copy="en">Private browser workspace</span>
+          <span data-lang-copy="de">Privater Browser-Arbeitsplatz</span>
+        </p>
+        <p class="project-line">
+          <span data-lang-copy="en">A private workspace for PDFs, images, video, office documents, CAD and everyday utilities. Files are processed locally in the browser — without uploads.</span>
+          <span data-lang-copy="de">Ein privater Arbeitsplatz für PDFs, Bilder, Video, Office-Dokumente, CAD und alltägliche Werkzeuge. Dateien werden lokal im Browser verarbeitet — ohne Upload.</span>
+        </p>
+        <a class="project-link" href="https://fernwork.net" target="_blank" rel="noopener">fernwork.net <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+
+    <section id="suprabench" class="cut project-cut" data-cut="02 / SUPRABENCH">
+      <div class="project-media" aria-hidden="true">
+        <video class="project-video video-main" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/suprabench.mp4?v=3" type="video/mp4" /></video>
+        <video class="project-video video-red" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/suprabench.mp4?v=3" type="video/mp4" /></video>
+        <video class="project-video video-cyan" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/suprabench.mp4?v=3" type="video/mp4" /></video>
+        <div class="project-grade"></div>
+      </div>
+      <div class="project-copy">
+        <p class="frame-caption">02 / SUPRABENCH</p>
+        <h2>SupraBench</h2>
+        <p class="project-kind">
+          <span data-lang-copy="en">Community-driven AI rankings</span>
+          <span data-lang-copy="de">Community-basierte KI-Rankings</span>
+        </p>
+        <p class="project-line">
+          <span data-lang-copy="en">AI model rankings that weigh benchmark quality, difficulty, saturation and community trust instead of rewarding bench-maxing.</span>
+          <span data-lang-copy="de">KI-Modellrankings, die Qualität, Schwierigkeit, Sättigung und Vertrauen in Benchmarks gewichten, statt Bench-Maxing zu belohnen.</span>
+        </p>
+        <a class="project-link" href="https://suprabench.com" target="_blank" rel="noopener">suprabench.com <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+
+    <section id="paper2form" class="cut project-cut" data-cut="03 / PAPER2FORM">
+      <div class="project-media" aria-hidden="true">
+        <video class="project-video video-main" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/paper2form.mp4?v=3" type="video/mp4" /></video>
+        <video class="project-video video-red" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/paper2form.mp4?v=3" type="video/mp4" /></video>
+        <video class="project-video video-cyan" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/paper2form.mp4?v=3" type="video/mp4" /></video>
+        <div class="project-grade"></div>
+      </div>
+      <div class="project-copy">
+        <p class="frame-caption">03 / PAPER2FORM</p>
+        <h2>Paper2Form</h2>
+        <p class="project-kind">
+          <span data-lang-copy="en">Document to digital form</span>
+          <span data-lang-copy="de">Dokument zu digitalem Formular</span>
+        </p>
+        <p class="project-line">
+          <span data-lang-copy="en">Turns scanned paper and handwritten documents into structured data, then transfers detected fields into Google Forms or Microsoft Forms.</span>
+          <span data-lang-copy="de">Verwandelt gescannte und handschriftliche Dokumente in strukturierte Daten und überträgt erkannte Felder in Google Forms oder Microsoft Forms.</span>
+        </p>
+        <a class="project-link" href="https://paper2form.com" target="_blank" rel="noopener">paper2form.com <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+  </main>
+
+  <nav class="cut-nav" aria-label="Sections">
+    <a href="#gehirn" data-cut-link="gehirn" aria-label="Gehirn" aria-current="true"><span></span></a>
+    <a href="#fernwork" data-cut-link="fernwork" aria-label="Fernwork"><span></span></a>
+    <a href="#suprabench" data-cut-link="suprabench" aria-label="SupraBench"><span></span></a>
+    <a href="#paper2form" data-cut-link="paper2form" aria-label="Paper2Form"><span></span></a>
+  </nav>
+
+  <script src="/shared/gehirn/gehirn.js"></script>
+  <script type="module" src="/shared/gehirn/gehirn-three.js"></script>
+  <script src="/shared/pwa.js" defer></script>
+</body>
+</html>

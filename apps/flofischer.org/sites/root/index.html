@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-language="en" data-pwa-site="root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta
+    name="description"
+    content="Florian Fischer — a split threshold between Seele and Gehirn."
+    data-description-en="Florian Fischer — a split threshold between Seele and Gehirn."
+    data-description-de="Florian Fischer — eine Schwelle zwischen Seele und Gehirn."
+  />
+  <meta name="theme-color" content="#0c0b10" />
+  <meta name="application-name" content="Flo Fischer" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Flo Fischer" />
+  <link rel="canonical" href="https://flofischer.org/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Flo Fischer" />
+  <meta property="og:title" content="Flo Fischer — Seele · Gehirn" />
+  <meta property="og:description" content="A split threshold between traditional Catholic apologetics and selected software projects." />
+  <meta property="og:url" content="https://flofischer.org/" />
+  <meta property="og:image" content="https://flofischer.org/social-preview.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="A sunlit jungle and a nocturnal Japanese city meet at the threshold between Seele and Gehirn." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Flo Fischer — Seele · Gehirn" />
+  <meta name="twitter:description" content="Traditional Catholic apologetics and selected software projects." />
+  <meta name="twitter:image" content="https://flofischer.org/social-preview.jpg" />
+  <title>Flo Fischer</title>
+  <script>
+    try {
+      var language = localStorage.getItem("ff-language");
+      if (language === "de") {
+        document.documentElement.lang = "de";
+        document.documentElement.dataset.language = "de";
+      }
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="/shared/hub/hub.css" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <link rel="preload" href="/shared/hub/art/seele-jungle-v2.webp" as="image" type="image/webp" />
+  <link rel="preload" href="/shared/hub/art/gehirn-city-v2.webp" as="image" type="image/webp" />
+  <link rel="preload" href="/shared/hub/art/seele-riverbank-v3.png" as="image" type="image/png" />
+  <link rel="preload" href="/shared/hub/art/gehirn-foreground-v2.webp" as="image" type="image/webp" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body
+  class="realm-hub"
+  data-title-en="Flo Fischer"
+  data-title-de="Flo Fischer"
+>
+  <canvas id="hub-world" aria-label="Split landscape between Seele and Gehirn"></canvas>
+
+  <div class="film-grain" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="fade-veil" data-fade></div>
+  <div class="boot-fade" data-boot></div>
+
+  <a class="skip-link" href="#fallback-nav">
+    <span data-lang-copy="en">Skip to links</span>
+    <span data-lang-copy="de">Zu den Links</span>
+  </a>
+
+  <header class="hud" data-hud>
+    <a class="hud-mark" href="/">flo fischer</a>
+    <p class="hud-zone" data-zone>Seele · Gehirn</p>
+    <nav class="hud-nav" aria-label="Site" id="fallback-nav">
+      <a href="https://seele.flofischer.org/" data-local="/__seele/">Seele</a>
+      <a href="https://gehirn.flofischer.org/" data-local="/__gehirn/">Gehirn</a>
+      <a
+        class="mode-link"
+        href="/diorama/"
+        data-local="/__root/diorama/"
+        aria-label="02 — open the freely rotatable 3D diorama version"
+        title="3D Diorama"
+      >02</a>
+      <div class="language-switch" role="group" aria-label="Language / Sprache">
+        <button type="button" data-language-button="en" aria-pressed="true">EN</button>
+        <span aria-hidden="true">/</span>
+        <button type="button" data-language-button="de" aria-pressed="false">DE</button>
+      </div>
+      <button type="button" class="mute" data-mute aria-pressed="false" title="Sound">
+        <span data-lang-copy="en">Sound</span>
+        <span data-lang-copy="de">Ton</span>
+      </button>
+    </nav>
+  </header>
+
+  <p class="hint" data-hint>
+    <span data-lang-copy="en">Drag to look · click a threshold to enter</span>
+    <span data-lang-copy="de">Ziehen zum Umschauen · Schwelle anklicken zum Eintreten</span>
+  </p>
+
+  <button type="button" class="prompt" data-prompt hidden>
+    <span data-prompt-kicker></span>
+    <strong data-prompt-title></strong>
+    <em data-prompt-action></em>
+  </button>
+
+  <noscript>
+    <div class="noscript">
+      <p>Seele · Gehirn</p>
+      <p><a href="https://seele.flofischer.org/">seele.flofischer.org</a></p>
+      <p><a href="https://gehirn.flofischer.org/">gehirn.flofischer.org</a></p>
+      <p><a href="/diorama/">3D Diorama</a></p>
+    </div>
+  </noscript>
+
+  <script type="module" src="/shared/hub/main.js"></script>
+  <script src="/shared/pwa.js" defer></script>
+</body>
+</html>

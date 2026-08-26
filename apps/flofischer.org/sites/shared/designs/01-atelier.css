@@ -1,0 +1,339 @@
+/* ═══════════════════════════════════════════
+   01 ATELIER — Lydia Leiwang inspired
+   Instrument Serif + Geist, full-bleed rules,
+   cream ground, electric accent (blue/red)
+   ═══════════════════════════════════════════ */
+
+html[data-design="1"] {
+  --bg: #f4f2f0;
+  --bg2: #eae7e5;
+  --ink: #0625ee;
+  --line: #0625ee;
+  --muted: color-mix(in srgb, var(--ink) 65%, var(--bg));
+  --font-d: "Instrument Serif", Georgia, serif;
+  --font-b: "Geist", Inter, system-ui, sans-serif;
+  --max: 1200px;
+  --pad: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+html[data-design="1"] body.realm-seele {
+  --ink: #123a7a;
+  --line: #123a7a;
+}
+
+html[data-design="1"] body.realm-gehirn {
+  --ink: #b01020;
+  --line: #b01020;
+}
+
+html[data-design="1"] body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-b);
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
+  line-height: 1.55;
+}
+
+html[data-design="1"] ::selection {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* shell */
+html[data-design="1"] .shell {
+  width: min(var(--max), 100% - 2 * var(--pad));
+  margin-inline: auto;
+}
+
+html[data-design="1"] .site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 0;
+  gap: 1rem;
+}
+
+html[data-design="1"] .site-header .mark {
+  font-family: var(--font-b);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+html[data-design="1"] .site-header nav {
+  display: flex;
+  gap: 1.35rem;
+}
+
+html[data-design="1"] .site-header nav a {
+  font-size: 0.85rem;
+  text-decoration: none;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+html[data-design="1"] .site-header nav a:hover,
+html[data-design="1"] .site-header nav a[aria-current="page"] {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 600;
+}
+
+/* hero */
+html[data-design="1"] .hero {
+  padding: 2.5rem 0 0;
+  position: relative;
+}
+
+html[data-design="1"] .hero-title {
+  font-family: var(--font-d);
+  font-weight: 400;
+  font-size: clamp(3.2rem, 8vw, 6.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+html[data-design="1"] .hero-title em {
+  font-style: italic;
+}
+
+html[data-design="1"] .hero-rule {
+  height: 1px;
+  background: var(--line);
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 1.25rem 0 1.75rem;
+}
+
+html[data-design="1"] .hero-sub {
+  max-width: 28rem;
+  font-size: 1rem;
+  line-height: 1.55;
+  opacity: 0.9;
+}
+
+/* portal split (root) */
+html[data-design="1"] .portal {
+  min-height: calc(100vh - 5rem);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+html[data-design="1"] .portal a {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  min-height: 70vh;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.25s;
+}
+
+html[data-design="1"] .portal a:first-child {
+  border-right: 1px solid var(--line);
+}
+
+html[data-design="1"] .portal a:hover {
+  background: var(--bg2);
+}
+
+html[data-design="1"] .portal .kicker {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  opacity: 0.7;
+}
+
+html[data-design="1"] .portal .name {
+  font-family: var(--font-d);
+  font-size: clamp(3.5rem, 10vw, 7rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+html[data-design="1"] .portal .name em {
+  font-style: italic;
+}
+
+html[data-design="1"] .portal .desc {
+  margin-top: 0.85rem;
+  max-width: 18rem;
+  font-size: 0.92rem;
+  opacity: 0.85;
+}
+
+html[data-design="1"] .portal .seele {
+  --ink: #123a7a;
+  color: #123a7a;
+}
+
+html[data-design="1"] .portal .gehirn {
+  --ink: #b01020;
+  color: #b01020;
+}
+
+/* lists */
+html[data-design="1"] .index {
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--line);
+}
+
+html[data-design="1"] .index a {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1rem 1.5rem;
+  align-items: baseline;
+  padding: 1.35rem 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+html[data-design="1"] .index a:hover {
+  background: var(--bg2);
+  margin-inline: calc(-1 * var(--pad));
+  padding-inline: var(--pad);
+}
+
+html[data-design="1"] .index .num {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+  opacity: 0.55;
+  min-width: 1.5rem;
+}
+
+html[data-design="1"] .index .title {
+  font-family: var(--font-d);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+html[data-design="1"] .index .title em {
+  font-style: italic;
+}
+
+html[data-design="1"] .index .meta {
+  font-size: 0.8rem;
+  opacity: 0.65;
+  text-align: right;
+}
+
+html[data-design="1"] .index .blurb {
+  grid-column: 2 / -1;
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin-top: -0.35rem;
+  max-width: 36rem;
+}
+
+/* article */
+html[data-design="1"] .article {
+  max-width: 40rem;
+  padding: 1rem 0 3rem;
+}
+
+html[data-design="1"] .article .crumb {
+  font-size: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+html[data-design="1"] .article .crumb a {
+  text-decoration: none;
+}
+
+html[data-design="1"] .article .crumb a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+html[data-design="1"] .article h1 {
+  font-family: var(--font-d);
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin-bottom: 1.25rem;
+}
+
+html[data-design="1"] .article h2 {
+  font-family: var(--font-d);
+  font-size: 1.65rem;
+  font-weight: 400;
+  margin: 2rem 0 0.65rem;
+  letter-spacing: -0.02em;
+}
+
+html[data-design="1"] .article p,
+html[data-design="1"] .article li {
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+html[data-design="1"] .article ol,
+html[data-design="1"] .article ul {
+  padding-left: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+html[data-design="1"] .article ol {
+  list-style: decimal;
+}
+
+html[data-design="1"] .article ul {
+  list-style: disc;
+}
+
+html[data-design="1"] .article blockquote {
+  border-left: 1px solid var(--line);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-family: var(--font-d);
+  font-style: italic;
+  font-size: 1.25rem;
+}
+
+html[data-design="1"] .site-footer {
+  border-top: 1px solid var(--line);
+  margin-top: 4rem;
+  padding: 2rem 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.75rem;
+}
+
+html[data-design="1"] .site-footer a {
+  text-decoration: none;
+}
+
+html[data-design="1"] .site-footer a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  html[data-design="1"] .portal {
+    grid-template-columns: 1fr;
+  }
+  html[data-design="1"] .portal a:first-child {
+    border-right: 0;
+  }
+  html[data-design="1"] .index a {
+    grid-template-columns: auto 1fr;
+  }
+  html[data-design="1"] .index .meta {
+    display: none;
+  }
+  html[data-design="1"] .index .blurb {
+    grid-column: 2;
+  }
+}

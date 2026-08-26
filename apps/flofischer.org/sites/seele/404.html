@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" data-design="3" data-language="en" data-pwa-site="seele">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, follow" />
+  <meta name="theme-color" content="#eee8da" />
+  <title>Not found — Seele</title>
+  <script>
+    try {
+      var language = localStorage.getItem("ff-language");
+      if (language === "de") {
+        document.documentElement.lang = "de";
+        document.documentElement.dataset.language = "de";
+      }
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="/shared/designs/base.css" />
+  <link rel="stylesheet" href="/shared/seele/seele.css" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+</head>
+<body class="realm-seele" data-title-en="Not found — Seele" data-title-de="Nicht gefunden — Seele">
+  <div class="page shell">
+    <header class="site-header">
+      <a class="mark" href="/" data-local="/__seele/">Seele</a>
+      <nav>
+        <a class="hub-link" href="https://flofischer.org/" data-local="/__root/"><span data-lang-copy="en">← Back to Hub</span><span data-lang-copy="de">← Zurück zum Hub</span></a>
+        <div class="language-switch" role="group" aria-label="Language / Sprache"><button type="button" data-language-button="en" aria-pressed="true">EN</button><span aria-hidden="true">/</span><button type="button" data-language-button="de" aria-pressed="false">DE</button></div>
+      </nav>
+    </header>
+    <main class="not-found">
+      <h1>404</h1>
+      <p><a href="/" data-local="/__seele/"><span data-lang-copy="en">Back to all articles</span><span data-lang-copy="de">Zurück zu allen Artikeln</span></a></p>
+    </main>
+  </div>
+  <script src="/shared/seele/seele.js"></script>
+  <script src="/shared/pwa.js" defer></script>
+</body>
+</html>

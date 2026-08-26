@@ -1,0 +1,16 @@
+{
+  "name": "flofischer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Persönliche Website — flofischer.org (Seele / Gehirn)",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "preview": "python3 -m http.server 8787 --directory sites",
+    "audit": "node scripts/run-audit.mjs",
+    "check:deploy": "wrangler deploy --dry-run"
+  },
+  "devDependencies": {
+    "wrangler": "^4.120.0"
+  }
+}

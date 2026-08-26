@@ -1,3 +1,12 @@
 node_modules/
 .wrangler/
 .dev.vars*
+dist/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+.cloudflare/
+.vscode/
+.idea/

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" data-design="3" data-language="en" data-pwa-site="seele">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta
+    name="description"
+    content="Seele — traditional Catholic apologetics."
+    data-description-en="Seele — traditional Catholic apologetics."
+    data-description-de="Seele — traditionelle katholische Apologetik."
+  />
+  <meta name="theme-color" content="#eee8da" />
+  <meta name="application-name" content="Seele" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Seele" />
+  <link rel="canonical" href="https://seele.flofischer.org/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Seele" />
+  <meta property="og:title" content="Seele — Traditional Catholic Apologetics" />
+  <meta property="og:description" content="Traditional Catholic apologetics in English and German." />
+  <meta property="og:url" content="https://seele.flofischer.org/" />
+  <meta property="og:image" content="https://seele.flofischer.org/social-preview.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Seele — Traditional Catholic Apologetics with a botanical illustration." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Seele — Traditional Catholic Apologetics" />
+  <meta name="twitter:description" content="Traditional Catholic apologetics in English and German." />
+  <meta name="twitter:image" content="https://seele.flofischer.org/social-preview.jpg" />
+  <title>Seele — Traditional Catholic Apologetics</title>
+  <script>
+    try {
+      var language = localStorage.getItem("ff-language");
+      if (language === "de") {
+        document.documentElement.lang = "de";
+        document.documentElement.dataset.language = "de";
+      }
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="/shared/designs/base.css" />
+  <link rel="stylesheet" href="/shared/seele/seele.css" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+</head>
+<body
+  class="realm-seele"
+  data-title-en="Seele — Traditional Catholic Apologetics"
+  data-title-de="Seele — Traditionelle katholische Apologetik"
+>
+  <div class="page shell">
+    <header class="site-header">
+      <a class="mark" href="./">Seele</a>
+      <nav>
+        <a class="hub-link" href="https://flofischer.org/" data-local="/__root/">
+          <span data-lang-copy="en">← Back to Hub</span>
+          <span data-lang-copy="de">← Zurück zum Hub</span>
+        </a>
+        <div class="language-switch" role="group" aria-label="Language / Sprache">
+          <button type="button" data-language-button="en" aria-pressed="true">EN</button>
+          <span aria-hidden="true">/</span>
+          <button type="button" data-language-button="de" aria-pressed="false">DE</button>
+        </div>
+      </nav>
+    </header>
+
+    <div class="issue-bar">
+      <span data-lang-copy="en">Apologetics Blog</span>
+      <span data-lang-copy="de">Apologetik-Blog</span>
+      <time data-roman-year></time>
+    </div>
+
+    <header class="hero">
+      <div class="hero-copy">
+        <h1 class="hero-title">
+          <span data-lang-copy="en">Traditional Catholic Apologetics</span>
+          <span data-lang-copy="de">Traditionelle katholische Apologetik</span>
+        </h1>
+      </div>
+      <figure
+        class="botanical-plate"
+        data-botanical-carousel
+        tabindex="0"
+        aria-label="Interactive botanical Christian symbols. Hover or use the arrow keys to change the illustration."
+        data-label-en="Interactive botanical Christian symbols. Hover or use the arrow keys to change the illustration."
+        data-label-de="Interaktive botanische christliche Symbole. Mit dem Mauszeiger oder den Pfeiltasten wechselt die Illustration."
+      >
+        <img
+          class="is-active"
+          src="/shared/seele/symbols/botanical-cross.png"
+          alt=""
+          data-botanical-symbol
+        />
+        <img
+          src="/shared/seele/symbols/olive-ichthys.png"
+          alt=""
+          loading="lazy"
+          data-botanical-symbol
+        />
+        <img
+          src="/shared/seele/symbols/marian-lilies.png"
+          alt=""
+          loading="lazy"
+          data-botanical-symbol
+        />
+        <img
+          src="/shared/seele/symbols/eucharistic-chalice.png"
+          alt=""
+          loading="lazy"
+          data-botanical-symbol
+        />
+        <img
+          src="/shared/seele/symbols/sacred-heart.png"
+          alt=""
+          loading="lazy"
+          data-botanical-symbol
+        />
+      </figure>
+    </header>
+
+    <main>
+      <section class="archive-tools" aria-label="Search and filter articles">
+        <label class="archive-search">
+          <span aria-hidden="true">⌕</span>
+          <span class="sr-only">
+            <span data-lang-copy="en">Search articles</span>
+            <span data-lang-copy="de">Artikel durchsuchen</span>
+          </span>
+          <input
+            type="search"
+            data-article-search
+            aria-label="Search articles / Artikel durchsuchen"
+            data-placeholder-en="Search every article…"
+            data-placeholder-de="Alle Artikel durchsuchen…"
+            placeholder="Search every article…"
+            autocomplete="off"
+          />
+          <kbd>/</kbd>
+        </label>
+        <div class="tag-filters" role="group" aria-label="Filter by subject">
+          <button type="button" data-tag-filter="all" aria-pressed="true">
+            <span data-lang-copy="en">All</span><span data-lang-copy="de">Alle</span>
+          </button>
+          <button type="button" data-tag-filter="reason" aria-pressed="false">
+            <span data-lang-copy="en">Reason</span><span data-lang-copy="de">Vernunft</span>
+          </button>
+          <button type="button" data-tag-filter="church" aria-pressed="false">
+            <span data-lang-copy="en">Church</span><span data-lang-copy="de">Kirche</span>
+          </button>
+          <button type="button" data-tag-filter="science" aria-pressed="false">
+            <span data-lang-copy="en">Science</span><span data-lang-copy="de">Wissenschaft</span>
+          </button>
+          <button type="button" data-tag-filter="miracles" aria-pressed="false">
+            <span data-lang-copy="en">Miracles</span><span data-lang-copy="de">Wunder</span>
+          </button>
+        </div>
+        <output data-results-count>6 articles</output>
+      </section>
+
+      <div class="index">
+        <a
+          href="posts/gottesbeweise.html"
+          data-article-card
+          data-slug="gottesbeweise"
+          data-tags="reason philosophy science miracles"
+          data-search-en="Proving God Kalam morality teleology cosmology logic Resurrection philosophy science miracles lecture"
+          data-search-de="Gottesbeweise Kalam Moral Teleologie Kosmologie Logik Auferstehung Philosophie Wissenschaft Wunder Vortrag"
+        >
+          <span class="num">01</span>
+          <span class="title">
+            <span data-lang-copy="en">Arguments for God’s Existence</span>
+            <span data-lang-copy="de">Gottesbeweise</span>
+          </span>
+          <figure class="post-image">
+            <img
+              src="/shared/seele/article-images/william-lane-craig.png"
+              alt="Illustrated portrait of William Lane Craig"
+              data-alt-en="Illustrated portrait of William Lane Craig"
+              data-alt-de="Illustriertes Porträt von William Lane Craig"
+            />
+          </figure>
+          <span class="blurb">
+            <span data-lang-copy="en">Kalam, morality, teleology, Resurrection.</span>
+            <span data-lang-copy="de">Kalam, Moral, Teleologie, Auferstehung.</span>
+          </span>
+          <span class="meta">
+            <span data-lang-copy="en">Lecture</span>
+            <span data-lang-copy="de">Vortrag</span>
+          </span>
+        </a>
+
+        <a
+          href="posts/fsspx-verteidigung.html"
+          data-article-card
+          data-slug="fsspx"
+          data-tags="church tradition"
+          data-search-en="SSPX FSSPX modernism episcopal consecrations Vatican II Novus Ordo ecclesiology church tradition"
+          data-search-de="FSSPX SSPX Modernismus Bischofsweihen Vatikanum Novus Ordo Ekklesiologie Kirche Tradition"
+        >
+          <span class="num">02</span>
+          <span class="title"><span data-lang-copy="en">SSPX</span><span data-lang-copy="de">FSSPX</span></span>
+          <span class="blurb">
+            <span data-lang-copy="en">Modernism and episcopal consecrations.</span>
+            <span data-lang-copy="de">Modernismus und Bischofsweihen.</span>
+          </span>
+          <span class="meta">
+            <span data-lang-copy="en">Ecclesiology</span>
+            <span data-lang-copy="de">Ekklesiologie</span>
+          </span>
+        </a>
+
+        <a
+          href="posts/aliens-katholizismus.html"
+          data-article-card
+          data-slug="aliens"
+          data-tags="science philosophy"
+          data-search-en="Aliens Catholicism Fermi paradox Drake equation abiogenesis baptism extraterrestrial science philosophy"
+          data-search-de="Aliens Katholizismus Fermi Paradoxon Drake Gleichung Abiogenese Taufe Außerirdische Wissenschaft Philosophie"
+        >
+          <span class="num">03</span>
+          <span class="title">
+            <span data-lang-copy="en">Aliens and Catholicism</span>
+            <span data-lang-copy="de">Aliens und Katholizismus</span>
+          </span>
+          <span class="blurb">
+            <span data-lang-copy="en">Abiogenesis, Drake, Carter.</span>
+            <span data-lang-copy="de">Abiogenese, Drake, Carter.</span>
+          </span>
+          <span class="meta">Essay</span>
+        </a>
+
+        <a
+          href="posts/eucharistische-wunder.html"
+          data-article-card
+          data-slug="eucharist"
+          data-tags="miracles science church"
+          data-search-en="Eucharistic miracles Lanciano Buenos Aires Tixtla Sokolka Legnica Eucharist science church lecture"
+          data-search-de="Eucharistische Wunder Lanciano Buenos Aires Tixtla Sokolka Liegnitz Eucharistie Wissenschaft Kirche Vortrag"
+        >
+          <span class="num">04</span>
+          <span class="title">
+            <span data-lang-copy="en">Eucharistic Miracles</span>
+            <span data-lang-copy="de">Eucharistische Wunder</span>
+          </span>
+          <span class="blurb">
+            <span data-lang-copy="en">Definition, Lanciano.</span>
+            <span data-lang-copy="de">Definition, Lanciano.</span>
+          </span>
+          <span class="meta">
+            <span data-lang-copy="en">Lecture</span>
+            <span data-lang-copy="de">Vortrag</span>
+          </span>
+        </a>
+
+        <a
+          href="posts/vorsehung-freier-wille.html"
+          data-article-card
+          data-slug="providence"
+          data-tags="reason philosophy"
+          data-search-en="Providence free will omniscience Molinism Banez open theism time philosophy reason"
+          data-search-de="Vorsehung freier Wille Allwissenheit Molinismus Banez Open Theism Zeit Philosophie Vernunft"
+        >
+          <span class="num">05</span>
+          <span class="title">
+            <span data-lang-copy="en">Providence and Free Will</span>
+            <span data-lang-copy="de">Vorsehung und freier Wille</span>
+          </span>
+          <span class="blurb">
+            <span data-lang-copy="en">Omniscience and freedom.</span>
+            <span data-lang-copy="de">Allwissenheit und Freiheit.</span>
+          </span>
+          <span class="meta">
+            <span data-lang-copy="en">Philosophy</span>
+            <span data-lang-copy="de">Philosophie</span>
+          </span>
+        </a>
+
+        <a
+          href="posts/antwort-christian-wagner.html"
+          data-article-card
+          data-slug="wagner-response"
+          data-tags="church tradition"
+          data-search-en="Christian B. Wagner null sentence SSPX FSSPX excommunication canon law Thomism response church tradition"
+          data-search-de="Christian B. Wagner nichtiges Urteil SSPX FSSPX Exkommunikation Kirchenrecht Thomismus Replik Kirche Tradition"
+        >
+          <span class="num">06</span>
+          <span class="title">
+            <span data-lang-copy="en">Must One Submit to a Null Sentence?</span>
+            <span data-lang-copy="de">Muss man sich einem nichtigen Urteil unterwerfen?</span>
+          </span>
+          <span class="blurb">
+            <span data-lang-copy="en">Excommunication, nullity, and the SSPX.</span>
+            <span data-lang-copy="de">Exkommunikation, Nichtigkeit und die FSSPX.</span>
+          </span>
+          <span class="meta">
+            <span data-lang-copy="en">Response</span>
+            <span data-lang-copy="de">Replik</span>
+          </span>
+        </a>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <span>seele.flofischer.org</span>
+      <a href="https://flofischer.org/" data-local="/__root/">
+        <span data-lang-copy="en">Back to Hub</span>
+        <span data-lang-copy="de">Zurück zum Hub</span>
+      </a>
+    </footer>
+  </div>
+
+  <script src="/shared/seele/seele.js"></script>
+  <script src="/shared/pwa.js" defer></script>
+</body>
+</html>

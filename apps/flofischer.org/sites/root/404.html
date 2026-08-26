@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" data-language="en" data-pwa-site="root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, follow" />
+  <meta name="theme-color" content="#0c0b10" />
+  <title>404 — Flo Fischer</title>
+  <link rel="stylesheet" href="/shared/hub/hub.css" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+</head>
+<body class="realm-hub is-404">
+  <div class="lost">
+    <p class="intro-mark">flo fischer</p>
+    <h1>
+      <span class="word-seele">404</span>
+      <span class="word-gehirn">lost</span>
+    </h1>
+    <p>
+      <span data-lang-copy="en">This path does not cross the threshold.</span>
+      <span data-lang-copy="de">Dieser Pfad führt nicht über die Schwelle.</span>
+    </p>
+    <nav class="intro-skip">
+      <a class="skip-seele" href="/">Hub</a>
+      <a class="skip-gehirn" href="https://gehirn.flofischer.org/" data-local="/__gehirn/">Gehirn</a>
+    </nav>
+  </div>
+  <script>
+    (function () {
+      try {
+        var language = localStorage.getItem("ff-language");
+        if (language === "de") {
+          document.documentElement.lang = "de";
+          document.documentElement.dataset.language = "de";
+        }
+      } catch (e) {}
+      if (/localhost|127\.0\.0\.1|workers\.dev/.test(location.hostname)) {
+        document.querySelectorAll("[data-local]").forEach(function (link) {
+          link.href = link.dataset.local;
+        });
+      }
+    })();
+  </script>
+  <script src="/shared/pwa.js" defer></script>
+</body>
+</html>
