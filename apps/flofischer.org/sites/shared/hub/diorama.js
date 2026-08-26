@@ -104,6 +104,51 @@ function cylinderBetween(from, to, radius, material, segments = 8) {
   return mesh;
 }
 
+function createGabledRoof(width, depth, height, roofMaterial, wallMaterial) {
+  const halfWidth = width / 2;
+  const halfDepth = depth / 2;
+  const leftFront = [-halfWidth, 0, halfDepth];
+  const leftBack = [-halfWidth, 0, -halfDepth];
+  const rightFront = [halfWidth, 0, halfDepth];
+  const rightBack = [halfWidth, 0, -halfDepth];
+  const ridgeFront = [0, height, halfDepth];
+  const ridgeBack = [0, height, -halfDepth];
+
+  const slopeGeometry = new THREE.BufferGeometry();
+  slopeGeometry.setAttribute("position", new THREE.Float32BufferAttribute([
+    ...leftFront, ...ridgeFront, ...ridgeBack,
+    ...leftFront, ...ridgeBack, ...leftBack,
+    ...rightFront, ...rightBack, ...ridgeBack,
+    ...rightFront, ...ridgeBack, ...ridgeFront,
+  ], 3));
+  slopeGeometry.setAttribute("uv", new THREE.Float32BufferAttribute([
+    0, 1, 0, 0, 1, 0,
+    0, 1, 1, 0, 1, 1,
+    0, 1, 1, 1, 1, 0,
+    0, 1, 1, 0, 0, 0,
+  ], 2));
+  slopeGeometry.computeVertexNormals();
+  const slopes = new THREE.Mesh(slopeGeometry, roofMaterial);
+  slopes.castShadow = !qualityLow;
+
+  const gableGeometry = new THREE.BufferGeometry();
+  gableGeometry.setAttribute("position", new THREE.Float32BufferAttribute([
+    ...leftFront, ...rightFront, ...ridgeFront,
+    ...rightBack, ...leftBack, ...ridgeBack,
+  ], 3));
+  gableGeometry.setAttribute("uv", new THREE.Float32BufferAttribute([
+    0, 0, 1, 0, 0.5, 1,
+    1, 0, 0, 0, 0.5, 1,
+  ], 2));
+  gableGeometry.computeVertexNormals();
+  const gables = new THREE.Mesh(gableGeometry, wallMaterial);
+  gables.castShadow = !qualityLow;
+
+  const roof = new THREE.Group();
+  roof.add(slopes, gables);
+  return roof;
+}
+
 function ellipseContains(x, z, margin = 0) {
   return (x * x) / ((8.15 - margin) ** 2) + (z * z) / ((5.72 - margin) ** 2) < 1;
 }
@@ -982,11 +1027,8 @@ async function start() {
   nave.position.y = 0.8;
   nave.castShadow = !qualityLow;
   chapel.add(nave);
-  const roof = new THREE.Mesh(new THREE.ConeGeometry(2.05, 1.28, 4), roofMaterial);
-  roof.scale.z = 1.38;
-  roof.rotation.y = Math.PI / 4;
-  roof.position.y = 1.96;
-  roof.castShadow = !qualityLow;
+  const roof = createGabledRoof(2.52, 3.36, 1.05, roofMaterial, stoneMaterial);
+  roof.position.y = 1.54;
   chapel.add(roof);
   const tower = new THREE.Mesh(new RoundedBoxGeometry(0.92, 2.45, 0.95, 3, 0.05), stoneMaterial);
   tower.position.set(0, 1.35, 1.44);
