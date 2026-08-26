@@ -14,8 +14,6 @@ export async function qrResponse(request, isAllowed = () => true) {
   const allowedPath = target.pathname === "/vote"
     || target.pathname === "/pad/rosa"
     || target.pathname === "/pad/blau"
-    || target.pathname === "/judge/rosa"
-    || target.pathname === "/judge/blau"
     || target.pathname === "/buzzer/rosa"
     || target.pathname === "/buzzer/blau";
   const token = target.searchParams.get("t") || "";
@@ -45,8 +43,6 @@ export function qrMatchesGame(data, target) {
   if (target.pathname === "/vote") return Object.values(data.vote?.tokens || {}).includes(token);
   if (target.pathname === "/pad/rosa") return data.map?.tokens.rosa === token;
   if (target.pathname === "/pad/blau") return data.map?.tokens.blau === token;
-  if (target.pathname === "/judge/rosa") return data.challenge?.judgeTokens?.rosa === token;
-  if (target.pathname === "/judge/blau") return data.challenge?.judgeTokens?.blau === token;
   if (target.pathname === "/buzzer/rosa") return data.challenge?.buzzerTokens?.rosa === token;
   if (target.pathname === "/buzzer/blau") return data.challenge?.buzzerTokens?.blau === token;
   return false;

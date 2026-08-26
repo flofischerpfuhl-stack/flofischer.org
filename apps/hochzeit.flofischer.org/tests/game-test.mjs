@@ -9,7 +9,6 @@ import {
   hostAction,
   hydrateState,
   isHost,
-  judgeAction,
   mapAction,
   publicState,
   quizScores,
@@ -49,9 +48,12 @@ test("all 20 games have a complete and startable gameplay definition", async () 
       assert.equal(data.challenge.kind, "quiz");
     }
     if (card.kind === "map") assert.equal(data.map.roundPlaces.length, 3);
-    if (card.kind === "vote") assert.deepEqual(Object.keys(data.vote.tokens), ["guests"]);
+    if (card.kind === "vote") {
+      assert.deepEqual(Object.keys(data.vote.tokens), ["guests"]);
+      assert.equal(card.guessMode, "percentage", `${card.id} must ask for a percentage only`);
+    }
   }
-  for (const path of ["../public/media/foto-raten-sprite.png", "../public/media/plate-m.svg", "../public/media/plate-gap.svg"]) {
+  for (const path of ["../public/media/foto-raten-sprite.png", ...Array.from({ length: 6 }, (_, index) => `../public/media/plate-0${index + 1}.svg`)]) {
     await access(fileURLToPath(new URL(path, import.meta.url)));
   }
   const music = CARDS.find((card) => card.id === "raten-1");
@@ -73,7 +75,7 @@ test("hydrate preserves a running show and migrates the previous schema", () => 
   assert.ok(reloaded.history.past.length >= 3);
 
   const migrated = hydrateState({ scores: { rosa: 4, blau: 7 }, flipped: { "party-2": true }, active: null, revision: 12 }, makeToken, () => 20_000);
-  assert.equal(migrated.schemaVersion, 3);
+  assert.equal(migrated.schemaVersion, 4);
   assert.equal(migrated.session.label, "Bestehende Show");
   assert.deepEqual(migrated.scores, { rosa: 4, blau: 7 });
   assert.equal(migrated.flipped["party-2"], true);
@@ -127,16 +129,16 @@ test("undo and redo restore complete game snapshots with monotonic revisions", (
 });
 
 test("leaving the game suspends it and reopening resumes the exact state", () => {
-  const data = start(freshState(tokens()), "party-4", tokens(), () => 1_000);
-  hostAction(data, { type: "timer:start" }, tokens(), () => 2_000);
-  const runningSince = data.challenge.timer.runningSince;
+  const data = start(freshState(tokens()), "aktion-2", tokens(), () => 1_000);
+  hostAction(data, { type: "relay:start" }, tokens(), () => 2_000);
+  const runningSince = data.challenge.relay.rounds.rosa.timer.runningSince;
   assert.equal(hostAction(data, { type: "close" }).ok, true);
   assert.equal(data.view, "board");
-  assert.equal(data.active.id, "party-4");
-  assert.equal(data.challenge.timer.runningSince, runningSince);
-  assert.equal(hostAction(data, { type: "start", id: "party-4" }, tokens(), () => 4_000).ok, true);
+  assert.equal(data.active.id, "aktion-2");
+  assert.equal(data.challenge.relay.rounds.rosa.timer.runningSince, runningSince);
+  assert.equal(hostAction(data, { type: "start", id: "aktion-2" }, tokens(), () => 4_000).ok, true);
   assert.equal(data.view, "game");
-  assert.equal(data.challenge.timer.runningSince, runningSince);
+  assert.equal(data.challenge.relay.rounds.rosa.timer.runningSince, runningSince);
   assert.equal(hostAction(data, { type: "start", id: "aktion-1" }, tokens(), () => 4_000).error, "card_not_flipped");
 });
 
@@ -189,7 +191,7 @@ test("revealing a different unstarted card automatically closes the previous pre
   assert.deepEqual(data.flipped, { "aktion-1": true }, "undo restores the previous open preview");
 });
 
-test("timers, counters, and measurement games keep their live state", () => {
+test("timers, relays, and measurement games keep their live state", () => {
   const watch = start(freshState(tokens()), "aktion-1", tokens(), () => 1_000);
   assert.equal(hostAction(watch, { type: "timer:start" }, tokens(), () => 2_000).ok, true);
   const reloaded = hydrateState(structuredClone(watch), tokens(), () => 9_000);
@@ -199,11 +201,12 @@ test("timers, counters, and measurement games keep their live state", () => {
   assert.equal(hostAction(reloaded, { type: "timer:reset" }).ok, true);
   assert.equal(reloaded.challenge.timer.elapsedMs, 0);
 
-  const counter = start(freshState(tokens()), "aktion-4");
-  for (let index = 0; index < 45; index++) hostAction(counter, { type: "counter:change", team: "rosa", delta: 1 });
-  assert.equal(counter.challenge.counters.rosa, 40, "target counter must clamp at 40");
-  hostAction(counter, { type: "counter:change", team: "rosa", delta: -1 });
-  assert.equal(counter.challenge.counters.rosa, 39);
+  const relay = start(freshState(tokens()), "aktion-4");
+  assert.equal(relay.challenge.relay.rounds.rosa.timer.elapsedMs, 0);
+  hostAction(relay, { type: "relay:start" }, tokens(), () => 10_000);
+  assert.equal(hostAction(relay, { type: "relay:change", delta: 1 }, tokens(), () => 10_100).error, "relay_progress_not_tracked");
+  assert.equal(hostAction(relay, { type: "relay:finish" }, tokens(), () => 11_000).ok, true);
+  assert.equal(relay.challenge.relay.rounds.rosa.timer.elapsedMs, 1_000);
 
   const measure = start(freshState(tokens()), "party-3");
   assert.equal(hostAction(measure, { type: "measurement:set", team: "rosa", left: 102.5, right: 101.2 }).ok, true);
@@ -211,21 +214,21 @@ test("timers, counters, and measurement games keep their live state", () => {
   assert.equal(hostAction(measure, { type: "measurement:set", team: "blau", left: -1, right: 4 }).error, "bad_measurement");
 });
 
-test("singing call runs two isolated team rounds and derives fewer-error winner", () => {
+test("wedding pantomime runs two isolated timed rounds and derives the higher-score winner", () => {
   const data = start(freshState(tokens()), "party-2", tokens());
-  assert.equal(data.challenge.phone.order[0], "rosa");
-  hostAction(data, { type: "phone:start" }, tokens(), () => 1_000);
-  hostAction(data, { type: "phone:error", delta: 1 });
-  hostAction(data, { type: "phone:error", delta: 1 });
-  hostAction(data, { type: "phone:finish" }, tokens(), () => 91_000);
-  assert.equal(data.challenge.phone.rounds.rosa.done, true);
-  assert.equal(data.challenge.phone.index, 1);
-  hostAction(data, { type: "phone:start" }, tokens(), () => 92_000);
-  hostAction(data, { type: "phone:error", delta: 1 });
-  hostAction(data, { type: "phone:finish" }, tokens(), () => 182_000);
-  assert.equal(data.challenge.result, "blau");
-  assert.equal(hostAction(data, { type: "winner", team: "rosa" }).error, "result_mismatch");
-  assert.equal(hostAction(data, { type: "winner", team: "blau" }).ok, true);
+  assert.equal(data.challenge.teamRounds.order[0], "rosa");
+  hostAction(data, { type: "team-round:start" }, tokens(), () => 1_000);
+  hostAction(data, { type: "team-round:correct" }, tokens(), () => 2_000);
+  hostAction(data, { type: "team-round:correct" }, tokens(), () => 3_000);
+  hostAction(data, { type: "team-round:finish" }, tokens(), () => 61_000);
+  assert.equal(data.challenge.teamRounds.rounds.rosa.done, true);
+  assert.equal(data.challenge.teamRounds.index, 1);
+  hostAction(data, { type: "team-round:start" }, tokens(), () => 62_000);
+  hostAction(data, { type: "team-round:correct" }, tokens(), () => 63_000);
+  hostAction(data, { type: "team-round:finish" }, tokens(), () => 122_000);
+  assert.equal(data.challenge.result, "rosa");
+  assert.equal(hostAction(data, { type: "winner", team: "blau" }).error, "result_mismatch");
+  assert.equal(hostAction(data, { type: "winner", team: "rosa" }).ok, true);
 });
 
 test("pull-ups enforce four alternating individual attempts and derive totals", () => {
@@ -242,16 +245,24 @@ test("pull-ups enforce four alternating individual attempts and derive totals", 
   assert.equal(hostAction(data, { type: "winner", team: "rosa" }).ok, true);
 });
 
-test("push-up judges are team-bound and duplicate events count exactly once", () => {
+test("shirt and push-up relays require their complete target and compare two times from zero", () => {
+  const shirt = start(freshState(tokens()), "aktion-2", tokens());
+  assert.equal(hostAction(shirt, { type: "relay:start" }, tokens(), () => 1_000).ok, true);
+  for (let person = 0; person < 9; person++) hostAction(shirt, { type: "relay:change", delta: 1 }, tokens(), () => 2_000 + person);
+  assert.equal(hostAction(shirt, { type: "relay:finish" }, tokens(), () => 20_000).error, "relay_incomplete");
+  assert.equal(hostAction(shirt, { type: "relay:change", delta: 1 }, tokens(), () => 20_000).ok, true);
+  assert.equal(shirt.challenge.relay.rounds.rosa.done, true, "person ten automatically stops the team clock");
+  assert.equal(shirt.challenge.relay.rounds.rosa.timer.elapsedMs, 19_000);
+  assert.equal(shirt.challenge.relay.rounds.blau.timer.elapsedMs, 0);
+
   const data = start(freshState(tokens()), "aktion-4", tokens());
-  const { rosa, blau } = data.challenge.judgeTokens;
-  assert.equal(judgeAction(data, { team: "blau", token: rosa, delta: 1, eventId: "wrong" }).status, 403);
-  assert.equal(judgeAction(data, { team: "rosa", token: rosa, delta: 1, eventId: "rep-1" }).ok, true);
-  assert.equal(judgeAction(data, { team: "rosa", token: rosa, delta: 1, eventId: "rep-1" }).ok, true);
-  assert.equal(data.challenge.counters.rosa, 1);
-  assert.equal(judgeAction(data, { team: "blau", token: blau, delta: 1, eventId: "rep-2" }).ok, true);
-  assert.equal(data.challenge.counters.blau, 1);
-  assert.equal(publicState(data, { role: "screen" }).challenge.judgeTokens, undefined);
+  for (const [team, startedAt, finishedAt] of [["rosa", 1_000, 31_000], ["blau", 40_000, 65_000]]) {
+    assert.equal(data.challenge.relay.order[data.challenge.relay.index], team);
+    assert.equal(hostAction(data, { type: "relay:start" }, tokens(), () => startedAt).ok, true);
+    assert.equal(hostAction(data, { type: "relay:finish" }, tokens(), () => finishedAt).ok, true);
+  }
+  assert.equal(data.challenge.result, "blau");
+  assert.equal(data.challenge.judgeTokens, undefined);
 });
 
 test("five-round quizzes require reveal, record both teams, and only tie-break on a tie", () => {
@@ -270,7 +281,7 @@ test("five-round quizzes require reveal, record both teams, and only tie-break o
   assert.equal(hostAction(data, { type: "quiz:tiebreak" }).error, "tiebreak_not_needed");
 });
 
-test("quiz tie-break records the first timed answer and can finish", () => {
+test("quiz tie-break only accepts an enabled buzzer and a wrong answer immediately awards the opponent", () => {
   const data = start(freshState(tokens()), "raten-1");
   for (let round = 0; round < 5; round++) {
     hostAction(data, { type: "quiz:ready", team: "rosa" });
@@ -282,17 +293,18 @@ test("quiz tie-break records the first timed answer and can finish", () => {
   }
   assert.deepEqual(quizScores(data.challenge), { rosa: 5, blau: 5 });
   assert.equal(hostAction(data, { type: "quiz:tiebreak" }, tokens(), () => 5_000).ok, true);
+  assert.equal(buzzerAction(data, { team: "blau", token: data.challenge.buzzerTokens.blau }, () => 5_200).error, "buzzer_closed");
+  assert.equal(hostAction(data, { type: "quiz:buzzer:open" }, tokens(), () => 5_500).ok, true);
   assert.equal(buzzerAction(data, { team: "blau", token: data.challenge.buzzerTokens.blau }, () => 5_640).ok, true);
-  assert.deepEqual(data.challenge.buzz, { team: "blau", elapsedMs: 640 });
+  assert.deepEqual(data.challenge.buzz, { team: "blau", elapsedMs: 140 });
   assert.equal(buzzerAction(data, { team: "rosa", token: data.challenge.buzzerTokens.rosa }, () => 5_700).error, "already_buzzed");
   hostAction(data, { type: "quiz:reveal" });
-  hostAction(data, { type: "quiz:mark", team: "blau", correct: true });
-  hostAction(data, { type: "quiz:mark", team: "rosa", correct: false });
-  hostAction(data, { type: "quiz:next" });
+  assert.equal(hostAction(data, { type: "quiz:tiebreak:judge", correct: false }, tokens(), () => 6_000).ok, true);
   assert.equal(data.challenge.tie.complete, true);
+  assert.equal(data.active.awarded, "rosa", "a wrong blue answer immediately awards pink/Kathi");
 });
 
-test("all three map rounds hide the other team until each resolution", () => {
+test("all three map rounds hide the other team until the second confirmation auto-resolves", () => {
   const data = start(freshState(tokens()), "raten-4", tokens());
   const { rosa: rosaToken, blau: blauToken } = data.map.tokens;
   for (let round = 0; round < 3; round++) {
@@ -306,14 +318,15 @@ test("all three map rounds hide the other team until each resolution", () => {
     assert.equal(mapAction(data, { type: "map:tap", team: "blau", token: blauToken, roundId, lat: -34, lng: 151 - round }).ok, true);
     rosa = publicState(data, { role: "pad", team: "rosa", token: rosaToken });
     assert.deepEqual(Object.keys(rosa.map.taps), ["rosa"], `pink must not receive blue pin in round ${round + 1}`);
-    assert.equal(mapAction(data, { type: "map:lock", team: "rosa", token: rosaToken, roundId }).ok, true);
-    assert.equal(mapAction(data, { type: "map:lock", team: "blau", token: blauToken, roundId }).ok, true);
+    assert.equal(mapAction(data, { type: "map:confirm", team: "rosa", token: rosaToken, roundId }).ok, true);
     rosa = publicState(data, { role: "pad", team: "rosa", token: rosaToken });
-    assert.deepEqual(Object.keys(rosa.map.taps), ["rosa"], "even two locked pins stay private until host resolution");
-    assert.equal(hostAction(data, { type: "map:resolve" }).ok, true);
+    assert.deepEqual(Object.keys(rosa.map.taps), ["rosa"], "one confirmed pin remains private");
+    assert.equal(rosa.map.place.lat, undefined);
+    assert.equal(mapAction(data, { type: "map:confirm", team: "blau", token: blauToken, roundId }).ok, true);
     rosa = publicState(data, { role: "pad", team: "rosa", token: rosaToken });
     assert.deepEqual(Object.keys(rosa.map.taps).sort(), ["blau", "rosa"]);
     assert.equal(typeof rosa.map.place.detail, "string");
+    assert.equal(Number.isFinite(rosa.map.place.lat), true, "revealed target coordinates render the actual-position marker");
     if (round < 2) {
       assert.equal(data.map.complete, false);
       assert.equal(hostAction(data, { type: "map:next" }).ok, true);
@@ -337,7 +350,7 @@ test("map tokens are team-bound and regenerated codes expose no state", () => {
   assert.deepEqual(publicState(data, { role: "pad", team: "rosa", token: oldRosa }), { room: "KATHI", access: { role: "pad", team: "rosa", valid: false } });
 });
 
-test("map resolution requires two locked teams and places remain unique", () => {
+test("map confirmation is automatic, idempotent, undoable, and places remain unique", () => {
   const data = start(freshState(tokens()), "raten-4", tokens());
   const { rosa, blau } = data.map.tokens;
   const roundId = data.map.roundId;
@@ -346,9 +359,17 @@ test("map resolution requires two locked teams and places remain unique", () => 
   mapAction(data, { type: "map:tap", team: "blau", token: blau, roundId, lat: 2, lng: 2 });
   assert.equal(hostAction(data, { type: "map:resolve" }).error, "teams_not_locked");
   assert.equal(hostAction(data, { type: "map:select", placeId: "col" }).error, "round_in_progress");
-  mapAction(data, { type: "map:lock", team: "rosa", token: rosa, roundId });
-  mapAction(data, { type: "map:lock", team: "blau", token: blau, roundId });
-  assert.equal(hostAction(data, { type: "map:resolve" }).ok, true);
+  mapAction(data, { type: "map:confirm", team: "rosa", token: rosa, roundId });
+  assert.equal(data.map.done, false);
+  mapAction(data, { type: "map:confirm", team: "blau", token: blau, roundId });
+  assert.equal(data.map.done, true);
+  assert.equal(mapAction(data, { type: "map:confirm", team: "blau", token: blau, roundId }).ok, true);
+  assert.equal(data.map.roundResults.length, 1);
+  assert.equal(hostAction(data, { type: "history:undo" }).ok, true);
+  assert.equal(data.map.done, false);
+  assert.equal(data.map.locks.blau, undefined);
+  assert.equal(hostAction(data, { type: "history:redo" }).ok, true);
+  assert.equal(data.map.done, true);
   assert.equal(new Set(data.map.roundPlaces).size, 3);
 });
 
@@ -360,6 +381,8 @@ test("screen state never contains live map pins, private QR tokens, or hidden qu
   assert.deepEqual(screenMap.map.taps, {});
   assert.equal(screenMap.map.tokens, undefined);
   assert.equal(publicState(mapData, { host: true }).map.taps.rosa, undefined, "even private host view does not project live pin coordinates");
+  assert.equal(screenMap.map.place.lat, undefined, "target coordinates stay secret before reveal");
+  assert.equal(publicState(mapData, { host: true }).map.place.lat, undefined);
 
   const quizData = start(freshState(tokens()), "raten-5", tokens());
   const screenQuiz = publicState(quizData, { role: "screen" });
@@ -385,9 +408,8 @@ test("old map requests cannot affect the next round", () => {
   const oldRound = data.map.roundId;
   for (const team of ["rosa", "blau"]) {
     mapAction(data, { type: "map:tap", team, token: data.map.tokens[team], roundId: oldRound, lat: 1, lng: 1 });
-    mapAction(data, { type: "map:lock", team, token: data.map.tokens[team], roundId: oldRound });
+    mapAction(data, { type: "map:confirm", team, token: data.map.tokens[team], roundId: oldRound });
   }
-  hostAction(data, { type: "map:resolve" });
   hostAction(data, { type: "map:next" });
   assert.notEqual(data.map.roundId, oldRound);
   assert.equal(mapAction(data, { type: "map:tap", team: "rosa", token: data.map.tokens.rosa, roundId: oldRound, lat: 8, lng: 8 }).error, "stale_round");
@@ -419,12 +441,14 @@ test("percentage voting closes before reveal and awards the nearest estimate", (
   assert.deepEqual(data.scores, { rosa: 4, blau: 0 });
 });
 
-test("creative countdown games open a direct secret guest vote instead of manual scoring", () => {
+test("the joke duel opens a direct secret guest vote only after both performances", () => {
   const data = start(freshState(tokens()), "party-4", tokens());
   const base = Date.now();
-  hostAction(data, { type: "timer:start" }, tokens(), () => base);
-  assert.equal(hostAction(data, { type: "showcase:finish" }, tokens(), () => base + 30_000).error, "timer_not_finished");
-  assert.equal(hostAction(data, { type: "showcase:finish" }, tokens(), () => base + 60_000).ok, true);
+  assert.equal(data.vote.phase, "pending");
+  assert.equal(voteAction(data, { token: data.vote.tokens.guests, uid: "early", choice: "a" }).error, "vote_closed");
+  assert.equal(hostAction(data, { type: "performance:done" }, tokens(), () => base).ok, true);
+  assert.equal(data.vote.phase, "pending");
+  assert.equal(hostAction(data, { type: "performance:done" }, tokens(), () => base + 1_000).ok, true);
   assert.equal(data.challenge.phase, "judging");
   assert.equal(hostAction(data, { type: "winner", team: "rosa" }).error, "result_not_ready");
   for (const [uid, choice] of [["1", "a"], ["2", "a"], ["3", "b"]]) voteAction(data, { token: data.vote.tokens.guests, uid, choice });
@@ -434,22 +458,22 @@ test("creative countdown games open a direct secret guest vote instead of manual
   assert.deepEqual(data.scores, { rosa: 4, blau: 0 });
 });
 
-test("moderator records both team guesses and only guests receive a public voting token", () => {
+test("moderator atomically records both percentage guesses and only guests receive a public voting token", () => {
   const data = start(freshState(tokens()), "vote-2", tokens());
   const { guests } = data.vote.tokens;
   assert.deepEqual(Object.keys(data.vote.tokens), ["guests"]);
   assert.equal(hostAction(data, { type: "vote:open" }).error, "guesses_missing");
-  assert.equal(hostAction(data, { type: "vote:guess", team: "rosa", choice: "a" }).ok, true);
-  assert.equal(hostAction(data, { type: "vote:guess", team: "rosa", choice: "b" }).ok, true, "moderator can correct a misclick before opening");
-  assert.equal(hostAction(data, { type: "vote:guess", team: "blau", choice: "b" }).ok, true);
+  assert.equal(hostAction(data, { type: "vote:guesses:set", rosaPercent: 40, blauPercent: 70 }).ok, true);
+  assert.equal(hostAction(data, { type: "vote:guesses:set", rosaPercent: 41, blauPercent: 70 }).ok, true, "changing one field preserves the other atomically");
+  assert.equal(hostAction(data, { type: "vote:guesses:set", rosaPercent: 110, blauPercent: 20 }).error, "bad_percentage");
   let host = publicState(data, { host: true });
   assert.deepEqual(host.vote.guessStatus, { rosa: true, blau: true });
-  assert.deepEqual(host.vote.guesses, { rosa: "b", blau: "b" });
+  assert.deepEqual(host.vote.guesses, { rosa: { percent: 41 }, blau: { percent: 70 } });
   const screen = publicState(data, { role: "screen" });
   assert.equal(screen.vote.guesses, undefined, "team guesses stay off the public projector");
   assert.equal(screen.vote.guestToken, guests);
   assert.equal(hostAction(data, { type: "vote:open" }).ok, true);
-  assert.equal(hostAction(data, { type: "vote:guess", team: "rosa", choice: "a" }).status, 400);
+  assert.equal(hostAction(data, { type: "vote:guesses:set", rosaPercent: 30, blauPercent: 30 }).status, 400);
   assert.equal(voteAction(data, { token: guests, uid: "guest-1", choice: "a" }).ok, true);
   assert.equal(voteAction(data, { token: guests, uid: "guest-2", choice: "b" }).ok, true);
   let guest = publicState(data, { role: "vote", token: guests, uid: "guest-1" });
@@ -459,7 +483,7 @@ test("moderator records both team guesses and only guests receive a public votin
   assert.equal(hostAction(data, { type: "vote:reveal" }).ok, true);
   host = publicState(data, { host: true });
   assert.deepEqual(host.vote.counts, { a: 1, b: 1 });
-  assert.deepEqual(host.vote.guesses, { rosa: "b", blau: "b" });
+  assert.deepEqual(host.vote.guesses, { rosa: { percent: 41 }, blau: { percent: 70 } });
 });
 
 test("a physical result is gated, constrained, and awarded exactly once", () => {

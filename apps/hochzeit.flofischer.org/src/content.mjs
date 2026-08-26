@@ -31,19 +31,19 @@ const musicRounds = [
 ];
 
 const photoRounds = [
-  { prompt: "Was ist im Detail zu sehen?", answer: "Eheringe", media: "photo", sprite: { column: 0, row: 0 } },
-  { prompt: "Was ist im Detail zu sehen?", answer: "Sektkorken mit Agraffe", media: "photo", sprite: { column: 1, row: 0 } },
-  { prompt: "Was ist im Detail zu sehen?", answer: "Brautschleier aus Spitze", media: "photo", sprite: { column: 2, row: 0 } },
-  { prompt: "Was ist im Detail zu sehen?", answer: "Fliege", media: "photo", sprite: { column: 0, row: 1 } },
-  { prompt: "Was ist im Detail zu sehen?", answer: "Hochzeitstorte", media: "photo", sprite: { column: 1, row: 1 } },
+  { prompt: "Welches Hochzeitsmotiv steckt in diesem winzigen Ausschnitt?", answer: "Eheringe", media: "photo", sprite: { column: 0, row: 0 }, detail: { scale: 5.2, x: 30, y: 72 } },
+  { prompt: "Welches Hochzeitsmotiv steckt in diesem winzigen Ausschnitt?", answer: "Sektkorken mit Agraffe", media: "photo", sprite: { column: 1, row: 0 }, detail: { scale: 5.4, x: 61, y: 54 } },
+  { prompt: "Welches Hochzeitsmotiv steckt in diesem winzigen Ausschnitt?", answer: "Brautschleier aus Spitze", media: "photo", sprite: { column: 2, row: 0 }, detail: { scale: 5.7, x: 72, y: 34 } },
+  { prompt: "Welches Hochzeitsmotiv steckt in diesem winzigen Ausschnitt?", answer: "Fliege", media: "photo", sprite: { column: 0, row: 1 }, detail: { scale: 5.6, x: 82, y: 18 } },
+  { prompt: "Welches Hochzeitsmotiv steckt in diesem winzigen Ausschnitt?", answer: "Hochzeitstorte", media: "photo", sprite: { column: 1, row: 1 }, detail: { scale: 5.5, x: 22, y: 66 } },
 ];
 
 const plateRounds = [
-  { prompt: "Zu welcher Stadt gehört dieses Kennzeichen?", answer: "München", media: "plate", asset: "/media/plate-m.svg" },
-  { prompt: "Zu welcher Stadt gehört dieses Kennzeichen?", answer: "Berlin", media: "plate", asset: "/media/plate-b.svg" },
-  { prompt: "Zu welcher Stadt gehört dieses Kennzeichen?", answer: "Frankfurt am Main", media: "plate", asset: "/media/plate-f.svg" },
-  { prompt: "Zu welcher Stadt gehört dieses Kennzeichen?", answer: "Hamburg", media: "plate", asset: "/media/plate-hh.svg" },
-  { prompt: "Zu welcher Stadt gehört dieses Kennzeichen?", answer: "Karlsruhe", media: "plate", asset: "/media/plate-ka.svg" },
+  { prompt: "Zu welcher Stadt oder welchem Landkreis gehört dieses Kennzeichen?", answer: "Ansbach", media: "plate", asset: "/media/plate-01.svg" },
+  { prompt: "Zu welcher Stadt oder welchem Landkreis gehört dieses Kennzeichen?", answer: "Fürth", media: "plate", asset: "/media/plate-02.svg" },
+  { prompt: "Zu welcher Stadt oder welchem Landkreis gehört dieses Kennzeichen?", answer: "Heidenheim an der Brenz", media: "plate", asset: "/media/plate-03.svg" },
+  { prompt: "Zu welcher Stadt oder welchem Landkreis gehört dieses Kennzeichen?", answer: "Weißenburg-Gunzenhausen", media: "plate", asset: "/media/plate-04.svg" },
+  { prompt: "Zu welcher Stadt oder welchem Landkreis gehört dieses Kennzeichen?", answer: "Main-Tauber-Kreis", media: "plate", asset: "/media/plate-05.svg" },
 ];
 
 const quizRounds = [
@@ -68,11 +68,11 @@ export const CARDS = [
     decision: "Schnellere gültige Rolle gewinnt. Bei gleichzeitigem Ziel: eine kurze Stechrunde mit zehn Blättern.",
   },
   {
-    id: "aktion-2", cat: "Aktion", stars: 2, kind: "physical", mode: "stopwatch", title: "Hemd anziehen",
-    text: "Ein Hemd mit dicken Handschuhen anziehen und drei markierte Knöpfe schließen.",
-    setup: ["Zwei gleich große, vollständig aufgeknöpfte Hemden", "Zwei Paar identische dicke Handschuhe", "Ein Spieler pro Team; gleiche Startposition"],
-    rules: ["Beide Arme müssen in den Ärmeln sein", "Nur die behandschuhten Hände benutzen; keine Zähne oder Hilfe", "Fertig gilt mit drei geschlossenen markierten Knöpfen"],
-    decision: "Die erste regelkonform angezogene Person gewinnt.",
+    id: "aktion-2", cat: "Aktion", stars: 2, kind: "physical", mode: "team-relay", target: 10, unit: "Personen", title: "Hemd-Staffel",
+    text: "Zehn Personen pro Team ziehen dasselbe Hemd nacheinander vollständig an und wieder aus.",
+    setup: ["Je Team zehn Personen in fester Reihenfolge und ein passend großes, vollständig aufgeknöpftes Hemd", "Je Team genau eine feste Hilfsperson bestimmen; sie darf während der gesamten Staffel helfen", "Teams absolvieren ihre Läufe nacheinander; Hemd und Startzustand sind identisch"],
+    rules: ["Person 1 beginnt, danach folgen 2 bis 10 ohne Auslassen oder Parallelwechsel", "Vollständig angezogen heißt: beide Arme in den Ärmeln, Hemd am Oberkörper und die drei markierten Knöpfe geschlossen", "Erst nach vollständigem Ausziehen und Übergabe darf die nächste Person beginnen; außer der festen Hilfsperson hilft niemand"],
+    decision: "Die kürzere Gesamtzeit für zehn vollständige Durchgänge gewinnt. Bei exakt gleicher Zeit folgt ein Durchgang pro Team als Stechen.",
   },
   {
     id: "aktion-3", cat: "Aktion", stars: 3, kind: "physical", mode: "stopwatch", title: "Tempo-Box leer",
@@ -82,11 +82,11 @@ export const CARDS = [
     decision: "Die zuerst sichtbar leere Box gewinnt.",
   },
   {
-    id: "aktion-4", cat: "Aktion", stars: 4, kind: "physical", mode: "counter", target: 40, title: "Liegestütz-Staffel",
-    text: "Jedes Team sammelt 40 saubere Liegestütze. Genau eine Person je Team ist gleichzeitig aktiv.",
-    setup: ["Rutschfeste Matten und identische Schaumstoff-Zielblöcke", "Gleiche Teamgröße; Standard- oder Knievariante vorher gemeinsam festlegen", "Je Team ein neutraler Zählrichter; Teilnahme freiwillig"],
-    rules: ["Oben Arme strecken, unten Brust an den Zielblock; Körperlinie halten", "Wechsel erst nach vollständiger Wiederholung und sichtbarem Abklatschen", "Bei Schmerz oder Schwindel sofort abbrechen; nur gültige Wiederholungen zählen"],
-    decision: "Das erste Team mit 40 gültigen Wiederholungen gewinnt.",
+    id: "aktion-4", cat: "Aktion", stars: 4, kind: "physical", mode: "team-relay", target: 40, unit: "Liegestütze", trackProgress: false, title: "Liegestütz-Staffel",
+    text: "Beide Teams absolvieren nacheinander je 40 gültige Liegestütze gegen die Stoppuhr.",
+    setup: ["Rutschfeste Matte und identischer Schaumstoff-Zielblock", "Gleiche Teamgröße; Standard- oder Knievariante vorher gemeinsam festlegen", "Eine neutrale Person zählt bei beiden Läufen; Teilnahme freiwillig"],
+    rules: ["Oben Arme strecken, unten Brust an den Zielblock; Körperlinie halten", "Genau eine Person ist aktiv; Wechsel erst nach vollständiger Wiederholung und Abklatschen", "Bei Schmerz oder Schwindel sofort abbrechen; die Uhr stoppt bei der 40. gültigen Wiederholung"],
+    decision: "Die kürzere Zeit bis zur 40. gültigen Wiederholung gewinnt. Bei exakt gleicher Zeit: zehn weitere Wiederholungen pro Team.",
   },
   {
     id: "aktion-5", cat: "Aktion", stars: 5, kind: "physical", mode: "pullups", title: "Klimmzüge",
@@ -103,11 +103,15 @@ export const CARDS = [
     decision: "Das erste gültige Team gewinnt. Gleichstand: Stechen mit 30 ml.",
   },
   {
-    id: "party-2", cat: "Party", stars: 2, kind: "physical", mode: "phone", durationMs: 90000, title: "Nur singend anrufen",
-    text: "90 Sekunden Telefonat: Jede Antwort muss gesungen werden.",
-    setup: ["Je Team Haupt- und Ersatzkontakt mit allgemeiner Lautsprecher-Einwilligung", "Keine Aufnahme und keine sensiblen Themen; Telefonnummer nie zeigen", "Zwei getrennte 90-Sekunden-Runden; Reihenfolge auslosen"],
-    rules: ["Zeit startet erst beim Abnehmen", "Jede eigene, nicht gesungene Äußerung zählt als Sprechfehler", "Nach 90 Sekunden auflösen; weniger Sprechfehler gewinnt"],
-    decision: "Weniger Sprechfehler gewinnt. Gleichstand: 20 Sekunden gesungener Hochzeitsgruß und Gästeentscheid.",
+    id: "party-2", cat: "Party", stars: 2, kind: "physical", mode: "team-rounds", durationMs: 60000, title: "Hochzeits-Pantomime",
+    text: "Die Teams erraten abwechselnd pantomimisch dargestellte Hochzeitsbegriffe.",
+    setup: ["Zwölf gleich schwere Begriffe auf verdeckten Karten vorbereiten", "Je Team sechs Karten; Reihenfolge auslosen", "Eine darstellende Person je Karte, alle anderen im eigenen Team raten"],
+    rules: ["Nicht sprechen, buchstabieren, Geräusche machen oder auf Gegenstände zeigen", "Jede Karte höchstens 30 Sekunden; danach wird ohne Punkt gewechselt", "Die Moderation zählt nur vollständig genannte Begriffe"],
+    decision: "Mehr richtig erratene Begriffe gewinnt. Bei Gleichstand erhält kein Team Punkte.",
+    termSets: {
+      rosa: ["Brautstrauß werfen", "Hochzeitstorte anschneiden", "Ehering anstecken", "Eröffnungstanz", "Sektkorken knallen", "Schleier tragen"],
+      blau: ["Heiratsantrag", "Braut über die Schwelle tragen", "Hochzeitsfoto machen", "Kirchenglocken läuten", "Geschenk auspacken", "Fliege binden"],
+    },
   },
   {
     id: "party-3", cat: "Party", stars: 3, kind: "physical", mode: "measurement", title: "Die perfekte Hälfte",
@@ -117,18 +121,18 @@ export const CARDS = [
     decision: "Die kleinere prozentuale Gewichtsabweichung gewinnt; die Website berechnet und wertet automatisch.",
   },
   {
-    id: "party-4", cat: "Party", stars: 4, kind: "physical", mode: "countdown", durationMs: 60000, audienceDecision: true, title: "60-Sekunden-Hochzeitswunsch",
-    text: "In 60 Sekunden formuliert jedes Team einen kurzen, originellen Wunsch für Anton und Kathi.",
-    setup: ["Identische Karten, Stifte und getrennte Arbeitsplätze", "Gleiche Teamgröße; Vortragsreihenfolge auslosen", "Beide Teams schreiben gleichzeitig"],
-    rules: ["Nach 60 Sekunden Stifte weg; höchstens 25 Wörter", "Je höchstens 20 Sekunden vorlesen", "Herzlich und auf Anton und Kathi bezogen; nichts Privates, Peinliches oder Abwertendes"],
-    decision: "Publikumsapplaus entscheidet über den schönsten Wunsch.",
+    id: "party-4", cat: "Party", stars: 4, kind: "physical", mode: "performance", audienceDecision: true, voteQuestion: "Welcher Witz war lustiger?", title: "Der beste Witz",
+    text: "Je eine Person pro Team erzählt dem Publikum einen Witz.",
+    setup: ["Pro Team eine freiwillige erzählende Person bestimmen", "Vortragsreihenfolge auslosen", "Der öffentliche Gäste-QR darf schon vor dem ersten Witz gescannt werden"],
+    rules: ["Je Team genau ein Witz und höchstens 60 Sekunden", "Keine privaten, diskriminierenden oder bloßstellenden Inhalte", "Abgestimmt wird erst, nachdem beide Witze vollständig erzählt wurden"],
+    decision: "Die geheime Publikumsabstimmung über den öffentlichen Gäste-QR entscheidet. Bei Stimmengleichheit gibt es keine Punkte.",
   },
   {
     id: "party-5", cat: "Party", stars: 5, kind: "physical", mode: "countdown", durationMs: 180000, audienceDecision: true, title: "Klopapier-Brautkleid",
     text: "Drei Minuten: Ein Teammitglied wird zum tragbaren Hochzeitslook gestylt.",
     setup: ["Identische verschlossene Materialsets; keine Nadeln, Klammern oder scharfen Werkzeuge", "Je ein freiwilliges, vollständig bekleidetes Model und gleich viele Designer", "Trockene freie Fläche ohne offene Flammen; Laufstegreihenfolge auslosen"],
     rules: ["Gesicht, Hals, Atemwege und Brustkorb nie einengen; kein Klebeband auf Haut oder Haar", "Bei null sofort Hände weg; Arme und Beine bleiben beweglich", "Nur nach Sicherheitscheck: zehn Sekunden stabil stehen und sicher einige Schritte gehen"],
-    decision: "Publikumsapplaus bewertet Idee, Ausführung und Laufstegmoment.",
+    decision: "Die geheime Publikumsabstimmung über den öffentlichen Gäste-QR bewertet Idee, Ausführung und Laufstegmoment.",
   },
   {
     id: "raten-1", cat: "Raten", stars: 1, kind: "quiz", title: "Lieder raten",
@@ -138,15 +142,15 @@ export const CARDS = [
   },
   {
     id: "raten-2", cat: "Raten", stars: 2, kind: "quiz", title: "Foto raten",
-    text: "Fünf stark vergrößerte Hochzeitsdetails. Nach der Antwort wird das vollständige Motiv aufgedeckt.",
+    text: "Fünf extrem kleine, bewusst schwer gewählte Hochzeitsdetails. Nach der Antwort wird das vollständige Motiv aufgedeckt.",
     rounds: photoRounds,
     tieBreak: [{ prompt: "Stechen: Was ist im Detail zu sehen?", answer: "Brautstrauß", media: "photo", sprite: { column: 2, row: 1 } }],
   },
   {
     id: "raten-3", cat: "Raten", stars: 3, kind: "quiz", title: "Nummernschilder",
-    text: "Fünf realistisch gestaltete Kennzeichen-Motive nacheinander. Gesucht ist jeweils Stadt oder Landkreis.",
+    text: "Fünf weniger geläufige, realistisch gestaltete Kennzeichen nacheinander. Gesucht ist jeweils Stadt oder Landkreis.",
     rounds: plateRounds,
-    tieBreak: [{ prompt: "Stechen: Welcher Landkreis ist gesucht?", answer: "Garmisch-Partenkirchen", media: "plate", asset: "/media/plate-gap.svg" }],
+    tieBreak: [{ prompt: "Stechen: Welcher Landkreis ist gesucht?", answer: "Ostallgäu", media: "plate", asset: "/media/plate-06.svg" }],
   },
   {
     id: "raten-4", cat: "Raten", stars: 4, kind: "map", roundCount: 3, title: "Wo liegt das?",
@@ -158,9 +162,9 @@ export const CARDS = [
     rounds: quizRounds,
     tieBreak: [quizTieBreak[0]],
   },
-  { id: "vote-1", cat: "Abstimmung", stars: 1, kind: "vote", title: "Heute lieber Wein oder Bier?", a: "Wein", b: "Bier", minVotes: 3, durationMs: 30000, text: "Alkoholfreie Varianten zählen zur jeweiligen Kategorie. Beide Teams tippen verdeckt; dann stimmen die Gäste einmal pro Gerät." },
-  { id: "vote-2", cat: "Abstimmung", stars: 2, kind: "vote", title: "Nächster Urlaub: Berge oder Meer?", a: "Berge", b: "Meer", minVotes: 3, durationMs: 30000, text: "Beide Teams tippen verdeckt, welche Urlaubsart die Mehrheit der Gäste wählen wird." },
-  { id: "vote-3", cat: "Abstimmung", stars: 3, kind: "vote", title: "Auf Hochzeiten: feiern oder plaudern?", a: "Auf der Tanzfläche feiern", b: "In Ruhe plaudern", minVotes: 3, durationMs: 30000, text: "Beide Teams tippen verdeckt, welche ausgewogene Option die Gäste bevorzugen." },
+  { id: "vote-1", cat: "Abstimmung", stars: 1, kind: "vote", guessMode: "percentage", title: "Heute lieber Wein oder Bier?", a: "Wein", b: "Bier", minVotes: 3, durationMs: 30000, text: "Beide Teams schätzen verdeckt den prozentualen Wein-Anteil; dann stimmen die Gäste einmal pro Gerät." },
+  { id: "vote-2", cat: "Abstimmung", stars: 2, kind: "vote", guessMode: "percentage", title: "Nächster Urlaub: Berge oder Meer?", a: "Berge", b: "Meer", minVotes: 3, durationMs: 30000, text: "Beide Teams schätzen verdeckt den prozentualen Berge-Anteil." },
+  { id: "vote-3", cat: "Abstimmung", stars: 3, kind: "vote", guessMode: "percentage", title: "Auf Hochzeiten: feiern oder plaudern?", a: "Auf der Tanzfläche feiern", b: "In Ruhe plaudern", minVotes: 3, durationMs: 30000, text: "Beide Teams schätzen verdeckt den prozentualen Tanzflächen-Anteil." },
   { id: "vote-4", cat: "Abstimmung", stars: 4, kind: "vote", guessMode: "percentage", title: "Zehn Jahre: Stadt oder Land?", a: "Pulsierende Stadt", b: "Ruhiges Land", minVotes: 3, durationMs: 30000, text: "Beide Teams schätzen geheim den prozentualen Stadt-Anteil. Die kleinere Abweichung gewinnt." },
-  { id: "vote-5", cat: "Abstimmung", stars: 5, kind: "vote", guessMode: "percentage-turnout", title: "Team Hund oder Team Katze?", a: "Team Hund", b: "Team Katze", minVotes: 3, durationMs: 30000, text: "Teams schätzen geheim Hunde-Anteil und Wahlbeteiligung. Erst Prozentnähe, dann Beteiligungsnähe entscheidet." },
+  { id: "vote-5", cat: "Abstimmung", stars: 5, kind: "vote", guessMode: "percentage", title: "Team Hund oder Team Katze?", a: "Team Hund", b: "Team Katze", minVotes: 3, durationMs: 30000, text: "Beide Teams schätzen geheim nur den prozentualen Hunde-Anteil. Die kleinere Abweichung gewinnt." },
 ];

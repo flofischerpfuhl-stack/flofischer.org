@@ -5,7 +5,6 @@ import {
   hydrateState,
   hostAction,
   isHost,
-  judgeAction,
   mapAction,
   publicState,
   voteAction,
@@ -35,6 +34,7 @@ export class Room extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
     this.hostPin = String(env.HOST_PIN || "");
+    this.mutations = Promise.resolve();
     this.ready = ctx.blockConcurrencyWhile(async () => {
       const saved = await ctx.storage.get("game");
       this.data = hydrateState(saved);
@@ -71,41 +71,22 @@ export class Room extends DurableObject {
     if (request.method === "POST" && url.pathname === "/api/action") {
       const body = await readJson(request);
       if (!(await isHost(body, this.hostPin)) && !(await validHostCookie(request, this.data.session.id, this.hostPin))) return json({ ok: false, error: "forbidden" }, 403);
-      const next = structuredClone(this.data);
-      const result = hostAction(next, body);
-      if (!result.ok) return json(result, result.status);
-      await this.persist(next);
-      this.data = next;
+      const mutation = await this.mutate((next) => hostAction(next, body));
+      if (!mutation.result.ok) return json(mutation.result, mutation.result.status);
       return json({ ok: true, state: publicState(this.data, { host: true }) }, 200, { "set-cookie": await makeHostCookie(this.data.session.id, request.url, this.hostPin) });
     }
 
     if (request.method === "POST" && url.pathname === "/api/map") {
       const body = await readJson(request);
-      const next = structuredClone(this.data);
-      const result = mapAction(next, body);
-      if (!result.ok) return json(result, result.status);
-      await this.persist(next);
-      this.data = next;
+      const mutation = await this.mutate((next) => mapAction(next, body));
+      if (!mutation.result.ok) return json(mutation.result, mutation.result.status);
       return json({ ok: true, state: publicState(this.data, { role: "pad", team: body.team, token: body.token }) });
-    }
-
-    if (request.method === "POST" && url.pathname === "/api/judge") {
-      const body = await readJson(request);
-      const next = structuredClone(this.data);
-      const result = judgeAction(next, body);
-      if (!result.ok) return json(result, result.status);
-      await this.persist(next);
-      this.data = next;
-      return json({ ok: true, state: publicState(this.data, { role: "judge", team: body.team, token: body.token }) });
     }
 
     if (request.method === "POST" && url.pathname === "/api/buzzer") {
       const body = await readJson(request);
-      const next = structuredClone(this.data);
-      const result = buzzerAction(next, body);
-      if (!result.ok) return json(result, result.status);
-      await this.persist(next);
-      this.data = next;
+      const mutation = await this.mutate((next) => buzzerAction(next, body));
+      if (!mutation.result.ok) return json(mutation.result, mutation.result.status);
       return json({ ok: true, state: publicState(this.data, { role: "buzzer", team: body.team, token: body.token }) });
     }
 
@@ -114,11 +95,8 @@ export class Room extends DurableObject {
       if (!sameOriginJson(request)) return json({ ok: false, error: "bad_request_origin" }, 403);
       const ballot = ballotCredential(request);
       body.uid = ballot.id;
-      const next = structuredClone(this.data);
-      const result = voteAction(next, body);
-      if (!result.ok) return json(result, result.status);
-      await this.persist(next);
-      this.data = next;
+      const mutation = await this.mutate((next) => voteAction(next, body));
+      if (!mutation.result.ok) return json(mutation.result, mutation.result.status);
       return json({ ok: true, state: publicState(this.data, { role: "vote", token: body.token, uid: ballot.id }) }, 200, { "set-cookie": ballot.cookie });
     }
 
@@ -127,6 +105,19 @@ export class Room extends DurableObject {
 
   async persist(next) {
     await this.ctx.storage.put("game", next);
+  }
+
+  async mutate(mutator) {
+    const run = this.mutations.then(async () => {
+      const next = structuredClone(this.data);
+      const result = mutator(next);
+      if (!result.ok) return { result };
+      await this.persist(next);
+      this.data = next;
+      return { result };
+    });
+    this.mutations = run.then(() => undefined, () => undefined);
+    return run;
   }
 }
 

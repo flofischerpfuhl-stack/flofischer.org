@@ -8,7 +8,6 @@ import {
   freshState,
   hostAction,
   isHost,
-  judgeAction,
   mapAction,
   publicState,
   voteAction,
@@ -65,13 +64,6 @@ const server = http.createServer(async (request, response) => {
       const result = mapAction(data, body);
       if (!result.ok) return sendJson(response, result, result.status);
       return sendJson(response, { ok: true, state: publicState(data, { role: "pad", team: body.team, token: body.token }) });
-    }
-
-    if (request.method === "POST" && url.pathname === "/api/judge") {
-      const body = await readJson(request);
-      const result = judgeAction(data, body);
-      if (!result.ok) return sendJson(response, result, result.status);
-      return sendJson(response, { ok: true, state: publicState(data, { role: "judge", team: body.team, token: body.token }) });
     }
 
     if (request.method === "POST" && url.pathname === "/api/buzzer") {

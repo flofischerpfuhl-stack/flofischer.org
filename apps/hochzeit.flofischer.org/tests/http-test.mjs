@@ -56,33 +56,31 @@ result = await request(`/api/state?pin=${encodeURIComponent(hostPin)}`);
 assert.equal(result.body.session.id, sessionId, "ordinary page/API reloads must keep the same show");
 pass("Explicit session start and reload persistence");
 
-state = await openGame("party-4");
+state = await openGame("aktion-2");
 assert.equal(state.active.kind, "physical");
-assert.equal(state.challenge.timer.mode, "countdown");
-state = await host("timer:start");
-assert.equal(typeof state.challenge.timer.runningSince, "number");
+assert.equal(state.challenge.relay.rounds.rosa.timer.mode, "stopwatch");
+assert.equal(state.challenge.relay.rounds.rosa.timer.elapsedMs, 0);
+state = await host("relay:start");
+assert.equal(typeof state.challenge.relay.rounds.rosa.timer.runningSince, "number");
 result = await request(`/api/state?pin=${encodeURIComponent(hostPin)}`);
-assert.equal(result.body.challenge.timer.runningSince, state.challenge.timer.runningSince);
-state = await host("timer:pause");
-assert.equal(state.challenge.timer.runningSince, null);
-assert.ok(state.challenge.timer.elapsedMs >= 0);
-pass("Timer state survives API reload");
+assert.equal(result.body.challenge.relay.rounds.rosa.timer.runningSince, state.challenge.relay.rounds.rosa.timer.runningSince);
+pass("Zero-based relay timer state survives API reload");
 
 state = await openGame("aktion-4");
-for (let index = 0; index < 3; index++) state = await host("counter:change", { team: "rosa", delta: 1 });
-assert.equal(state.challenge.counters.rosa, 3);
-const judgeToken = state.challenge.judgeTokens.rosa;
-result = await request(`/api/qr?u=${encodeURIComponent(`/judge/rosa?t=${judgeToken}`)}`);
-assert.equal(result.response.status, 200);
-result = await post("/api/judge", { team: "rosa", token: judgeToken, delta: 1, eventId: "http-rep-1" });
-assert.equal(result.response.status, 200);
-result = await post("/api/judge", { team: "rosa", token: judgeToken, delta: 1, eventId: "http-rep-1" });
-assert.equal(result.body.state.challenge.count, 4, "duplicate judge event counts once");
+assert.equal(state.challenge.judgeTokens, undefined);
+state = await host("relay:start");
+result = await post("/api/action", { pin: hostPin, type: "relay:change", delta: 1 });
+assert.equal(result.response.status, 409);
+assert.equal(result.body.error, "relay_progress_not_tracked");
+state = await host("relay:finish");
+assert.equal(state.challenge.relay.rounds.rosa.done, true);
+result = await request(`/api/qr?u=${encodeURIComponent(`/judge/rosa?t=${"a".repeat(32)}`)}`);
+assert.equal(result.response.status, 400, "obsolete push-up judge QR is gone");
 state = await openGame("party-3");
 state = await host("measurement:set", { team: "rosa", left: 101.2, right: 99.8 });
 state = await host("measurement:set", { team: "blau", left: 105, right: 100 });
 assert.deepEqual(state.challenge.measurements.rosa, { left: 101.2, right: 99.8 });
-pass("Counter and measurement controls over HTTP");
+pass("Sequential push-up relay without QR and measurement controls over HTTP");
 
 state = await openGame("raten-3");
 assert.equal(state.cards.find((card) => card.id === "raten-3").rounds.length, 5);
@@ -96,7 +94,7 @@ for (let round = 0; round < 5; round++) {
 }
 assert.equal(state.challenge.main.complete, true);
 assert.equal(Object.keys(state.challenge.main.marks).length, 5);
-for (const asset of ["/media/plate-m.svg", "/media/plate-b.svg", "/media/plate-f.svg", "/media/plate-hh.svg", "/media/plate-ka.svg", "/media/plate-gap.svg"]) {
+for (const asset of Array.from({ length: 6 }, (_, index) => `/media/plate-0${index + 1}.svg`)) {
   result = await request(asset);
   assert.equal(result.response.status, 200, asset);
   assert.match(result.response.headers.get("content-type"), /^image\/svg\+xml/);
@@ -143,12 +141,25 @@ for (let round = 0; round < 3; round++) {
   assert.equal(result.response.status, 200);
   result = await request(`/api/state?role=pad&team=rosa&token=${rosaToken}`);
   assert.deepEqual(Object.keys(result.body.map.taps), ["rosa"], `round ${round + 1}: pink must not receive blue pin`);
-  result = await post("/api/map", { type: "map:lock", team: "rosa", token: rosaToken, roundId });
-  assert.equal(result.response.status, 200);
-  result = await post("/api/map", { type: "map:lock", team: "blau", token: blauToken, roundId });
-  assert.equal(result.response.status, 200);
-  assert.deepEqual(Object.keys(result.body.state.map.taps), ["blau"], "even locked pads stay private before host reveal");
-  state = await host("map:resolve");
+  if (round === 1) {
+    const confirmations = await Promise.all([
+      post("/api/map", { type: "map:confirm", team: "rosa", token: rosaToken, roundId }),
+      post("/api/map", { type: "map:confirm", team: "blau", token: blauToken, roundId }),
+    ]);
+    assert.ok(confirmations.every((confirmation) => confirmation.response.status === 200));
+    assert.deepEqual(confirmations.map((confirmation) => confirmation.body.state.map.done).sort(), [false, true], "simultaneous confirmations must serialize without losing either team");
+    result = confirmations.find((confirmation) => confirmation.body.state.map.done);
+  } else {
+    result = await post("/api/map", { type: "map:confirm", team: "rosa", token: rosaToken, roundId });
+    assert.equal(result.response.status, 200);
+    assert.equal(result.body.state.map.done, false);
+    assert.deepEqual(Object.keys(result.body.state.map.taps), ["rosa"], "the first confirmed pad stays private");
+    result = await post("/api/map", { type: "map:confirm", team: "blau", token: blauToken, roundId });
+    assert.equal(result.response.status, 200);
+  }
+  assert.equal(result.body.state.map.done, true, "the second confirmation auto-resolves");
+  assert.deepEqual(Object.keys(result.body.state.map.taps).sort(), ["blau", "rosa"]);
+  assert.equal(Number.isFinite(result.body.state.map.place.lat), true);
   result = await request(`/api/state?role=pad&team=blau&token=${blauToken}`);
   assert.deepEqual(Object.keys(result.body.map.taps).sort(), ["blau", "rosa"]);
   assert.equal(result.body.map.done, true);
@@ -160,7 +171,7 @@ assert.equal(state.map.roundResults.length, 3);
 assert.ok(state.active.awarded, "map winner must be awarded automatically");
 assert.equal(state.completed["raten-4"].result, state.active.awarded);
 assert.ok(state.scores.rosa === 4 || state.scores.blau === 4 || (state.scores.rosa === 0 && state.scores.blau === 0));
-pass("Three map rounds, privacy, locks, automatic result and points");
+pass("Three map rounds, privacy, concurrent confirmations, actual target and automatic points");
 
 state = await host("qr:regenerate");
 assert.notEqual(state.map.tokens.rosa, rosaToken);
@@ -185,15 +196,11 @@ result = await request(`/api/qr?u=${encodeURIComponent(`/vote?t=${voteTokens.gue
 assert.equal(result.response.status, 200);
 result = await post("/api/action", { type: "vote:open", pin: hostPin });
 assert.equal(result.response.status, 409);
-result = await post("/api/action", { type: "vote:guess", pin: hostPin, team: "rosa", choice: "a" });
-assert.equal(result.response.status, 200);
-result = await post("/api/action", { type: "vote:guess", pin: hostPin, team: "rosa", choice: "b" });
-assert.equal(result.response.status, 200);
-result = await post("/api/action", { type: "vote:guess", pin: hostPin, team: "blau", choice: "b" });
+result = await post("/api/action", { type: "vote:guesses:set", pin: hostPin, rosaPercent: 40, blauPercent: 70 });
 assert.equal(result.response.status, 200);
 result = await request(`/api/state?pin=${encodeURIComponent(hostPin)}`);
 assert.deepEqual(result.body.vote.guessStatus, { rosa: true, blau: true });
-assert.deepEqual(result.body.vote.guesses, { rosa: "b", blau: "b" });
+assert.deepEqual(result.body.vote.guesses, { rosa: { percent: 40 }, blau: { percent: 70 } });
 result = await request("/api/state?role=screen");
 assert.equal(result.body.vote.guesses, undefined);
 state = await host("vote:open");
@@ -211,8 +218,8 @@ assert.equal(result.body.vote.counts, undefined);
 state = await host("vote:close", { force: true });
 state = await host("vote:reveal");
 assert.deepEqual(state.vote.counts, { a: 1, b: 1 });
-assert.deepEqual(state.vote.guesses, { rosa: "b", blau: "b" });
-assert.equal(state.active.awarded, "draw");
+assert.deepEqual(state.vote.guesses, { rosa: { percent: 40 }, blau: { percent: 70 } });
+assert.equal(state.active.awarded, "rosa");
 pass("Moderator-recorded team guesses, public guest QR, close gate, and automatic result");
 
 const awardedRevision = state.revision;
@@ -221,8 +228,8 @@ assert.deepEqual(state.scores, { rosa: 0, blau: 0 });
 assert.equal(state.active.awarded, null);
 assert.ok(state.revision > awardedRevision);
 state = await host("history:redo");
-assert.deepEqual(state.scores, { rosa: 0, blau: 0 });
-assert.equal(state.active.awarded, "draw");
+assert.deepEqual(state.scores, { rosa: 2, blau: 0 });
+assert.equal(state.active.awarded, "rosa");
 pass("Undo and redo of complete score/game snapshot");
 
 state = await host("close");
@@ -239,7 +246,7 @@ assert.deepEqual(state.scores, { rosa: 0, blau: 0 });
 assert.deepEqual(state.flipped, {});
 state = await host("history:undo");
 assert.equal(state.session.id, previousSession);
-assert.deepEqual(state.scores, { rosa: 0, blau: 0 });
+assert.deepEqual(state.scores, { rosa: 2, blau: 0 });
 pass("New session reset is explicit and recoverable");
 
 result = await request("/api/state");

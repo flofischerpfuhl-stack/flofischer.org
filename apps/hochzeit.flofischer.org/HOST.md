@@ -22,17 +22,22 @@
 ## Landkarte
 
 1. Die zwei getrennten Team-QR-Codes mit den jeweiligen iPads scannen.
-2. Die Karte lässt sich per Pinch/Mausrad oder mit `+` und `−` bis 400 % vergrößern und bei Zoom verschieben.
-3. Beide Teams setzen und sperren ihren Pin. Vor der Auflösung sieht jedes Team nur den eigenen Pin.
-4. Die Moderation löst die Runde erst auf, wenn beide Pins gesperrt sind.
+2. Die Karte lässt sich per Pinch/Mausrad oder mit `+` und `−` bis 800 % vergrößern und bei Zoom verschieben.
+3. Beide Teams setzen und **bestätigen** ihren Pin. Vor der Auflösung sieht jedes Team ausschließlich den eigenen Pin.
+4. Sobald das zweite Team bestätigt hat, löst die Website automatisch auf und zeigt auch die tatsächliche Position. Die Moderation muss nichts weiter anklicken.
 5. Nach drei Sehenswürdigkeiten entscheiden zuerst Rundensiege, dann die kleinere Gesamtdistanz. Die Website vergibt die Kartenpunkte automatisch.
 
 ## Gäste-Abstimmung
 
 1. Der öffentliche Gäste-QR erscheint sofort auf dem Beamer. Gäste können schon scannen und warten auf ihrem Handy auf den Start.
-2. Team Rosa und Team Blau nennen ihren Tipp nacheinander der Moderation; diese speichert beide Tipps auf ihrem privaten Gerät.
+2. Team Kathi und Team Anton nennen nur ihren Prozenttipp der Moderation; diese speichert beide Tipps gemeinsam auf ihrem privaten Gerät.
 3. Erst wenn beide Tipps gespeichert sind, das Gäste-Voting öffnen. Auf den Handys erscheinen die Abstimmungsbuttons automatisch.
 4. Ergebnis auflösen. Erst dann werden Stimmen und konkrete Teamtipps öffentlich sichtbar.
-5. Beide Teams können Punkte erhalten, wenn beide die Mehrheit richtig vorhergesagt haben.
+5. Die nähere Prozent-Schätzung gewinnt; bei exakt gleichem Abstand erhalten beide Teams die Spielpunkte.
+
+## Hemd- und Liegestütz-Staffel
+
+- Hemd: zehn Personen je Team in fester Reihenfolge; genau eine vorher bestimmte Hilfsperson darf helfen. Jeder muss das Hemd vollständig an- und wieder ausziehen. Der Klick für Person 10 stoppt die Uhr automatisch.
+- Liegestütze: Teams laufen nacheinander. Eine neutrale Person zählt laut; die Moderation stoppt bei der 40. gültigen Wiederholung. Es gibt dafür keine QR-Codes und keine 40 Einzelklicks.
 
 **QR-Codes erneuern** macht alle vorherigen Links dieses Spiels sofort ungültig.

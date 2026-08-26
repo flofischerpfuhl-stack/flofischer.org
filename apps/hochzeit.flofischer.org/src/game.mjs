@@ -2,7 +2,7 @@ import { CARDS, PLACES } from "./content.mjs";
 
 export { CARDS, PLACES };
 export const ROOM = "KATHI";
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 const CARD_BY_ID = Object.fromEntries(CARDS.map((card) => [card.id, card]));
 const MAX_HISTORY = 40;
@@ -52,17 +52,23 @@ export function hydrateState(saved, makeToken = token, now = () => Date.now()) {
     data.vote.guesses = { rosa: data.vote.guesses?.rosa || null, blau: data.vote.guesses?.blau || null };
     data.vote.tokens = { guests: data.vote.tokens?.guests || data.vote.token || makeToken() };
     delete data.vote.token;
-    data.vote.guessMode ||= CARD_BY_ID[data.active?.id]?.guessMode || "choice";
+    const configuredMode = CARD_BY_ID[data.active?.id]?.guessMode || data.vote.guessMode || "percentage";
+    if (data.vote.guessMode !== configuredMode && !data.vote.revealed) {
+      data.vote.guesses = { rosa: null, blau: null };
+    }
+    data.vote.guessMode = configuredMode;
+    for (const team of ["rosa", "blau"]) {
+      const guess = data.vote.guesses[team];
+      if (configuredMode === "percentage" && guess && typeof guess === "object") data.vote.guesses[team] = { percent: clamp(Number(guess.percent) || 0, 0, 100) };
+    }
     data.vote.minVotes ||= CARD_BY_ID[data.active?.id]?.minVotes || 1;
     data.vote.durationMs ||= CARD_BY_ID[data.active?.id]?.durationMs || 30000;
     data.vote.phase ||= data.vote.revealed ? "revealed" : data.vote.open ? "voting" : "team";
   }
   if (data.active?.kind === "physical" && !data.challenge) data.challenge = newPhysicalChallenge(CARD_BY_ID[data.active.id], makeToken);
-  if (data.active?.id === "party-2" && data.challenge?.mode !== "phone") {
-    const previousTimer = data.challenge?.timer;
-    data.challenge = newPhysicalChallenge(CARD_BY_ID["party-2"]);
-    if (previousTimer) data.challenge.phone.rounds.rosa.timer = previousTimer;
-    data.challenge.phase = previousTimer?.runningSince !== null ? "running" : "setup";
+  const activeCardDefinition = CARD_BY_ID[data.active?.id];
+  if (data.active?.kind === "physical" && data.challenge && activeCardDefinition && data.challenge.mode !== activeCardDefinition.mode && !data.active.awarded) {
+    data.challenge = newPhysicalChallenge(activeCardDefinition, makeToken);
   }
   if (data.active?.id === "aktion-5" && data.challenge?.mode !== "pullups") {
     const totals = data.challenge?.counters || { rosa: 0, blau: 0 };
@@ -75,14 +81,14 @@ export function hydrateState(saved, makeToken = token, now = () => Date.now()) {
   }
   if (data.challenge?.kind === "physical") {
     if (typeof data.challenge.ready !== "boolean") data.challenge.ready = true;
+    if (data.challenge.relay && activeCardDefinition) data.challenge.relay.trackProgress = activeCardDefinition.trackProgress !== false;
     data.challenge.phase ||= data.challenge.timer?.runningSince !== null ? "running" : "setup";
     data.challenge.result ||= null;
     data.challenge.finishedAt ||= null;
-    if (data.active?.id === "aktion-4" && !data.challenge.judgeTokens) data.challenge.judgeTokens = { rosa: makeToken(), blau: makeToken() };
-    data.challenge.judgeEvents = Array.isArray(data.challenge.judgeEvents) ? data.challenge.judgeEvents.slice(-80) : [];
   }
   if (data.active?.kind === "quiz" && !data.challenge) data.challenge = newQuizChallenge();
   if (data.active?.kind === "quiz" && !data.challenge.buzzerTokens) data.challenge.buzzerTokens = { rosa: makeToken(), blau: makeToken() };
+  if (data.active?.kind === "quiz" && typeof data.challenge.buzzerOpen !== "boolean") data.challenge.buzzerOpen = false;
   return data;
 }
 
@@ -189,7 +195,6 @@ function applyHostAction(data, message, makeToken, now) {
     case "qr:regenerate":
       if (data.map) data.map.tokens = { rosa: makeToken(), blau: makeToken() };
       else if (data.vote) data.vote.tokens = { guests: makeToken() };
-      else if (data.challenge?.judgeTokens) data.challenge.judgeTokens = { rosa: makeToken(), blau: makeToken() };
       else if (data.challenge?.buzzerTokens) data.challenge.buzzerTokens = { rosa: makeToken(), blau: makeToken() };
       else return fail("no_qr_game");
       break;
@@ -228,12 +233,19 @@ function applyHostAction(data, message, makeToken, now) {
         data.vote.guesses[message.team] = message.choice;
       } else {
         const percent = Number(message.percent);
-        const turnout = data.vote.guessMode === "percentage-turnout" ? Number(message.turnout) : null;
         if (!Number.isInteger(percent) || percent < 0 || percent > 100) return fail("bad_percentage");
-        if (data.vote.guessMode === "percentage-turnout" && (!Number.isInteger(turnout) || turnout < 1 || turnout > 500)) return fail("bad_turnout");
-        data.vote.guesses[message.team] = { percent, ...(turnout === null ? {} : { turnout }) };
+        data.vote.guesses[message.team] = { percent };
       }
       break;
+    case "vote:guesses:set": {
+      if (!data.vote || data.vote.open) return fail("vote_already_open");
+      if (data.vote.guessMode !== "percentage") return fail("wrong_guess_mode");
+      const rosa = Number(message.rosaPercent);
+      const blau = Number(message.blauPercent);
+      if (![rosa, blau].every((value) => Number.isInteger(value) && value >= 0 && value <= 100)) return fail("bad_percentage");
+      data.vote.guesses = { rosa: { percent: rosa }, blau: { percent: blau } };
+      break;
+    }
     case "vote:open":
       if (!data.vote) return fail("no_vote_game");
       if (!data.vote.guesses.rosa || !data.vote.guesses.blau) return fail("guesses_missing", 409);
@@ -257,6 +269,11 @@ function applyHostAction(data, message, makeToken, now) {
       data.vote.revealed = true;
       data.vote.phase = "revealed";
       data.vote.result = calculateVoteResult(data.vote);
+      if (data.active?.kind === "physical" && data.challenge) {
+        data.challenge.result = data.vote.result;
+        data.challenge.phase = "finished";
+        data.challenge.finishedAt = now();
+      }
       awardGame(data, data.vote.result, now);
       break;
     case "timer:start": return timerStart(data, now);
@@ -266,14 +283,19 @@ function applyHostAction(data, message, makeToken, now) {
       break;
     case "timer:pause": return timerPause(data, now);
     case "timer:reset": return timerReset(data);
+    case "relay:start": return relayStart(data, now);
+    case "relay:change": return relayChange(data, message, now);
+    case "relay:finish": return relayFinish(data, now);
+    case "performance:done": return performanceDone(data, now);
+    case "team-round:start": return teamRoundStart(data, now);
+    case "team-round:correct": return teamRoundAdvance(data, true, now);
+    case "team-round:skip": return teamRoundAdvance(data, false, now);
+    case "team-round:finish": return teamRoundFinish(data, now);
     case "counter:change": return counterChange(data, message);
     case "measurement:set": return measurementSet(data, message);
     case "measurement:resolve": return measurementResolve(data, now);
     case "physical:finish": return physicalFinish(data, message, now);
     case "showcase:finish": return showcaseFinish(data, now);
-    case "phone:start": return phoneStart(data, now);
-    case "phone:error": return phoneError(data, message);
-    case "phone:finish": return phoneFinish(data, now);
     case "pullups:start": return pullupsStart(data);
     case "pullups:rep": return pullupsRep(data, message);
     case "pullups:finish": return pullupsFinish(data, now);
@@ -285,25 +307,35 @@ function applyHostAction(data, message, makeToken, now) {
     case "quiz:tiebreak": return quizTieBreak(data, now);
     case "quiz:buzz": return quizBuzz(data, message, now);
     case "quiz:buzz:reset": return quizBuzzReset(data, now);
+    case "quiz:buzzer:open": return quizBuzzerOpen(data, now);
+    case "quiz:buzzer:close": return quizBuzzerClose(data);
+    case "quiz:tiebreak:judge": return quizTieBreakJudge(data, message, now);
     default: return fail("unknown_action");
   }
   return { ok: true };
 }
 
-export function mapAction(data, message) {
+export function mapAction(data, message, now = () => Date.now()) {
   const map = data.map;
   const team = message.team === "rosa" || message.team === "blau" ? message.team : null;
   if (!map || !team || message.token !== map.tokens[team]) return fail("invalid_token", 403);
   if (message.roundId !== map.roundId) return fail("stale_round", 409);
-  if (map.done || map.locks[team]) return fail("position_locked", 409);
+  if (map.done) return message.type === "map:confirm" ? { ok: true } : fail("position_locked", 409);
+  if (map.locks[team]) return message.type === "map:confirm" ? { ok: true } : fail("position_locked", 409);
   if (message.type === "map:tap") {
     const lat = Number(message.lat);
     const lng = Number(message.lng);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return fail("bad_position");
     map.taps[team] = { lat: clamp(lat, -90, 90), lng: clamp(lng, -180, 180) };
-  } else if (message.type === "map:lock") {
+  } else if (message.type === "map:confirm" || message.type === "map:lock") {
     if (!map.taps[team]) return fail("no_position");
+    if (!map.locks[team === "rosa" ? "blau" : "rosa"] && map.locks[team]) return { ok: true };
+    if (map.locks[team === "rosa" ? "blau" : "rosa"]) rememberExternalAction(data);
     map.locks[team] = true;
+    if (map.locks.rosa && map.locks.blau) {
+      resolveMap(map);
+      if (map.complete) awardGame(data, mapOverallWinner(map), now);
+    }
   } else return fail("unknown_action");
   data.revision++;
   return { ok: true };
@@ -319,22 +351,6 @@ export function voteAction(data, message) {
   if (message.choice !== "a" && message.choice !== "b") return fail("bad_choice");
   if (!Object.hasOwn(vote.votes, uid) && Object.keys(vote.votes).length >= 250) return fail("ballot_limit", 409);
   vote.votes[uid] = message.choice;
-  data.revision++;
-  return { ok: true };
-}
-
-export function judgeAction(data, message) {
-  const team = message.team === "rosa" || message.team === "blau" ? message.team : null;
-  const challenge = data.challenge;
-  if (!team || !challenge?.judgeTokens || message.token !== challenge.judgeTokens[team]) return fail("invalid_token", 403);
-  const eventId = String(message.eventId || "").slice(0, 80);
-  if (!eventId) return fail("missing_event_id");
-  challenge.judgeEvents ||= [];
-  if (challenge.judgeEvents.includes(eventId)) return { ok: true };
-  const result = counterChange(data, { team, delta: Number(message.delta) });
-  if (!result.ok) return result;
-  challenge.judgeEvents.push(eventId);
-  challenge.judgeEvents = challenge.judgeEvents.slice(-80);
   data.revision++;
   return { ok: true };
 }
@@ -391,21 +407,16 @@ export function publicState(data, access = {}) {
     if (!voteValid) return invalidState("vote");
     return { room: ROOM, vote: voteState(data.vote, { uid: access.uid }), revision: data.revision, access: { role: "vote", valid: true } };
   }
-  if (access.role === "judge") {
-    const judgeTeam = access.team === "rosa" || access.team === "blau" ? access.team : null;
-    if (!judgeTeam || !data.challenge?.judgeTokens || access.token !== data.challenge.judgeTokens[judgeTeam]) return invalidState("judge", judgeTeam);
-    return { room: ROOM, challenge: { phase: data.challenge.phase, ready: data.challenge.ready, result: data.challenge.result, count: data.challenge.counters[judgeTeam], target: CARD_BY_ID[data.active?.id]?.target || null }, revision: data.revision, access: { role: "judge", team: judgeTeam, valid: true } };
-  }
   if (access.role === "buzzer") {
     const buzzerTeam = access.team === "rosa" || access.team === "blau" ? access.team : null;
     if (!buzzerTeam || !data.challenge?.buzzerTokens || access.token !== data.challenge.buzzerTokens[buzzerTeam]) return invalidState("buzzer", buzzerTeam);
-    return { room: ROOM, challenge: { phase: data.challenge.phase, buzz: data.challenge.buzz, tieStartedAt: data.challenge.tieStartedAt }, revision: data.revision, access: { role: "buzzer", team: buzzerTeam, valid: true } };
+    return { room: ROOM, challenge: { phase: data.challenge.phase, buzz: data.challenge.buzz, buzzerOpen: Boolean(data.challenge.buzzerOpen), tieStartedAt: data.challenge.tieStartedAt }, revision: data.revision, access: { role: "buzzer", team: buzzerTeam, valid: true } };
   }
   return invalidState("viewer");
 }
 
 function invalidState(role, team = null) {
-  return { room: ROOM, access: role === "pad" || role === "judge" || role === "buzzer" ? { role, team, valid: false } : { role, valid: false } };
+  return { room: ROOM, access: role === "pad" || role === "buzzer" ? { role, team, valid: false } : { role, valid: false } };
 }
 
 function mapState(map, access = {}) {
@@ -420,7 +431,12 @@ function mapState(map, access = {}) {
     if ((showAllTeams || access.team === team || access.host || access.screen) && map.locks[team]) locks[team] = true;
   }
   return {
-    place: { id: map.place.id, name: map.place.name, detail: map.done || access.host ? map.place.detail : undefined },
+    place: {
+      id: map.place.id,
+      name: map.place.name,
+      ...(map.done || access.host ? { detail: map.place.detail } : {}),
+      ...(map.done ? { lat: map.place.lat, lng: map.place.lng } : {}),
+    },
     round: map.round, roundCount: map.roundPlaces.length, taps, locks, done: map.done, complete: map.complete,
     roundId: map.roundId,
     result: map.done ? map.result : null, totals: map.totals,
@@ -450,16 +466,15 @@ function voteState(vote, access = {}) {
 function screenChallenge(challenge) {
   if (!challenge) return null;
   const copy = structuredClone(challenge);
-  delete copy.judgeTokens;
-  delete copy.judgeEvents;
   delete copy.buzzerTokens;
   return copy;
 }
 
 function publicCardsForScreen(data) {
   return CARDS.map((card) => {
-    if (card.kind !== "quiz") return card;
     const copy = structuredClone(card);
+    delete copy.termSets;
+    if (card.kind !== "quiz") return copy;
     for (const phase of ["main", "tie"]) {
       const section = data.challenge?.[phase];
       const rounds = phase === "main" ? copy.rounds : copy.tieBreak;
@@ -479,7 +494,7 @@ function startGame(data, card, makeToken) {
   if (card.kind === "quiz") data.challenge = newQuizChallenge(makeToken);
   if (card.kind === "map") data.map = newMap(card, makeToken);
   if (card.kind === "vote") data.vote = { q: card.title, a: card.a, b: card.b, guessMode: card.guessMode || "choice", minVotes: card.minVotes || 1, durationMs: card.durationMs || 30000, phase: "team", open: false, revealed: false, openedAt: null, closesAt: null, closedAt: null, votes: {}, guesses: { rosa: null, blau: null }, tokens: { guests: makeToken() } };
-  if (card.kind === "physical" && card.audienceDecision) data.vote = { q: `${card.title}: Welches Team gewinnt?`, a: "Team Rosa", b: "Team Blau", guessMode: "direct", minVotes: 3, durationMs: 30000, phase: "pending", open: false, revealed: false, openedAt: null, closesAt: null, closedAt: null, votes: {}, guesses: { rosa: null, blau: null }, tokens: { guests: makeToken() } };
+  if (card.kind === "physical" && card.audienceDecision) data.vote = { q: card.voteQuestion || `${card.title}: Welches Team gewinnt?`, a: "Team Kathi", b: "Team Anton", guessMode: "direct", minVotes: 3, durationMs: 30000, phase: "pending", open: false, revealed: false, openedAt: null, closesAt: null, closedAt: null, votes: {}, guesses: { rosa: null, blau: null }, tokens: { guests: makeToken() } };
 }
 
 function activeCard(card, awarded = null) {
@@ -488,14 +503,27 @@ function activeCard(card, awarded = null) {
 
 function newPhysicalChallenge(card, makeToken = token) {
   const timer = card.mode === "stopwatch" || card.mode === "countdown" ? { mode: card.mode, durationMs: card.durationMs || null, elapsedMs: 0, runningSince: null } : null;
-  const phone = card.mode === "phone" ? { order: ["rosa", "blau"], index: 0, rounds: { rosa: { timer: { mode: "countdown", durationMs: card.durationMs, elapsedMs: 0, runningSince: null }, errors: 0, done: false }, blau: { timer: { mode: "countdown", durationMs: card.durationMs, elapsedMs: 0, runningSince: null }, errors: 0, done: false } } } : null;
+  const relay = card.mode === "team-relay" ? {
+    order: ["rosa", "blau"], index: 0, target: Number(card.target) || 1, unit: card.unit || "Durchgänge", trackProgress: card.trackProgress !== false,
+    rounds: {
+      rosa: { timer: { mode: "stopwatch", durationMs: null, elapsedMs: 0, runningSince: null }, progress: 0, splits: [], done: false },
+      blau: { timer: { mode: "stopwatch", durationMs: null, elapsedMs: 0, runningSince: null }, progress: 0, splits: [], done: false },
+    },
+  } : null;
+  const performance = card.mode === "performance" ? { order: ["rosa", "blau"], index: 0, performed: { rosa: false, blau: false } } : null;
+  const teamRounds = card.mode === "team-rounds" ? {
+    order: ["rosa", "blau"], index: 0,
+    rounds: {
+      rosa: { timer: { mode: "countdown", durationMs: card.durationMs || 60000, elapsedMs: 0, runningSince: null }, termIndex: 0, correct: 0, skipped: 0, done: false },
+      blau: { timer: { mode: "countdown", durationMs: card.durationMs || 60000, elapsedMs: 0, runningSince: null }, termIndex: 0, correct: 0, skipped: 0, done: false },
+    },
+  } : null;
   const pullups = card.mode === "pullups" ? { index: 0, attempts: [{ team: "rosa", person: 1, reps: 0, status: "pending" }, { team: "blau", person: 1, reps: 0, status: "pending" }, { team: "rosa", person: 2, reps: 0, status: "pending" }, { team: "blau", person: 2, reps: 0, status: "pending" }] } : null;
-  const judgeTokens = card.id === "aktion-4" ? { rosa: makeToken(), blau: makeToken() } : null;
-  return { kind: "physical", mode: card.mode, phase: "setup", ready: false, result: null, finishedAt: null, timer, phone, pullups, judgeTokens, judgeEvents: [], counters: { rosa: 0, blau: 0 }, measurements: { rosa: { left: null, right: null }, blau: { left: null, right: null } } };
+  return { kind: "physical", mode: card.mode, phase: "setup", ready: false, result: null, finishedAt: null, timer, relay, performance, teamRounds, pullups, counters: { rosa: 0, blau: 0 }, measurements: { rosa: { left: null, right: null }, blau: { left: null, right: null } } };
 }
 
 function newQuizChallenge(makeToken = token) {
-  return { kind: "quiz", phase: "main", main: { index: 0, ready: {}, revealed: {}, marks: {}, complete: false }, tie: { index: 0, ready: {}, revealed: {}, marks: {}, complete: false }, buzz: null, tieStartedAt: null, buzzerTokens: { rosa: makeToken(), blau: makeToken() } };
+  return { kind: "quiz", phase: "main", main: { index: 0, ready: {}, revealed: {}, marks: {}, complete: false }, tie: { index: 0, ready: {}, revealed: {}, marks: {}, complete: false }, buzz: null, buzzerOpen: false, tieStartedAt: null, buzzerTokens: { rosa: makeToken(), blau: makeToken() } };
 }
 
 function newMap(card, makeToken) {
@@ -572,6 +600,142 @@ function timerReset(data) {
   data.challenge.phase = "setup";
   data.challenge.result = null;
   data.challenge.finishedAt = null;
+  return { ok: true };
+}
+
+function relayStart(data, now) {
+  const challenge = data.challenge;
+  const relay = challenge?.relay;
+  if (challenge?.mode !== "team-relay" || !relay) return fail("no_relay");
+  if (!challenge.ready) return fail("setup_not_confirmed", 409);
+  if (challenge.phase === "finished") return fail("game_finished", 409);
+  const team = relay.order[relay.index];
+  const round = relay.rounds[team];
+  if (!round || round.done || round.timer.runningSince !== null) return fail("timer_running", 409);
+  round.timer.runningSince = now();
+  challenge.phase = "running";
+  return { ok: true };
+}
+
+function relayChange(data, message, now) {
+  const challenge = data.challenge;
+  const relay = challenge?.relay;
+  if (challenge?.mode !== "team-relay" || !relay) return fail("no_relay");
+  const team = relay.order[relay.index];
+  const round = relay.rounds[team];
+  if (round?.timer.runningSince === null || round.done) return fail("timer_not_running", 409);
+  if (relay.trackProgress === false) return fail("relay_progress_not_tracked", 409);
+  const delta = Number(message.delta);
+  if (delta !== 1 && delta !== -1) return fail("bad_delta");
+  const next = clamp(round.progress + delta, 0, relay.target);
+  const changedAt = now();
+  if (delta > 0 && next > round.progress) round.splits.push(changedAt);
+  if (delta < 0 && next < round.progress) round.splits.pop();
+  round.progress = next;
+  if (delta > 0 && next >= relay.target) return relayFinish(data, () => changedAt);
+  return { ok: true };
+}
+
+function relayFinish(data, now) {
+  const challenge = data.challenge;
+  const relay = challenge?.relay;
+  if (challenge?.mode !== "team-relay" || !relay) return fail("no_relay");
+  const team = relay.order[relay.index];
+  const round = relay.rounds[team];
+  if (round?.timer.runningSince === null || round.done) return fail("timer_not_running", 409);
+  if (relay.trackProgress !== false && round.progress < relay.target) return fail("relay_incomplete", 409);
+  round.timer.elapsedMs = timerElapsed(round.timer, now());
+  round.timer.runningSince = null;
+  round.done = true;
+  if (relay.index === 0) {
+    relay.index = 1;
+    challenge.phase = "setup";
+  } else {
+    const rosa = relay.rounds.rosa.timer.elapsedMs;
+    const blau = relay.rounds.blau.timer.elapsedMs;
+    challenge.result = rosa === blau ? "draw" : rosa < blau ? "rosa" : "blau";
+    challenge.phase = "finished";
+    challenge.finishedAt = now();
+  }
+  return { ok: true };
+}
+
+function performanceDone(data, now) {
+  const card = CARD_BY_ID[data.active?.id];
+  const challenge = data.challenge;
+  const performance = challenge?.performance;
+  if (challenge?.mode !== "performance" || !performance || !data.vote || !card?.audienceDecision) return fail("no_performance");
+  if (!challenge.ready) return fail("setup_not_confirmed", 409);
+  if (challenge.phase === "judging" || challenge.phase === "finished") return fail("performance_finished", 409);
+  const team = performance.order[performance.index];
+  performance.performed[team] = true;
+  if (performance.index === 0) {
+    performance.index = 1;
+    challenge.phase = "performing";
+  } else {
+    challenge.phase = "judging";
+    data.vote.phase = "voting";
+    data.vote.open = true;
+    data.vote.openedAt = now();
+    data.vote.closesAt = now() + data.vote.durationMs;
+  }
+  return { ok: true };
+}
+
+function teamRoundStart(data, now) {
+  const challenge = data.challenge;
+  const teamRounds = challenge?.teamRounds;
+  if (challenge?.mode !== "team-rounds" || !teamRounds) return fail("no_team_round");
+  if (!challenge.ready) return fail("setup_not_confirmed", 409);
+  const team = teamRounds.order[teamRounds.index];
+  const round = teamRounds.rounds[team];
+  if (!round || round.done || round.timer.runningSince !== null || challenge.phase === "finished") return fail("timer_running", 409);
+  round.timer.runningSince = now();
+  challenge.phase = "running";
+  return { ok: true };
+}
+
+function teamRoundAdvance(data, correct, now) {
+  const card = CARD_BY_ID[data.active?.id];
+  const challenge = data.challenge;
+  const teamRounds = challenge?.teamRounds;
+  if (challenge?.mode !== "team-rounds" || !teamRounds) return fail("no_team_round");
+  const team = teamRounds.order[teamRounds.index];
+  const round = teamRounds.rounds[team];
+  if (round?.timer.runningSince === null || round.done) return fail("timer_not_running", 409);
+  const terms = card?.termSets?.[team] || [];
+  if (round.termIndex >= terms.length) return fail("terms_complete", 409);
+  if (correct) round.correct++;
+  else round.skipped++;
+  round.termIndex++;
+  if (round.termIndex >= terms.length) return teamRoundFinish(data, now);
+  return { ok: true };
+}
+
+function teamRoundFinish(data, now) {
+  const card = CARD_BY_ID[data.active?.id];
+  const challenge = data.challenge;
+  const teamRounds = challenge?.teamRounds;
+  if (challenge?.mode !== "team-rounds" || !teamRounds) return fail("no_team_round");
+  const team = teamRounds.order[teamRounds.index];
+  const round = teamRounds.rounds[team];
+  if (round?.timer.runningSince === null || round.done) return fail("timer_not_running", 409);
+  const elapsed = timerElapsed(round.timer, now());
+  const terms = card?.termSets?.[team] || [];
+  if (elapsed < round.timer.durationMs && round.termIndex < terms.length) return fail("timer_not_finished", 409);
+  round.timer.elapsedMs = Math.min(round.timer.durationMs, elapsed);
+  round.timer.runningSince = null;
+  round.done = true;
+  if (teamRounds.index === 0) {
+    teamRounds.index = 1;
+    challenge.phase = "setup";
+  } else {
+    const rosa = teamRounds.rounds.rosa.correct;
+    const blau = teamRounds.rounds.blau.correct;
+    challenge.result = rosa === blau ? "draw" : rosa > blau ? "rosa" : "blau";
+    challenge.phase = "finished";
+    challenge.finishedAt = now();
+  }
   return { ok: true };
 }
 
@@ -663,52 +827,6 @@ function showcaseFinish(data, now) {
   data.vote.open = true;
   data.vote.openedAt = now();
   data.vote.closesAt = now() + data.vote.durationMs;
-  return { ok: true };
-}
-
-function phoneStart(data, now) {
-  const challenge = data.challenge;
-  if (challenge?.mode !== "phone" || challenge.phase === "finished") return fail("no_phone_round", 409);
-  if (!challenge.ready) return fail("setup_not_confirmed", 409);
-  const team = challenge.phone.order[challenge.phone.index];
-  const round = challenge.phone.rounds[team];
-  if (round.done || round.timer.runningSince !== null) return fail("timer_running", 409);
-  round.timer.runningSince = now();
-  challenge.phase = "running";
-  return { ok: true };
-}
-
-function phoneError(data, message) {
-  const challenge = data.challenge;
-  if (challenge?.mode !== "phone" || challenge.phase === "finished") return fail("no_phone_round", 409);
-  const team = challenge.phone.order[challenge.phone.index];
-  const round = challenge.phone.rounds[team];
-  if (round.timer.runningSince === null) return fail("timer_not_running", 409);
-  const delta = Number(message.delta);
-  if (delta !== 1 && delta !== -1) return fail("bad_delta");
-  round.errors = clamp(round.errors + delta, 0, 99);
-  return { ok: true };
-}
-
-function phoneFinish(data, now) {
-  const challenge = data.challenge;
-  if (challenge?.mode !== "phone" || challenge.phase === "finished") return fail("no_phone_round", 409);
-  const team = challenge.phone.order[challenge.phone.index];
-  const round = challenge.phone.rounds[team];
-  if (round.timer.runningSince === null) return fail("timer_not_running", 409);
-  round.timer.elapsedMs = Math.min(round.timer.durationMs, timerElapsed(round.timer, now()));
-  round.timer.runningSince = null;
-  round.done = true;
-  if (challenge.phone.index === 0) {
-    challenge.phone.index = 1;
-    challenge.phase = "setup";
-  } else {
-    const rosa = challenge.phone.rounds.rosa.errors;
-    const blau = challenge.phone.rounds.blau.errors;
-    challenge.result = rosa === blau ? "draw" : rosa < blau ? "rosa" : "blau";
-    challenge.phase = "finished";
-    challenge.finishedAt = now();
-  }
   return { ok: true };
 }
 
@@ -831,7 +949,8 @@ function quizTieBreak(data, now) {
   data.challenge.phase = "tie";
   data.challenge.tie = { index: 0, ready: {}, revealed: {}, marks: {}, complete: false };
   data.challenge.buzz = null;
-  data.challenge.tieStartedAt = now();
+  data.challenge.buzzerOpen = false;
+  data.challenge.tieStartedAt = null;
   return { ok: true };
 }
 
@@ -839,7 +958,39 @@ function quizBuzz(data, message, now) {
   if (data.challenge?.kind !== "quiz" || data.challenge.phase !== "tie") return fail("no_tiebreak", 409);
   if (message.team !== "rosa" && message.team !== "blau") return fail("bad_team");
   if (data.challenge.buzz) return fail("already_buzzed", 409);
+  if (!data.challenge.buzzerOpen || data.challenge.tieStartedAt === null) return fail("buzzer_closed", 409);
   data.challenge.buzz = { team: message.team, elapsedMs: Math.max(0, now() - data.challenge.tieStartedAt) };
+  data.challenge.buzzerOpen = false;
+  return { ok: true };
+}
+
+function quizBuzzerOpen(data, now) {
+  if (data.challenge?.kind !== "quiz" || data.challenge.phase !== "tie" || data.challenge.buzz) return fail("no_tiebreak", 409);
+  data.challenge.buzzerOpen = true;
+  data.challenge.tieStartedAt = now();
+  return { ok: true };
+}
+
+function quizBuzzerClose(data) {
+  if (data.challenge?.kind !== "quiz" || data.challenge.phase !== "tie") return fail("no_tiebreak", 409);
+  data.challenge.buzzerOpen = false;
+  return { ok: true };
+}
+
+function quizTieBreakJudge(data, message, now) {
+  const challenge = data.challenge;
+  if (challenge?.kind !== "quiz" || challenge.phase !== "tie" || !challenge.buzz) return fail("buzzer_missing", 409);
+  const context = quizContext(data);
+  if (!context?.section.revealed?.[context.section.index]) return fail("round_not_revealed", 409);
+  const correct = Boolean(message.correct);
+  const winner = correct ? challenge.buzz.team : challenge.buzz.team === "rosa" ? "blau" : "rosa";
+  context.section.marks[context.section.index] = {
+    rosa: winner === "rosa",
+    blau: winner === "blau",
+  };
+  context.section.complete = true;
+  challenge.buzzerOpen = false;
+  awardGame(data, winner, now);
   return { ok: true };
 }
 
@@ -869,18 +1020,14 @@ function calculateVoteResult(vote) {
   const rosaDiff = Math.abs(vote.guesses.rosa.percent - actual);
   const blauDiff = Math.abs(vote.guesses.blau.percent - actual);
   if (Math.abs(rosaDiff - blauDiff) > 1e-9) return rosaDiff < blauDiff ? "rosa" : "blau";
-  if (vote.guessMode === "percentage-turnout") {
-    const rosaTurnout = Math.abs(vote.guesses.rosa.turnout - values.length);
-    const blauTurnout = Math.abs(vote.guesses.blau.turnout - values.length);
-    if (rosaTurnout !== blauTurnout) return rosaTurnout < blauTurnout ? "rosa" : "blau";
-  }
   return "both";
 }
 
 function quizBuzzReset(data, now) {
   if (data.challenge?.kind !== "quiz" || data.challenge.phase !== "tie") return fail("no_tiebreak", 409);
   data.challenge.buzz = null;
-  data.challenge.tieStartedAt = now();
+  data.challenge.buzzerOpen = false;
+  data.challenge.tieStartedAt = null;
   return { ok: true };
 }
 
@@ -982,6 +1129,12 @@ function redo(data) {
 
 function snapshot(data) { const value = structuredClone(data); delete value.history; return value; }
 function replaceData(target, source) { for (const key of Object.keys(target)) delete target[key]; Object.assign(target, source); }
+function rememberExternalAction(data) {
+  data.history ||= { past: [], future: [] };
+  data.history.past.push(snapshot(data));
+  if (data.history.past.length > MAX_HISTORY) data.history.past.shift();
+  data.history.future = [];
+}
 
 function shuffledPlaceIds() {
   const ids = PLACES.map((place) => place.id);
