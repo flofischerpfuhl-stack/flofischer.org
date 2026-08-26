@@ -39,7 +39,7 @@
     } catch (e) {}
   </script>
   <link rel="stylesheet" href="/shared/hub/hub.css" />
-  <link rel="stylesheet" href="/shared/hub/diorama.css?v=11" />
+  <link rel="stylesheet" href="/shared/hub/diorama.css?v=12" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -60,7 +60,25 @@
   <div class="film-grain" aria-hidden="true"></div>
   <div class="scanlines" aria-hidden="true"></div>
   <div class="diorama-vignette" aria-hidden="true"></div>
-  <div class="diorama-loader" data-diorama-loader aria-hidden="true"></div>
+  <div class="diorama-loader" data-diorama-loader role="status" aria-live="polite">
+    <div class="diorama-loader-panel">
+      <span class="diorama-loader-spinner" aria-hidden="true"></span>
+      <p class="diorama-loader-title">
+        <span data-lang-copy="en">Building the floating island</span>
+        <span data-lang-copy="de">Floating Island wird aufgebaut</span>
+      </p>
+      <div
+        class="diorama-loader-track"
+        role="progressbar"
+        aria-label="Diorama loading progress"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+        data-loader-progress
+      ><span data-loader-progress-fill></span></div>
+      <p class="diorama-loader-value"><span data-loader-progress-value>0</span>%</p>
+    </div>
+  </div>
   <div class="fade-veil" data-fade></div>
 
   <a class="skip-link" href="#diorama-fallback">
@@ -95,7 +113,7 @@
     </div>
   </noscript>
 
-  <script type="module" src="/shared/hub/diorama.js?v=11"></script>
+  <script type="module" src="/shared/hub/diorama.js?v=12"></script>
   <script src="/shared/pwa.js" defer></script>
 </body>
 </html>

@@ -16,8 +16,19 @@ const qualityLow = window.matchMedia("(max-width: 820px), (pointer: coarse)").ma
 
 const canvas = document.querySelector("#diorama-world");
 const loaderOverlay = document.querySelector("[data-diorama-loader]");
+const loaderProgress = document.querySelector("[data-loader-progress]");
+const loaderProgressFill = document.querySelector("[data-loader-progress-fill]");
+const loaderProgressValue = document.querySelector("[data-loader-progress-value]");
 const fade = document.querySelector("[data-fade]");
 const zoneLabel = document.querySelector("[data-zone]");
+const loaderStartedAt = performance.now();
+
+function setLoadingProgress(value) {
+  const progress = Math.round(THREE.MathUtils.clamp(value, 0, 100));
+  loaderProgress?.setAttribute("aria-valuenow", String(progress));
+  if (loaderProgressFill) loaderProgressFill.style.transform = `scaleX(${progress / 100})`;
+  if (loaderProgressValue) loaderProgressValue.textContent = String(progress);
+}
 
 function rng(seed) {
   let value = seed % 2147483647;
@@ -199,6 +210,7 @@ function signTexture(kind, language) {
 }
 
 async function start() {
+  setLoadingProgress(4);
   rewriteLocalLinks();
   let language = "en";
   try { language = localStorage.getItem(KEY) || document.documentElement.dataset.language || "en"; } catch (_) {}
@@ -217,6 +229,7 @@ async function start() {
   renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.enabled = !qualityLow;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  setLoadingProgress(10);
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x171317);
@@ -247,23 +260,29 @@ async function start() {
 
   const textureLoader = new THREE.TextureLoader();
   const TEX = "/shared/hub/textures";
+  let loadedTextures = 0;
+  const trackedTexture = (url, options) => loadTexture(textureLoader, url, options).finally(() => {
+    loadedTextures += 1;
+    setLoadingProgress(10 + (loadedTextures / 12) * 60);
+  });
   const [
     meadow, forestNormal, forestRoughness, rock, rockNormal, asphalt,
     cobble, bark, facadeA, facadeB, waterNormals, tropicalLeaf,
   ] = await Promise.all([
-    loadTexture(textureLoader, `${TEX}/meadow.jpg`, { repeat: 5.4 }),
-    loadTexture(textureLoader, `${TEX}/forest-floor-normal.jpg`, { repeat: 5.4, srgb: false }),
-    loadTexture(textureLoader, `${TEX}/forest-floor-roughness.jpg`, { repeat: 5.4, srgb: false }),
-    loadTexture(textureLoader, `${TEX}/mossy-rock.jpg`, { repeat: 1.8 }),
-    loadTexture(textureLoader, `${TEX}/mossy-rock-normal.jpg`, { repeat: 1.8, srgb: false }),
-    loadTexture(textureLoader, `${TEX}/asphalt.jpg`, { repeat: 2.7 }),
-    loadTexture(textureLoader, `${TEX}/cobble.jpg`, { repeat: 2.2 }),
-    loadTexture(textureLoader, `${TEX}/bark.jpg`, { repeat: 2.0 }),
-    loadTexture(textureLoader, `${TEX}/facade-a.jpg`),
-    loadTexture(textureLoader, `${TEX}/facade-b.jpg`),
-    loadTexture(textureLoader, `${TEX}/waternormals.jpg`, { repeat: 1.7, srgb: false }),
-    loadTexture(textureLoader, `${TEX}/tropical-leaf.png`),
+    trackedTexture(`${TEX}/meadow.jpg`, { repeat: 5.4 }),
+    trackedTexture(`${TEX}/forest-floor-normal.jpg`, { repeat: 5.4, srgb: false }),
+    trackedTexture(`${TEX}/forest-floor-roughness.jpg`, { repeat: 5.4, srgb: false }),
+    trackedTexture(`${TEX}/mossy-rock.jpg`, { repeat: 1.8 }),
+    trackedTexture(`${TEX}/mossy-rock-normal.jpg`, { repeat: 1.8, srgb: false }),
+    trackedTexture(`${TEX}/asphalt.jpg`, { repeat: 2.7 }),
+    trackedTexture(`${TEX}/cobble.jpg`, { repeat: 2.2 }),
+    trackedTexture(`${TEX}/bark.jpg`, { repeat: 2.0 }),
+    trackedTexture(`${TEX}/facade-a.jpg`),
+    trackedTexture(`${TEX}/facade-b.jpg`),
+    trackedTexture(`${TEX}/waternormals.jpg`, { repeat: 1.7, srgb: false }),
+    trackedTexture(`${TEX}/tropical-leaf.png`),
   ]);
+  setLoadingProgress(72);
 
   const skyMaterial = new THREE.ShaderMaterial({
     side: THREE.BackSide,
@@ -283,14 +302,14 @@ async function start() {
       uniform float uSide;
       void main() {
         float height = clamp(vDirection.y * 0.5 + 0.5, 0.0, 1.0);
-        vec3 dawnLow = vec3(0.68, 0.31, 0.13);
-        vec3 dawnHigh = vec3(0.20, 0.32, 0.29);
+        vec3 dawnLow = vec3(0.96, 0.58, 0.24);
+        vec3 dawnHigh = vec3(0.43, 0.62, 0.68);
         vec3 nightLow = vec3(0.035, 0.045, 0.065);
         vec3 nightHigh = vec3(0.008, 0.012, 0.025);
         vec3 dawn = mix(dawnLow, dawnHigh, pow(height, 0.7));
         vec3 night = mix(nightLow, nightHigh, pow(height, 1.15));
         vec3 color = mix(dawn, night, uSide);
-        color += vec3(0.9, 0.34, 0.08) * pow(max(dot(vDirection, normalize(vec3(-0.65, 0.26, -0.2))), 0.0), 105.0) * (1.0-uSide);
+        color += vec3(1.0, 0.56, 0.16) * pow(max(dot(vDirection, normalize(vec3(-0.65, 0.26, -0.2))), 0.0), 82.0) * (1.0-uSide);
         gl_FragColor = vec4(color, 1.0);
       }
     `,
@@ -299,7 +318,7 @@ async function start() {
 
   const hemi = new THREE.HemisphereLight(0xffd39b, 0x243820, 1.45);
   scene.add(hemi);
-  const sunrise = new THREE.DirectionalLight(0xff9b4c, 3.1);
+  const sunrise = new THREE.DirectionalLight(0xffbd6a, 3.1);
   sunrise.position.set(-12, 14, 8);
   sunrise.castShadow = !qualityLow;
   if (sunrise.castShadow) {
@@ -322,7 +341,7 @@ async function start() {
   const neonCyan = new THREE.PointLight(0x39d9ef, 0, 12, 1.7);
   neonCyan.position.set(6, 3.1, 2.4);
   scene.add(neonCyan);
-  const soulFill = new THREE.PointLight(0xffc979, 5.8, 15, 1.65);
+  const soulFill = new THREE.PointLight(0xffd89a, 7.6, 18, 1.55);
   soulFill.position.set(-4.8, 6.2, 3.4);
   scene.add(soulFill);
   const undersideFill = new THREE.PointLight(0x9fc2b7, 8.2, 24, 1.35);
@@ -446,12 +465,14 @@ async function start() {
   scene.add(voidShadow);
 
   const soulGroundMaterial = new THREE.MeshStandardMaterial({
-    color: 0x9fbd6b,
+    color: 0x5fc34a,
     map: meadow,
     normalMap: forestNormal,
     normalScale: new THREE.Vector2(0.72, 0.72),
     roughnessMap: forestRoughness,
     roughness: 0.96,
+    emissive: 0x143b10,
+    emissiveIntensity: 0.2,
   });
   const mindGroundMaterial = new THREE.MeshStandardMaterial({
     color: 0x3c3f4c,
@@ -511,6 +532,7 @@ async function start() {
   soulWater.material.depthWrite = true;
   soulWater.renderOrder = 3;
   scene.add(soulWater);
+  setLoadingProgress(78);
 
   const pathStoneMaterial = new THREE.MeshStandardMaterial({ color: 0xada38d, map: cobble, roughness: 0.94 });
   const pathRandom = rng(735);
@@ -594,7 +616,7 @@ async function start() {
   });
   grassBladeMap.anisotropy = qualityLow ? 2 : 6;
   const grassMaterial = new THREE.MeshStandardMaterial({
-    color: 0x89b85a,
+    color: 0x65c84b,
     map: grassBladeMap,
     roughness: 0.92,
     side: THREE.DoubleSide,
@@ -602,8 +624,8 @@ async function start() {
     transparent: true,
     alphaTest: 0.18,
     depthWrite: true,
-    emissive: 0x1d3410,
-    emissiveIntensity: 0.34,
+    emissive: 0x1b4613,
+    emissiveIntensity: 0.48,
   });
   grassMaterial.userData.time = { value: 0 };
   grassMaterial.onBeforeCompile = (shader) => {
@@ -635,59 +657,92 @@ async function start() {
     dummy.scale.set(scale, 0.82 + grassRandom() * 0.92, scale);
     dummy.updateMatrix();
     grass.setMatrixAt(index, dummy.matrix);
-    instanceColor.setHSL(0.255 + grassRandom() * 0.095, 0.5 + grassRandom() * 0.24, 0.27 + grassRandom() * 0.18);
+    instanceColor.setHSL(0.275 + grassRandom() * 0.09, 0.64 + grassRandom() * 0.2, 0.32 + grassRandom() * 0.17);
     grass.setColorAt(index, instanceColor);
   }
   grass.instanceMatrix.needsUpdate = true;
   if (grass.instanceColor) grass.instanceColor.needsUpdate = true;
   scene.add(grass);
 
-  const flowerCount = qualityLow ? 110 : 420;
-  const flowerPositions = new Float32Array(flowerCount * 3);
-  const flowerColors = new Float32Array(flowerCount * 3);
+  const flowerCount = qualityLow ? 90 : 240;
+  const petalsPerFlower = 5;
   const flowerRandom = rng(281);
+  const flowerStemMaterial = new THREE.MeshStandardMaterial({ color: 0x397b31, roughness: 0.94 });
+  const flowerCenterMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffd75f,
+    emissive: 0x5b3005,
+    emissiveIntensity: 0.25,
+    roughness: 0.72,
+  });
+  const stemGeometry = new THREE.CylinderGeometry(0.012, 0.018, 1, 5);
+  stemGeometry.translate(0, 0.5, 0);
+  const flowerPetalGeometry = new THREE.SphereGeometry(0.055, 6, 4);
+  const flowerCenterGeometry = new THREE.SphereGeometry(0.035, 7, 5);
+  const flowerStems = new THREE.InstancedMesh(stemGeometry, flowerStemMaterial, flowerCount);
+  const flowerCenters = new THREE.InstancedMesh(flowerCenterGeometry, flowerCenterMaterial, flowerCount);
+  const flowerPalette = [0xff4f8b, 0xffa83d, 0x9b77ff, 0x39c8ff, 0xfff4df, 0xf05ad8];
+  const petalCapacity = Math.ceil(flowerCount / flowerPalette.length) * petalsPerFlower;
+  const flowerPetals = flowerPalette.map((color) => new THREE.InstancedMesh(
+    flowerPetalGeometry,
+    new THREE.MeshBasicMaterial({ color, toneMapped: false }),
+    petalCapacity
+  ));
+  const petalCounts = flowerPalette.map(() => 0);
   for (let index = 0; index < flowerCount; index += 1) {
     let x;
     let z;
     do {
       x = -0.4 - flowerRandom() * 7.1;
       z = -5 + flowerRandom() * 10;
-    } while (!ellipseContains(x, z, 0.4) || Math.hypot((x + 4.15) / 1.25, (z - 1.35) / 0.7) < 1.8);
-    flowerPositions[index * 3] = x;
-    flowerPositions[index * 3 + 1] = 0.88 + flowerRandom() * 0.16;
-    flowerPositions[index * 3 + 2] = z;
-    instanceColor.setHSL([0.96, 0.08, 0.14, 0.75][index % 4], 0.58, 0.7);
-    instanceColor.toArray(flowerColors, index * 3);
-  }
-  const flowerGeometry = new THREE.BufferGeometry();
-  flowerGeometry.setAttribute("position", new THREE.BufferAttribute(flowerPositions, 3));
-  flowerGeometry.setAttribute("color", new THREE.BufferAttribute(flowerColors, 3));
-  const flowerMap = canvasParticle((context, size) => {
-    context.translate(size / 2, size / 2);
-    context.fillStyle = "#ffffff";
-    for (let index = 0; index < 5; index += 1) {
-      context.rotate((Math.PI * 2) / 5);
-      context.beginPath();
-      context.ellipse(0, -size * 0.22, size * 0.12, size * 0.23, 0, 0, Math.PI * 2);
-      context.fill();
+    } while (
+      !ellipseContains(x, z, 0.42)
+      || soulWaterContains(x, z, 0.38)
+      || Math.hypot((x + 3.3) / 1.45, (z + 1.65) / 1.65) < 1
+    );
+
+    const height = 0.22 + flowerRandom() * 0.31;
+    dummy.position.set(x, 0.7, z);
+    dummy.rotation.set((flowerRandom() - 0.5) * 0.08, flowerRandom() * Math.PI, (flowerRandom() - 0.5) * 0.11);
+    dummy.scale.set(0.82 + flowerRandom() * 0.35, height, 0.82 + flowerRandom() * 0.35);
+    dummy.updateMatrix();
+    flowerStems.setMatrixAt(index, dummy.matrix);
+
+    const headY = 0.7 + height;
+    dummy.position.set(x, headY, z);
+    dummy.rotation.set(0, 0, 0);
+    dummy.scale.setScalar(0.92 + flowerRandom() * 0.42);
+    dummy.updateMatrix();
+    flowerCenters.setMatrixAt(index, dummy.matrix);
+
+    const paletteIndex = index % flowerPalette.length;
+    const petalMesh = flowerPetals[paletteIndex];
+    const phase = flowerRandom() * Math.PI * 2;
+    for (let petal = 0; petal < petalsPerFlower; petal += 1) {
+      const angle = phase + (petal / petalsPerFlower) * Math.PI * 2;
+      const petalIndex = petalCounts[paletteIndex];
+      dummy.position.set(
+        x + Math.cos(angle) * 0.058,
+        headY + 0.006 + Math.sin(petal * 2.7) * 0.006,
+        z + Math.sin(angle) * 0.058
+      );
+      dummy.rotation.set(0, -angle, Math.sin(angle) * 0.16);
+      dummy.scale.set(1.25, 0.5, 0.82);
+      dummy.updateMatrix();
+      petalMesh.setMatrixAt(petalIndex, dummy.matrix);
+      petalCounts[paletteIndex] += 1;
     }
-    context.fillStyle = "#fff1a0";
-    context.beginPath();
-    context.arc(0, 0, size * 0.1, 0, Math.PI * 2);
-    context.fill();
+  }
+  flowerStems.instanceMatrix.needsUpdate = true;
+  flowerCenters.instanceMatrix.needsUpdate = true;
+  flowerStems.frustumCulled = false;
+  flowerCenters.frustumCulled = false;
+  flowerPetals.forEach((petalMesh, index) => {
+    petalMesh.count = petalCounts[index];
+    petalMesh.instanceMatrix.needsUpdate = true;
+    petalMesh.frustumCulled = false;
   });
-  const flowerMaterial = new THREE.PointsMaterial({
-    map: flowerMap,
-    color: 0xffffff,
-    vertexColors: true,
-    size: qualityLow ? 0.13 : 0.115,
-    sizeAttenuation: true,
-    transparent: true,
-    alphaTest: 0.12,
-    depthWrite: false,
-  });
-  const flowers = new THREE.Points(flowerGeometry, flowerMaterial);
-  scene.add(flowers);
+  scene.add(flowerStems, ...flowerPetals, flowerCenters);
+  setLoadingProgress(84);
 
   const barkMaterial = new THREE.MeshStandardMaterial({ color: 0x51402e, map: bark, roughness: 0.91 });
   const leafMaterials = [
@@ -928,6 +983,7 @@ async function start() {
   const chapelGlow = new THREE.PointLight(0xffbd70, 5.5, 7, 1.8);
   chapelGlow.position.set(-3.3, 2.2, 0.2);
   scene.add(chapelGlow);
+  setLoadingProgress(90);
 
   const wetWood = new THREE.MeshStandardMaterial({ color: 0x291a18, roughness: 0.48, metalness: 0.08 });
   const redWood = new THREE.MeshStandardMaterial({ color: 0x8d191f, roughness: 0.42, metalness: 0.12 });
@@ -1231,6 +1287,7 @@ async function start() {
 
   let composer = null;
   let bloom = null;
+  setLoadingProgress(94);
   if (!qualityLow) {
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
@@ -1324,21 +1381,21 @@ async function start() {
     zoneLabel.textContent = side < 0.36 ? "Seele" : side > 0.64 ? "Gehirn" : "Seele · Gehirn";
 
     skyMaterial.uniforms.uSide.value = THREE.MathUtils.damp(skyMaterial.uniforms.uSide.value, side, 3.2, delta);
-    scene.fog.color.set(0x4f402f).lerp(new THREE.Color(0x11101a), side);
-    scene.fog.density = THREE.MathUtils.lerp(0.011, 0.016, side);
-    hemi.color.set(0xffd39b).lerp(new THREE.Color(0x7894c0), side);
-    hemi.groundColor.set(0x243820).lerp(new THREE.Color(0x090a10), side);
-    hemi.intensity = THREE.MathUtils.lerp(1.62, 0.86, side);
-    sunrise.intensity = THREE.MathUtils.lerp(3.2, 0.62, side);
+    scene.fog.color.set(0x8f7858).lerp(new THREE.Color(0x11101a), side);
+    scene.fog.density = THREE.MathUtils.lerp(0.0085, 0.016, side);
+    hemi.color.set(0xffe4b4).lerp(new THREE.Color(0x7894c0), side);
+    hemi.groundColor.set(0x405d31).lerp(new THREE.Color(0x090a10), side);
+    hemi.intensity = THREE.MathUtils.lerp(2.18, 0.86, side);
+    sunrise.intensity = THREE.MathUtils.lerp(4.65, 0.62, side);
     moonlight.intensity = THREE.MathUtils.lerp(0.1, 1.2, side);
     neonPink.intensity = 6.8 * side;
     neonCyan.intensity = 5.6 * side;
-    soulFill.intensity = THREE.MathUtils.lerp(7.2, 2.8, side);
-    chapelGlow.intensity = THREE.MathUtils.lerp(6.2, 1.1, side);
-    renderer.toneMappingExposure = THREE.MathUtils.lerp(1.15, 0.96, side);
+    soulFill.intensity = THREE.MathUtils.lerp(10.8, 2.8, side);
+    chapelGlow.intensity = THREE.MathUtils.lerp(7.6, 1.1, side);
+    renderer.toneMappingExposure = THREE.MathUtils.lerp(1.34, 0.96, side);
     if (bloom) bloom.strength = THREE.MathUtils.lerp(0.04, 0.16, side);
     mindGroundMaterial.color.set(0x4a4d59).lerp(new THREE.Color(0x282d3a), side);
-    soulGroundMaterial.color.set(0xa5c773).lerp(new THREE.Color(0x617c50), side * 0.45);
+    soulGroundMaterial.color.set(0x68cb4d).lerp(new THREE.Color(0x3e7436), side * 0.35);
 
     soulWater.material.uniforms.time.value = reducedMotion ? 0.35 : elapsed * 0.42;
     grassMaterial.userData.time.value = reducedMotion ? 0 : elapsed;
@@ -1391,12 +1448,27 @@ async function start() {
     else renderer.render(scene, camera);
 
     readyFrames += 1;
-    if (readyFrames === 3) loaderOverlay?.classList.add("is-off");
+    if (readyFrames === 1) {
+      setLoadingProgress(97);
+      loaderOverlay?.classList.add("has-preview");
+    } else if (readyFrames === 2) {
+      setLoadingProgress(99);
+    } else if (readyFrames === 3) {
+      setLoadingProgress(100);
+      const minimumVisibleMs = new URLSearchParams(location.search).get("loader") === "preview" ? 8000 : 1100;
+      const remaining = Math.max(0, minimumVisibleMs - (performance.now() - loaderStartedAt));
+      window.setTimeout(() => {
+        loaderOverlay?.classList.add("is-off");
+        loaderOverlay?.setAttribute("aria-hidden", "true");
+      }, remaining);
+    }
   }
   requestAnimationFrame(animate);
 }
 
 start().catch((error) => {
   console.error(error);
+  setLoadingProgress(100);
   loaderOverlay?.classList.add("is-off");
+  loaderOverlay?.setAttribute("aria-hidden", "true");
 });
