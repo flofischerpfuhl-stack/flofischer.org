@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { Water } from "three/addons/objects/Water.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
@@ -93,6 +94,17 @@ function cylinderBetween(from, to, radius, material, segments = 8) {
 
 function ellipseContains(x, z, margin = 0) {
   return (x * x) / ((8.15 - margin) ** 2) + (z * z) / ((5.72 - margin) ** 2) < 1;
+}
+
+function soulWaterContains(x, z, margin = 0) {
+  const pond = ((x + 4.12) / (1.72 + margin)) ** 2
+    + ((z - 1.3) / (1.02 + margin)) ** 2 < 1;
+  if (pond) return true;
+  if (z < 1.55 - margin || z > 4.55 + margin) return false;
+  const progress = THREE.MathUtils.clamp((z - 1.55) / 3, 0, 1);
+  const center = -4.12 + Math.sin(progress * Math.PI * 1.35) * 0.18;
+  const halfWidth = 0.46 + Math.sin(progress * Math.PI) * 0.11 + margin;
+  return Math.abs(x - center) < halfWidth;
 }
 
 function halfEllipseShape(side, radiusX, radiusZ) {
@@ -210,18 +222,21 @@ async function start() {
   scene.background = new THREE.Color(0x171317);
   scene.fog = new THREE.FogExp2(0x171317, 0.018);
 
-  const camera = new THREE.PerspectiveCamera(39, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(0.6, 9.4, 18.7);
+  const initialAspect = window.innerWidth / window.innerHeight;
+  const camera = new THREE.PerspectiveCamera(39, initialAspect, 0.1, 100);
+  const initialDirection = new THREE.Vector3(0.6, 9.4, 18.7).normalize();
+  const initialDistance = initialAspect < 0.72 ? 41 : initialAspect < 1.08 ? 27 : 20.96;
+  camera.position.copy(initialDirection.multiplyScalar(initialDistance));
 
   const controls = new OrbitControls(camera, canvas);
   controls.target.set(0, 0.25, 0);
   controls.enableDamping = true;
   controls.dampingFactor = 0.055;
   controls.enablePan = false;
-  controls.minDistance = 10.5;
-  controls.maxDistance = 27;
-  controls.minPolarAngle = 0.28;
-  controls.maxPolarAngle = Math.PI * 0.73;
+  controls.minDistance = 8.85;
+  controls.maxDistance = initialAspect < 0.72 ? 52 : 38;
+  controls.minPolarAngle = 0.16;
+  controls.maxPolarAngle = Math.PI * 0.68;
   controls.autoRotate = !reducedMotion;
   controls.autoRotateSpeed = 0.24;
   controls.addEventListener("start", () => {
@@ -233,12 +248,12 @@ async function start() {
   const textureLoader = new THREE.TextureLoader();
   const TEX = "/shared/hub/textures";
   const [
-    forest, forestNormal, forestRoughness, rock, rockNormal, asphalt,
+    meadow, forestNormal, forestRoughness, rock, rockNormal, asphalt,
     cobble, bark, facadeA, facadeB, waterNormals, tropicalLeaf,
   ] = await Promise.all([
-    loadTexture(textureLoader, `${TEX}/forest-floor.jpg`, { repeat: 3.2 }),
-    loadTexture(textureLoader, `${TEX}/forest-floor-normal.jpg`, { repeat: 3.2, srgb: false }),
-    loadTexture(textureLoader, `${TEX}/forest-floor-roughness.jpg`, { repeat: 3.2, srgb: false }),
+    loadTexture(textureLoader, `${TEX}/meadow.jpg`, { repeat: 5.4 }),
+    loadTexture(textureLoader, `${TEX}/forest-floor-normal.jpg`, { repeat: 5.4, srgb: false }),
+    loadTexture(textureLoader, `${TEX}/forest-floor-roughness.jpg`, { repeat: 5.4, srgb: false }),
     loadTexture(textureLoader, `${TEX}/mossy-rock.jpg`, { repeat: 1.8 }),
     loadTexture(textureLoader, `${TEX}/mossy-rock-normal.jpg`, { repeat: 1.8, srgb: false }),
     loadTexture(textureLoader, `${TEX}/asphalt.jpg`, { repeat: 2.7 }),
@@ -310,6 +325,9 @@ async function start() {
   const soulFill = new THREE.PointLight(0xffc979, 5.8, 15, 1.65);
   soulFill.position.set(-4.8, 6.2, 3.4);
   scene.add(soulFill);
+  const undersideFill = new THREE.PointLight(0x9fc2b7, 8.2, 24, 1.35);
+  undersideFill.position.set(-1.2, -5.2, 6.8);
+  scene.add(undersideFill);
 
   const islandMaterial = new THREE.MeshStandardMaterial({
     color: 0x544840,
@@ -317,6 +335,8 @@ async function start() {
     normalMap: rockNormal,
     normalScale: new THREE.Vector2(0.7, 0.7),
     roughness: 0.92,
+    emissive: 0x120f0d,
+    emissiveIntensity: 0.34,
   });
   const islandGeometry = new THREE.CylinderGeometry(8.2, 6.7, 2.7, 96, 6, false);
   const islandPosition = islandGeometry.attributes.position;
@@ -336,12 +356,23 @@ async function start() {
   island.receiveShadow = true;
   scene.add(island);
 
+  const undersideMaterial = new THREE.MeshStandardMaterial({
+    color: 0x373238,
+    map: rock,
+    normalMap: rockNormal,
+    normalScale: new THREE.Vector2(0.85, 0.85),
+    roughness: 0.97,
+    emissive: 0x171419,
+    emissiveIntensity: 0.72,
+  });
   const underside = new THREE.Mesh(
-    new THREE.ConeGeometry(6.65, 3.4, 64, 4, true),
-    new THREE.MeshStandardMaterial({ color: 0x292229, map: rock, roughness: 0.96 })
+    new THREE.ConeGeometry(6.68, 5.2, 80, 8, true),
+    undersideMaterial
   );
   underside.scale.z = 0.7;
-  underside.position.y = -3.55;
+  underside.rotation.z = Math.PI;
+  underside.position.y = -4.66;
+  underside.castShadow = !qualityLow;
   scene.add(underside);
 
   const mossRim = new THREE.Mesh(
@@ -355,14 +386,14 @@ async function start() {
   scene.add(mossRim);
 
   const undersideRockRandom = rng(241);
-  for (let index = 0; index < (qualityLow ? 28 : 54); index += 1) {
+  for (let index = 0; index < (qualityLow ? 32 : 66); index += 1) {
     const angle = undersideRockRandom() * Math.PI * 2;
     const radial = Math.sqrt(undersideRockRandom()) * 6.55;
     const x = Math.cos(angle) * radial;
     const z = Math.sin(angle) * radial * 0.7;
     const rockChunk = new THREE.Mesh(
       new THREE.DodecahedronGeometry(0.55 + undersideRockRandom() * 0.75, 1),
-      islandMaterial
+      undersideMaterial
     );
     rockChunk.position.set(x, -1.6 - undersideRockRandom() * (2.25 - radial * 0.12), z);
     rockChunk.scale.set(
@@ -375,18 +406,48 @@ async function start() {
     scene.add(rockChunk);
   }
 
+  // Long, irregular stone teeth make the whole shared world read as one
+  // suspended island, while leaving both top surfaces untouched.
+  const spireRandom = rng(8841);
+  for (let index = 0; index < (qualityLow ? 10 : 18); index += 1) {
+    const angle = spireRandom() * Math.PI * 2;
+    const radial = 1.0 + Math.sqrt(spireRandom()) * 4.9;
+    const from = new THREE.Vector3(
+      Math.cos(angle) * radial,
+      -1.72 - spireRandom() * 0.42,
+      Math.sin(angle) * radial * 0.7
+    );
+    const length = 2.4 + spireRandom() * 3.7 + (1 - radial / 6) * 1.3;
+    const to = from.clone().add(new THREE.Vector3(
+      (spireRandom() - 0.5) * 1.05,
+      -length,
+      (spireRandom() - 0.5) * 0.72
+    ));
+    const direction = to.clone().sub(from);
+    const spire = new THREE.Mesh(
+      new THREE.ConeGeometry(0.34 + spireRandom() * 0.46, direction.length(), 9, 3, true),
+      undersideMaterial
+    );
+    spire.position.copy(from).add(to).multiplyScalar(0.5);
+    spire.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+    spire.scale.z = 0.72 + spireRandom() * 0.45;
+    spire.rotation.y += spireRandom() * Math.PI;
+    spire.castShadow = !qualityLow;
+    scene.add(spire);
+  }
+
   const voidShadow = new THREE.Mesh(
     new THREE.CircleGeometry(8.4, 64),
-    new THREE.MeshBasicMaterial({ color: 0x050507, transparent: true, opacity: 0.42, depthWrite: false })
+    new THREE.MeshBasicMaterial({ color: 0x050507, transparent: true, opacity: 0.18, depthWrite: false })
   );
   voidShadow.rotation.x = -Math.PI / 2;
-  voidShadow.scale.y = 0.58;
-  voidShadow.position.y = -5.15;
+  voidShadow.scale.set(0.72, 0.42, 0.72);
+  voidShadow.position.y = -9.1;
   scene.add(voidShadow);
 
   const soulGroundMaterial = new THREE.MeshStandardMaterial({
-    color: 0x71815b,
-    map: forest,
+    color: 0x9fbd6b,
+    map: meadow,
     normalMap: forestNormal,
     normalScale: new THREE.Vector2(0.72, 0.72),
     roughnessMap: forestRoughness,
@@ -416,107 +477,40 @@ async function start() {
   seam.position.set(0, 0.71, 0);
   scene.add(seam);
 
-  const waterMaterial = new THREE.ShaderMaterial({
-    transparent: true,
-    side: THREE.DoubleSide,
-    uniforms: {
-      uTime: { value: 0 },
-      uNormal: { value: waterNormals },
-      uOpacity: { value: 0.9 },
-    },
-    vertexShader: `
-      varying vec2 vUv;
-      varying vec3 vWorld;
-      uniform float uTime;
-      void main() {
-        vUv = uv;
-        vec3 transformed = position;
-        transformed.z += sin(position.x * 3.4 + uTime * 0.65) * 0.018;
-        transformed.z += cos(position.y * 4.7 - uTime * 0.48) * 0.012;
-        vec4 world = modelMatrix * vec4(transformed, 1.0);
-        vWorld = world.xyz;
-        gl_Position = projectionMatrix * viewMatrix * world;
-      }
-    `,
-    fragmentShader: `
-      varying vec2 vUv;
-      varying vec3 vWorld;
-      uniform sampler2D uNormal;
-      uniform float uTime;
-      uniform float uOpacity;
-      void main() {
-        vec3 normalA = texture2D(uNormal, vUv * 2.4 + vec2(uTime * 0.012, -uTime * 0.017)).rgb;
-        vec3 normalB = texture2D(uNormal, vUv * 3.1 + vec2(-uTime * 0.016, uTime * 0.011)).rgb;
-        float shimmer = (normalA.r + normalB.g) * 0.5;
-        vec3 deep = vec3(0.015, 0.22, 0.25);
-        vec3 sun = vec3(0.54, 0.83, 0.75);
-        vec3 color = mix(deep, sun, smoothstep(0.25, 0.9, shimmer));
-        float fresnel = pow(1.0 - abs(normalize(cameraPosition-vWorld).y), 2.0);
-        color += vec3(0.42, 0.54, 0.58) * fresnel * 0.45;
-        gl_FragColor = vec4(color, uOpacity);
-      }
-    `,
-  });
-  const pond = new THREE.Mesh(new THREE.CircleGeometry(1.65, 64), waterMaterial);
-  pond.rotation.x = -Math.PI / 2;
-  pond.scale.set(1.28, 0.72, 1);
-  pond.position.set(-4.15, 0.745, 1.35);
-  scene.add(pond);
-
+  const pondShape = new THREE.Shape();
+  pondShape.absellipse(-4.12, -1.3, 1.72, 1.02, 0, Math.PI * 2, false, 0);
   const streamShape = new THREE.Shape();
-  streamShape.moveTo(-4.72, 1.45);
-  streamShape.bezierCurveTo(-4.38, 2.25, -4.72, 3.1, -4.42, 5.45);
-  streamShape.lineTo(-3.58, 5.45);
-  streamShape.bezierCurveTo(-3.82, 3.2, -3.45, 2.28, -3.72, 1.45);
+  streamShape.moveTo(-4.66, -1.55);
+  streamShape.bezierCurveTo(-4.42, -2.28, -4.65, -3.25, -4.48, -4.55);
+  streamShape.lineTo(-3.65, -4.55);
+  streamShape.bezierCurveTo(-3.78, -3.2, -3.55, -2.26, -3.61, -1.55);
   streamShape.closePath();
-  const stream = new THREE.Mesh(new THREE.ShapeGeometry(streamShape, 24), waterMaterial);
-  stream.rotation.x = -Math.PI / 2;
-  stream.position.y = 0.748;
-  scene.add(stream);
-
-  const waterfallMaterial = new THREE.ShaderMaterial({
-    transparent: true,
-    depthWrite: false,
-    side: THREE.DoubleSide,
-    uniforms: { uTime: { value: 0 } },
-    vertexShader: `
-      varying vec2 vUv;
-      uniform float uTime;
-      void main() {
-        vUv = uv;
-        vec3 transformed = position;
-        transformed.x += sin(uv.y * 19.0 + uTime * 1.2) * 0.018;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
-      }
-    `,
-    fragmentShader: `
-      varying vec2 vUv;
-      uniform float uTime;
-      void main() {
-        float edge = smoothstep(0.0, 0.14, vUv.x) * smoothstep(0.0, 0.14, 1.0-vUv.x);
-        float bands = 0.55 + 0.45 * sin(vUv.y * 72.0 - uTime * 5.2 + sin(vUv.x * 24.0));
-        vec3 color = mix(vec3(0.08,0.33,0.36), vec3(0.62,0.86,0.8), bands * 0.32);
-        float foam = smoothstep(0.72, 1.0, 1.0-vUv.y) * (0.35 + bands * 0.3);
-        gl_FragColor = vec4(color + foam * 0.45, edge * (0.27 + bands * 0.13));
-      }
-    `,
+  const waterGeometry = new THREE.ShapeGeometry([pondShape, streamShape], 48);
+  const waterBed = new THREE.Mesh(
+    waterGeometry.clone(),
+    new THREE.MeshStandardMaterial({ color: 0x0b4e52, roughness: 0.82, metalness: 0.02 })
+  );
+  waterBed.rotation.x = -Math.PI / 2;
+  waterBed.position.y = 0.725;
+  waterBed.receiveShadow = true;
+  scene.add(waterBed);
+  const soulWater = new Water(waterGeometry, {
+    textureWidth: qualityLow ? 256 : 512,
+    textureHeight: qualityLow ? 256 : 512,
+    waterNormals,
+    sunDirection: sunrise.position.clone().normalize(),
+    sunColor: 0xf2c78c,
+    waterColor: 0x0e6d72,
+    distortionScale: 0.95,
+    alpha: 0.68,
+    fog: true,
   });
-  const waterfallGeometry = new THREE.PlaneGeometry(0.78, 2.15, 12, 22);
-  const waterfallPosition = waterfallGeometry.attributes.position;
-  const waterfallUv = waterfallGeometry.attributes.uv;
-  for (let index = 0; index < waterfallPosition.count; index += 1) {
-    const uvX = waterfallUv.getX(index);
-    const uvY = waterfallUv.getY(index);
-    const edgeWidth = 0.72 + Math.sin(uvY * 11.0) * 0.13 + Math.sin(uvY * 23.0 + 0.8) * 0.06;
-    waterfallPosition.setX(index, waterfallPosition.getX(index) * edgeWidth + Math.sin(uvY * 8.0) * 0.055);
-    waterfallPosition.setZ(index, Math.sin(uvY * 15.0 + uvX * 4.0) * 0.025);
-  }
-  waterfallGeometry.computeVertexNormals();
-  const waterfall = new THREE.Mesh(waterfallGeometry, waterfallMaterial);
-  waterfall.position.set(-4.0, -0.33, 5.54);
-  waterfall.rotation.y = Math.PI;
-  waterfall.visible = false;
-  scene.add(waterfall);
+  soulWater.rotation.x = -Math.PI / 2;
+  soulWater.position.y = 0.752;
+  soulWater.material.transparent = true;
+  soulWater.material.depthWrite = true;
+  soulWater.renderOrder = 3;
+  scene.add(soulWater);
 
   const pathStoneMaterial = new THREE.MeshStandardMaterial({ color: 0xada38d, map: cobble, roughness: 0.94 });
   const pathRandom = rng(735);
@@ -600,7 +594,7 @@ async function start() {
   });
   grassBladeMap.anisotropy = qualityLow ? 2 : 6;
   const grassMaterial = new THREE.MeshStandardMaterial({
-    color: 0x78924d,
+    color: 0x89b85a,
     map: grassBladeMap,
     roughness: 0.92,
     side: THREE.DoubleSide,
@@ -608,8 +602,8 @@ async function start() {
     transparent: true,
     alphaTest: 0.18,
     depthWrite: true,
-    emissive: 0x17220d,
-    emissiveIntensity: 0.2,
+    emissive: 0x1d3410,
+    emissiveIntensity: 0.34,
   });
   grassMaterial.userData.time = { value: 0 };
   grassMaterial.onBeforeCompile = (shader) => {
@@ -620,9 +614,9 @@ async function start() {
       "#include <begin_vertex>\ntransformed.x += sin(uTime*1.15 + instanceMatrix[3].x*0.8 + instanceMatrix[3].z)*0.07*uv.y;"
     );
   };
-  const grassGeometry = new THREE.PlaneGeometry(0.055, 0.38, 1, 3);
-  grassGeometry.translate(0, 0.19, 0);
-  const grassCount = qualityLow ? 1600 : 6900;
+  const grassGeometry = new THREE.PlaneGeometry(0.064, 0.44, 1, 3);
+  grassGeometry.translate(0, 0.22, 0);
+  const grassCount = qualityLow ? 3800 : 11800;
   const grass = new THREE.InstancedMesh(grassGeometry, grassMaterial, grassCount);
   grass.frustumCulled = false;
   const grassRandom = rng(18);
@@ -634,14 +628,14 @@ async function start() {
     do {
       x = -0.15 - grassRandom() * 7.55;
       z = -5.25 + grassRandom() * 10.5;
-    } while (!ellipseContains(x, z, 0.25) || Math.hypot((x + 4.15) / 1.3, (z - 1.35) / 0.75) < 1.75);
+    } while (!ellipseContains(x, z, 0.25) || soulWaterContains(x, z, 0.28));
     dummy.position.set(x, 0.69, z);
     dummy.rotation.set(0, grassRandom() * Math.PI, (grassRandom() - 0.5) * 0.16);
-    const scale = 0.65 + grassRandom() * 0.95;
-    dummy.scale.set(scale, 0.72 + grassRandom() * 0.75, scale);
+    const scale = 0.68 + grassRandom() * 1.05;
+    dummy.scale.set(scale, 0.82 + grassRandom() * 0.92, scale);
     dummy.updateMatrix();
     grass.setMatrixAt(index, dummy.matrix);
-    instanceColor.setHSL(0.21 + grassRandom() * 0.12, 0.38 + grassRandom() * 0.24, 0.24 + grassRandom() * 0.2);
+    instanceColor.setHSL(0.255 + grassRandom() * 0.095, 0.5 + grassRandom() * 0.24, 0.27 + grassRandom() * 0.18);
     grass.setColorAt(index, instanceColor);
   }
   grass.instanceMatrix.needsUpdate = true;
@@ -1304,6 +1298,7 @@ async function start() {
 
   function resize() {
     camera.aspect = window.innerWidth / window.innerHeight;
+    controls.maxDistance = camera.aspect < 0.72 ? 52 : 38;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     composer?.setSize(window.innerWidth, window.innerHeight);
@@ -1343,10 +1338,9 @@ async function start() {
     renderer.toneMappingExposure = THREE.MathUtils.lerp(1.15, 0.96, side);
     if (bloom) bloom.strength = THREE.MathUtils.lerp(0.04, 0.16, side);
     mindGroundMaterial.color.set(0x4a4d59).lerp(new THREE.Color(0x282d3a), side);
-    soulGroundMaterial.color.set(0x7f8f63).lerp(new THREE.Color(0x455440), side * 0.45);
+    soulGroundMaterial.color.set(0xa5c773).lerp(new THREE.Color(0x617c50), side * 0.45);
 
-    waterMaterial.uniforms.uTime.value = elapsed;
-    waterfallMaterial.uniforms.uTime.value = elapsed;
+    soulWater.material.uniforms.time.value = reducedMotion ? 0.35 : elapsed * 0.42;
     grassMaterial.userData.time.value = reducedMotion ? 0 : elapsed;
 
     const petalsArray = petals.geometry.attributes.position.array;

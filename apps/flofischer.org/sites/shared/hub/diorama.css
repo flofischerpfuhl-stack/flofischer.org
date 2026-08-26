@@ -94,14 +94,6 @@ body.is-orbiting #diorama-world {
   transition: color 500ms ease;
 }
 
-.realm-diorama .mode-link {
-  display: grid;
-  min-width: 1.8rem;
-  min-height: 1.8rem;
-  place-items: center;
-  border: 1px solid rgba(239, 237, 232, 0.3);
-}
-
 .realm-diorama .diorama-hint {
   width: max-content;
   max-width: calc(100vw - 2rem);
@@ -118,13 +110,8 @@ body.is-orbiting #diorama-world {
     gap: 0.55rem;
   }
 
-  .realm-diorama .hud-nav > a:not(.mode-link) {
+  .realm-diorama .hud-nav > a {
     display: none;
-  }
-
-  .realm-diorama .mode-link {
-    min-width: 2.75rem;
-    min-height: 2.75rem;
   }
 
   .realm-diorama .language-switch button {

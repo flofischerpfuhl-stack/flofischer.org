@@ -14,7 +14,7 @@ from xml.etree import ElementTree
 ROOT = Path(__file__).resolve().parents[1]
 SITES = ROOT / "sites"
 PUBLIC_PAGES = {
-    "root": [SITES / "root/index.html", SITES / "root/diorama/index.html"],
+    "root": [SITES / "root/index.html"],
     "seele": [SITES / "seele/index.html", *sorted((SITES / "seele/posts").glob("*.html"))],
     "gehirn": [SITES / "gehirn/index.html"],
 }
@@ -144,6 +144,15 @@ def image_size(path: Path) -> str:
 def main() -> int:
     errors: list[str] = []
     canonical_urls: set[str] = set()
+
+    root_markup = (SITES / "root/index.html").read_text(encoding="utf-8")
+    if 'id="diorama-world"' not in root_markup:
+        errors.append("root/index.html: floating-island diorama canvas is missing")
+    if 'id="hub-world"' in root_markup:
+        errors.append("root/index.html: legacy first-person canvas is still present")
+    for legacy_file in ("main.js", "player.js", "world.js"):
+        if (SITES / "shared/hub" / legacy_file).exists():
+            errors.append(f"shared/hub/{legacy_file}: legacy first-person runtime must be removed")
 
     for site, pages in PUBLIC_PAGES.items():
         for page in pages:

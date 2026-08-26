@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Flo Fischer — Seele · Gehirn",
   "short_name": "Flo Fischer",
-  "description": "A split threshold between traditional Catholic apologetics and selected software projects.",
+  "description": "A freely rotatable floating island between Seele and Gehirn.",
   "lang": "en",
   "dir": "ltr",
   "start_url": "/",
@@ -19,7 +19,6 @@
     { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "3D Diorama", "url": "/diorama/" },
     { "name": "Seele", "url": "https://seele.flofischer.org/" },
     { "name": "Gehirn", "url": "https://gehirn.flofischer.org/" }
   ]

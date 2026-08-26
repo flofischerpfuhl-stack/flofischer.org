@@ -91,6 +91,13 @@ export default {
       pathname = prefixMatch[2] || "/";
     }
 
+    // The former separate diorama URL is now only a compatibility alias: the
+    // rotatable floating island is the sole hub at the root URL.
+    if (site === "root" && /^\/diorama(?:\/|\/index\.html)?$/.test(pathname)) {
+      url.pathname = "/";
+      return Response.redirect(url.toString(), 308);
+    }
+
     // Shared assets are global (not site-prefixed)
     if (pathname === "/shared" || pathname.startsWith("/shared/")) {
       const res = await tryPaths(env, url.origin, [
