@@ -114,6 +114,9 @@ html[data-language="de"] [data-lang-copy="de"] {
 }
 
 .realm-seele .hub-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
   color: var(--ink);
   font-family: var(--sans);
   font-size: 0.68rem;
@@ -924,7 +927,7 @@ html[data-language="de"] [data-lang-copy="de"] {
   }
 
   .realm-seele .site-header {
-    align-items: flex-end;
+    align-items: center;
     gap: 1rem;
     padding-block: 1rem;
   }
@@ -934,15 +937,16 @@ html[data-language="de"] [data-lang-copy="de"] {
   }
 
   .realm-seele .site-header nav {
-    align-items: flex-end;
+    align-items: center;
     gap: 0.9rem;
   }
 
   .realm-seele .hub-link {
-    max-width: 8.5rem;
+    max-width: none;
     font-size: 0.56rem;
     line-height: 1.25;
-    text-align: right;
+    text-align: center;
+    white-space: nowrap;
   }
 
   .realm-seele .language-switch {

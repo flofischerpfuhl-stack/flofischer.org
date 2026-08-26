@@ -74,7 +74,8 @@ function configureTexture(texture, { repeat = 0, srgb = true } = {}) {
   if (srgb) texture.colorSpace = THREE.SRGBColorSpace;
   if (repeat) {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(repeat, repeat);
+    const [repeatX, repeatY] = Array.isArray(repeat) ? repeat : [repeat, repeat];
+    texture.repeat.set(repeatX, repeatY);
   }
   texture.anisotropy = qualityLow ? 4 : 10;
   return texture;
@@ -263,11 +264,12 @@ async function start() {
   let loadedTextures = 0;
   const trackedTexture = (url, options) => loadTexture(textureLoader, url, options).finally(() => {
     loadedTextures += 1;
-    setLoadingProgress(10 + (loadedTextures / 12) * 60);
+    setLoadingProgress(10 + (loadedTextures / 14) * 60);
   });
   const [
     meadow, forestNormal, forestRoughness, rock, rockNormal, asphalt,
     cobble, bark, facadeA, facadeB, waterNormals, tropicalLeaf,
+    chapelFieldstone, chapelRoofTiles,
   ] = await Promise.all([
     trackedTexture(`${TEX}/meadow.jpg`, { repeat: 5.4 }),
     trackedTexture(`${TEX}/forest-floor-normal.jpg`, { repeat: 5.4, srgb: false }),
@@ -281,6 +283,8 @@ async function start() {
     trackedTexture(`${TEX}/facade-b.jpg`),
     trackedTexture(`${TEX}/waternormals.jpg`, { repeat: 1.7, srgb: false }),
     trackedTexture(`${TEX}/tropical-leaf.png`),
+    trackedTexture(`${TEX}/chapel-fieldstone-v1.webp`, { repeat: [1.05, 1.25] }),
+    trackedTexture(`${TEX}/chapel-roof-biberschwanz-v1.webp`, { repeat: [1.35, 2.1] }),
   ]);
   setLoadingProgress(72);
 
@@ -314,7 +318,9 @@ async function start() {
       }
     `,
   });
-  scene.add(new THREE.Mesh(new THREE.SphereGeometry(58, 36, 24), skyMaterial));
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(58, 36, 24), skyMaterial);
+  sky.frustumCulled = false;
+  scene.add(sky);
 
   const hemi = new THREE.HemisphereLight(0xffd39b, 0x243820, 1.45);
   scene.add(hemi);
@@ -844,13 +850,32 @@ async function start() {
     const trunk = new THREE.Mesh(new THREE.TubeGeometry(curve, 16, 0.11 * scale, 8, false), barkMaterial);
     trunk.castShadow = !qualityLow;
     group.add(trunk);
-    const leafMaterial = new THREE.MeshStandardMaterial({ color: 0x3f7e3a, side: THREE.DoubleSide, roughness: 0.88 });
+    const leafMaterial = new THREE.MeshStandardMaterial({
+      color: 0x74a94d,
+      map: tropicalLeaf,
+      alphaTest: tropicalLeaf ? 0.2 : 0,
+      transparent: Boolean(tropicalLeaf),
+      side: THREE.DoubleSide,
+      roughness: 0.88,
+    });
+    const crown = curve.getPoint(1);
+    const leafAxis = new THREE.Vector3(0, 1, 0);
     for (let index = 0; index < 11; index += 1) {
       const angle = (index / 11) * Math.PI * 2;
-      const leaf = new THREE.Mesh(new THREE.PlaneGeometry(0.4 * scale, 2.05 * scale, 2, 5), leafMaterial);
-      leaf.geometry.translate(0, 1.02 * scale, 0);
-      leaf.position.copy(curve.getPoint(1));
-      leaf.rotation.set(0.62 + random() * 0.22, angle, 0);
+      const length = (1.82 + random() * 0.46) * scale;
+      const leaf = new THREE.Mesh(
+        new THREE.PlaneGeometry((0.36 + random() * 0.11) * scale, length, 2, 5),
+        leafMaterial
+      );
+      leaf.geometry.translate(0, length * 0.5, 0);
+      leaf.position.copy(crown);
+      const direction = new THREE.Vector3(
+        Math.cos(angle),
+        0.16 - random() * 0.34,
+        Math.sin(angle)
+      ).normalize();
+      leaf.quaternion.setFromUnitVectors(leafAxis, direction);
+      leaf.rotateY((random() - 0.5) * 0.18);
       group.add(leaf);
     }
     group.position.set(x, 0.72, z);
@@ -939,8 +964,18 @@ async function start() {
     console.error("Detailed diorama plants failed to load", error);
   });
 
-  const stoneMaterial = new THREE.MeshStandardMaterial({ color: 0xd8cbb3, map: cobble, roughness: 0.9 });
-  const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x6d3e2e, roughness: 0.82 });
+  const stoneMaterial = new THREE.MeshStandardMaterial({
+    color: 0xf0e5d3,
+    map: chapelFieldstone,
+    roughness: 0.96,
+  });
+  const roofMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffd6cd,
+    map: chapelRoofTiles,
+    roughness: 0.9,
+    emissive: 0x260400,
+    emissiveIntensity: 0.1,
+  });
   const windowMaterial = new THREE.MeshStandardMaterial({ color: 0xffd48e, emissive: 0xff9b42, emissiveIntensity: 0.9 });
   const chapel = new THREE.Group();
   const nave = new THREE.Mesh(new RoundedBoxGeometry(2.2, 1.55, 3.05, 4, 0.08), stoneMaterial);
@@ -1372,6 +1407,9 @@ async function start() {
     const delta = Math.min(clock.getDelta(), 0.07);
     const elapsed = clock.elapsedTime;
     controls.update();
+    // Keep the sky dome centered on the camera so zooming out can never expose
+    // its outer edge as a dark disk on narrow mobile viewports.
+    sky.position.copy(camera.position);
 
     const direction = camera.position.clone().sub(controls.target).normalize();
     const side = smoothstep(-0.78, 0.78, direction.x);
