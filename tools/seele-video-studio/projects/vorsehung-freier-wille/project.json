@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "slug": "vorsehung-freier-wille",
+  "title": "Vorsehung und freier Wille",
+  "canonicalUrl": "https://seele.flofischer.org/posts/vorsehung-freier-wille.html",
+  "languages": ["de", "en"],
+  "format": {"width": 1920, "height": 1080, "fps": 30, "durationSeconds": 20},
+  "testVoice": {"provider": "Windows SAPI", "voice": "Microsoft Stefan", "rate": 1},
+  "status": "concept-comparison",
+  "approvedVariant": null
+}

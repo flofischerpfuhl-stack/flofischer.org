@@ -1,0 +1,111 @@
+@font-face {
+  font-family: "Marlboro";
+  src: url("./assets/Marlboro.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+}
+
+* { box-sizing: border-box; }
+
+.display {
+  font-family: "Marlboro", Impact, "Arial Narrow", sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.serif { font-family: Georgia, "Times New Roman", serif; }
+
+.eyebrow,
+.brand,
+.language,
+.footer,
+.sideNote {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.brand {
+  position: absolute;
+  z-index: 20;
+  left: 86px;
+  top: 50px;
+  font-family: "Marlboro", Impact, sans-serif;
+  font-size: 70px;
+  font-weight: 400;
+  line-height: .8;
+  letter-spacing: .04em;
+}
+
+.language {
+  position: absolute;
+  z-index: 20;
+  right: 86px;
+  top: 62px;
+  font-size: 16px;
+}
+
+.headerLine {
+  position: absolute;
+  z-index: 19;
+  left: 86px;
+  right: 86px;
+  top: 124px;
+  height: 1px;
+}
+
+.footer {
+  position: absolute;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  align-items: center;
+  gap: 32px;
+  left: 86px;
+  right: 86px;
+  bottom: 42px;
+  font-size: 14px;
+  letter-spacing: .14em;
+}
+
+.footer span:nth-child(2) { text-align: center; }
+
+.paperNoise,
+.grainDark,
+.manuscriptPaper {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.paperNoise {
+  opacity: .14;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E");
+}
+
+.grainDark {
+  opacity: .18;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+}
+
+.manuscriptPaper {
+  opacity: .34;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(135,91,46,.2), transparent 16%),
+    radial-gradient(circle at 88% 78%, rgba(135,91,46,.16), transparent 20%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.45' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.26'/%3E%3C/svg%3E");
+}
+
+.sunMist {
+  position: absolute;
+  left: -140px;
+  right: -140px;
+  bottom: 40px;
+  height: 300px;
+  opacity: .42;
+  filter: blur(42px);
+  background: radial-gradient(ellipse at center, rgba(255,255,255,.82), rgba(255,255,255,0) 68%);
+}

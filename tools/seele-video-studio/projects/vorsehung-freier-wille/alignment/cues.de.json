@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "mode": "editorial-prototype",
+  "note": "Konzept-Zeitmarken; für die Produktion durch Wort-Zeitmarken der finalen Audiodatei ersetzen.",
+  "fps": 30,
+  "cues": [
+    {"fromFrame": 0, "toFrame": 74, "label": "Thema"},
+    {"fromFrame": 60, "toFrame": 235, "label": "Hook-Frage"},
+    {"fromFrame": 215, "toFrame": 355, "label": "Problem"},
+    {"fromFrame": 335, "toFrame": 480, "label": "Grenzen klassischer Antworten"},
+    {"fromFrame": 455, "toFrame": 565, "label": "Ausblick"},
+    {"fromFrame": 550, "toFrame": 600, "label": "Artikelverweis"}
+  ]
+}

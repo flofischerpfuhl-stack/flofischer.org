@@ -1,0 +1,12 @@
+{
+  "renderedAt": "2026-08-31",
+  "deliveryDirectory": "C:\\Users\\flori\\Documents\\Codex\\upload\\seele-video-concepts",
+  "files": [
+    {"name": "01-editorial.mp4", "sha256": "546ba32e26bbf199a762a5f47167a48b884e69a9005acf0932c72b95d25d09b2"},
+    {"name": "02-sacred-sculpture.mp4", "sha256": "ec92513742de3439d5a88d291caebabe72e47b1f81958dc75498f651ef6dc52d"},
+    {"name": "03-sunrise.mp4", "sha256": "2676f3c9d1aaac3ad9b12e9145abd326503775adf886a216300ff4b70471ff32"},
+    {"name": "04-typographic-minimal.mp4", "sha256": "ff305e4f45e6bc5b5c68984db7f58741947a44f04cb996d380a52711a151b1da"},
+    {"name": "05-animated-manuscript.mp4", "sha256": "d9d25b7c48eebbb57ad48fffa624c03c1985515c15b075b8791ea41cf5ab4af2"}
+  ],
+  "qaReport": "C:\\Users\\flori\\Documents\\Codex\\upload\\seele-video-concepts\\qa-report.json"
+}

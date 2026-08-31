@@ -1,0 +1,28 @@
+{
+  "name": "@flofischer/seele-video-studio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "still": "remotion still src/index.ts",
+    "render": "remotion render src/index.ts",
+    "render:all": "node scripts/render-all.mjs",
+    "qa": "node scripts/qa.mjs",
+    "voice": "pwsh -NoProfile -File scripts/generate-voice.ps1",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.363",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "remotion": "^4.0.363",
+    "three": "^0.179.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.10",
+    "@types/three": "^0.179.0",
+    "typescript": "^5.9.2"
+  }
+}

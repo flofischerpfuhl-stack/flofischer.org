@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-31T11:52:29.051Z",
+  "requirements": {
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "durationSeconds": 20,
+    "audio": true
+  },
+  "files": [
+    {
+      "name": "01-editorial.mp4",
+      "duration": 20.053333,
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "side_data_list": [
+            {}
+          ]
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2,
+          "r_frame_rate": "0/0"
+        }
+      ],
+      "checks": {
+        "dimensions": true,
+        "frameRate": true,
+        "videoCodec": true,
+        "audioStream": true,
+        "duration": true
+      },
+      "timeline": "C:\\Users\\flori\\Documents\\Codex\\upload\\seele-video-concepts\\qa\\01-editorial-timeline.jpg",
+      "pass": true
+    },
+    {
+      "name": "02-sacred-sculpture.mp4",
+      "duration": 20.053333,
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "side_data_list": [
+            {}
+          ]
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2,
+          "r_frame_rate": "0/0"
+        }
+      ],
+      "checks": {
+        "dimensions": true,
+        "frameRate": true,
+        "videoCodec": true,
+        "audioStream": true,
+        "duration": true
+      },
+      "timeline": "C:\\Users\\flori\\Documents\\Codex\\upload\\seele-video-concepts\\qa\\02-sacred-sculpture-timeline.jpg",
+      "pass": true
+    },
+    {
+      "name": "03-sunrise.mp4",
+      "duration": 20.053333,
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "side_data_list": [
+            {}
+          ]
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2,
+          "r_frame_rate": "0/0"
+        }
+      ],
+      "checks": {
+        "dimensions": true,
+        "frameRate": true,
+        "videoCodec": true,
+        "audioStream": true,
+        "duration": true
+      },
+      "timeline": "C:\\Users\\flori\\Documents\\Codex\\upload\\seele-video-concepts\\qa\\03-sunrise-timeline.jpg",
+      "pass": true
+    },
+    {
+      "name": "04-typographic-minimal.mp4",
+      "duration": 20.053333,
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "side_data_list": [
+            {}
+          ]
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2,
+          "r_frame_rate": "0/0"
+        }
+      ],
+      "checks": {
+        "dimensions": true,
+        "frameRate": true,
+        "videoCodec": true,
+        "audioStream": true,
+        "duration": true
+      },
+      "timeline": "C:\\Users\\flori\\Documents\\Codex\\upload\\seele-video-concepts\\qa\\04-typographic-minimal-timeline.jpg",
+      "pass": true
+    },
+    {
+      "name": "05-animated-manuscript.mp4",
+      "duration": 20.053333,
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "side_data_list": [
+            {}
+          ]
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2,
+          "r_frame_rate": "0/0"
+        }
+      ],
+      "checks": {
+        "dimensions": true,
+        "frameRate": true,
+        "videoCodec": true,
+        "audioStream": true,
+        "duration": true
+      },
+      "timeline": "C:\\Users\\flori\\Documents\\Codex\\upload\\seele-video-concepts\\qa\\05-animated-manuscript-timeline.jpg",
+      "pass": true
+    }
+  ],
+  "pass": true
+}

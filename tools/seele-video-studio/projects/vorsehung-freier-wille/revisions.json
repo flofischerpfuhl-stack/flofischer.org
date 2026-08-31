@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "version": "v001",
+      "date": "2026-08-31",
+      "status": "concept-comparison",
+      "source": "scripts/v001.de.md",
+      "reason": "Initialer 20-Sekunden-Vergleich der fünf Designrichtungen",
+      "approved": false
+    }
+  ]
+}
