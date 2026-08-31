@@ -29,17 +29,10 @@
   <meta name="twitter:description" content="A freely rotatable world between Seele and Gehirn." />
   <meta name="twitter:image" content="https://flofischer.org/social-preview.jpg" />
   <title>Flo Fischer — 3D Diorama</title>
-  <script>
-    try {
-      var language = localStorage.getItem("ff-language");
-      if (language === "de") {
-        document.documentElement.lang = "de";
-        document.documentElement.dataset.language = "de";
-      }
-    } catch (e) {}
-  </script>
+  <script src="/shared/language.js"></script>
+  <link rel="preload" href="/shared/hub/art/diorama-preview.webp" as="image" type="image/webp" />
   <link rel="stylesheet" href="/shared/hub/hub.css" />
-  <link rel="stylesheet" href="/shared/hub/diorama.css?v=10" />
+  <link rel="stylesheet" href="/shared/hub/diorama.css?v=11" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -58,7 +51,19 @@
   <div class="film-grain" aria-hidden="true"></div>
   <div class="scanlines" aria-hidden="true"></div>
   <div class="diorama-vignette" aria-hidden="true"></div>
-  <div class="diorama-loader" data-diorama-loader aria-hidden="true"></div>
+  <div class="diorama-loader" data-diorama-loader aria-live="polite">
+    <div class="loader-scene" aria-hidden="true">
+      <span class="loader-layer loader-layer--back"></span>
+      <span class="loader-layer loader-layer--island"></span>
+      <span class="loader-layer loader-layer--front"></span>
+    </div>
+    <div class="loader-status">
+      <span data-lang-copy="en">Building the floating island</span>
+      <span data-lang-copy="de">Die schwebende Insel wird gebaut</span>
+      <span class="loader-percent" data-load-percent>0%</span>
+      <span class="loader-progress" aria-hidden="true"><span data-load-progress></span></span>
+    </div>
+  </div>
   <div class="fade-veil" data-fade></div>
 
   <a class="skip-link" href="#diorama-fallback">
@@ -94,7 +99,7 @@
     </div>
   </noscript>
 
-  <script type="module" src="/shared/hub/diorama.js?v=10"></script>
+  <script type="module" src="/shared/hub/diorama.js?v=11"></script>
   <script src="/shared/pwa.js" defer></script>
 </body>
 </html>

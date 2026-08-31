@@ -7,7 +7,6 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
-const KEY = "ff-language";
 const isLocal = /localhost|127\.0\.0\.1|workers\.dev/.test(location.hostname);
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const qualityLow = window.matchMedia("(max-width: 820px), (pointer: coarse)").matches
@@ -15,6 +14,7 @@ const qualityLow = window.matchMedia("(max-width: 820px), (pointer: coarse)").ma
 
 const canvas = document.querySelector("#diorama-world");
 const loaderOverlay = document.querySelector("[data-diorama-loader]");
+const loaderPercent = document.querySelector("[data-load-percent]");
 const fade = document.querySelector("[data-fade]");
 const zoneLabel = document.querySelector("[data-zone]");
 
@@ -46,9 +46,15 @@ function applyLanguage(language, persist = false) {
     description.content = language === "de" ? description.dataset.descriptionDe : description.dataset.descriptionEn;
   }
   if (persist) {
-    try { localStorage.setItem(KEY, language); } catch (_) {}
+    window.FFLanguage?.set(language);
   }
   return language;
+}
+
+function setLoadProgress(value) {
+  const progress = Math.max(0, Math.min(100, Math.round(value)));
+  loaderOverlay?.style.setProperty("--load-progress", `${progress}%`);
+  if (loaderPercent) loaderPercent.textContent = `${progress}%`;
 }
 
 function rewriteLocalLinks() {
@@ -188,8 +194,8 @@ function signTexture(kind, language) {
 
 async function start() {
   rewriteLocalLinks();
-  let language = "en";
-  try { language = localStorage.getItem(KEY) || document.documentElement.dataset.language || "en"; } catch (_) {}
+  setLoadProgress(6);
+  let language = window.FFLanguage?.get() || document.documentElement.dataset.language || "en";
   language = applyLanguage(language);
 
   const renderer = new THREE.WebGLRenderer({
@@ -249,6 +255,7 @@ async function start() {
     loadTexture(textureLoader, `${TEX}/waternormals.jpg`, { repeat: 1.7, srgb: false }),
     loadTexture(textureLoader, `${TEX}/tropical-leaf.png`),
   ]);
+  setLoadProgress(62);
 
   const skyMaterial = new THREE.ShaderMaterial({
     side: THREE.BackSide,
@@ -1311,6 +1318,7 @@ async function start() {
   window.addEventListener("resize", resize);
 
   const clock = new THREE.Clock();
+  setLoadProgress(90);
   let readyFrames = 0;
   let lastRenderedAt = 0;
   function animate(now = 0) {
@@ -1397,6 +1405,7 @@ async function start() {
     else renderer.render(scene, camera);
 
     readyFrames += 1;
+    if (readyFrames <= 3) setLoadProgress(90 + readyFrames * 3.34);
     if (readyFrames === 3) loaderOverlay?.classList.add("is-off");
   }
   requestAnimationFrame(animate);

@@ -2,10 +2,52 @@
 """Generate the bilingual Seele article shells."""
 
 from pathlib import Path
+import subprocess
 
 
 ROOT = Path(__file__).resolve().parents[1]
 POSTS = ROOT / "sites/seele/posts"
+DISCLAIMERS = ROOT / "sites/shared/seele/disclaimers"
+
+
+def render_markdown(path: Path) -> str:
+    if not path.exists():
+        return ""
+    return subprocess.run(
+        [
+            "pandoc",
+            str(path),
+            "-f",
+            "markdown+raw_html",
+            "-t",
+            "html5",
+            "--wrap=none",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+def disclaimer_template(slug: str) -> str:
+    english = render_markdown(DISCLAIMERS / "en" / f"{slug}.md")
+    german = render_markdown(DISCLAIMERS / "de" / f"{slug}.md")
+    if not english and not german:
+        return ""
+    return f"""<template data-disclaimer-template>
+          <details class="article-disclaimer">
+            <summary>
+              <span class="disclaimer-icon" aria-hidden="true">!</span>
+              <span data-lang-copy="en">Editorial note</span>
+              <span data-lang-copy="de">Redaktioneller Hinweis</span>
+              <span class="disclaimer-toggle" aria-hidden="true"></span>
+            </summary>
+            <div class="disclaimer-copy">
+              <div data-lang-copy="en">{english}</div>
+              <div data-lang-copy="de">{german}</div>
+            </div>
+          </details>
+        </template>"""
 
 ARTICLES = [
     {
@@ -32,17 +74,6 @@ ARTICLES = [
         "description_de": "Eine ausführliche Verteidigung der FSSPX, ihrer Kritik an Modernismus und Zweitem Vatikanum sowie der kirchenrechtlichen Bewertung der Bischofsweihen von 1988.",
         "og_image": "https://seele.flofischer.org/shared/seele/article-images/flavio-pace.jpg",
         "og_image_alt": "Archbishop Flavio Pace in a church interior.",
-        "version": "v0.1",
-    },
-    {
-        "file": "aliens-katholizismus.html",
-        "slug": "aliens",
-        "title_en": "Aliens and Catholicism",
-        "title_de": "Aliens und Katholizismus",
-        "type_en": "Essay",
-        "type_de": "Essay",
-        "description_en": "What the Fermi paradox, Drake equation, abiogenesis and extraterrestrial intelligence could mean for Catholic theology.",
-        "description_de": "Was Fermi-Paradoxon, Drake-Gleichung, Abiogenese und außerirdische Intelligenz für die katholische Theologie bedeuten könnten.",
         "version": "v0.1",
     },
     {
@@ -112,15 +143,7 @@ PAGE = """<!DOCTYPE html>
   <meta name="twitter:description" content="{description_en}" />
 {twitter_image_meta}
   <title>{title_en} — Seele</title>
-  <script>
-    try {{
-      var language = localStorage.getItem("ff-language");
-      if (language === "de") {{
-        document.documentElement.lang = "de";
-        document.documentElement.dataset.language = "de";
-      }}
-    }} catch (e) {{}}
-  </script>
+  <script src="/shared/language.js"></script>
   <link rel="stylesheet" href="/shared/designs/base.css" />
   <link rel="stylesheet" href="/shared/seele/seele.css" />
   <link rel="manifest" href="/manifest.webmanifest" />
@@ -165,11 +188,14 @@ PAGE = """<!DOCTYPE html>
 
     <main class="article-page">
       <article class="article article--reader">
-        <aside class="article-toc">
-          <p>
+        <aside class="article-toc" id="article-contents" aria-label="Article contents / Artikelinhalt">
+          <div class="article-toc-heading">
+            <p>
             <span data-lang-copy="en">Contents</span>
             <span data-lang-copy="de">Inhalt</span>
-          </p>
+            </p>
+            <button type="button" class="article-toc-close" data-toc-close data-label-en="Close contents" data-label-de="Inhaltsverzeichnis schließen" aria-label="Close contents">×</button>
+          </div>
           <nav data-article-toc aria-label="Article contents"></nav>
         </aside>
         <div
@@ -184,8 +210,23 @@ PAGE = """<!DOCTYPE html>
             <span data-lang-copy="de">Text wird gesetzt…</span>
           </p>
         </div>
+{disclaimer_html}
       </article>
     </main>
+
+    <button class="article-toc-backdrop" type="button" data-toc-backdrop aria-label="Close contents" hidden></button>
+    <div class="reader-dock" data-reader-dock>
+      <button type="button" class="reader-dock-button reader-dock-toc" data-toc-toggle aria-controls="article-contents" aria-expanded="false" data-label-en="Open contents" data-label-de="Inhaltsverzeichnis öffnen" aria-label="Open contents">
+        <span aria-hidden="true">≡</span>
+      </button>
+      <div class="reader-progress" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-reader-progress>
+        <span data-reader-progress-bar></span>
+        <output data-reader-progress-label>0%</output>
+      </div>
+      <button type="button" class="reader-dock-button" data-scroll-top data-label-en="Back to top" data-label-de="Nach oben" aria-label="Back to top">
+        <span aria-hidden="true">↑</span>
+      </button>
+    </div>
 
     <footer class="site-footer">
       <span>seele.flofischer.org</span>
@@ -200,6 +241,7 @@ PAGE = """<!DOCTYPE html>
 
 
 for article in ARTICLES:
+    article["disclaimer_html"] = disclaimer_template(article["slug"])
     social_image = article.get("og_image", "https://seele.flofischer.org/social-preview.jpg")
     social_alt = article.get("og_image_alt", f'{article["title_en"]} — Seele')
     article["social_image_meta"] = (

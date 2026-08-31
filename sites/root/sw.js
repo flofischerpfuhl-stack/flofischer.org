@@ -6,6 +6,7 @@ self.PWA_CONFIG = {
     "/manifest.webmanifest",
     "/icons/icon-192.png",
     "/icons/icon-512.png",
+    "/shared/language.js",
     "/shared/hub/hub.css",
     "/shared/hub/diorama.css",
     "/shared/hub/diorama.js",

@@ -1,4 +1,3 @@
-const KEY = "ff-language";
 const MUTE_KEY = "ff-hub-mute";
 const isLocal = /localhost|127\.0\.0\.1|workers\.dev/.test(location.hostname);
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -30,7 +29,7 @@ function applyLanguage(language, persist) {
     description.content = language === "de" ? description.dataset.descriptionDe : description.dataset.descriptionEn;
   }
   if (persist) {
-    try { localStorage.setItem(KEY, language); } catch (_) {}
+    window.FFLanguage?.set(language);
   }
   return language;
 }
@@ -87,8 +86,7 @@ function createAmbience() {
 
 async function boot() {
   rewriteLocalLinks();
-  let language = document.documentElement.dataset.language || "en";
-  try { language = localStorage.getItem(KEY) || language; } catch (_) {}
+  let language = window.FFLanguage?.get() || document.documentElement.dataset.language || "en";
   language = applyLanguage(language, false);
 
   const fade = document.querySelector("[data-fade]");
