@@ -257,6 +257,19 @@
       });
     };
 
+    const preserveTocViewport = (item, mutate) => {
+      const scroller = toc.closest(".article-toc");
+      const row = item.querySelector(":scope > .toc-row");
+      if (!scroller || !row) {
+        mutate();
+        return;
+      }
+
+      const rowTop = row.getBoundingClientRect().top;
+      mutate();
+      scroller.scrollTop += row.getBoundingClientRect().top - rowTop;
+    };
+
     const renderNodes = (nodes, depth = 0) => {
       const list = document.createElement("ol");
       nodes.forEach((node) => {
@@ -292,12 +305,14 @@
           toggle.setAttribute("aria-controls", children.id);
           toggle.addEventListener("click", () => {
             const expanded = toggle.getAttribute("aria-expanded") === "true";
-            if (expanded) {
-              setBranch(item, false, true);
-            } else {
-              closeSiblingBranches(item);
-              setBranch(item, true);
-            }
+            preserveTocViewport(item, () => {
+              if (expanded) {
+                setBranch(item, false, true);
+              } else {
+                closeSiblingBranches(item);
+                setBranch(item, true);
+              }
+            });
           });
           item.append(children);
         }

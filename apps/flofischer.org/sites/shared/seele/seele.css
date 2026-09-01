@@ -491,6 +491,7 @@ html[data-language="de"] [data-lang-copy="de"] {
 }
 
 .realm-seele .article-toc {
+  overflow-anchor: none;
   position: sticky;
   top: 1.5rem;
   align-self: start;
