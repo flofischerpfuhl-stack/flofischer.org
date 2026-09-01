@@ -306,6 +306,8 @@ def main() -> int:
         errors.append("shared/seele/seele.css: mobile Seele hero overflow protection is missing")
     if "--hero-word-scale" in seele_style or "scaleX(var(--hero-word-scale" in seele_style:
         errors.append("shared/seele/seele.css: mobile Seele hero words must not be horizontally distorted")
+    if "padding-block: 0.07em 0.09em" not in seele_style:
+        errors.append("shared/seele/seele.css: mobile Seele hero must preserve display-font ink bounds")
     if "min-height: 0;\n    min-width: 0;" not in seele_style:
         errors.append("shared/seele/seele.css: mobile Seele hero must size itself from its display type")
     if "preserveTocViewport" not in seele_script or "overflow-anchor: none" not in seele_style:
