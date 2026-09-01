@@ -271,6 +271,7 @@ async function start() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.08;
+  renderer.debug.checkShaderErrors = isLocal;
   renderer.shadowMap.enabled = !qualityLow;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   setLoadingProgress(10);
@@ -325,7 +326,7 @@ async function start() {
     trackedTexture(`${TEX}/facade-a.jpg`),
     trackedTexture(`${TEX}/facade-b.jpg`),
     trackedTexture(`${TEX}/waternormals.jpg`, { repeat: 1.7, srgb: false }),
-    trackedTexture(`${TEX}/tropical-leaf.png`),
+    trackedTexture(`${TEX}/tropical-leaf.webp`),
     trackedTexture(`${TEX}/chapel-fieldstone-v1.webp`, { repeat: [1.05, 1.25] }),
     trackedTexture(`${TEX}/chapel-roof-biberschwanz-v1.webp`, { repeat: [1.35, 2.1] }),
   ]);
@@ -946,6 +947,7 @@ async function start() {
         fern.scale.setScalar(0.24 + fernRandom() * 0.3);
         scene.add(fern);
       }
+      if (renderer.shadowMap.enabled) renderer.shadowMap.needsUpdate = true;
     },
     undefined,
     () => {}
@@ -1002,6 +1004,7 @@ async function start() {
     jungleTreeLayout.forEach((position, index) => {
       placeDetailedModel(treeVariants[index % treeVariants.length], position[0], position[1], 3.4 + position[2] * 1.25, index * 1.37);
     });
+    if (renderer.shadowMap.enabled) renderer.shadowMap.needsUpdate = true;
   }).catch((error) => {
     document.body.dataset.detailedPlants = "failed";
     console.error("Detailed diorama plants failed to load", error);
@@ -1363,6 +1366,10 @@ async function start() {
   let composer = null;
   let bloom = null;
   setLoadingProgress(94);
+  if (renderer.shadowMap.enabled) {
+    renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = true;
+  }
   if (!qualityLow) {
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
@@ -1438,11 +1445,27 @@ async function start() {
   window.addEventListener("resize", resize);
 
   const clock = new THREE.Clock();
+  const cameraDirection = new THREE.Vector3();
+  const fogDay = new THREE.Color(0x8f7858);
+  const fogNight = new THREE.Color(0x11101a);
+  const hemiDay = new THREE.Color(0xffe4b4);
+  const hemiNight = new THREE.Color(0x7894c0);
+  const groundDay = new THREE.Color(0x405d31);
+  const groundNight = new THREE.Color(0x090a10);
+  const mindDay = new THREE.Color(0x4a4d59);
+  const mindNight = new THREE.Color(0x282d3a);
+  const soulDay = new THREE.Color(0x68cb4d);
+  const soulNight = new THREE.Color(0x3e7436);
   let readyFrames = 0;
   let lastRenderedAt = 0;
+  let lastSideValue = "";
+  let activeZone = "";
   function animate(now = 0) {
-    requestAnimationFrame(animate);
-    if (qualityLow && now - lastRenderedAt < 1000 / 20) return;
+    if (document.hidden) {
+      clock.getDelta();
+      return;
+    }
+    if (qualityLow && now - lastRenderedAt < 1000 / 30) return;
     lastRenderedAt = now;
     const delta = Math.min(clock.getDelta(), 0.07);
     const elapsed = clock.elapsedTime;
@@ -1451,18 +1474,26 @@ async function start() {
     // its outer edge as a dark disk on narrow mobile viewports.
     sky.position.copy(camera.position);
 
-    const direction = camera.position.clone().sub(controls.target).normalize();
-    const side = smoothstep(-0.78, 0.78, direction.x);
-    document.body.style.setProperty("--diorama-side", side.toFixed(3));
-    document.body.classList.toggle("side-seele", side < 0.38);
-    document.body.classList.toggle("side-gehirn", side > 0.62);
-    zoneLabel.textContent = side < 0.36 ? "Seele" : side > 0.64 ? "Gehirn" : "Seele · Gehirn";
+    cameraDirection.copy(camera.position).sub(controls.target).normalize();
+    const side = smoothstep(-0.78, 0.78, cameraDirection.x);
+    const sideValue = side.toFixed(3);
+    if (sideValue !== lastSideValue) {
+      document.body.style.setProperty("--diorama-side", sideValue);
+      lastSideValue = sideValue;
+    }
+    const nextZone = side < 0.36 ? "seele" : side > 0.64 ? "gehirn" : "bridge";
+    if (nextZone !== activeZone) {
+      activeZone = nextZone;
+      document.body.classList.toggle("side-seele", nextZone === "seele");
+      document.body.classList.toggle("side-gehirn", nextZone === "gehirn");
+      zoneLabel.textContent = nextZone === "seele" ? "Seele" : nextZone === "gehirn" ? "Gehirn" : "Seele · Gehirn";
+    }
 
     skyMaterial.uniforms.uSide.value = THREE.MathUtils.damp(skyMaterial.uniforms.uSide.value, side, 3.2, delta);
-    scene.fog.color.set(0x8f7858).lerp(new THREE.Color(0x11101a), side);
+    scene.fog.color.copy(fogDay).lerp(fogNight, side);
     scene.fog.density = THREE.MathUtils.lerp(0.0085, 0.016, side);
-    hemi.color.set(0xffe4b4).lerp(new THREE.Color(0x7894c0), side);
-    hemi.groundColor.set(0x405d31).lerp(new THREE.Color(0x090a10), side);
+    hemi.color.copy(hemiDay).lerp(hemiNight, side);
+    hemi.groundColor.copy(groundDay).lerp(groundNight, side);
     hemi.intensity = THREE.MathUtils.lerp(2.18, 0.86, side);
     sunrise.intensity = THREE.MathUtils.lerp(4.65, 0.62, side);
     moonlight.intensity = THREE.MathUtils.lerp(0.1, 1.2, side);
@@ -1472,8 +1503,8 @@ async function start() {
     chapelGlow.intensity = THREE.MathUtils.lerp(7.6, 1.1, side);
     renderer.toneMappingExposure = THREE.MathUtils.lerp(1.34, 0.96, side);
     if (bloom) bloom.strength = THREE.MathUtils.lerp(0.04, 0.16, side);
-    mindGroundMaterial.color.set(0x4a4d59).lerp(new THREE.Color(0x282d3a), side);
-    soulGroundMaterial.color.set(0x68cb4d).lerp(new THREE.Color(0x3e7436), side * 0.35);
+    mindGroundMaterial.color.copy(mindDay).lerp(mindNight, side);
+    soulGroundMaterial.color.copy(soulDay).lerp(soulNight, side * 0.35);
 
     soulWater.material.uniforms.time.value = reducedMotion ? 0.35 : elapsed * 0.42;
     grassMaterial.userData.time.value = reducedMotion ? 0 : elapsed;
@@ -1541,7 +1572,7 @@ async function start() {
       }, remaining);
     }
   }
-  requestAnimationFrame(animate);
+  renderer.setAnimationLoop(animate);
 }
 
 start().catch((error) => {

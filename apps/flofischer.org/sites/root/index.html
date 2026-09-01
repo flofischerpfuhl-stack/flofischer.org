@@ -15,6 +15,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Flo Fischer" />
   <link rel="canonical" href="https://flofischer.org/" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Flo Fischer" />
   <meta property="og:title" content="Flo Fischer — Seele · Gehirn" />
@@ -31,13 +32,13 @@
   <title>Flo Fischer</title>
   <script src="/shared/language.js"></script>
   <link rel="stylesheet" href="/shared/hub/hub.css" />
-  <link rel="stylesheet" href="/shared/hub/diorama.css?v=16" />
+  <link rel="stylesheet" href="/shared/hub/diorama.css?v=17" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
-  <link rel="preload" href="/shared/hub/art/seele-jungle-v2.webp" as="image" type="image/webp" />
-  <link rel="preload" href="/shared/hub/art/gehirn-city-v2.webp" as="image" type="image/webp" />
+  <link rel="preload" href="/shared/hub/art/diorama-preview.webp?v=17" as="image" type="image/webp" fetchpriority="high" />
+  <link rel="modulepreload" href="/shared/hub/diorama.js?v=17" />
   <script type="importmap">
     {
       "imports": {
@@ -110,7 +111,7 @@
     </div>
   </noscript>
 
-  <script type="module" src="/shared/hub/diorama.js?v=16"></script>
+  <script type="module" src="/shared/hub/diorama.js?v=17"></script>
   <script src="/shared/pwa.js" defer></script>
 </body>
 </html>

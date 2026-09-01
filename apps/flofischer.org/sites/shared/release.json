@@ -1,5 +1,5 @@
 {
   "deploymentPipeline": "cloudflare-workers-builds",
-  "hub": "floating-island-v16",
+  "hub": "floating-island-v17",
   "seeleReader": "floating-reader-with-mobile-toc-and-disclaimers"
 }

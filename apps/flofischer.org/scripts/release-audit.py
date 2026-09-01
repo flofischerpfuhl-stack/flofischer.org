@@ -148,7 +148,7 @@ def main() -> int:
     release_contract_path = SITES / "shared/release.json"
     expected_release_contract = {
         "deploymentPipeline": "cloudflare-workers-builds",
-        "hub": "floating-island-v16",
+        "hub": "floating-island-v17",
         "seeleReader": "floating-reader-with-mobile-toc-and-disclaimers",
     }
     try:
@@ -173,6 +173,32 @@ def main() -> int:
             errors.append(f"root/index.html: layered loading preview is missing {marker}")
     if not (SITES / "shared/hub/art/diorama-preview.webp").is_file():
         errors.append("shared/hub/art/diorama-preview.webp: floating-island loading preview is missing")
+    for obsolete_preload in ("seele-jungle-v2.webp", "gehirn-city-v2.webp"):
+        if f'rel="preload" href="/shared/hub/art/{obsolete_preload}"' in root_markup:
+            errors.append(f"root/index.html: obsolete hidden preload must not return ({obsolete_preload})")
+    if 'rel="modulepreload" href="/shared/hub/diorama.js?v=17"' not in root_markup:
+        errors.append("root/index.html: floating-island module preload is missing")
+    if 'rel="preload" href="/shared/hub/art/diorama-preview.webp?v=17"' not in root_markup:
+        errors.append("root/index.html: loading preview preload is missing")
+
+    diorama_script = (SITES / "shared/hub/diorama.js").read_text(encoding="utf-8")
+    for marker, label in (
+        ("renderer.shadowMap.autoUpdate = false", "single-update static shadows"),
+        ("renderer.setAnimationLoop(animate)", "renderer-managed animation loop"),
+        ("1000 / 30", "responsive mobile frame cap"),
+        ("tropical-leaf.webp", "lossless WebP foliage texture"),
+    ):
+        if marker not in diorama_script:
+            errors.append(f"shared/hub/diorama.js: missing {label}")
+    if (SITES / "shared/hub/textures/tropical-leaf.png").exists():
+        errors.append("shared/hub/textures/tropical-leaf.png: oversized legacy foliage texture must be removed")
+
+    root_worker = (SITES / "root/sw.js").read_text(encoding="utf-8")
+    if "models/polyhaven/pachira_aquatica_01" in root_worker:
+        errors.append("root/sw.js: optional detailed plants must not block service-worker installation")
+    pwa_worker = (SITES / "shared/pwa-worker.js").read_text(encoding="utf-8")
+    if "cacheableModel" not in pwa_worker or "gltf|bin" not in pwa_worker:
+        errors.append("shared/pwa-worker.js: runtime model caching is missing")
     for legacy_file in ("main.js", "player.js", "world.js"):
         if (SITES / "shared/hub" / legacy_file).exists():
             errors.append(f"shared/hub/{legacy_file}: legacy first-person runtime must be removed")
