@@ -302,8 +302,10 @@ def main() -> int:
         if marker not in seele_script:
             errors.append(f"shared/seele/seele.js: missing {label}")
 
-    if "font-size: clamp(5.5rem, 19svh, 10.5rem)" not in seele_style or "fitHeroTitle()" not in seele_script:
+    if "font-size: var(--hero-title-size" not in seele_style or "longestLine" not in seele_script:
         errors.append("shared/seele/seele.css: mobile Seele hero overflow protection is missing")
+    if "--hero-word-scale" in seele_style or "scaleX(var(--hero-word-scale" in seele_style:
+        errors.append("shared/seele/seele.css: mobile Seele hero words must not be horizontally distorted")
     if "min-height: 0;\n    min-width: 0;" not in seele_style:
         errors.append("shared/seele/seele.css: mobile Seele hero must size itself from its display type")
     if "preserveTocViewport" not in seele_script or "overflow-anchor: none" not in seele_style:

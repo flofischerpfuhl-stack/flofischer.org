@@ -145,7 +145,7 @@ PAGE = """<!DOCTYPE html>
   <title>{title_en} — Seele</title>
   <script src="/shared/language.js"></script>
   <link rel="stylesheet" href="/shared/designs/base.css" />
-  <link rel="stylesheet" href="/shared/seele/seele.css?v=10" />
+  <link rel="stylesheet" href="/shared/seele/seele.css?v=11" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -233,7 +233,7 @@ PAGE = """<!DOCTYPE html>
       <a href="../"><span data-lang-copy="en">All articles</span><span data-lang-copy="de">Alle Artikel</span></a>
     </footer>
   </div>
-  <script src="/shared/seele/seele.js?v=5"></script>
+  <script src="/shared/seele/seele.js?v=6"></script>
   <script src="/shared/pwa.js" defer></script>
 </body>
 </html>

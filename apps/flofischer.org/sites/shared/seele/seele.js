@@ -9,33 +9,37 @@
   let tocCleanup = null;
   let tocScrollPosition = 0;
   let tocBodyLock = null;
-  let heroFitFrame = 0;
-
   function fitHeroTitle() {
     const title = document.querySelector(".hero-title");
-    if (!title || window.innerWidth > 620) return;
-    if (heroFitFrame) cancelAnimationFrame(heroFitFrame);
-    heroFitFrame = requestAnimationFrame(() => {
-      heroFitFrame = 0;
-      const language = document.documentElement.dataset.language || "en";
-      const activeCopy = title.querySelector(`[data-lang-copy="${language}"]`);
-      const targetWidth = Math.max(1, title.clientWidth - 1);
-      activeCopy?.querySelectorAll(".hero-word").forEach((word) => {
-        word.style.removeProperty("--hero-word-scale");
-        const naturalWidth = word.scrollWidth;
-        if (naturalWidth) {
-          word.style.setProperty("--hero-word-scale", String(targetWidth / naturalWidth));
-        }
-      });
-    });
+    if (!title) return;
+    if (window.innerWidth > 620) {
+      title.style.removeProperty("--hero-title-size");
+      return;
+    }
+
+    const language = document.documentElement.dataset.language || "en";
+    const activeCopy = title.querySelector(`[data-lang-copy="${language}"]`);
+    const words = [...(activeCopy?.querySelectorAll(".hero-word") || [])];
+    const targetWidth = Math.max(1, title.clientWidth - 1);
+    if (!words.length || !targetWidth) return;
+
+    const measurementSize = 100;
+    title.style.setProperty("--hero-title-size", `${measurementSize}px`);
+    const longestLine = Math.max(...words.map((word) => word.getBoundingClientRect().width));
+    if (longestLine > 0) {
+      title.style.setProperty(
+        "--hero-title-size",
+        `${measurementSize * targetWidth / longestLine}px`
+      );
+    }
   }
 
   function bootHeroTitle() {
     const title = document.querySelector(".hero-title");
     if (!title) return;
-    new ResizeObserver(fitHeroTitle).observe(title);
     document.fonts?.ready.then(fitHeroTitle);
     window.addEventListener("resize", fitHeroTitle, { passive: true });
+    window.visualViewport?.addEventListener("resize", fitHeroTitle, { passive: true });
     fitHeroTitle();
   }
 

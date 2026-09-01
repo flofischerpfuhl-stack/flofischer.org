@@ -1160,7 +1160,7 @@ html[data-language="de"] [data-lang-copy="de"] {
     height: auto;
     max-width: 100%;
     overflow: hidden;
-    font-size: clamp(5.5rem, 19svh, 10.5rem);
+    font-size: var(--hero-title-size, clamp(3.5rem, 18.5vw, 5rem));
     letter-spacing: 0.012em;
     line-height: 0.78;
     overflow-wrap: normal;
@@ -1188,8 +1188,6 @@ html[data-language="de"] [data-lang-copy="de"] {
     width: max-content;
     max-width: none;
     white-space: nowrap;
-    transform: scaleX(var(--hero-word-scale, 1));
-    transform-origin: left center;
   }
 
   .realm-seele .botanical-plate {
