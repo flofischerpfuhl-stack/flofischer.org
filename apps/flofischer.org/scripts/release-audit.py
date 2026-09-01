@@ -148,7 +148,7 @@ def main() -> int:
     release_contract_path = SITES / "shared/release.json"
     expected_release_contract = {
         "deploymentPipeline": "cloudflare-workers-builds",
-        "hub": "floating-island-v15",
+        "hub": "floating-island-v16",
         "seeleReader": "floating-reader-with-mobile-toc-and-disclaimers",
     }
     try:
@@ -168,6 +168,11 @@ def main() -> int:
         errors.append("root/index.html: legacy dual-scene runtime is still referenced")
     if "/shared/hub/diorama.js" not in root_markup or "data-loader-progress" not in root_markup:
         errors.append("root/index.html: current floating-island runtime or loader is missing")
+    for marker in ("loader-layer--back", "loader-layer--island", "loader-layer--front"):
+        if marker not in root_markup:
+            errors.append(f"root/index.html: layered loading preview is missing {marker}")
+    if not (SITES / "shared/hub/art/diorama-preview.webp").is_file():
+        errors.append("shared/hub/art/diorama-preview.webp: floating-island loading preview is missing")
     for legacy_file in ("main.js", "player.js", "world.js"):
         if (SITES / "shared/hub" / legacy_file).exists():
             errors.append(f"shared/hub/{legacy_file}: legacy first-person runtime must be removed")
@@ -183,9 +188,45 @@ def main() -> int:
         ("insertDisclaimer(host)", "article disclaimer enhancement"),
         ("bootReaderDock()", "floating reader dock"),
         ("setTocOpen(open)", "mobile contents drawer"),
+        ("lockTocScroll()", "contents scroll-position lock"),
+        ("focusWithoutScroll", "scroll-safe contents focus"),
     ):
         if marker not in seele_script:
             errors.append(f"shared/seele/seele.js: missing {label}")
+
+    if "font-size: clamp(2.6rem, 12.5vw, 4.8rem)" not in seele_style:
+        errors.append("shared/seele/seele.css: mobile Seele hero overflow protection is missing")
+
+    language_script = SITES / "shared/language.js"
+    if not language_script.is_file() or "Domain=flofischer.org" not in language_script.read_text(encoding="utf-8"):
+        errors.append("shared/language.js: cross-subdomain language cookie is missing")
+    for page in (SITES / "root/index.html", SITES / "seele/index.html", SITES / "gehirn/index.html"):
+        if "/shared/language.js" not in page.read_text(encoding="utf-8"):
+            errors.append(f"{page.relative_to(ROOT)}: shared language bootstrap is missing")
+
+    content_builder = (ROOT / "scripts/build-seele-content.py").read_text(encoding="utf-8")
+    if 'SOURCE = ROOT / "sites/shared/seele/source"' not in content_builder:
+        errors.append("scripts/build-seele-content.py: article sources are not repository-owned")
+    if "VAULT" in content_builder or "/home/oem/" in content_builder:
+        errors.append("scripts/build-seele-content.py: external Obsidian dependency must not return")
+
+    german_proofs = (SITES / "shared/seele/content/de/gottesbeweise.html").read_text(encoding="utf-8")
+    english_proofs = (SITES / "shared/seele/content/en/gottesbeweise.html").read_text(encoding="utf-8")
+    if 'id="vorstellung"' in german_proofs or "Ich heiße Florian Fischer" in german_proofs:
+        errors.append("German Gottesbeweise: obsolete personal introduction is still present")
+    if 'id="einleitung"' not in german_proofs:
+        errors.append("German Gottesbeweise: synchronized introduction is missing")
+    if german_proofs.count("<section ") != english_proofs.count("<section "):
+        errors.append("German Gottesbeweise: section structure differs from the English canonical version")
+
+    seele_index = (SITES / "seele/index.html").read_text(encoding="utf-8")
+    alien_paths = (
+        SITES / "seele/posts/aliens-katholizismus.html",
+        SITES / "shared/seele/content/de/aliens.html",
+        SITES / "shared/seele/content/en/aliens.html",
+    )
+    if 'data-slug="aliens"' in seele_index or any(path.exists() for path in alien_paths):
+        errors.append("Seele: unfinished Aliens and Catholicism article is still published")
 
     for page in PUBLIC_PAGES["seele"][1:]:
         markup = page.read_text(encoding="utf-8")

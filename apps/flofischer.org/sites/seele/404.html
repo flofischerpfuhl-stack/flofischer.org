@@ -6,17 +6,9 @@
   <meta name="robots" content="noindex, follow" />
   <meta name="theme-color" content="#eee8da" />
   <title>Not found — Seele</title>
-  <script>
-    try {
-      var language = localStorage.getItem("ff-language");
-      if (language === "de") {
-        document.documentElement.lang = "de";
-        document.documentElement.dataset.language = "de";
-      }
-    } catch (e) {}
-  </script>
+  <script src="/shared/language.js"></script>
   <link rel="stylesheet" href="/shared/designs/base.css" />
-  <link rel="stylesheet" href="/shared/seele/seele.css?v=2" />
+  <link rel="stylesheet" href="/shared/seele/seele.css?v=3" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
@@ -35,7 +27,7 @@
       <p><a href="/" data-local="/__seele/"><span data-lang-copy="en">Back to all articles</span><span data-lang-copy="de">Zurück zu allen Artikeln</span></a></p>
     </main>
   </div>
-  <script src="/shared/seele/seele.js"></script>
+  <script src="/shared/seele/seele.js?v=3"></script>
   <script src="/shared/pwa.js" defer></script>
 </body>
 </html>

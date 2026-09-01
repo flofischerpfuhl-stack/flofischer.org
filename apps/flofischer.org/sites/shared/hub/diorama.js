@@ -8,7 +8,6 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
-const KEY = "ff-language";
 const isLocal = /localhost|127\.0\.0\.1|workers\.dev/.test(location.hostname);
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const qualityLow = window.matchMedia("(max-width: 820px), (pointer: coarse)").matches
@@ -58,7 +57,7 @@ function applyLanguage(language, persist = false) {
     description.content = language === "de" ? description.dataset.descriptionDe : description.dataset.descriptionEn;
   }
   if (persist) {
-    try { localStorage.setItem(KEY, language); } catch (_) {}
+    window.FFLanguage?.set(language);
   }
   return language;
 }
@@ -258,8 +257,7 @@ function signTexture(kind, language) {
 async function start() {
   setLoadingProgress(4);
   rewriteLocalLinks();
-  let language = "en";
-  try { language = localStorage.getItem(KEY) || document.documentElement.dataset.language || "en"; } catch (_) {}
+  let language = window.FFLanguage?.get() || document.documentElement.dataset.language || "en";
   language = applyLanguage(language);
 
   const renderer = new THREE.WebGLRenderer({

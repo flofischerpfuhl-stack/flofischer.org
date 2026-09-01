@@ -30,17 +30,9 @@
 <meta name="twitter:image" content="https://seele.flofischer.org/social-preview.jpg" />
   <meta name="twitter:image:alt" content="Must One Submit to a Null Sentence? — Seele" />
   <title>Must One Submit to a Null Sentence? — Seele</title>
-  <script>
-    try {
-      var language = localStorage.getItem("ff-language");
-      if (language === "de") {
-        document.documentElement.lang = "de";
-        document.documentElement.dataset.language = "de";
-      }
-    } catch (e) {}
-  </script>
+  <script src="/shared/language.js"></script>
   <link rel="stylesheet" href="/shared/designs/base.css" />
-  <link rel="stylesheet" href="/shared/seele/seele.css" />
+  <link rel="stylesheet" href="/shared/seele/seele.css?v=3" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -86,8 +78,8 @@
         <aside class="article-toc" id="article-contents" aria-label="Article contents / Artikelinhalt">
           <div class="article-toc-heading">
             <p>
-              <span data-lang-copy="en">Contents</span>
-              <span data-lang-copy="de">Inhalt</span>
+            <span data-lang-copy="en">Contents</span>
+            <span data-lang-copy="de">Inhalt</span>
             </p>
             <button type="button" class="article-toc-close" data-toc-close data-label-en="Close contents" data-label-de="Inhaltsverzeichnis schließen" aria-label="Close contents">×</button>
           </div>
@@ -115,23 +107,23 @@
             </summary>
             <div class="disclaimer-copy">
               <div data-lang-copy="en"><p>This essay is a response to Christian B. Wagner’s article <a href="https://thomism.com/p/invalid-sacraments-excommunications">“Invalid Sacraments, Excommunications, and the SSPX”</a> of July 2, 2026.[1] It builds on my <a href="https://substack.com/home/post/p-205027723">“Defense of the FSSPX and Its Episcopal Consecrations”</a>,[2] which I will reference rather than repeat.</p>
-<p>I found Wagner’s article genuinely helpful. His distinctions between schism and excommunication, and between the ways an excommunication can be unjust, are clear and, as far as I can tell, correct. My disagreement is localized: his argument passes over the actual canonical defense of the SSPX at its decisive point, and the passage of St. Thomas he relies on contains, within itself, the very exception the SSPX invokes.</p>
+<p>I found Wagner’s article genuinely helpful. His distinctions between schism and excommunication, and between the ways an excommunication can be unjust, are clear and, as far as I can tell, correct. My disagreement is localized: his argument passes over the actual canonical defense of the SSPX at its decisive point, and the passage of St. Thomas he relies on contains, within itself, the very exception the SSPX invokes.</p>
 <p>As with my defense: this text represents my position to the best of my current knowledge, and I am open, indeed grateful, to be shown where my thinking is wrong. I am an SSPX faithful who “formally adheres,” and I am not comfortable being excommunicated, even unjustly. Where a counter-argument against my position is serious, I have named it as such instead of hiding it. If somebody can close the gaps I point out at the end, I will change my position.</p></div>
               <div data-lang-copy="de"><p>Dieser Aufsatz ist eine Antwort auf Christian B. Wagners Artikel <a href="https://thomism.com/p/invalid-sacraments-excommunications">„Invalid Sacraments, Excommunications, and the SSPX“</a> vom 2. Juli 2026.[1] Er baut auf meiner <a href="https://substack.com/home/post/p-205027723">„Verteidigung der FSSPX und ihrer Bischofsweihen“</a>[2] auf, auf die ich verweisen werde, statt ihre Argumente zu wiederholen.</p>
 <p>Ich fand Wagners Artikel wirklich hilfreich. Seine Unterscheidungen zwischen Schisma und Exkommunikation sowie zwischen den verschiedenen Arten, auf die eine Exkommunikation ungerecht sein kann, sind klar und – soweit ich es beurteilen kann – richtig. Meine Meinungsverschiedenheit ist eng begrenzt: Sein Argument übergeht an der entscheidenden Stelle die eigentliche kirchenrechtliche Verteidigung der FSSPX; zugleich enthält die von ihm herangezogene Stelle des heiligen Thomas selbst genau jene Ausnahme, auf die sich die FSSPX beruft.</p>
-<p>Wie schon bei meiner Verteidigung gilt: Dieser Text gibt meine Position nach bestem gegenwärtigen Wissen wieder. Ich bin offen und sogar dankbar dafür, wenn mir gezeigt wird, wo mein Denken falsch ist. Ich bin ein Gläubiger der FSSPX, der ihr „förmlich anhängt“, und ich fühle mich nicht wohl damit, exkommuniziert zu sein – auch nicht ungerechterweise. Wo ein Gegenargument ernst zu nehmen ist, benenne ich es, statt es zu verstecken. Wenn jemand die am Ende aufgezeigten Lücken schließen kann, werde ich meine Position ändern.</p></div>
+<p>Wie schon bei meiner Verteidigung gilt: Dieser Text gibt meine Position nach bestem gegenwärtigem Wissen wieder. Ich bin offen und sogar dankbar dafür, wenn mir gezeigt wird, wo mein Denken falsch ist. Ich bin ein Gläubiger der FSSPX, der ihr „förmlich anhängt“, und ich fühle mich nicht wohl damit, exkommuniziert zu sein – auch nicht ungerechterweise. Wo ein Gegenargument ernst zu nehmen ist, benenne ich es, statt es zu verstecken. Wenn jemand die am Ende aufgezeigten Lücken schließen kann, werde ich meine Position ändern.</p></div>
             </div>
           </details>
         </template>
       </article>
     </main>
 
-    <button class="article-toc-backdrop" type="button" data-toc-backdrop data-label-en="Close contents" data-label-de="Inhaltsverzeichnis schließen" aria-label="Close contents" hidden></button>
+    <button class="article-toc-backdrop" type="button" data-toc-backdrop aria-label="Close contents" hidden></button>
     <div class="reader-dock" data-reader-dock>
       <button type="button" class="reader-dock-button reader-dock-toc" data-toc-toggle aria-controls="article-contents" aria-expanded="false" data-label-en="Open contents" data-label-de="Inhaltsverzeichnis öffnen" aria-label="Open contents">
         <span aria-hidden="true">≡</span>
       </button>
-      <div class="reader-progress" role="progressbar" data-label-en="Reading progress" data-label-de="Lesefortschritt" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-reader-progress>
+      <div class="reader-progress" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-reader-progress>
         <span data-reader-progress-bar></span>
         <output data-reader-progress-label>0%</output>
       </div>
@@ -145,7 +137,7 @@
       <a href="../"><span data-lang-copy="en">All articles</span><span data-lang-copy="de">Alle Artikel</span></a>
     </footer>
   </div>
-  <script src="/shared/seele/seele.js"></script>
+  <script src="/shared/seele/seele.js?v=3"></script>
   <script src="/shared/pwa.js" defer></script>
 </body>
 </html>

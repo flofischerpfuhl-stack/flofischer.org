@@ -29,17 +29,9 @@
   <meta name="twitter:description" content="A freely rotatable floating island between Seele and Gehirn." />
   <meta name="twitter:image" content="https://flofischer.org/social-preview.jpg" />
   <title>Flo Fischer</title>
-  <script>
-    try {
-      var language = localStorage.getItem("ff-language");
-      if (language === "de") {
-        document.documentElement.lang = "de";
-        document.documentElement.dataset.language = "de";
-      }
-    } catch (e) {}
-  </script>
+  <script src="/shared/language.js"></script>
   <link rel="stylesheet" href="/shared/hub/hub.css" />
-  <link rel="stylesheet" href="/shared/hub/diorama.css?v=15" />
+  <link rel="stylesheet" href="/shared/hub/diorama.css?v=16" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -61,6 +53,11 @@
   <div class="scanlines" aria-hidden="true"></div>
   <div class="diorama-vignette" aria-hidden="true"></div>
   <div class="diorama-loader" data-diorama-loader role="status" aria-live="polite">
+    <div class="loader-scene" aria-hidden="true">
+      <span class="loader-layer loader-layer--back"></span>
+      <span class="loader-layer loader-layer--island"></span>
+      <span class="loader-layer loader-layer--front"></span>
+    </div>
     <div class="diorama-loader-panel">
       <span class="diorama-loader-spinner" aria-hidden="true"></span>
       <p class="diorama-loader-title">
@@ -113,7 +110,7 @@
     </div>
   </noscript>
 
-  <script type="module" src="/shared/hub/diorama.js?v=15"></script>
+  <script type="module" src="/shared/hub/diorama.js?v=16"></script>
   <script src="/shared/pwa.js" defer></script>
 </body>
 </html>

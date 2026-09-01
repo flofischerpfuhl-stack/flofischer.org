@@ -30,17 +30,9 @@
 <meta name="twitter:image" content="https://seele.flofischer.org/shared/seele/article-images/eucharist/media/image1.jpg" />
   <meta name="twitter:image:alt" content="Dr Odoardo Linoli, who examined the Eucharistic miracle of Lanciano." />
   <title>Eucharistic Miracles — Seele</title>
-  <script>
-    try {
-      var language = localStorage.getItem("ff-language");
-      if (language === "de") {
-        document.documentElement.lang = "de";
-        document.documentElement.dataset.language = "de";
-      }
-    } catch (e) {}
-  </script>
+  <script src="/shared/language.js"></script>
   <link rel="stylesheet" href="/shared/designs/base.css" />
-  <link rel="stylesheet" href="/shared/seele/seele.css" />
+  <link rel="stylesheet" href="/shared/seele/seele.css?v=3" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -86,8 +78,8 @@
         <aside class="article-toc" id="article-contents" aria-label="Article contents / Artikelinhalt">
           <div class="article-toc-heading">
             <p>
-              <span data-lang-copy="en">Contents</span>
-              <span data-lang-copy="de">Inhalt</span>
+            <span data-lang-copy="en">Contents</span>
+            <span data-lang-copy="de">Inhalt</span>
             </p>
             <button type="button" class="article-toc-close" data-toc-close data-label-en="Close contents" data-label-de="Inhaltsverzeichnis schließen" aria-label="Close contents">×</button>
           </div>
@@ -109,12 +101,12 @@
       </article>
     </main>
 
-    <button class="article-toc-backdrop" type="button" data-toc-backdrop data-label-en="Close contents" data-label-de="Inhaltsverzeichnis schließen" aria-label="Close contents" hidden></button>
+    <button class="article-toc-backdrop" type="button" data-toc-backdrop aria-label="Close contents" hidden></button>
     <div class="reader-dock" data-reader-dock>
       <button type="button" class="reader-dock-button reader-dock-toc" data-toc-toggle aria-controls="article-contents" aria-expanded="false" data-label-en="Open contents" data-label-de="Inhaltsverzeichnis öffnen" aria-label="Open contents">
         <span aria-hidden="true">≡</span>
       </button>
-      <div class="reader-progress" role="progressbar" data-label-en="Reading progress" data-label-de="Lesefortschritt" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-reader-progress>
+      <div class="reader-progress" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-reader-progress>
         <span data-reader-progress-bar></span>
         <output data-reader-progress-label>0%</output>
       </div>
@@ -128,7 +120,7 @@
       <a href="../"><span data-lang-copy="en">All articles</span><span data-lang-copy="de">Alle Artikel</span></a>
     </footer>
   </div>
-  <script src="/shared/seele/seele.js"></script>
+  <script src="/shared/seele/seele.js?v=3"></script>
   <script src="/shared/pwa.js" defer></script>
 </body>
 </html>

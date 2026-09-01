@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build static Seele article fragments from the Obsidian originals."""
+"""Build static Seele article fragments from the repository-owned sources."""
 
 from pathlib import Path
 from html.parser import HTMLParser
@@ -12,32 +12,29 @@ import unicodedata
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VAULT = Path("/home/oem/Dokumente/091_Software/32_Obsidian")
+SOURCE = ROOT / "sites/shared/seele/source"
 OUT = ROOT / "sites/shared/seele/content"
 ARTICLE_IMAGES = ROOT / "sites/shared/seele/article-images"
 
 CURRENT_VERSIONS = {
     "gottesbeweise": "v0.1",
     "fsspx": "v0.1",
-    "aliens": "v0.1",
     "providence": "v0.1",
     "eucharist": "v0.1",
     "wagner-response": "v0.1",
 }
 
 SOURCES = {
-    ("gottesbeweise", "de"): VAULT / "97_Codex/Gottesbeweise.md",
-    ("gottesbeweise", "en"): VAULT / "97_Codex/Proving God.md",
-    ("fsspx", "de"): VAULT / "97_Codex/Verteidigung der FSSPX und ihrer Bischofsweihen - Version v0.1.md",
-    ("fsspx", "en"): VAULT / "97_Codex/Defense of the FSSPX and Its Episcopal Consecrations - English.md",
-    ("aliens", "de"): VAULT / "03_Projekte/Aliens und Katholizismus.md",
-    ("aliens", "en"): OUT / "en/aliens-catholicism.md",
-    ("providence", "de"): VAULT / "03_Projekte/Vorsehung und freier Wille.md",
-    ("providence", "en"): OUT / "en/providence-free-will.md",
-    ("eucharist", "de"): OUT / "de/eucharistic-miracles.md",
-    ("eucharist", "en"): Path("/home/oem/Dokumente/091_Software/03_Word/Modern day Eucharistic Miracles/Modern Day Eucharistic Miracles.docx"),
-    ("wagner-response", "en"): VAULT / "97_Codex/Response to Wagner - Invalid Sacraments, Excommunications, and the SSPX - v0.1.md",
-    ("wagner-response", "de"): OUT / "de/wagner-response.md",
+    ("gottesbeweise", "de"): SOURCE / "de/gottesbeweise.md",
+    ("gottesbeweise", "en"): SOURCE / "en/gottesbeweise.md",
+    ("fsspx", "de"): SOURCE / "de/fsspx.md",
+    ("fsspx", "en"): SOURCE / "en/fsspx.md",
+    ("providence", "de"): SOURCE / "de/providence.md",
+    ("providence", "en"): SOURCE / "en/providence.md",
+    ("eucharist", "de"): SOURCE / "de/eucharist.md",
+    ("eucharist", "en"): SOURCE / "en/eucharist.md",
+    ("wagner-response", "en"): SOURCE / "en/wagner-response.md",
+    ("wagner-response", "de"): SOURCE / "de/wagner-response.md",
 }
 
 TITLES = {
@@ -132,38 +129,7 @@ def remove_unfinished_sections(text: str) -> str:
 
 
 def read_source(slug: str, language: str, source: Path) -> str:
-    if source.suffix.lower() != ".docx":
-        return source.read_text(encoding="utf-8")
-
-    media_root = ARTICLE_IMAGES / "eucharist"
-    media_root.mkdir(parents=True, exist_ok=True)
-    conversion = subprocess.run(
-        [
-            "pandoc",
-            str(source),
-            "-f",
-            "docx",
-            "-t",
-            "markdown+raw_html",
-            "--wrap=none",
-            f"--extract-media={media_root}",
-        ],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    text = conversion.stdout
-    text = re.sub(
-        r'src="[^"]*/eucharist/media/([^"]+)"',
-        r'src="/shared/seele/article-images/eucharist/media/\1"',
-        text,
-    )
-    text = re.sub(
-        r'\]\([^\)]*/eucharist/media/([^\)]+)\)',
-        r'](/shared/seele/article-images/eucharist/media/\1)',
-        text,
-    )
-    return text
+    return source.read_text(encoding="utf-8")
 
 
 def preprocess(slug: str, language: str, text: str) -> str:
@@ -179,6 +145,11 @@ def preprocess(slug: str, language: str, text: str) -> str:
         for source_name, (filename, caption) in GERMAN_IMAGE_NAMES.items():
             pattern = rf'<img src="[^"]*{re.escape(source_name)}">'
             text = re.sub(pattern, figure(filename, caption), text)
+        for filename, caption in PORTRAITS.values():
+            text = text.replace(
+                f'<img src="/shared/seele/article-images/{filename}">',
+                figure(filename, caption),
+            )
         text = re.sub(r'<img src="C:[^"]+">', "", text)
 
     if slug == "gottesbeweise":
@@ -187,10 +158,10 @@ def preprocess(slug: str, language: str, text: str) -> str:
     if slug == "fsspx":
         heading = "Inhaltsverzeichnis" if language == "de" else "Table of Contents"
         text = re.sub(
-            rf"\n## {heading}\n.*?(?=\n## 1\. )",
-            "\n",
+            rf"^## {heading}\n.*?(?=^## 1\. )",
+            "",
             text,
-            flags=re.S,
+            flags=re.S | re.M,
         )
         text = text.replace(
             "![Archbishop Flavio Pace crossing himself during Sarah Mullally's blessing](Picture%201.jpg)",
@@ -243,7 +214,7 @@ def preprocess(slug: str, language: str, text: str) -> str:
 
     text = text.replace(chr(96) * 3 + "table-of-contents\n" + chr(96) * 3, "")
     text = re.sub(r'\n(___+|---+)\n', r'\n\n\1\n\n', text)
-    return text
+    return "\n".join(line.rstrip() for line in text.splitlines()) + "\n"
 
 
 class TextExtractor(HTMLParser):

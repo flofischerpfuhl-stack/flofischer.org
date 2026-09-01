@@ -1,5 +1,4 @@
 (function () {
-  const KEY = "ff-language";
   const LANGUAGES = ["en", "de"];
   const contentCache = new Map();
   let articleRequest = 0;
@@ -8,15 +7,64 @@
   let searchIndexPromise = null;
   let filterTimer = 0;
   let tocCleanup = null;
+  let tocScrollPosition = 0;
+  let tocBodyLock = null;
+
+  function focusWithoutScroll(element) {
+    if (!element) return;
+    try {
+      element.focus({ preventScroll: true });
+    } catch (_) {
+      element.focus();
+    }
+  }
+
+  function lockTocScroll() {
+    if (tocBodyLock) return;
+    tocScrollPosition = window.scrollY;
+    const viewportWidth = document.documentElement.clientWidth;
+    tocBodyLock = {
+      position: document.body.style.position,
+      top: document.body.style.top,
+      left: document.body.style.left,
+      right: document.body.style.right,
+      width: document.body.style.width,
+    };
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${tocScrollPosition}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "auto";
+    document.body.style.width = `${viewportWidth}px`;
+  }
+
+  function unlockTocScroll() {
+    if (!tocBodyLock) return;
+    const saved = tocBodyLock;
+    tocBodyLock = null;
+    document.body.style.position = saved.position;
+    document.body.style.top = saved.top;
+    document.body.style.left = saved.left;
+    document.body.style.right = saved.right;
+    document.body.style.width = saved.width;
+    window.scrollTo({ top: tocScrollPosition, left: 0, behavior: "instant" });
+  }
 
   function setTocOpen(open) {
     const toggle = document.querySelector("[data-toc-toggle]");
     const backdrop = document.querySelector("[data-toc-backdrop]");
+    const wasOpen = document.body.classList.contains("toc-open");
+    if (open === wasOpen) return;
+    if (open) lockTocScroll();
     document.body.classList.toggle("toc-open", open);
     toggle?.setAttribute("aria-expanded", String(open));
     if (backdrop) backdrop.hidden = !open;
-    if (open) document.querySelector("[data-toc-close]")?.focus();
-    else if (document.activeElement?.matches("[data-toc-close]")) toggle?.focus();
+    if (open) {
+      focusWithoutScroll(document.querySelector("[data-toc-close]"));
+    } else {
+      const returnFocus = document.activeElement?.matches("[data-toc-close]");
+      unlockTocScroll();
+      if (returnFocus) focusWithoutScroll(toggle);
+    }
   }
 
   function bootReaderDock() {
@@ -124,9 +172,7 @@
     filterArticles(language);
 
     if (persist) {
-      try {
-        localStorage.setItem(KEY, language);
-      } catch (_) {}
+      window.FFLanguage?.set(language);
     }
   }
 
@@ -598,10 +644,7 @@
     bootVersionSwitcher();
     bootReaderDock();
 
-    let language = document.documentElement.dataset.language || "en";
-    try {
-      language = localStorage.getItem(KEY) || language;
-    } catch (_) {}
+    const language = window.FFLanguage?.get() || document.documentElement.dataset.language || "en";
     applyLanguage(language, false);
   }
 

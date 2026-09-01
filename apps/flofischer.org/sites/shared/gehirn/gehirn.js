@@ -1,5 +1,4 @@
 (function () {
-  const KEY = "ff-language";
   const reel = document.querySelector("[data-reel]");
   const cuts = [...document.querySelectorAll("[data-cut]")];
   const mediaStacks = [...document.querySelectorAll(".project-media")];
@@ -23,7 +22,7 @@
     }
 
     if (persist) {
-      try { localStorage.setItem(KEY, language); } catch (_) {}
+      window.FFLanguage?.set(language);
     }
   }
 
@@ -95,8 +94,7 @@
       button.addEventListener("click", () => applyLanguage(button.dataset.languageButton, true));
     });
 
-    let language = document.documentElement.dataset.language || "en";
-    try { language = localStorage.getItem(KEY) || language; } catch (_) {}
+    const language = window.FFLanguage?.get() || document.documentElement.dataset.language || "en";
     applyLanguage(language, false);
 
     mediaStacks.forEach((stack) => {

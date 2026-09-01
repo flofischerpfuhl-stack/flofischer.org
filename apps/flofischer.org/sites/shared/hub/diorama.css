@@ -61,37 +61,69 @@ body.is-orbiting #diorama-world {
     background-color 420ms ease;
 }
 
-.diorama-loader::before {
+.loader-scene,
+.loader-layer {
+  position: absolute;
+  inset: -4%;
+}
+
+.loader-scene {
+  overflow: hidden;
+  opacity: 0.88;
+  transform: scale(1.045);
+  transition: opacity 480ms ease, transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.loader-layer {
+  background-image: url("/shared/hub/art/diorama-preview.webp?v=16");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  will-change: transform;
+}
+
+.loader-layer--back {
+  filter: blur(16px) saturate(0.76) brightness(0.6);
+  transform: scale(1.1);
+  animation: loader-drift-back 9s ease-in-out infinite alternate;
+}
+
+.loader-layer--island {
+  filter: blur(6px) saturate(0.84) brightness(0.69);
+  -webkit-mask-image: radial-gradient(ellipse 54% 45% at 50% 54%, #000 22%, rgba(0, 0, 0, 0.94) 58%, transparent 80%);
+  mask-image: radial-gradient(ellipse 54% 45% at 50% 54%, #000 22%, rgba(0, 0, 0, 0.94) 58%, transparent 80%);
+  animation: loader-drift-island 6.5s ease-in-out infinite alternate;
+}
+
+.loader-layer--front {
+  filter: blur(2.8px) saturate(0.88) brightness(0.64);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0 57%, rgba(0, 0, 0, 0.42) 72%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0 57%, rgba(0, 0, 0, 0.42) 72%, #000 100%);
+  animation: loader-drift-front 5s ease-in-out infinite alternate;
+}
+
+.diorama-loader::after {
   content: "";
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(70rem, 118vw);
-  aspect-ratio: 1.72;
+  inset: 0;
+  z-index: 1;
   background:
-    radial-gradient(circle at 24% 33%, rgba(255, 224, 137, 0.86) 0 5%, transparent 24%),
-    radial-gradient(circle at 72% 31%, rgba(255, 48, 111, 0.42) 0 5%, transparent 21%),
-    linear-gradient(90deg, #68a347 0 48.8%, #171924 51.2% 100%);
-  clip-path: polygon(4% 25%, 96% 25%, 91% 58%, 66% 65%, 54% 100%, 46% 100%, 35% 65%, 9% 58%);
-  filter: blur(30px) saturate(0.82);
-  opacity: 0.5;
-  transform: translate(-50%, -48%) scale(0.93);
-  transition: opacity 380ms ease, transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+    linear-gradient(to bottom, rgba(7, 6, 8, 0.18), transparent 43%, rgba(7, 6, 8, 0.72)),
+    radial-gradient(ellipse at center, transparent 20%, rgba(7, 6, 8, 0.5) 100%);
 }
 
 .diorama-loader.has-preview {
-  background: rgba(8, 8, 11, 0.46);
-  backdrop-filter: blur(17px) saturate(0.82);
+  background: rgba(8, 8, 11, 0.36);
 }
 
-.diorama-loader.has-preview::before {
-  opacity: 0;
-  transform: translate(-50%, -48%) scale(1.03);
+.diorama-loader.has-preview .loader-scene {
+  opacity: 0.72;
+  transform: scale(1.075);
 }
 
 .diorama-loader-panel {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   width: min(23rem, calc(100vw - 2.5rem));
   padding: 1.35rem 1.4rem 1.2rem;
   border: 1px solid rgba(239, 237, 232, 0.24);
@@ -151,6 +183,19 @@ body.is-orbiting #diorama-world {
   to { transform: rotate(1turn); }
 }
 
+@keyframes loader-drift-back {
+  to { transform: scale(1.12) translate3d(-0.8%, -0.35%, 0); }
+}
+
+@keyframes loader-drift-island {
+  from { transform: scale(1.045) translate3d(-0.4%, 0.15%, 0); }
+  to { transform: scale(1.065) translate3d(0.55%, -0.35%, 0); }
+}
+
+@keyframes loader-drift-front {
+  to { transform: scale(1.035) translate3d(0.75%, 0.4%, 0); }
+}
+
 .diorama-loader.is-off {
   visibility: hidden;
   opacity: 0;
@@ -176,6 +221,22 @@ body.is-orbiting #diorama-world {
 .realm-diorama.side-gehirn .scanlines { opacity: 0.05; }
 
 @media (max-width: 720px) {
+  .loader-layer--back,
+  .loader-layer--island,
+  .loader-layer--front {
+    background-size: 168% auto;
+  }
+
+  .loader-layer--island {
+    -webkit-mask-image: radial-gradient(ellipse 72% 31% at 50% 52%, #000 28%, rgba(0, 0, 0, 0.9) 65%, transparent 86%);
+    mask-image: radial-gradient(ellipse 72% 31% at 50% 52%, #000 28%, rgba(0, 0, 0, 0.9) 65%, transparent 86%);
+  }
+
+  .loader-layer--front {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0 54%, rgba(0, 0, 0, 0.5) 66%, transparent 83%);
+    mask-image: linear-gradient(to bottom, transparent 0 54%, rgba(0, 0, 0, 0.5) 66%, transparent 83%);
+  }
+
   .realm-diorama .hud-nav {
     gap: 0.55rem;
   }
@@ -197,8 +258,10 @@ body.is-orbiting #diorama-world {
 
 @media (prefers-reduced-motion: reduce) {
   .diorama-loader,
-  .diorama-loader::before {
+  .loader-scene,
+  .loader-layer {
     transition: none;
+    animation: none;
   }
 
   .diorama-loader-spinner { animation: none; }

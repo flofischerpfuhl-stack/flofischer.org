@@ -2,10 +2,52 @@
 """Generate the bilingual Seele article shells."""
 
 from pathlib import Path
+import subprocess
 
 
 ROOT = Path(__file__).resolve().parents[1]
 POSTS = ROOT / "sites/seele/posts"
+DISCLAIMERS = ROOT / "sites/shared/seele/disclaimers"
+
+
+def render_markdown(path: Path) -> str:
+    if not path.exists():
+        return ""
+    return subprocess.run(
+        [
+            "pandoc",
+            str(path),
+            "-f",
+            "markdown+raw_html",
+            "-t",
+            "html5",
+            "--wrap=none",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+def disclaimer_template(slug: str) -> str:
+    english = render_markdown(DISCLAIMERS / "en" / f"{slug}.md")
+    german = render_markdown(DISCLAIMERS / "de" / f"{slug}.md")
+    if not english and not german:
+        return ""
+    return f"""<template data-disclaimer-template>
+          <details class="article-disclaimer">
+            <summary>
+              <span class="disclaimer-icon" aria-hidden="true">!</span>
+              <span data-lang-copy="en">Editorial note</span>
+              <span data-lang-copy="de">Redaktioneller Hinweis</span>
+              <span class="disclaimer-toggle" aria-hidden="true"></span>
+            </summary>
+            <div class="disclaimer-copy">
+              <div data-lang-copy="en">{english}</div>
+              <div data-lang-copy="de">{german}</div>
+            </div>
+          </details>
+        </template>"""
 
 ARTICLES = [
     {
@@ -32,17 +74,6 @@ ARTICLES = [
         "description_de": "Eine ausführliche Verteidigung der FSSPX, ihrer Kritik an Modernismus und Zweitem Vatikanum sowie der kirchenrechtlichen Bewertung der Bischofsweihen von 1988.",
         "og_image": "https://seele.flofischer.org/shared/seele/article-images/flavio-pace.jpg",
         "og_image_alt": "Archbishop Flavio Pace in a church interior.",
-        "version": "v0.1",
-    },
-    {
-        "file": "aliens-katholizismus.html",
-        "slug": "aliens",
-        "title_en": "Aliens and Catholicism",
-        "title_de": "Aliens und Katholizismus",
-        "type_en": "Essay",
-        "type_de": "Essay",
-        "description_en": "What the Fermi paradox, Drake equation, abiogenesis and extraterrestrial intelligence could mean for Catholic theology.",
-        "description_de": "Was Fermi-Paradoxon, Drake-Gleichung, Abiogenese und außerirdische Intelligenz für die katholische Theologie bedeuten könnten.",
         "version": "v0.1",
     },
     {
@@ -82,45 +113,6 @@ ARTICLES = [
     },
 ]
 
-DISCLAIMER_TEMPLATES = {
-    "fsspx": """<template data-disclaimer-template>
-          <details class="article-disclaimer">
-            <summary>
-              <span class="disclaimer-icon" aria-hidden="true">!</span>
-              <span data-lang-copy="en">Editorial note</span>
-              <span data-lang-copy="de">Redaktioneller Hinweis</span>
-              <span class="disclaimer-toggle" aria-hidden="true"></span>
-            </summary>
-            <div class="disclaimer-copy">
-              <div data-lang-copy="en"><p>This essay was written before the July 1 consecrations in order to prepare myself intellectually for the consecrations and to be sure they were actually the right thing to do. The text is currently under review by SSPX and non-SSPX priests; however, they have not yet had time to finish their review. I have chosen to publish it anyway because I think it can help further the discussion and help other faithful of the SSPX, like myself, who find themselves in anguish because of the recent excommunications, not only of the bishops but also of the laity who formally adhere to the SSPX.</p>
-<p>The text will probably contain some errors. I hope it will be read in charity, and I am open and grateful for any factual corrections. If the text is too harsh at points, I hope the reader can excuse that and focus on the content of the claims I am making. This is not an official SSPX document. The text was formatted and translated from German into English using AI.</p>
-<p>I want to mention again that the document will probably contain some errors; it was written to the best of my knowledge. I am an SSPX faithful who “formally adheres” and am certainly not comfortable being excommunicated, even if unjustly. If somebody can show me where my thinking is wrong, I am completely open to changing my position. Currently, I would not even know what to confess in order to have my excommunication lifted.</p></div>
-              <div data-lang-copy="de"><p>Dieser Aufsatz wurde vor den Weihen vom 1. Juli verfasst, um mich intellektuell auf die Weihen vorzubereiten und mich zu vergewissern, dass sie tatsächlich das Richtige waren. Der Text wird derzeit von Priestern innerhalb und außerhalb der FSSPX geprüft; sie hatten jedoch noch nicht die Zeit, diese Prüfung abzuschließen. Ich habe mich dennoch zur Veröffentlichung entschlossen, weil der Text meines Erachtens die Diskussion weiterbringen und anderen Gläubigen der FSSPX helfen kann, die sich – wie ich – wegen der jüngsten Exkommunikationen in Gewissensnot befinden. Das betrifft nicht nur die Bischöfe, sondern auch die Laien, die der FSSPX förmlich anhängen.</p>
-<p>Der Text wird wahrscheinlich einige Fehler enthalten. Ich hoffe, dass er wohlwollend gelesen wird, und bin für sachliche Korrekturen offen und dankbar. Sollte der Text stellenweise zu scharf formuliert sein, bitte ich darum, dies zu entschuldigen und sich auf den Inhalt meiner Aussagen zu konzentrieren. Dies ist kein offizielles Dokument der FSSPX. Die englische Fassung wurde mithilfe von KI aus dem Deutschen übersetzt und formatiert.</p>
-<p>Ich möchte noch einmal darauf hinweisen, dass das Dokument wahrscheinlich einige Fehler enthält; es wurde nach bestem Wissen verfasst. Ich bin ein Gläubiger, der der FSSPX „förmlich anhängt“, und fühle mich keineswegs wohl damit, exkommuniziert zu sein – selbst wenn die Exkommunikation ungerecht ist. Wenn mir jemand zeigen kann, wo mein Denken falsch ist, bin ich uneingeschränkt bereit, meine Position zu ändern. Derzeit wüsste ich nicht einmal, was ich beichten sollte, um die Exkommunikation aufheben zu lassen.</p></div>
-            </div>
-          </details>
-        </template>""",
-    "wagner-response": """<template data-disclaimer-template>
-          <details class="article-disclaimer">
-            <summary>
-              <span class="disclaimer-icon" aria-hidden="true">!</span>
-              <span data-lang-copy="en">Editorial note</span>
-              <span data-lang-copy="de">Redaktioneller Hinweis</span>
-              <span class="disclaimer-toggle" aria-hidden="true"></span>
-            </summary>
-            <div class="disclaimer-copy">
-              <div data-lang-copy="en"><p>This essay is a response to Christian B. Wagner’s article <a href="https://thomism.com/p/invalid-sacraments-excommunications">“Invalid Sacraments, Excommunications, and the SSPX”</a> of July 2, 2026.[1] It builds on my <a href="https://substack.com/home/post/p-205027723">“Defense of the FSSPX and Its Episcopal Consecrations”</a>,[2] which I will reference rather than repeat.</p>
-<p>I found Wagner’s article genuinely helpful. His distinctions between schism and excommunication, and between the ways an excommunication can be unjust, are clear and, as far as I can tell, correct. My disagreement is localized: his argument passes over the actual canonical defense of the SSPX at its decisive point, and the passage of St. Thomas he relies on contains, within itself, the very exception the SSPX invokes.</p>
-<p>As with my defense: this text represents my position to the best of my current knowledge, and I am open, indeed grateful, to be shown where my thinking is wrong. I am an SSPX faithful who “formally adheres,” and I am not comfortable being excommunicated, even unjustly. Where a counter-argument against my position is serious, I have named it as such instead of hiding it. If somebody can close the gaps I point out at the end, I will change my position.</p></div>
-              <div data-lang-copy="de"><p>Dieser Aufsatz ist eine Antwort auf Christian B. Wagners Artikel <a href="https://thomism.com/p/invalid-sacraments-excommunications">„Invalid Sacraments, Excommunications, and the SSPX“</a> vom 2. Juli 2026.[1] Er baut auf meiner <a href="https://substack.com/home/post/p-205027723">„Verteidigung der FSSPX und ihrer Bischofsweihen“</a>[2] auf, auf die ich verweisen werde, statt ihre Argumente zu wiederholen.</p>
-<p>Ich fand Wagners Artikel wirklich hilfreich. Seine Unterscheidungen zwischen Schisma und Exkommunikation sowie zwischen den verschiedenen Arten, auf die eine Exkommunikation ungerecht sein kann, sind klar und – soweit ich es beurteilen kann – richtig. Meine Meinungsverschiedenheit ist eng begrenzt: Sein Argument übergeht an der entscheidenden Stelle die eigentliche kirchenrechtliche Verteidigung der FSSPX; zugleich enthält die von ihm herangezogene Stelle des heiligen Thomas selbst genau jene Ausnahme, auf die sich die FSSPX beruft.</p>
-<p>Wie schon bei meiner Verteidigung gilt: Dieser Text gibt meine Position nach bestem gegenwärtigen Wissen wieder. Ich bin offen und sogar dankbar dafür, wenn mir gezeigt wird, wo mein Denken falsch ist. Ich bin ein Gläubiger der FSSPX, der ihr „förmlich anhängt“, und ich fühle mich nicht wohl damit, exkommuniziert zu sein – auch nicht ungerechterweise. Wo ein Gegenargument ernst zu nehmen ist, benenne ich es, statt es zu verstecken. Wenn jemand die am Ende aufgezeigten Lücken schließen kann, werde ich meine Position ändern.</p></div>
-            </div>
-          </details>
-        </template>""",
-}
-
 PAGE = """<!DOCTYPE html>
 <html lang="en" data-design="3" data-language="en" data-pwa-site="seele">
 <head>
@@ -151,17 +143,9 @@ PAGE = """<!DOCTYPE html>
   <meta name="twitter:description" content="{description_en}" />
 {twitter_image_meta}
   <title>{title_en} — Seele</title>
-  <script>
-    try {{
-      var language = localStorage.getItem("ff-language");
-      if (language === "de") {{
-        document.documentElement.lang = "de";
-        document.documentElement.dataset.language = "de";
-      }}
-    }} catch (e) {{}}
-  </script>
+  <script src="/shared/language.js"></script>
   <link rel="stylesheet" href="/shared/designs/base.css" />
-  <link rel="stylesheet" href="/shared/seele/seele.css" />
+  <link rel="stylesheet" href="/shared/seele/seele.css?v=3" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -207,8 +191,8 @@ PAGE = """<!DOCTYPE html>
         <aside class="article-toc" id="article-contents" aria-label="Article contents / Artikelinhalt">
           <div class="article-toc-heading">
             <p>
-              <span data-lang-copy="en">Contents</span>
-              <span data-lang-copy="de">Inhalt</span>
+            <span data-lang-copy="en">Contents</span>
+            <span data-lang-copy="de">Inhalt</span>
             </p>
             <button type="button" class="article-toc-close" data-toc-close data-label-en="Close contents" data-label-de="Inhaltsverzeichnis schließen" aria-label="Close contents">×</button>
           </div>
@@ -226,16 +210,16 @@ PAGE = """<!DOCTYPE html>
             <span data-lang-copy="de">Text wird gesetzt…</span>
           </p>
         </div>
-{disclaimer_template}
+{disclaimer_html}
       </article>
     </main>
 
-    <button class="article-toc-backdrop" type="button" data-toc-backdrop data-label-en="Close contents" data-label-de="Inhaltsverzeichnis schließen" aria-label="Close contents" hidden></button>
+    <button class="article-toc-backdrop" type="button" data-toc-backdrop aria-label="Close contents" hidden></button>
     <div class="reader-dock" data-reader-dock>
       <button type="button" class="reader-dock-button reader-dock-toc" data-toc-toggle aria-controls="article-contents" aria-expanded="false" data-label-en="Open contents" data-label-de="Inhaltsverzeichnis öffnen" aria-label="Open contents">
         <span aria-hidden="true">≡</span>
       </button>
-      <div class="reader-progress" role="progressbar" data-label-en="Reading progress" data-label-de="Lesefortschritt" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-reader-progress>
+      <div class="reader-progress" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-reader-progress>
         <span data-reader-progress-bar></span>
         <output data-reader-progress-label>0%</output>
       </div>
@@ -249,7 +233,7 @@ PAGE = """<!DOCTYPE html>
       <a href="../"><span data-lang-copy="en">All articles</span><span data-lang-copy="de">Alle Artikel</span></a>
     </footer>
   </div>
-  <script src="/shared/seele/seele.js"></script>
+  <script src="/shared/seele/seele.js?v=3"></script>
   <script src="/shared/pwa.js" defer></script>
 </body>
 </html>
@@ -257,7 +241,7 @@ PAGE = """<!DOCTYPE html>
 
 
 for article in ARTICLES:
-    article["disclaimer_template"] = DISCLAIMER_TEMPLATES.get(article["slug"], "")
+    article["disclaimer_html"] = disclaimer_template(article["slug"])
     social_image = article.get("og_image", "https://seele.flofischer.org/social-preview.jpg")
     social_alt = article.get("og_image_alt", f'{article["title_en"]} — Seele')
     article["social_image_meta"] = (

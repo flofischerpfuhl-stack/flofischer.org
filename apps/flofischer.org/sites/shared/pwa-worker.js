@@ -1,4 +1,4 @@
-const PWA_VERSION = "2026-09-01-1";
+const PWA_VERSION = "2026-09-01-2";
 const CACHE_PREFIX = "ff-pwa-";
 const CACHE_NAME = `${CACHE_PREFIX}${self.PWA_CONFIG.site}-${PWA_VERSION}`;
 const scopeUrl = new URL(self.registration.scope);
