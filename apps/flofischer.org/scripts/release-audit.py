@@ -304,6 +304,8 @@ def main() -> int:
 
     if "font-size: clamp(5.5rem, 19svh, 10.5rem)" not in seele_style or "fitHeroTitle()" not in seele_script:
         errors.append("shared/seele/seele.css: mobile Seele hero overflow protection is missing")
+    if "min-height: 0;\n    min-width: 0;" not in seele_style:
+        errors.append("shared/seele/seele.css: mobile Seele hero must size itself from its display type")
     if "preserveTocViewport" not in seele_script or "overflow-anchor: none" not in seele_style:
         errors.append("shared/seele: collapsible contents navigation must preserve its viewport position")
     legacy_seele_pngs = sorted((SITES / "shared/seele").rglob("*.png"))
