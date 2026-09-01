@@ -302,7 +302,7 @@ def main() -> int:
         if marker not in seele_script:
             errors.append(f"shared/seele/seele.js: missing {label}")
 
-    if "font-size: clamp(3.5rem, 18.5vw, 5rem)" not in seele_style:
+    if "font-size: clamp(5.5rem, 19svh, 10.5rem)" not in seele_style or "fitHeroTitle()" not in seele_script:
         errors.append("shared/seele/seele.css: mobile Seele hero overflow protection is missing")
     if "preserveTocViewport" not in seele_script or "overflow-anchor: none" not in seele_style:
         errors.append("shared/seele: collapsible contents navigation must preserve its viewport position")

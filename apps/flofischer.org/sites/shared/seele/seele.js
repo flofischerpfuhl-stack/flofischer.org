@@ -9,6 +9,35 @@
   let tocCleanup = null;
   let tocScrollPosition = 0;
   let tocBodyLock = null;
+  let heroFitFrame = 0;
+
+  function fitHeroTitle() {
+    const title = document.querySelector(".hero-title");
+    if (!title || window.innerWidth > 620) return;
+    if (heroFitFrame) cancelAnimationFrame(heroFitFrame);
+    heroFitFrame = requestAnimationFrame(() => {
+      heroFitFrame = 0;
+      const language = document.documentElement.dataset.language || "en";
+      const activeCopy = title.querySelector(`[data-lang-copy="${language}"]`);
+      const targetWidth = Math.max(1, title.clientWidth - 1);
+      activeCopy?.querySelectorAll(".hero-word").forEach((word) => {
+        word.style.removeProperty("--hero-word-scale");
+        const naturalWidth = word.scrollWidth;
+        if (naturalWidth) {
+          word.style.setProperty("--hero-word-scale", String(targetWidth / naturalWidth));
+        }
+      });
+    });
+  }
+
+  function bootHeroTitle() {
+    const title = document.querySelector(".hero-title");
+    if (!title) return;
+    new ResizeObserver(fitHeroTitle).observe(title);
+    document.fonts?.ready.then(fitHeroTitle);
+    window.addEventListener("resize", fitHeroTitle, { passive: true });
+    fitHeroTitle();
+  }
 
   function focusWithoutScroll(element) {
     if (!element) return;
@@ -137,6 +166,7 @@
 
     document.documentElement.lang = language;
     document.documentElement.dataset.language = language;
+    fitHeroTitle();
 
     document.querySelectorAll("[data-language-button]").forEach((button) => {
       button.setAttribute("aria-pressed", button.dataset.languageButton === language ? "true" : "false");
@@ -656,6 +686,7 @@
 
     bootArchiveTools();
     bootBotanicalCarousel();
+    bootHeroTitle();
     bootVersionSwitcher();
     bootReaderDock();
 
