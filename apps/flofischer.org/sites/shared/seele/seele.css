@@ -503,23 +503,20 @@ html[data-language="de"] [data-lang-copy="de"] {
 
 .realm-seele .article-toc::-webkit-scrollbar,
 .realm-seele .article table::-webkit-scrollbar,
-.realm-seele .article .math.display::-webkit-scrollbar,
-.realm-seele .article .math.inline::-webkit-scrollbar {
+.realm-seele .article .math.display::-webkit-scrollbar {
   width: 7px;
   height: 7px;
 }
 
 .realm-seele .article-toc::-webkit-scrollbar-track,
 .realm-seele .article table::-webkit-scrollbar-track,
-.realm-seele .article .math.display::-webkit-scrollbar-track,
-.realm-seele .article .math.inline::-webkit-scrollbar-track {
+.realm-seele .article .math.display::-webkit-scrollbar-track {
   background: rgba(23, 20, 16, 0.12);
 }
 
 .realm-seele .article-toc::-webkit-scrollbar-thumb,
 .realm-seele .article table::-webkit-scrollbar-thumb,
-.realm-seele .article .math.display::-webkit-scrollbar-thumb,
-.realm-seele .article .math.inline::-webkit-scrollbar-thumb {
+.realm-seele .article .math.display::-webkit-scrollbar-thumb {
   border: 2px solid var(--paper);
   border-radius: 0;
   background: var(--ink);
@@ -1282,9 +1279,9 @@ html[data-language="de"] [data-lang-copy="de"] {
   }
 
   .realm-seele .article .math.inline {
-    display: inline-flex;
-    overflow-x: auto;
-    vertical-align: middle;
+    display: inline;
+    overflow: visible;
+    vertical-align: baseline;
   }
 
   .reader-dock-toc {

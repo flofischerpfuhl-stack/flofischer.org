@@ -173,6 +173,12 @@ def main() -> int:
             errors.append(f"shared/hub/{legacy_file}: legacy first-person runtime must be removed")
 
     seele_script = (SITES / "shared/seele/seele.js").read_text(encoding="utf-8")
+    seele_style = (SITES / "shared/seele/seele.css").read_text(encoding="utf-8")
+    if (
+        ".math.inline::-webkit-scrollbar" in seele_style
+        or "display: inline-flex;\n    overflow-x: auto;" in seele_style
+    ):
+        errors.append("shared/seele/seele.css: inline mathematics must not create mobile scrollbars")
     for marker, label in (
         ("insertDisclaimer(host)", "article disclaimer enhancement"),
         ("bootReaderDock()", "floating reader dock"),
