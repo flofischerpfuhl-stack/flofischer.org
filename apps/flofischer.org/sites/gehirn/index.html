@@ -31,7 +31,7 @@
   <title>Gehirn — Projects</title>
   <script src="/shared/language.js"></script>
   <link rel="stylesheet" href="/shared/designs/base.css" />
-  <link rel="stylesheet" href="/shared/gehirn/gehirn.css" />
+  <link rel="stylesheet" href="/shared/gehirn/gehirn.css?v=2" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -44,6 +44,8 @@
       }
     }
   </script>
+  <link rel="modulepreload" href="/shared/gehirn/gehirn-three.js?v=2" />
+  <link rel="preload" href="/shared/gehirn/models/brain.glb?v=2" as="fetch" type="model/gltf-binary" crossorigin="anonymous" />
 </head>
 <body class="realm-gehirn" data-title-en="Gehirn — Projects" data-title-de="Gehirn — Projekte">
   <div class="film-grain" aria-hidden="true"></div>
@@ -70,15 +72,20 @@
       <div class="brain-stage" data-brain-stage aria-label="Rotating anaglyph brain">
         <canvas data-brain-canvas></canvas>
         <div class="brain-fallback" aria-hidden="true"></div>
+        <div class="brain-loader" data-brain-loader role="status" aria-live="polite">
+          <span class="brain-loader-spinner" aria-hidden="true"></span>
+          <span data-lang-copy="en">Loading brain <output data-brain-progress>0</output>%</span>
+          <span data-lang-copy="de">Gehirn lädt <output data-brain-progress>0</output>%</span>
+        </div>
       </div>
       <a class="next-cut" href="#fernwork" aria-label="Next: Fernwork">↓</a>
     </section>
 
     <section id="fernwork" class="cut project-cut" data-cut="01 / FERNWORK">
       <div class="project-media" aria-hidden="true">
-        <video class="project-video video-main" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/fernwork.mp4?v=3" type="video/mp4" /></video>
-        <video class="project-video video-red" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/fernwork.mp4?v=3" type="video/mp4" /></video>
-        <video class="project-video video-cyan" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/fernwork.mp4?v=3" type="video/mp4" /></video>
+        <video class="project-video video-main" muted loop playsinline preload="none"><source src="/shared/gehirn/previews/fernwork.webm?v=4" type="video/webm" /><source src="/shared/gehirn/previews/fernwork.mp4?v=4" type="video/mp4" /></video>
+        <video class="project-video video-red" muted loop playsinline preload="none"><source src="/shared/gehirn/previews/fernwork.webm?v=4" type="video/webm" /><source src="/shared/gehirn/previews/fernwork.mp4?v=4" type="video/mp4" /></video>
+        <video class="project-video video-cyan" muted loop playsinline preload="none"><source src="/shared/gehirn/previews/fernwork.webm?v=4" type="video/webm" /><source src="/shared/gehirn/previews/fernwork.mp4?v=4" type="video/mp4" /></video>
         <div class="project-grade"></div>
       </div>
       <div class="project-copy">
@@ -98,9 +105,9 @@
 
     <section id="suprabench" class="cut project-cut" data-cut="02 / SUPRABENCH">
       <div class="project-media" aria-hidden="true">
-        <video class="project-video video-main" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/suprabench.mp4?v=3" type="video/mp4" /></video>
-        <video class="project-video video-red" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/suprabench.mp4?v=3" type="video/mp4" /></video>
-        <video class="project-video video-cyan" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/suprabench.mp4?v=3" type="video/mp4" /></video>
+        <video class="project-video video-main" muted loop playsinline preload="none"><source src="/shared/gehirn/previews/suprabench.webm?v=4" type="video/webm" /><source src="/shared/gehirn/previews/suprabench.mp4?v=4" type="video/mp4" /></video>
+        <video class="project-video video-red" muted loop playsinline preload="none"><source src="/shared/gehirn/previews/suprabench.webm?v=4" type="video/webm" /><source src="/shared/gehirn/previews/suprabench.mp4?v=4" type="video/mp4" /></video>
+        <video class="project-video video-cyan" muted loop playsinline preload="none"><source src="/shared/gehirn/previews/suprabench.webm?v=4" type="video/webm" /><source src="/shared/gehirn/previews/suprabench.mp4?v=4" type="video/mp4" /></video>
         <div class="project-grade"></div>
       </div>
       <div class="project-copy">
@@ -120,9 +127,9 @@
 
     <section id="paper2form" class="cut project-cut" data-cut="03 / PAPER2FORM">
       <div class="project-media" aria-hidden="true">
-        <video class="project-video video-main" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/paper2form.mp4?v=3" type="video/mp4" /></video>
-        <video class="project-video video-red" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/paper2form.mp4?v=3" type="video/mp4" /></video>
-        <video class="project-video video-cyan" autoplay muted loop playsinline preload="metadata"><source src="/shared/gehirn/previews/paper2form.mp4?v=3" type="video/mp4" /></video>
+        <video class="project-video video-main" muted loop playsinline preload="none"><source src="/shared/gehirn/previews/paper2form.webm?v=4" type="video/webm" /><source src="/shared/gehirn/previews/paper2form.mp4?v=4" type="video/mp4" /></video>
+        <video class="project-video video-red" muted loop playsinline preload="none"><source src="/shared/gehirn/previews/paper2form.webm?v=4" type="video/webm" /><source src="/shared/gehirn/previews/paper2form.mp4?v=4" type="video/mp4" /></video>
+        <video class="project-video video-cyan" muted loop playsinline preload="none"><source src="/shared/gehirn/previews/paper2form.webm?v=4" type="video/webm" /><source src="/shared/gehirn/previews/paper2form.mp4?v=4" type="video/mp4" /></video>
         <div class="project-grade"></div>
       </div>
       <div class="project-copy">
@@ -148,8 +155,8 @@
     <a href="#paper2form" data-cut-link="paper2form" aria-label="Paper2Form"><span></span></a>
   </nav>
 
-  <script src="/shared/gehirn/gehirn.js"></script>
-  <script type="module" src="/shared/gehirn/gehirn-three.js"></script>
+  <script src="/shared/gehirn/gehirn.js?v=2"></script>
+  <script type="module" src="/shared/gehirn/gehirn-three.js?v=2"></script>
   <script src="/shared/pwa.js" defer></script>
 </body>
 </html>

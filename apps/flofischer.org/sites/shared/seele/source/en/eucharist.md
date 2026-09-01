@@ -36,13 +36,13 @@ There are also reports about an investigation done by a medical commission of Un
 
 The Eucharistic Miracle of Buenos Aires began on the 15^th^ of August in 1996 when in the parish of Santa Maria y Caballito Almagro a woman came up to the priest, Father Alejandro Pezet, and informed him, that she found a host placed on a candle holder. As it was dusty, Father Pezet did not want to eat it, so it was put into water to dissolve, as is standard procedure. In the coming days it transformed into real flesh and blood. On Monday, the 26 of August parts of the flesh had turned red. This was Photographed by professional Photographer Marcello Antonini.
 
-![](/shared/seele/article-images/eucharist/media/image2.png){width="3.136111111111111in" height="1.7708333333333333in"}![](/shared/seele/article-images/eucharist/media/image3.png){width="2.5131944444444443in" height="1.770138888888889in"}
+![](/shared/seele/article-images/eucharist/media/image2.webp){width="3.136111111111111in" height="1.7708333333333333in"}![](/shared/seele/article-images/eucharist/media/image3.webp){width="2.5131944444444443in" height="1.770138888888889in"}
 
 *Host on the 26 of August, Photographed by Marcello Antonini*
 
 In the next days most of the white parts of the Host had also turned red. During these days the location of the host was changed to another tabernacle and Father Petez claimes nobody had acces to it.
 
-![](/shared/seele/article-images/eucharist/media/image4.png){width="3.1770833333333335in" height="1.9166655730533684in"}![](/shared/seele/article-images/eucharist/media/image5.png){width="3.1125in" height="1.9270833333333333in"}
+![](/shared/seele/article-images/eucharist/media/image4.webp){width="3.1770833333333335in" height="1.9166655730533684in"}![](/shared/seele/article-images/eucharist/media/image5.webp){width="3.1125in" height="1.9270833333333333in"}
 
 *Host a few days after 26 of August, Photographed by Marcello Antonini, the white parts of the host seem to be interwoven with the flesh*
 
@@ -94,7 +94,7 @@ There already is a perfect summary of the events that happened at Tixtla:
 
 "*October 21, 2006, the effusion of a reddish substance was noted from a consecrated Host during the Eucharistic Celebration at Tixtla, in the Diocese of Chilpancingo-Chilapa. The Bishop of the place, Most Reverend Alejo Zavala Castro, then convened a Theological Commission of investigation and, in October 2009, he invited Doctor Ricardo Castañón Gómez, to take on the leadership of the program of scientific research whose purpose was in fact that of verifying the said event. The Mexican Ecclesiastical authorities turned to Doctor Castañón Gómez because they were aware that, in the years 1999-2006, the scientist had conducted some studies on two consecrated Hosts that also bled in the Parish of Saint Mary, in Buenos Aires. The Mexican case starts in October 2006, when Father Leopoldo Roque, pastor of the Parish of Saint Martin of Tours, invites Father Raymundo Reyna Esteban to lead a spiritual retreat or his parishioners. As Father Leopoldo and another priest were distributing Communion, assisted by a religious sister who was to the left of Father Raymundo, this latter one turns towards him with the "pix"containing the Sacred Particles, looking at Father with eyes filled with tears, an incident that immediately attracted the attention of the celebrant: the Host that she had taken to give Communion to a lady parishioner had begun to effuse a reddish substance.*"[^28]
 
-![](/shared/seele/article-images/eucharist/media/image6.png){width="5.552083333333333in" height="4.447916666666667in"}
+![](/shared/seele/article-images/eucharist/media/image6.webp){width="5.552083333333333in" height="4.447916666666667in"}
 
 *The Host from Tixla, Picture from Gomez´ Book as cited*
 
@@ -108,11 +108,11 @@ Dr. Ricardo Gómez has published the scientific findings in a book he wrote[^29]
 
 4\. Different kinds of red and white blood cells were found
 
-![](/shared/seele/article-images/eucharist/media/image7.png){width="2.6666666666666665in" height="2.8784722222222223in"}
+![](/shared/seele/article-images/eucharist/media/image7.webp){width="2.6666666666666665in" height="2.8784722222222223in"}
 
 *red and white blood cells are identified*
 
-![](/shared/seele/article-images/eucharist/media/image8.png){width="3.876388888888889in" height="2.0729155730533684in"}
+![](/shared/seele/article-images/eucharist/media/image8.webp){width="3.876388888888889in" height="2.0729155730533684in"}
 
 *"we can see acidophilic elements that remind erythrocytes (red blood cells) degenerated, among them we can see other basophilic elements (white blood cells) that seem to have lobed nuclei and others with rounded nuclei"*
 
@@ -120,7 +120,7 @@ Dr. Ricardo Gómez has published the scientific findings in a book he wrote[^29]
 
 6\. The hypothesis, that the substance was placed on top of the host is extremely unlikely as two different studies have found, that the substance comes out of the host. In a corresponding report by expert, signed by Dr. Eduardo Sánchez, it explicates: "*Blood comes out from its interior towards its periphery, that is, the blood comes from the interior to the exterior, coinciding like a large vessel that bleeds when it is lacerated in its anatomical structure*".
 
-![](/shared/seele/article-images/eucharist/media/image9.png){width="6.291666666666667in" height="3.59375in"}
+![](/shared/seele/article-images/eucharist/media/image9.webp){width="6.291666666666667in" height="3.59375in"}
 
 *\"This way, it can be seen that the center of the image, shown on the left, has a semicircular shape (place where the sample was taken under study). On the other hand, the image shown on the right shows a dispersion along its entire structure, with a central area that seems to cross the entire contour or thickness of its structure. In this way, it can be seen that the blood comes from the interior, being able to be absorbed by the thickness of its surface. In other words, it is possible to appreciate that the structure of the host is of the same characteristics for being a single piece, having for all its extension a single infiltration in its center as if it was a glass that bled to the outside. It is for this probability that the blood found in the analyzed sample and of which the necessary images are shown, has a direction from the inside towards the outside taking into consideration the thickness, consistency and macroscopic and microscopic characteristics observed in the present expert study\"*
 
@@ -134,7 +134,7 @@ A documentary done by Mike Willesee who also accompanied the investigation in th
 
 The Eucharistic miracle took place on Sunday, October 12, 2008 when at the parish church of St. Anthony in Sokolka, at 8:30 a.m. a consecrated host fell down on the floor. After that it was put into water to dissolve, as is standard procedure. At the request of the pastor, Fr. Stanislaw Gniedziejko, Sister Julia Dubowska, of the Congregation of the Eucharistic Sisters, who was the parish sacristan poured the water with the host into another container because the host would take time to dissolve. It was then placed into a safe to which only the pastor and the sister had acces. On October 19 the sister noticed, that there was a bright red stain in the middle of the host. The water seemed to be untainted by the color. Metropolitan archbishop of Bialystok, Edward Ozorowski, was immediately informed and he went to the parish with other diocese officials. "*On October 29, the container with the host was transferred to the Divine Mercy Chapel in the rectory, and placed in the tabernacle. The next day, by decision of the archbishop, the stained host was taken out of the water and placed on a small corporal, which was then put back in the tabernacle. The host was kept this way for three years, until it was solemnly brought to the church on October 2, 2011. During the first year, it was kept secret. During that time, the Church authorities reflected on what to do, since they were dealing with a sign from God which needed to be interpreted. By mid-January of 2009, the altered fragment of the host had dried out naturally, and remained like a blood stain or clot; since then, its appearance has not changed. That same month, the archbishop requested histopathological studies be done on the host. On March 30, he created an ecclesial commission to study the phenomenon.*" [^32] [^33]
 
-![](/shared/seele/article-images/eucharist/media/image10.png){width="4.345833333333333in" height="3.7291666666666665in"}
+![](/shared/seele/article-images/eucharist/media/image10.webp){width="4.345833333333333in" height="3.7291666666666665in"}
 
 *The host in question*[^34]
 
@@ -150,7 +150,7 @@ The scientific findings are summarized in the article "Eucharistic Miracle from 
 
 The church collected these scientific findings together with witness testimony and theological interpretations and published it in 2009, since then "*no objections have been raised from the scientific community as to the way the sample was taken, the methodology of the research carried out and the scientific credibility of the results of the expertise*". [^38] It is also noteworthy that Professor Sobaniec-Łotowska said about the interconnectedness of the tissue with the host: "*Even the scientists of NASA, who have at their disposal the most modern analytical techniques, would not be able to artificially recreate such a thing*"[^39].
 
-![](/shared/seele/article-images/eucharist/media/image11.png){width="4.697916666666667in" height="2.78125in"}
+![](/shared/seele/article-images/eucharist/media/image11.webp){width="4.697916666666667in" height="2.78125in"}
 
 *The two professors who were responsible for the analysis*[^40]
 
@@ -160,7 +160,7 @@ It should be noted that many people doubt the miracle. The reason is probably a 
 
 On December 25 2013, during communion, the priest, Andrzej Ziombra, let a host fall to the ground. It was then put into water to dissolve. On the 4^th^ of January the priest noticed that 1/5 of the host had turned red. He then informed Bishop Stefan Cichy, who ordered him to observe the host for the next two weeks. After this time the host had fully dissolved except for the red part.[^44]
 
-![](/shared/seele/article-images/eucharist/media/image12.png){width="2.78125in" height="2.1013888888888888in"}
+![](/shared/seele/article-images/eucharist/media/image12.webp){width="2.78125in" height="2.1013888888888888in"}
 
 *The host the red part after it was separated* [^45]
 
@@ -176,7 +176,7 @@ So we can summarize the results of both tests as follows:
 
 4\. The heart was in a state of agony
 
-![](/shared/seele/article-images/eucharist/media/image13.png){width="2.8027777777777776in" height="1.84375in"}
+![](/shared/seele/article-images/eucharist/media/image13.webp){width="2.8027777777777776in" height="1.84375in"}
 
 *Press Conference with Dr. Engel, head of the investigation commission when they presented their results* [^47]
 
@@ -184,7 +184,7 @@ So we can summarize the results of both tests as follows:
 
 Now we want to examine the similarities and differences of the miracles we looked at.
 
-![](/shared/seele/article-images/eucharist/media/image14.png){width="6.3in" height="1.2826388888888889in"}
+![](/shared/seele/article-images/eucharist/media/image14.webp){width="6.3in" height="1.2826388888888889in"}
 
 The fact that they all turned into real human flesh (and blood) is not surprising as this was the criterium for looking at them. The fact that the DNA-Tests were inconclusive is only in so far relevant as they did not find different DNA in the different miracles. The same is true for the blood-type. That all of the flesh is heart tissue is rather surprising as it would be unnecessarily difficult to fake because it had no prior theological necessity. One can read into that, but the appearance of any real flesh on a consecrated host would be enough for a eucharistic miracle. That the flesh and Host were not interconnected in some of the miracles speaks not against them, but in the cases where they were it speaks to the unnecessary difficulty one would have to go through to fake it. It should also be noted, that in many cases the heart seems to be in agony.
 

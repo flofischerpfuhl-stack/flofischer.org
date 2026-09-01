@@ -33,7 +33,7 @@ Das Argument wurde Populär gemacht vom amerikanischen Philosophen und evangelik
 
 ___
 ## _Exkurs: William Lane Craig_
-<img src="/shared/seele/article-images/william-lane-craig.png">
+<img src="/shared/seele/article-images/william-lane-craig.webp">
 
 William Lane Craig (\* 23.08.1949 in Peoria, Illinois, USA) ist Professor für Philosophie an der Biola University. Im Jahr 1977 hat er seinen Doktortitel in Philosophie an der University of Birmingham erhalten. Das Thema seiner Doktorarbeit war das Kalam Kosmologische Argument. Aus seiner Doktorarbeit ist dann auch das Buch _The Kalam Cosmological Argument_ entstanden. Im Jahr 1984 dann hat er an der Universität München seinen Doktortitel in Theologie erhalten. Das Thema dieser Doktorarbeit war das Historische Argument für die Auferstehung Jesu. Aus dieser Doktorarbeit resultiere unter anderem das Buch _The Son Rises_. Dr. Craig hat über 40 Bücher und über 200 Fachartikel veröffentlicht [ReasonableFaith 2021]. Seine Forschungsinteressen liegen vor allem beim Kalam, der Auferstehung Jesu, der Zeitphilosophie, der Existenz von Abstrakten Objekten, generellen Metaphysik und der Historizität von Adam und Eva. Dr. Craig ist evangelikaler Protestant und hat in vielen Debatten sowohl generischen Theismus als auch das Christentum im speziellen Verteidigt. Dabei hat er es mit allen vier sogenannten _New Atheists_ aufgenommen und prominennte atheistische Philosophen, Physiker und Neu-Testament-Forscher debattiert. Der allgemeine Konsens ist, dass Craig sich in fast allen seinen Debatten sehr gut geschlagen hat. Der _New Atheist_ Sam Harris bezeichnete in als "the one Christian apologist who seems to have put the fear of God into many of my fellow atheists" [PremierChristianity 2013]. Meiner Meinung nach ist er der beste Verteidiger von Gottes Existenz und der Auferstehung Jesu in öffentlichen Debatten.
 ___
@@ -133,7 +133,7 @@ Warum könnte nicht ein sogenanntes Boltzmann-Gehirn anfangen zu existieren? Ein
 
 ___
 ### _Exkurs: Robert C. Koons_
-<img src="/shared/seele/article-images/robert-koons.png">
+<img src="/shared/seele/article-images/robert-koons.webp">
 
 Rob Koons (\* 22.02.1957 in Saint Paul, Minnesota, USA) ist Professor für Philosophie an der University of Texas in Houston, wo er seit über 35 Jahre unterrichtet. Er ist Autor von fünf Büchern und vielen Fachartikeln. Er ist spezialisiert auf Metaphysik und philosophische Logik [RobKoons 2024]. Die letzte Zeit hat er sich viel mit Wissenschaftsphilosophie beschäftigt in dem er thomistische Metaphysik mit moderner Physik und Biologie in Kontakt bringt. Koons ist gläubiger Katholik. Zusammen mit Alexander Pruss ist er ein weiterer Katholik und Thomist der in den letzten Jahren das Kalam Kosmologische Argument nicht nur akzeptiert sondern auch entscheidend vorgetrieben hat.
 ___
@@ -358,7 +358,7 @@ Seit 2023 hat Joe Schmidt fünf Artikel in Philosophischen Fachjournalen veröff
 
 ___
 ##### _Exkurs: Joe Schmid_
-<img src="/shared/seele/article-images/joe-schmid.png">
+<img src="/shared/seele/article-images/joe-schmid.webp">
 
 Joe Schmid wurde im August 2000 in den USA geboren. Er wurde katholisch erzogen, bezeichnet sich heute allerdings als agnostisch [YoutubeFandom 1]. Er ist momentan Doktorand für Philosophie an der Princeton University und obwohl er noch keinen höheren akademischen Grad erlangt hat, hat er dennoch schon wiederholt Artikel in Philosophischen Fachzeitschriften veröffentlicht und schon zwei eigene Bücher veröffentlicht. Eines davon zusammen mit dem Daniel Lindford über den Springer Verlag. [JosephSchmid 1] Er betreibt einen YouTube-Kanal mit Namen "Majesty of Reason". Der theistische Philosoph Dr. Josh Rasmussen bezeichnete Schmid als "jungen Magnus Carlson der Philosophie" und sagte, nachdem er einen Artikel von Schmid reviewte, dass dieser Artikel Schmids "Legendenstatus" noch weiter steigern würde. [Twitter 1]
 ___
@@ -414,7 +414,7 @@ Das Argument für einen _Unbewegten Beweger_ wird erstmal von Aristoteles im Buc
 
 ___
 ## _Exkurs: Aristoteles_
-<img src="/shared/seele/article-images/aristotle.png">
+<img src="/shared/seele/article-images/aristotle.webp">
 
 Aristoteles (384–322 vor Christus) gilt als einer der größten und Einflussreichsten Philosophen die jemals gelebt haben. Seine über 2000 Jahre Alten Argumente werden noch bis heute diskutiert. Er hat wohl um die 200 Werke verfasst, von denen rund 31 bis heute überlebt haben. In seinen Werken behandelte er Themen von Logik, Metaphysik, Geistesphilosophie, Ethik, Politiktheorie, Ästhetik, Rhetorik bis zu Physik und Biologie.
 Er wurde im nordöstlichen Griechenland geboren. Mit rund 17 Jahren fing er an in Athen in Platos Akademie zu studieren. Dort blieb er bis zu Platos Tod in 347 vor Christus, woraufhin er sich in Kleinasien niederlies. Im Jahr 343 begann er den 13-jährigen, Sohn der Mazedonischen Königs zu unterrichten, der später als "Alexander der Große" bekannt werden sollte. Im Jahr 335 etablierte er in Athen seine eigene Schule. [StanfordEncyclopedia 6]
@@ -490,7 +490,7 @@ Auch dieses Argument lässt sich grob in zwei Stufen einteilen. In der ersten wi
 
 ___
 ### _Exkurs: Ed Feser_
-<img src="/shared/seele/article-images/edward-feser.png">
+<img src="/shared/seele/article-images/edward-feser.webp">
 
 Edward Charles Feser (\*16.04.1968) ist ein US-Amerikanischer Professor für Philosophie am Pasadena City College in Kalifornien. Er hat über zehn Bücher veröffentlicht und viele Akademische Fachartikel. Seine Forschungsinteressen sind vor allem in den philosophischen Subdisziplinen der Metaphysik, Natürlichen Theologie, Geistesphilosophie, Moralphilosophie und politischer Philosophie. Feser ist traditioneller Katholik [EdFeser 2024]. Er gilt als einer der einflussreichsten gegenwärtigen Verteidiger der Thomistischen Metaphysik. Im Bereich der Gottesbeweise war sein Buch "Five Proofs for the Existence of God" sehr bedeutend, auch weil die Argumente Einfluss auf den bekannten konservativen politischen Kommentator Ben Shapiro hatten.
 ___
@@ -505,7 +505,7 @@ Dieser Frage geht er in _De Ente et Essentia_ nach und entwickelt im Zuge dessen
 
 ___
 ## _Exkurs: Thomas von Aquin_
-<img src="/shared/seele/article-images/thomas-aquinas.png">
+<img src="/shared/seele/article-images/thomas-aquinas.webp">
 
 Thomas von Aquin wurde im Jahr 1225 bei Aquin, ungefähr in der Mitte zwischen Rom und Neapel geboren. Entgegen den Wünschen seiner Familie trat er im Alter von 19 Jahren in den Dominikaner Orden ein. Nachdem er drei Jahre in Paris studierte studierte er in 1248 unter dem Heiligen Albertus Maximus in Köln. Albertus war ein Anführer der Bewegung christliche Theologie mit Arabischer und Griechischer Philosophie zu harmonisieren. Nachdem er seinen Doktortitel erhielt lehrte er einige Jahre in Paris [StanfordEncyclopedia 7]. Neben seiner Tätigkeit als Professor fing er an seine *Summa Theologica* ("Die Summe der Theologie") zu schreiben. Diese wahr Angedacht als Textbuch für Theologiestudenten und belesene Laien. Sie gliedert sich in drei Teile [Wikipedia 1]:
 1. Die Existenz und Natur Gottes; die Schöpfung der Welt; Engel; und die Natur des Menschen
@@ -659,7 +659,7 @@ Das De Ente Argument kann schon als Kontingenz Argument klassifiziert werde. Ein
 
 ___
 ## _Exkurs: Gottfried Wilhelm Leibniz_
-<img src="/shared/seele/article-images/leibniz.png">
+<img src="/shared/seele/article-images/leibniz.webp">
 
 Gottfried Wilhelm Leibnitz (1646–1716) gilt als einer der größten Denker des 17. und 18 Jahrhunderts und gilt als letztes _Universalgenie_. Neben wichtigen Beiträgen im Bereich der Philosophie war er auch eine wichtige Figur in Physik und Mathematik. *Im Jahr 1665 gewann er den Ehrenpreis der Universität Leipzig für die schönste Perücke*.
 Leibnitz wurde am 1. Juli 1646 in Leipzig geboren, wo er 1661 auch anfing zu studieren. 1672 erhielt er die Möglichkeit für eine diplomatische Mission für vier Jahre nach Paris zu gehen, der damaligen Hauptstadt des intellektuellen Lebens. Den rest seines Lebens verbrachte er vor hauptsächlich in Hannover, wo er für das Haus Hannover arbeitete. Er stabt ebendort im am 14. November 1716.
@@ -714,7 +714,7 @@ Das moralische Argument ist auch eines, dass von William Lane Craig verteidigt w
 
 ___
 ## _Exkurs: Trent Horn_
-<img src="/shared/seele/article-images/trent-horn.png">
+<img src="/shared/seele/article-images/trent-horn.webp">
 
 Trent Horn wurde als Kind eines jüdischen Vaters und einer ehemals katholische Mutter in Kalifornien geboren. Nachdem er sich in der Schule mit einer Gruppe von Katholiken anfreundete recherchierte er die Argumente für den Katholischen Glauben und konvertierte schließlich 2002 zum Katholizismus [Everybodywiki 1]. Horn erlange den Master in Bioethik, Philosophie und Theologie. Er ist Apologet beim sehr bekannten amerikanischen Apostolat *Catholic Answers*. Außerdem ist er Speaker, Autor vieler Bücher und hat eine erfolgreichen Podacst namens *The Counsil of Trent*.
 Horn hat in Debatten eine große Breite an Katholischen Glaubensgrundsätzen verteidigt, wie die Existenz Gottes, die Auferstehung Jesus die Kanonizität der deuterokanonischen Bücher der Bibel und die katholische rechtfertigungslehre, hauptsächlich fokussiert er sich aber auf die Verteidigung des ungeborenen Lebens.
@@ -759,7 +759,7 @@ Es gibt allerdings auch eine alternative Erklärung: moralische Fakten sind Plat
 
 ___
 ### _Exkurs: Platon_
-<img src="/shared/seele/article-images/plato.png">
+<img src="/shared/seele/article-images/plato.webp">
 
 Platon (429?–347 vor Christus) wahr ein Philosph im Antiken Griechenland. Platon wurde in eine Aristokratische Familie geboren. Platon war Schüler des Sokrates, von dem selbst keine Schriften stammen. Das meiste was über Sokrates bekannt ist stammt aus den Schriften von Platon. Nachdem er viel in der Region von Griechenland bis Italien reiste gründete er in 380 vor Christus seine berühmte Akademie, den Vorläufer unserer heutigen Universitäten. In dieser Akademie war Platon dann Lehrer des Aristoteles. Er starb 348 in Athen. [Britannica 1] Bekannt ist Platon vor allem für die Sokratischen Dialoge, seine Idee der Formen und sein Höhlengleichnis.
 ___
@@ -785,14 +785,14 @@ Paleys Uhrmacher-Argument ist das erste Teleologische Argument, das wir hier bet
 
 ___
 ## _Exkurs: William Paley_
-<img src="/shared/seele/article-images/william-paley.png">
+<img src="/shared/seele/article-images/william-paley.webp">
 
 William Paley (\* 1743, †1805) war ein englischer Anglikanischer Priester, Philosoph und Autor. Nach seinem Studium wurde er 1767 zum Priester geweiht. Später lehrte er am Christs College und wurde danach Rektor in verschiedenen Orten. 1782 wurde er Erzdiakon. Bekannt ist er vor allem für seine Uhrmacher-Analogie. [Britannica 2; Wikipedia 2]
 ___
 
 ___
 ## _Exkurs: Richard Dawkins_
-<img src="/shared/seele/article-images/richard-dawkins.png">
+<img src="/shared/seele/article-images/richard-dawkins.webp">
 
 Richard Dawkins (\*26 März 1941) ist ein Britischer Biologe. Dawkins war von 1995 bis 2008 Professor an der University of Oxford. Bekannt wurde er als Autor des Buchs *The selfish Gene*, indem er Evolution aus der Perspektive der Gene statt aus der Perspektive eines gesamten Organismus analysiert. Das Buch ist auch der Ursprung des Wortes *Meme*, welches er hier Einführt um ein mentales Konzept in Analogie zu einem Gene zu beschreiben. Laut ihm kann eine abstrakte Idee, also ein *Meme* sich wie ein Gen verbreiten und mutieren. [Wikipedia 3]
 Dawkins ist bekannt als einer der *four Horseman* des neuen Atheismus, zu denen noch Christopher Hitchens, Sam Harris und Daniel Dennett zählen. Als neuer Atheismus wird eine atheistische Bewegung des 21. Jahrhunderts bezeichnet, die ein humanistisches und naturalistisches Weltbild vertritt [Wikipedia 4]. Die Kritik des neuen Atheismus fokussierte sich vor allem auf christlichen Fundamentalismus und die *Intelligent Design*-Bewegung.
@@ -914,7 +914,7 @@ Hinzu kommen zu einigen speziellen Multiversums-Theorien von Physiker dann noch 
 
 ___
 ## _Exkurs: Anselm von Canterbury_
-<img src="/shared/seele/article-images/anselm.png">
+<img src="/shared/seele/article-images/anselm.webp">
 
 Anselm von Canterbury wurde 1033 in Aosta im heutigen Italien geboren. 1059 trat er in Frankreich in ein Kloster ein. Später wurde er dort Prior und schließlich Erzbischof von Canterbury. Heute zählt er zu den 37 Kirchenlehrern und gilt als eine zentrale Gründungsfigur der Scholastik [StanfordEncyclopedia 9].
 
@@ -941,7 +941,7 @@ Wie bereits erwähnt formulierte der Heilige Anselm mehrere Versionen des Ontolo
 
 ___
 ## _Exkurs: Alvin Plantinga_
-<img src="/shared/seele/article-images/alvin-plantinga.png">
+<img src="/shared/seele/article-images/alvin-plantinga.webp">
 
 Der US-amerikanische Philosoph Alvin Plantinga (\*1932) gilt als einer der bedeutendsten Akteure der analytischen Religionsphilosophie und als wichtigster Vertreter der Reformierten Epistemologie.
 Plantinga entspringt einer akademisch geprägten Einwanderer-Familie aus den Niederlanden. Plantinga hat University of Michigan und an der Yale University studiert. 1958 erhielt er seinen Doktor in Philosphie.
@@ -981,7 +981,7 @@ Wie wir festgestellt haben ist die Prämisse des Modal Ontologischen Arguments d
 
 ___
 ## _Exkurs: Kurt Gödel_
-<img src="/shared/seele/article-images/godel-einstein.png">
+<img src="/shared/seele/article-images/godel-einstein.webp">
 
 Kurt Gödel (\* 1906, †1978) war eine in Österreich-Ungarn geborener Mathematiker und Logiker. Auch wegen seiner "Unvollständigkeitssätze" gilt er als der vielleicht größte Logiker der je gelebt hat.
 Gödel hat im Jahr 1929 seinen Doktortitel in Mathematik an der Universität Wien erhalten. Im Jahr 1931 veröffentlichte er seinen Unvollständikeitssatz im Artikel “Über formal unentscheidbare Sätze der _Principia Mathematica_ und verwandter Systeme”. Hier bewies er, dass jedes formallogische System, das stark genug ist grundlegende Arithmetik abzubilden wahre Sätze beinhaltet, die nicht von den Axiomen des System abgeleitet werden können. Für diese monumentale Entdeckung wurde er in der Mathematik weltbekannt und respektiert.
@@ -1055,7 +1055,7 @@ _folgt in einer späteren Version des Scripts_
 
 ___
 ## _Exkurs: Alexander Pruss_
-<img src="/shared/seele/article-images/alexander-pruss.png">
+<img src="/shared/seele/article-images/alexander-pruss.webp">
 
 _folgt in einer späteren Version des Scripts_
 ___

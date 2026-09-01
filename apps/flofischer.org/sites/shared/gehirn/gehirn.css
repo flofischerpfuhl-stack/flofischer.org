@@ -319,6 +319,44 @@ html[data-language="de"] [data-lang-copy="de"] {
   opacity: 0;
 }
 
+.brain-loader {
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: rgba(239, 237, 232, 0.72);
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  transition: opacity 240ms ease, visibility 0s linear 240ms;
+  white-space: nowrap;
+}
+
+.brain-loader-spinner {
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 1px solid rgba(239, 237, 232, 0.22);
+  border-top-color: var(--red);
+  border-right-color: var(--cyan);
+  border-radius: 50%;
+  animation: brain-loader-spin 780ms linear infinite;
+}
+
+.brain-stage.brain-ready .brain-loader,
+.brain-stage.brain-failed .brain-loader {
+  visibility: hidden;
+  opacity: 0;
+}
+
+@keyframes brain-loader-spin {
+  to { transform: rotate(1turn); }
+}
+
 .next-cut {
   position: absolute;
   bottom: 1.8rem;
@@ -602,6 +640,10 @@ html[data-language="de"] [data-lang-copy="de"] {
     width: 70vw;
   }
 
+  .brain-loader {
+    bottom: 10%;
+  }
+
   .project-video {
     object-position: 58% center;
   }
@@ -671,5 +713,9 @@ html[data-language="de"] [data-lang-copy="de"] {
 
   .brain-stage canvas {
     transition: none;
+  }
+
+  .brain-loader-spinner {
+    animation: none;
   }
 }

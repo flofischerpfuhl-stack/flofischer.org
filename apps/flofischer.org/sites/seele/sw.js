@@ -10,7 +10,7 @@ self.PWA_CONFIG = {
     "/shared/seele/seele.css",
     "/shared/seele/seele.js",
     "/shared/seele/search-index.json",
-    "/shared/seele/symbols/botanical-cross.png"
+    "/shared/seele/symbols/botanical-cross.webp"
   ]
 };
 importScripts("/shared/pwa-worker.js");

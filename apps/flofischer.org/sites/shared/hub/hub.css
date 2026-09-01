@@ -124,46 +124,11 @@ body.side-seele .film-grain { opacity: 0.04; }
   mask-image: radial-gradient(ellipse at center, transparent 0 51%, rgba(0, 0, 0, 0.18) 68%, #000 95%);
 }
 
-.fade-veil,
-.boot-fade {
+.fade-veil {
   z-index: 80;
   opacity: 0;
   background: #0c0b10;
   transition: opacity 720ms ease, background 400ms ease;
-}
-
-.boot-fade {
-  opacity: 1;
-  overflow: hidden;
-  background: #0c0b10;
-}
-
-.boot-fade::before,
-.boot-fade::after {
-  content: "";
-  position: absolute;
-  inset-block: 0;
-  width: 50%;
-  background-position: center;
-  background-size: cover;
-}
-
-.boot-fade::before {
-  left: 0;
-  background-image:
-    linear-gradient(rgba(14, 16, 8, 0.08), rgba(7, 7, 9, 0.28)),
-    url("/shared/hub/art/seele-jungle-v2.webp");
-}
-
-.boot-fade::after {
-  right: 0;
-  background-image:
-    linear-gradient(rgba(7, 7, 9, 0.12), rgba(7, 7, 9, 0.35)),
-    url("/shared/hub/art/gehirn-city-v2.webp");
-}
-
-.boot-fade.is-off {
-  opacity: 0;
 }
 
 .fade-veil.is-on { opacity: 1; }

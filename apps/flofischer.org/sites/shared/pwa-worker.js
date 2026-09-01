@@ -1,4 +1,4 @@
-const PWA_VERSION = "2026-09-01-3";
+const PWA_VERSION = "2026-09-01-4";
 const CACHE_PREFIX = "ff-pwa-";
 const CACHE_NAME = `${CACHE_PREFIX}${self.PWA_CONFIG.site}-${PWA_VERSION}`;
 const scopeUrl = new URL(self.registration.scope);
@@ -79,7 +79,7 @@ self.addEventListener("fetch", (event) => {
     || url.hostname === "fonts.googleapis.com"
     || url.hostname === "fonts.gstatic.com";
   const cacheableDestination = ["style", "script", "font", "image", "manifest"].includes(request.destination);
-  const cacheableModel = sameOrigin && /\.(?:gltf|bin)$/i.test(url.pathname);
+  const cacheableModel = sameOrigin && /\.(?:glb|gltf|bin|ktx2)$/i.test(url.pathname);
 
   if (sameOrigin && ["style", "script", "manifest"].includes(request.destination)) {
     event.respondWith(networkFirstStatic(request));

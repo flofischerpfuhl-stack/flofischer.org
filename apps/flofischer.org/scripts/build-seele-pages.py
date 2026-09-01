@@ -59,7 +59,7 @@ ARTICLES = [
         "type_de": "Vortrag",
         "description_en": "A critical survey of the Kalam, moral, teleological, Thomistic, contingency, ontological and Resurrection arguments for God.",
         "description_de": "Eine kritische Untersuchung des Kalam-, Moral-, teleologischen, thomistischen, Kontingenz-, ontologischen und Auferstehungsarguments für Gott.",
-        "og_image": "https://seele.flofischer.org/shared/seele/article-images/william-lane-craig.png",
+        "og_image": "https://seele.flofischer.org/shared/seele/article-images/william-lane-craig.webp",
         "og_image_alt": "William Lane Craig during a debate about the existence of God.",
         "version": "v0.1",
     },
@@ -145,7 +145,7 @@ PAGE = """<!DOCTYPE html>
   <title>{title_en} — Seele</title>
   <script src="/shared/language.js"></script>
   <link rel="stylesheet" href="/shared/designs/base.css" />
-  <link rel="stylesheet" href="/shared/seele/seele.css?v=3" />
+  <link rel="stylesheet" href="/shared/seele/seele.css?v=7" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />

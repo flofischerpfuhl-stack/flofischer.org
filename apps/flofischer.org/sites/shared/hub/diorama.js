@@ -1,7 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { KTX2Loader } from "three/addons/loaders/KTX2Loader.js";
 import { Water } from "three/addons/objects/Water.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -87,6 +89,17 @@ function loadTexture(textureLoader, url, options) {
       (texture) => resolve(configureTexture(texture, options)),
       undefined,
       () => resolve(null)
+    );
+  });
+}
+
+function loadOptimizedTexture(ktx2Loader, textureLoader, name, fallbackExtension, options) {
+  return new Promise((resolve) => {
+    ktx2Loader.load(
+      `/shared/hub/textures/${name}.ktx2`,
+      (texture) => resolve(configureTexture(texture, options)),
+      undefined,
+      () => loadTexture(textureLoader, `/shared/hub/textures/${name}.${fallbackExtension}`, options).then(resolve)
     );
   });
 }
@@ -304,9 +317,12 @@ async function start() {
   controls.addEventListener("end", () => document.body.classList.remove("is-orbiting"));
 
   const textureLoader = new THREE.TextureLoader();
-  const TEX = "/shared/hub/textures";
+  const ktx2Loader = new KTX2Loader()
+    .setTranscoderPath("https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/libs/basis/")
+    .setWorkerLimit(qualityLow ? 2 : 4)
+    .detectSupport(renderer);
   let loadedTextures = 0;
-  const trackedTexture = (url, options) => loadTexture(textureLoader, url, options).finally(() => {
+  const trackedTexture = (name, extension, options) => loadOptimizedTexture(ktx2Loader, textureLoader, name, extension, options).finally(() => {
     loadedTextures += 1;
     setLoadingProgress(10 + (loadedTextures / 14) * 60);
   });
@@ -315,21 +331,22 @@ async function start() {
     cobble, bark, facadeA, facadeB, waterNormals, tropicalLeaf,
     chapelFieldstone, chapelRoofTiles,
   ] = await Promise.all([
-    trackedTexture(`${TEX}/meadow.jpg`, { repeat: 5.4 }),
-    trackedTexture(`${TEX}/forest-floor-normal.jpg`, { repeat: 5.4, srgb: false }),
-    trackedTexture(`${TEX}/forest-floor-roughness.jpg`, { repeat: 5.4, srgb: false }),
-    trackedTexture(`${TEX}/mossy-rock.jpg`, { repeat: 1.8 }),
-    trackedTexture(`${TEX}/mossy-rock-normal.jpg`, { repeat: 1.8, srgb: false }),
-    trackedTexture(`${TEX}/asphalt.jpg`, { repeat: 2.7 }),
-    trackedTexture(`${TEX}/cobble.jpg`, { repeat: 2.2 }),
-    trackedTexture(`${TEX}/bark.jpg`, { repeat: 2.0 }),
-    trackedTexture(`${TEX}/facade-a.jpg`),
-    trackedTexture(`${TEX}/facade-b.jpg`),
-    trackedTexture(`${TEX}/waternormals.jpg`, { repeat: 1.7, srgb: false }),
-    trackedTexture(`${TEX}/tropical-leaf.webp`),
-    trackedTexture(`${TEX}/chapel-fieldstone-v1.webp`, { repeat: [1.05, 1.25] }),
-    trackedTexture(`${TEX}/chapel-roof-biberschwanz-v1.webp`, { repeat: [1.35, 2.1] }),
+    trackedTexture("meadow", "jpg", { repeat: 5.4 }),
+    trackedTexture("forest-floor-normal", "jpg", { repeat: 5.4, srgb: false }),
+    trackedTexture("forest-floor-roughness", "jpg", { repeat: 5.4, srgb: false }),
+    trackedTexture("mossy-rock", "jpg", { repeat: 1.8 }),
+    trackedTexture("mossy-rock-normal", "jpg", { repeat: 1.8, srgb: false }),
+    trackedTexture("asphalt", "jpg", { repeat: 2.7 }),
+    trackedTexture("cobble", "jpg", { repeat: 2.2 }),
+    trackedTexture("bark", "jpg", { repeat: 2.0 }),
+    trackedTexture("facade-a", "jpg"),
+    trackedTexture("facade-b", "jpg"),
+    trackedTexture("waternormals", "jpg", { repeat: 1.7, srgb: false }),
+    trackedTexture("tropical-leaf", "webp"),
+    trackedTexture("chapel-fieldstone-v1", "webp", { repeat: [1.05, 1.25] }),
+    trackedTexture("chapel-roof-biberschwanz-v1", "webp", { repeat: [1.35, 2.1] }),
   ]);
+  ktx2Loader.dispose();
   setLoadingProgress(72);
 
   const skyMaterial = new THREE.ShaderMaterial({
@@ -929,9 +946,19 @@ async function start() {
   createPalm(-2.05, -3.05, 0.72, 833);
   if (!qualityLow) createPalm(-7.0, -0.8, 0.68, 847);
 
+  const optionalDraco = new DRACOLoader();
+  optionalDraco.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/libs/draco/");
+  optionalDraco.setDecoderConfig({ type: "wasm" });
+  let optionalModelsPending = 2;
+  const settleOptionalModel = () => {
+    optionalModelsPending -= 1;
+    if (optionalModelsPending === 0) optionalDraco.dispose();
+  };
+
   const fernLoader = new GLTFLoader();
+  fernLoader.setDRACOLoader(optionalDraco);
   fernLoader.load(
-    "/shared/hub/models/fern_02/fern_02.gltf",
+    "/shared/hub/models/fern_02/fern_02_draco.glb",
     (gltf) => {
       const fernRandom = rng(923);
       for (let index = 0; index < (qualityLow ? 12 : 28); index += 1) {
@@ -948,12 +975,14 @@ async function start() {
         scene.add(fern);
       }
       if (renderer.shadowMap.enabled) renderer.shadowMap.needsUpdate = true;
+      settleOptionalModel();
     },
     undefined,
-    () => {}
+    settleOptionalModel
   );
 
   const detailedPlantLoader = new GLTFLoader();
+  detailedPlantLoader.setDRACOLoader(optionalDraco);
   function prepareDetailedModel(root, alphaMap = null, alphaMatcher = () => true) {
     root.traverse((child) => {
       if (!child.isMesh) return;
@@ -988,8 +1017,8 @@ async function start() {
     return holder;
   }
   Promise.all([
-    detailedPlantLoader.loadAsync("/shared/hub/models/polyhaven/pachira_aquatica_01/pachira_aquatica_01_1k.gltf"),
-    loadTexture(textureLoader, "/shared/hub/models/polyhaven/pachira_aquatica_01/textures/pachira_aquatica_01_leaves_alpha_1k.png", { srgb: false }),
+    detailedPlantLoader.loadAsync("/shared/hub/models/polyhaven/pachira_aquatica_01/pachira_aquatica_01_draco.glb"),
+    loadTexture(textureLoader, "/shared/hub/models/polyhaven/pachira_aquatica_01/textures/pachira_aquatica_01_leaves_alpha_1k.webp", { srgb: false }),
   ]).then(([treeModel, treeAlpha]) => {
     document.body.dataset.detailedPlants = "ready";
     const treeVariants = [0, 1, 2, 3].map((index) => {
@@ -1005,9 +1034,11 @@ async function start() {
       placeDetailedModel(treeVariants[index % treeVariants.length], position[0], position[1], 3.4 + position[2] * 1.25, index * 1.37);
     });
     if (renderer.shadowMap.enabled) renderer.shadowMap.needsUpdate = true;
+    settleOptionalModel();
   }).catch((error) => {
     document.body.dataset.detailedPlants = "failed";
     console.error("Detailed diorama plants failed to load", error);
+    settleOptionalModel();
   });
 
   const stoneMaterial = new THREE.MeshStandardMaterial({

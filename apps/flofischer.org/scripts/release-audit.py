@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import json
+import re
+import struct
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
@@ -148,7 +150,7 @@ def main() -> int:
     release_contract_path = SITES / "shared/release.json"
     expected_release_contract = {
         "deploymentPipeline": "cloudflare-workers-builds",
-        "hub": "floating-island-v17",
+        "hub": "floating-island-v18",
         "seeleReader": "floating-reader-with-mobile-toc-and-disclaimers",
     }
     try:
@@ -176,9 +178,17 @@ def main() -> int:
     for obsolete_preload in ("seele-jungle-v2.webp", "gehirn-city-v2.webp"):
         if f'rel="preload" href="/shared/hub/art/{obsolete_preload}"' in root_markup:
             errors.append(f"root/index.html: obsolete hidden preload must not return ({obsolete_preload})")
-    if 'rel="modulepreload" href="/shared/hub/diorama.js?v=17"' not in root_markup:
+    for obsolete_art in (
+        "seele-riverbank-v3.png", "seele-jungle-v2.webp", "seele-foreground-v2.webp",
+        "gehirn-city-v2.webp", "gehirn-foreground-v2.webp",
+    ):
+        if (SITES / "shared/hub/art" / obsolete_art).exists():
+            errors.append(f"shared/hub/art/{obsolete_art}: obsolete dual-scene asset must not return")
+    if 'rel="modulepreload" href="/shared/hub/diorama.js?v=18"' not in root_markup:
         errors.append("root/index.html: floating-island module preload is missing")
-    if 'rel="preload" href="/shared/hub/art/diorama-preview.webp?v=17"' not in root_markup:
+    if root_markup.index('type="importmap"') > root_markup.index('rel="modulepreload"'):
+        errors.append("root/index.html: import map must precede modulepreload for Firefox")
+    if 'rel="preload" href="/shared/hub/art/diorama-preview.webp?v=18"' not in root_markup:
         errors.append("root/index.html: loading preview preload is missing")
 
     diorama_script = (SITES / "shared/hub/diorama.js").read_text(encoding="utf-8")
@@ -186,22 +196,94 @@ def main() -> int:
         ("renderer.shadowMap.autoUpdate = false", "single-update static shadows"),
         ("renderer.setAnimationLoop(animate)", "renderer-managed animation loop"),
         ("1000 / 30", "responsive mobile frame cap"),
-        ("tropical-leaf.webp", "lossless WebP foliage texture"),
+        ('trackedTexture("tropical-leaf", "webp"', "lossless WebP foliage fallback"),
+        ("KTX2Loader", "GPU-compressed KTX2 texture loading"),
+        ("loadOptimizedTexture", "fallback-safe optimized texture loading"),
+        ("DRACOLoader", "Draco-compressed detail model loading"),
+        ("pachira_aquatica_01_draco.glb", "Draco detailed-tree model"),
+        ("fern_02_draco.glb", "Draco fern model"),
     ):
         if marker not in diorama_script:
             errors.append(f"shared/hub/diorama.js: missing {label}")
     if (SITES / "shared/hub/textures/tropical-leaf.png").exists():
         errors.append("shared/hub/textures/tropical-leaf.png: oversized legacy foliage texture must be removed")
 
+    initial_texture_names = (
+        "meadow", "forest-floor-normal", "forest-floor-roughness", "mossy-rock",
+        "mossy-rock-normal", "asphalt", "cobble", "bark", "facade-a", "facade-b",
+        "waternormals", "tropical-leaf", "chapel-fieldstone-v1", "chapel-roof-biberschwanz-v1",
+    )
+    ktx2_paths = [SITES / "shared/hub/textures" / f"{name}.ktx2" for name in initial_texture_names]
+    for path in ktx2_paths:
+        if not path.is_file():
+            errors.append(f"{path.relative_to(ROOT)}: required first-frame KTX2 texture is missing")
+        elif path.stat().st_size > 400_000:
+            errors.append(f"{path.relative_to(ROOT)}: KTX2 texture exceeds 400 KB performance budget")
+    if all(path.is_file() for path in ktx2_paths) and sum(path.stat().st_size for path in ktx2_paths) > 3_600_000:
+        errors.append("shared/hub/textures: first-frame KTX2 bundle exceeds 3.6 MB performance budget")
+    optional_models = {
+        SITES / "shared/hub/models/fern_02/fern_02_draco.glb": 1_100_000,
+        SITES / "shared/hub/models/polyhaven/pachira_aquatica_01/pachira_aquatica_01_draco.glb": 3_500_000,
+    }
+    for path, budget in optional_models.items():
+        if not path.is_file() or path.stat().st_size > budget:
+            errors.append(f"{path.relative_to(ROOT)}: missing or exceeds Draco model performance budget")
+    for obsolete_model in (
+        "shared/hub/models/fern_02/fern_02.gltf",
+        "shared/hub/models/fern_02/fern_02.bin",
+        "shared/hub/models/polyhaven/pachira_aquatica_01/pachira_aquatica_01_1k.gltf",
+        "shared/hub/models/polyhaven/pachira_aquatica_01/pachira_aquatica_01.bin",
+    ):
+        if (SITES / obsolete_model).exists():
+            errors.append(f"{obsolete_model}: uncompressed detail model must not return")
+
     root_worker = (SITES / "root/sw.js").read_text(encoding="utf-8")
     if "models/polyhaven/pachira_aquatica_01" in root_worker:
         errors.append("root/sw.js: optional detailed plants must not block service-worker installation")
     pwa_worker = (SITES / "shared/pwa-worker.js").read_text(encoding="utf-8")
-    if "cacheableModel" not in pwa_worker or "gltf|bin" not in pwa_worker:
+    if "cacheableModel" not in pwa_worker or "glb|gltf|bin|ktx2" not in pwa_worker:
         errors.append("shared/pwa-worker.js: runtime model caching is missing")
     for legacy_file in ("main.js", "player.js", "world.js"):
         if (SITES / "shared/hub" / legacy_file).exists():
             errors.append(f"shared/hub/{legacy_file}: legacy first-person runtime must be removed")
+
+    brain_path = SITES / "shared/gehirn/models/brain.glb"
+    if not brain_path.is_file() or brain_path.stat().st_size > 1_500_000:
+        errors.append("shared/gehirn/models/brain.glb: optimized visible-systems model must stay below 1.5 MB")
+    elif brain_path.read_bytes()[:4] == b"glTF":
+        data = brain_path.read_bytes()
+        json_length, json_type = struct.unpack_from("<II", data, 12)
+        if json_type == 0x4E4F534A:
+            document = json.loads(data[20:20 + json_length].decode("utf-8"))
+            categories = {node.get("extras", {}).get("bx_cat") for node in document.get("nodes", [])}
+            if not categories <= {"cortex", "cerebellum", "brainstem"}:
+                errors.append("shared/gehirn/models/brain.glb: contains anatomy systems that are never rendered")
+
+    brain_script = (SITES / "shared/gehirn/gehirn-three.js").read_text(encoding="utf-8")
+    brain_markup = (SITES / "gehirn/index.html").read_text(encoding="utf-8")
+    for marker, label in (
+        ("data-brain-loader", "brain loading indicator"),
+        ("data-brain-progress", "brain loading progress"),
+    ):
+        if marker not in brain_markup:
+            errors.append(f"gehirn/index.html: missing {label}")
+    for marker, label in (
+        ("renderer.setAnimationLoop(render)", "renderer-managed brain loop"),
+        ("1000 / 30", "mobile brain frame cap"),
+        ("const materials = new Map()", "shared brain material cache"),
+    ):
+        if marker not in brain_script:
+            errors.append(f"shared/gehirn/gehirn-three.js: missing {label}")
+    for name in ("fernwork", "suprabench", "paper2form"):
+        webm = SITES / "shared/gehirn/previews" / f"{name}.webm"
+        if not webm.is_file() or webm.stat().st_size > 500_000:
+            errors.append(f"shared/gehirn/previews/{name}.webm: missing or exceeds 500 KB performance budget")
+        if brain_markup.find(f"{name}.webm") > brain_markup.find(f"{name}.mp4"):
+            errors.append(f"gehirn/index.html: {name} must offer WebM before MP4 fallback")
+    if "project-video" in brain_markup and " autoplay" in brain_markup:
+        errors.append("gehirn/index.html: offscreen project videos must not autoplay during initial load")
+    if brain_markup.count('preload="none"') != 9:
+        errors.append("gehirn/index.html: project videos must defer loading until their cut is visible")
 
     seele_script = (SITES / "shared/seele/seele.js").read_text(encoding="utf-8")
     seele_style = (SITES / "shared/seele/seele.css").read_text(encoding="utf-8")
@@ -220,8 +302,15 @@ def main() -> int:
         if marker not in seele_script:
             errors.append(f"shared/seele/seele.js: missing {label}")
 
-    if "font-size: clamp(2.6rem, 12.5vw, 4.8rem)" not in seele_style:
+    if "font-size: clamp(3.5rem, 18.5vw, 5rem)" not in seele_style:
         errors.append("shared/seele/seele.css: mobile Seele hero overflow protection is missing")
+    legacy_seele_pngs = sorted((SITES / "shared/seele").rglob("*.png"))
+    for path in legacy_seele_pngs:
+        errors.append(f"{path.relative_to(ROOT)}: editorial raster assets must use lossless WebP")
+    for path in (SITES / "shared/seele").rglob("*"):
+        if path.suffix.lower() in {".html", ".md", ".css", ".js", ".json"} and "/shared/seele/" in path.read_text(encoding="utf-8"):
+            if re.search(r"/shared/seele/[^\s\"')>]+\.png", path.read_text(encoding="utf-8")):
+                errors.append(f"{path.relative_to(ROOT)}: obsolete editorial PNG reference must use WebP")
 
     language_script = SITES / "shared/language.js"
     if not language_script.is_file() or "Domain=flofischer.org" not in language_script.read_text(encoding="utf-8"):

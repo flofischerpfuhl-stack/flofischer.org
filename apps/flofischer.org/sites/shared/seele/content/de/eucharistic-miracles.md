@@ -37,13 +37,13 @@ Daneben kursieren Berichte über eine Untersuchung durch eine medizinische Kommi
 
 Das Eucharistische Wunder von Buenos Aires begann am 15. August 1996 in der Pfarrei Santa María y Caballito Almagro. Eine Frau teilte dem Priester, Pater Alejandro Pezet, mit, dass sie auf einem Kerzenhalter eine Hostie gefunden habe. Weil sie staubig war, wollte Pater Pezet sie nicht konsumieren; entsprechend dem üblichen Verfahren wurde sie deshalb in Wasser gelegt, damit sie sich auflöse. In den folgenden Tagen verwandelte sie sich in eine Substanz, die wie Fleisch und Blut aussah. Am Montag, dem 26. August, waren Teile davon rot geworden. Der Berufsfotograf Marcello Antonini dokumentierte dies.
 
-<div class="article-figure-pair"><img src="/shared/seele/article-images/eucharist/media/image2.png" alt="Hostie am 26. August" loading="lazy"><img src="/shared/seele/article-images/eucharist/media/image3.png" alt="Detail der Hostie am 26. August" loading="lazy"></div>
+<div class="article-figure-pair"><img src="/shared/seele/article-images/eucharist/media/image2.webp" alt="Hostie am 26. August" loading="lazy"><img src="/shared/seele/article-images/eucharist/media/image3.webp" alt="Detail der Hostie am 26. August" loading="lazy"></div>
 
 *Die Hostie am 26. August, fotografiert von Marcello Antonini.*
 
 In den darauffolgenden Tagen wurden auch die meisten weißen Teile der Hostie rot. Während dieser Zeit wurde die Hostie in einen anderen Tabernakel gebracht. Pater Pezet erklärt, dass niemand Zugang zu ihr gehabt habe.
 
-<div class="article-figure-pair"><img src="/shared/seele/article-images/eucharist/media/image4.png" alt="Hostie einige Tage nach dem 26. August" loading="lazy"><img src="/shared/seele/article-images/eucharist/media/image5.png" alt="Verbindung von Hostie und rötlicher Substanz" loading="lazy"></div>
+<div class="article-figure-pair"><img src="/shared/seele/article-images/eucharist/media/image4.webp" alt="Hostie einige Tage nach dem 26. August" loading="lazy"><img src="/shared/seele/article-images/eucharist/media/image5.webp" alt="Verbindung von Hostie und rötlicher Substanz" loading="lazy"></div>
 
 *Die Hostie einige Tage nach dem 26. August, fotografiert von Marcello Antonini. Die weißen Teile scheinen mit der fleischartigen Substanz verwoben zu sein.*
 
@@ -88,7 +88,7 @@ Eine bereits vorliegende Zusammenfassung beschreibt die Ereignisse in Tixtla wie
 
 > „Am 21. Oktober 2006 wurde während einer Eucharistiefeier in Tixtla in der Diözese Chilpancingo-Chilapa der Austritt einer rötlichen Substanz aus einer konsekrierten Hostie bemerkt. Der Ortsbischof, Msgr. Alejo Zavala Castro, berief daraufhin eine theologische Untersuchungskommission ein und lud im Oktober 2009 Dr. Ricardo Castañón Gómez ein, die Leitung des wissenschaftlichen Untersuchungsprogramms zu übernehmen, dessen Zweck die Überprüfung des Ereignisses war. Die mexikanischen kirchlichen Behörden wandten sich an Dr. Castañón Gómez, weil ihnen bekannt war, dass der Wissenschaftler in den Jahren 1999 bis 2006 zwei konsekrierte Hostien untersucht hatte, die in der Pfarrei Santa María in Buenos Aires ebenfalls bluteten. Der mexikanische Fall begann im Oktober 2006, als Pater Leopoldo Roque, Pfarrer von San Martín de Tours, Pater Raymundo Reyna Esteban einlud, Exerzitien für seine Pfarrangehörigen zu leiten. Während Pater Leopoldo und ein weiterer Priester die Kommunion austeilten, unterstützt von einer Ordensschwester links von Pater Raymundo, wandte sich diese mit der Pyxis, welche die heiligen Gestalten enthielt, unter Tränen an ihn. Dies zog sofort die Aufmerksamkeit des Zelebranten auf sich: Die Hostie, die sie einer Kommunikantin reichen wollte, hatte begonnen, eine rötliche Substanz abzugeben.“[^28]
 
-<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image6.png" alt="Die Hostie von Tixtla" loading="lazy"><figcaption>Die Hostie von Tixtla; Abbildung aus dem zitierten Buch von Gómez.</figcaption></figure>
+<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image6.webp" alt="Die Hostie von Tixtla" loading="lazy"><figcaption>Die Hostie von Tixtla; Abbildung aus dem zitierten Buch von Gómez.</figcaption></figure>
 
 Dr. Ricardo Gómez veröffentlichte die wissenschaftlichen Befunde in einem eigenen Buch.[^29] Ab Seite 113 werden folgende Ergebnisse genannt:
 
@@ -97,14 +97,14 @@ Dr. Ricardo Gómez veröffentlichte die wissenschaftlichen Befunde in einem eige
 3. Die erste Untersuchung deutete auf nicht näher bestimmbares Muskelgewebe; später wurde es als Teil des Herzens identifiziert.
 4. Es wurden verschiedene Arten roter und weißer Blutkörperchen gefunden.
 
-<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image7.png" alt="Identifizierte rote und weiße Blutkörperchen" loading="lazy"><figcaption>Identifizierte rote und weiße Blutkörperchen.</figcaption></figure>
+<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image7.webp" alt="Identifizierte rote und weiße Blutkörperchen" loading="lazy"><figcaption>Identifizierte rote und weiße Blutkörperchen.</figcaption></figure>
 
-<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image8.png" alt="Mikroskopische Aufnahme von Blutkörperchen" loading="lazy"><figcaption>„Man erkennt acidophile Elemente, die an degenerierte Erythrozyten erinnern, und dazwischen basophile Elemente, die wie Leukozyten mit gelappten oder runden Zellkernen wirken.“</figcaption></figure>
+<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image8.webp" alt="Mikroskopische Aufnahme von Blutkörperchen" loading="lazy"><figcaption>„Man erkennt acidophile Elemente, die an degenerierte Erythrozyten erinnern, und dazwischen basophile Elemente, die wie Leukozyten mit gelappten oder runden Zellkernen wirken.“</figcaption></figure>
 
 5. Die DNA war menschlich, ließ sich aber nicht näher identifizieren. Das war überraschend, weil genügend Material vorhanden zu sein schien. Ein Analytiker erklärte: „Dennoch und überraschenderweise war auch die neue DNA-Analyse vollständig negativ. Es war beispielsweise nicht möglich, eine PCR-Amplifikation zu erhalten, obwohl reichlich Probenmaterial vorhanden war. […] Ich habe keine Erklärung für dieses ungewöhnliche Phänomen.“
 6. Die Hypothese, die Substanz sei nachträglich auf die Hostie aufgetragen worden, wurde durch zwei Untersuchungen als äußerst unwahrscheinlich bewertet. In einem von Dr. Eduardo Sánchez unterzeichneten Gutachten heißt es: „Das Blut tritt aus dem Inneren zur Peripherie aus; das heißt, es kommt aus dem Inneren nach außen, wie bei einem großen Gefäß, das blutet, wenn seine anatomische Struktur verletzt wird.“
 
-<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image9.png" alt="Gutachterliche Darstellung der Probe von Tixtla" loading="lazy"><figcaption>Die gutachterliche Darstellung soll zeigen, dass die rötliche Substanz aus dem Inneren der Hostie nach außen dringt und Hostie und veränderte Struktur ein zusammenhängendes Stück bilden.</figcaption></figure>
+<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image9.webp" alt="Gutachterliche Darstellung der Probe von Tixtla" loading="lazy"><figcaption>Die gutachterliche Darstellung soll zeigen, dass die rötliche Substanz aus dem Inneren der Hostie nach außen dringt und Hostie und veränderte Struktur ein zusammenhängendes Stück bilden.</figcaption></figure>
 
 7. Eine Untersuchung des Blutes mit moderneren Verfahren identifizierte frisches Blut. Dies ist bemerkenswert, weil die Analyse 2010 stattfand, die Probe aber aus dem Jahr 2006 stammte.
 
@@ -118,7 +118,7 @@ Am 19. Oktober bemerkte die Schwester in der Mitte der Hostie einen leuchtend ro
 
 > „Am 29. Oktober wurde das Gefäß mit der Hostie in die Kapelle der Göttlichen Barmherzigkeit im Pfarrhaus gebracht und in den Tabernakel gestellt. Am nächsten Tag wurde die verfärbte Hostie auf Entscheidung des Erzbischofs aus dem Wasser genommen und auf ein kleines Korporale gelegt, das anschließend wieder im Tabernakel verwahrt wurde. So blieb die Hostie drei Jahre lang, bis sie am 2. Oktober 2011 feierlich in die Kirche gebracht wurde. Während des ersten Jahres wurde der Vorgang geheim gehalten. In dieser Zeit berieten die kirchlichen Behörden darüber, wie mit einem Zeichen Gottes umzugehen sei, das ausgelegt werden müsse. Mitte Januar 2009 war der veränderte Teil der Hostie auf natürliche Weise getrocknet und sah nun wie ein Blutfleck oder Gerinnsel aus; seitdem hat sich sein Aussehen nicht verändert. Noch im selben Monat ordnete der Erzbischof histopathologische Untersuchungen an. Am 30. März setzte er eine kirchliche Kommission zur Untersuchung des Phänomens ein.“[^32][^33]
 
-<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image10.png" alt="Die Hostie von Sokółka" loading="lazy"><figcaption>Die untersuchte Hostie.[^34]</figcaption></figure>
+<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image10.webp" alt="Die Hostie von Sokółka" loading="lazy"><figcaption>Die untersuchte Hostie.[^34]</figcaption></figure>
 
 Die wissenschaftlichen Befunde werden in dem Aufsatz „Eucharistic Miracle from a Scientific Perspective“ von Zbigniew Jacyna-Onyszkiewicz, Maria Elżbieta Sobaniec-Łotowska, Stanisław Tadeusz Sulkowski, Andrzej Kakareko und Mirosław Rucki zusammengefasst. Der Beitrag ist ausführlich belegt und nennt die beteiligten Mediziner. Eine Suche bei ResearchGate zeigt, dass mindestens zwei der Autoren zahlreiche medizinische Arbeiten ohne Bezug zu Christentum oder übernatürlichen Ereignissen veröffentlicht haben: Maria Elżbieta Sobaniec-Łotowska mehr als 60,[^35] Mirosław Rucki mehr als 150.[^36] Dem Aufsatz zufolge wussten die Untersuchenden nicht, welches Material ihnen vorlag. Die Ergebnisse umfassten:
 
@@ -129,7 +129,7 @@ Die wissenschaftlichen Befunde werden in dem Aufsatz „Eucharistic Miracle from
 
 Die Kirche führte die wissenschaftlichen Ergebnisse mit Zeugenaussagen und theologischen Deutungen zusammen und veröffentlichte sie 2009. Seitdem seien „aus der wissenschaftlichen Gemeinschaft keine Einwände gegen die Entnahme der Probe, die Methodik der Untersuchungen oder die wissenschaftliche Glaubwürdigkeit der Gutachten erhoben worden“.[^38] Prof. Sobaniec-Łotowska sagte über die Verbindung von Gewebe und Hostie: „Selbst Wissenschaftler der NASA, denen modernste Analysetechniken zur Verfügung stehen, wären nicht in der Lage, so etwas künstlich herzustellen.“[^39]
 
-<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image11.png" alt="Die beiden Professorinnen und Professoren der Analyse" loading="lazy"><figcaption>Die beiden für die Analyse verantwortlichen Professoren.[^40]</figcaption></figure>
+<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image11.webp" alt="Die beiden Professorinnen und Professoren der Analyse" loading="lazy"><figcaption>Die beiden für die Analyse verantwortlichen Professoren.[^40]</figcaption></figure>
 
 Viele Menschen bezweifeln das Wunder. Der Grund dafür ist vermutlich ein polnischer Artikel, der ohne Quellen behauptet, auf der Hostie sei das Bakterium *Serratia marcescens* gefunden worden. Dieses Bakterium kann Brot rot färben und kommt als natürliche Erklärung für falsche Eucharistische Wunder infrage, ähnlich wie *Neurospora crassa*, das als Ursache eines angeblichen Wunders in Paterson festgestellt wurde.[^41] Selbst der kritische Artikel merkt jedoch an: „Bis heute verstehe ich nicht, wie ein ausgebildeter Histopathologe so charakteristische Zellen wie Herzmuskelzellen mit einer viel kleineren Bakterienzelle verwechseln konnte.“[^42] Eine mögliche Erklärung – sofern das Bakterium überhaupt nachgewiesen wurde – wäre, dass sowohl Herzgewebe als auch Bakterien vorhanden waren.
 
@@ -139,7 +139,7 @@ Dennoch ist festzuhalten, dass sich die Universität der beiden Professoren 2009
 
 Am 25. Dezember 2013 ließ der Priester Andrzej Ziombra während der Kommunion eine Hostie zu Boden fallen. Sie wurde in Wasser gelegt, damit sie sich auflöse. Am 4. Januar bemerkte der Priester, dass etwa ein Fünftel der Hostie rot geworden war. Er informierte Bischof Stefan Cichy, der ihn anwies, die Hostie zwei weitere Wochen zu beobachten. Danach hatte sie sich bis auf den roten Teil vollständig aufgelöst.[^44]
 
-<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image12.png" alt="Der abgetrennte rote Teil der Hostie von Legnica" loading="lazy"><figcaption>Der rote Teil der Hostie nach seiner Abtrennung.[^45]</figcaption></figure>
+<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image12.webp" alt="Der abgetrennte rote Teil der Hostie von Legnica" loading="lazy"><figcaption>Der rote Teil der Hostie nach seiner Abtrennung.[^45]</figcaption></figure>
 
 Die wissenschaftliche Untersuchung begann am 26. Januar 2014. Wissenschaftler der Abteilung für Rechtsmedizin der Medizinischen Universität Wrocław entnahmen 15 Proben. Sie konnten Pilze oder Bakterien als Ursache der Rötung ausschließen. Histopathologische Analysen zeigten Fragmente, die Herzmuskel ähnelten; DNA ließ sich zunächst nicht identifizieren.
 
@@ -154,13 +154,13 @@ Die Ergebnisse beider Untersuchungen lassen sich so zusammenfassen:
 3. Die DNA-Tests blieben ohne eindeutiges Ergebnis.
 4. Das Herz befand sich in einem Zustand der Agonie.
 
-<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image13.png" alt="Pressekonferenz der Untersuchungskommission von Legnica" loading="lazy"><figcaption>Pressekonferenz mit Dr. Engel, dem Leiter der Untersuchungskommission, bei der die Ergebnisse vorgestellt wurden.[^47]</figcaption></figure>
+<figure class="article-figure"><img src="/shared/seele/article-images/eucharist/media/image13.webp" alt="Pressekonferenz der Untersuchungskommission von Legnica" loading="lazy"><figcaption>Pressekonferenz mit Dr. Engel, dem Leiter der Untersuchungskommission, bei der die Ergebnisse vorgestellt wurden.[^47]</figcaption></figure>
 
 ## Vergleich der Wunder
 
 Nun sollen Gemeinsamkeiten und Unterschiede der betrachteten Fälle verglichen werden.
 
-<figure class="article-figure article-figure--wide"><img src="/shared/seele/article-images/eucharist/media/image14.png" alt="Vergleichstabelle der fünf Eucharistischen Wunder" loading="lazy"></figure>
+<figure class="article-figure article-figure--wide"><img src="/shared/seele/article-images/eucharist/media/image14.webp" alt="Vergleichstabelle der fünf Eucharistischen Wunder" loading="lazy"></figure>
 
 Dass in allen Fällen menschliches Fleisch – und teilweise Blut – festgestellt wurde, überrascht für sich genommen nicht, weil genau dieses Merkmal das Auswahlkriterium war. Dass DNA-Tests nicht eindeutig ausfielen, ist vor allem insofern relevant, als in den verschiedenen Fällen keine unterschiedliche DNA identifiziert wurde. Ähnliches gilt für die Blutgruppe.
 

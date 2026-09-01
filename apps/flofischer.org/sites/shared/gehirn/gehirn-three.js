@@ -7,11 +7,14 @@ const stage = document.querySelector("[data-brain-stage]");
 const canvas = document.querySelector("[data-brain-canvas]");
 
 if (stage && canvas) {
+  const qualityLow = window.matchMedia("(max-width: 820px), (pointer: coarse)").matches
+    || (navigator.hardwareConcurrency || 8) <= 4;
+  const progressOutputs = stage.querySelectorAll("[data-brain-progress]");
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
   const renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: true,
+    antialias: !qualityLow,
     alpha: true,
     powerPreference: "high-performance",
   });
@@ -29,9 +32,11 @@ if (stage && canvas) {
   let spinAngle = -0.36;
   let spinSpeed = 0.16;
   let loaded = false;
+  let pointerRect = null;
+  let lastRenderAt = 0;
 
   renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.65));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, qualityLow ? 1.15 : 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.86;
@@ -64,11 +69,13 @@ if (stage && canvas) {
   const loader = new GLTFLoader();
   loader.setDRACOLoader(draco);
   loader.load(
-    "/shared/gehirn/models/brain.glb",
+    "/shared/gehirn/models/brain.glb?v=2",
     (gltf) => {
       specimen.add(gltf.scene);
       const bounds = new THREE.Box3();
       let meshIndex = 0;
+      const materials = new Map();
+      const sourceMaterials = new Set();
 
       gltf.scene.traverse((object) => {
         if (!object.isMesh) return;
@@ -77,17 +84,24 @@ if (stage && canvas) {
         object.visible = visibleSystems.has(category);
         if (!object.visible) return;
 
-        const shade = 0.58 + ((meshIndex * 17) % 9) * 0.009;
-        object.material = new THREE.MeshStandardMaterial({
-          color: new THREE.Color().setHSL(0.105, 0.035, shade),
-          roughness: category === "cerebellum" ? 0.82 : 0.74,
-          metalness: 0.05,
-          emissive: new THREE.Color(0x18181b),
-          emissiveIntensity: 0.12,
-        });
+        const materialKey = `${category}:${(meshIndex * 17) % 9}`;
+        if (!materials.has(materialKey)) {
+          const shade = 0.58 + ((meshIndex * 17) % 9) * 0.009;
+          materials.set(materialKey, new THREE.MeshStandardMaterial({
+            color: new THREE.Color().setHSL(0.105, 0.035, shade),
+            roughness: category === "cerebellum" ? 0.82 : 0.74,
+            metalness: 0.05,
+            emissive: new THREE.Color(0x18181b),
+            emissiveIntensity: 0.12,
+          }));
+        }
+        const originals = Array.isArray(object.material) ? object.material : [object.material];
+        originals.filter(Boolean).forEach((material) => sourceMaterials.add(material));
+        object.material = materials.get(materialKey);
         bounds.expandByObject(object);
         meshIndex += 1;
       });
+      sourceMaterials.forEach((material) => material.dispose());
 
       const center = bounds.getCenter(new THREE.Vector3());
       const radius = bounds.getBoundingSphere(new THREE.Sphere()).radius || 1;
@@ -96,10 +110,15 @@ if (stage && canvas) {
       specimen.rotation.set(0.04, Math.PI, -0.025);
 
       loaded = true;
+      progressOutputs.forEach((output) => { output.value = "100"; output.textContent = "100"; });
       stage.classList.add("brain-ready");
       draco.dispose();
     },
-    undefined,
+    (event) => {
+      if (!event.total) return;
+      const progress = Math.min(99, Math.round((event.loaded / event.total) * 100));
+      progressOutputs.forEach((output) => { output.value = String(progress); output.textContent = String(progress); });
+    },
     () => {
       stage.classList.add("brain-failed");
       draco.dispose();
@@ -132,7 +151,7 @@ if (stage && canvas) {
     const rect = stage.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.65));
+    pointerRect = stage.getBoundingClientRect();
     camera.aspect = width / height;
     camera.position.z = camera.aspect < 0.85 ? 10.1 : 7.15;
     camera.updateProjectionMatrix();
@@ -145,16 +164,18 @@ if (stage && canvas) {
 
   const visibilityObserver = new IntersectionObserver((entries) => {
     visible = entries.some((entry) => entry.isIntersecting);
+    clock.getDelta();
   }, { threshold: 0.05 });
   visibilityObserver.observe(stage);
 
   stage.addEventListener("pointerenter", () => {
     pointerInside = true;
     previousPointerX = null;
+    pointerRect = stage.getBoundingClientRect();
   });
 
   stage.addEventListener("pointermove", (event) => {
-    const rect = stage.getBoundingClientRect();
+    const rect = pointerRect || stage.getBoundingClientRect();
     const nextPointerX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
     if (previousPointerX !== null) {
       const movement = THREE.MathUtils.clamp(nextPointerX - previousPointerX, -0.22, 0.22);
@@ -172,24 +193,27 @@ if (stage && canvas) {
     pointerY = 0;
   });
 
-  function render() {
+  function render(now) {
+    if (!visible || document.hidden) {
+      clock.getDelta();
+      return;
+    }
+    if (qualityLow && now - lastRenderAt < 1000 / 30) return;
+    lastRenderAt = now;
     const delta = Math.min(clock.getDelta(), 0.05);
     const elapsed = clock.elapsedTime;
-    if (visible) {
-      if (!reducedMotion.matches) {
-        const cursorDrive = pointerInside ? pointerX * 0.34 + pointerVelocity : 0;
-        const targetSpeed = 0.16 + cursorDrive;
-        spinSpeed = THREE.MathUtils.lerp(spinSpeed, targetSpeed, 1 - Math.exp(-delta * 4.8));
-        spinAngle += spinSpeed * delta;
-        pointerVelocity *= Math.exp(-delta * 7.5);
-      }
-      brain.rotation.y = reducedMotion.matches ? -0.36 : spinAngle;
-      brain.rotation.x += (-0.04 + pointerY * 0.085 - brain.rotation.x) * (1 - Math.exp(-delta * 5));
-      specimen.position.y = reducedMotion.matches ? 0 : Math.sin(elapsed * 0.68) * 0.045;
-      if (loaded || !stage.classList.contains("brain-failed")) effect.render(scene, camera);
+    if (!reducedMotion.matches) {
+      const cursorDrive = pointerInside ? pointerX * 0.34 + pointerVelocity : 0;
+      const targetSpeed = 0.16 + cursorDrive;
+      spinSpeed = THREE.MathUtils.lerp(spinSpeed, targetSpeed, 1 - Math.exp(-delta * 4.8));
+      spinAngle += spinSpeed * delta;
+      pointerVelocity *= Math.exp(-delta * 7.5);
     }
-    requestAnimationFrame(render);
+    brain.rotation.y = reducedMotion.matches ? -0.36 : spinAngle;
+    brain.rotation.x += (-0.04 + pointerY * 0.085 - brain.rotation.x) * (1 - Math.exp(-delta * 5));
+    specimen.position.y = reducedMotion.matches ? 0 : Math.sin(elapsed * 0.68) * 0.045;
+    if (loaded || !stage.classList.contains("brain-failed")) effect.render(scene, camera);
   }
 
-  render();
+  renderer.setAnimationLoop(render);
 }
