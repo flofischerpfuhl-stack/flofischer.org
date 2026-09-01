@@ -145,6 +145,20 @@ def main() -> int:
     errors: list[str] = []
     canonical_urls: set[str] = set()
 
+    release_contract_path = SITES / "shared/release.json"
+    expected_release_contract = {
+        "deploymentPipeline": "cloudflare-workers-builds",
+        "hub": "floating-island-v15",
+        "seeleReader": "floating-reader-with-mobile-toc-and-disclaimers",
+    }
+    try:
+        release_contract = json.loads(release_contract_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        errors.append(f"sites/shared/release.json: invalid release contract ({exc})")
+    else:
+        if release_contract != expected_release_contract:
+            errors.append("sites/shared/release.json: release contract does not match the protected production architecture")
+
     root_markup = (SITES / "root/index.html").read_text(encoding="utf-8")
     if 'id="diorama-world"' not in root_markup:
         errors.append("root/index.html: floating-island diorama canvas is missing")
