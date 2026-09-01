@@ -78,9 +78,9 @@ HimmelCAD folgt, sobald eine eigene Website online ist.
 
 ## Designs
 
-**Seele** nutzt einen festen, hellen Editorial-Look, botanisch-christliche Lehrtafeln, eine redaktionelle Volltextsuche und Themenfilter. Sechs zweisprachige Langtexte werden aus den Obsidian-Quellen übernommen; Englisch ist die Standardsprache.
+**Seele** nutzt einen festen, hellen Editorial-Look, botanisch-christliche Lehrtafeln, eine redaktionelle Volltextsuche und Themenfilter. Die fünf veröffentlichten zweisprachigen Langtexte werden vollständig aus den Markdown-Quellen unter `sites/shared/seele/source/` gebaut; der Build ist unabhängig von Obsidian und privaten Dateipfaden. Die Sprache wird domainübergreifend gespeichert und anhand der Browsersprache vorbelegt.
 
-Der **Hub** ist eine kleine, dichte Three.js-Schwelle ohne Splash-Screen: links ein blühender Tagesgarten (Seele), rechts ein nächtlicher Tempelhof mit Kirschblüte und Neon (Gehirn). Nur Umschauen — Ziehen mit der Maus — und Klick auf eine Schwelle. **Gehirn** nutzt einen einzelnen dunklen, anaglyphischen Filmrollen-Look mit Weiß sowie gegeneinander verschobenen Rot- und Cyan-Kanälen. Die drei Projektflächen zeigen loopende Aufnahmen der echten Websites unter einer gemeinsamen visuellen Behandlung.
+Der **Hub** besteht ausschließlich aus dem aktuellen Floating-Island-Diorama. Seele und Gehirn sind Bereiche derselben Insel; die früheren zwei separaten Three.js-Szenen und `/shared/hub/main.js` gehören nicht mehr zur Architektur. **Gehirn** nutzt einen einzelnen dunklen, anaglyphischen Filmrollen-Look mit Weiß sowie gegeneinander verschobenen Rot- und Cyan-Kanälen. Die drei Projektflächen zeigen loopende Aufnahmen der echten Websites unter einer gemeinsamen visuellen Behandlung.
 
 ## Lizenz
 
