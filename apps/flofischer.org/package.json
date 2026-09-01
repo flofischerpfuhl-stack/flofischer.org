@@ -5,6 +5,7 @@
   "description": "Persönliche Website — flofischer.org (Seele / Gehirn)",
   "scripts": {
     "dev": "wrangler dev",
+    "predeploy": "npm run audit",
     "deploy": "wrangler deploy",
     "preview": "python3 -m http.server 8787 --directory sites",
     "audit": "node scripts/run-audit.mjs",

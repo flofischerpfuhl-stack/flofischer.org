@@ -9,6 +9,65 @@
   let filterTimer = 0;
   let tocCleanup = null;
 
+  function setTocOpen(open) {
+    const toggle = document.querySelector("[data-toc-toggle]");
+    const backdrop = document.querySelector("[data-toc-backdrop]");
+    document.body.classList.toggle("toc-open", open);
+    toggle?.setAttribute("aria-expanded", String(open));
+    if (backdrop) backdrop.hidden = !open;
+    if (open) document.querySelector("[data-toc-close]")?.focus();
+    else if (document.activeElement?.matches("[data-toc-close]")) toggle?.focus();
+  }
+
+  function bootReaderDock() {
+    const host = document.querySelector("[data-content-host]");
+    const dock = document.querySelector("[data-reader-dock]");
+    const progress = document.querySelector("[data-reader-progress]");
+    const progressBar = document.querySelector("[data-reader-progress-bar]");
+    const progressLabel = document.querySelector("[data-reader-progress-label]");
+    if (!host || !dock || !progress || !progressBar || !progressLabel) return;
+
+    document.querySelector("[data-toc-toggle]")?.addEventListener("click", () => setTocOpen(true));
+    document.querySelector("[data-toc-close]")?.addEventListener("click", () => setTocOpen(false));
+    document.querySelector("[data-toc-backdrop]")?.addEventListener("click", () => setTocOpen(false));
+    document.querySelector("[data-scroll-top]")?.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && document.body.classList.contains("toc-open")) setTocOpen(false);
+    });
+
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const top = host.getBoundingClientRect().top + window.scrollY;
+      const height = host.offsetHeight;
+      const readable = Math.max(1, height - window.innerHeight * 0.72);
+      const value = Math.max(0, Math.min(1, (window.scrollY - top + 96) / readable));
+      const percent = Math.round(value * 100);
+      progress.setAttribute("aria-valuenow", String(percent));
+      progressBar.style.width = `${percent}%`;
+      progressLabel.value = `${percent}%`;
+      progressLabel.textContent = `${percent}%`;
+      dock.classList.toggle("is-visible", height > window.innerHeight && window.scrollY > top - window.innerHeight * 0.35);
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    if ("ResizeObserver" in window) new ResizeObserver(schedule).observe(host);
+    update();
+  }
+
+  function insertDisclaimer(host) {
+    const template = document.querySelector("[data-disclaimer-template]");
+    const title = host.querySelector("h1");
+    if (!template || !title) return;
+    host.querySelector("section#disclaimer")?.remove();
+    title.after(template.content.cloneNode(true));
+  }
+
   function romanYear(year) {
     const values = [
       [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
@@ -176,6 +235,7 @@
         link.href = "#" + node.section.id;
         link.textContent = node.heading.textContent.trim();
         link.dataset.tocTarget = node.section.id;
+        link.addEventListener("click", () => setTocOpen(false));
         row.append(link, toggle);
         item.append(row);
 
@@ -308,6 +368,7 @@
       if (request !== articleRequest) return;
       host.innerHTML = html;
       host.dataset.loadedLanguage = language;
+      insertDisclaimer(host);
       buildArticleToc(host);
       loadMath();
     } catch (_) {
@@ -535,6 +596,7 @@
     bootArchiveTools();
     bootBotanicalCarousel();
     bootVersionSwitcher();
+    bootReaderDock();
 
     let language = document.documentElement.dataset.language || "en";
     try {

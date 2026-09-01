@@ -150,9 +150,37 @@ def main() -> int:
         errors.append("root/index.html: floating-island diorama canvas is missing")
     if 'id="hub-world"' in root_markup:
         errors.append("root/index.html: legacy first-person canvas is still present")
+    if "/shared/hub/main.js" in root_markup:
+        errors.append("root/index.html: legacy dual-scene runtime is still referenced")
+    if "/shared/hub/diorama.js" not in root_markup or "data-loader-progress" not in root_markup:
+        errors.append("root/index.html: current floating-island runtime or loader is missing")
     for legacy_file in ("main.js", "player.js", "world.js"):
         if (SITES / "shared/hub" / legacy_file).exists():
             errors.append(f"shared/hub/{legacy_file}: legacy first-person runtime must be removed")
+
+    seele_script = (SITES / "shared/seele/seele.js").read_text(encoding="utf-8")
+    for marker, label in (
+        ("insertDisclaimer(host)", "article disclaimer enhancement"),
+        ("bootReaderDock()", "floating reader dock"),
+        ("setTocOpen(open)", "mobile contents drawer"),
+    ):
+        if marker not in seele_script:
+            errors.append(f"shared/seele/seele.js: missing {label}")
+
+    for page in PUBLIC_PAGES["seele"][1:]:
+        markup = page.read_text(encoding="utf-8")
+        for marker, label in (
+            ('data-reader-dock', "floating reader dock"),
+            ('data-toc-toggle', "mobile contents button"),
+            ('id="article-contents"', "article contents target"),
+        ):
+            if marker not in markup:
+                errors.append(f"{page.relative_to(ROOT)}: missing {label}")
+
+    for filename in ("fsspx-verteidigung.html", "antwort-christian-wagner.html"):
+        markup = (SITES / "seele/posts" / filename).read_text(encoding="utf-8")
+        if "data-disclaimer-template" not in markup or "Redaktioneller Hinweis" not in markup:
+            errors.append(f"sites/seele/posts/{filename}: bilingual editorial disclaimer is missing")
 
     for site, pages in PUBLIC_PAGES.items():
         for page in pages:

@@ -22,15 +22,13 @@
   <meta property="og:url" content="https://seele.flofischer.org/posts/vorsehung-freier-wille.html" />
   <meta property="article:author" content="Florian Fischer" />
   <meta property="article:section" content="Philosophy" />
-  <meta property="og:image" content="https://seele.flofischer.org/social-preview.jpg" />
+<meta property="og:image" content="https://seele.flofischer.org/social-preview.jpg" />
   <meta property="og:image:alt" content="Providence and Free Will — Seele" />
-
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Providence and Free Will" />
   <meta name="twitter:description" content="How divine foreknowledge, providence and human freedom can coexist, from Boethius and Thomism to Molinism and open theism." />
-  <meta name="twitter:image" content="https://seele.flofischer.org/social-preview.jpg" />
+<meta name="twitter:image" content="https://seele.flofischer.org/social-preview.jpg" />
   <meta name="twitter:image:alt" content="Providence and Free Will — Seele" />
-
   <title>Providence and Free Will — Seele</title>
   <script>
     try {
@@ -42,7 +40,7 @@
     } catch (e) {}
   </script>
   <link rel="stylesheet" href="/shared/designs/base.css" />
-  <link rel="stylesheet" href="/shared/seele/seele.css?v=2" />
+  <link rel="stylesheet" href="/shared/seele/seele.css" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -85,11 +83,14 @@
 
     <main class="article-page">
       <article class="article article--reader">
-        <aside class="article-toc">
-          <p>
-            <span data-lang-copy="en">Contents</span>
-            <span data-lang-copy="de">Inhalt</span>
-          </p>
+        <aside class="article-toc" id="article-contents" aria-label="Article contents / Artikelinhalt">
+          <div class="article-toc-heading">
+            <p>
+              <span data-lang-copy="en">Contents</span>
+              <span data-lang-copy="de">Inhalt</span>
+            </p>
+            <button type="button" class="article-toc-close" data-toc-close data-label-en="Close contents" data-label-de="Inhaltsverzeichnis schließen" aria-label="Close contents">×</button>
+          </div>
           <nav data-article-toc aria-label="Article contents"></nav>
         </aside>
         <div
@@ -104,8 +105,23 @@
             <span data-lang-copy="de">Text wird gesetzt…</span>
           </p>
         </div>
+
       </article>
     </main>
+
+    <button class="article-toc-backdrop" type="button" data-toc-backdrop data-label-en="Close contents" data-label-de="Inhaltsverzeichnis schließen" aria-label="Close contents" hidden></button>
+    <div class="reader-dock" data-reader-dock>
+      <button type="button" class="reader-dock-button reader-dock-toc" data-toc-toggle aria-controls="article-contents" aria-expanded="false" data-label-en="Open contents" data-label-de="Inhaltsverzeichnis öffnen" aria-label="Open contents">
+        <span aria-hidden="true">≡</span>
+      </button>
+      <div class="reader-progress" role="progressbar" data-label-en="Reading progress" data-label-de="Lesefortschritt" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-reader-progress>
+        <span data-reader-progress-bar></span>
+        <output data-reader-progress-label>0%</output>
+      </div>
+      <button type="button" class="reader-dock-button" data-scroll-top data-label-en="Back to top" data-label-de="Nach oben" aria-label="Back to top">
+        <span aria-hidden="true">↑</span>
+      </button>
+    </div>
 
     <footer class="site-footer">
       <span>seele.flofischer.org</span>
