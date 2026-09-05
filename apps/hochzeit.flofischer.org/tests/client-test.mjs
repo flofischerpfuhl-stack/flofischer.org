@@ -54,9 +54,10 @@ test("all 20 host and screen game views render; manual tiebreak has no device QR
   assert.equal(html.includes("/buzzer/"), false);
   assert.equal(html.includes("/api/qr"), false);
   const shirt = open("aktion-2");
-  hostAction(shirt, { type: "relay:start" });
+  hostAction(shirt, { type: "timer:start" });
   ui.set(publicState(shirt, { host: true }));
-  assert.ok(ui.run("gameMarkup()").includes("AN- UND WIEDER AUSGEZOGEN"));
+  assert.ok(ui.run("gameMarkup()").includes('data-action="physical-finish"'));
+  assert.equal(ui.run("gameMarkup()").includes('data-action="relay-change"'), false);
 });
 
 test("lost host response retries the same request once; another click is blocked until confirmed", async () => {
@@ -120,8 +121,48 @@ test("percentage predictions and dress vote result render publicly after reveal"
     ui.set(publicState(s, { role: "screen" }));
     const screen = ui.run("screenGameMarkup()");
     assert.ok(screen.includes('class="bars"'));
-    if (id === "vote-1") assert.ok(screen.includes("40 % Wein") && screen.includes("60 % Wein"));
+    if (id === "vote-1") assert.ok(screen.includes("40 % Hund") && screen.includes("60 % Hund"));
     ui.set(publicState(s, { host: true }));
     assert.ok(ui.run("gameMarkup()").includes('class="bars"'));
   }
+});
+
+test("cutting projector hides unannounced weights, explains the next cut and shows the final winner", () => {
+  const ui = client();
+  const data = open("party-3");
+  for (let turn = 0; turn < 6; turn++) {
+    hostAction(data, { type: "cut:guess", guess: "left" });
+    hostAction(data, { type: "cut:weigh", left: 73.2, right: 22.9 });
+    ui.set(publicState(data, { role: "screen" }));
+    const before = ui.run("screenGameMarkup()");
+    assert.equal(before.includes("73,2"), false);
+    assert.equal(before.includes("73.2"), false);
+    assert.equal(before.includes("data-cut-weights"), false);
+    hostAction(data, { type: "cut:reveal" });
+    ui.set(publicState(data, { role: "screen" }));
+    const after = ui.run("screenGameMarkup()");
+    assert.ok(after.includes("73,2"));
+    assert.equal(after.includes('data-action="cut-next"'), false);
+    if (turn % 2 === 0) assert.ok(after.includes("Anton nimmt das linke Stück"));
+    if (turn < 5) hostAction(data, { type: "cut:next" });
+  }
+  assert.ok(ui.run("screenGameMarkup()").includes("5 Showpunkte je Team"));
+});
+
+test("projector shows a physical winner and never receives pantomime terms", () => {
+  const ui = client();
+  const data = open("aktion-2");
+  hostAction(data, { type: "timer:start" });
+  hostAction(data, { type: "physical:finish", team: "rosa" });
+  hostAction(data, { type: "winner", team: "rosa" });
+  ui.set(publicState(data, { role: "screen" }));
+  assert.ok(ui.run("screenGameMarkup()").includes("Team Kathi gewinnt"));
+  const pantomime = open("party-2");
+  hostAction(pantomime, { type: "team-round:start" });
+  const screen = publicState(pantomime, { role: "screen" });
+  assert.equal(JSON.stringify(screen).includes("Zähne putzen"), false);
+  ui.set(screen);
+  assert.equal(ui.run("screenGameMarkup()").includes("Zähne putzen"), false);
+  ui.set(publicState(pantomime, { host: true }));
+  assert.ok(ui.run("gameMarkup()").includes("Zähne putzen"));
 });

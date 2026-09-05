@@ -122,7 +122,7 @@ const server = http.createServer(async (request, response) => {
 });
 
 async function serveStatic(pathname, headOnly, response) {
-  const assetMatch = pathname.match(/^\/(world\.jpg|app\.js|transport\.mjs|styles\.css|media\/[a-z0-9-]+\.(?:svg|png))$/i);
+  const assetMatch = pathname.match(/^\/(world\.jpg|app\.js|transport\.mjs|styles\.css|media\/[a-z0-9-]+\.(?:svg|png|mp3))$/i);
   const fileName = assetMatch ? assetMatch[1] : "index.html";
   const body = await readFile(join(PUBLIC_DIR, fileName));
   const types = {
@@ -132,6 +132,7 @@ async function serveStatic(pathname, headOnly, response) {
     ".css": "text/css; charset=utf-8",
     ".jpg": "image/jpeg",
     ".png": "image/png",
+    ".mp3": "audio/mpeg",
     ".svg": "image/svg+xml; charset=utf-8",
   };
   response.writeHead(200, {

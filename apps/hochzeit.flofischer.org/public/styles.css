@@ -68,6 +68,7 @@ img { max-width: 100%; }
 .show-logo-small, .show-logo-title { position: relative; display: block; white-space: nowrap; }
 .show-logo-small { margin-bottom: -2px; font: 1000 calc(var(--logo-title-size) * .36)/1 Arial, sans-serif; letter-spacing: .27em; }
 .show-logo-title { font: 1000 var(--logo-title-size)/.88 Impact, Haettenschweiler, "Arial Narrow Bold", Arial, sans-serif; letter-spacing: -.025em; }
+.show-logo-type { display: block; width: 100%; height: auto; min-width: 0; fill: currentColor; overflow: visible; }
 .show-logo-rings { position: absolute; z-index: 3; top: -3px; right: 8%; width: 41px; height: 25px; transform: rotate(-8deg); }
 .show-logo-rings i { position: absolute; width: 22px; aspect-ratio: 1; border: 3px solid #fff4bf; border-radius: 50%; box-shadow: 0 0 0 1px #7b5500, 0 2px 5px rgba(0,0,0,.5); }
 .show-logo-rings i:first-child { left: 1px; }

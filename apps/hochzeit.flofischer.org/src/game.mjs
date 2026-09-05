@@ -324,6 +324,10 @@ function applyHostAction(data, message, makeToken, now) {
     case "counter:change": return counterChange(data, message);
     case "measurement:set": return measurementSet(data, message);
     case "measurement:resolve": return measurementResolve(data, now);
+    case "cut:guess": return cuttingAction(data, message, now);
+    case "cut:weigh": return cuttingAction(data, message, now);
+    case "cut:reveal": return cuttingAction(data, message, now);
+    case "cut:next": return cuttingAction(data, message, now);
     case "physical:finish": return physicalFinish(data, message, now);
     case "showcase:finish": return showcaseFinish(data, now);
     case "pullups:start": return pullupsStart(data);
@@ -425,7 +429,7 @@ export function publicState(data, access = {}) {
       vote: voteState(data.vote, { screen: true }), cards: publicCardsForScreen(data), revision: data.revision, access: { role: "screen", valid: true },
     };
   }
-  if (host) {
+  if (host && (!access.role || access.role === "host")) {
     return {
       room: ROOM,
       session: data.session,
@@ -519,6 +523,7 @@ function screenChallenge(challenge) {
   if (!challenge) return null;
   const copy = structuredClone(challenge);
   delete copy.buzzerTokens;
+  if (copy.cutting && !copy.cutting.current.winner) delete copy.cutting.current.weights;
   return copy;
 }
 
@@ -530,7 +535,10 @@ function publicCardsForScreen(data) {
     for (const phase of ["main", "tie"]) {
       const section = data.active?.id === card.id ? data.challenge?.[phase] : null;
       const rounds = phase === "main" ? copy.rounds : copy.tieBreak;
-      rounds?.forEach((round, index) => { if (!section?.revealed?.[index]) delete round.answer; });
+      rounds?.forEach((round, index) => {
+        if (!section?.revealed?.[index]) delete round.answer;
+        if (round.media === "audio") delete round.asset;
+      });
     }
     return copy;
   });
@@ -571,7 +579,48 @@ function newPhysicalChallenge(card, makeToken = token) {
     },
   } : null;
   const pullups = card.mode === "pullups" ? { index: 0, attempts: [{ team: "rosa", person: 1, reps: 0, status: "pending" }, { team: "blau", person: 1, reps: 0, status: "pending" }, { team: "rosa", person: 2, reps: 0, status: "pending" }, { team: "blau", person: 2, reps: 0, status: "pending" }] } : null;
-  return { kind: "physical", mode: card.mode, phase: "setup", ready: false, result: null, finishedAt: null, timer, relay, performance, teamRounds, pullups, counters: { rosa: 0, blau: 0 }, measurements: { rosa: { left: null, right: null }, blau: { left: null, right: null } } };
+  const cutting = card.mode === "cutting" ? { index: 0, roundCount: 3, current: { guess: null, weights: null, actual: null, winner: null }, turns: [], points: { rosa: 0, blau: 0 } } : null;
+  return { kind: "physical", mode: card.mode, phase: "setup", ready: false, result: null, finishedAt: null, timer, relay, performance, teamRounds, pullups, cutting, counters: { rosa: 0, blau: 0 }, measurements: { rosa: { left: null, right: null }, blau: { left: null, right: null } } };
+}
+
+function cuttingAction(data, message, now) {
+  const challenge = data.challenge;
+  const game = challenge?.cutting;
+  if (challenge?.mode !== "cutting" || !game || data.active?.awarded || challenge.phase === "finished") return fail("game_finished", 409);
+  if (!challenge.ready) return fail("setup_not_confirmed", 409);
+  const current = game.current;
+  if (message.type === "cut:guess") {
+    if (current.guess || current.winner) return fail("guess_locked", 409);
+    if (!["left", "right", "equal"].includes(message.guess)) return fail("bad_choice");
+    current.guess = message.guess;
+    challenge.phase = "running";
+  } else if (message.type === "cut:weigh") {
+    if (!current.guess || current.winner) return fail("guess_required", 409);
+    const left = Number(message.left), right = Number(message.right);
+    if (![left, right].every(n => Number.isFinite(n) && n > 0 && n <= 10000)) return fail("bad_measurement");
+    current.weights = { left, right };
+  } else if (message.type === "cut:reveal") {
+    if (current.winner) return fail("round_already_scored", 409);
+    if (!current.guess || !current.weights) return fail("measurements_missing", 409);
+    const { left, right } = current.weights;
+    current.actual = Math.abs(left - right) < 1e-9 ? "equal" : left > right ? "left" : "right";
+    const cutter = game.index % 2 === 0 ? "rosa" : "blau";
+    const guesser = cutter === "rosa" ? "blau" : "rosa";
+    current.winner = current.guess === current.actual ? guesser : cutter;
+    game.points[current.winner]++;
+    game.turns.push({ ...structuredClone(current), cutter, guesser, round: Math.floor(game.index / 2) + 1 });
+    if (game.index === game.roundCount * 2 - 1) {
+      challenge.result = game.points.rosa === game.points.blau ? "both" : game.points.rosa > game.points.blau ? "rosa" : "blau";
+      challenge.phase = "finished";
+      challenge.finishedAt = now();
+      awardGame(data, challenge.result, now);
+    }
+  } else if (message.type === "cut:next") {
+    if (!current.winner || game.index >= game.roundCount * 2 - 1) return fail("round_not_scored", 409);
+    game.index++;
+    game.current = { guess: null, weights: null, actual: null, winner: null };
+  }
+  return { ok: true };
 }
 
 function newQuizChallenge(makeToken = token) {
@@ -845,6 +894,7 @@ function measurementResolve(data, now) {
 function physicalFinish(data, message, now) {
   const challenge = data.challenge;
   if (!challenge || challenge.kind !== "physical" || challenge.phase === "finished" || data.active?.awarded) return fail("game_finished", 409);
+  if (!["countdown", "stopwatch", "counter"].includes(challenge.mode)) return fail("guided_result_required", 409);
   const result = message.team;
   if (!isResult(result)) return fail("bad_team");
   if (challenge.mode === "countdown") {

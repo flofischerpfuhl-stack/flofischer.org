@@ -48,6 +48,8 @@ const serverTime = () => performance.timeOrigin + performance.now() + clockOffse
 let mapCamera = { key: "", scale: 1, x: 0, y: 0 };
 let timerFrame = 0;
 let audioContext = null;
+let songAudio = null;
+let songAsset = null;
 let audioStopTimer = 0;
 const MAP_MAX_SCALE = 8;
 const TEAM_NAMES = { rosa: "Kathi", blau: "Anton" };
@@ -82,6 +84,12 @@ app.addEventListener("submit", async (event) => {
     event.preventDefault();
     const fields = new FormData(voteGuess);
     return hostSend({ type: "vote:guesses:set", rosaPercent: Number(fields.get("rosaPercent")), blauPercent: Number(fields.get("blauPercent")) });
+  }
+  const cutForm = event.target.closest("[data-cut-weights]");
+  if (cutForm) {
+    event.preventDefault();
+    const fields = new FormData(cutForm);
+    return hostSend({ type: "cut:weigh", left: Number(fields.get("left")), right: Number(fields.get("right")) });
   }
   const form = event.target.closest("[data-measurement]");
   if (!form) return;
@@ -125,6 +133,9 @@ app.addEventListener("click", async (event) => {
   if (action === "physical-finish") return hostSend({ type: "physical:finish", team: button.dataset.team });
   if (action === "physical-tiebreak") return hostSend({ type: "physical:tiebreak", team: button.dataset.team });
   if (action === "showcase-finish") return hostSend({ type: "showcase:finish" });
+  if (action === "cut-guess") return hostSend({ type: "cut:guess", guess: button.dataset.guess });
+  if (action === "cut-reveal") return hostSend({ type: "cut:reveal" });
+  if (action === "cut-next") return hostSend({ type: "cut:next" });
   if (action === "physical-ready") return hostSend({ type: "physical:ready" });
   if (action === "pullups-start") return hostSend({ type: "pullups:start" });
   if (action === "pullups-rep") return hostSend({ type: "pullups:rep", delta: Number(button.dataset.delta) });
@@ -143,6 +154,8 @@ app.addEventListener("click", async (event) => {
   if (action === "quiz-buzzer-open") return hostSend({ type: "quiz:buzzer:open" });
   if (action === "quiz-tiebreak-judge") return hostSend({ type: "quiz:tiebreak:judge", correct: button.dataset.correct === "true" });
   if (action === "play-melody") return playMelody(currentQuizRound()?.melody).catch(() => showToast("Audio konnte nicht starten. Lautsprecher prüfen und erneut antippen."));
+  if (action === "play-song") return playSong(currentQuizRound());
+  if (action === "stop-song") return stopAudio();
   if (action === "map-confirm") return confirmMapPosition();
   if (action === "vote") {
     voteChoice = button.dataset.choice;
@@ -378,7 +391,7 @@ function screenGameMarkup() {
   else if (active.kind === "vote" || active.kind === "physical" && state.vote && (state.challenge.phase === "judging" || state.challenge.mode === "performance" || state.vote.revealed)) content = screenVoteMarkup();
   else if (active.kind === "physical") content = physicalMarkup(true);
   else if (active.kind === "quiz") content = quizMarkup(true);
-  return `<section class="game-stage screen-game"><div class="game-content"><p class="game-kicker">${escapeHtml(active.cat)} · ${active.stars} SHOWPUNKTE</p><h2 class="game-title">${escapeHtml(active.title)}</h2><p class="game-description">${escapeHtml(active.text)}</p>${content}${active.kind === "physical" && state.vote && !state.vote.revealed && state.challenge.mode === "countdown" && state.challenge.phase !== "judging" ? screenVoteMarkup() : ""}</div></section>`;
+  return `<section class="game-stage screen-game"><div class="game-content"><p class="game-kicker">${escapeHtml(active.cat)} · ${active.stars} SHOWPUNKTE</p><h2 class="game-title">${escapeHtml(active.title)}</h2><p class="game-description">${escapeHtml(active.text)}</p>${content}${active.awarded ? `<div class="winner-panel"><p class="awarded">${escapeHtml(resultLabel(active.awarded))}${active.awarded === "draw" ? "" : ` · ${active.stars} Showpunkte${active.awarded === "both" ? " je Team" : ""}`}</p></div>` : ""}${active.kind === "physical" && state.vote && !state.vote.revealed && state.challenge.mode === "countdown" && state.challenge.phase !== "judging" ? screenVoteMarkup() : ""}</div></section>`;
 }
 
 function screenVoteMarkup() {
@@ -400,12 +413,12 @@ function hostHeader() {
 }
 
 function showLogoMarkup(className = "") {
-  return `<div class="show-logo ${escapeHtml(className)}" role="img" aria-label="Schlag den Ehepartner"><span class="show-logo-wings" aria-hidden="true"></span><span class="show-logo-lockup"><span class="show-logo-small">Schlag den</span><span class="show-logo-title">Ehepartner</span></span><span class="show-logo-rings" aria-hidden="true"><i></i><i></i></span></div>`;
+  return `<div class="show-logo ${escapeHtml(className)}" role="img" aria-label="Schlag den Ehepartner"><span class="show-logo-wings" aria-hidden="true"></span><span class="show-logo-lockup"><svg class="show-logo-type" viewBox="0 0 340 76" aria-hidden="true"><text x="170" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="900" textLength="210" lengthAdjust="spacingAndGlyphs">SCHLAG DEN</text><text x="170" y="63" text-anchor="middle" font-family="Arial, sans-serif" font-size="43" font-weight="900" textLength="294" lengthAdjust="spacingAndGlyphs">EHEPARTNER</text></svg></span><span class="show-logo-rings" aria-hidden="true"><i></i><i></i></span></div>`;
 }
 
 function boardMarkup(readOnly = false) {
   const categories = ["Aktion", "Party", "Raten", "Abstimmung"];
-  return `<section class="board" aria-label="Spieltafel">${categories.map((category) => `<div class="category"><h2 class="category-title">${category}</h2>${state.cards.filter((card) => card.cat === category).map((card) => {
+  return `<section class="board" aria-label="Spieltafel">${categories.map((category) => `<div class="category"><h2 class="category-title">${category}</h2>${state.cards.filter((card) => card.cat === category).sort((a, b) => a.stars - b.stars).map((card) => {
     const flipped = Boolean(state.flipped[card.id]); const completed = state.completed?.[card.id]; const running = state.active?.id === card.id && !completed; const revealing = flipped && !completed && !running && boardReady && !knownFlips.has(card.id);
     const label = completed ? `${card.title}, erledigt: ${resultLabel(completed.result)}` : running ? `${card.title}, läuft, fortsetzen` : flipped ? `${card.title} starten` : `${card.stars} Punkte aufdecken`;
     const resultClass = completed ? `completed-${completed.result}` : "";
@@ -429,6 +442,8 @@ function physicalMarkup(readOnly = false) {
   if (challenge.mode === "pullups") controls = pullupsMarkup(challenge, readOnly);
   if (challenge.mode === "counter") controls = counterMarkup(card, challenge, readOnly);
   if (challenge.mode === "measurement") controls = measurementMarkup(challenge, readOnly);
+  if (challenge.mode === "cutting") controls = cuttingMarkup(challenge, readOnly);
+  if (readOnly && challenge.ready) return `${controls}<article class="decision-card"><p>${escapeHtml(card.decision)}</p></article>`;
   const gate = !challenge.ready ? readOnly ? `<p class="screen-wait">Material-, Fairness- und Sicherheitscheck läuft.</p>` : `<section class="setup-gate"><p class="eyebrow">PFLICHTCHECK VOR DEM START</p><p>Material identisch, Regeln erklärt, sichere Fläche geprüft und alle Teilnehmenden freiwillig bereit?</p><button class="button gold big" data-action="physical-ready">✓ SETUP &amp; SICHERHEIT BESTÄTIGEN</button></section>` : `<p class="ready-banner">✓ SETUP UND SICHERHEIT BESTÄTIGT</p>`;
   return `<div class="brief-grid"><article class="brief-card"><p class="eyebrow">VORBEREITUNG</p>${listMarkup(card.setup)}</article><article class="brief-card"><p class="eyebrow">REGELN</p>${listMarkup(card.rules)}</article></div>${gate}${challenge.ready ? controls : ""}<article class="decision-card"><p class="eyebrow">ENTSCHEIDUNG</p><p>${escapeHtml(card.decision)}</p></article>`;
 }
@@ -492,6 +507,32 @@ function counterMarkup(card, challenge, readOnly = false) {
   return `<section class="control-arena"><div class="control-heading"><p class="eyebrow">GÜLTIGE WIEDERHOLUNGEN</p>${target}</div><div class="team-control-grid">${["rosa", "blau"].map((team) => `<article class="team-counter ${team}"><span>TEAM ${teamName(team).toUpperCase()}</span><strong>${challenge.counters[team]}</strong>${readOnly ? "" : `<div><button class="counter-button" data-action="counter" data-team="${team}" data-delta="-1" aria-label="Eins abziehen">−</button><button class="counter-button primary" data-action="counter" data-team="${team}" data-delta="1" ${challenge.phase === "finished" || card.target && challenge.counters[team] >= card.target ? "disabled" : ""} aria-label="Gültige Wiederholung hinzufügen">+</button></div>`}</article>`).join("")}</div>${!readOnly && !card.target && !challenge.result && (challenge.counters.rosa || challenge.counters.blau) ? `<button class="button gold big finish-count" data-action="physical-finish" data-team="${calculated}">ALLE VERSUCHE BEENDET · AUSWERTEN</button>` : ""}</section>`;
 }
 
+function cuttingMarkup(challenge, readOnly = false) {
+  const game = challenge.cutting;
+  const round = Math.floor(game.index / 2) + 1;
+  const secondCut = game.index % 2 === 1;
+  const cutter = secondCut ? "blau" : "rosa";
+  const guesser = secondCut ? "rosa" : "blau";
+  const current = game.current;
+  const summary = `<div class="relay-summary"><span class="rosa"><b>Kathi</b><strong>${game.points.rosa} Einzelpunkte</strong></span><span class="blau"><b>Anton</b><strong>${game.points.blau} Einzelpunkte</strong></span></div>`;
+  let step;
+  if (current.winner) {
+    const correct = current.guess === current.actual;
+    step = `<div class="result-card"><p>Tipp von ${teamName(guesser)}: <strong>${sideLabel(current.guess)}</strong> · ${correct ? "RICHTIG" : "FALSCH"}</p><h3>${teamName(current.winner)} bekommt einen Einzelpunkt</h3><p>Links: ${formatNumber(current.weights.left)} g · Rechts: ${formatNumber(current.weights.right)} g</p><p><strong>${current.actual === "equal" ? "Beide Stücke sind gleich schwer." : `${sideLabel(current.actual)} ist schwerer.`}</strong></p></div>`;
+    if (challenge.phase !== "finished") {
+      const instruction = secondCut ? "Nächster Gegenstand: Kathi schneidet, Anton rät." : `Anton nimmt ${current.actual === "right" ? "das rechte" : "das linke"} Stück und schneidet es erneut durch; Kathi rät. ${current.actual === "equal" ? "Bei gleichem Gewicht nehmen wir das linke Stück." : ""}`;
+      step += `<p class="game-description">${instruction}</p>${readOnly ? "" : `<button class="button gold big" data-action="cut-next">${secondCut ? "NÄCHSTER GEGENSTAND" : "ZWEITER SCHNITT"}</button>`}`;
+    }
+  } else if (!current.guess) {
+    step = `<h3>${teamName(cutter)} schneidet ${secondCut ? "das größere Stück noch einmal" : "den neuen Gegenstand"} durch.</h3><p class="game-description">${teamName(guesser)} rät: Welches Stück ist schwerer? Links und rechts aus Sicht des Publikums.</p>${readOnly ? `<p class="screen-wait">Erst den Tipp nennen, dann wird gewogen.</p>` : `<div class="button-row centered">${["left", "right", "equal"].map(side => `<button class="button ${guesser} big" data-action="cut-guess" data-guess="${side}">TIPP: ${sideLabel(side)}</button>`).join("")}</div>`}`;
+  } else {
+    step = `<p class="game-description">Tipp von ${teamName(guesser)} liegt fest: <strong>${sideLabel(current.guess)}</strong></p>${readOnly ? `<p class="screen-wait">Die Moderation wiegt die Stücke. Gleich wird aufgelöst.</p>` : `<form class="measure-card" data-cut-weights><div class="measure-inputs"><label>Links<input name="left" type="number" min="0.1" max="10000" step="0.1" required value="${current.weights?.left ?? ""}"> g</label><label>Rechts<input name="right" type="number" min="0.1" max="10000" step="0.1" required value="${current.weights?.right ?? ""}"> g</label></div><button class="button secondary" type="submit">GEWICHTE PRIVAT SPEICHERN</button></form>${current.weights ? `<button class="button gold big" data-action="cut-reveal">AUFLÖSEN · EINZELPUNKT VERGEBEN</button>` : ""}`}`;
+  }
+  return `<section class="control-arena cutting-arena"><p class="eyebrow">GEGENSTAND ${round} VON 3 · SCHNITT ${secondCut ? 2 : 1} VON 2</p>${summary}${step}</section>`;
+}
+
+function sideLabel(side) { return ({ left: "Links", right: "Rechts", equal: "Gleich schwer" })[side] || "–"; }
+
 function measurementMarkup(challenge, readOnly = false) {
   return `<section class="control-arena"><p class="eyebrow">GEWICHTE EINTRAGEN</p><div class="team-control-grid">${["rosa", "blau"].map((team) => {
     const value = challenge.measurements[team]; const difference = value.left !== null && value.right !== null ? `${formatNumber(Math.abs(value.left - value.right))} g Unterschied` : "Noch nicht gewogen";
@@ -525,6 +566,7 @@ function quizSummaryMarkup(card, challenge, scores, readOnly = false) {
 }
 
 function quizMediaMarkup(round, revealed, readOnly = false) {
+  if (round.media === "audio") return `<div class="media-stage melody-stage"><div class="sound-bars" aria-hidden="true">${Array.from({ length: 12 }, (_, index) => `<i style="--i:${index}"></i>`).join("")}</div>${readOnly ? `<p>Hörprobe anhören und den Titel erraten.</p>` : `<div class="button-row centered"><button class="button gold big" data-action="play-song">▶ HÖRPROBE VON VORN</button><button class="button secondary big" data-action="stop-song">■ STOPP</button></div><p>Die MP3 läuft über die Lautsprecher des Moderationsgeräts.</p>`}</div>`;
   if (round.media === "melody") return `<div class="media-stage melody-stage"><div class="sound-bars" aria-hidden="true">${Array.from({ length: 12 }, (_, index) => `<i style="--i:${index}"></i>`).join("")}</div>${readOnly ? `<p>Die Hörprobe wird von der Moderation abgespielt.</p>` : `<button class="button gold big" data-action="play-melody">▶ HÖRPROBE ABSPIELEN</button><p>Lautsprecher vor der Runde testen. Beim Rundenwechsel stoppt die Hörprobe.</p>`}</div>`;
   if (round.media === "plate") return `<div class="media-stage plate-stage"><img src="${escapeHtml(round.asset)}" alt="Deutsches Nummernschild für diese Raterunde"></div>`;
   if (round.media === "photo") { const x = round.sprite.column * 50; const y = round.sprite.row * 100; const detail = round.detail || { scale: 4.8, x: 50, y: 50 }; return `<div class="media-stage photo-stage"><div class="photo-window"><div class="photo-sprite ${revealed ? "revealed" : "zoomed"}" style="background-position:${x}% ${y}%;--detail-scale:${detail.scale};--detail-x:${detail.x}%;--detail-y:${detail.y}%"></div></div><span>${revealed ? "GANZES MOTIV" : "MIKRO-AUSSCHNITT"}</span></div>`; }
@@ -839,9 +881,23 @@ async function playMelody(melody) {
 async function stopAudio() {
   clearTimeout(audioStopTimer);
   audioStopTimer = 0;
+  if (songAudio) { songAudio.pause(); songAudio.currentTime = 0; }
   if (!audioContext) return;
   await audioContext.close().catch(() => {});
   audioContext = null;
+}
+
+async function playSong(round) {
+  if (!round?.asset) return;
+  if (songAudio) songAudio.pause();
+  if (songAsset !== round.asset) { songAudio = new Audio(round.asset); songAudio.preload = "auto"; songAsset = round.asset; }
+  songAudio.currentTime = round.startSeconds || 0;
+  try {
+    await songAudio.play();
+    showToast("Hörprobe läuft …");
+    clearTimeout(audioStopTimer);
+    audioStopTimer = setTimeout(() => { void stopAudio(); }, (round.durationSeconds || 25) * 1000);
+  } catch { showToast("MP3 konnte nicht starten. Verbindung und Lautsprecher prüfen, dann erneut antippen."); }
 }
 
 function noteFrequency(note) {
@@ -860,7 +916,7 @@ function formatNumber(value) { return Number(value).toLocaleString("de-DE", { ma
 function formatTime(value) { const total = Math.max(0, Number(value) || 0); const minutes = Math.floor(total / 60000); const seconds = Math.floor(total % 60000 / 1000); const tenths = Math.floor(total % 1000 / 100); return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${tenths}`; }
 function openScoreDialog() { document.querySelector("#score-rosa").value = state.scores.rosa; document.querySelector("#score-blau").value = state.scores.blau; scoreDialog.showModal(); }
 function openSessionDialog() { document.querySelector("#session-label").value = `Show ${state.session.number + 1}`; document.querySelector("#session-confirm").value = ""; sessionDialog.showModal(); }
-function errorMessage(error) { return ({ stale_session: "Diese Aktion gehört zu einer früheren Show. Bitte neu laden.", invalid_action_time: "Gerätezeit stimmt nicht. Bitte neu laden und erneut versuchen.", timer_finished: "Die 60 Sekunden sind vorbei. Bitte die Runde beenden.", no_votes: "Noch keine Stimmen. Bitte die Abstimmung erneut öffnen.", bad_reps: "Bitte eine ganze Zahl von 0 bis 99 eingeben.", already_awarded: "Dieses Spiel ist bereits gewertet. Zum Ändern bitte Rückgängig verwenden.", card_completed: "Diese Karte ist bereits erledigt und bleibt gesperrt.", card_still_flipping: "Die Karte klappt noch um – danach erneut antippen.", another_game_active: "Ein anderes Spiel läuft noch. Bitte zuerst fortsetzen oder ausdrücklich verwerfen.", setup_not_confirmed: "Bitte zuerst Setup und Sicherheit bestätigen.", result_not_ready: "Das Spiel ist noch nicht regelkonform abgeschlossen.", result_mismatch: "Dieses Ergebnis passt nicht zum gespeicherten Spielverlauf.", guesses_missing: "Bitte zuerst die beiden angesagten Teamtipps speichern.", answers_not_locked: "Beide Teamantworten müssen zuerst feststehen.", round_not_scored: "Bitte beide Teams ausdrücklich als richtig oder falsch werten.", nothing_to_undo: "Es gibt nichts rückgängig zu machen.", nothing_to_redo: "Es gibt nichts zu wiederholen.", round_not_revealed: "Bitte zuerst die Antwort aufdecken.", tiebreak_not_needed: "Das Stechen ist nur bei Gleichstand nötig.", position_locked: "Diese Position ist bereits gesperrt.", stale_round: "Diese Eingabe gehört zu einer früheren Kartenrunde.", stale_revision: "Der Stand wurde inzwischen auf einem anderen Gerät geändert. Bitte erneut versuchen.", vote_closed: "Diese Abstimmung ist bereits geschlossen.", vote_not_closed: "Bitte die Abstimmung zuerst verbindlich schließen.", quorum_missing: "Noch nicht genug Stimmen. Falls wirklich nötig, bewusst vorzeitig schließen." })[error] || "Aktion gerade nicht möglich."; }
+function errorMessage(error) { return ({ guess_locked: "Der Tipp steht bereits fest. Zum Korrigieren Rückgängig verwenden.", guess_required: "Bitte zuerst den Tipp festhalten.", measurements_missing: "Bitte zuerst beide Gewichte speichern.", bad_measurement: "Bitte zwei gültige Gewichte größer null eingeben.", stale_session: "Diese Aktion gehört zu einer früheren Show. Bitte neu laden.", invalid_action_time: "Gerätezeit stimmt nicht. Bitte neu laden und erneut versuchen.", timer_finished: "Die 60 Sekunden sind vorbei. Bitte die Runde beenden.", no_votes: "Noch keine Stimmen. Bitte die Abstimmung erneut öffnen.", bad_reps: "Bitte eine ganze Zahl von 0 bis 99 eingeben.", already_awarded: "Dieses Spiel ist bereits gewertet. Zum Ändern bitte Rückgängig verwenden.", card_completed: "Diese Karte ist bereits erledigt und bleibt gesperrt.", card_still_flipping: "Die Karte klappt noch um – danach erneut antippen.", another_game_active: "Ein anderes Spiel läuft noch. Bitte zuerst fortsetzen oder ausdrücklich verwerfen.", setup_not_confirmed: "Bitte zuerst Setup und Sicherheit bestätigen.", result_not_ready: "Das Spiel ist noch nicht regelkonform abgeschlossen.", result_mismatch: "Dieses Ergebnis passt nicht zum gespeicherten Spielverlauf.", guesses_missing: "Bitte zuerst die beiden angesagten Teamtipps speichern.", answers_not_locked: "Beide Teamantworten müssen zuerst feststehen.", round_not_scored: "Bitte beide Teams ausdrücklich als richtig oder falsch werten.", nothing_to_undo: "Es gibt nichts rückgängig zu machen.", nothing_to_redo: "Es gibt nichts zu wiederholen.", round_not_revealed: "Bitte zuerst die Antwort aufdecken.", tiebreak_not_needed: "Das Stechen ist nur bei Gleichstand nötig.", position_locked: "Diese Position ist bereits gesperrt.", stale_round: "Diese Eingabe gehört zu einer früheren Kartenrunde.", stale_revision: "Der Stand wurde inzwischen auf einem anderen Gerät geändert. Bitte erneut versuchen.", vote_closed: "Diese Abstimmung ist bereits geschlossen.", vote_not_closed: "Bitte die Abstimmung zuerst verbindlich schließen.", quorum_missing: "Noch nicht genug Stimmen. Falls wirklich nötig, bewusst vorzeitig schließen." })[error] || "Aktion gerade nicht möglich."; }
 function showToast(message, sticky = false) { const toast = document.querySelector("#toast"); if (!toast) return; toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); if (!sticky) toastTimer = setTimeout(() => toast.classList.remove("show"), 2600); }
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]); }
 

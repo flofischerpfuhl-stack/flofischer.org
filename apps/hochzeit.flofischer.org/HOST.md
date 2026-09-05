@@ -16,17 +16,34 @@ Karten, Regeln, Timer, Ergebnisse und Punkte laufen über die Website. Die Landk
 
 1. Karte einmal antippen: Titel aufdecken. Andere Karte antippen: vorherige klappt zu.
 2. Zweites Antippen nach der Animation: Spiel öffnen.
-3. Den angezeigten Ablauf durchführen. Physische Ergebnisse bestätigen; Quiz, Karte, Messung und Voting werten automatisch.
+3. Den angezeigten Ablauf durchführen. Physische Ergebnisse bestätigen; Quiz, Karte, Teilspiel und Voting werten automatisch.
 4. Gewertete Karten bleiben erledigt. Fehlwertung über Rückgängig korrigieren.
 
 ## Stechen und Zählen
 
 - **Quiz-Stechen:** Antwort ausrufen lassen. Du entscheidest, wer zuerst dran war, hörst die Antwort an und klickst das Team. Danach Lösung aufdecken und richtig/falsch werten. Falsch bedeutet Sieg fürs andere Team. „Niemand weiß es“ beendet ohne Punkte. Die Auswahl kann vor dem Aufdecken korrigiert werden.
 - **Klimmzüge:** Vier abwechselnde Versuche. Eine Person zählt laut, die Gesamtzahl wird einmal pro Versuch eingetragen (auch null). Keine Einzelklicks pro Klimmzug.
-- **Hemd:** Zehn Personen je Team und genau eine feste Hilfsperson. Erst nach vollständigem **An- und wieder Ausziehen** klicken. Beim zehnten vollständigen Durchgang stoppt die Uhr.
+- **Hemd:** Beide Teams starten gleichzeitig, je zehn Personen und genau eine feste Hilfsperson. Eine gemeinsame Stoppuhr starten. Sobald ein Team alle zehn vollständigen An-/Auszieh-Durchgänge geschafft hat, dessen Siegerknopf klicken und das Ergebnis bestätigen. Keine Personen einzeln zählen oder klicken.
 - **Liegestütze:** Neutral laut bis 40 zählen; nur Start und Stopp klicken.
 - **Physischer Gleichstand:** Kurzes Stechen laut Spielregel durchführen und dessen Sieger eintragen. Alternativ ausdrücklich ohne Punkte abschließen. Bei Staffelzeiten zählt die angezeigte Zehntelsekunde.
-- **Pantomime:** Kathi, dann Anton; jeweils **60 Sekunden insgesamt**, höchstens sechs Begriffe. Nur die darstellende Person sieht den Begriff auf deinem Gerät. Richtig/Überspringen wechselt weiter. Nach Ablauf keine neuen Punkte, dann Runde beenden. Keine Papierkarten erforderlich.
+- **Pantomime:** Kathi, dann Anton; jeweils **60 Sekunden insgesamt**, 30 kurze Begriffe je Team als Vorrat. Nur die darstellende Person sieht den Begriff auf deinem Gerät. Richtig/Überspringen wechselt weiter. Nach Ablauf keine neuen Punkte, dann Runde beenden. Keine Papierkarten erforderlich.
+
+## Die größere Hälfte · fünf Showpunkte
+
+Drei Gegenstände mit je zwei Schneide-/Ratezügen ergeben sechs Einzelpunkte. Das Klopapier-Brautkleid ist dafür das Drei-Punkte-Spiel.
+
+1. Kathi schneidet den neuen Gegenstand. Anton sagt links, rechts oder gleich schwer. Den Tipp auf der Moderationsseite festhalten.
+2. Erst danach beide Stücke wiegen und die Gewichte privat speichern. „Auflösen“ zeigt die Gewichte und vergibt einen Einzelpunkt: richtiger Tipp an Anton, falscher Tipp an Kathi.
+3. Anton nimmt das größere/schwerere Stück und schneidet es noch einmal. Bei identischem Gewicht das linke Stück nehmen. Jetzt rät Kathi, wieder Tipp → Wiegen → Auflösen.
+4. Mit dem nächsten Gegenstand wieder bei Kathi beginnen. Nach drei Gegenständen vergibt die Seite automatisch fünf Showpunkte an das Team mit mehr Einzelpunkten. Bei 3:3 erhalten beide fünf Showpunkte.
+
+Links/rechts immer aus Publikumssicht kennzeichnen und die Stücke nicht vertauschen. „Größer“ wird objektiv nach Gewicht entschieden. Vor dem Auflösen bleiben gespeicherte Gewichte nur auf der Moderationsseite.
+
+## Gäste-Fragen
+
+1 Punkt: Hund oder Katze? · 2: München oder Berlin? · 3: Lidl oder Aldi? · 4: Organisiert oder Sponti? · 5: Geimpft oder ungeimpft?
+
+Geschätzt wird jeweils der Prozentanteil für die erste Antwort.
 
 ## Landkarte
 

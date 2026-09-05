@@ -107,7 +107,7 @@ test("a new session is explicit, resets the show, and can be undone and redone",
   const newSession = data.session.id;
   assert.equal(hostAction(data, { type: "history:undo" }).ok, true);
   assert.equal(data.session.id, oldSession);
-  assert.deepEqual(data.scores, { rosa: 0, blau: 5 });
+  assert.deepEqual(data.scores, { rosa: 0, blau: 3 });
   assert.equal(data.active.id, "party-5");
   assert.equal(hostAction(data, { type: "history:redo" }).ok, true);
   assert.equal(data.session.id, newSession);
@@ -129,14 +129,14 @@ test("undo and redo restore complete game snapshots with monotonic revisions", (
 });
 
 test("leaving the game suspends it and reopening resumes the exact state", () => {
-  const data = start(freshState(tokens()), "aktion-2", tokens(), () => 1_000);
+  const data = start(freshState(tokens()), "aktion-4", tokens(), () => 1_000);
   hostAction(data, { type: "relay:start" }, tokens(), () => 2_000);
   const runningSince = data.challenge.relay.rounds.rosa.timer.runningSince;
   assert.equal(hostAction(data, { type: "close" }).ok, true);
   assert.equal(data.view, "board");
-  assert.equal(data.active.id, "aktion-2");
+  assert.equal(data.active.id, "aktion-4");
   assert.equal(data.challenge.relay.rounds.rosa.timer.runningSince, runningSince);
-  assert.equal(hostAction(data, { type: "start", id: "aktion-2" }, tokens(), () => 4_000).ok, true);
+  assert.equal(hostAction(data, { type: "start", id: "aktion-4" }, tokens(), () => 4_000).ok, true);
   assert.equal(data.view, "game");
   assert.equal(data.challenge.relay.rounds.rosa.timer.runningSince, runningSince);
   assert.equal(hostAction(data, { type: "start", id: "aktion-1" }, tokens(), () => 4_000).error, "card_not_flipped");
@@ -209,9 +209,10 @@ test("timers, relays, and measurement games keep their live state", () => {
   assert.equal(relay.challenge.relay.rounds.rosa.timer.elapsedMs, 1_000);
 
   const measure = start(freshState(tokens()), "party-3");
-  assert.equal(hostAction(measure, { type: "measurement:set", team: "rosa", left: 102.5, right: 101.2 }).ok, true);
-  assert.deepEqual(measure.challenge.measurements.rosa, { left: 102.5, right: 101.2 });
-  assert.equal(hostAction(measure, { type: "measurement:set", team: "blau", left: -1, right: 4 }).error, "bad_measurement");
+  hostAction(measure, { type: "cut:guess", guess: "left" });
+  assert.equal(hostAction(measure, { type: "cut:weigh", left: 102.5, right: 101.2 }).ok, true);
+  assert.deepEqual(measure.challenge.cutting.current.weights, { left: 102.5, right: 101.2 });
+  assert.equal(hostAction(measure, { type: "cut:weigh", left: -1, right: 4 }).error, "bad_measurement");
 });
 
 test("wedding pantomime runs two isolated timed rounds and derives the higher-score winner", () => {
@@ -247,13 +248,13 @@ test("pull-ups enforce four alternating individual attempts and derive totals", 
 
 test("shirt and push-up relays require their complete target and compare two times from zero", () => {
   const shirt = start(freshState(tokens()), "aktion-2", tokens());
-  assert.equal(hostAction(shirt, { type: "relay:start" }, tokens(), () => 1_000).ok, true);
-  for (let person = 0; person < 9; person++) hostAction(shirt, { type: "relay:change", delta: 1 }, tokens(), () => 2_000 + person);
-  assert.equal(hostAction(shirt, { type: "relay:finish" }, tokens(), () => 20_000).error, "relay_incomplete");
-  assert.equal(hostAction(shirt, { type: "relay:change", delta: 1 }, tokens(), () => 20_000).ok, true);
-  assert.equal(shirt.challenge.relay.rounds.rosa.done, true, "person ten automatically stops the team clock");
-  assert.equal(shirt.challenge.relay.rounds.rosa.timer.elapsedMs, 19_000);
-  assert.equal(shirt.challenge.relay.rounds.blau.timer.elapsedMs, 0);
+  assert.equal(shirt.challenge.mode, "stopwatch");
+  assert.equal(shirt.challenge.relay, null);
+  assert.equal(hostAction(shirt, { type: "timer:start" }, tokens(), () => 1000).ok, true);
+  assert.equal(hostAction(shirt, { type: "physical:finish", team: "rosa" }, tokens(), () => 20000).ok, true);
+  assert.equal(shirt.challenge.timer.elapsedMs, 19000);
+  assert.equal(hostAction(shirt, { type: "winner", team: "rosa" }).ok, true);
+  assert.equal(shirt.scores.rosa, 2);
 
   const data = start(freshState(tokens()), "aktion-4", tokens());
   for (const [team, startedAt, finishedAt] of [["rosa", 1_000, 31_000], ["blau", 40_000, 65_000]]) {
@@ -416,13 +417,35 @@ test("old map requests cannot affect the next round", () => {
   assert.deepEqual(data.map.taps, {});
 });
 
-test("measurement result uses relative deviation and awards automatically", () => {
-  const data = start(freshState(tokens()), "party-3", tokens());
-  hostAction(data, { type: "measurement:set", team: "rosa", left: 45, right: 55 });
-  hostAction(data, { type: "measurement:set", team: "blau", left: 94, right: 106 });
-  assert.equal(hostAction(data, { type: "measurement:resolve" }, tokens(), () => 9_000).ok, true);
-  assert.equal(data.active.awarded, "blau", "6% beats 10% even though absolute grams are larger");
-  assert.deepEqual(data.scores, { rosa: 0, blau: 3 });
+test("cutting has six decisions across three objects and awards five show points", () => {
+  const data = start(freshState(), "party-3");
+  assert.equal(data.active.stars, 5);
+  assert.equal(hostAction(data, { type: "physical:finish", team: "rosa" }).error, "guided_result_required");
+  for (let turn = 0; turn < 6; turn++) {
+    assert.equal(data.challenge.cutting.index, turn);
+    assert.equal(hostAction(data, { type: "cut:weigh", left: 70, right: 30 }).error, "guess_required");
+    assert.equal(hostAction(data, { type: "cut:guess", guess: turn % 2 ? "left" : "right" }).ok, true);
+    assert.equal(hostAction(data, { type: "cut:guess", guess: "left" }).error, "guess_locked");
+    assert.equal(hostAction(data, { type: "cut:weigh", left: 70, right: 30 }).ok, true);
+    assert.equal(publicState(data, { role: "screen" }).challenge.cutting.current.weights, undefined);
+    assert.equal(hostAction(data, { type: "cut:reveal" }).ok, true);
+    assert.deepEqual(publicState(data, { role: "screen" }).challenge.cutting.current.weights, { left: 70, right: 30 });
+    assert.equal(data.challenge.cutting.current.winner, "rosa");
+    if (turn < 5) {
+      assert.equal(data.active.awarded, null);
+      assert.equal(hostAction(data, { type: "cut:reveal" }).error, "round_already_scored");
+      assert.equal(hostAction(data, { type: "cut:next" }).ok, true);
+    }
+  }
+  assert.deepEqual(data.challenge.cutting.points, { rosa: 6, blau: 0 });
+  assert.deepEqual(data.challenge.cutting.turns.map(t => t.round), [1, 1, 2, 2, 3, 3]);
+  assert.deepEqual(data.scores, { rosa: 5, blau: 0 });
+  assert.equal(hostAction(data, { type: "cut:reveal" }).error, "game_finished");
+  hostAction(data, { type: "history:undo" });
+  assert.equal(data.active.awarded, null);
+  assert.equal(data.challenge.cutting.points.rosa, 5);
+  hostAction(data, { type: "history:redo" });
+  assert.equal(data.scores.rosa, 5);
 });
 
 test("percentage voting closes before reveal and awards the nearest estimate", () => {
@@ -438,7 +461,7 @@ test("percentage voting closes before reveal and awards the nearest estimate", (
   hostAction(data, { type: "vote:close" }, tokens(), () => 2_000);
   hostAction(data, { type: "vote:reveal" }, tokens(), () => 3_000);
   assert.equal(data.active.awarded, "rosa");
-  assert.deepEqual(data.scores, { rosa: 4, blau: 0 });
+  assert.deepEqual(data.scores, { rosa: 5, blau: 0 });
 });
 
 test("the joke duel opens a direct secret guest vote only after both performances", () => {
@@ -634,4 +657,46 @@ test("zero-vote joke voting can reopen and finish without repeating performances
   hostAction(data, { type: "vote:close", force: true });
   assert.equal(hostAction(data, { type: "vote:reveal" }).ok, true);
   assert.equal(data.active.awarded, "blau");
+});
+
+test("a host cookie never upgrades guest or team device projections", () => {
+  const vote = start(freshState(), "vote-1");
+  hostAction(vote, { type: "vote:guesses:set", rosaPercent: 42, blauPercent: 57 });
+  const guest = publicState(vote, { host: true, role: "vote", token: vote.vote.tokens.guests, uid: "guest" });
+  assert.equal(guest.access.role, "vote");
+  assert.equal(guest.cards, undefined);
+  assert.equal(guest.vote.guesses, undefined);
+  assert.equal(guest.vote.tokens, undefined);
+  assert.equal(publicState(vote, { host: true, role: "vote", token: "wrong" }).access.valid, false);
+  const map = start(freshState(), "raten-4");
+  mapAction(map, { type: "map:tap", team: "blau", token: map.map.tokens.blau, roundId: map.map.roundId, lat: 10, lng: 20 });
+  const pad = publicState(map, { host: true, role: "pad", team: "rosa", token: map.map.tokens.rosa });
+  assert.equal(pad.access.role, "pad");
+  assert.deepEqual(pad.map.taps, {});
+  assert.equal(pad.map.tokens, undefined);
+});
+
+test("cutting ties give both teams five points and equal weights are a valid guess", () => {
+  const data = start(freshState(), "party-3");
+  for (let turn = 0; turn < 6; turn++) {
+    hostAction(data, { type: "cut:guess", guess: "equal" });
+    hostAction(data, { type: "cut:weigh", left: 25, right: 25 });
+    hostAction(data, { type: "cut:reveal" });
+    if (turn < 5) hostAction(data, { type: "cut:next" });
+  }
+  assert.deepEqual(data.challenge.cutting.points, { rosa: 3, blau: 3 });
+  assert.deepEqual(data.scores, { rosa: 5, blau: 5 });
+});
+
+test("pantomime has enough short terms and the revised board has one card per point value", () => {
+  const card = CARDS.find(c => c.id === "party-2");
+  for (const terms of Object.values(card.termSets)) {
+    assert.equal(terms.length, 30);
+    assert.ok(terms.every(t => t.split(" ").length <= 2));
+    assert.equal(new Set(terms).size, terms.length);
+  }
+  for (const category of ["Aktion", "Party", "Raten", "Abstimmung"]) assert.deepEqual(CARDS.filter(c => c.cat === category).map(c => c.stars).sort(), [1, 2, 3, 4, 5]);
+  assert.equal(CARDS.find(c => c.title === "Geimpft oder ungeimpft?").stars, 5);
+  assert.equal(CARDS.find(c => c.title === "Organisiert oder Sponti?").stars, 4);
+  assert.equal(CARDS.find(c => c.mode === "cutting").stars, 5);
 });
