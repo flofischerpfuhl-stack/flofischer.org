@@ -8,7 +8,7 @@ import { acceptState, pollDelay } from "../public/transport.mjs";
 // Exercise the real rendering and request orchestration with a small DOM stub.
 // This is not a substitute for visual browser QA.
 const source = (await readFile(new URL("../public/app.js", import.meta.url), "utf8"))
-  .replace(/^import .*;\n/, "").split('if (context.role === "host" || context.role === "screen") {')[0];
+  .replace(/^import .*;\n/gm, "").split('if (context.role === "host" || context.role === "screen") {')[0];
 
 function client(requestJson = async () => { throw new Error("Unexpected request"); }) {
   const storage = new Map();
@@ -20,6 +20,7 @@ function client(requestJson = async () => { throw new Error("Unexpected request"
     sessionStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
     localStorage: { getItem: () => null, setItem() {} },
     URLSearchParams, URL, performance, crypto, console, requestJson, acceptState, pollDelay,
+    createAudioLibrary: () => ({ status: () => "idle", url: () => null, load: async () => null }),
     actionId: () => crypto.randomUUID(), setTimeout: () => 1, clearTimeout() {},
     requestAnimationFrame: () => 1, cancelAnimationFrame() {}, window: {},
   });
@@ -165,4 +166,58 @@ test("projector shows a physical winner and never receives pantomime terms", () 
   assert.equal(ui.run("screenGameMarkup()").includes("Zähne putzen"), false);
   ui.set(publicState(pantomime, { host: true }));
   assert.ok(ui.run("gameMarkup()").includes("Zähne putzen"));
+});
+
+
+test("music uses shouted titles with exclusive judgment and no private written answers", () => {
+  const ui = client();
+  const data = open("raten-1");
+  ui.set(publicState(data, { host: true }));
+  let html = ui.run("gameMarkup()");
+  assert.ok(html.includes("KATHI WAR ZUERST"));
+  assert.equal(html.includes("Antworten verdeckt notieren"), false);
+  assert.equal(html.includes('data-action="quiz-ready"'), false);
+  hostAction(data, { type:"quiz:call", team:"rosa" });
+
+  ui.set(publicState(data, { host: true }));
+  html = ui.run("gameMarkup()");
+  assert.ok(html.includes("TITEL FALSCH · TEAM ANTON FRAGEN"));
+  assert.equal(html.includes('data-action="quiz-mark"'), false);
+  ui.set(publicState(data, { role:"screen" }));
+  html = ui.run("screenGameMarkup()");
+  assert.equal(html.includes('data-action="play-song"'), false);
+  assert.equal(html.includes('data-action="quiz-call-judge"'), false);
+});
+
+
+test("music projector keeps title and artist secret while the opponent answers", () => {
+  const ui=client(), data=open("raten-1");
+  hostAction(data,{type:"quiz:call",team:"rosa"});
+  hostAction(data,{type:"quiz:call:judge",correct:false});
+  ui.set(publicState(data,{role:"screen"}));
+  let html=ui.run("screenGameMarkup()");
+  assert.ok(html.includes("Jetzt Team Anton"));
+  assert.equal(html.includes("Fäaschtbänkler"),false);
+  assert.equal(html.includes("Schlüsseldienstmann"),false);
+  ui.set(publicState(data,{host:true}));
+  html=ui.run("gameMarkup()");
+  assert.ok(html.includes("TITEL RICHTIG · 2 PUNKTE FÜR ANTON"));
+  hostAction(data,{type:"quiz:call:opponent",correct:true});
+  ui.set(publicState(data,{role:"screen"}));
+  html=ui.run("screenGameMarkup()");
+  assert.ok(html.includes("Schlüsseldienstmann"));
+  assert.ok(html.includes("Fäaschtbänkler"));
+  assert.equal(ui.run("quizScores().blau"),2);
+});
+
+test("playback stays disabled until ready and uses only the complete local blob", async () => {
+  const ui=client();
+  const sources=[];
+  ui.c.Audio=class { constructor(src) { sources.push(src); } pause() {} async play() {} };
+  await ui.run('playSong({asset:"/one.mp3"})');
+  assert.equal(sources.length,0);
+  ui.run('songs.status = () => "ready"; songs.url = () => "blob:complete-local-file";');
+  await ui.run('playSong({asset:"/one.mp3",durationSeconds:25})');
+  assert.deepEqual(sources,["blob:complete-local-file"]);
+  await ui.run('stopAudio()');
 });

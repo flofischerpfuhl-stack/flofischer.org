@@ -1,3 +1,4 @@
+import { createAudioLibrary } from "./audio.mjs";
 import { requestJson, pollDelay, acceptState, actionId } from "./transport.mjs";
 
 const app = document.querySelector("#app");
@@ -51,6 +52,36 @@ let audioContext = null;
 let songAudio = null;
 let songAsset = null;
 let audioStopTimer = 0;
+let audioWarming = false;
+const songs = createAudioLibrary({ onChange: () => {
+  if (context.role === "host" && state) { updateAudioStatus(); }
+} });
+async function warmSongs(retry = false) {
+  if (audioWarming || context.role !== "host") return;
+  audioWarming = true;
+  try {
+    for (const round of state.cards.find(card => card.id === "raten-1")?.rounds || []) {
+      if (round.media === "audio" && round.asset && (songs.status(round.asset) === "idle" || (retry && songs.status(round.asset) === "error"))) {
+        await songs.load(round.asset).catch(() => {});
+      }
+    }
+  } finally { audioWarming = false; updateAudioStatus(); }
+}
+function updateAudioStatus() {
+  const rounds = state.cards.find(card => card.id === "raten-1")?.rounds.filter(round => round.media === "audio") || [];
+  const ready = rounds.filter(round => songs.status(round.asset) === "ready").length;
+  const failed = rounds.some(round => songs.status(round.asset) === "error");
+  const status = document.querySelector("#audio-status");
+  if (status) status.textContent = `Hörproben: ${ready}/${rounds.length} vollständig auf diesem Gerät bereit${failed ? " · Download fehlgeschlagen: erneut laden" : ""}`;
+  const retry = document.querySelector('[data-action="retry-songs"]');
+  if (retry) retry.hidden = !failed;
+  const button = document.querySelector('[data-action="play-song"]');
+  if (button && state.active?.kind === "quiz") {
+    const available = songs.status(currentQuizRound()?.asset) === "ready";
+    button.disabled = !available;
+    button.textContent = available ? "▶ HÖRPROBE VON VORN" : "HÖRPROBE WIRD GELADEN …";
+  }
+}
 const MAP_MAX_SCALE = 8;
 const TEAM_NAMES = { rosa: "Kathi", blau: "Anton" };
 const knownFlips = new Set();
@@ -154,6 +185,11 @@ app.addEventListener("click", async (event) => {
   if (action === "quiz-buzzer-open") return hostSend({ type: "quiz:buzzer:open" });
   if (action === "quiz-tiebreak-judge") return hostSend({ type: "quiz:tiebreak:judge", correct: button.dataset.correct === "true" });
   if (action === "play-melody") return playMelody(currentQuizRound()?.melody).catch(() => showToast("Audio konnte nicht starten. Lautsprecher prüfen und erneut antippen."));
+  if (action === "quiz-call-judge") return hostSend({ type: "quiz:call:judge", correct: button.dataset.correct === "true", artistCorrect: button.dataset.artist === "true" });
+  if (action === "quiz-call-opponent") return hostSend({ type: "quiz:call:opponent", correct: button.dataset.correct === "true" });
+  if (action === "quiz-call-reset") return hostSend({ type: "quiz:call:reset" });
+  if (action === "quiz-call-skip") { await stopAudio(); return hostSend({ type: "quiz:call:skip" }); }
+  if (action === "retry-songs") return warmSongs(true);
   if (action === "play-song") return playSong(currentQuizRound());
   if (action === "stop-song") return stopAudio();
   if (action === "map-confirm") return confirmMapPosition();
@@ -362,7 +398,7 @@ function render() {
 }
 
 function renderHost() {
-  app.innerHTML = `<main class="shell"><div class="private-banner">${state.localMode ? "LOKAL · Spielstand wird auf diesem Laptop gespeichert" : "PRIVATE MODERATION"} · Beameransicht: <a href="/screen" target="hochzeit-screen">/screen öffnen</a></div>${hostHeader()}${state.view === "game" && state.active ? gameMarkup() : boardMarkup()}</main>`;
+  app.innerHTML = `<main class="shell"><div class="private-banner">${state.localMode ? "LOKAL · Spielstand wird auf diesem Laptop gespeichert" : "PRIVATE MODERATION"} · Beameransicht: <a href="/screen" target="hochzeit-screen">/screen öffnen</a></div>${hostHeader()}<p id="audio-status" class="privacy-note"></p><button class="button secondary" data-action="retry-songs" hidden>Hörproben erneut laden</button>${state.view === "game" && state.active ? gameMarkup() : boardMarkup()}</main>`;
   if (state.view !== "game") {
     const flippedNow = new Set(Object.keys(state.flipped).filter((id) => state.flipped[id]));
     for (const id of knownFlips) if (!flippedNow.has(id)) knownFlips.delete(id);
@@ -371,6 +407,7 @@ function renderHost() {
     document.querySelectorAll(".tile.revealing").forEach((tile) => { const release = () => { tile.classList.remove("revealing"); tile.removeAttribute("aria-disabled"); }; tile.addEventListener("animationend", release, { once: true }); setTimeout(release, 700); });
   }
   wireMap(false); wireTimer();
+  updateAudioStatus(); void warmSongs();
 }
 
 function renderScreen() {
@@ -543,12 +580,32 @@ function measurementMarkup(challenge, readOnly = false) {
 function quizMarkup(readOnly = false) {
   const card = activeCardDefinition(); const challenge = state.challenge; const phase = challenge.phase; const section = phase === "tie" ? challenge.tie : challenge.main; const rounds = phase === "tie" ? card.tieBreak : card.rounds; const round = rounds[section.index]; const revealed = Boolean(section.revealed[section.index]); const mark = section.marks[section.index] || { rosa: null, blau: null }; const scores = quizScores();
   if (section.complete) return quizSummaryMarkup(card, challenge, scores, readOnly);
+  const callMode = phase === "main" && card.answerMode === "call";
+  const first = section.calls?.[section.index];
   const scored = typeof mark.rosa === "boolean" && typeof mark.blau === "boolean";
-  const marking = readOnly ? "" : phase === "tie" ? tieJudgeMarkup(challenge) : `<div class="mark-grid">${["rosa", "blau"].map((team) => `<div class="mark-team ${team}"><b>Team ${teamName(team)}</b><div class="mark-actions"><button class="mark-button ${mark[team] === true ? "selected correct" : ""}" data-action="quiz-mark" data-team="${team}" data-correct="true">✓ Richtig</button><button class="mark-button ${mark[team] === false ? "selected wrong" : ""}" data-action="quiz-mark" data-team="${team}" data-correct="false">✕ Falsch</button></div></div>`).join("")}</div>`;
+  const marking = readOnly ? "" : phase === "tie" ? tieJudgeMarkup(challenge) : callMode ? musicJudgeMarkup(section, round) : `<div class="mark-grid">${["rosa", "blau"].map((team) => `<div class="mark-team ${team}"><b>Team ${teamName(team)}</b><div class="mark-actions"><button class="mark-button ${mark[team] === true ? "selected correct" : ""}" data-action="quiz-mark" data-team="${team}" data-correct="true">✓ Richtig</button><button class="mark-button ${mark[team] === false ? "selected wrong" : ""}" data-action="quiz-mark" data-team="${team}" data-correct="false">✕ Falsch</button></div></div>`).join("")}</div>`;
   const ready = section.ready?.[section.index] || { rosa: false, blau: false };
-  const lockControls = phase === "main" ? `<p class="privacy-note">Antworten verdeckt notieren. Erst wenn beide feststehen, gemeinsam aufdecken.</p><div class="guess-status">${["rosa", "blau"].map((team) => `<span class="${team}">Team ${teamName(team)}: <button class="mark-button ${ready[team] ? "selected" : ""}" data-action="quiz-ready" data-team="${team}" ${ready[team] ? "disabled" : ""}>${ready[team] ? "✓ Antwort liegt fest" : "Antwort liegt fest"}</button></span>`).join("")}</div><button class="button gold big reveal-answer" data-action="quiz-reveal" ${ready.rosa && ready.blau ? "" : "disabled"}>BEIDE ANTWORTEN AUFDECKEN</button>` : `${buzzMarkup(challenge, round)}${challenge.buzz ? `<button class="button gold big reveal-answer" data-action="quiz-reveal">STECHANTWORT AUFDECKEN</button>` : ""}`;
+  const lockControls = callMode ? musicCallMarkup(first, section, round) : phase === "main" ? `<p class="privacy-note">Antworten verdeckt notieren. Erst wenn beide feststehen, gemeinsam aufdecken.</p><div class="guess-status">${["rosa", "blau"].map((team) => `<span class="${team}">Team ${teamName(team)}: <button class="mark-button ${ready[team] ? "selected" : ""}" data-action="quiz-ready" data-team="${team}" ${ready[team] ? "disabled" : ""}>${ready[team] ? "✓ Antwort liegt fest" : "Antwort liegt fest"}</button></span>`).join("")}</div><button class="button gold big reveal-answer" data-action="quiz-reveal" ${ready.rosa && ready.blau ? "" : "disabled"}>BEIDE ANTWORTEN AUFDECKEN</button>` : `${buzzMarkup(challenge, round)}${challenge.buzz ? `<button class="button gold big reveal-answer" data-action="quiz-reveal">STECHANTWORT AUFDECKEN</button>` : ""}`;
   const navigation = phase === "main" ? `<div class="round-navigation"><button class="button secondary" data-action="quiz-previous" ${section.index === 0 ? "disabled" : ""}>← Vorherige</button><button class="button gold" data-action="quiz-next" ${revealed && scored ? "" : "disabled"}>${section.index === rounds.length - 1 ? "Auswertung" : "Nächste Runde →"}</button></div>` : "";
-  return `<section class="quiz-arena"><header class="round-header"><div><p class="eyebrow">${phase === "tie" ? "STECHEN PER ZURUF" : `RUNDE ${section.index + 1} VON ${rounds.length}`}</p><div class="round-dots">${rounds.map((_, index) => `<span class="${index < section.index ? "done" : index === section.index ? "current" : ""}"></span>`).join("")}</div></div><div class="mini-score"><span class="rosa">Kathi <strong>${scores.rosa}</strong></span><span class="blau">Anton <strong>${scores.blau}</strong></span></div></header>${quizMediaMarkup(round, revealed, readOnly)}<h3 class="quiz-prompt">${escapeHtml(round.prompt)}</h3>${revealed ? `<div class="answer-reveal"><span>RICHTIGE ANTWORT</span><strong>${escapeHtml(round.answer)}</strong></div>${marking}` : readOnly ? `<p class="screen-wait">${phase === "tie" ? "Antwort ausrufen. Die Moderation entscheidet, wer zuerst dran war." : "Beide Teams legen ihre Antwort verdeckt fest."}</p>` : lockControls}${readOnly ? "" : navigation}</section>`;
+  return `<section class="quiz-arena"><header class="round-header"><div><p class="eyebrow">${phase === "tie" ? "STECHEN PER ZURUF" : `RUNDE ${section.index + 1} VON ${rounds.length}`}</p><div class="round-dots">${rounds.map((_, index) => `<span class="${index < section.index ? "done" : index === section.index ? "current" : ""}"></span>`).join("")}</div></div><div class="mini-score"><span class="rosa">Kathi <strong>${scores.rosa}</strong></span><span class="blau">Anton <strong>${scores.blau}</strong></span></div></header>${quizMediaMarkup(round, revealed, readOnly)}<h3 class="quiz-prompt">${escapeHtml(round.prompt)}</h3>${revealed ? `<div class="answer-reveal"><span>RICHTIGE ANTWORT</span><strong>${escapeHtml(round.answer)}</strong>${round.artist ? `<p>${escapeHtml(round.artist)}</p>` : ""}</div>${marking}` : readOnly ? `<p class="screen-wait">${callMode ? (section.wrongCalls?.[section.index] ? `Jetzt Team ${teamName(first === "rosa" ? "blau" : "rosa")}: Wie heißt der Titel?` : "Titel ausrufen! Titel = 1 Punkt, mit Interpret = 2. Die Moderation entscheidet, wer zuerst war.") : phase === "tie" ? "Antwort ausrufen. Die Moderation entscheidet, wer zuerst dran war." : "Beide Teams legen ihre Antwort verdeckt fest."}</p>` : lockControls}${readOnly ? "" : navigation}</section>`;
+}
+
+function musicCallMarkup(first, section, round) {
+  if (first) return musicJudgeMarkup(section, round);
+  return `<p class="privacy-note">Per Zuruf: Titel richtig = 1 Punkt, Titel + Interpret = 2. Titel falsch = 1 Punkt für das andere Team, mit eigener richtiger Titelantwort = 2.</p><div class="buzz-grid"><button class="button rosa big" data-action="quiz-call" data-team="rosa">KATHI WAR ZUERST</button><button class="button blau big" data-action="quiz-call" data-team="blau">ANTON WAR ZUERST</button></div><button class="button secondary" data-action="quiz-call-skip">NIEMAND WEISS ES · RUNDE OHNE PUNKT</button>`;
+}
+function musicJudgeMarkup(section, round) {
+  const index = section.index, first = section.calls?.[index], mark = section.marks[index];
+  if (mark) {
+    const points = section.roundPoints?.[index];
+    const winner = mark.rosa ? "rosa" : mark.blau ? "blau" : null;
+    return `<p class="privacy-note">${winner ? `${points?.[winner] ?? 1} Rundenpunkt(e) für ${teamName(winner)}` : "Kein Rundenpunkt"}. Zum Korrigieren „Rückgängig“ verwenden.</p>`;
+  }
+  if (!first) return "";
+  const other = first === "rosa" ? "blau" : "rosa";
+  const solution = `<div class="answer-reveal"><span>NUR MODERATION · LÖSUNG</span><strong>${escapeHtml(round.answer)}</strong><p>${escapeHtml(round.artist || "Interpret noch festzulegen")}</p>${round.answerNote ? `<p>${escapeHtml(round.answerNote)}</p>` : ""}</div>`;
+  if (section.wrongCalls?.[index]) return `${solution}<p>Team ${teamName(first)} lag falsch. Jetzt Team ${teamName(other)} nach dem Titel fragen. Der Beamer zeigt die Lösung erst nach der Wertung.</p><div class="button-row centered"><button class="button ${other} big" data-action="quiz-call-opponent" data-correct="true">TITEL RICHTIG · 2 PUNKTE FÜR ${teamName(other).toUpperCase()}</button><button class="button secondary big" data-action="quiz-call-opponent" data-correct="false">TITEL NICHT GEWUSST · 1 PUNKT FÜR ${teamName(other).toUpperCase()}</button></div>`;
+  return `${solution}<p>Antwort von Team ${teamName(first)}:</p><div class="button-row centered"><button class="button ${first} big" data-action="quiz-call-judge" data-correct="true">TITEL RICHTIG · 1 PUNKT</button><button class="button ${first} big" data-action="quiz-call-judge" data-correct="true" data-artist="true">TITEL + INTERPRET RICHTIG · 2 PUNKTE</button><button class="button secondary big" data-action="quiz-call-judge" data-correct="false">TITEL FALSCH · TEAM ${teamName(other).toUpperCase()} FRAGEN</button></div><button class="button secondary" data-action="quiz-call-reset">Team-Auswahl korrigieren</button>`;
 }
 
 function tieJudgeMarkup(challenge) {
@@ -566,7 +623,7 @@ function quizSummaryMarkup(card, challenge, scores, readOnly = false) {
 }
 
 function quizMediaMarkup(round, revealed, readOnly = false) {
-  if (round.media === "audio") return `<div class="media-stage melody-stage"><div class="sound-bars" aria-hidden="true">${Array.from({ length: 12 }, (_, index) => `<i style="--i:${index}"></i>`).join("")}</div>${readOnly ? `<p>Hörprobe anhören und den Titel erraten.</p>` : `<div class="button-row centered"><button class="button gold big" data-action="play-song">▶ HÖRPROBE VON VORN</button><button class="button secondary big" data-action="stop-song">■ STOPP</button></div><p>Die MP3 läuft über die Lautsprecher des Moderationsgeräts.</p>`}</div>`;
+  if (round.media === "audio") return `<div class="media-stage melody-stage"><div class="sound-bars" aria-hidden="true">${Array.from({ length: 12 }, (_, index) => `<i style="--i:${index}"></i>`).join("")}</div>${readOnly ? `<p>Hörprobe anhören und den Titel erraten.</p>` : `<div class="button-row centered"><button class="button gold big" data-action="play-song" ${songs.status(round.asset) === "ready" ? "" : "disabled"}>${songs.status(round.asset) === "ready" ? "▶ HÖRPROBE VON VORN" : "HÖRPROBE WIRD GELADEN …"}</button><button class="button secondary big" data-action="stop-song">■ STOPP</button></div><p>Vollständig geladene Hörprobe über die Lautsprecher des Moderationsgeräts. Titel = 1 Punkt · Titel + Interpret = 2 Punkte.</p>`}</div>`;
   if (round.media === "melody") return `<div class="media-stage melody-stage"><div class="sound-bars" aria-hidden="true">${Array.from({ length: 12 }, (_, index) => `<i style="--i:${index}"></i>`).join("")}</div>${readOnly ? `<p>Die Hörprobe wird von der Moderation abgespielt.</p>` : `<button class="button gold big" data-action="play-melody">▶ HÖRPROBE ABSPIELEN</button><p>Lautsprecher vor der Runde testen. Beim Rundenwechsel stoppt die Hörprobe.</p>`}</div>`;
   if (round.media === "plate") return `<div class="media-stage plate-stage"><img src="${escapeHtml(round.asset)}" alt="Deutsches Nummernschild für diese Raterunde"></div>`;
   if (round.media === "photo") { const x = round.sprite.column * 50; const y = round.sprite.row * 100; const detail = round.detail || { scale: 4.8, x: 50, y: 50 }; return `<div class="media-stage photo-stage"><div class="photo-window"><div class="photo-sprite ${revealed ? "revealed" : "zoomed"}" style="background-position:${x}% ${y}%;--detail-scale:${detail.scale};--detail-x:${detail.x}%;--detail-y:${detail.y}%"></div></div><span>${revealed ? "GANZES MOTIV" : "MIKRO-AUSSCHNITT"}</span></div>`; }
@@ -888,9 +945,9 @@ async function stopAudio() {
 }
 
 async function playSong(round) {
-  if (!round?.asset) return;
+  if (!round?.asset || songs.status(round.asset) !== "ready") return showToast("Bitte warten, bis die Hörprobe vollständig geladen ist.");
   if (songAudio) songAudio.pause();
-  if (songAsset !== round.asset) { songAudio = new Audio(round.asset); songAudio.preload = "auto"; songAsset = round.asset; }
+  if (songAsset !== round.asset) { songAudio = new Audio(songs.url(round.asset)); songAudio.preload = "auto"; songAsset = round.asset; }
   songAudio.currentTime = round.startSeconds || 0;
   try {
     await songAudio.play();
@@ -906,7 +963,7 @@ function noteFrequency(note) {
 
 function activeCardDefinition() { return state.cards.find((card) => card.id === state.active.id); }
 function currentQuizRound() { const card = activeCardDefinition(); const section = state.challenge.phase === "tie" ? state.challenge.tie : state.challenge.main; return (state.challenge.phase === "tie" ? card.tieBreak : card.rounds)[section.index]; }
-function quizScores() { const scores = { rosa: 0, blau: 0 }; for (const mark of Object.values(state.challenge.main.marks || {})) { if (mark.rosa) scores.rosa++; if (mark.blau) scores.blau++; } return scores; }
+function quizScores() { const scores = { rosa: 0, blau: 0 }; for (const [index, mark] of Object.entries(state.challenge.main.marks || {})) { const points = state.challenge.main.roundPoints?.[index]; if (mark.rosa) scores.rosa += points?.rosa ?? 1; if (mark.blau) scores.blau += points?.blau ?? 1; } return scores; }
 function measurementDifference(team) { const item = state.challenge.measurements[team]; return item.left === null || item.right === null ? null : Math.abs(item.left - item.right); }
 function resultLabel(result) { return ({ rosa: "Team Kathi gewinnt", blau: "Team Anton gewinnt", both: "Beide Teams gewinnen", draw: "Keine Punkte" })[result] || "Erledigt"; }
 function teamName(team) { return TEAM_NAMES[team] || team; }
@@ -916,7 +973,7 @@ function formatNumber(value) { return Number(value).toLocaleString("de-DE", { ma
 function formatTime(value) { const total = Math.max(0, Number(value) || 0); const minutes = Math.floor(total / 60000); const seconds = Math.floor(total % 60000 / 1000); const tenths = Math.floor(total % 1000 / 100); return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${tenths}`; }
 function openScoreDialog() { document.querySelector("#score-rosa").value = state.scores.rosa; document.querySelector("#score-blau").value = state.scores.blau; scoreDialog.showModal(); }
 function openSessionDialog() { document.querySelector("#session-label").value = `Show ${state.session.number + 1}`; document.querySelector("#session-confirm").value = ""; sessionDialog.showModal(); }
-function errorMessage(error) { return ({ guess_locked: "Der Tipp steht bereits fest. Zum Korrigieren Rückgängig verwenden.", guess_required: "Bitte zuerst den Tipp festhalten.", measurements_missing: "Bitte zuerst beide Gewichte speichern.", bad_measurement: "Bitte zwei gültige Gewichte größer null eingeben.", stale_session: "Diese Aktion gehört zu einer früheren Show. Bitte neu laden.", invalid_action_time: "Gerätezeit stimmt nicht. Bitte neu laden und erneut versuchen.", timer_finished: "Die 60 Sekunden sind vorbei. Bitte die Runde beenden.", no_votes: "Noch keine Stimmen. Bitte die Abstimmung erneut öffnen.", bad_reps: "Bitte eine ganze Zahl von 0 bis 99 eingeben.", already_awarded: "Dieses Spiel ist bereits gewertet. Zum Ändern bitte Rückgängig verwenden.", card_completed: "Diese Karte ist bereits erledigt und bleibt gesperrt.", card_still_flipping: "Die Karte klappt noch um – danach erneut antippen.", another_game_active: "Ein anderes Spiel läuft noch. Bitte zuerst fortsetzen oder ausdrücklich verwerfen.", setup_not_confirmed: "Bitte zuerst Setup und Sicherheit bestätigen.", result_not_ready: "Das Spiel ist noch nicht regelkonform abgeschlossen.", result_mismatch: "Dieses Ergebnis passt nicht zum gespeicherten Spielverlauf.", guesses_missing: "Bitte zuerst die beiden angesagten Teamtipps speichern.", answers_not_locked: "Beide Teamantworten müssen zuerst feststehen.", round_not_scored: "Bitte beide Teams ausdrücklich als richtig oder falsch werten.", nothing_to_undo: "Es gibt nichts rückgängig zu machen.", nothing_to_redo: "Es gibt nichts zu wiederholen.", round_not_revealed: "Bitte zuerst die Antwort aufdecken.", tiebreak_not_needed: "Das Stechen ist nur bei Gleichstand nötig.", position_locked: "Diese Position ist bereits gesperrt.", stale_round: "Diese Eingabe gehört zu einer früheren Kartenrunde.", stale_revision: "Der Stand wurde inzwischen auf einem anderen Gerät geändert. Bitte erneut versuchen.", vote_closed: "Diese Abstimmung ist bereits geschlossen.", vote_not_closed: "Bitte die Abstimmung zuerst verbindlich schließen.", quorum_missing: "Noch nicht genug Stimmen. Falls wirklich nötig, bewusst vorzeitig schließen." })[error] || "Aktion gerade nicht möglich."; }
+function errorMessage(error) { return ({ call_answers_pending: "Bitte zuerst die Teamantworten werten; danach erscheint die Lösung automatisch.", call_missing: "Bitte zuerst das Team auswählen, das zuerst war.", opponent_answer_required: "Bitte zuerst die Antwort des anderen Teams werten.", round_already_scored: "Die Runde ist bereits gewertet. Zum Korrigieren Rückgängig verwenden.", guess_locked: "Der Tipp steht bereits fest. Zum Korrigieren Rückgängig verwenden.", guess_required: "Bitte zuerst den Tipp festhalten.", measurements_missing: "Bitte zuerst beide Gewichte speichern.", bad_measurement: "Bitte zwei gültige Gewichte größer null eingeben.", stale_session: "Diese Aktion gehört zu einer früheren Show. Bitte neu laden.", invalid_action_time: "Gerätezeit stimmt nicht. Bitte neu laden und erneut versuchen.", timer_finished: "Die 60 Sekunden sind vorbei. Bitte die Runde beenden.", no_votes: "Noch keine Stimmen. Bitte die Abstimmung erneut öffnen.", bad_reps: "Bitte eine ganze Zahl von 0 bis 99 eingeben.", already_awarded: "Dieses Spiel ist bereits gewertet. Zum Ändern bitte Rückgängig verwenden.", card_completed: "Diese Karte ist bereits erledigt und bleibt gesperrt.", card_still_flipping: "Die Karte klappt noch um – danach erneut antippen.", another_game_active: "Ein anderes Spiel läuft noch. Bitte zuerst fortsetzen oder ausdrücklich verwerfen.", setup_not_confirmed: "Bitte zuerst Setup und Sicherheit bestätigen.", result_not_ready: "Das Spiel ist noch nicht regelkonform abgeschlossen.", result_mismatch: "Dieses Ergebnis passt nicht zum gespeicherten Spielverlauf.", guesses_missing: "Bitte zuerst die beiden angesagten Teamtipps speichern.", answers_not_locked: "Beide Teamantworten müssen zuerst feststehen.", round_not_scored: "Bitte beide Teams ausdrücklich als richtig oder falsch werten.", nothing_to_undo: "Es gibt nichts rückgängig zu machen.", nothing_to_redo: "Es gibt nichts zu wiederholen.", round_not_revealed: "Bitte zuerst die Antwort aufdecken.", tiebreak_not_needed: "Das Stechen ist nur bei Gleichstand nötig.", position_locked: "Diese Position ist bereits gesperrt.", stale_round: "Diese Eingabe gehört zu einer früheren Kartenrunde.", stale_revision: "Der Stand wurde inzwischen auf einem anderen Gerät geändert. Bitte erneut versuchen.", vote_closed: "Diese Abstimmung ist bereits geschlossen.", vote_not_closed: "Bitte die Abstimmung zuerst verbindlich schließen.", quorum_missing: "Noch nicht genug Stimmen. Falls wirklich nötig, bewusst vorzeitig schließen." })[error] || "Aktion gerade nicht möglich."; }
 function showToast(message, sticky = false) { const toast = document.querySelector("#toast"); if (!toast) return; toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); if (!sticky) toastTimer = setTimeout(() => toast.classList.remove("show"), 2600); }
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]); }
 

@@ -13,21 +13,50 @@ export const PLACES = [
   { id: "pyr", name: "Pyramiden von Gizeh", detail: "Gizeh, Ägypten", lat: 29.9792, lng: 31.1342 },
 ];
 
-const melodies = {
-  ode: { tempo: 132, notes: [["E4",1],["E4",1],["F4",1],["G4",1],["G4",1],["F4",1],["E4",1],["D4",1],["C4",1],["C4",1],["D4",1],["E4",1],["E4",1.5],["D4",.5],["D4",2]] },
-  mendelssohn: { tempo: 112, notes: [["C4",1],["F4",.75],["F4",.25],["F4",1],["C4",1],["G4",.75],["E4",.25],["F4",2],["C4",1],["F4",.75],["A4",.25],["C5",1],["A4",1],["F4",2]] },
-  elise: { tempo: 120, notes: [["E5",.5],["D#5",.5],["E5",.5],["D#5",.5],["E5",.5],["B4",.5],["D5",.5],["C5",.5],["A4",1],["R",.5],["C4",.5],["E4",.5],["A4",.5],["B4",1]] },
-  mozart: { tempo: 140, notes: [["G4",.5],["D5",.5],["G5",1],["D5",1],["G5",1],["D5",.5],["G5",.5],["B5",.5],["D6",.5],["C6",1],["A5",1],["C6",1],["A5",.5],["C6",.5]] },
-  donau: { tempo: 102, notes: [["C4",1],["E4",1],["G4",2],["G4",1],["R",1],["G4",1],["R",1],["E5",1],["R",1],["E5",1],["R",1],["C5",2],["G4",2]] },
-  wagner: { tempo: 104, notes: [["Bb4",1],["D5",1],["F5",1.5],["Eb5",.5],["D5",1],["F5",1],["Bb5",2],["A5",1],["G5",1],["F5",2]] },
-};
-
 const musicRounds = [
-  { prompt: "Titel oder Komponist?", answer: "Ode an die Freude – Ludwig van Beethoven", media: "melody", melody: melodies.ode },
-  { prompt: "Welches berühmte Hochzeitsstück ist das?", answer: "Hochzeitsmarsch – Felix Mendelssohn", media: "melody", melody: melodies.mendelssohn },
-  { prompt: "Wie heißt dieses Klavierstück?", answer: "Für Elise – Ludwig van Beethoven", media: "melody", melody: melodies.elise },
-  { prompt: "Welches Mozart-Stück beginnt so?", answer: "Eine kleine Nachtmusik – Wolfgang Amadeus Mozart", media: "melody", melody: melodies.mozart },
-  { prompt: "Welcher Walzer ist gesucht?", answer: "An der schönen blauen Donau – Johann Strauss", media: "melody", melody: melodies.donau },
+  {
+    "prompt": "Welcher Titel ist gesucht? Interpret gewusst = zweiter Punkt.",
+    "answer": "Schlüsseldienstmann",
+    "media": "audio",
+    "asset": "/media/song-01-2279aec62321.mp3",
+    "durationSeconds": 25,
+    "artist": "Fäaschtbänkler",
+    "answerNote": "„Schlüsseldienst“ als erkennbaren Titel ebenfalls gelten lassen."
+  },
+  {
+    "prompt": "Welcher Titel ist gesucht? Interpret gewusst = zweiter Punkt.",
+    "answer": "Ultralight Beam",
+    "media": "audio",
+    "asset": "/media/song-02-bc16c09461de.mp3",
+    "durationSeconds": 25,
+    "artist": "Kanye West",
+    "answerNote": "Kanye West reicht; Featuring-Namen sind nicht nötig."
+  },
+  {
+    "prompt": "Welcher Titel ist gesucht? Interpret gewusst = zweiter Punkt.",
+    "answer": "Our God is an Awesome God",
+    "media": "audio",
+    "asset": "/media/song-03-ec96ba90b7d8.mp3",
+    "durationSeconds": 25,
+    "artist": null,
+    "answerNote": "„Awesome God“ als Titel reicht. Den akzeptierten Interpreten vor der Show festlegen."
+  },
+  {
+    "prompt": "Welcher Titel ist gesucht? Interpret gewusst = zweiter Punkt.",
+    "answer": "Cataleya",
+    "media": "audio",
+    "asset": "/media/song-04-e3a54db2b65f.mp3",
+    "durationSeconds": 25,
+    "artist": "Samra"
+  },
+  {
+    "prompt": "Welcher Titel ist gesucht? Interpret gewusst = zweiter Punkt.",
+    "answer": "Everybody (Backstreet’s Back)",
+    "media": "audio",
+    "asset": "/media/song-05-d87b7f40cbbf.mp3",
+    "durationSeconds": 25,
+    "artist": "Backstreet Boys"
+  }
 ];
 
 const photoRounds = [
@@ -135,10 +164,10 @@ export const CARDS = [
     decision: "Die geheime Publikumsabstimmung über den öffentlichen Gäste-QR bewertet Idee, Ausführung und Laufstegmoment.",
   },
   {
-    id: "raten-1", cat: "Raten", stars: 1, kind: "quiz", title: "Lieder raten",
-    text: "Fünf lokal erzeugte Melodie-Intros. Pro Runde kann jedes Team einen Punkt holen.",
+    id: "raten-1", cat: "Raten", stars: 1, kind: "quiz", title: "Lieder raten", answerMode: "call",
+    text: "Fünf Hörproben per Zuruf. Titel richtig: 1 Rundenpunkt; Titel plus Interpret: insgesamt 2. Titel falsch: Gegenseite erhält 1 Punkt, mit eigener richtiger Titelantwort insgesamt 2.",
     rounds: musicRounds,
-    tieBreak: [{ prompt: "Stechen: Welches Hochzeitsstück ist das?", answer: "Brautchor – Richard Wagner", media: "melody", melody: melodies.wagner }],
+    tieBreak: [{ prompt: "Stechen: Wie viele Saiten hat eine normale Gitarre?", answer: "Sechs", media: "question" }],
   },
   {
     id: "raten-2", cat: "Raten", stars: 2, kind: "quiz", title: "Foto raten",

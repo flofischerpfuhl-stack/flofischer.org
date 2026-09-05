@@ -6,7 +6,7 @@
 ## Vor dem Start
 
 - Moderation und Beamer einmal neu laden, damit beide die aktuelle Version verwenden. Ein Reload setzt keine Show zurück.
-- Lautsprecher am **Moderationsgerät** testen: Dort werden die Melodien abgespielt, nicht automatisch am Beamer. iPads und Gäste verwenden ihre QR-Codes.
+- Lautsprecher am **Moderationsgerät** testen: Dort werden die Hörproben abgespielt, nicht automatisch am Beamer. iPads und Gäste verwenden ihre QR-Codes.
 - „Sicherung speichern“ lädt den aktuellen Spielstand herunter. Die Moderation hält zusätzlich eine Browser-Sicherung vor (nach Moderator-Änderungen und ungefähr alle 30 Sekunden). Bei fehlender Verbindung wird die letzte vorhandene Sicherung mit ihrem tatsächlichen Zeitstempel angeboten.
 - Nur „Neue Show“ setzt Punkte und Karten zurück und verlangt „NEU“. Rückgängig/Wiederholen stellt Moderator-Zustände wieder her.
 
@@ -27,6 +27,20 @@ Karten, Regeln, Timer, Ergebnisse und Punkte laufen über die Website. Die Landk
 - **Liegestütze:** Neutral laut bis 40 zählen; nur Start und Stopp klicken.
 - **Physischer Gleichstand:** Kurzes Stechen laut Spielregel durchführen und dessen Sieger eintragen. Alternativ ausdrücklich ohne Punkte abschließen. Bei Staffelzeiten zählt die angezeigte Zehntelsekunde.
 - **Pantomime:** Kathi, dann Anton; jeweils **60 Sekunden insgesamt**, 30 kurze Begriffe je Team als Vorrat. Nur die darstellende Person sieht den Begriff auf deinem Gerät. Richtig/Überspringen wechselt weiter. Nach Ablauf keine neuen Punkte, dann Runde beenden. Keine Papierkarten erforderlich.
+
+## Lieder raten
+
+Fünf MP3-Hörproben à 25 Sekunden: Schlüsseldienstmann (Fäaschtbänkler), Ultralight Beam (Kanye West), Our God is an Awesome God, Cataleya (Samra), Everybody (Backstreet Boys).
+
+- Beim Öffnen der Moderation lädt die Seite alle fünf Hörproben vollständig (zusammen ca. 2 MB). Vor der Show **„5/5 vollständig auf diesem Gerät bereit“** abwarten. Bei Fehler „Hörproben erneut laden“ antippen.
+- Zuerst wird der Browser-Speicher geprüft, sonst vollständig heruntergeladen. Abgespielt wird ausschließlich eine komplette Datei aus dem Gerätespeicher. Ein Internetabbruch während der Wiedergabe verursacht dadurch keinen Streaming-Aussetzer.
+- Über HTTPS/localhost werden die Dateien, soweit der Browser es erlaubt, auch für spätere Besuche gespeichert. Im lokalen HTTP-WLAN bleiben sie mindestens bis zum Schließen/Neuladen des Tabs im Speicher und können vom Laptop erneut geladen werden.
+- Per Zuruf entscheiden, welches Team zuerst war; Team anklicken stoppt die Musik. Titel richtig = ein Rundenpunkt, Titel plus Interpret = insgesamt zwei. Falscher Titel: anderes Team erhält einen Punkt und darf selbst den Titel nennen; richtig gibt ihm insgesamt zwei.
+- Die Lösung wird zum Prüfen zunächst **nur der Moderation** gezeigt. Bei falschem Titel zuerst die Gegenseite anhören und werten. Erst danach erscheint die Lösung auf dem Beamer. „Niemand weiß es“ vor der ersten Team-Auswahl überspringt die Runde ohne Punkte.
+- Die Rundenpunkte entscheiden das Ein-Showpunkt-Spiel. Bei Gleichstand gibt es eine kurze Musik-Wissensfrage per Zuruf. Fehlwertung über Rückgängig korrigieren.
+- Bei „Awesome God“ ist der Interpret aus der gelieferten Datei nicht eindeutig erkennbar; den akzeptierten Namen vor der Show festlegen.
+
+Die Audio-Sicherung ersetzt keine Serververbindung für Wertung, Beamer-Synchronisierung oder Abstimmungen. Für eine vollständig internetlose Show lokal im gemeinsamen WLAN spielen (siehe unten).
 
 ## Die größere Hälfte · fünf Showpunkte
 

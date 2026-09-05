@@ -122,7 +122,7 @@ const server = http.createServer(async (request, response) => {
 });
 
 async function serveStatic(pathname, headOnly, response) {
-  const assetMatch = pathname.match(/^\/(world\.jpg|app\.js|transport\.mjs|styles\.css|media\/[a-z0-9-]+\.(?:svg|png|mp3))$/i);
+  const assetMatch = pathname.match(/^\/(world\.jpg|app\.js|transport\.mjs|audio\.mjs|styles\.css|media\/[a-z0-9-]+\.(?:svg|png|mp3))$/i);
   const fileName = assetMatch ? assetMatch[1] : "index.html";
   const body = await readFile(join(PUBLIC_DIR, fileName));
   const types = {
@@ -137,7 +137,8 @@ async function serveStatic(pathname, headOnly, response) {
   };
   response.writeHead(200, {
     "content-type": types[extname(fileName)] || "application/octet-stream",
-    "cache-control": ["index.html", "app.js", "transport.mjs", "styles.css"].includes(fileName) ? "no-store" : "public, max-age=3600",
+    "content-length": body.length,
+    "cache-control": ["index.html", "app.js", "transport.mjs", "audio.mjs", "styles.css"].includes(fileName) ? "no-store" : "public, max-age=3600",
   });
   response.end(headOnly ? undefined : body);
 }

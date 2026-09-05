@@ -345,7 +345,12 @@ function applyHostAction(data, message, makeToken, now) {
     case "quiz:previous": return quizPrevious(data);
     case "quiz:tiebreak": return quizTieBreak(data, now);
     case "quiz:buzz": return quizBuzz(data, message, now);
+    case "quiz:call:judge": return quizMainCall(data, message);
+    case "quiz:call:opponent": return quizMainCall(data, message);
+    case "quiz:call:skip": return quizMainCall(data, message);
+    case "quiz:call:reset": return quizMainCall(data, message);
     case "quiz:call":
+      if (CARD_BY_ID[data.active?.id]?.answerMode === "call" && data.challenge?.phase === "main") return quizMainCall(data, message);
       if (data.active?.awarded || data.challenge?.kind !== "quiz" || data.challenge.phase !== "tie" || data.challenge.tie.complete) return fail("no_tiebreak", 409);
       if (!["rosa", "blau"].includes(message.team)) return fail("bad_team");
       if (data.challenge.buzz) return fail("already_buzzed", 409);
@@ -536,7 +541,7 @@ function publicCardsForScreen(data) {
       const section = data.active?.id === card.id ? data.challenge?.[phase] : null;
       const rounds = phase === "main" ? copy.rounds : copy.tieBreak;
       rounds?.forEach((round, index) => {
-        if (!section?.revealed?.[index]) delete round.answer;
+        if (!section?.revealed?.[index]) { delete round.answer; delete round.artist; delete round.answerNote; }
         if (round.media === "audio") delete round.asset;
       });
     }
@@ -980,18 +985,59 @@ function timerElapsed(timer, now) {
   return timer.elapsedMs + (timer.runningSince === null ? 0 : Math.max(0, now - timer.runningSince));
 }
 
+function quizMainCall(data, message) {
+  const context = quizContext(data);
+  if (!context || data.active?.awarded || data.challenge.phase !== "main" || context.section.complete || CARD_BY_ID[data.active?.id]?.answerMode !== "call") return fail("no_call_round", 409);
+  const section = context.section, index = section.index;
+  section.calls ||= {};
+  section.wrongCalls ||= {};
+  section.roundPoints ||= {};
+  if (section.marks[index]) return fail("round_already_scored", 409);
+  const finish = (winner, points) => {
+    section.marks[index] = { rosa: winner === "rosa", blau: winner === "blau" };
+    section.roundPoints[index] = { rosa: winner === "rosa" ? points : 0, blau: winner === "blau" ? points : 0 };
+    section.revealed[index] = true;
+    return { ok: true };
+  };
+  if (["quiz:call:judge", "quiz:call:opponent"].includes(message.type)) {
+    const first = section.calls[index];
+    if (!first) return fail("call_missing", 409);
+    if (typeof message.correct !== "boolean") return fail("bad_judgment");
+    if (message.type === "quiz:call:opponent") {
+      if (!section.wrongCalls[index]) return fail("opponent_not_due", 409);
+      return finish(first === "rosa" ? "blau" : "rosa", message.correct ? 2 : 1);
+    }
+    if (section.wrongCalls[index]) return fail("opponent_answer_required", 409);
+    if (!message.correct) { section.wrongCalls[index] = true; return { ok: true }; }
+    if (message.artistCorrect !== undefined && typeof message.artistCorrect !== "boolean") return fail("bad_judgment");
+    return finish(first, message.artistCorrect === true ? 2 : 1);
+  }
+  if (section.revealed[index] || section.wrongCalls[index]) return fail("round_revealed", 409);
+  if (message.type === "quiz:call:reset") { delete section.calls[index]; return { ok: true }; }
+  if (section.calls[index]) return fail("already_buzzed", 409);
+  if (message.type === "quiz:call:skip") return finish(null, 0);
+  if (!["rosa", "blau"].includes(message.team)) return fail("bad_team");
+  section.calls[index] = message.team;
+  return { ok: true };
+}
+
 function quizReveal(data) {
   const context = quizContext(data);
   if (!context) return fail("no_quiz");
   if (data.challenge.phase === "main") {
-    const ready = context.section.ready?.[context.section.index];
-    if (!ready?.rosa || !ready?.blau) return fail("answers_not_locked", 409);
+    if (CARD_BY_ID[data.active?.id]?.answerMode === "call") {
+      return fail("call_answers_pending", 409);
+    } else {
+      const ready = context.section.ready?.[context.section.index];
+      if (!ready?.rosa || !ready?.blau) return fail("answers_not_locked", 409);
+    }
   } else if (!data.challenge.buzz) return fail("buzzer_missing", 409);
   context.section.revealed[context.section.index] = true;
   return { ok: true };
 }
 
 function quizReady(data, message) {
+  if (CARD_BY_ID[data.active?.id]?.answerMode === "call") return fail("call_mode", 409);
   const context = quizContext(data);
   if (!context || data.challenge.phase !== "main") return fail("no_quiz");
   if (message.team !== "rosa" && message.team !== "blau") return fail("bad_team");
@@ -1003,6 +1049,7 @@ function quizReady(data, message) {
 }
 
 function quizMark(data, message) {
+  if (CARD_BY_ID[data.active?.id]?.answerMode === "call" && data.challenge?.phase === "main") return fail("call_mode", 409);
   const context = quizContext(data);
   if (!context) return fail("no_quiz");
   if (message.team !== "rosa" && message.team !== "blau") return fail("bad_team");
@@ -1149,9 +1196,10 @@ function quizContext(data) {
 
 export function quizScores(challenge) {
   const scores = { rosa: 0, blau: 0 };
-  for (const mark of Object.values(challenge?.main?.marks || {})) {
-    if (mark.rosa) scores.rosa++;
-    if (mark.blau) scores.blau++;
+  for (const [index, mark] of Object.entries(challenge?.main?.marks || {})) {
+    const points = challenge.main.roundPoints?.[index];
+    if (mark.rosa) scores.rosa += points?.rosa ?? 1;
+    if (mark.blau) scores.blau += points?.blau ?? 1;
   }
   return scores;
 }

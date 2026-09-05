@@ -106,11 +106,24 @@ pass("Five license-plate rounds and six styled plate graphics");
 state = await openGame("raten-1");
 const musicCard = state.cards.find((card) => card.id === "raten-1");
 assert.equal(musicCard.rounds.length, 5);
-assert.ok(musicCard.rounds.every((round) => round.melody.notes.length > 5));
-result = await request("/app.js");
-assert.match(result.body, /new AudioContext\(\)/);
-assert.match(result.body, /oscillator\.start/);
-pass("Five playable local WebAudio melody rounds");
+assert.equal(musicCard.answerMode, "call");
+for (const round of musicCard.rounds) {
+  assert.equal(round.media, "audio");
+  result = await request(round.asset);
+  assert.equal(result.response.status, 200);
+  assert.match(result.response.headers.get("content-type"), /^audio\/mpeg/);
+  assert.ok(Number(result.response.headers.get("content-length")) > 300000);
+}
+result = await request("/audio.mjs");
+assert.equal(result.response.status, 200);
+assert.match(result.body, /createObjectURL/);
+state = await host("quiz:call", { team: "rosa" });
+state = await host("quiz:call:judge", { correct: false });
+const musicScreen = (await request("/api/state?role=screen")).body;
+assert.equal(musicScreen.cards.find(card => card.id === "raten-1").rounds[0].answer, undefined);
+state = await host("quiz:call:opponent", { correct: true });
+assert.equal(state.challenge.main.roundPoints[0].blau, 2);
+pass("Five complete MP3 clips and weighted calls with hidden counteranswer");
 
 state = await openGame("raten-2");
 assert.equal(state.cards.find((card) => card.id === "raten-2").rounds.length, 5);

@@ -57,7 +57,8 @@ test("all 20 games have a complete and startable gameplay definition", async () 
     await access(fileURLToPath(new URL(path, import.meta.url)));
   }
   const music = CARDS.find((card) => card.id === "raten-1");
-  assert.ok(music.rounds.every((round) => round.media === "melody" && round.melody.notes.length > 5));
+  assert.ok(music.rounds.every((round) => round.media === "audio" && round.asset && Object.hasOwn(round, "artist")));
+  for (const round of music.rounds) await access(new URL(`../public${round.asset}`, import.meta.url));
 });
 
 test("hydrate preserves a running show and migrates the previous schema", () => {
@@ -283,7 +284,7 @@ test("five-round quizzes require reveal, record both teams, and only tie-break o
 });
 
 test("quiz tie-break only accepts an enabled buzzer and a wrong answer immediately awards the opponent", () => {
-  const data = start(freshState(tokens()), "raten-1");
+  const data = start(freshState(tokens()), "raten-3");
   for (let round = 0; round < 5; round++) {
     hostAction(data, { type: "quiz:ready", team: "rosa" });
     hostAction(data, { type: "quiz:ready", team: "blau" });
@@ -614,9 +615,8 @@ test("quiz tiebreak uses a moderator-selected call without devices or timing", (
 
 test("all other quiz answers stay hidden after revealing the active quiz", () => {
   const data = start(freshState(), "raten-1");
-  hostAction(data, { type: "quiz:ready", team: "rosa" });
-  hostAction(data, { type: "quiz:ready", team: "blau" });
-  hostAction(data, { type: "quiz:reveal" });
+  hostAction(data, { type: "quiz:call", team: "rosa" });
+  hostAction(data, { type: "quiz:call:judge", correct: true });
   const screen = publicState(data, { role: "screen" });
   for (const card of screen.cards.filter(c => c.kind === "quiz")) {
     assert.equal(Boolean(card.rounds[0].answer), card.id === "raten-1");
@@ -699,4 +699,50 @@ test("pantomime has enough short terms and the revised board has one card per po
   assert.equal(CARDS.find(c => c.title === "Geimpft oder ungeimpft?").stars, 5);
   assert.equal(CARDS.find(c => c.title === "Organisiert oder Sponti?").stars, 4);
   assert.equal(CARDS.find(c => c.mode === "cutting").stars, 5);
+});
+
+
+test("music title and artist award one or two points, wrong titles give the opponent one or two", () => {
+  const data = start(freshState(), "raten-1");
+  const act = message => hostAction(data, message);
+  assert.equal(act({ type: "quiz:ready", team: "rosa" }).error, "call_mode");
+  assert.equal(act({ type: "quiz:reveal" }).error, "call_answers_pending");
+  // Kathi 1, Kathi 2, Anton 1 (neither knew title), Anton 2 (counteranswer), Kathi 2.
+  const cases = [[true,false,null],[true,true,null],[false,false,false],[false,false,true],[true,true,null]];
+  for (const [correct, artistCorrect, opponentCorrect] of cases) {
+    assert.equal(act({ type:"quiz:call", team:"rosa" }).ok,true);
+    assert.equal(act({ type:"quiz:call", team:"blau" }).error,"already_buzzed");
+    assert.equal(act({ type:"quiz:mark", team:"rosa", correct:true }).error,"call_mode");
+    assert.equal(act({ type:"quiz:call:opponent", correct:true }).error,"opponent_not_due");
+    assert.equal(act({ type:"quiz:call:judge", correct, artistCorrect }).ok,true);
+    if (!correct) {
+      const index=data.challenge.main.index;
+      const publicCard=publicState(data,{role:"screen"}).cards.find(c=>c.id==="raten-1");
+      assert.equal(publicCard.rounds[index].answer,undefined);
+      assert.equal(publicCard.rounds[index].artist,undefined);
+      assert.equal(publicCard.rounds[index].answerNote,undefined);
+      assert.equal(act({ type:"quiz:reveal" }).error,"call_answers_pending");
+      assert.equal(act({ type:"quiz:next" }).error,"round_not_revealed");
+      assert.equal(act({ type:"quiz:call:judge", correct:true }).error,"opponent_answer_required");
+      assert.equal(act({ type:"quiz:call:opponent", correct:opponentCorrect }).ok,true);
+    }
+    assert.equal(act({ type:"quiz:call:judge", correct:true }).error,"round_already_scored");
+    assert.equal(act({ type:"quiz:next" }).ok,true);
+  }
+  assert.deepEqual(quizScores(data.challenge), {rosa:5,blau:3});
+  assert.equal(data.active.awarded,"rosa");
+  assert.deepEqual(data.scores,{rosa:1,blau:0});
+});
+
+test("music can correct the selected caller and skip an unknown title", () => {
+  const data = start(freshState(), "raten-1");
+  hostAction(data, { type: "quiz:call", team: "rosa" });
+  assert.equal(hostAction(data, { type: "quiz:call:skip" }).error, "already_buzzed");
+  hostAction(data, { type: "quiz:call:reset" });
+  assert.equal(hostAction(data, { type: "quiz:call:skip" }).ok, true);
+  assert.deepEqual(data.challenge.main.marks[0], { rosa:false, blau:false });
+  assert.deepEqual(data.challenge.main.roundPoints[0], { rosa:0, blau:0 });
+  assert.equal(hostAction(data, { type: "quiz:next" }).ok, true);
+  assert.equal(data.challenge.main.index, 1);
+  assert.equal(hostAction(data, { type: "quiz:reveal" }).error, "call_answers_pending");
 });
