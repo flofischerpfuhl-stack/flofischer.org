@@ -463,3 +463,7 @@ dialog::backdrop { background: rgba(0,0,0,.78); backdrop-filter: blur(4px); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+#connection-status { position: sticky; top: 0; z-index: 200; padding: 12px 20px; background: #ffe19c; color: #241a08; text-align: center; font: 600 16px/1.4 system-ui; }
+#connection-status[hidden] { display: none; }
+.pullup-actions label { display: grid; gap: 10px; font-size: 18px; }
+.pullup-actions input { max-width: 180px; padding: 12px; font-size: 28px; }

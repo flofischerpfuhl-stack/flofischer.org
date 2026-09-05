@@ -507,3 +507,131 @@ test("anonymous state is minimal and PIN accepts only the configured value", asy
   assert.equal(await isHost({}, configuredPin), false);
   assert.equal(await isHost({ pin: configuredPin }), false, "missing server configuration must fail closed");
 });
+
+test("guest traffic does not invalidate moderator actions, another moderator does", () => {
+  const data = start(freshState(), "vote-1");
+  hostAction(data, { type: "vote:guesses:set", rosaPercent: 40, blauPercent: 60 });
+  hostAction(data, { type: "vote:open" });
+  const expectedHostRevision = data.hostRevision;
+  for (let n = 0; n < 100; n++) assert.equal(voteAction(data, { token: data.vote.tokens.guests, uid: String(n), choice: "a" }).ok, true);
+  assert.equal(hostAction(data, { type: "vote:close", expectedHostRevision }).ok, true);
+  assert.equal(hostAction(data, { type: "vote:reveal", expectedHostRevision }).error, "stale_revision");
+});
+
+test("retries are idempotent even after undo and new-session cookie recovery", () => {
+  const data = start(freshState(), "aktion-5");
+  hostAction(data, { type: "pullups:start" });
+  const message = { type: "pullups:rep", delta: 1, actionId: "rep-1", sessionId: data.session.id, expectedHostRevision: data.hostRevision };
+  assert.equal(hostAction(data, message).ok, true);
+  assert.equal(hostAction(data, message).ok, true);
+  assert.equal(data.challenge.counters.rosa, 1);
+  hostAction(data, { type: "history:undo" });
+  assert.equal(hostAction(data, message).ok, true);
+  assert.equal(data.challenge.counters.rosa, 0, "retry must not undo an intentional undo");
+  const newShow = { type: "session:new", actionId: "new-show", sessionId: data.session.id };
+  hostAction(data, newShow);
+  const sessionId = data.session.id;
+  assert.equal(hostAction(data, newShow).ok, true);
+  assert.equal(data.session.id, sessionId);
+  assert.equal(hostAction(data, { type: "close", sessionId: newShow.sessionId }).error, "stale_session");
+});
+
+test("relay time uses captured clicks despite unequal request latency", () => {
+  const data = start(freshState(), "aktion-4");
+  assert.equal(hostAction(data, { type: "relay:start", occurredAt: 10000 }, undefined, () => 13000).ok, true);
+  assert.equal(hostAction(data, { type: "relay:finish", occurredAt: 40000 }, undefined, () => 48000).ok, true);
+  assert.equal(data.challenge.relay.rounds.rosa.timer.elapsedMs, 30000);
+  assert.equal(hostAction(data, { type: "relay:start", occurredAt: 999999 }, undefined, () => 49000).error, "invalid_action_time");
+});
+
+test("pantomime rejects late points but accepts an on-time click delivered late", () => {
+  const data = start(freshState(), "party-2");
+  hostAction(data, { type: "team-round:start" }, undefined, () => 10000);
+  assert.equal(hostAction(data, { type: "team-round:correct", occurredAt: 69999 }, undefined, () => 75000).ok, true);
+  assert.equal(hostAction(data, { type: "team-round:correct" }, undefined, () => 70000).error, "timer_finished");
+  assert.equal(hostAction(data, { type: "team-round:skip" }, undefined, () => 130000).error, "timer_finished");
+  assert.equal(data.challenge.teamRounds.rounds.rosa.correct, 1);
+  assert.equal(hostAction(data, { type: "team-round:finish" }, undefined, () => 130000).ok, true);
+});
+
+test("physical tiebreaks and whole-attempt pull-up counts preserve the main results", () => {
+  const data = start(freshState(), "aktion-5");
+  for (let i = 0; i < 4; i++) {
+    hostAction(data, { type: "pullups:start" });
+    assert.equal(hostAction(data, { type: "pullups:finish", reps: -1 }).error, "bad_reps");
+    assert.equal(hostAction(data, { type: "pullups:finish", reps: 3 }).ok, true);
+  }
+  assert.equal(data.challenge.result, "draw");
+  assert.deepEqual(data.challenge.counters, { rosa: 6, blau: 6 });
+  assert.equal(hostAction(data, { type: "physical:tiebreak", team: "blau" }).ok, true);
+  assert.equal(hostAction(data, { type: "winner", team: "blau" }).ok, true);
+  assert.equal(data.scores.blau, 5);
+  assert.equal(hostAction(data, { type: "physical:tiebreak", team: "rosa" }).error, "tiebreak_unavailable");
+});
+
+test("quiz tiebreak uses a moderator-selected call without devices or timing", () => {
+  const data = start(freshState(), "raten-1");
+  data.challenge.main.complete = true;
+  assert.equal(hostAction(data, { type: "quiz:tiebreak" }).ok, true);
+  assert.equal(hostAction(data, { type: "quiz:call", team: "blau" }).ok, true);
+  assert.equal(data.challenge.buzz.team, "blau");
+  assert.equal(data.challenge.buzz.elapsedMs, undefined);
+  assert.equal(hostAction(data, { type: "quiz:call", team: "rosa" }).error, "already_buzzed");
+  hostAction(data, { type: "quiz:buzz:reset" });
+  hostAction(data, { type: "quiz:call", team: "rosa" });
+  hostAction(data, { type: "quiz:reveal" });
+  assert.equal(hostAction(data, { type: "quiz:tiebreak:judge", correct: true }).ok, true);
+  assert.equal(data.active.awarded, "rosa");
+  const noAnswer = start(freshState(), "raten-5");
+  noAnswer.challenge.main.complete = true;
+  hostAction(noAnswer, { type: "quiz:tiebreak" });
+  assert.equal(hostAction(noAnswer, { type: "quiz:tiebreak:draw" }).ok, true);
+  assert.equal(noAnswer.active.awarded, "draw");
+});
+
+test("all other quiz answers stay hidden after revealing the active quiz", () => {
+  const data = start(freshState(), "raten-1");
+  hostAction(data, { type: "quiz:ready", team: "rosa" });
+  hostAction(data, { type: "quiz:ready", team: "blau" });
+  hostAction(data, { type: "quiz:reveal" });
+  const screen = publicState(data, { role: "screen" });
+  for (const card of screen.cards.filter(c => c.kind === "quiz")) {
+    assert.equal(Boolean(card.rounds[0].answer), card.id === "raten-1");
+    assert.equal(card.rounds[1].answer, undefined);
+    assert.equal(card.tieBreak[0].answer, undefined);
+  }
+});
+
+test("expired voting closes on every client and can extend without losing votes", () => {
+  const data = start(freshState(), "vote-1");
+  hostAction(data, { type: "vote:guesses:set", rosaPercent: 40, blauPercent: 60 });
+  hostAction(data, { type: "vote:open" });
+  voteAction(data, { token: data.vote.tokens.guests, uid: "1", choice: "a" });
+  data.vote.closesAt = Date.now() - 1;
+  for (const access of [{ host: true }, { role: "screen" }, { role: "vote", token: data.vote.tokens.guests }]) {
+    assert.equal(publicState(data, access).vote.open, false);
+    assert.equal(publicState(data, access).vote.phase, "closed");
+  }
+  assert.equal(hostAction(data, { type: "vote:extend" }).ok, true);
+  assert.equal(Object.keys(data.vote.votes).length, 1);
+  assert.equal(publicState(data, { role: "screen" }).vote.open, true);
+  data.vote.closesAt = Date.now() - 1;
+  assert.equal(hostAction(data, { type: "vote:reveal" }).ok, true);
+  const screen = publicState(data, { role: "screen" }).vote;
+  assert.deepEqual(screen.guesses, data.vote.guesses);
+  assert.deepEqual(screen.counts, { a: 1, b: 0 });
+  assert.equal(hostAction(data, { type: "vote:extend" }).error, "vote_not_open");
+});
+
+test("zero-vote joke voting can reopen and finish without repeating performances", () => {
+  const data = start(freshState(), "party-4");
+  hostAction(data, { type: "performance:done" });
+  hostAction(data, { type: "performance:done" });
+  hostAction(data, { type: "vote:close", force: true });
+  assert.equal(hostAction(data, { type: "vote:reveal" }).error, "no_votes");
+  assert.equal(hostAction(data, { type: "vote:extend" }).ok, true);
+  voteAction(data, { token: data.vote.tokens.guests, uid: "1", choice: "b" });
+  hostAction(data, { type: "vote:close", force: true });
+  assert.equal(hostAction(data, { type: "vote:reveal" }).ok, true);
+  assert.equal(data.active.awarded, "blau");
+});

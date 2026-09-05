@@ -254,12 +254,12 @@ assert.deepEqual(result.body, { room: "KATHI", access: { role: "viewer", valid: 
 result = await request("/api/state?role=screen");
 assert.equal(result.body.access.role, "screen");
 assert.equal(result.body.vote.tokens, undefined);
-assert.equal(result.body.vote.guesses, undefined);
+assert.deepEqual(result.body.vote.guesses, { rosa: { percent: 40 }, blau: { percent: 70 } }, "revealed predictions belong on the projector");
 result = await request("/api/state?role=pad&team=rosa&token=wrong");
 assert.deepEqual(result.body, { room: "KATHI", access: { role: "pad", team: "rosa", valid: false } });
 pass("Anonymous and invalid-token state stays minimal");
 
-for (const asset of ["/", "/styles.css", "/app.js", "/world.jpg"]) {
+for (const asset of ["/", "/styles.css", "/app.js", "/transport.mjs", "/world.jpg"]) {
   result = await request(asset);
   assert.equal(result.response.status, 200, asset);
 }
@@ -279,5 +279,33 @@ assert.match(result.body, /aria-label="Schlag den Ehepartner"/);
 assert.doesNotMatch(result.body, /Schlag das Team/i);
 assert.match(result.body, /screen-guest-qr/);
 pass("HTML, gameshow styles, responsive overflow rules, and map asset");
+
+result = await post("/api/buzzer", { team: "rosa", token: "obsolete" });
+assert.equal(result.response.status, 410, "old device links cannot interfere with spoken tiebreaks");
+result = await request("/api/backup");
+assert.equal(result.response.status, 403);
+const login = await post("/api/host", { pin: hostPin });
+const cookie = login.response.headers.get("set-cookie").split(";")[0];
+result = await request("/api/backup", { headers: { cookie } });
+assert.equal(result.response.status, 200);
+const backup = result.body;
+assert.equal(backup.format, "hochzeit-show-backup");
+assert.equal(backup.state.history, undefined);
+assert.deepEqual(backup.state.scores, { rosa: 2, blau: 0 });
+pass("Authenticated show backup and retired device buzzer");
+
+const current = (await request("/api/state", { headers: { cookie } })).body;
+assert.ok(Number.isFinite(current.serverNow));
+if (current.localMode) {
+  state = await host("score:set", { rosa: 99, blau: 99 });
+  result = await request("/api/restore", { method: "POST", headers: { cookie, "content-type": "application/json" }, body: JSON.stringify({ backup, expectedHostRevision: state.hostRevision }) });
+  assert.equal(result.response.status, 200);
+  assert.deepEqual(result.body.state.scores, { rosa: 2, blau: 0 });
+  assert.equal(result.body.state.localMode, true);
+  assert.ok(result.body.state.revision > state.revision);
+  result = await request("/api/restore", { method: "POST", headers: { cookie, "content-type": "application/json" }, body: JSON.stringify({ backup, expectedHostRevision: state.hostRevision }) });
+  assert.equal(result.response.status, 409, "an old import cannot overwrite intervening state");
+  pass("Local backup restore with conflict protection");
+}
 
 console.log(`\n${results.length} HTTP test groups passed at ${origin}`);

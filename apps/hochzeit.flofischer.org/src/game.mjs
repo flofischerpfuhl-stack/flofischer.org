@@ -22,6 +22,8 @@ export function freshState(makeToken = token, now = () => Date.now()) {
     vote: null,
     map: null,
     revision: 0,
+    hostRevision: 0,
+    actionReceipts: [],
     history: { past: [], future: [] },
   };
 }
@@ -32,6 +34,8 @@ export function hydrateState(saved, makeToken = token, now = () => Date.now()) {
   const data = {
     ...base,
     ...structuredClone(saved),
+    hostRevision: Number(saved.hostRevision ?? saved.revision) || 0,
+    actionReceipts: Array.isArray(saved.actionReceipts) ? saved.actionReceipts.slice(-128) : [],
     schemaVersion: SCHEMA_VERSION,
     scores: { rosa: safeScore(saved.scores?.rosa), blau: safeScore(saved.scores?.blau) },
     flipped: saved.flipped && typeof saved.flipped === "object" ? saved.flipped : {},
@@ -113,18 +117,35 @@ export async function isHost(body, configuredPin) {
 }
 
 export function hostAction(data, message, makeToken = token, now = () => Date.now()) {
-  if (Number.isInteger(message.expectedRevision) && message.expectedRevision !== data.revision) return fail("stale_revision", 409);
+  // Receipts survive undo: retrying a request must never perform it a second time.
+  if (message.actionId && data.actionReceipts?.includes(message.actionId)) return { ok: true };
+  if (message.sessionId && message.sessionId !== data.session.id) return fail("stale_session", 409);
+  if (Number.isInteger(message.expectedHostRevision)) {
+    if (message.expectedHostRevision !== (data.hostRevision ?? data.revision)) return fail("stale_revision", 409);
+  } else if (Number.isInteger(message.expectedRevision) && message.expectedRevision !== data.revision) return fail("stale_revision", 409);
+  const receivedAt = now();
+  const timed = /^(timer:|relay:|team-round:|physical:finish$)/.test(message.type);
+  if (timed && message.occurredAt !== undefined) {
+    if (!Number.isFinite(message.occurredAt) || message.occurredAt > receivedAt + 2000 || message.occurredAt < receivedAt - 12 * 3600000) return fail("invalid_action_time", 409);
+    now = () => Math.min(receivedAt, message.occurredAt);
+  }
   if (!data.history) data.history = { past: [], future: [] };
-  if (message.type === "history:undo") return undo(data);
-  if (message.type === "history:redo") return redo(data);
+  const hostRevision = Number(data.hostRevision ?? data.revision) || 0;
+  const receipts = [...(data.actionReceipts || [])];
   const before = snapshot(data);
   const previousRevision = Number(data.revision) || 0;
-  const result = applyHostAction(data, message, makeToken, now);
+  const historyAction = message.type === "history:undo" || message.type === "history:redo";
+  const result = message.type === "history:undo" ? undo(data) : message.type === "history:redo" ? redo(data) : applyHostAction(data, message, makeToken, now);
   if (!result.ok) return result;
   data.revision = previousRevision + 1;
-  data.history.past.push(before);
-  if (data.history.past.length > MAX_HISTORY) data.history.past.splice(0, data.history.past.length - MAX_HISTORY);
-  data.history.future = [];
+  data.hostRevision = hostRevision + 1;
+  if (message.actionId) receipts.push(String(message.actionId).slice(0, 100));
+  data.actionReceipts = receipts.slice(-128);
+  if (!historyAction) {
+    data.history.past.push(before);
+    if (data.history.past.length > MAX_HISTORY) data.history.past.splice(0, data.history.past.length - MAX_HISTORY);
+    data.history.future = [];
+  }
   return { ok: true };
 }
 
@@ -248,11 +269,19 @@ function applyHostAction(data, message, makeToken, now) {
     }
     case "vote:open":
       if (!data.vote) return fail("no_vote_game");
+      if (data.vote.phase !== "team" || data.vote.revealed || data.active.awarded) return fail("vote_already_open", 409);
       if (!data.vote.guesses.rosa || !data.vote.guesses.blau) return fail("guesses_missing", 409);
       data.vote.open = true;
       data.vote.phase = "voting";
       data.vote.openedAt = now();
       data.vote.closesAt = now() + (Number(data.vote.durationMs) || 30000);
+      break;
+    case "vote:extend":
+      if (!data.vote || data.vote.revealed || data.active.awarded || !["voting", "closed"].includes(data.vote.phase)) return fail("vote_not_open", 409);
+      data.vote.phase = "voting";
+      data.vote.open = true;
+      data.vote.closedAt = null;
+      data.vote.closesAt = now() + (data.vote.durationMs || 30000);
       break;
     case "vote:close": {
       if (!data.vote || data.vote.phase !== "voting") return fail("vote_not_open", 409);
@@ -264,8 +293,9 @@ function applyHostAction(data, message, makeToken, now) {
       break;
     }
     case "vote:reveal":
-      if (!data.vote || data.vote.phase !== "closed") return fail("vote_not_closed", 409);
+      if (!data.vote || !(data.vote.phase === "closed" || data.vote.phase === "voting" && now() >= data.vote.closesAt)) return fail("vote_not_closed", 409);
       if (!Object.keys(data.vote.votes).length) return fail("no_votes", 409);
+      data.vote.open = false;
       data.vote.revealed = true;
       data.vote.phase = "revealed";
       data.vote.result = calculateVoteResult(data.vote);
@@ -298,7 +328,12 @@ function applyHostAction(data, message, makeToken, now) {
     case "showcase:finish": return showcaseFinish(data, now);
     case "pullups:start": return pullupsStart(data);
     case "pullups:rep": return pullupsRep(data, message);
-    case "pullups:finish": return pullupsFinish(data, now);
+    case "pullups:finish": return pullupsFinish(data, now, message);
+    case "physical:tiebreak":
+      if (data.active?.awarded || data.challenge?.phase !== "finished" || data.challenge.result !== "draw" || !["stopwatch", "team-relay", "pullups"].includes(data.challenge.mode)) return fail("tiebreak_unavailable", 409);
+      if (!["rosa", "blau"].includes(message.team)) return fail("bad_team");
+      data.challenge.result = message.team;
+      break;
     case "quiz:reveal": return quizReveal(data);
     case "quiz:ready": return quizReady(data, message);
     case "quiz:mark": return quizMark(data, message);
@@ -306,6 +341,19 @@ function applyHostAction(data, message, makeToken, now) {
     case "quiz:previous": return quizPrevious(data);
     case "quiz:tiebreak": return quizTieBreak(data, now);
     case "quiz:buzz": return quizBuzz(data, message, now);
+    case "quiz:call":
+      if (data.active?.awarded || data.challenge?.kind !== "quiz" || data.challenge.phase !== "tie" || data.challenge.tie.complete) return fail("no_tiebreak", 409);
+      if (!["rosa", "blau"].includes(message.team)) return fail("bad_team");
+      if (data.challenge.buzz) return fail("already_buzzed", 409);
+      data.challenge.buzz = { team: message.team, byCall: true };
+      data.challenge.buzzerOpen = false;
+      break;
+    case "quiz:tiebreak:draw":
+      if (data.active?.awarded || data.challenge?.phase !== "tie" || data.challenge.tie.complete) return fail("no_tiebreak", 409);
+      data.challenge.tie.complete = true;
+      data.challenge.buzzerOpen = false;
+      awardGame(data, "draw", now);
+      break;
     case "quiz:buzz:reset": return quizBuzzReset(data, now);
     case "quiz:buzzer:open": return quizBuzzerOpen(data, now);
     case "quiz:buzzer:close": return quizBuzzerClose(data);
@@ -335,6 +383,7 @@ export function mapAction(data, message, now = () => Date.now()) {
     if (map.locks.rosa && map.locks.blau) {
       resolveMap(map);
       if (map.complete) awardGame(data, mapOverallWinner(map), now);
+      data.hostRevision = (data.hostRevision ?? data.revision) + 1;
     }
   } else return fail("unknown_action");
   data.revision++;
@@ -396,6 +445,7 @@ export function publicState(data, access = {}) {
         undoCount: data.history?.past?.length || 0, redoCount: data.history?.future?.length || 0,
       },
       revision: data.revision,
+      hostRevision: data.hostRevision ?? data.revision,
       access: { role: "host", valid: true },
     };
   }
@@ -441,7 +491,7 @@ function mapState(map, access = {}) {
     roundId: map.roundId,
     result: map.done ? map.result : null, totals: map.totals,
     roundResults: map.done || access.host ? map.roundResults : [],
-    ...(access.host ? { tokens: map.tokens } : {}),
+    ...(access.host ? { tokens: map.tokens, hasTaps: Object.keys(map.taps).length > 0 } : {}),
   };
 }
 
@@ -449,8 +499,10 @@ function voteState(vote, access = {}) {
   if (!vote) return null;
   const values = Object.values(vote.votes);
   const counts = { a: values.filter((value) => value === "a").length, b: values.filter((value) => value === "b").length };
+  const expired = vote.phase === "voting" && vote.closesAt && Date.now() >= vote.closesAt;
   return {
-    q: vote.q, a: vote.a, b: vote.b, guessMode: vote.guessMode || "choice", minVotes: vote.minVotes || 1, phase: vote.phase || (vote.revealed ? "revealed" : vote.open ? "voting" : "team"), open: vote.open, revealed: vote.revealed, closesAt: vote.closesAt || null,
+    q: vote.q, a: vote.a, b: vote.b, guessMode: vote.guessMode || "choice", minVotes: vote.minVotes || 1, phase: expired ? "closed" : vote.phase || (vote.revealed ? "revealed" : vote.open ? "voting" : "team"), open: Boolean(vote.open && !expired), revealed: vote.revealed, closesAt: vote.closesAt || null,
+    ...(vote.revealed ? { guesses: vote.guesses, result: vote.result } : {}),
     ...(access.host || access.screen || vote.revealed ? { n: values.length, counts: vote.revealed ? counts : null } : {}),
     ...(access.host ? {
       tokens: vote.tokens,
@@ -476,7 +528,7 @@ function publicCardsForScreen(data) {
     delete copy.termSets;
     if (card.kind !== "quiz") return copy;
     for (const phase of ["main", "tie"]) {
-      const section = data.challenge?.[phase];
+      const section = data.active?.id === card.id ? data.challenge?.[phase] : null;
       const rounds = phase === "main" ? copy.rounds : copy.tieBreak;
       rounds?.forEach((round, index) => { if (!section?.revealed?.[index]) delete round.answer; });
     }
@@ -653,7 +705,7 @@ function relayFinish(data, now) {
   } else {
     const rosa = relay.rounds.rosa.timer.elapsedMs;
     const blau = relay.rounds.blau.timer.elapsedMs;
-    challenge.result = rosa === blau ? "draw" : rosa < blau ? "rosa" : "blau";
+    challenge.result = Math.floor(rosa / 100) === Math.floor(blau / 100) ? "draw" : rosa < blau ? "rosa" : "blau";
     challenge.phase = "finished";
     challenge.finishedAt = now();
   }
@@ -705,6 +757,7 @@ function teamRoundAdvance(data, correct, now) {
   if (round?.timer.runningSince === null || round.done) return fail("timer_not_running", 409);
   const terms = card?.termSets?.[team] || [];
   if (round.termIndex >= terms.length) return fail("terms_complete", 409);
+  if (timerElapsed(round.timer, now()) >= round.timer.durationMs) return fail("timer_finished", 409);
   if (correct) round.correct++;
   else round.skipped++;
   round.termIndex++;
@@ -851,10 +904,15 @@ function pullupsRep(data, message) {
   return { ok: true };
 }
 
-function pullupsFinish(data, now) {
+function pullupsFinish(data, now, message = {}) {
   const challenge = data.challenge;
   const attempt = challenge?.pullups?.attempts?.[challenge.pullups.index];
   if (challenge?.mode !== "pullups" || attempt?.status !== "active") return fail("attempt_not_active", 409);
+  if (message.reps !== undefined) {
+    if (!Number.isInteger(message.reps) || message.reps < 0 || message.reps > 99) return fail("bad_reps");
+    attempt.reps = message.reps;
+    challenge.counters[attempt.team] = challenge.pullups.attempts.filter((item) => item.team === attempt.team).reduce((sum, item) => sum + item.reps, 0);
+  }
   attempt.status = "done";
   if (challenge.pullups.index < challenge.pullups.attempts.length - 1) {
     challenge.pullups.index++;
@@ -1127,7 +1185,7 @@ function redo(data) {
   return { ok: true };
 }
 
-function snapshot(data) { const value = structuredClone(data); delete value.history; return value; }
+function snapshot(data) { const value = structuredClone(data); delete value.history; delete value.actionReceipts; return value; }
 function replaceData(target, source) { for (const key of Object.keys(target)) delete target[key]; Object.assign(target, source); }
 function rememberExternalAction(data) {
   data.history ||= { past: [], future: [] };

@@ -104,9 +104,9 @@ export const CARDS = [
   },
   {
     id: "party-2", cat: "Party", stars: 2, kind: "physical", mode: "team-rounds", durationMs: 60000, title: "Hochzeits-Pantomime",
-    text: "Die Teams erraten abwechselnd pantomimisch dargestellte Hochzeitsbegriffe.",
-    setup: ["Zwölf gleich schwere Begriffe auf verdeckten Karten vorbereiten", "Je Team sechs Karten; Reihenfolge auslosen", "Eine darstellende Person je Karte, alle anderen im eigenen Team raten"],
-    rules: ["Nicht sprechen, buchstabieren, Geräusche machen oder auf Gegenstände zeigen", "Jede Karte höchstens 30 Sekunden; danach wird ohne Punkt gewechselt", "Die Moderation zählt nur vollständig genannte Begriffe"],
+    text: "Jedes Team hat 60 Sekunden für bis zu sechs pantomimisch dargestellte Hochzeitsbegriffe.",
+    setup: ["Die Website hält je Team sechs Begriffe bereit; keine Papierkarten nötig", "Team Kathi spielt zuerst, danach Team Anton; nur die darstellende Person sieht den Begriff bei der Moderation", "Eine darstellende Person je Team, die anderen im eigenen Team raten"],
+    rules: ["Nicht sprechen, buchstabieren, Geräusche machen oder auf Gegenstände zeigen", "60 Sekunden pro Team insgesamt; Überspringen ist jederzeit ohne Punkt möglich", "Nur vollständig genannte Begriffe vor Ablauf der Zeit zählen; bei null ist Schluss"],
     decision: "Mehr richtig erratene Begriffe gewinnt. Bei Gleichstand erhält kein Team Punkte.",
     termSets: {
       rosa: ["Brautstrauß werfen", "Hochzeitstorte anschneiden", "Ehering anstecken", "Eröffnungstanz", "Sektkorken knallen", "Schleier tragen"],
@@ -123,7 +123,7 @@ export const CARDS = [
   {
     id: "party-4", cat: "Party", stars: 4, kind: "physical", mode: "performance", audienceDecision: true, voteQuestion: "Welcher Witz war lustiger?", title: "Der beste Witz",
     text: "Je eine Person pro Team erzählt dem Publikum einen Witz.",
-    setup: ["Pro Team eine freiwillige erzählende Person bestimmen", "Vortragsreihenfolge auslosen", "Der öffentliche Gäste-QR darf schon vor dem ersten Witz gescannt werden"],
+    setup: ["Pro Team eine freiwillige erzählende Person bestimmen", "Team Kathi erzählt zuerst, danach Team Anton", "Der öffentliche Gäste-QR darf schon vor dem ersten Witz gescannt werden"],
     rules: ["Je Team genau ein Witz und höchstens 60 Sekunden", "Keine privaten, diskriminierenden oder bloßstellenden Inhalte", "Abgestimmt wird erst, nachdem beide Witze vollständig erzählt wurden"],
     decision: "Die geheime Publikumsabstimmung über den öffentlichen Gäste-QR entscheidet. Bei Stimmengleichheit gibt es keine Punkte.",
   },
@@ -158,7 +158,7 @@ export const CARDS = [
   },
   {
     id: "raten-5", cat: "Raten", stars: 5, kind: "quiz", title: "Quiz-Blitz",
-    text: "Fünf schnelle Wissensfragen. Bei Gleichstand entscheidet eine zeitkritische Stechfrage.",
+    text: "Fünf schnelle Wissensfragen. Bei Gleichstand entscheidet eine Stechfrage per Zuruf; die Moderation entscheidet, wer zuerst dran war.",
     rounds: quizRounds,
     tieBreak: [quizTieBreak[0]],
   },

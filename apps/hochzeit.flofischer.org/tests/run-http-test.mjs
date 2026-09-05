@@ -1,9 +1,13 @@
 import { spawn } from "node:child_process";
 import net from "node:net";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const port = await freePort();
 const hostPin = "ci-only-pin";
-const env = { ...process.env, PORT: String(port), HOST_PIN: hostPin };
+const testDir = await mkdtemp(join(tmpdir(), "hochzeit-http-"));
+const env = { ...process.env, PORT: String(port), HOST_PIN: hostPin, STATE_FILE: join(testDir, "game.json") };
 const server = spawn(process.execPath, ["server.mjs"], { env, stdio: ["ignore", "pipe", "pipe"] });
 
 try {
@@ -15,6 +19,8 @@ try {
   if (status !== 0) process.exitCode = status;
 } finally {
   server.kill();
+  await new Promise(resolve => server.exitCode !== null ? resolve() : server.once("exit", resolve));
+  await rm(testDir, { recursive: true, force: true });
 }
 
 function freePort() {

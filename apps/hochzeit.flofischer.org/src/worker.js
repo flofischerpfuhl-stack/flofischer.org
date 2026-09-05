@@ -1,7 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
 import {
   ROOM,
-  buzzerAction,
   hydrateState,
   hostAction,
   isHost,
@@ -10,6 +9,7 @@ import {
   voteAction,
 } from "./game.mjs";
 import { qrMatchesGame, qrResponse } from "./qr.mjs";
+import { exportBackup } from "./backup.mjs";
 
 export default {
   async fetch(request, env) {
@@ -45,6 +45,11 @@ export class Room extends DurableObject {
   async fetch(request) {
     await this.ready;
     const url = new URL(request.url);
+
+    if (request.method === "GET" && url.pathname === "/api/backup") {
+      if (!(await validHostCookie(request, this.data.session.id, this.hostPin))) return json({ ok: false, error: "forbidden" }, 403);
+      return json(exportBackup(this.data));
+    }
 
     if (request.method === "GET" && url.pathname === "/api/qr") {
       return qrResponse(request, (target) => qrMatchesGame(this.data, target));
@@ -84,10 +89,8 @@ export class Room extends DurableObject {
     }
 
     if (request.method === "POST" && url.pathname === "/api/buzzer") {
-      const body = await readJson(request);
-      const mutation = await this.mutate((next) => buzzerAction(next, body));
-      if (!mutation.result.ok) return json(mutation.result, mutation.result.status);
-      return json({ ok: true, state: publicState(this.data, { role: "buzzer", team: body.team, token: body.token }) });
+      await readJson(request);
+      return json({ ok: false, error: "buzzer_removed" }, 410);
     }
 
     if (request.method === "POST" && url.pathname === "/api/vote") {
@@ -130,6 +133,8 @@ async function readJson(request) {
 }
 
 function json(value, status = 200, extraHeaders = {}) {
+  if (value.access?.valid) value = { ...value, serverNow: Date.now() };
+  if (value.state?.access?.valid) value = { ...value, state: { ...value.state, serverNow: Date.now() } };
   return Response.json(value, {
     status,
     headers: {

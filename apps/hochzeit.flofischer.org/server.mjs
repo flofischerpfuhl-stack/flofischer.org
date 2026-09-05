@@ -4,8 +4,6 @@ import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   ROOM,
-  buzzerAction,
-  freshState,
   hostAction,
   isHost,
   mapAction,
@@ -13,16 +11,43 @@ import {
   voteAction,
 } from "./src/game.mjs";
 import { qrMatchesGame, qrResponse } from "./src/qr.mjs";
+import { openLocalStore } from "./src/local-store.mjs";
+import { exportBackup, restoreBackup } from "./src/backup.mjs";
+import { networkInterfaces } from "node:os";
 
 const PORT = Number(process.env.PORT || 8787);
 const HOST_PIN = process.env.HOST_PIN || "0000";
 const PUBLIC_DIR = fileURLToPath(new URL("./public/", import.meta.url));
-const data = freshState();
+const store = await openLocalStore(process.env.STATE_FILE || fileURLToPath(new URL("./.local/game.json", import.meta.url)));
 
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
+    let data = store.data;
     setSecurityHeaders(response);
+
+    if (request.method === "GET" && url.pathname === "/api/backup") {
+      if (!(await validHostCookie(request, data.session.id))) return sendJson(response, { ok: false, error: "forbidden" }, 403);
+      return sendJson(response, exportBackup(store.data));
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/restore") {
+      if (!(await validHostCookie(request, data.session.id)) || !sameOriginJson(request, url)) return sendJson(response, { ok: false, error: "forbidden" }, 403);
+      const body = await readJson(request);
+      let restored;
+      try { restored = restoreBackup(body.backup); } catch { return sendJson(response, { ok: false, error: "invalid_backup" }, 400); }
+      const result = await store.mutate(next => {
+        if (body.expectedHostRevision !== next.hostRevision) return { ok: false, error: "stale_revision", status: 409 };
+        const revision = next.revision + 1;
+        const hostRevision = next.hostRevision + 1;
+        Object.keys(next).forEach(key => delete next[key]);
+        Object.assign(next, restored, { revision, hostRevision });
+        return { ok: true };
+      });
+      if (!result.ok) return sendJson(response, result, result.status);
+      response.setHeader("set-cookie", await makeHostCookie(store.data.session.id, url));
+      return sendJson(response, { ok: true, state: publicState(store.data, { host: true }) });
+    }
 
     if (request.method === "GET" && url.pathname === "/api/qr") {
       const qr = await qrResponse(new Request(url.href), (target) => qrMatchesGame(data, target));
@@ -53,24 +78,24 @@ const server = http.createServer(async (request, response) => {
     if (request.method === "POST" && url.pathname === "/api/action") {
       const body = await readJson(request);
       if (!(await isHost(body, HOST_PIN)) && !(await validHostCookie(request, data.session.id))) return sendJson(response, { ok: false, error: "forbidden" }, 403);
-      const result = hostAction(data, body);
+      const result = await store.mutate(next => hostAction(next, body));
       if (!result.ok) return sendJson(response, result, result.status);
+      data = store.data;
       response.setHeader("set-cookie", await makeHostCookie(data.session.id, url));
       return sendJson(response, { ok: true, state: publicState(data, { host: true }) });
     }
 
     if (request.method === "POST" && url.pathname === "/api/map") {
       const body = await readJson(request);
-      const result = mapAction(data, body);
+      const result = await store.mutate(next => mapAction(next, body));
       if (!result.ok) return sendJson(response, result, result.status);
+      data = store.data;
       return sendJson(response, { ok: true, state: publicState(data, { role: "pad", team: body.team, token: body.token }) });
     }
 
     if (request.method === "POST" && url.pathname === "/api/buzzer") {
-      const body = await readJson(request);
-      const result = buzzerAction(data, body);
-      if (!result.ok) return sendJson(response, result, result.status);
-      return sendJson(response, { ok: true, state: publicState(data, { role: "buzzer", team: body.team, token: body.token }) });
+      await readJson(request);
+      return sendJson(response, { ok: false, error: "buzzer_removed" }, 410);
     }
 
     if (request.method === "POST" && url.pathname === "/api/vote") {
@@ -79,8 +104,9 @@ const server = http.createServer(async (request, response) => {
       const ballot = ballotCredential(request, url);
       body.uid = ballot.id;
       response.setHeader("set-cookie", ballot.cookie);
-      const result = voteAction(data, body);
+      const result = await store.mutate(next => voteAction(next, body));
       if (!result.ok) return sendJson(response, result, result.status);
+      data = store.data;
       return sendJson(response, { ok: true, state: publicState(data, { role: "vote", token: body.token, uid: body.uid }) });
     }
 
@@ -96,12 +122,13 @@ const server = http.createServer(async (request, response) => {
 });
 
 async function serveStatic(pathname, headOnly, response) {
-  const assetMatch = pathname.match(/^\/(world\.jpg|app\.js|styles\.css|media\/[a-z0-9-]+\.(?:svg|png))$/i);
+  const assetMatch = pathname.match(/^\/(world\.jpg|app\.js|transport\.mjs|styles\.css|media\/[a-z0-9-]+\.(?:svg|png))$/i);
   const fileName = assetMatch ? assetMatch[1] : "index.html";
   const body = await readFile(join(PUBLIC_DIR, fileName));
   const types = {
     ".html": "text/html; charset=utf-8",
     ".js": "text/javascript; charset=utf-8",
+    ".mjs": "text/javascript; charset=utf-8",
     ".css": "text/css; charset=utf-8",
     ".jpg": "image/jpeg",
     ".png": "image/png",
@@ -109,7 +136,7 @@ async function serveStatic(pathname, headOnly, response) {
   };
   response.writeHead(200, {
     "content-type": types[extname(fileName)] || "application/octet-stream",
-    "cache-control": fileName === "index.html" ? "no-store" : "public, max-age=3600",
+    "cache-control": ["index.html", "app.js", "transport.mjs", "styles.css"].includes(fileName) ? "no-store" : "public, max-age=3600",
   });
   response.end(headOnly ? undefined : body);
 }
@@ -146,6 +173,9 @@ function setSecurityHeaders(response) {
 }
 
 function sendJson(response, value, status = 200) {
+  const meta = { serverNow: Date.now(), localMode: true };
+  if (value.access?.valid) value = { ...value, ...meta };
+  if (value.state?.access?.valid) value = { ...value, state: { ...value.state, ...meta } };
   response.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" });
   response.end(JSON.stringify(value));
 }
@@ -154,7 +184,7 @@ function readJson(request) {
   return new Promise((resolve) => {
     let body = "";
     request.on("data", (chunk) => {
-      if (body.length < 100_000) body += chunk;
+      if (body.length < 2_000_000) body += chunk;
     });
     request.on("end", () => {
       try {
@@ -168,4 +198,6 @@ function readJson(request) {
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`READY http://127.0.0.1:${PORT} · Hochzeitsshow`);
+  for (const item of Object.values(networkInterfaces()).flat()) if (item.family === "IPv4" && !item.internal) console.log(`Im gemeinsamen WLAN: http://${item.address}:${PORT} (auch auf der Moderation diese Adresse für scanbare QR-Codes verwenden)`);
+  console.log("Spielstand wird nach jeder Aktion auf diesem Laptop gespeichert.");
 });

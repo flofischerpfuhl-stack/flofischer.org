@@ -1,43 +1,70 @@
 # Host-Zettel — Schlag den Ehepartner
 
-**URL:** https://hochzeit.flofischer.org
-**Host-PIN:** als Cloudflare-Secret `HOST_PIN` hinterlegt; nicht im Repository speichern.
+**Online:** https://hochzeit.flofischer.org · **Beamer:** /screen
+**Host-PIN:** Cloudflare-Secret `HOST_PIN`; nicht ins Repository schreiben.
 
-## Show starten
+## Vor dem Start
 
-1. Beamer: `https://hochzeit.flofischer.org/screen` öffnen. Die Moderation öffnet `https://hochzeit.flofischer.org/` und gibt dort die Host-PIN ein.
-2. Ein normaler Seiten-Reload behält Session, Punktestand, Karten, laufendes Spiel, Timer und Verlauf.
-3. Nur **Neue Show** setzt alles zurück. Zur Sicherheit muss dabei `NEU` eingegeben werden.
-4. **Rückgängig/Wiederholen** stellt komplette Moderator-Zustände wieder her.
+- Moderation und Beamer einmal neu laden, damit beide die aktuelle Version verwenden. Ein Reload setzt keine Show zurück.
+- Lautsprecher am **Moderationsgerät** testen: Dort werden die Melodien abgespielt, nicht automatisch am Beamer. iPads und Gäste verwenden ihre QR-Codes.
+- „Sicherung speichern“ lädt den aktuellen Spielstand herunter. Die Moderation hält zusätzlich eine Browser-Sicherung vor (nach Moderator-Änderungen und ungefähr alle 30 Sekunden). Bei fehlender Verbindung wird die letzte vorhandene Sicherung mit ihrem tatsächlichen Zeitstempel angeboten.
+- Nur „Neue Show“ setzt Punkte und Karten zurück und verlangt „NEU“. Rückgängig/Wiederholen stellt Moderator-Zustände wieder her.
 
-## Spieltafel
+## Was auf der Seite bleibt
 
-1. Erster Klick auf eine Karte: Titel aufdecken.
-2. Wird stattdessen eine andere ungespielte Karte angeklickt, klappt die vorherige automatisch wieder zu.
-3. Zweiter Klick auf die offene Karte: Spiel öffnen.
-4. Regeln, Material, Rundenzähler und Entscheidung stehen im Spielbildschirm.
-5. Nach dem Ergebnis Gewinner anklicken; die Sterne werden genau einmal vergeben.
-6. Gewertete Karten bleiben als **Erledigt** aufgedeckt und sind nicht mehr anklickbar. Eine Fehlwertung wird über **Rückgängig** korrigiert.
+Karten, Regeln, Timer, Ergebnisse und Punkte laufen über die Website. Die Landkarte und Gästeabstimmungen bleiben digital. Für Stechen werden keine Handy-Buzzer oder zusätzlichen Team-QRs benötigt.
+
+1. Karte einmal antippen: Titel aufdecken. Andere Karte antippen: vorherige klappt zu.
+2. Zweites Antippen nach der Animation: Spiel öffnen.
+3. Den angezeigten Ablauf durchführen. Physische Ergebnisse bestätigen; Quiz, Karte, Messung und Voting werten automatisch.
+4. Gewertete Karten bleiben erledigt. Fehlwertung über Rückgängig korrigieren.
+
+## Stechen und Zählen
+
+- **Quiz-Stechen:** Antwort ausrufen lassen. Du entscheidest, wer zuerst dran war, hörst die Antwort an und klickst das Team. Danach Lösung aufdecken und richtig/falsch werten. Falsch bedeutet Sieg fürs andere Team. „Niemand weiß es“ beendet ohne Punkte. Die Auswahl kann vor dem Aufdecken korrigiert werden.
+- **Klimmzüge:** Vier abwechselnde Versuche. Eine Person zählt laut, die Gesamtzahl wird einmal pro Versuch eingetragen (auch null). Keine Einzelklicks pro Klimmzug.
+- **Hemd:** Zehn Personen je Team und genau eine feste Hilfsperson. Erst nach vollständigem **An- und wieder Ausziehen** klicken. Beim zehnten vollständigen Durchgang stoppt die Uhr.
+- **Liegestütze:** Neutral laut bis 40 zählen; nur Start und Stopp klicken.
+- **Physischer Gleichstand:** Kurzes Stechen laut Spielregel durchführen und dessen Sieger eintragen. Alternativ ausdrücklich ohne Punkte abschließen. Bei Staffelzeiten zählt die angezeigte Zehntelsekunde.
+- **Pantomime:** Kathi, dann Anton; jeweils **60 Sekunden insgesamt**, höchstens sechs Begriffe. Nur die darstellende Person sieht den Begriff auf deinem Gerät. Richtig/Überspringen wechselt weiter. Nach Ablauf keine neuen Punkte, dann Runde beenden. Keine Papierkarten erforderlich.
 
 ## Landkarte
 
-1. Die zwei getrennten Team-QR-Codes mit den jeweiligen iPads scannen.
-2. Die Karte lässt sich per Pinch/Mausrad oder mit `+` und `−` bis 800 % vergrößern und bei Zoom verschieben.
-3. Beide Teams setzen und **bestätigen** ihren Pin. Vor der Auflösung sieht jedes Team ausschließlich den eigenen Pin.
-4. Sobald das zweite Team bestätigt hat, löst die Website automatisch auf und zeigt auch die tatsächliche Position. Die Moderation muss nichts weiter anklicken.
-5. Nach drei Sehenswürdigkeiten entscheiden zuerst Rundensiege, dann die kleinere Gesamtdistanz. Die Website vergibt die Kartenpunkte automatisch.
+- Beide Team-QRs scannen. Die Karte ist bis 800 % zoombar.
+- Pin setzen und bestätigen. Ein fehlgeschlagener letzter Pin muss neu gesetzt werden; ein alter Pin wird dann nicht versehentlich bestätigt.
+- Sobald beide bestätigt haben, werden Pins, Ziel und Entfernungen öffentlich. Nach drei Runden entscheiden Rundensiege, dann Gesamtdistanz; Punkte automatisch.
+- QR-Codes erneuern macht alte Links ungültig.
 
-## Gäste-Abstimmung
+## Gästeabstimmung
 
-1. Der öffentliche Gäste-QR erscheint sofort auf dem Beamer. Gäste können schon scannen und warten auf ihrem Handy auf den Start.
-2. Team Kathi und Team Anton nennen nur ihren Prozenttipp der Moderation; diese speichert beide Tipps gemeinsam auf ihrem privaten Gerät.
-3. Erst wenn beide Tipps gespeichert sind, das Gäste-Voting öffnen. Auf den Handys erscheinen die Abstimmungsbuttons automatisch.
-4. Ergebnis auflösen. Erst dann werden Stimmen und konkrete Teamtipps öffentlich sichtbar.
-5. Die nähere Prozent-Schätzung gewinnt; bei exakt gleichem Abstand erhalten beide Teams die Spielpunkte.
+- Gäste können den öffentlichen QR schon vor dem Start scannen.
+- Bei Prozentfragen beide Tipps gemeinsam speichern und dann öffnen. Bei Witzen erst beide Beiträge anhören, beim Brautkleid erst Zeitende und Laufsteg/Sicherheitscheck, dann öffnen.
+- Nach 30 Sekunden schließen auch die Handybuttons automatisch. Bei Bedarf „Weitere 30 Sekunden“ bzw. „Erneut öffnen“; bereits abgegebene Stimmen bleiben erhalten.
+- Ohne Stimmen gibt es kein Ergebnis. Erneut öffnen statt das ganze Spiel neu starten.
+- Nach der Auflösung erscheinen Stimmen, Teamtipps und bei Prozentfragen der tatsächliche Anteil auf dem Beamer. Gleich nahe Tipps erhalten beide Punkte; direkte Publikums-Stimmengleichheit gibt keine Punkte.
 
-## Hemd- und Liegestütz-Staffel
+## Verbindung und Zeitmessung
 
-- Hemd: zehn Personen je Team in fester Reihenfolge; genau eine vorher bestimmte Hilfsperson darf helfen. Jeder muss das Hemd vollständig an- und wieder ausziehen. Der Klick für Person 10 stoppt die Uhr automatisch.
-- Liegestütze: Teams laufen nacheinander. Eine neutrale Person zählt laut; die Moderation stoppt bei der 40. gültigen Wiederholung. Es gibt dafür keine QR-Codes und keine 40 Einzelklicks.
+Moderator-Klicks tragen ihren ursprünglichen Zeitpunkt. Eine verzögerte oder wiederholte Übertragung verlängert die gespeicherte Laufzeit nicht. Startsignal und Startklick deshalb gemeinsam geben. Die Gerätezeit wird mit dem Server abgeglichen; das ist keine Sportmessanlage.
 
-**QR-Codes erneuern** macht alle vorherigen Links dieses Spiels sofort ungültig.
+Bei unbestätigter Aktion zeigt die Seite einen dauerhaften Hinweis und sendet dieselbe Aktion erneut. Bis zur Bestätigung keine weiteren Moderator-Aktionen durchführen. Bei einem Konflikt mit einer anderen Moderation wird die Aktion verworfen und muss am aktualisierten Stand bewusst wiederholt werden. Gäste-/Karten-Eingaben mit Fehlerhinweis bitte erneut eingeben bzw. bestätigen.
+
+**Die Online-Seite braucht weiterhin Internet.** Bei vollständigem Ausfall ist der lokale Betrieb im gemeinsamen WLAN der Ersatz. Internetloses WLAN reicht; isolierte Gäste-Netze, die Geräte voneinander abschotten, funktionieren dafür nicht.
+
+## Lokal im WLAN spielen
+
+Node.js und Abhängigkeiten sind auf diesem Rechner vorbereitet. Terminal im Ordner `apps/hochzeit.flofischer.org`:
+
+```bash
+npm run dev:node
+```
+
+Standard-PIN lokal: `0000`; mit der Umgebungsvariable `HOST_PIN` lässt sich eine andere festlegen. Das Terminal zeigt die LAN-Adresse, z. B. `http://192.168.1.10:8787`.
+
+1. **Auch die Moderation mit dieser LAN-Adresse öffnen**, damit QR-Codes auf die erreichbare Laptop-Adresse zeigen. Nicht `localhost` für die Moderation verwenden.
+2. Beamer öffnet dieselbe Adresse mit `/screen`; alle Geräte müssen im selben erreichbaren WLAN sein. Laptop am Strom lassen, Energiesparen/Ruhezustand während der Show vermeiden.
+3. Optional „Sicherung laden“ und die vorher online heruntergeladene JSON-Datei auswählen. Das ersetzt den lokalen Stand. Die Datei enthält den Stand ihres angezeigten Sicherungszeitpunkts; spätere Aktionen fehlen.
+4. Teamgeräte und Gäste scannen die **lokalen** QR-Codes neu. Cloud und Laptop synchronisieren sich nicht automatisch. Nach dem Wechsel die Show lokal fortsetzen.
+5. Jeder bestätigte lokale Schritt wird atomar in `.local/game.json` gespeichert. Server-Neustart lädt diesen Stand wieder. Nicht gleichzeitig zwei lokale Server mit derselben Datei starten. Im Zweifel die Datei zusätzlich kopieren.
+
+Die Tests verwenden eigene temporäre Spielstände und verändern diese Datei nicht.

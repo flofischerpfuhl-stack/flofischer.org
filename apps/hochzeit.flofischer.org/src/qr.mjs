@@ -43,8 +43,6 @@ export function qrMatchesGame(data, target) {
   if (target.pathname === "/vote") return Object.values(data.vote?.tokens || {}).includes(token);
   if (target.pathname === "/pad/rosa") return data.map?.tokens.rosa === token;
   if (target.pathname === "/pad/blau") return data.map?.tokens.blau === token;
-  if (target.pathname === "/buzzer/rosa") return data.challenge?.buzzerTokens?.rosa === token;
-  if (target.pathname === "/buzzer/blau") return data.challenge?.buzzerTokens?.blau === token;
   return false;
 }
 

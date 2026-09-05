@@ -1,3 +1,5 @@
+import { requestJson, pollDelay, acceptState, actionId } from "./transport.mjs";
+
 const app = document.querySelector("#app");
 const scoreDialog = document.querySelector("#score-dialog");
 const scoreForm = document.querySelector("#score-form");
@@ -27,6 +29,22 @@ let boardReady = false;
 let mapPointerActive = false;
 let deferredRender = false;
 let mapPositionQueue = Promise.resolve();
+let mapPositionSaved = true;
+let mapPendingSends = 0;
+let pendingHostMessage = null;
+try { pendingHostMessage = JSON.parse(sessionStorage.getItem("hochzeit-pending") || "null"); } catch {}
+let hostSending = false;
+let clientSending = false;
+let pollTimeout;
+let networkFailures = 0;
+let clockOffset = 0;
+let bestClockRtt = Infinity;
+let backupBusy = false;
+let lastBackupAt = 0;
+let lastBackupRevision = -1;
+let cachedBackup = null;
+try { cachedBackup = JSON.parse(localStorage.getItem("hochzeit-backup") || "null"); } catch {}
+const serverTime = () => performance.timeOrigin + performance.now() + clockOffset;
 let mapCamera = { key: "", scale: 1, x: 0, y: 0 };
 let timerFrame = 0;
 let audioContext = null;
@@ -54,6 +72,11 @@ sessionForm.addEventListener("submit", async (event) => {
 });
 
 app.addEventListener("submit", async (event) => {
+  const pullupsForm = event.target.closest("[data-pullups-result]");
+  if (pullupsForm) {
+    event.preventDefault();
+    return hostSend({ type: "pullups:finish", reps: Number(new FormData(pullupsForm).get("reps")) });
+  }
   const voteGuess = event.target.closest("[data-host-vote-guesses]");
   if (voteGuess) {
     event.preventDefault();
@@ -72,6 +95,8 @@ app.addEventListener("click", async (event) => {
   if (!button || button.disabled || button.classList.contains("revealing")) return;
   const action = button.dataset.action;
   if (action === "login") return login();
+  if (action === "backup") return downloadBackup();
+  if (action === "restore") return document.querySelector("#backup-file").click();
   if (action === "flip") return activateTile(button);
   if (action === "close") return hostSend({ type: "close" });
   if (action === "discard") return confirm("Laufendes Spiel wirklich verwerfen? Der bisherige Spielstand dieses Spiels geht verloren.") && hostSend({ type: "game:discard" });
@@ -83,6 +108,7 @@ app.addEventListener("click", async (event) => {
   if (action === "new-session") return openSessionDialog();
   if (action === "map-next") return hostSend({ type: "map:next" });
   if (action === "vote-open") return hostSend({ type: "vote:open" });
+  if (action === "vote-extend") return hostSend({ type: "vote:extend" });
   if (action === "vote-close") return button.dataset.force !== "true" || confirm("Mindestbeteiligung nicht erreicht. Abstimmung wirklich vorzeitig schließen?") ? hostSend({ type: "vote:close", force: button.dataset.force === "true" }) : false;
   if (action === "vote-reveal") return hostSend({ type: "vote:reveal" });
   if (action === "score-dialog") return openScoreDialog();
@@ -97,6 +123,7 @@ app.addEventListener("click", async (event) => {
   if (action === "team-round-skip") return hostSend({ type: "team-round:skip" });
   if (action === "team-round-finish") return hostSend({ type: "team-round:finish" });
   if (action === "physical-finish") return hostSend({ type: "physical:finish", team: button.dataset.team });
+  if (action === "physical-tiebreak") return hostSend({ type: "physical:tiebreak", team: button.dataset.team });
   if (action === "showcase-finish") return hostSend({ type: "showcase:finish" });
   if (action === "physical-ready") return hostSend({ type: "physical:ready" });
   if (action === "pullups-start") return hostSend({ type: "pullups:start" });
@@ -110,11 +137,12 @@ app.addEventListener("click", async (event) => {
   if (action === "quiz-next") return hostSend({ type: "quiz:next" });
   if (action === "quiz-previous") return hostSend({ type: "quiz:previous" });
   if (action === "quiz-tiebreak") return hostSend({ type: "quiz:tiebreak" });
-  if (action === "quiz-buzz") return hostSend({ type: "quiz:buzz", team: button.dataset.team });
+  if (action === "quiz-call") { await stopAudio(); return hostSend({ type: "quiz:call", team: button.dataset.team }); }
+  if (action === "quiz-tie-draw") return hostSend({ type: "quiz:tiebreak:draw" });
   if (action === "quiz-buzz-reset") return hostSend({ type: "quiz:buzz:reset" });
   if (action === "quiz-buzzer-open") return hostSend({ type: "quiz:buzzer:open" });
   if (action === "quiz-tiebreak-judge") return hostSend({ type: "quiz:tiebreak:judge", correct: button.dataset.correct === "true" });
-  if (action === "play-melody") return playMelody(currentQuizRound()?.melody);
+  if (action === "play-melody") return playMelody(currentQuizRound()?.melody).catch(() => showToast("Audio konnte nicht starten. Lautsprecher prüfen und erneut antippen."));
   if (action === "map-confirm") return confirmMapPosition();
   if (action === "vote") {
     voteChoice = button.dataset.choice;
@@ -125,6 +153,7 @@ app.addEventListener("click", async (event) => {
 });
 
 app.addEventListener("change", (event) => {
+  if (event.target.id === "backup-file" && event.target.files[0]) return importBackupFile(event.target.files[0]);
   if (event.target.matches("[data-place]")) hostSend({ type: "map:select", placeId: event.target.value });
 });
 
@@ -141,11 +170,13 @@ function loginMarkup(error = "") {
 
 async function login() {
   const pin = document.querySelector("#pin")?.value.trim() || "";
-  const response = await fetch("/api/host", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ pin }) });
-  if (!response.ok) return loginMarkup("Falsche PIN – bitte erneut versuchen.");
-  context.pin = "authenticated";
-  sessionStorage.setItem("hochzeit-host", "1");
-  await poll();
+  try {
+    const { response } = await requestJson("/api/host", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ pin }) });
+    if (!response.ok) return loginMarkup(response.status === 401 ? "Falsche PIN – bitte erneut versuchen." : "Server nicht erreichbar. Bitte erneut versuchen.");
+    context.pin = "authenticated";
+    sessionStorage.setItem("hochzeit-host", "1");
+    await poll();
+  } catch { loginMarkup("Keine Verbindung. Bitte erneut versuchen."); }
 }
 
 async function activateTile(button) {
@@ -156,58 +187,152 @@ async function activateTile(button) {
   finally { pendingTiles.delete(id); if (button.isConnected) { button.disabled = false; button.removeAttribute("aria-busy"); } }
 }
 
+async function refreshBackup() {
+  if (backupBusy || context.role !== "host" || !context.pin) return false;
+  backupBusy = true;
+  try {
+    const { response, body } = await requestJson("/api/backup", { cache: "no-store" });
+    if (!response.ok || body.format !== "hochzeit-show-backup") return false;
+    cachedBackup = body;
+    lastBackupAt = Date.now();
+    lastBackupRevision = body.state.hostRevision;
+    try { localStorage.setItem("hochzeit-backup", JSON.stringify(body)); } catch {}
+    return true;
+  } catch { return false; }
+  finally { backupBusy = false; }
+}
+
+async function downloadBackup() {
+  await refreshBackup();
+  if (!cachedBackup) return showToast("Noch keine Sicherung vorhanden. Bitte einmal mit dem Server verbinden.");
+  const blob = new Blob([JSON.stringify(cachedBackup)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `hochzeit-sicherung-${new Date(cachedBackup.savedAt).toISOString().replaceAll(":", "-")}.json`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  showToast(`Sicherung vom ${new Date(cachedBackup.savedAt).toLocaleTimeString("de-DE")} gespeichert.`);
+}
+
+async function importBackupFile(file) {
+  if (pendingHostMessage || hostSending) return showToast("Bitte zuerst die letzte Aktion bestätigen lassen.");
+  try {
+    if (file.size > 2000000) throw new Error("too_large");
+    const backup = JSON.parse(await file.text());
+    if (backup.format !== "hochzeit-show-backup") throw new Error("invalid_backup");
+    if (!confirm(`Sicherung vom ${new Date(backup.savedAt).toLocaleString("de-DE")} laden? Der aktuelle lokale Spielstand wird ersetzt. Alle Geräte müssen danach die lokalen Links verwenden.`)) return;
+    hostSending = true;
+    const { response, body } = await requestJson("/api/restore", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ backup, expectedHostRevision: state.hostRevision }) });
+    if (!response.ok) return showToast(body.error === "stale_revision" ? errorMessage(body.error) : "Sicherung konnte nicht geladen werden.");
+    if (acceptState(state, body.state)) state = body.state;
+    lastBackupRevision = -1;
+    await stopAudio();
+    render();
+    void refreshBackup();
+    showToast("Spielstand übernommen. Teamgeräte bitte die lokalen QR-Codes scannen lassen.");
+  } catch { showToast("Laden nicht bestätigt. Verbindung und Sicherungsdatei prüfen."); }
+  finally { hostSending = false; }
+}
+
+function connectionStatus(message = "") {
+  const element = document.querySelector("#connection-status");
+  if (element) { element.textContent = message; element.hidden = !message; }
+}
+
+function schedulePoll() {
+  clearTimeout(pollTimeout);
+  pollTimeout = setTimeout(poll, pollDelay(context.role, networkFailures, document.hidden));
+}
+
 async function poll() {
-  if (polling || (context.role === "host" && !context.pin)) return;
+  if (polling) return;
+  if (context.role === "host" && !context.pin) return schedulePoll();
   polling = true;
   try {
     const query = new URLSearchParams();
-    if (context.role === "pad") { query.set("role", "pad"); query.set("team", context.team); query.set("token", context.token); }
-    if (context.role === "buzzer") { query.set("role", "buzzer"); query.set("team", context.team); query.set("token", context.token); }
-    if (context.role === "vote") { query.set("role", "vote"); query.set("token", context.token); }
-    if (context.role === "screen") query.set("role", "screen");
-    const response = await fetch(`/api/state?${query}`, { cache: "no-store" });
+    if (context.role !== "host") query.set("role", context.role);
+    if (context.team) query.set("team", context.team);
+    if (context.token) query.set("token", context.token);
+    const started = performance.timeOrigin + performance.now();
+    const { response, body: nextState } = await requestJson(`/api/state?${query}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const nextState = await response.json();
+    const finished = performance.timeOrigin + performance.now();
+    const rtt = finished - started;
+    const liveTimers = [state?.challenge?.timer, ...Object.values(state?.challenge?.relay?.rounds || {}).map(r => r.timer), ...Object.values(state?.challenge?.teamRounds?.rounds || {}).map(r => r.timer)];
+    if (!liveTimers.some(timer => timer?.runningSince != null) && Number.isFinite(nextState.serverNow) && rtt < bestClockRtt * 1.3) {
+      clockOffset = nextState.serverNow - (started + finished) / 2;
+      bestClockRtt = Math.min(bestClockRtt, rtt);
+    }
+    networkFailures = 0;
     if (context.role === "host" && !nextState.access?.valid) { context.pin = ""; sessionStorage.removeItem("hochzeit-host"); state = null; loginMarkup("Bitte erneut anmelden."); return; }
-    const changed = !state || nextState.revision !== state.revision || nextState.access?.valid !== state.access?.valid;
-    if (state && Number(nextState.revision) < Number(state.revision)) return;
-    if (context.role === "host" && nextState.challenge?.buzz && !state?.challenge?.buzz) await stopAudio();
+    if (!acceptState(state, nextState)) return;
+    const changed = !state || nextState.revision !== state.revision || nextState.access?.valid !== state.access?.valid || nextState.vote?.phase !== state.vote?.phase;
     state = nextState;
     if (context.role === "vote") voteChoice = state.vote?.choice || null;
-    if (changed || deferredRender) { if (mapPointerActive) deferredRender = true; else { deferredRender = false; render(); } }
-    document.querySelector("#toast")?.classList.remove("show");
-  } catch { showToast("Verbindung wird wiederhergestellt …", true); }
-  finally { polling = false; }
+    if (changed || deferredRender) {
+      if (mapPointerActive || mapPendingSends) deferredRender = true;
+      else { deferredRender = false; render(); }
+    }
+    connectionStatus(pendingHostMessage ? "Aktion wird noch bestätigt …" : "");
+    if (context.role === "host" && (state.hostRevision !== lastBackupRevision || Date.now() - lastBackupAt > 30000)) void refreshBackup();
+    if (context.role === "host" && pendingHostMessage && !hostSending) await deliverHostMessage();
+  } catch {
+    networkFailures++;
+    connectionStatus(pendingHostMessage ? "Verbindung unterbrochen · Deine letzte Aktion bleibt gespeichert und wird erneut gesendet." : "Verbindung unterbrochen · Letzter bestätigter Stand. Verbindung wird erneut geprüft.");
+  } finally { polling = false; schedulePoll(); }
 }
 
 async function hostSend(message) {
+  if (pendingHostMessage || hostSending) { showToast("Bitte die Bestätigung der letzten Aktion abwarten."); return false; }
+  pendingHostMessage = { ...message, actionId: actionId(), sessionId: state?.session.id, expectedHostRevision: state?.hostRevision, occurredAt: serverTime() };
+  sessionStorage.setItem("hochzeit-pending", JSON.stringify(pendingHostMessage));
+  if (["close", "game:discard", "game:restart", "quiz:next", "quiz:previous", "quiz:tiebreak:draw", "session:new"].includes(message.type)) await stopAudio();
+  return deliverHostMessage();
+}
+
+async function deliverHostMessage() {
+  if (!pendingHostMessage || hostSending) return false;
+  hostSending = true;
+  connectionStatus("Aktion wird gespeichert …");
   try {
-    if (["close", "game:discard", "game:restart", "quiz:next", "quiz:previous", "session:new"].includes(message.type)) await stopAudio();
-    const response = await fetch("/api/action", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...message, expectedRevision: state?.revision }) });
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok) { showToast(errorMessage(body.error), response.status >= 500); return false; }
-    if (!state || Number(body.state.revision) >= Number(state.revision)) state = body.state;
-    render(); return true;
-  } catch { showToast("Aktion nicht bestätigt – Verbindung prüfen und erneut versuchen.", true); return false; }
+    const { response, body } = await requestJson("/api/action", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(pendingHostMessage) });
+    if (response.status >= 500) throw new Error("Server unavailable");
+    pendingHostMessage = null;
+    sessionStorage.removeItem("hochzeit-pending");
+    connectionStatus("");
+    if (!response.ok) { showToast(errorMessage(body.error)); void poll(); return false; }
+    if (acceptState(state, body.state)) state = body.state;
+    render();
+    void refreshBackup();
+    return true;
+  } catch {
+    connectionStatus("Noch nicht bestätigt · Bitte warten. Die Aktion wird mit ihrem ursprünglichen Klickzeitpunkt erneut gesendet.");
+    return false;
+  } finally { hostSending = false; }
 }
 
 async function clientSend(endpoint, message) {
-  let response;
-  try { response = await fetch(endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(message) }); }
-  catch { showToast("Nicht gespeichert – Verbindung prüfen.", true); return false; }
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    if (body.error === "invalid_token") { state.access.valid = false; render(); }
-    else showToast(errorMessage(body.error));
-    return false;
-  }
-  state = body.state;
-  if (context.role === "vote") voteChoice = state.vote?.choice || null;
-  render(); return true;
+  if (clientSending) return false;
+  clientSending = true;
+  try {
+    const { response, body } = await requestJson(endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(message) });
+    if (!response.ok) {
+      if (body.error === "invalid_token") { state.access.valid = false; render(); }
+      else showToast(errorMessage(body.error));
+      return false;
+    }
+    if (acceptState(state, body.state)) state = body.state;
+    if (context.role === "vote") voteChoice = state.vote?.choice || null;
+    render();
+    return true;
+  } catch { showToast("Nicht bestätigt – Verbindung prüfen und erneut versuchen.", true); return false; }
+  finally { clientSending = false; }
 }
 
 async function confirmMapPosition() {
   await mapPositionQueue;
+  if (!mapPositionSaved) { showToast("Die letzte Position wurde nicht gespeichert. Bitte erneut auf die Karte tippen."); return false; }
   return clientSend("/api/map", { type: "map:confirm", team: context.team, token: context.token, roundId: state.map.roundId });
 }
 
@@ -216,14 +341,15 @@ function render() {
   if (!state) return;
   if (context.role === "host") return renderHost();
   if (context.role === "screen") return renderScreen();
+  if (context.role === "buzzer") return renderBuzzer();
   if (!state.access?.valid) return renderInvalidToken();
   if (context.role === "pad") return renderPad();
-  if (context.role === "buzzer") return renderBuzzer();
-  return renderVoteClient();
+  renderVoteClient();
+  wireTimer();
 }
 
 function renderHost() {
-  app.innerHTML = `<main class="shell"><div class="private-banner">PRIVATE MODERATION · Beameransicht: <a href="/screen" target="hochzeit-screen">/screen öffnen</a></div>${hostHeader()}${state.view === "game" && state.active ? gameMarkup() : boardMarkup()}</main>`;
+  app.innerHTML = `<main class="shell"><div class="private-banner">${state.localMode ? "LOKAL · Spielstand wird auf diesem Laptop gespeichert" : "PRIVATE MODERATION"} · Beameransicht: <a href="/screen" target="hochzeit-screen">/screen öffnen</a></div>${hostHeader()}${state.view === "game" && state.active ? gameMarkup() : boardMarkup()}</main>`;
   if (state.view !== "game") {
     const flippedNow = new Set(Object.keys(state.flipped).filter((id) => state.flipped[id]));
     for (const id of knownFlips) if (!flippedNow.has(id)) knownFlips.delete(id);
@@ -249,16 +375,16 @@ function screenGameMarkup() {
   const active = state.active;
   let content = `<p class="screen-wait">Die Moderation bereitet das Spiel vor.</p>`;
   if (active.kind === "map") content = state.map.done ? `${mapView(state.map, false)}${resultMarkup(state.map)}` : `<section class="screen-map-target"><p class="eyebrow">GESUCHTER ORT</p><h3 class="target-name">${escapeHtml(state.map.place.name)}</h3>${teamStatusMarkup(state.map)}<p class="screen-wait">Beide Teams setzen und bestätigen ihren Pin verdeckt. Danach löst die Karte automatisch auf.</p></section>`;
-  else if (active.kind === "vote" || active.kind === "physical" && state.vote && (state.challenge.phase === "judging" || state.challenge.mode === "performance")) content = screenVoteMarkup();
+  else if (active.kind === "vote" || active.kind === "physical" && state.vote && (state.challenge.phase === "judging" || state.challenge.mode === "performance" || state.vote.revealed)) content = screenVoteMarkup();
   else if (active.kind === "physical") content = physicalMarkup(true);
   else if (active.kind === "quiz") content = quizMarkup(true);
-  return `<section class="game-stage screen-game"><div class="game-content"><p class="game-kicker">${escapeHtml(active.cat)} · ${active.stars} SHOWPUNKTE</p><h2 class="game-title">${escapeHtml(active.title)}</h2><p class="game-description">${escapeHtml(active.text)}</p>${content}</div></section>`;
+  return `<section class="game-stage screen-game"><div class="game-content"><p class="game-kicker">${escapeHtml(active.cat)} · ${active.stars} SHOWPUNKTE</p><h2 class="game-title">${escapeHtml(active.title)}</h2><p class="game-description">${escapeHtml(active.text)}</p>${content}${active.kind === "physical" && state.vote && !state.vote.revealed && state.challenge.mode === "countdown" && state.challenge.phase !== "judging" ? screenVoteMarkup() : ""}</div></section>`;
 }
 
 function screenVoteMarkup() {
   const vote = state.vote;
   const question = voteQuestionMarkup(vote, "screen-vote-question");
-  if (vote.revealed) return `<section class="screen-vote-phase revealed">${question}${barsMarkup(vote)}<p class="recommendation">${escapeHtml(resultLabel(state.active.awarded))}</p></section>`;
+  if (vote.revealed) return `<section class="screen-vote-phase revealed">${question}${barsMarkup(vote)}${revealedGuessesMarkup(vote)}<p class="recommendation">${escapeHtml(resultLabel(state.active.awarded))}</p></section>`;
   const guestUrl = vote.guestToken ? `${location.origin}/vote?t=${encodeURIComponent(vote.guestToken)}` : "";
   if (vote.phase === "closed") return `<section class="screen-vote-phase closed">${question}<div class="vote-count"><strong>${vote.n || 0}</strong><span>GÜLTIGE STIMMEN</span></div><h3 class="screen-vote-heading">ABSTIMMUNG GESCHLOSSEN</h3><p class="screen-wait">Keine weiteren Stimmen. Das Ergebnis wird gleich aufgelöst.</p></section>`;
   const preparing = vote.phase === "team" || vote.phase === "pending";
@@ -270,7 +396,7 @@ function hostHeader() {
   const started = new Date(state.session.startedAt).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" });
   return `<header class="host-header"><div class="brand"><p class="eyebrow">ANTON &amp; KATHI</p>${showLogoMarkup("header-logo")}<div class="session-pill"><strong>${escapeHtml(state.session.label)}</strong><span>seit ${escapeHtml(started)}</span></div></div>
     <div class="scoreboard" aria-label="Spielstand"><div class="score rosa"><small>TEAM KATHI</small><strong>${state.scores.rosa}</strong></div><div class="score blau"><small>TEAM ANTON</small><strong>${state.scores.blau}</strong></div></div>
-    <nav class="global-actions" aria-label="Show-Steuerung"><button class="icon-button" data-action="undo" ${state.history.canUndo ? "" : "disabled"} title="Letzte Moderator-Aktion rückgängig">↶ <span>Rückgängig</span></button><button class="icon-button" data-action="redo" ${state.history.canRedo ? "" : "disabled"} title="Aktion wiederholen">↷ <span>Wiederholen</span></button><button class="button secondary" data-action="score-dialog">Punktestand</button><button class="button gold" data-action="new-session">Neue Show</button></nav></header>`;
+    <nav class="global-actions" aria-label="Show-Steuerung"><button class="icon-button" data-action="undo" ${state.history.canUndo ? "" : "disabled"} title="Letzte Moderator-Aktion rückgängig">↶ <span>Rückgängig</span></button><button class="icon-button" data-action="redo" ${state.history.canRedo ? "" : "disabled"} title="Aktion wiederholen">↷ <span>Wiederholen</span></button><button class="button secondary" data-action="score-dialog">Punktestand</button><button class="button secondary" data-action="backup">Sicherung speichern</button>${state.localMode ? `<button class="button secondary" data-action="restore">Sicherung laden</button><input id="backup-file" type="file" accept="application/json,.json" hidden>` : ""}<button class="button gold" data-action="new-session">Neue Show</button></nav></header>`;
 }
 
 function showLogoMarkup(className = "") {
@@ -290,13 +416,13 @@ function boardMarkup(readOnly = false) {
 function gameMarkup() {
   const active = state.active;
   const content = active.kind === "map" ? hostMapMarkup() : active.kind === "vote" ? hostVoteMarkup() : active.kind === "quiz" ? quizMarkup() : physicalMarkup();
-  return `<section class="game-stage"><div class="game-content"><div class="game-toolbar"><button class="button secondary" data-action="close">← Spieltafel · Stand bleibt gespeichert</button><button class="button secondary" data-action="restart" ${active.awarded ? "disabled" : ""}>Spiel neu starten</button>${!active.awarded ? `<button class="button danger" data-action="discard">Spiel verwerfen</button>` : ""}${state.map || state.vote || state.challenge?.buzzerTokens ? `<button class="button secondary" data-action="qr">${state.vote ? "Gäste-QR erneuern" : "QR-Codes erneuern"}</button>` : ""}</div><p class="game-kicker">${escapeHtml(active.cat)} · ${active.stars} ${active.stars === 1 ? "SHOWPUNKT" : "SHOWPUNKTE"}</p><h2 class="game-title">${escapeHtml(active.title)}</h2><p class="game-description">${escapeHtml(active.text)}</p>${content}${winnerMarkup()}</div></section>`;
+  return `<section class="game-stage"><div class="game-content"><div class="game-toolbar"><button class="button secondary" data-action="close">← Spieltafel · Stand bleibt gespeichert</button><button class="button secondary" data-action="restart" ${active.awarded ? "disabled" : ""}>Spiel neu starten</button>${!active.awarded ? `<button class="button danger" data-action="discard">Spiel verwerfen</button>` : ""}${state.map || state.vote ? `<button class="button secondary" data-action="qr">${state.vote ? "Gäste-QR erneuern" : "QR-Codes erneuern"}</button>` : ""}</div><p class="game-kicker">${escapeHtml(active.cat)} · ${active.stars} ${active.stars === 1 ? "SHOWPUNKT" : "SHOWPUNKTE"}</p><h2 class="game-title">${escapeHtml(active.title)}</h2><p class="game-description">${escapeHtml(active.text)}</p>${content}${winnerMarkup()}</div></section>`;
 }
 
 function physicalMarkup(readOnly = false) {
   const card = activeCardDefinition(); const challenge = state.challenge; let controls = "";
-  if (!readOnly && card.audienceDecision && challenge.phase === "judging") return hostVoteMarkup();
-  if (challenge.mode === "stopwatch" || challenge.mode === "countdown") controls = timerMarkup(challenge.timer, readOnly);
+  if (!readOnly && card.audienceDecision && (challenge.phase === "judging" || state.vote?.revealed)) return hostVoteMarkup();
+  if (challenge.mode === "stopwatch" || challenge.mode === "countdown") controls = timerMarkup(challenge.timer, readOnly || challenge.phase === "finished");
   if (challenge.mode === "team-relay") controls = relayMarkup(card, challenge, readOnly);
   if (challenge.mode === "performance") controls = performanceMarkup(challenge, readOnly);
   if (challenge.mode === "team-rounds") controls = teamRoundsMarkup(card, challenge, readOnly);
@@ -318,9 +444,9 @@ function relayMarkup(card, challenge, readOnly = false) {
   const unitLabel = card.id === "aktion-2" ? `PERSON ${Math.min(relay.target, round.progress + 1)} VON ${relay.target}` : `${round.progress} VON ${relay.target} GÜLTIG`;
   const progressMeter = tracked ? `<div class="relay-progress"><strong>${unitLabel}</strong><div style="--progress:${round.progress / relay.target * 100}%"><i></i></div></div>` : `<div class="relay-progress relay-stop-note"><strong>NEUTRALE PERSON ZÄHLT LAUT BIS ${relay.target}</strong><p>Die Moderation stoppt hier exakt bei der ${relay.target}. gültigen Wiederholung.</p></div>`;
   const runningControls = tracked
-    ? `<div class="button-row centered"><button class="counter-button" data-action="relay-change" data-delta="-1" ${round.progress <= 0 ? "disabled" : ""}>−</button><button class="button ${team} big" data-action="relay-change" data-delta="1">PERSON VOLLSTÄNDIG ANGEZOGEN${round.progress + 1 >= relay.target ? " · ZEIT STOPPEN" : ""}</button></div>`
+    ? `<div class="button-row centered"><button class="counter-button" data-action="relay-change" data-delta="-1" ${round.progress <= 0 ? "disabled" : ""}>−</button><button class="button ${team} big" data-action="relay-change" data-delta="1">PERSON HAT DAS HEMD AN- UND WIEDER AUSGEZOGEN${round.progress + 1 >= relay.target ? " · ZEIT STOPPEN" : ""}</button></div>`
     : `<button class="button gold big" data-action="relay-finish">BEI DER ${relay.target}. GÜLTIGEN WIEDERHOLUNG STOPPEN</button>`;
-  return `<section class="control-arena relay-arena"><p class="eyebrow">TEAMLAUF ${relay.index + 1} VON 2</p><h3 class="active-team ${team}">TEAM ${teamName(team).toUpperCase()}</h3>${timerMarkup(round.timer, true)}${progress}${progressMeter}${readOnly ? `<p class="screen-wait">${running ? tracked ? "Die Teamzeit läuft. Person für Person, bis alle zehn das Hemd vollständig anhatten." : `Die Teamzeit läuft bis zur ${relay.target}. gültigen Wiederholung.` : "Die Moderation startet den Lauf gleich bei 00:00.0."}</p>` : running ? runningControls : `<button class="button gold big" data-action="relay-start">STOPPUHR FÜR TEAM ${teamName(team).toUpperCase()} BEI 00:00.0 STARTEN</button>`}</section>`;
+  return `<section class="control-arena relay-arena"><p class="eyebrow">TEAMLAUF ${relay.index + 1} VON 2</p><h3 class="active-team ${team}">TEAM ${teamName(team).toUpperCase()}</h3>${timerMarkup(round.timer, true)}${progress}${progressMeter}${readOnly ? `<p class="screen-wait">${running ? tracked ? "Die Teamzeit läuft. Person für Person, bis alle zehn das Hemd vollständig an- und wieder ausgezogen haben." : `Die Teamzeit läuft bis zur ${relay.target}. gültigen Wiederholung.` : "Die Moderation startet den Lauf gleich bei 00:00.0."}</p>` : running ? runningControls : `<button class="button gold big" data-action="relay-start">STOPPUHR FÜR TEAM ${teamName(team).toUpperCase()} BEI 00:00.0 STARTEN</button>`}</section>`;
 }
 
 function performanceMarkup(challenge, readOnly = false) {
@@ -346,7 +472,7 @@ function pullupsMarkup(challenge, readOnly = false) {
   const pullups = challenge.pullups; const attempt = pullups.attempts[pullups.index];
   const progress = `<div class="attempt-progress">${pullups.attempts.map((item, index) => `<span class="${item.team} ${item.status}">${index + 1}. ${teamName(item.team)} ${item.person}: <strong>${item.reps}</strong></span>`).join("")}</div>`;
   if (challenge.phase === "finished") return `<section class="control-arena"><p class="eyebrow">VIER VERSUCHE BEENDET</p>${progress}<h3 class="pullup-total">Kathi ${challenge.counters.rosa} : ${challenge.counters.blau} Anton</h3></section>`;
-  return `<section class="control-arena pullup-arena"><p class="eyebrow">VERSUCH ${pullups.index + 1} VON ${pullups.attempts.length}</p><h3 class="active-team ${attempt.team}">TEAM ${teamName(attempt.team).toUpperCase()} · PERSON ${attempt.person}</h3><strong class="attempt-reps">${attempt.reps}</strong>${progress}${readOnly ? "" : attempt.status === "active" ? `<div class="pullup-actions"><button class="counter-button" data-action="pullups-rep" data-delta="-1">−</button><button class="counter-button primary" data-action="pullups-rep" data-delta="1">+ GÜLTIG</button><button class="button gold big" data-action="pullups-finish">VERSUCH BEENDEN</button></div>` : `<button class="button gold big" data-action="pullups-start">SPOTTER BEREIT · VERSUCH STARTEN</button>`}</section>`;
+  return `<section class="control-arena pullup-arena"><p class="eyebrow">VERSUCH ${pullups.index + 1} VON ${pullups.attempts.length}</p><h3 class="active-team ${attempt.team}">TEAM ${teamName(attempt.team).toUpperCase()} · PERSON ${attempt.person}</h3><strong class="attempt-reps">${attempt.reps}</strong>${progress}${readOnly ? "" : attempt.status === "active" ? `<form class="pullup-actions" data-pullups-result><label>Gültige Klimmzüge dieses Versuchs<input name="reps" type="number" inputmode="numeric" min="0" max="99" step="1" required value="${attempt.reps || ""}"></label><button class="button gold big" type="submit">ANZAHL SPEICHERN · VERSUCH BEENDEN</button></form><p>Eine Person zählt laut. Die Gesamtzahl erst nach dem Versuch eintragen; null ist möglich.</p>` : `<button class="button gold big" data-action="pullups-start">SPOTTER BEREIT · VERSUCH STARTEN</button>`}</section>`;
 }
 
 function timerMarkup(timer, readOnly = false) {
@@ -357,7 +483,7 @@ function timerMarkup(timer, readOnly = false) {
 }
 
 function resultButtons(title, action) {
-  return `<p class="eyebrow result-heading">${title}</p><div class="button-row centered"><button class="button rosa big" data-action="${action}" data-team="rosa">Kathi</button><button class="button blau big" data-action="${action}" data-team="blau">Anton</button><button class="button secondary big" data-action="${action}" data-team="draw">Stechen / keine Punkte</button></div>`;
+  return `<p class="eyebrow result-heading">${title}</p><div class="button-row centered"><button class="button rosa big" data-action="${action}" data-team="rosa">Kathi</button><button class="button blau big" data-action="${action}" data-team="blau">Anton</button><button class="button secondary big" data-action="${action}" data-team="draw">Gleichstand</button></div>`;
 }
 
 function counterMarkup(card, challenge, readOnly = false) {
@@ -381,7 +507,7 @@ function quizMarkup(readOnly = false) {
   const ready = section.ready?.[section.index] || { rosa: false, blau: false };
   const lockControls = phase === "main" ? `<p class="privacy-note">Antworten verdeckt notieren. Erst wenn beide feststehen, gemeinsam aufdecken.</p><div class="guess-status">${["rosa", "blau"].map((team) => `<span class="${team}">Team ${teamName(team)}: <button class="mark-button ${ready[team] ? "selected" : ""}" data-action="quiz-ready" data-team="${team}" ${ready[team] ? "disabled" : ""}>${ready[team] ? "✓ Antwort liegt fest" : "Antwort liegt fest"}</button></span>`).join("")}</div><button class="button gold big reveal-answer" data-action="quiz-reveal" ${ready.rosa && ready.blau ? "" : "disabled"}>BEIDE ANTWORTEN AUFDECKEN</button>` : `${buzzMarkup(challenge, round)}${challenge.buzz ? `<button class="button gold big reveal-answer" data-action="quiz-reveal">STECHANTWORT AUFDECKEN</button>` : ""}`;
   const navigation = phase === "main" ? `<div class="round-navigation"><button class="button secondary" data-action="quiz-previous" ${section.index === 0 ? "disabled" : ""}>← Vorherige</button><button class="button gold" data-action="quiz-next" ${revealed && scored ? "" : "disabled"}>${section.index === rounds.length - 1 ? "Auswertung" : "Nächste Runde →"}</button></div>` : "";
-  return `<section class="quiz-arena"><header class="round-header"><div><p class="eyebrow">${phase === "tie" ? "STECHEN AUF ZEIT" : `RUNDE ${section.index + 1} VON ${rounds.length}`}</p><div class="round-dots">${rounds.map((_, index) => `<span class="${index < section.index ? "done" : index === section.index ? "current" : ""}"></span>`).join("")}</div></div><div class="mini-score"><span class="rosa">Kathi <strong>${scores.rosa}</strong></span><span class="blau">Anton <strong>${scores.blau}</strong></span></div></header>${quizMediaMarkup(round, revealed, readOnly)}<h3 class="quiz-prompt">${escapeHtml(round.prompt)}</h3>${revealed ? `<div class="answer-reveal"><span>RICHTIGE ANTWORT</span><strong>${escapeHtml(round.answer)}</strong></div>${marking}` : readOnly ? `<p class="screen-wait">${phase === "tie" ? "Der Buzzer wird von der Moderation passend zur Aufgabe freigegeben." : "Beide Teams legen ihre Antwort verdeckt fest."}</p>` : lockControls}${readOnly ? "" : navigation}</section>`;
+  return `<section class="quiz-arena"><header class="round-header"><div><p class="eyebrow">${phase === "tie" ? "STECHEN PER ZURUF" : `RUNDE ${section.index + 1} VON ${rounds.length}`}</p><div class="round-dots">${rounds.map((_, index) => `<span class="${index < section.index ? "done" : index === section.index ? "current" : ""}"></span>`).join("")}</div></div><div class="mini-score"><span class="rosa">Kathi <strong>${scores.rosa}</strong></span><span class="blau">Anton <strong>${scores.blau}</strong></span></div></header>${quizMediaMarkup(round, revealed, readOnly)}<h3 class="quiz-prompt">${escapeHtml(round.prompt)}</h3>${revealed ? `<div class="answer-reveal"><span>RICHTIGE ANTWORT</span><strong>${escapeHtml(round.answer)}</strong></div>${marking}` : readOnly ? `<p class="screen-wait">${phase === "tie" ? "Antwort ausrufen. Die Moderation entscheidet, wer zuerst dran war." : "Beide Teams legen ihre Antwort verdeckt fest."}</p>` : lockControls}${readOnly ? "" : navigation}</section>`;
 }
 
 function tieJudgeMarkup(challenge) {
@@ -393,7 +519,7 @@ function tieJudgeMarkup(challenge) {
 
 function quizSummaryMarkup(card, challenge, scores, readOnly = false) {
   const tie = scores.rosa === scores.blau;
-  if (challenge.phase === "main" && tie) return `<section class="result-card"><p class="eyebrow">NACH ${card.rounds.length} RUNDEN</p><h3>${scores.rosa} : ${scores.blau} – Gleichstand</h3><p>Beide Teams öffnen zuerst ihren privaten Buzzer. Die Moderation startet dann das Stechen; buzzern ist erst nach der ausdrücklichen Freigabe möglich.</p>${readOnly ? "" : `${buzzerQrMarkup(challenge)}<button class="button gold big" data-action="quiz-tiebreak">STECHEN VORBEREITEN</button>`}</section>`;
+  if (challenge.phase === "main" && tie) return `<section class="result-card"><p class="eyebrow">NACH ${card.rounds.length} RUNDEN</p><h3>${scores.rosa} : ${scores.blau} – Gleichstand</h3><p>Im Stechen die Antwort ausrufen. Die Moderation entscheidet, wer zuerst dran war. Bei falscher Antwort gewinnt das andere Team.</p>${readOnly ? "" : `<button class="button gold big" data-action="quiz-tiebreak">STECHFRAGE ZEIGEN</button>`}</section>`;
   const recommendation = quizRecommendation();
   return `<section class="result-card"><p class="eyebrow">SPIELERGEBNIS</p><h3>Kathi ${scores.rosa} : ${scores.blau} Anton</h3><p>${escapeHtml(recommendation.text)}</p></section>`;
 }
@@ -405,15 +531,9 @@ function quizMediaMarkup(round, revealed, readOnly = false) {
   return `<div class="media-stage question-stage"><span>?</span></div>`;
 }
 
-function buzzMarkup(challenge, round) {
-  if (challenge.buzz) return `<div class="buzz-result ${challenge.buzz.team}"><span>ERSTER BUZZER</span><strong>TEAM ${teamName(challenge.buzz.team).toUpperCase()}</strong><b>${formatTime(challenge.buzz.elapsedMs)}</b><p>Jetzt die richtige Antwort aufdecken und werten. Bei einer falschen Antwort gewinnt sofort das andere Team.</p></div>`;
-  const release = round?.media === "melody" ? `<p class="privacy-note">Der Buzzer wird automatisch nur während der Hörprobe freigeschaltet.</p>` : `<button class="button gold big" data-action="quiz-buzzer-open" ${challenge.buzzerOpen ? "disabled" : ""}>${challenge.buzzerOpen ? "BUZZER IST FREIGEGEBEN" : "FRAGE GELESEN · BUZZER FREIGEBEN"}</button>`;
-  return `${buzzerQrMarkup(challenge)}${release}<div class="buzz-grid"><button class="button rosa big" data-action="quiz-buzz" data-team="rosa" ${challenge.buzzerOpen ? "" : "disabled"}>NOTFALL: KATHI</button><button class="button blau big" data-action="quiz-buzz" data-team="blau" ${challenge.buzzerOpen ? "" : "disabled"}>NOTFALL: ANTON</button></div>`;
-}
-
-function buzzerQrMarkup(challenge) {
-  const tokens = challenge.buzzerTokens;
-  return `<p class="privacy-note">Echte Team-Buzzer: privat an die beiden Teams geben. Das erste freigegebene Serversignal gewinnt.</p><div class="qr-grid">${["rosa", "blau"].map((team) => qrCard(team, `Buzzer Team ${teamName(team)}`, `${location.origin}/buzzer/${team}?t=${encodeURIComponent(tokens[team])}`)).join("")}</div>`;
+function buzzMarkup(challenge) {
+  if (challenge.buzz) return `<div class="buzz-result ${challenge.buzz.team}"><span>ZUERST DRAN</span><strong>TEAM ${teamName(challenge.buzz.team).toUpperCase()}</strong><p>Antwort erst laut nennen lassen, dann aufdecken und werten.</p><button class="button secondary" data-action="quiz-buzz-reset">Team-Auswahl korrigieren</button></div>`;
+  return `<p class="privacy-note">Antwort ausrufen! Du entscheidest, wer zuerst dran war. Erst die Antwort anhören, dann das Team auswählen.</p><div class="buzz-grid"><button class="button rosa big" data-action="quiz-call" data-team="rosa">KATHI WAR ZUERST</button><button class="button blau big" data-action="quiz-call" data-team="blau">ANTON WAR ZUERST</button></div><button class="button secondary" data-action="quiz-tie-draw">NIEMAND WEISS ES · KEINE PUNKTE</button>`;
 }
 
 function winnerMarkup() {
@@ -422,8 +542,9 @@ function winnerMarkup() {
   if (!readiness.ready) return `<div class="winner-panel locked"><p class="eyebrow">PUNKTEVERGABE</p><p>${escapeHtml(readiness.text)}</p></div>`;
   if (state.active.kind !== "physical") return `<div class="winner-panel locked"><p class="eyebrow">AUTOMATISCHE WERTUNG</p><p>Das Ergebnis wird aus dem Spielablauf berechnet und automatisch vergeben.</p></div>`;
   const result = state.challenge.result;
+  if (result === "draw" && ["stopwatch", "team-relay", "pullups"].includes(state.challenge.mode)) return `<div class="winner-panel"><p class="eyebrow">GLEICHSTAND · KURZES STECHEN</p><p>Stechen nach der Spielregel durchführen und den Sieger eintragen.</p><div class="button-row centered"><button class="button rosa big" data-action="physical-tiebreak" data-team="rosa">KATHI GEWINNT DAS STECHEN</button><button class="button blau big" data-action="physical-tiebreak" data-team="blau">ANTON GEWINNT DAS STECHEN</button><button class="button secondary" data-action="winner" data-team="draw">OHNE PUNKTE ABSCHLIESSEN</button></div></div>`;
   const buttonClass = result === "rosa" ? "rosa" : result === "blau" ? "blau" : result === "both" ? "both" : "secondary";
-  return `<div class="winner-panel"><p class="eyebrow">ERGEBNIS BESTÄTIGEN</p><p class="recommendation"><strong>${escapeHtml(resultLabel(result))}</strong> wurde aus dem abgeschlossenen Ablauf ermittelt.</p><button class="button ${buttonClass} big" data-action="winner" data-team="${result}">ERGEBNIS ÜBERNEHMEN · +${state.active.stars}</button></div>`;
+  return `<div class="winner-panel"><p class="eyebrow">ERGEBNIS BESTÄTIGEN</p><p class="recommendation"><strong>${escapeHtml(resultLabel(result))}</strong> wurde aus dem abgeschlossenen Ablauf ermittelt.</p><button class="button ${buttonClass} big" data-action="winner" data-team="${result}">ERGEBNIS ÜBERNEHMEN${result === "draw" ? " · KEINE PUNKTE" : ` · +${state.active.stars}`}</button></div>`;
 }
 
 function resultReadiness() {
@@ -455,7 +576,7 @@ function quizRecommendation() {
 
 function hostMapMarkup() {
   const map = state.map; const rosaUrl = `${location.origin}/pad/rosa?t=${encodeURIComponent(map.tokens.rosa)}`; const blauUrl = `${location.origin}/pad/blau?t=${encodeURIComponent(map.tokens.blau)}`;
-  return `<div class="round-banner"><strong>RUNDE ${map.round + 1} / ${map.roundCount}</strong><span>Rundensiege: Kathi ${map.totals.rosaWins} · Anton ${map.totals.blauWins}${map.totals.draws ? ` · ${map.totals.draws} unentschieden` : ""}</span></div><div class="map-panel"><div>${mapView(map, false)}${map.done ? resultMarkup(map) : ""}</div><aside class="map-side"><p class="eyebrow">GESUCHTER ORT</p><h3 class="target-name">${escapeHtml(map.place.name)}</h3><label class="select-label">Ort dieser Runde<select class="place-picker" data-place aria-label="Ort auswählen" ${Object.keys(map.taps).length ? "disabled" : ""}>${state.places.map((place) => `<option value="${place.id}" ${place.id === map.place.id ? "selected" : ""}>${escapeHtml(place.name)}</option>`).join("")}</select></label>${teamStatusMarkup(map)}${map.done && !map.complete ? `<button class="button gold" data-action="map-next">NÄCHSTE RUNDE →</button>` : !map.done ? `<p class="auto-resolve-note">Die Runde löst automatisch auf, sobald beide Teams bestätigt haben.</p>` : ""}</aside></div><div class="qr-grid">${qrCard("rosa", "iPad Team Kathi", rosaUrl)}${qrCard("blau", "iPad Team Anton", blauUrl)}</div>`;
+  return `<div class="round-banner"><strong>RUNDE ${map.round + 1} / ${map.roundCount}</strong><span>Rundensiege: Kathi ${map.totals.rosaWins} · Anton ${map.totals.blauWins}${map.totals.draws ? ` · ${map.totals.draws} unentschieden` : ""}</span></div><div class="map-panel"><div>${mapView(map, false)}${map.done ? resultMarkup(map) : ""}</div><aside class="map-side"><p class="eyebrow">GESUCHTER ORT</p><h3 class="target-name">${escapeHtml(map.place.name)}</h3><label class="select-label">Ort dieser Runde<select class="place-picker" data-place aria-label="Ort auswählen" ${map.hasTaps || map.done ? "disabled" : ""}>${state.places.map((place) => `<option value="${place.id}" ${place.id === map.place.id ? "selected" : ""}>${escapeHtml(place.name)}</option>`).join("")}</select></label>${teamStatusMarkup(map)}${map.done && !map.complete ? `<button class="button gold" data-action="map-next">NÄCHSTE RUNDE →</button>` : !map.done ? `<p class="auto-resolve-note">Die Runde löst automatisch auf, sobald beide Teams bestätigt haben.</p>` : ""}</aside></div><div class="qr-grid">${qrCard("rosa", "iPad Team Kathi", rosaUrl)}${qrCard("blau", "iPad Team Anton", blauUrl)}</div>`;
 }
 
 function mapView(map, interactive) {
@@ -488,8 +609,8 @@ function hostVoteMarkup() {
   const vote = state.vote; const guestUrl = `${location.origin}/vote?t=${encodeURIComponent(vote.tokens.guests)}`;
   const question = voteQuestionMarkup(vote);
   if (vote.phase === "team") return `<section class="vote-host">${question}<p class="eyebrow">1 · BEIDE PROZENTTIPPS BEI DER MODERATION</p><p class="privacy-note">🔒 Beide Teams nennen ausschließlich den geschätzten Prozentanteil für Antwort A. Beide Eingaben werden gemeinsam gespeichert und bleiben bis zur Auflösung geheim.</p>${hostVoteGuessesMarkup(vote)}<button class="button gold big" data-action="vote-open" ${vote.guessStatus.rosa && vote.guessStatus.blau ? "" : "disabled"}>30-SEKUNDEN-GÄSTEVOTING ÖFFNEN</button></section>`;
-  if (vote.phase === "voting") return `<section class="vote-host">${question}<p class="eyebrow">2 · GÄSTE STIMMEN AB</p><div class="vote-count"><strong>${vote.n}</strong><span>STIMMEN</span></div><output class="vote-deadline" data-vote-deadline="${vote.closesAt || ""}">00:30</output><div class="qr-grid one">${qrCard("vote-qr", "Gäste-Abstimmung", guestUrl)}</div><p>Mindestens ${vote.minVotes} Stimmen. Während der Abstimmung bleibt die Verteilung geheim.</p>${vote.n >= vote.minVotes ? `<button class="button gold big" data-action="vote-close">ABSTIMMUNG SCHLIESSEN</button>` : `<button class="button danger" data-action="vote-close" data-force="true">Vorzeitig schließen (${vote.n}/${vote.minVotes})</button>`}</section>`;
-  if (vote.phase === "closed") return `<section class="vote-host">${question}<p class="eyebrow">3 · ABSTIMMUNG GESCHLOSSEN</p><div class="vote-count"><strong>${vote.n}</strong><span>GÜLTIGE STIMMEN</span></div><p>Keine weiteren Stimmen werden angenommen. Teamtipps und Verteilung sind noch verdeckt.</p><button class="button gold big" data-action="vote-reveal">ERGEBNIS AUFLÖSEN &amp; AUTOMATISCH WERTEN</button></section>`;
+  if (vote.phase === "voting") return `<section class="vote-host">${question}<p class="eyebrow">2 · GÄSTE STIMMEN AB</p><div class="vote-count"><strong>${vote.n}</strong><span>STIMMEN</span></div><output class="vote-deadline" data-vote-deadline="${vote.closesAt || ""}">00:30</output><div class="qr-grid one">${qrCard("vote-qr", "Gäste-Abstimmung", guestUrl)}</div><button class="button secondary" data-action="vote-extend">WEITERE 30 SEKUNDEN AB JETZT</button><p>Mindestens ${vote.minVotes} Stimmen. Nach 30 Sekunden schließt die Abstimmung automatisch.</p>${vote.n >= vote.minVotes ? `<button class="button gold big" data-action="vote-close">ABSTIMMUNG SCHLIESSEN</button>` : `<button class="button danger" data-action="vote-close" data-force="true">Vorzeitig schließen (${vote.n}/${vote.minVotes})</button>`}</section>`;
+  if (vote.phase === "closed") return `<section class="vote-host">${question}<p class="eyebrow">3 · ABSTIMMUNG GESCHLOSSEN</p><div class="vote-count"><strong>${vote.n}</strong><span>GÜLTIGE STIMMEN</span></div><p>Keine weiteren Stimmen werden angenommen. Teamtipps und Verteilung sind noch verdeckt.</p><button class="button gold big" data-action="vote-reveal" ${vote.n ? "" : "disabled"}>ERGEBNIS AUFLÖSEN &amp; AUTOMATISCH WERTEN</button><button class="button secondary" data-action="vote-extend">${vote.n ? "NOCHMALS 30 SEKUNDEN ÖFFNEN" : "NOCH KEINE STIMMEN · ERNEUT 30 SEKUNDEN ÖFFNEN"}</button></section>`;
   return `<section class="vote-host">${question}<p class="eyebrow">4 · ERGEBNIS</p>${barsMarkup(vote)}${vote.guessMode === "direct" ? "" : `<div class="guess-reveal"><span class="rosa">Kathi: <strong>${escapeHtml(formatVoteGuess(vote, vote.guesses.rosa))}</strong></span><span class="blau">Anton: <strong>${escapeHtml(formatVoteGuess(vote, vote.guesses.blau))}</strong></span></div>`}<p class="recommendation"><strong>${escapeHtml(resultLabel(state.active.awarded))}</strong> · automatisch aus ${vote.n} Stimmen berechnet.</p></section>`;
 }
 
@@ -506,6 +627,13 @@ function voteRecommendation() {
   if (rosa) return { label: "Team Kathi", text: "Kathis Tipp trifft die Mehrheit." };
   if (blau) return { label: "Team Anton", text: "Antons Tipp trifft die Mehrheit." };
   return { label: "Keine Punkte", text: "Kein Tipp trifft die Mehrheit." };
+}
+
+function revealedGuessesMarkup(vote) {
+  if (!vote.revealed || vote.guessMode !== "percentage" || !vote.guesses) return "";
+  const total = vote.counts.a + vote.counts.b;
+  const actual = total ? vote.counts.a / total * 100 : 0;
+  return `<div class="guess-reveal"><span>Kathi: <strong>${formatVoteGuess(vote, vote.guesses.rosa)}</strong></span><span>Anton: <strong>${formatVoteGuess(vote, vote.guesses.blau)}</strong></span><span>Tatsächlich: <strong>${formatNumber(actual)} % ${escapeHtml(vote.a)}</strong></span></div>`;
 }
 
 function formatVoteGuess(vote, guess) {
@@ -529,9 +657,7 @@ function barRow(label, count, total, choice) { return `<div class="bar-row"><spa
 function renderInvalidToken() { app.innerHTML = `<main class="client-shell"><section class="scan-again"><p class="eyebrow">VERBINDUNG ABGELAUFEN</p><h1>Bitte neu scannen</h1><p>Die Moderation hat einen neuen QR-Code erzeugt oder das Spiel beendet.</p></section></main>`; }
 
 function renderBuzzer() {
-  const challenge = state.challenge; const team = context.team; const active = challenge.phase === "tie" && challenge.buzzerOpen && !challenge.buzz;
-  const won = challenge.buzz?.team === team;
-  app.innerHTML = `<main class="client-shell"><section class="client-stage narrow judge-stage"><header class="client-head"><div><p class="eyebrow">ZEITSTECHEN</p><h1 class="client-title">TEAM ${teamName(team).toUpperCase()}</h1></div></header>${challenge.phase !== "tie" ? `<p class="screen-wait">Wartet auf das Stechen.</p>` : challenge.buzz ? `<div class="buzz-result ${challenge.buzz.team}"><strong>${won ? "IHR WART ZUERST" : "ANDERES TEAM WAR ZUERST"}</strong><b>${formatTime(challenge.buzz.elapsedMs)}</b></div>` : `<button class="team-buzzer ${team}" data-action="team-buzz" ${active ? "" : "disabled"}>${active ? "BUZZ!" : "WARTEN"}</button><p class="room centered-text">Der Button ist nur während der ausdrücklichen Freigabe aktiv.</p>`}</section></main>`;
+  app.innerHTML = `<main class="client-shell"><section class="client-stage"><h1>Wir spielen per Zuruf</h1><p>Kein Handy-Buzzer nötig. Die Moderation entscheidet, wer zuerst dran war.</p></section></main>`;
 }
 
 function renderPad() {
@@ -550,7 +676,6 @@ function wireMap(interactive) {
   const canPlace = Boolean(interactive && context.role === "pad" && !state.map.done && !state.map.locks[context.team]);
   const pointers = new Map();
   let gesture = null;
-  let lastSend = 0;
 
   const clampCamera = () => {
     const width = viewport.clientWidth;
@@ -579,12 +704,17 @@ function wireMap(interactive) {
   };
 
   const queuePosition = (point) => {
+    const roundId = state.map.roundId;
+    const token = context.token;
+    mapPositionSaved = false;
+    mapPendingSends++;
     mapPositionQueue = mapPositionQueue.then(async () => {
-      const response = await fetch("/api/map", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type: "map:tap", team: context.team, token: context.token, roundId: state.map.roundId, ...point }) });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) { if (body.error === "invalid_token") { state = body.state || { access: { role: "pad", team: context.team, valid: false } }; render(); } else showToast("Position konnte nicht gespeichert werden."); return false; }
-      state = body.state; return true;
-    }).catch(() => { showToast("Verbindung wird wiederhergestellt …"); return false; });
+      const { response, body } = await requestJson("/api/map", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type: "map:tap", team: context.team, token, roundId, ...point }) });
+      if (!response.ok) { mapPositionSaved = false; if (body.error === "invalid_token") { state = { access: { role: "pad", team: context.team, valid: false } }; render(); } else showToast("Position konnte nicht gespeichert werden. Bitte erneut tippen."); return false; }
+      if (acceptState(state, body.state)) state = body.state;
+      mapPositionSaved = true;
+      return true;
+    }).catch(() => { mapPositionSaved = false; showToast("Position nicht gespeichert. Bitte erneut tippen.", true); return false; }).finally(() => { mapPendingSends--; });
     return mapPositionQueue;
   };
   const place = (clientX, clientY) => {
@@ -594,7 +724,7 @@ function wireMap(interactive) {
     const y = Math.max(0, Math.min(rect.height, (clientY - rect.top - mapCamera.y) / mapCamera.scale));
     const point = { lat: 90 - y / rect.height * 180, lng: x / rect.width * 360 - 180 };
     map.querySelector(`.map-pin.${context.team}`)?.remove(); map.insertAdjacentHTML("beforeend", pinMarkup(point, context.team)); document.querySelector(".pad-lock")?.removeAttribute("disabled");
-    if (performance.now() - lastSend > 100) { lastSend = performance.now(); queuePosition(point); }
+    queuePosition(point);
   };
   const finishInteraction = () => {
     if (pointers.size) return;
@@ -679,33 +809,30 @@ function wireMap(interactive) {
 function renderVoteClient() {
   const vote = state.vote;
   const waiting = vote.guessMode === "direct" ? "Erst beide Beiträge ansehen. Danach wird die Abstimmung hier automatisch freigeschaltet." : "Die Teams geben zuerst ihre geheimen Prozenttipps ab. Gleich geht es los.";
-  app.innerHTML = `<main class="client-shell"><section class="client-stage"><header class="client-head"><div><p class="eyebrow">GÄSTE-ABSTIMMUNG</p><h1 class="client-title">${escapeHtml(vote.q)}</h1></div></header>${vote.open && !vote.revealed ? `<div class="vote-buttons"><button class="vote-choice ${voteChoice === "a" ? "selected" : ""}" data-action="vote" data-choice="a"><small>A</small>${escapeHtml(vote.a)}</button><button class="vote-choice ${voteChoice === "b" ? "selected" : ""}" data-action="vote" data-choice="b"><small>B</small>${escapeHtml(vote.b)}</button></div><p class="room centered-text">DEINE STIMME KANN BIS ZUR AUFLÖSUNG GEÄNDERT WERDEN</p>` : vote.revealed ? `<p class="awarded">ABSTIMMUNG BEENDET</p>${barsMarkup(vote)}` : `<div class="vote-count"><strong>?</strong><span>WARTET AUF START</span></div><p class="game-description">${waiting}</p>`}</section></main>`;
+  app.innerHTML = `<main class="client-shell"><section class="client-stage"><header class="client-head"><div><p class="eyebrow">GÄSTE-ABSTIMMUNG</p><h1 class="client-title">${escapeHtml(vote.q)}</h1></div></header>${vote.open && !vote.revealed ? `<output class="vote-deadline" data-vote-deadline="${vote.closesAt}"></output><div class="vote-buttons"><button class="vote-choice ${voteChoice === "a" ? "selected" : ""}" data-action="vote" data-choice="a"><small>A</small>${escapeHtml(vote.a)}</button><button class="vote-choice ${voteChoice === "b" ? "selected" : ""}" data-action="vote" data-choice="b"><small>B</small>${escapeHtml(vote.b)}</button></div><p class="room centered-text">DEINE STIMME KANN BIS ZUM ENDE DER ABSTIMMUNG GEÄNDERT WERDEN</p>` : vote.revealed ? `<p class="awarded">ABSTIMMUNG BEENDET</p>${barsMarkup(vote)}` : `<div class="vote-count"><strong>${vote.phase === "closed" ? "✓" : "?"}</strong><span>${vote.phase === "closed" ? "ABSTIMMUNG GESCHLOSSEN" : "WARTET AUF START"}</span></div><p class="game-description">${vote.phase === "closed" ? "Die Moderation zeigt gleich das Ergebnis oder öffnet die Abstimmung erneut." : waiting}</p>`}</section></main>`;
 }
 
 function wireTimer() {
   const deadline = document.querySelector("[data-vote-deadline]");
   if (deadline) {
-    const updateDeadline = () => { const left = Math.max(0, Number(deadline.dataset.voteDeadline) - Date.now()); deadline.textContent = `${String(Math.ceil(left / 1000)).padStart(2, "0")} SEKUNDEN`; deadline.classList.toggle("finished", left <= 0); timerFrame = requestAnimationFrame(updateDeadline); };
+    const updateDeadline = () => { const left = Math.max(0, Number(deadline.dataset.voteDeadline) - serverTime()); deadline.textContent = `${String(Math.ceil(left / 1000)).padStart(2, "0")} SEKUNDEN`; deadline.classList.toggle("finished", left <= 0); if (left <= 0 && state.vote?.open) { state.vote.open = false; state.vote.phase = "closed"; render(); return; } timerFrame = requestAnimationFrame(updateDeadline); };
     updateDeadline(); return;
   }
   const output = document.querySelector("[data-timer-display]"); if (!output) return;
-  const update = () => { const elapsedBase = Number(output.dataset.elapsed); const runningSince = Number(output.dataset.running); const duration = Number(output.dataset.duration); const elapsed = elapsedBase + (runningSince ? Math.max(0, Date.now() - runningSince) : 0); const value = output.dataset.mode === "countdown" ? Math.max(0, duration - elapsed) : elapsed; const finished = output.dataset.mode === "countdown" && value <= 0; output.textContent = formatTime(value); output.classList.toggle("finished", finished); document.querySelector("[data-countdown-finish]")?.classList.toggle("ready", finished); if (runningSince) timerFrame = requestAnimationFrame(update); };
+  const update = () => { const elapsedBase = Number(output.dataset.elapsed); const runningSince = Number(output.dataset.running); const duration = Number(output.dataset.duration); const elapsed = elapsedBase + (runningSince ? Math.max(0, serverTime() - runningSince) : 0); const value = output.dataset.mode === "countdown" ? Math.max(0, duration - elapsed) : elapsed; const finished = output.dataset.mode === "countdown" && value <= 0; output.textContent = formatTime(value); output.classList.toggle("finished", finished); document.querySelector("[data-countdown-finish]")?.classList.toggle("ready", finished); if (runningSince) timerFrame = requestAnimationFrame(update); };
   update();
 }
 
 async function playMelody(melody) {
   if (!melody?.notes) return;
-  const tieSample = state.challenge?.phase === "tie";
-  if (tieSample && !await hostSend({ type: "quiz:buzzer:open" })) return;
   if (audioContext) await audioContext.close().catch(() => {});
-  audioContext = new AudioContext(); const beat = 60 / melody.tempo; let cursor = audioContext.currentTime + 0.08; const master = audioContext.createGain(); master.gain.value = 0.17; master.connect(audioContext.destination);
+  const AudioContext = window.AudioContext || window.webkitAudioContext; audioContext = new AudioContext(); await audioContext.resume(); const beat = 60 / melody.tempo; let cursor = audioContext.currentTime + 0.08; const master = audioContext.createGain(); master.gain.value = 0.17; master.connect(audioContext.destination);
   for (const [note, beats] of melody.notes) { const duration = beat * beats; if (note !== "R") { const oscillator = audioContext.createOscillator(); const gain = audioContext.createGain(); oscillator.type = "triangle"; oscillator.frequency.value = noteFrequency(note); oscillator.connect(gain); gain.connect(master); gain.gain.setValueAtTime(0.001, cursor); gain.gain.exponentialRampToValueAtTime(0.72, cursor + 0.025); gain.gain.exponentialRampToValueAtTime(0.001, cursor + Math.max(0.06, duration - 0.035)); oscillator.start(cursor); oscillator.stop(cursor + duration); } cursor += duration; }
   showToast("Melodie läuft …");
   clearTimeout(audioStopTimer);
   const durationMs = Math.max(100, Math.ceil((cursor - audioContext.currentTime) * 1000));
   audioStopTimer = setTimeout(async () => {
     await stopAudio();
-    if (tieSample && state.challenge?.phase === "tie" && state.challenge.buzzerOpen && !state.challenge.buzz) await hostSend({ type: "quiz:buzzer:close" });
   }, durationMs);
 }
 
@@ -733,9 +860,14 @@ function formatNumber(value) { return Number(value).toLocaleString("de-DE", { ma
 function formatTime(value) { const total = Math.max(0, Number(value) || 0); const minutes = Math.floor(total / 60000); const seconds = Math.floor(total % 60000 / 1000); const tenths = Math.floor(total % 1000 / 100); return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${tenths}`; }
 function openScoreDialog() { document.querySelector("#score-rosa").value = state.scores.rosa; document.querySelector("#score-blau").value = state.scores.blau; scoreDialog.showModal(); }
 function openSessionDialog() { document.querySelector("#session-label").value = `Show ${state.session.number + 1}`; document.querySelector("#session-confirm").value = ""; sessionDialog.showModal(); }
-function errorMessage(error) { return ({ already_awarded: "Dieses Spiel ist bereits gewertet. Zum Ändern bitte Rückgängig verwenden.", card_completed: "Diese Karte ist bereits erledigt und bleibt gesperrt.", card_still_flipping: "Die Karte klappt noch um – danach erneut antippen.", another_game_active: "Ein anderes Spiel läuft noch. Bitte zuerst fortsetzen oder ausdrücklich verwerfen.", setup_not_confirmed: "Bitte zuerst Setup und Sicherheit bestätigen.", result_not_ready: "Das Spiel ist noch nicht regelkonform abgeschlossen.", result_mismatch: "Dieses Ergebnis passt nicht zum gespeicherten Spielverlauf.", guesses_missing: "Bitte zuerst die beiden angesagten Teamtipps speichern.", answers_not_locked: "Beide Teamantworten müssen zuerst feststehen.", round_not_scored: "Bitte beide Teams ausdrücklich als richtig oder falsch werten.", nothing_to_undo: "Es gibt nichts rückgängig zu machen.", nothing_to_redo: "Es gibt nichts zu wiederholen.", round_not_revealed: "Bitte zuerst die Antwort aufdecken.", tiebreak_not_needed: "Das Stechen ist nur bei Gleichstand nötig.", position_locked: "Diese Position ist bereits gesperrt.", stale_round: "Diese Eingabe gehört zu einer früheren Kartenrunde.", stale_revision: "Der Stand wurde inzwischen auf einem anderen Gerät geändert. Bitte erneut versuchen.", vote_closed: "Diese Abstimmung ist bereits geschlossen.", vote_not_closed: "Bitte die Abstimmung zuerst verbindlich schließen.", quorum_missing: "Noch nicht genug Stimmen. Falls wirklich nötig, bewusst vorzeitig schließen." })[error] || "Aktion gerade nicht möglich."; }
+function errorMessage(error) { return ({ stale_session: "Diese Aktion gehört zu einer früheren Show. Bitte neu laden.", invalid_action_time: "Gerätezeit stimmt nicht. Bitte neu laden und erneut versuchen.", timer_finished: "Die 60 Sekunden sind vorbei. Bitte die Runde beenden.", no_votes: "Noch keine Stimmen. Bitte die Abstimmung erneut öffnen.", bad_reps: "Bitte eine ganze Zahl von 0 bis 99 eingeben.", already_awarded: "Dieses Spiel ist bereits gewertet. Zum Ändern bitte Rückgängig verwenden.", card_completed: "Diese Karte ist bereits erledigt und bleibt gesperrt.", card_still_flipping: "Die Karte klappt noch um – danach erneut antippen.", another_game_active: "Ein anderes Spiel läuft noch. Bitte zuerst fortsetzen oder ausdrücklich verwerfen.", setup_not_confirmed: "Bitte zuerst Setup und Sicherheit bestätigen.", result_not_ready: "Das Spiel ist noch nicht regelkonform abgeschlossen.", result_mismatch: "Dieses Ergebnis passt nicht zum gespeicherten Spielverlauf.", guesses_missing: "Bitte zuerst die beiden angesagten Teamtipps speichern.", answers_not_locked: "Beide Teamantworten müssen zuerst feststehen.", round_not_scored: "Bitte beide Teams ausdrücklich als richtig oder falsch werten.", nothing_to_undo: "Es gibt nichts rückgängig zu machen.", nothing_to_redo: "Es gibt nichts zu wiederholen.", round_not_revealed: "Bitte zuerst die Antwort aufdecken.", tiebreak_not_needed: "Das Stechen ist nur bei Gleichstand nötig.", position_locked: "Diese Position ist bereits gesperrt.", stale_round: "Diese Eingabe gehört zu einer früheren Kartenrunde.", stale_revision: "Der Stand wurde inzwischen auf einem anderen Gerät geändert. Bitte erneut versuchen.", vote_closed: "Diese Abstimmung ist bereits geschlossen.", vote_not_closed: "Bitte die Abstimmung zuerst verbindlich schließen.", quorum_missing: "Noch nicht genug Stimmen. Falls wirklich nötig, bewusst vorzeitig schließen." })[error] || "Aktion gerade nicht möglich."; }
 function showToast(message, sticky = false) { const toast = document.querySelector("#toast"); if (!toast) return; toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); if (!sticky) toastTimer = setTimeout(() => toast.classList.remove("show"), 2600); }
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]); }
 
+if (context.role === "host" || context.role === "screen") {
+  for (const src of ["/world.jpg", "/media/foto-raten-sprite.png"]) { const preload = new Image(); preload.src = src; }
+}
 if (context.role === "host" && !context.pin) loginMarkup(); else poll();
-setInterval(poll, 750);
+schedulePoll();
+window.addEventListener("online", () => { networkFailures = 0; void poll(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) void poll(); });
