@@ -32,12 +32,12 @@
   <title>Flo Fischer</title>
   <script src="/shared/language.js"></script>
   <link rel="stylesheet" href="/shared/hub/hub.css" />
-  <link rel="stylesheet" href="/shared/hub/diorama.css?v=18" />
+  <link rel="stylesheet" href="/shared/hub/diorama.css?v=19" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
-  <link rel="preload" href="/shared/hub/art/diorama-preview.webp?v=18" as="image" type="image/webp" fetchpriority="high" />
+  <link rel="preload" href="/shared/hub/art/diorama-preview.webp?v=19" as="image" type="image/webp" fetchpriority="high" />
   <script type="importmap">
     {
       "imports": {
@@ -46,7 +46,16 @@
       }
     }
   </script>
-  <link rel="modulepreload" href="/shared/hub/diorama.js?v=18" />
+  <link rel="modulepreload" href="/shared/hub/diorama.js?v=19" />
+  <link rel="modulepreload" href="/shared/hub/diorama/utils.js" />
+  <link rel="modulepreload" href="/shared/hub/diorama/layout.js" />
+  <link rel="modulepreload" href="/shared/hub/diorama/textures.js" />
+  <link rel="modulepreload" href="/shared/hub/diorama/materials.js" />
+  <link rel="modulepreload" href="/shared/hub/diorama/island.js" />
+  <link rel="modulepreload" href="/shared/hub/diorama/seele.js" />
+  <link rel="modulepreload" href="/shared/hub/diorama/gehirn.js" />
+  <link rel="modulepreload" href="/shared/hub/diorama/atmosphere.js" />
+  <link rel="modulepreload" href="/shared/hub/diorama/signs.js" />
 </head>
 <body class="realm-diorama" data-title-en="Flo Fischer" data-title-de="Flo Fischer">
   <canvas id="diorama-world" aria-label="Freely rotatable floating island between Seele and Gehirn"></canvas>
@@ -111,7 +120,7 @@
     </div>
   </noscript>
 
-  <script type="module" src="/shared/hub/diorama.js?v=18"></script>
+  <script type="module" src="/shared/hub/diorama.js?v=19"></script>
   <script src="/shared/pwa.js" defer></script>
 </body>
 </html>

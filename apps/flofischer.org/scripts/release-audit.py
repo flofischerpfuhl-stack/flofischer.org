@@ -150,7 +150,7 @@ def main() -> int:
     release_contract_path = SITES / "shared/release.json"
     expected_release_contract = {
         "deploymentPipeline": "cloudflare-workers-builds",
-        "hub": "floating-island-v18",
+        "hub": "floating-island-v19",
         "seeleReader": "floating-reader-with-mobile-toc-and-disclaimers",
     }
     try:
@@ -184,16 +184,28 @@ def main() -> int:
     ):
         if (SITES / "shared/hub/art" / obsolete_art).exists():
             errors.append(f"shared/hub/art/{obsolete_art}: obsolete dual-scene asset must not return")
-    if 'rel="modulepreload" href="/shared/hub/diorama.js?v=18"' not in root_markup:
+    if 'rel="modulepreload" href="/shared/hub/diorama.js?v=19"' not in root_markup:
         errors.append("root/index.html: floating-island module preload is missing")
     if root_markup.index('type="importmap"') > root_markup.index('rel="modulepreload"'):
         errors.append("root/index.html: import map must precede modulepreload for Firefox")
-    if 'rel="preload" href="/shared/hub/art/diorama-preview.webp?v=18"' not in root_markup:
+    if 'rel="preload" href="/shared/hub/art/diorama-preview.webp?v=19"' not in root_markup:
         errors.append("root/index.html: loading preview preload is missing")
 
-    diorama_script = (SITES / "shared/hub/diorama.js").read_text(encoding="utf-8")
+    diorama_modules = sorted((SITES / "shared/hub/diorama").glob("*.js"))
+    diorama_script = "\n".join(
+        path.read_text(encoding="utf-8") for path in [SITES / "shared/hub/diorama.js", *diorama_modules]
+    )
+    for module in diorama_modules:
+        if f'rel="modulepreload" href="/shared/hub/diorama/{module.name}"' not in root_markup:
+            errors.append(f"root/index.html: floating-island module preload is missing for {module.name}")
+    diorama_css = (SITES / "shared/hub/diorama.css").read_text(encoding="utf-8")
+    if "diorama-preview.webp?v=19" not in diorama_css:
+        errors.append("shared/hub/diorama.css: loader preview must use the same cache version as the preload")
     for marker, label in (
         ("renderer.shadowMap.autoUpdate = false", "single-update static shadows"),
+        ("renderer.compileAsync(", "parallel shader compilation"),
+        ("EXT_disjoint_timer_query_webgl2", "GPU-timed adaptive quality"),
+        ("WebGLCubeRenderTarget", "baked reflection probes"),
         ("renderer.setAnimationLoop(animate)", "renderer-managed animation loop"),
         ("1000 / 30", "responsive mobile frame cap"),
         ('trackedTexture("tropical-leaf", "webp"', "lossless WebP foliage fallback"),
@@ -204,14 +216,20 @@ def main() -> int:
         ("fern_02_draco.glb", "Draco fern model"),
     ):
         if marker not in diorama_script:
-            errors.append(f"shared/hub/diorama.js: missing {label}")
+            errors.append(f"shared/hub/diorama runtime: missing {label}")
     if (SITES / "shared/hub/textures/tropical-leaf.png").exists():
         errors.append("shared/hub/textures/tropical-leaf.png: oversized legacy foliage texture must be removed")
+    leaf_path = SITES / "shared/hub/textures/tropical-leaf.webp"
+    if not leaf_path.is_file() or leaf_path.stat().st_size > 200_000:
+        errors.append("shared/hub/textures/tropical-leaf.webp: missing or exceeds 200 KB foliage budget")
+    for retired in ("tropical-leaf.ktx2", "asphalt.ktx2", "asphalt.jpg", "forest-floor-roughness.ktx2", "forest-floor-roughness.jpg"):
+        if (SITES / "shared/hub/textures" / retired).exists():
+            errors.append(f"shared/hub/textures/{retired}: retired texture must not return")
 
     initial_texture_names = (
-        "meadow", "forest-floor-normal", "forest-floor-roughness", "mossy-rock",
-        "mossy-rock-normal", "asphalt", "cobble", "bark", "facade-a", "facade-b",
-        "waternormals", "tropical-leaf", "chapel-fieldstone-v1", "chapel-roof-biberschwanz-v1",
+        "meadow", "forest-floor-normal", "mossy-rock",
+        "mossy-rock-normal", "cobble", "bark", "facade-a", "facade-b",
+        "waternormals", "chapel-fieldstone-v1", "chapel-roof-biberschwanz-v1",
     )
     ktx2_paths = [SITES / "shared/hub/textures" / f"{name}.ktx2" for name in initial_texture_names]
     for path in ktx2_paths:
