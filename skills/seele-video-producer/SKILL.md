@@ -7,6 +7,8 @@ description: Produces reusable 16:9 German and English videos from articles on s
 
 Use `C:\Users\flori\source\flofischer.org\tools\seele-video-studio` as the renderer and project archive. Read [workflow](references/workflow.md) before production work. Read [project schema](references/project-schema.md) when creating or updating a project.
 
+For any scene that needs a third-party 3D model, read [asset selection and licensing](references/assets-and-licensing.md) before searching or downloading. For reactions, quoted clips, or embedded videos, read [video quotes and reactions](references/video-quotes.md).
+
 ## Core rules
 
 - Treat the article as source material, not as the finished video script.
@@ -16,6 +18,10 @@ Use `C:\Users\flori\source\flofischer.org\tools\seele-video-studio` as the rende
 - Keep one content/timing baseline when comparing visual variants.
 - Use the site's warm paper, strong condensed display type, editorial rules, Christian botanical symbolism, and restrained color unless an approved project decision overrides them.
 - Build reusable visual components rather than one-off exported slides.
+- Search the private 3D catalog before browsing for a new model. Add a new asset only when it is a better semantic and visual fit than the existing library.
+- Keep raw third-party models private and out of Git. Record source, creator, license, download date, original file, normalized derivative, size, and SHA-256.
+- Prefer CC0 and CC BY. Use CC BY only when full credit in the public video description satisfies the license; do not select assets that require attribution inside the rendered video. Treat NC, NC-SA, Editorial, unknown-license, and non-downloadable models as excluded by default.
+- Use Sketchfab Free Standard only in the private single-seat library and never expose the raw asset for extraction or redistribution.
 - For guided narration, keep the speaker's cadence and pauses only after obtaining the guide track; do not claim cadence matching for text-only synthetic speech.
 - Derive final on-screen cue timing from word-level alignment of the final audio, then verify it visually.
 - Never commit generated MP4, WAV, or extracted frame batches to Git. Deliver them under `C:\Users\flori\Documents\Codex\upload\seele-video-concepts` unless Florian names another destination.

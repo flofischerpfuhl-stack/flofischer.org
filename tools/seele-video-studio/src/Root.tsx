@@ -1,29 +1,53 @@
 import React from 'react';
 import {Composition} from 'remotion';
 import {SeeleVideo} from './SeeleVideo';
-import type {Variant} from './project';
-
-const variants: Array<{id: string; variant: Variant}> = [
-  {id: 'V1-Editorial', variant: 'editorial'},
-  {id: 'V2-Sacred-Sculpture', variant: 'sculpture'},
-  {id: 'V3-Sunrise', variant: 'sunrise'},
-  {id: 'V4-Typographic-Minimal', variant: 'minimal'},
-  {id: 'V5-Animated-Manuscript', variant: 'manuscript'}
-];
+import {VideoQuoteDemo} from './VideoQuoteFrame';
 
 export const VideoRoot: React.FC = () => (
   <>
-    {variants.map(({id, variant}) => (
-      <Composition
-        key={id}
-        id={id}
-        component={SeeleVideo}
-        defaultProps={{variant}}
-        durationInFrames={600}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-    ))}
+    <Composition
+      id="PinkSky-Test-40s"
+      component={SeeleVideo}
+      defaultProps={{sky: 'pink', showAsset: true, muted: false}}
+      durationInFrames={1200}
+      fps={30}
+      width={1920}
+      height={1080}
+    />
+    <Composition
+      id="PinkSky-Transition-Study"
+      component={SeeleVideo}
+      defaultProps={{sky: 'pink', showAsset: false, muted: true}}
+      durationInFrames={300}
+      fps={30}
+      width={1920}
+      height={1080}
+    />
+    <Composition
+      id="BlueSky-Future-Preview"
+      component={SeeleVideo}
+      defaultProps={{sky: 'blue'}}
+      durationInFrames={1200}
+      fps={30}
+      width={1920}
+      height={1080}
+    />
+    <Composition
+      id="DarkSky-Future-Preview"
+      component={SeeleVideo}
+      defaultProps={{sky: 'dark'}}
+      durationInFrames={1200}
+      fps={30}
+      width={1920}
+      height={1080}
+    />
+    <Composition
+      id="VideoQuote-Reaction-Demo"
+      component={VideoQuoteDemo}
+      durationInFrames={240}
+      fps={30}
+      width={1920}
+      height={1080}
+    />
   </>
 );

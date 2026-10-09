@@ -8,6 +8,33 @@
       "source": "scripts/v001.de.md",
       "reason": "Initialer 20-Sekunden-Vergleich der fünf Designrichtungen",
       "approved": false
+    },
+    {
+      "version": "v002",
+      "date": "2026-08-31",
+      "status": "pink-sky-concept-test",
+      "source": "scripts/v002.de.md",
+      "reason": "Erweiterter 40-Sekunden-Test mit freigegebener rosa Tiefenrichtung, Asset-Überlagerung und kontinuierlichen Übergängen",
+      "approved": false,
+      "visualDirectionApproved": true
+    },
+    {
+      "version": "v003",
+      "date": "2026-08-31",
+      "status": "visual-revision-in-progress",
+      "source": "scripts/v002.de.md",
+      "reason": "Korrektur nach visueller Gegenprüfung mit der Webflow-Referenz: Vollbildtitel, keine Dauerelemente, dezente Himmelsparallaxe und eine einzelne echte Wolkenbank als Übergang",
+      "approved": false,
+      "blockedOn": "authenticated real 3D model download"
+    },
+    {
+      "version": "v004",
+      "date": "2026-08-31",
+      "status": "rendered-ready-for-review",
+      "source": "scripts/v002.de.md",
+      "reason": "Randfüllender Titel ohne Zusatzschrift, vollständige Mehrwolken-Abdeckung, zwei zusätzliche Shopify-inspirierte Übergangstests und echtes rotierendes GLB-Asset",
+      "approved": false,
+      "blockedOn": "user visual approval"
     }
   ]
 }

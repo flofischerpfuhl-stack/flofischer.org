@@ -7,16 +7,20 @@
     "studio": "remotion studio src/index.ts",
     "still": "remotion still src/index.ts",
     "render": "remotion render src/index.ts",
+    "render:test": "node scripts/render-test.mjs",
     "render:all": "node scripts/render-all.mjs",
     "qa": "node scripts/qa.mjs",
     "voice": "pwsh -NoProfile -File scripts/generate-voice.ps1",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@remotion/cli": "^4.0.363",
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
+    "@remotion/cli": "4.0.363",
+    "@remotion/three": "4.0.363",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "remotion": "^4.0.363",
+    "remotion": "4.0.363",
     "three": "^0.179.1"
   },
   "devDependencies": {

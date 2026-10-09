@@ -1,22 +1,40 @@
 param(
+  [string]$ProjectSlug = "vorsehung-freier-wille",
+  [string]$ScriptVersion = "v002",
+  [string]$Language = "de",
   [string]$Voice = "Microsoft Stefan",
-  [int]$Rate = 1
+  [int]$Rate = 1,
+  [string]$OutputFile = ""
 )
 
 $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Speech
 
 $studioRoot = Split-Path -Parent $PSScriptRoot
-$outputPath = Join-Path $studioRoot "public\audio\voice-de.wav"
-$eszett = [char]0x00DF
-$text = "Wenn Gott schon heute wei$($eszett), was du morgen entscheidest, bist du dann wirklich frei? Genau hier beginnt das Problem von Vorsehung und freiem Willen. Der Artikel zeigt, wo klassische Antworten an Grenzen sto$($eszett)en, und warum Gottes Wissen vielleicht ganz anders gedacht werden muss."
+$scriptPath = Join-Path $studioRoot "projects\$ProjectSlug\scripts\$ScriptVersion.$Language.md"
+if (-not (Test-Path -LiteralPath $scriptPath)) {
+  throw "Script not found: $scriptPath"
+}
+
+$script = Get-Content -Raw -LiteralPath $scriptPath
+$match = [regex]::Match($script, '(?ms)^## Voice-over\s+(.*?)\s+^## ')
+if (-not $match.Success) {
+  throw "Voice-over section not found in $scriptPath"
+}
+$text = ($match.Groups[1].Value.Trim() -replace '\r?\n', ' ')
+
+if ([string]::IsNullOrWhiteSpace($OutputFile)) {
+  $OutputFile = Join-Path $studioRoot "public\audio\$ProjectSlug-$ScriptVersion-$Language.wav"
+}
+$outputDirectory = Split-Path -Parent $OutputFile
+New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
 
 $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
 $synth.SelectVoice($Voice)
 $synth.Rate = $Rate
 $synth.Volume = 100
-$synth.SetOutputToWaveFile($outputPath)
+$synth.SetOutputToWaveFile($OutputFile)
 $synth.Speak($text)
 $synth.Dispose()
 
-Write-Output $outputPath
+Write-Output $OutputFile

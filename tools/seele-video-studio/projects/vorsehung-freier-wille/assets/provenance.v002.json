@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-31",
+  "generator": "OpenAI built-in image generation",
+  "assets": [
+    {"id": "pink-editorial", "path": "public/assets/skies/pink-editorial.png", "sha256": "6A53EAA88B296F3A89E81518D8A7A88E0F179B0A77611A28BCA17863A6A0E40D", "role": "active layered sky"},
+    {"id": "blue-editorial", "path": "public/assets/skies/blue-editorial.png", "sha256": "A290CF2A943023ED65CC7C0CC5CDDB05A5375971D60A06F620296F277A810088", "role": "prepared future sky"},
+    {"id": "dark-editorial", "path": "public/assets/skies/dark-editorial.png", "sha256": "6B48541F76B1C9E156C6B0F512D3ECCB10C09F0D72C032920EF32F86083A1A7F", "role": "prepared future sky"},
+    {"id": "generated-angel-concept", "path": "public/assets/generated/angel-concept.png", "sha256": "CEAA92655BD3DF57502B4E7BD0913E35BEFADC61F26CD3FCC53B035E76FACD78", "role": "rejected temporary concept sculpture; do not use in approval render"},
+    {"id": "pink-cloud-bank-v2", "path": "public/assets/transitions/pink-cloud-bank-v2.png", "sha256": "1564FDB48A46E15C5CE8B68E2B5BF001BB23BB1BFCA78784C6E9669DC982E4C0", "role": "single volumetric cloud-bank transition with alpha"}
+  ]
+}

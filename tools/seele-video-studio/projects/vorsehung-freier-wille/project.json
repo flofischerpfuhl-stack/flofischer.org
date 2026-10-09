@@ -4,8 +4,24 @@
   "title": "Vorsehung und freier Wille",
   "canonicalUrl": "https://seele.flofischer.org/posts/vorsehung-freier-wille.html",
   "languages": ["de", "en"],
-  "format": {"width": 1920, "height": 1080, "fps": 30, "durationSeconds": 20},
-  "testVoice": {"provider": "Windows SAPI", "voice": "Microsoft Stefan", "rate": 1},
-  "status": "concept-comparison",
-  "approvedVariant": null
+  "format": {"width": 1920, "height": 1080, "fps": 30, "durationSeconds": 40},
+  "testVoice": {
+    "provider": "Windows SAPI",
+    "voice": "Microsoft Stefan",
+    "rate": 1,
+    "asset": "public/audio/vorsehung-freier-wille-v002-de.wav",
+    "provenance": "neutral synthetic concept voice"
+  },
+  "status": "visual-revision-v004-ready-for-review",
+  "approvedVariant": "pink-sky-depth",
+  "visualAssets": {
+    "activeSky": "pink-editorial",
+    "preparedSkies": ["blue-editorial", "dark-editorial"],
+    "activeSculpture": "sketchfab-c290e37-painted-wooden-angel",
+    "rejectedConceptSculpture": "generated-angel-concept",
+    "transitionCloud": "pink-cloud-bank-v2",
+    "real3dReplacementStatus": "downloaded-inventoried-and-render-tested",
+    "testedTransitions": ["multi-cloud-full-occlusion", "etched-outline-flash", "torn-paper-wipe"]
+  },
+  "attributionPolicy": "description-only-when-license-permits"
 }

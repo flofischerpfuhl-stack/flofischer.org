@@ -2,17 +2,21 @@
 
 Wiederverwendbare Remotion-Vorlage für 16:9-Videos aus Artikeln von `seele.flofischer.org`.
 
-## Konzeptvergleich rendern
+## Aktuellen 40-Sekunden-Test rendern
 
 ```powershell
 npm install
 npm run voice
 npm run typecheck
-npm run render:all -- "C:\Users\flori\Documents\Codex\upload\seele-video-concepts"
+npm run render:test -- "C:\Users\flori\Documents\Codex\upload\seele-video-concepts"
 npm run qa -- "C:\Users\flori\Documents\Codex\upload\seele-video-concepts"
 ```
 
-Alle fünf Kompositionen sind 1920×1080, 30 fps und 20 Sekunden lang. Sie teilen Skript, Sprache und Zeitmarken. `Botanical3D.tsx` rekonstruiert Kreuz, Zweige, Blätter und Blüten aus echten Three.js-3D-Koordinaten und projiziert sie deterministisch in SVG; dadurch bleibt das Rendering reproduzierbar und benötigt kein WebGL.
+Die aktive Komposition `PinkSky-Test-40s` ist 1920×1080, 30 fps und 40 Sekunden lang. Die Schwesterkompositionen für blauen und dunklen Himmel sind für spätere Videos vorbereitet, aber nicht Teil des aktuellen Testexports. `VideoQuote-Reaction-Demo` zeigt den wiederverwendbaren Play-/Pause- und VHS-Hold-Zustand.
+
+Der rosa Himmel besteht aus mehreren unterschiedlich bewegten Ausschnitten desselben generierten Matte-Paintings. Das erzeugt langsame Parallaxe ohne sichtbare Schleife. Das aktuelle Engelsmotiv ist ein dokumentiertes Konzeptasset; `RealGltfAsset` in `src/SceneAsset.tsx` ist für ein später authentifiziert heruntergeladenes GLB vorbereitet.
+
+Lizenz- und Bibliotheksregeln stehen in `docs/asset-library.md`. Rohmodelle und der lokale Katalog liegen ausschließlich in `private-assets/` und werden von Git ignoriert.
 
 ## Projektgedächtnis
 

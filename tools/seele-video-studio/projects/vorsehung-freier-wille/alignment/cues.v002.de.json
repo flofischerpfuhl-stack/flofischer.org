@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "scriptVersion": "v002",
+  "mode": "editorial-concept-test",
+  "note": "Redaktionelle Konzept-Zeitmarken; vor Produktion durch Wort-Zeitmarken der finalen Audiodatei ersetzen.",
+  "fps": 30,
+  "cues": [
+    {"fromFrame": 0, "toFrame": 215, "label": "Thema"},
+    {"fromFrame": 180, "toFrame": 430, "label": "Hook-Frage"},
+    {"fromFrame": 395, "toFrame": 690, "label": "Drei Antworten"},
+    {"fromFrame": 655, "toFrame": 925, "label": "Entscheidungsbaum"},
+    {"fromFrame": 890, "toFrame": 1080, "label": "Offene Folgerungen"},
+    {"fromFrame": 1045, "toFrame": 1200, "label": "Artikelverweis"}
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-31",
+  "status": "visual-study-not-final",
+  "composition": "PinkSky-Transition-Study",
+  "file": "C:\\Users\\flori\\Documents\\Codex\\upload\\seele-video-concepts\\vorsehung-freier-wille-v003-study\\titel-und-wolkenuebergang-v003.mp4",
+  "sha256": "4b468cfbabeb4bf60b076a3516058ba9a5fc9ebf06c7cdffd8c155260db6bb04",
+  "durationSeconds": 10.048,
+  "video": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1"
+  },
+  "reviewedFrames": [0, 90, 170, 190, 205, 220, 239, 270],
+  "checks": {
+    "titlePresentAtFrameZero": true,
+    "titleFillsOpening": true,
+    "persistentFrameRemoved": true,
+    "persistentHeaderFooterRemoved": true,
+    "backgroundParallaxRestrained": true,
+    "cloudUsedOnlyForOneTransition": true,
+    "cloudGoneAfterTransition": true,
+    "italicSerifAccentVisible": true,
+    "entirePreviewPlaybackCompleted": true
+  },
+  "pass": true,
+  "note": "This pass covers only the opening and cloud transition. The 40-second approval render remains blocked until a real licensed 3D model is downloaded and tested."
+}
