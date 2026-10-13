@@ -50,7 +50,14 @@ function withSiteHeaders(response, pathname) {
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-Frame-Options", "SAMEORIGIN");
-  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  if (pathname === "/fernwork" || pathname.startsWith("/fernwork/")) {
+    // Unlisted Fernwork redesign mockups: reachable only by link, never indexed.
+    // The QR reader mockup needs the camera.
+    headers.set("X-Robots-Tag", "noindex, nofollow");
+    headers.set("Permissions-Policy", "camera=(self), microphone=(), geolocation=()");
+  } else {
+    headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  }
 
   if (pathname.endsWith("/sw.js") || pathname === "/sw.js") {
     headers.set("Cache-Control", "no-cache, no-store, must-revalidate");

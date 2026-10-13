@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="color-scheme" content="light dark">
+<title>Textbench · Fernwork</title>
+<link rel="icon" href="../kit/img/logo.svg" type="image/svg+xml">
+<script src="../kit/theme-init.js"></script>
+<link rel="stylesheet" href="../kit/tokens.css">
+<link rel="stylesheet" href="../kit/components.css">
+<link rel="stylesheet" href="text.css">
+</head>
+<body>
+<main id="main">
+  <div class="fw-workbench tb" id="wb">
+    <div class="fw-framebar" role="toolbar" aria-label="Document" id="framebar"></div>
+    <nav class="tb-lenschips" id="lenschips" aria-label="Lenses" data-roving="button"></nav>
+    <div class="fw-wb-main has-inspector" id="wb-main">
+      <div class="fw-stage tb-stage" id="stage">
+        <div class="tb-progress" id="progress" hidden role="status"><div class="fw-progress fw-progress--indeterminate fw-progress--thin"><div class="fw-progress__track"><div class="fw-progress__bar"></div></div></div><span class="tb-progress__label"></span></div>
+        <div class="tb-rxbar" id="rxbar" hidden></div>
+        <div class="tb-cmpbar" id="cmpbar" hidden></div>
+        <div class="tb-editor" id="editor"></div>
+        <div class="tb-diff" id="diff" hidden><div class="tb-diff__body" id="diffbody"></div><div class="tb-minimap" id="minimap" aria-hidden="true"></div></div>
+        <div class="tb-empty" id="empty" hidden></div>
+        <div class="tb-detect" id="detect" hidden role="status"></div>
+      </div>
+      <aside class="fw-inspector tb-panel" aria-label="Lens panel" id="panel"></aside>
+    </div>
+    <div class="fw-statusbar" id="status"></div>
+    <button class="tb-mstatus" type="button" id="mstatus"></button>
+    <div class="tb-mbar" id="mbar">
+      <button class="fw-btn" type="button" id="m-paste" aria-label="Paste"><span data-icon="clipboard-paste"></span><span class="tb-mbar__l">Paste</span></button>
+      <button class="fw-btn" type="button" id="m-open" aria-label="Open file"><span data-icon="folder-open"></span><span class="tb-mbar__l">Open</span></button>
+      <span class="fw-spacer"></span>
+      <button class="fw-btn fw-btn--primary" type="button" id="m-primary" hidden></button>
+    </div>
+  </div>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>

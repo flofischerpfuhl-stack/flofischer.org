@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Convert · Fernwork</title>
+<meta name="description" content="Convert photos, videos, audio, spreadsheets, documents and data. Drop anything; every file gets the right format. Private, on your device, works offline.">
+<link rel="icon" href="../kit/img/logo.svg" type="image/svg+xml">
+<script src="../kit/theme-init.js"></script>
+<link rel="stylesheet" href="../kit/tokens.css">
+<link rel="stylesheet" href="../kit/components.css">
+<link rel="stylesheet" href="convert.css">
+</head>
+<body>
+<!-- Fernwork One · Convert ("One Drop"), archetype B · Queue. ?leaf=<preset> = SEO page (H1 inside the tool card). -->
+<main id="main">
+  <div class="fw-page cv-page" id="cv-page">
+    <div id="cv-head"></div>
+    <div id="cv-intake" class="cv-intake"></div>
+    <div class="cv-work" id="cv-work" hidden>
+      <div class="cv-work__main">
+        <div class="fw-groupbar cv-groups" id="cv-groups"></div>
+        <div class="cv-filter-note" id="cv-filter-note" hidden></div>
+        <div class="fw-items cv-items" id="cv-items" role="list" aria-label="Files"></div>
+      </div>
+      <aside class="cv-inspector" id="cv-inspector" hidden aria-label="Settings"></aside>
+    </div>
+    <div id="cv-below" class="cv-below"></div>
+  </div>
+  <div class="fw-page fw-actionbar-wrap cv-abwrap" id="cv-ab" hidden>
+    <div class="fw-actionbar cv-actionbar" role="region" aria-label="Batch summary">
+      <div class="cv-ab-progress" id="cv-ab-progress" hidden></div>
+      <div class="fw-actionbar__summary"><span class="fw-actionbar__line" id="ab-line"></span><span class="fw-actionbar__sub" id="ab-sub"></span></div>
+      <div class="fw-actionbar__actions">
+        <button class="fw-btn fw-btn--ghost" type="button" id="ab-cancel" hidden>Cancel all</button>
+        <button class="fw-btn fw-btn--ghost fw-hide-mobile" type="button" id="ab-clear">Clear</button>
+        <button class="fw-btn fw-btn--primary" type="button" id="ab-primary" disabled><span data-icon="download"></span><span data-l>Download all</span></button>
+      </div>
+    </div>
+  </div>
+</main>
+<script type="module" src="convert.js"></script>
+</body>
+</html>

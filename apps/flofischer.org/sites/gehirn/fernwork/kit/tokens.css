@@ -1,0 +1,211 @@
+/* ==========================================================================
+   Fernwork One · design tokens (DESIGN.md §6). Light is the default; dark via
+   [data-theme="dark"] or the OS preference when no explicit theme is set.
+   Load order: theme-init.js (sync, in <head>) → tokens.css → components.css.
+   ========================================================================== */
+
+/* ---------- Fonts (local, same-origin) ---------- */
+@font-face { font-family: "Geist"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("fonts/geist-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Geist"; font-style: normal; font-weight: 500; font-display: swap;
+  src: url("fonts/geist-latin-500-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Geist"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("fonts/geist-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Geist"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("fonts/geist-latin-ext-400-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Geist"; font-style: normal; font-weight: 500; font-display: swap;
+  src: url("fonts/geist-latin-ext-500-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Geist"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("fonts/geist-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("fonts/geist-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 500; font-display: swap;
+  src: url("fonts/geist-mono-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("fonts/geist-mono-latin-600-normal.woff2") format("woff2"); }
+
+/* ---------- Theme-independent tokens ---------- */
+:root {
+  /* Type */
+  --font-ui: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --text-xs: 12px;   --lh-xs: 16px;
+  --text-sm: 13px;   --lh-sm: 18px;
+  --text-base: 14px; --lh-base: 20px;
+  --text-md: 16px;   --lh-md: 24px;
+  --text-lg: 20px;   --lh-lg: 28px;
+  --text-xl: 24px;   --lh-xl: 32px;
+  --text-2xl: 32px;  --lh-2xl: 40px;
+  --text-display: 48px; --lh-display: 52px;
+  --weight-regular: 400; --weight-medium: 500; --weight-semibold: 600;
+  --tracking-tight: -0.011em;  /* lg and up */
+  --tracking-tighter: -0.022em; /* 2xl, display */
+
+  /* Spacing (4-based) */
+  --space-0: 0; --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px;
+  --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-16: 64px;
+  --gutter: 24px;
+
+  /* Shape */
+  --radius-xs: 4px; --radius-sm: 8px; --radius-md: 12px; --radius-pill: 999px;
+
+  /* Z-index scale (nothing above 1000) */
+  --z-base: 0; --z-sticky: 100; --z-appbar: 200; --z-dropdown: 300; --z-sheet: 400;
+  --z-modal: 500; --z-toast: 600; --z-dropveil: 700;
+
+  /* Motion */
+  --dur-1: 120ms; --dur-2: 180ms; --dur-3: 240ms;
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+
+  /* Sizes */
+  --control-h: 36px; --control-h-sm: 32px; --primary-h: 40px; --query-h: 56px;
+  --hit-min: 44px;
+  --appbar-h: 48px; --rail-w: 56px; --rail-w-open: 232px;
+  --framebar-h: 44px; --statusbar-h: 28px; --bottombar-h: 56px; --actionbar-h: 56px;
+  --inspector-w: 320px; --list-w: 240px;
+  --page-max: 1040px; --page-max-wide: 1200px;
+  --icon-sm: 16px; --icon-md: 20px; --icon-lg: 24px;
+
+  /* Series palette (CVD-safe; identical in both themes, lighten in dark via --series-*) */
+  --series-1: #2563eb; --series-2: #ea580c; --series-3: #7c3aed; --series-4: #dc2626;
+  --series-5: #0d9488; --series-6: #ca8a04; --series-7: #db2777; --series-8: #4b5563;
+
+  color-scheme: light;
+}
+
+@media (pointer: coarse) {
+  :root { --control-h: 44px; --control-h-sm: 44px; --primary-h: 48px; }
+}
+@media (max-width: 767px) {
+  :root { --gutter: 16px; --appbar-h: 52px; --query-h: 48px; --text-2xl: 28px; --lh-2xl: 36px; }
+}
+@media (max-height: 500px) and (min-width: 480px) {
+  :root { --appbar-h: 44px; }
+}
+
+/* ---------- Light (default; [data-theme="light"] also scopes it to any subtree) ---------- */
+:root, [data-theme="light"] {
+  --bg: #ffffff;
+  --surface-1: #ffffff;
+  --surface-2: #fafafa;
+  --surface-sunken: #f4f4f5;
+  --surface-overlay: #ffffff;    /* popovers, dialogs, sheets, toasts, command bar */
+  --surface-overlay-2: #fafafa;  /* footers inside overlays */
+  --surface-selected: #ffffff;   /* active segment */
+  --overlay-hover: #f4f4f5;      /* hovered/selected row inside an overlay */
+  --surface-hover: #f4f4f5;      /* row/item hover */
+  --surface-active: #ececee;     /* pressed */
+  --surface-inverse: #18181b;    /* tooltips, kbd on dark chips */
+  --text-inverse: #fafafa;
+
+  --border-subtle: #ececec;
+  --border-strong: #d4d4d8;
+  --border-focus: #15803d;
+
+  --text-1: #111111;
+  --text-2: #52525b;
+  --text-3: #6b6b73;
+  --text-disabled: #a1a1aa;      /* decorative / disabled only, never readable copy */
+
+  --accent-fill: #15803d;
+  --accent-fill-hover: #166534;
+  --accent-fill-press: #14532d;
+  --accent-on: #ffffff;
+  --accent-text: #15803d;
+  --accent-subtle-bg: #ecfdf3;
+  --accent-subtle-hover: #dcfce7;
+  --accent-border: #86efac;
+
+  --info: #2563eb;    --info-bg: #eff6ff;    --info-border: #bfdbfe;
+  --success: #15803d; --success-bg: #ecfdf3; --success-border: #bbf7d0;
+  --warning: #b45309; --warning-bg: #fffbeb; --warning-border: #fde68a;
+  --danger: #dc2626;  --danger-bg: #fef2f2;  --danger-border: #fecaca;
+  --danger-fill: #dc2626; --danger-fill-hover: #b91c1c;
+
+  --scrim: rgba(9, 9, 11, .32);
+  --veil: rgba(255, 255, 255, .78);
+  --checker-a: #ffffff; --checker-b: #ececee;
+  --stage: #f4f4f5;
+  --skeleton: #ececee;
+
+  --chart-axis: #a1a1aa; --chart-grid: #ececec; --chart-label: #52525b; --chart-label-halo: #ffffff;
+
+  --shadow-1: 0 1px 2px rgba(16, 16, 20, .05), 0 1px 1px rgba(16, 16, 20, .03);
+  --shadow-2: 0 8px 24px -6px rgba(16, 16, 20, .12), 0 2px 6px -2px rgba(16, 16, 20, .06);
+  --shadow-3: 0 24px 64px -16px rgba(16, 16, 20, .24), 0 8px 20px -8px rgba(16, 16, 20, .10);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, .7);
+
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-fill);
+  --focus-ring-inset: inset 0 0 0 2px var(--accent-fill);
+  color-scheme: light;
+}
+
+/* ---------- Dark ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0b0c; --surface-1: #121214; --surface-2: #18181b; --surface-sunken: #070708;
+    --surface-overlay: #18181b; --surface-overlay-2: #121214; --surface-selected: #2a2a30; --overlay-hover: #26262b;
+    --surface-hover: #1d1d21; --surface-active: #26262b; --surface-inverse: #ededed; --text-inverse: #111111;
+    --border-subtle: #232326; --border-strong: #3a3a3f; --border-focus: #22c55e;
+    --text-1: #ededed; --text-2: #b4b4bb; --text-3: #8e8e96; --text-disabled: #55555c;
+    --accent-fill: #22c55e; --accent-fill-hover: #4ade80; --accent-fill-press: #16a34a; --accent-on: #052e16;
+    --accent-text: #4ade80; --accent-subtle-bg: rgba(34, 197, 94, .12); --accent-subtle-hover: rgba(34, 197, 94, .18);
+    --accent-border: rgba(74, 222, 128, .38);
+    --info: #60a5fa; --info-bg: rgba(96, 165, 250, .10); --info-border: rgba(96, 165, 250, .32);
+    --success: #4ade80; --success-bg: rgba(34, 197, 94, .10); --success-border: rgba(74, 222, 128, .30);
+    --warning: #fbbf24; --warning-bg: rgba(251, 191, 36, .10); --warning-border: rgba(251, 191, 36, .30);
+    --danger: #f87171; --danger-bg: rgba(248, 113, 113, .10); --danger-border: rgba(248, 113, 113, .32);
+    --danger-fill: #ef4444; --danger-fill-hover: #f87171;
+    --scrim: rgba(0, 0, 0, .6); --veil: rgba(11, 11, 12, .82);
+    --checker-a: #18181b; --checker-b: #232326; --stage: #070708; --skeleton: #1d1d21;
+    --chart-axis: #55555c; --chart-grid: #232326; --chart-label: #b4b4bb; --chart-label-halo: #0b0b0c;
+    --series-1: #60a5fa; --series-2: #fb923c; --series-3: #a78bfa; --series-4: #f87171;
+    --series-5: #2dd4bf; --series-6: #facc15; --series-7: #f472b6; --series-8: #9ca3af;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, .5);
+    --shadow-2: 0 12px 32px -8px rgba(0, 0, 0, .7), 0 0 0 1px rgba(255, 255, 255, .04);
+    --shadow-3: 0 32px 80px -16px rgba(0, 0, 0, .85), 0 0 0 1px rgba(255, 255, 255, .05);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, .04);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"], [data-theme="dark"] {
+  --bg: #0b0b0c; --surface-1: #121214; --surface-2: #18181b; --surface-sunken: #070708;
+  --surface-overlay: #18181b; --surface-overlay-2: #121214; --surface-selected: #2a2a30; --overlay-hover: #26262b;
+  --surface-hover: #1d1d21; --surface-active: #26262b; --surface-inverse: #ededed; --text-inverse: #111111;
+  --border-subtle: #232326; --border-strong: #3a3a3f; --border-focus: #22c55e;
+  --text-1: #ededed; --text-2: #b4b4bb; --text-3: #8e8e96; --text-disabled: #55555c;
+  --accent-fill: #22c55e; --accent-fill-hover: #4ade80; --accent-fill-press: #16a34a; --accent-on: #052e16;
+  --accent-text: #4ade80; --accent-subtle-bg: rgba(34, 197, 94, .12); --accent-subtle-hover: rgba(34, 197, 94, .18);
+  --accent-border: rgba(74, 222, 128, .38);
+  --info: #60a5fa; --info-bg: rgba(96, 165, 250, .10); --info-border: rgba(96, 165, 250, .32);
+  --success: #4ade80; --success-bg: rgba(34, 197, 94, .10); --success-border: rgba(74, 222, 128, .30);
+  --warning: #fbbf24; --warning-bg: rgba(251, 191, 36, .10); --warning-border: rgba(251, 191, 36, .30);
+  --danger: #f87171; --danger-bg: rgba(248, 113, 113, .10); --danger-border: rgba(248, 113, 113, .32);
+  --danger-fill: #ef4444; --danger-fill-hover: #f87171;
+  --scrim: rgba(0, 0, 0, .6); --veil: rgba(11, 11, 12, .82);
+  --checker-a: #18181b; --checker-b: #232326; --stage: #070708; --skeleton: #1d1d21;
+  --chart-axis: #55555c; --chart-grid: #232326; --chart-label: #b4b4bb; --chart-label-halo: #0b0b0c;
+  --series-1: #60a5fa; --series-2: #fb923c; --series-3: #a78bfa; --series-4: #f87171;
+  --series-5: #2dd4bf; --series-6: #facc15; --series-7: #f472b6; --series-8: #9ca3af;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .5);
+  --shadow-2: 0 12px 32px -8px rgba(0, 0, 0, .7), 0 0 0 1px rgba(255, 255, 255, .04);
+  --shadow-3: 0 32px 80px -16px rgba(0, 0, 0, .85), 0 0 0 1px rgba(255, 255, 255, .05);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, .04);
+  color-scheme: dark;
+}
+
+/* ---------- Reduced motion: every duration collapses ---------- */
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 0ms; --dur-2: 0ms; --dur-3: 0ms; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+/* Theme switch without flashing transitions (set by shell.js for one frame) */
+:root.fw-no-transition *, :root.fw-no-transition *::before, :root.fw-no-transition *::after { transition: none !important; }

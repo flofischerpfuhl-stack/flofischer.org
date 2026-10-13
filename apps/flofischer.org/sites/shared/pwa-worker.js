@@ -69,6 +69,8 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+  // Unlisted mockups under /fernwork/ change often: never serve them from the cache.
+  if (url.pathname.startsWith("/fernwork/")) return;
   if (request.mode === "navigate") {
     event.respondWith(networkFirst(request));
     return;

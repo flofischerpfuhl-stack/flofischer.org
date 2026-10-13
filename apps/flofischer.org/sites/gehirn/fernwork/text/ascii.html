@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>ASCII art · Fernwork</title>
+<link rel="icon" href="../kit/img/logo.svg" type="image/svg+xml">
+<script src="../kit/theme-init.js"></script>
+<link rel="stylesheet" href="../kit/tokens.css">
+<link rel="stylesheet" href="../kit/components.css">
+<link rel="stylesheet" href="text.css">
+<link rel="stylesheet" href="ascii.css">
+</head>
+<body>
+<main id="main">
+  <div class="fw-workbench tb as" id="wb">
+    <div class="fw-framebar" role="toolbar" aria-label="ASCII art" id="framebar"></div>
+    <div class="fw-wb-main has-inspector" id="wb-main">
+      <div class="fw-stage as-stage" id="stage"></div>
+      <aside class="fw-inspector as-panel" aria-label="Preview and export" id="panel"></aside>
+    </div>
+    <div class="fw-statusbar" id="status"></div>
+    <div class="tb-mbar as-mbar" id="mbar"></div>
+  </div>
+</main>
+<script src="vendor/figlet/figlet.js"></script>
+<script type="module" src="ascii.js"></script>
+</body>
+</html>

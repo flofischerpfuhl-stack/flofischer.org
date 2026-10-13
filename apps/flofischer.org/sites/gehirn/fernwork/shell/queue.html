@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title></title>
+<link rel="icon" href="../kit/img/logo.svg" type="image/svg+xml">
+<script src="../kit/theme-init.js"></script>
+<link rel="stylesheet" href="../kit/tokens.css">
+<link rel="stylesheet" href="../kit/components.css">
+<link rel="stylesheet" href="shell.css">
+</head>
+<body>
+<!-- Archetype B · Queue skeleton (Convert, Checksum batch). ?leaf=<id> picks the preset. -->
+<main id="main">
+  <div class="fw-page">
+    <div id="page-header"></div>
+    <div class="q-layout">
+      <div id="intake"></div>
+      <div id="work" hidden>
+        <div class="fw-groupbar">
+          <span class="fw-groupbar__text" id="group-text"></span>
+          <span class="fw-spacer"></span>
+          <button class="fw-btn fw-btn--ghost fw-btn--sm" type="button" id="settings-btn"><span data-icon="settings"></span>Settings</button>
+        </div>
+        <div class="fw-items" id="items" role="list" aria-label="Files"></div>
+      </div>
+    </div>
+  </div>
+  <div class="fw-page fw-actionbar-wrap" id="actionbar-wrap" hidden style="padding-top:0">
+    <div class="fw-actionbar" role="region" aria-label="Batch summary">
+      <div class="fw-actionbar__summary"><span class="fw-actionbar__line" id="ab-line"></span><span class="fw-actionbar__sub" id="ab-sub"></span></div>
+      <div class="fw-actionbar__actions">
+        <button class="fw-btn fw-btn--ghost fw-hide-mobile" type="button" id="ab-clear">Clear</button>
+        <button class="fw-btn fw-btn--primary" type="button" id="ab-primary" disabled><span data-icon="download"></span><span>Download all</span></button>
+      </div>
+    </div>
+  </div>
+</main>
+<script type="module">
+import { mountShell, renderPageHeader, getLeaf, chipOf, icon, esc, formatBytes, fileKind, extOf, toast, openDialog, openPopover, enhance, $, $$, h, kbd } from '../kit/shell.js';
+
+const params = new URLSearchParams(location.search);
+const leaf = getLeaf(params.get('leaf') || 'convert-images') || getLeaf('convert-images');
+const chip = chipOf(leaf);
+// what each Convert chip takes, and its default target
+const CHIP = {
+  'convert-images': { kinds: ['image'], noun: 'images', target: 'JPG', icon: 'image' },
+  'convert-video': { kinds: ['video'], noun: 'videos', target: 'MP4', icon: 'film' },
+  'convert-audio': { kinds: ['audio', 'video'], noun: 'audio or video', target: 'MP3', icon: 'music' },
+  'convert-data': { kinds: ['data', 'text'], noun: 'data files', target: 'CSV', icon: 'braces' },
+  'convert-sheets': { kinds: ['sheet'], noun: 'spreadsheets', target: 'XLSX', icon: 'sheet' },
+  'convert-docs': { kinds: ['doc', 'slides', 'text'], noun: 'documents', target: 'PDF', icon: 'file-text' },
+  'checksum': { kinds: ['*'], noun: 'any files', target: 'SHA-256', icon: 'fingerprint' },
+}[chip.id] || { kinds: ['*'], noun: 'files', target: 'PDF', icon: 'file' };
+const PRESET_TARGET = { 'heic-to-jpg': 'JPG', 'png-to-jpg': 'JPG', 'jpg-to-png': 'PNG', 'webp-to-png': 'PNG', 'png-to-webp': 'WebP', 'avif-to-png': 'PNG', 'tiff-to-png': 'PNG', 'mov-to-mp4': 'MP4', 'mkv-to-mp4': 'MP4', 'webm-to-mp4': 'MP4', 'mp4-to-gif': 'GIF', 'mp4-to-mp3': 'MP3', 'wav-to-mp3': 'MP3', 'flac-to-mp3': 'MP3', 'm4a-to-mp3': 'MP3', 'csv-to-json': 'JSON', 'json-to-csv': 'CSV', 'xlsx-to-csv': 'CSV', 'csv-to-xlsx': 'XLSX', 'ods-to-xlsx': 'XLSX', 'docx-to-pdf': 'PDF', 'odt-to-pdf': 'PDF', 'markdown-to-pdf': 'PDF', 'html-to-pdf': 'PDF', 'docx-to-txt': 'TXT' };
+let target = PRESET_TARGET[leaf.id] || CHIP.target;
+const sampleSpec = CHIP.kinds.includes('image') ? 'IMG_2041.jpg>IMG_2041.HEIC|IMG_2042.jpg>IMG_2042.HEIC|IMG_2043.jpg>IMG_2043.HEIC'
+  : CHIP.kinds.includes('doc') ? 'report.docx' : CHIP.kinds.includes('data') ? 'data.json' : 'report.docx|IMG_2041.jpg';
+
+mountShell({ leaf: leaf.id, archetype: 'queue', routing: 'shell', accept: CHIP.kinds, acceptLabel: leaf.name, onFiles: (files) => addFiles(files) });
+document.title = `${leaf.name} · Fernwork`;
+renderPageHeader($('#page-header'), { leaf, aside: `<button class="fw-iconbtn" type="button" aria-label="Keyboard shortcuts" data-tip="Shortcuts" data-tip-kbd="?">${icon('keyboard', { size: 18 })}</button>` });
+$('#page-header .fw-iconbtn').onclick = () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }));
+
+// ── intake (empty state → slim strip) ──
+function renderIntake(slim) {
+  $('#intake').innerHTML = slim
+    ? `<div class="fw-intake fw-intake--slim" data-intake aria-label="Add more files"><span class="fw-intake__icon">${icon('plus', { size: 18 })}</span>
+        <span class="fw-intake__title">Add files</span><span class="fw-intake__sub fw-hide-mobile">drop, paste ${kbd('mod+v')} or click</span></div>`
+    : `<div class="fw-intake" data-intake aria-label="Choose ${esc(CHIP.noun)}, or drop them here">
+        <span class="fw-intake__icon">${icon(CHIP.icon, { size: 22 })}</span>
+        <span class="fw-intake__title"><span class="fw-pointer-copy">Drop ${esc(CHIP.noun)} here</span><span class="fw-touch-copy">Choose ${esc(CHIP.noun)}</span></span>
+        <span class="fw-intake__actions"><button class="fw-btn fw-btn--primary" type="button" data-pick>${icon('folder-open')}Choose files</button></span>
+        <span class="fw-intake__sub"><span class="fw-pointer-copy">or paste with ${kbd('mod+v')}</span><span class="fw-dot fw-pointer-copy"></span><a href="#" data-sample="${sampleSpec}">Try a sample</a></span>
+        <span class="fw-intake__privacy">${icon('lock', { size: 12 })} Converted on this device</span></div>`;
+  enhance($('#intake'));
+}
+renderIntake(false);
+
+// ── items ──
+const items = [];
+function addFiles(files) {
+  const fresh = files.filter((f) => !items.some((x) => x.file.name === f.name && x.file.size === f.size));
+  if (!fresh.length) return;
+  $('#work').hidden = false; $('#actionbar-wrap').hidden = false;
+  renderIntake(true);
+  fresh.forEach((file, i) => {
+    const it = { file, status: 'queued', p: 0, out: 0, kind: fileKind(file) };
+    items.push(it);
+    const thumb = it.kind === 'image' ? `<img alt="" src="${URL.createObjectURL(file)}">` : icon(it.kind === 'doc' ? 'file-text' : it.kind === 'video' ? 'film' : 'file', { size: 20 });
+    it.el = h(`<div class="fw-item" role="listitem" style="animation-delay:${i * 50}ms">
+      <div class="fw-item__thumb ${it.kind === 'image' ? '' : 'fw-item__thumb--icon'}">${thumb}</div>
+      <div class="fw-item__main"><span class="fw-item__name" title="${esc(file.name)}">${esc(file.name)}</span>
+        <span class="fw-item__meta"><span>${formatBytes(file.size)}</span><span aria-hidden="true">·</span><span>${extOf(file).toUpperCase()} → ${esc(target)}</span></span></div>
+      <div class="fw-item__status" aria-live="polite"></div>
+      <div class="fw-item__actions"><button class="fw-iconbtn fw-iconbtn--sm" type="button" aria-label="Download ${esc(file.name)}" data-tip="Download" disabled>${icon('download')}</button>
+        <button class="fw-iconbtn fw-iconbtn--sm" type="button" aria-label="More for ${esc(file.name)}" data-tip="More">${icon('ellipsis')}</button></div>
+      <div class="fw-item__progress" style="width:0"></div></div>`);
+    $('#items').append(it.el);
+    it.el.querySelector('[aria-label^="More"]').onclick = () => removeItem(it);
+    renderStatus(it);
+  });
+  updateGroup(); run();
+}
+function renderStatus(it) {
+  const s = it.el.querySelector('.fw-item__status');
+  if (it.status === 'queued') s.innerHTML = `<span class="fw-faint">Queued</span>`;
+  else if (it.status === 'working') s.innerHTML = `<span class="fw-ring" style="--value:${Math.round(it.p)}"></span><span class="fw-num fw-muted">${Math.round(it.p)} %</span>`;
+  else if (it.status === 'done') {
+    const pct = Math.round((1 - it.out / it.file.size) * 100);
+    s.innerHTML = `<span class="fw-delta">${icon('circle-check')}<span>${formatBytes(it.out)}</span>${pct > 0 ? `<b>−${pct} %</b>` : ''}</span>`;
+    it.el.querySelector('[aria-label^="Download"]').disabled = false;
+  }
+  const bar = it.el.querySelector('.fw-item__progress'); bar.style.transition = it.status === 'done' ? 'none' : ''; bar.style.width = it.status === 'working' ? it.p + '%' : '0';
+}
+function updateGroup() {
+  const n = items.length; const noun = items.every((i) => i.kind === 'image') ? (n === 1 ? 'photo' : 'photos') : (n === 1 ? 'file' : 'files');
+  $('#group-text').innerHTML = `${n} ${noun} <span class="fw-faint">→</span> <button class="fw-target" type="button" id="target-btn" aria-haspopup="dialog" aria-expanded="false">${esc(target)}${icon('chevron-down', { size: 14 })}</button>`;
+  $('#target-btn').onclick = (e) => openPalette(e.currentTarget);
+  const done = items.filter((i) => i.status === 'done');
+  const working = items.filter((i) => i.status !== 'done');
+  const inB = items.reduce((s, i) => s + i.file.size, 0), outB = done.reduce((s, i) => s + i.out, 0);
+  if (working.length) {
+    const left = working.reduce((s, i) => s + (100 - i.p), 0) / 100 * 1.1;
+    $('#ab-line').textContent = `Converting ${done.length + 1 > n ? n : done.length + 1} of ${n}`;
+    $('#ab-sub').textContent = `about ${Math.max(1, Math.round(left))} s left · on this device`;
+    $('#ab-primary').disabled = true;
+  } else {
+    $('#ab-line').innerHTML = `${n} ${noun} · ${formatBytes(inB)} → ${formatBytes(outB)}`;
+    $('#ab-sub').textContent = `Saved ${formatBytes(inB - outB)} · ready to download`;
+    $('#ab-primary').disabled = false;
+  }
+  $('#ab-primary span:last-child').textContent = n > 1 ? 'Download all' : 'Download';
+}
+let running = false;
+async function run() {
+  if (running) return; running = true;
+  for (const it of items) {
+    if (it.status === 'done') continue;
+    it.status = 'working'; renderStatus(it); updateGroup();
+    const dur = 700 + Math.min(900, it.file.size / 6000);
+    const t0 = performance.now();
+    await new Promise((res) => { const tick = (t) => { it.p = Math.min(100, ((t - t0) / dur) * 100); renderStatus(it); updateGroup(); if (it.p < 100) requestAnimationFrame(tick); else res(); }; requestAnimationFrame(tick); });
+    it.out = Math.round(it.file.size * (it.kind === 'image' ? 0.24 + (it.file.size % 7) / 100 : 0.62)); it.status = 'done'; renderStatus(it); updateGroup();
+  }
+  running = false;
+  const n = items.length; const inB = items.reduce((s, i) => s + i.file.size, 0), outB = items.reduce((s, i) => s + i.out, 0);
+  if (document.hidden) toast(`Converted ${n} files · saved ${formatBytes(inB - outB)}`);
+}
+function removeItem(it) {
+  const i = items.indexOf(it); if (i < 0) return;
+  items.splice(i, 1); it.el.remove(); updateGroup();
+  if (!items.length) reset();
+  toast(`Removed ${it.file.name}`, { type: 'neutral', action: { label: 'Undo', onClick: () => { it.status = 'queued'; addFiles([it.file]); } } });
+}
+function reset() { items.length = 0; $('#items').innerHTML = ''; $('#work').hidden = true; $('#actionbar-wrap').hidden = true; renderIntake(false); }
+$('#ab-clear').onclick = () => { const old = items.map((i) => i.file); reset(); toast(`Cleared ${old.length} files`, { type: 'neutral', action: { label: 'Undo', onClick: () => addFiles(old) } }); };
+$('#ab-primary').onclick = () => toast(`Saved ${items.length > 1 ? 'IMG_2041-and-' + (items.length - 1) + '-more.zip' : items[0].file.name.replace(/\.\w+$/, '.' + target.toLowerCase())}`, { type: 'success' });
+$('#settings-btn').onclick = () => openDialog({ title: `${target} settings`, size: 440, body: `<div class="fw-stack" style="--gap:20px;color:var(--text-1)">
+    <div class="fw-slider"><label class="fw-slider__label" for="q">Quality</label><output class="fw-slider__value"></output><input id="q" type="range" min="40" max="100" value="82" data-unit=" %"></div>
+    <div class="fw-field"><span class="fw-field__label">Size</span><div class="fw-seg" aria-label="Size"><button class="fw-seg__opt" aria-checked="true">Original</button><button class="fw-seg__opt">2560 px</button><button class="fw-seg__opt">1920 px</button><button class="fw-seg__opt">1280 px</button></div></div>
+    <label class="fw-toggle"><input type="checkbox"> Keep location and camera data</label>
+    <p class="fw-t-sm fw-faint">Estimated: 9.7 MB → about 2.4 MB</p></div>`,
+  actions: [{ label: 'Reset to defaults', ghost: true, close: false }, { label: 'Apply', primary: true }] });
+
+const FORMATS = [
+  { group: 'Best for photos', items: [['JPG', 'Smallest, opens everywhere'], ['WebP', 'Smaller than JPG, modern browsers'], ['AVIF', 'Smallest, newest apps only']] },
+  { group: 'Keep transparency', items: [['PNG', 'Lossless, larger files'], ['GIF', 'Old animations']] },
+  { group: 'Documents', items: [['PDF', 'One page per image']] },
+];
+function openPalette(anchor) {
+  const el = h(`<div><div class="fw-palette__search"><div class="fw-inputwrap">${icon('search')}<input class="fw-input" placeholder="Find a format…" aria-label="Find a format"></div></div>
+    ${FORMATS.map((g) => `<div class="fw-palette__group" role="group" aria-label="${g.group}"><div class="fw-palette__label">${g.group}</div>
+      ${g.items.map(([f, why]) => `<button class="fw-palette__opt" type="button" role="option" aria-selected="${f === target}" data-f="${f}"><span class="fw-palette__fmt">${f}</span><span class="fw-palette__why">${why}</span>${f === target ? icon('check', { className: 'fw-menu__check' }) : ''}</button>`).join('')}</div>`).join('')}</div>`);
+  el.querySelectorAll('.fw-menu__check').forEach((c) => (c.style.visibility = 'visible'));
+  const p = openPopover(anchor, el, { className: 'fw-palette', label: 'Choose a format' });
+  el.querySelector('input').addEventListener('input', (e) => { const q = e.target.value.toLowerCase(); el.querySelectorAll('.fw-palette__opt').forEach((o) => { o.hidden = !(o.dataset.f.toLowerCase().includes(q) || o.textContent.toLowerCase().includes(q)); }); });
+  el.addEventListener('click', (e) => { const o = e.target.closest('.fw-palette__opt'); if (!o) return; target = o.dataset.f; p.close(); items.forEach((i) => { if (i.status === 'done') i.status = 'queued'; i.p = 0; }); $$('.fw-item__meta span:last-child').forEach((m) => { m.textContent = m.textContent.replace(/→ .*/, '→ ' + target); }); items.forEach(renderStatus); updateGroup(); run(); });
+}
+
+</script>
+</body>
+</html>

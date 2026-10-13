@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title></title>
+<link rel="icon" href="../kit/img/logo.svg" type="image/svg+xml">
+<script src="../kit/theme-init.js"></script>
+<link rel="stylesheet" href="../kit/tokens.css">
+<link rel="stylesheet" href="../kit/components.css">
+<link rel="stylesheet" href="shell.css">
+</head>
+<body>
+<!-- Archetype C · Instant skeleton (Units, Inspect, Time, Clean link, Color, Generate, QR). ?leaf=<id>&q=<value> -->
+<main id="main">
+  <div class="fw-page">
+    <div id="page-header"></div>
+    <div class="i-layout">
+      <div class="fw-paste">
+        <div class="fw-paste__box">
+          <label class="fw-sr" for="in">Input</label>
+          <textarea class="fw-paste__field" id="in" rows="1" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+          <div class="fw-paste__actions">
+            <button class="fw-btn fw-btn--sm" type="button" id="paste-btn"><span data-icon="clipboard-paste"></span>Paste</button>
+            <button class="fw-iconbtn fw-iconbtn--sm" type="button" id="clear-btn" aria-label="Clear" data-tip="Clear" hidden><span data-icon="x"></span></button>
+          </div>
+        </div>
+        <div class="fw-paste__meta" id="meta"></div>
+      </div>
+      <div id="result"></div>
+      <section class="fw-section" id="recent-sec">
+        <div class="fw-section__head"><h2 class="fw-section__title">Recent</h2><span class="fw-section__more">Saved on this device · <a href="#" id="clear-hist">Clear</a></span></div>
+        <div class="fw-recent fw-card" style="padding:4px" id="hist"></div>
+      </section>
+    </div>
+  </div>
+  <div class="fw-page fw-actionbar-wrap i-mobile-bar" id="mbar" hidden>
+    <div class="fw-actionbar"><div class="fw-actionbar__summary"><span class="fw-actionbar__line" id="mbar-line"></span></div>
+      <div class="fw-actionbar__actions"><button class="fw-btn fw-btn--primary" type="button" id="mbar-copy"><span data-icon="copy"></span><span>Copy</span></button></div></div>
+  </div>
+</main>
+<script type="module">
+import { mountShell, renderPageHeader, getLeaf, icon, esc, $, $$, h, enhance, copyText, cleanUrl, detect, convertUnits, parseColor, toHex, toHsl, relTime, fmtNum, answer, toast, navigate, kbd } from '../kit/shell.js';
+
+const params = new URLSearchParams(location.search);
+const leaf = getLeaf(params.get('leaf') || 'units') || getLeaf('units');
+mountShell({ leaf: leaf.id, archetype: 'instant', routing: 'shell', recent: params.get('q') ? { note: params.get('q').slice(0, 40) } : undefined,
+  onPasteText: (t) => { set(t); return true; } }); // paste anywhere on the page fills the input
+document.title = `${leaf.name} · Fernwork`;
+renderPageHeader($('#page-header'), { leaf });
+
+const PH = {
+  'clean-link': 'Paste a link to remove trackers', units: 'Type a conversion, e.g. 5 ft in cm', 'cm-to-inches': 'Type a length, e.g. 180 cm in in',
+  time: 'Paste a Unix timestamp or a date', 'unix-timestamp': 'Paste a Unix timestamp', 'pick-color': 'Type or paste a colour: #15803d, rgb(), hsl()',
+  contrast: 'Two colours, e.g. #15803d on #ffffff', inspect: 'Paste anything: JWT, Base64, URL, hash, UUID', 'qr-code': 'Text, link, Wi-Fi or contact for the code',
+};
+const SAMPLE = { 'clean-link': 'https://shop.example.com/products/trail-shoe?utm_source=newsletter&utm_medium=email&utm_campaign=autumn&fbclid=IwAR2xk&color=moss',
+  units: '5 ft in cm', time: '1760000000', 'pick-color': '#15803d', inspect: 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMiLCJleHAiOjE5MDAwMDAwMDB9.c2ln' };
+const kind = leaf.id === 'cm-to-inches' ? 'units' : leaf.id === 'unix-timestamp' ? 'time' : leaf.id;
+const input = $('#in');
+input.placeholder = PH[leaf.id] || PH[kind] || 'Paste or type here';
+$('#meta').innerHTML = `<span>${icon('lock', { size: 12 })} Runs on this device</span>${SAMPLE[kind] ? `<span aria-hidden="true">·</span><a href="#" id="sample">Try a sample</a>` : ''}`;
+$('#sample')?.addEventListener('click', (e) => { e.preventDefault(); set(SAMPLE[kind]); });
+
+function rowsHtml(rows) {
+  return `<div class="fw-rows">${rows.map(([l, v, sans]) => `<div class="fw-vrow"><span class="fw-vrow__label">${esc(l)}</span><span class="fw-vrow__value ${sans ? 'fw-vrow__value--sans' : ''}">${esc(v)}</span>
+    <button class="fw-iconbtn fw-iconbtn--sm fw-copy" type="button" data-copy="${esc(v)}" aria-label="Copy ${esc(l)}" data-tip="Copy">${icon('copy')}</button></div>`).join('')}</div>`;
+}
+function heroActions(copy, extra = '') {
+  return `<div class="fw-hero__actions i-desktop-actions"><button class="fw-btn fw-btn--primary" type="button" data-copy="${esc(copy)}">${icon('copy')}<span>Copy</span></button>${extra}</div>`;
+}
+let current = '';
+function render() {
+  const s = input.value.trim(); $('#clear-btn').hidden = !s; $('#paste-btn').hidden = !!s && !matchMedia('(pointer:coarse)').matches;
+  const det = detect(s)[0];
+  const metaDet = det ? `<span class="fw-detect">${icon('scan', { size: 14 })}Detected: ${esc(det.label)}<button type="button" id="change-det">change</button></span>` : '';
+  $('#meta').querySelector('.fw-detect')?.remove();
+  if (metaDet) $('#meta').insertAdjacentHTML('afterbegin', metaDet);
+  let html = '', copy = '';
+  if (!s) {
+    html = `<div class="fw-hero fw-hero--empty"><span class="fw-hero__label">${icon('text-cursor')} Result appears as you type</span>
+      <div class="fw-stack" style="--gap:10px;width:100%"><div class="fw-skel" style="height:44px;width:42%"></div><div class="fw-skel" style="height:14px;width:64%"></div></div></div>`;
+  } else if (kind === 'clean-link') {
+    try {
+      const r = cleanUrl(s); copy = r.url;
+      html = `<div class="fw-hero"><span class="fw-hero__label">${r.removed.length ? `<span class="fw-verdict fw-verdict--ok">${icon('circle-check')} ${r.removed.length} tracker${r.removed.length > 1 ? 's' : ''} removed</span>` : `<span class="fw-verdict fw-verdict--ok">${icon('circle-check')} No known trackers</span>`}</span>
+        <div class="i-result-url">${esc(r.url)}</div>
+        ${r.removed.length ? `<div class="i-removed fw-t-sm fw-faint">Removed ${r.removed.map((k) => `<s class="fw-mono">${esc(k)}</s>`).join(' ')}</div>` : ''}
+        ${heroActions(r.url, `<a class="fw-btn" href="#" data-goto="qr-code">${icon('qr-code')}QR code</a><button class="fw-btn fw-btn--ghost" type="button">${icon('share-2')}Share</button>`)}</div>`;
+    } catch { html = `<div class="fw-alert fw-alert--danger"><span class="fw-alert__icon">${icon('circle-alert')}</span><div class="fw-alert__body">That doesn’t look like a link. Links start with https:// or www.</div></div>`; }
+  } else if (kind === 'units') {
+    const u = convertUnits(s) || convertUnits(s + ' in cm');
+    if (u) {
+      const a = answer(s); copy = a ? a.copy : `${fmtNum(u.value)} ${u.unit}`;
+      html = `<div class="fw-hero"><span class="fw-hero__label">${esc(u.from)} =</span><div class="fw-hero__value">${esc(a ? a.value : fmtNum(u.value))}<small>${esc(u.unit)}</small></div>
+        ${heroActions(copy, `<button class="fw-btn" type="button">${icon('pin')}Pin</button><button class="fw-btn fw-btn--ghost" type="button">${icon('arrow-left-right')}Swap</button>`)}</div>
+        ${u.dim === 'length' ? rowsHtml(['m', 'mm', 'in', 'ft', 'yd', 'mi'].map((x) => { const v = convertUnits(`${u.from} in ${x}`); return [x === 'in' ? 'Inches' : x === 'ft' ? 'Feet' : x === 'm' ? 'Meters' : x === 'mm' ? 'Millimeters' : x === 'yd' ? 'Yards' : 'Miles', `${fmtNum(v.value, { sig: 6 })} ${v.unit}`]; })) : ''}`;
+    } else html = `<div class="fw-alert fw-alert--warning"><span class="fw-alert__icon">${icon('triangle-alert')}</span><div class="fw-alert__body">Add a unit, like “5 ft in cm” or “20 °C in °F”.</div></div>`;
+  } else if (kind === 'time') {
+    const a = answer(s);
+    if (a && a.kind === 'time') {
+      const ms = /^\d+$/.test(s) ? (s.length >= 12 ? +s : +s * 1000) : Date.parse(s); copy = new Date(ms).toISOString();
+      html = `<div class="fw-hero"><span class="fw-hero__label">${esc(a.q)} · ${esc(relTime(ms))}</span><div class="fw-hero__value" style="font-size:32px;line-height:40px">${esc(new Date(ms).toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' }))}</div>${heroActions(copy)}</div>
+        ${rowsHtml([['ISO 8601', new Date(ms).toISOString()], ['Unix seconds', String(Math.floor(ms / 1000))], ['Unix milliseconds', String(ms)], ['UTC', new Date(ms).toUTCString()], ['Relative', relTime(ms), true]])}`;
+    }
+  } else if (kind === 'pick-color' || kind === 'contrast' || kind === 'palette') {
+    const c = parseColor(s);
+    if (c) { copy = toHex(c);
+      html = `<div class="fw-hero"><div class="fw-row-flex" style="--gap:16px"><span class="i-swatch" style="background:${toHex(c)}"></span><div><span class="fw-hero__label">Colour</span><div class="fw-hero__value fw-hero__value--mono">${toHex(c)}</div></div></div>${heroActions(copy, `<a class="fw-btn" href="#" data-goto="contrast">${icon('contrast')}Check contrast</a>`)}</div>
+        ${rowsHtml([['HEX', toHex(c)], ['RGB', `rgb(${c.r} ${c.g} ${c.b})`], ['HSL', toHsl(c)]])}`;
+    }
+  }
+  if (!html) {
+    html = `<div class="fw-hero"><span class="fw-hero__label">${det ? esc(det.label) : 'Result'}</span><div class="fw-stack" style="--gap:10px"><div class="fw-skel" style="height:28px;width:60%"></div><div class="fw-skel" style="height:14px;width:40%"></div></div>
+      <p class="fw-t-sm fw-faint">Skeleton: the ${esc(leaf.name)} mockup fills this area.</p></div>`;
+  }
+  $('#result').innerHTML = html; enhance($('#result')); current = copy;
+  $$('[data-goto]', $('#result')).forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); navigate(a.dataset.goto, { query: { q: s } }); }));
+  $('#mbar').hidden = !copy; $('#mbar-line').textContent = copy;
+}
+function set(v) { input.value = v; render(); }
+input.addEventListener('input', render);
+$('#clear-btn').onclick = () => { const old = input.value; set(''); input.focus(); toast('Cleared', { type: 'neutral', action: { label: 'Undo', onClick: () => set(old) } }); };
+$('#paste-btn').onclick = async () => { try { set(await navigator.clipboard.readText()); } catch { input.focus(); toast('Press ' + (navigator.platform.includes('Mac') ? '⌘V' : 'Ctrl+V') + ' to paste', { type: 'info' }); } };
+$('#mbar-copy').onclick = (e) => copyText(current, e.currentTarget);
+// recent values for this tool
+const HIST = { 'clean-link': ['youtube.com/watch?v=… · 2 trackers', 'amazon.de/dp/… · 6 trackers'], units: ['5 ft in cm', '100 kg in lb', '20 °C in °F'], time: ['1760000000', '2026-10-13'], 'pick-color': ['#15803d', '#2563eb'] }[kind] || [];
+$('#hist').innerHTML = HIST.map((x) => `<a class="fw-recent__item" href="#" data-v="${esc(x)}"><span class="fw-recent__icon">${icon(leaf.icon)}</span><span class="fw-recent__main"><span class="fw-recent__title fw-mono" style="font-size:13px;font-weight:400">${esc(x)}</span></span><span class="fw-recent__when">${['2 h', '1 d', '4 d'][HIST.indexOf(x)]}</span></a>`).join('');
+$('#recent-sec').hidden = !HIST.length;
+$('#hist').addEventListener('click', (e) => { const a = e.target.closest('[data-v]'); if (!a) return; e.preventDefault(); if (!a.dataset.v.includes('…')) set(a.dataset.v); });
+$('#clear-hist').onclick = (e) => { e.preventDefault(); $('#recent-sec').hidden = true; toast('History cleared', { type: 'neutral', action: { label: 'Undo', onClick: () => { $('#recent-sec').hidden = false; } } }); };
+set(params.get('q') || '');
+if (!matchMedia('(pointer:coarse)').matches) input.focus();
+</script>
+</body>
+</html>

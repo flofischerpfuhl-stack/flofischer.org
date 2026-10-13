@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Fernwork · Do anything with a file</title>
+<link rel="icon" href="../kit/img/logo.svg" type="image/svg+xml">
+<script src="../kit/theme-init.js"></script>
+<link rel="stylesheet" href="../kit/tokens.css">
+<link rel="stylesheet" href="../kit/components.css">
+<link rel="stylesheet" href="shell.css">
+</head>
+<body>
+<main id="main">
+  <div class="home">
+    <section class="home-hero" aria-labelledby="home-h1">
+      <h1 id="home-h1">Do anything with a file.<br> <span>Privately, in your browser.</span></h1>
+      <p class="home-hero__lede">Convert, edit, view and inspect over 90 kinds of files and values. Nothing is uploaded.</p>
+      <div class="home-hero__box">
+        <div class="fw-intake home-drop" id="home-drop" data-intake aria-label="Choose a file, or drop one here">
+          <span class="fw-intake__icon">${icon}</span>
+          <span class="home-drop__text">
+            <span class="fw-intake__title"><span class="fw-pointer-copy">Drop any file here</span><span class="fw-touch-copy">Choose a file</span></span>
+            <span class="fw-intake__sub"><span class="fw-pointer-copy">or</span>
+              <span class="fw-touch-copy">Photo, PDF, video, Word, Excel, CAD…</span>
+              <span class="fw-intake__actions"><button class="fw-btn fw-btn--sm" type="button" data-pick>Choose file</button></span>
+              <span class="fw-dot fw-pointer-copy" aria-hidden="true"></span><span class="fw-pointer-copy">paste <span class="fw-kbd-hint" data-kbd="mod+v"></span></span>
+              <span class="fw-dot fw-pointer-copy" aria-hidden="true"></span><a href="#" class="fw-pointer-copy" data-sample="IMG_2041.jpg>IMG_2041.HEIC|IMG_2042.jpg>IMG_2042.HEIC|IMG_2043.jpg>IMG_2043.HEIC">try 3 sample photos</a>
+            </span>
+          </span>
+          <span class="fw-intake__privacy">${lock} Files never leave this device</span>
+        </div>
+        <div class="fw-query home-search">
+          <span data-icon="search" data-size="20"></span>
+          <input class="fw-query__input" id="home-search" type="text" autocomplete="off" spellcheck="false"
+            placeholder="What do you want to do? Try “compress pdf” or “5 ft in cm”" aria-label="Search tools or type a calculation">
+          <span class="fw-kbd-hint fw-hide-mobile" data-kbd="/" style="margin-right:8px"></span>
+        </div>
+        <div class="home-popular" id="home-popular" aria-label="Popular tasks"><span class="home-popular__label">Popular</span></div>
+      </div>
+    </section>
+
+    <section class="home-section" aria-labelledby="continue-h">
+      <div class="home-section__head"><h2 class="home-section__title" id="continue-h">Continue</h2>
+        <span class="home-section__aside"><span data-icon="lock" data-size="12"></span>Kept on this device · <button class="fw-btn fw-btn--ghost fw-btn--sm" type="button" id="clear-recent" style="height:24px;padding:0 6px">Clear</button></span></div>
+      <div class="continue" id="continue"></div>
+    </section>
+
+    <section class="home-section" aria-labelledby="all-h">
+      <div class="home-section__head"><h2 class="home-section__title" id="all-h">All tools</h2><span class="home-section__aside fw-hide-mobile">Press <span data-kbd="mod+k"></span> to search from anywhere</span></div>
+      <div class="home-group"><h3 class="home-group-label">Files</h3><div id="map-files"></div></div>
+      <div class="home-group"><h3 class="home-group-label">Quick tools</h3><div id="map-quick"></div></div>
+    </section>
+  </div>
+</main>
+<script type="module">
+import { mountShell, icon, kbd, renderCatalog, getRecent, getLeaf, hrefFor, shortAgo, attachSearch, POPULAR, esc, openChooser, clearRecent, toast, $, $$ } from '../kit/shell.js';
+
+// small template helpers for the static markup above
+document.querySelector('.fw-intake__icon').innerHTML = icon('upload', { size: 22 });
+document.querySelector('.fw-intake__privacy').innerHTML = icon('lock', { size: 12 }) + ' Files never leave this device';
+$$('[data-kbd]').forEach((el) => { el.innerHTML = kbd(el.dataset.kbd); });
+
+$('#map-files').innerHTML = renderCatalog({ group: 'files' });
+$('#map-quick').innerHTML = renderCatalog({ group: 'quick' });
+$('#home-popular').insertAdjacentHTML('beforeend', POPULAR.slice(0, 5).map((id) => { const l = getLeaf(id); return `<a class="fw-chip" href="${hrefFor(l)}" data-leaf="${id}">${esc(l.name)}</a>`; }).join(''));
+
+function renderContinue() {
+  const r = getRecent().slice(0, 5);
+  $('#continue').innerHTML = r.map((x) => { const l = getLeaf(x.leaf); return `<a class="continue__card" href="${hrefFor(l)}" data-leaf="${l.id}">
+    <span class="continue__top"><span class="continue__icon">${icon(l.icon, { size: 18 })}</span><span class="continue__when">${shortAgo(x.t)}</span></span>
+    <span class="continue__name">${esc(l.name)}</span><span class="continue__file">${esc(x.file || x.note || '')}</span></a>`; }).join('')
+    || '<p class="fw-t-sm fw-faint">Tools you use show up here.</p>';
+  $('#continue').closest('section').hidden = !r.length;
+}
+renderContinue();
+$('#clear-recent').onclick = () => { const undo = clearRecent(); renderContinue(); toast('Recent cleared', { type: 'neutral', action: { label: 'Undo', onClick: () => { undo(); renderContinue(); } } }); };
+
+mountShell({ archetype: 'home', rail: false, routing: 'shell', wide: true, searchInput: '#home-search',
+  onFiles: (files) => openChooser(files) });  // home has no direct accept: every drop/pick goes to the action chooser
+attachSearch($('#home-search'));
+setTimeout(() => $('#home-drop').classList.add('is-pulse'), 700);
+if (matchMedia('(max-width: 767px)').matches) $('#home-search').placeholder = 'Search tools or type 5 ft in cm';
+</script>
+</body>
+</html>

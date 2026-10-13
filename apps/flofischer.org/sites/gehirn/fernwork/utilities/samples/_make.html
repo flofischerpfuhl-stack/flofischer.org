@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en"><head>
+<meta name="robots" content="noindex, nofollow"><meta charset="utf-8"><title>sample maker</title>
+<link rel="stylesheet" href="../../kit/tokens.css">
+<style>
+  body { margin: 0; background: #222; }
+  #scene { position: relative; overflow: hidden; }
+  .wood { position: absolute; inset: 0; }
+  .card { position: absolute; transform-origin: 50% 50%; box-shadow: 0 30px 60px rgba(0,0,0,.45), 0 6px 14px rgba(0,0,0,.35); border-radius: 6px; }
+  .mug { position: absolute; border-radius: 50%; }
+  .light { position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 20%, rgba(255,240,210,.22), transparent 60%), radial-gradient(ellipse at 90% 100%, rgba(0,0,0,.45), transparent 55%); pointer-events: none; }
+  .flyer { position: absolute; inset: 0; background: #f6f1e7; font-family: Geist, sans-serif; color: #2b1d14; }
+</style></head>
+<body><div id="scene"></div>
+<script type="module">
+import { encode, drawQR, build } from '../lib/qrlib.js';
+import { drawCard } from '../lib/card.js';
+const P = new URLSearchParams(location.search); const scene = P.get('scene') || 'wifi';
+const el = document.getElementById('scene');
+await document.fonts.load('600 40px Geist'); await document.fonts.load('600 40px "Geist Mono"'); await document.fonts.ready;
+function woodCanvas(w, h) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
+  g.fillStyle = '#8a5a35'; g.fillRect(0, 0, w, h);
+  for (let y = 0; y < h; y += 2) { const t = Math.sin(y * 0.013) * 0.5 + Math.sin(y * 0.071 + 2) * 0.3 + Math.sin(y * 0.0041) * 0.4; g.fillStyle = `rgba(${t > 0 ? '255,220,170' : '40,20,5'},${Math.abs(t) * 0.16})`; g.fillRect(0, y, w, 2); }
+  for (let i = 0; i < 9; i++) { const y = (i + 0.5) * h / 9; g.fillStyle = 'rgba(30,15,5,.35)'; g.fillRect(0, y, w, 3); }
+  const id = g.getImageData(0, 0, w, h); for (let i = 0; i < id.data.length; i += 4) { const n = (Math.random() - 0.5) * 22; id.data[i] += n; id.data[i + 1] += n; id.data[i + 2] += n; } g.putImageData(id, 0, 0);
+  return c;
+}
+if (scene === 'wifi') {
+  const W = 1600, H = 1200; el.style.width = W + 'px'; el.style.height = H + 'px';
+  const wood = woodCanvas(W, H); wood.className = 'wood'; el.append(wood);
+  const fields = { ssid: 'Fernwork-Gast', pass: 'Grüße🦊2026!', sec: 'WPA' };
+  const qr = encode(build('wifi', fields).text, 'M');
+  const cv = document.createElement('canvas'); drawCard(cv, { format: 'a6', type: 'wifi', fields, qr, fg: '#111111', bg: '#ffffff', caption: 'Scan to join our Wi-Fi' });
+  const img = document.createElement('img'); img.src = cv.toDataURL('image/png'); img.className = 'card';
+  img.style.cssText += `width:560px;left:${W / 2 - 300}px;top:${H / 2 - 420}px;transform:perspective(1500px) rotateX(24deg) rotateY(-10deg) rotateZ(-7deg);`;
+  el.append(img);
+  const mug = document.createElement('div'); mug.className = 'mug'; mug.style.cssText = 'width:420px;height:420px;right:-90px;top:-120px;background:radial-gradient(circle at 50% 50%, #3b2416 0 46%, #e9e4dc 47% 58%, #cfc8bd 59% 64%, rgba(0,0,0,.35) 66%, transparent 72%);'; el.append(mug);
+  const l = document.createElement('div'); l.className = 'light'; el.append(l);
+} else if (scene === 'flyer') {
+  const W = 1200, H = 1500; el.style.width = W + 'px'; el.style.height = H + 'px';
+  el.innerHTML = `<div class="flyer"><div style="padding:90px 90px 0">
+    <div style="font:600 30px Geist;letter-spacing:.14em;color:#b45309">SATURDAY 24 OCTOBER · 18:00</div>
+    <div style="font:600 112px/1.0 Geist;letter-spacing:-.03em;margin-top:26px">Autumn party<br>in the courtyard</div>
+    <div style="font:400 38px/1.4 Geist;margin-top:30px;color:#5b3a29">Soup, cider, a fire pit and the neighbours.<br>Gartenstraße 12 · bring a mug.</div></div>
+    <div id="codes" style="position:absolute;left:90px;right:90px;bottom:110px;display:flex;justify-content:space-between"></div></div>`;
+  const codes = [
+    ['Tickets', build('link', { url: 'https://tickets.example.com/autumn-party?utm_source=poster&utm_medium=print&utm_campaign=autumn26&fbclid=IwAR3kd9Xq' }).text],
+    ['Add to calendar', build('event', { title: 'Autumn party in the courtyard', start: '2026-10-24T18:00', end: '2026-10-24T23:00', where: 'Gartenstraße 12', uid: 'autumn-26', stamp: '2026-10-01T09:00:00Z' }).text],
+    ['Call the host', build('contact', { first: 'Jürgen', last: 'Müller', tel: '+49 170 1234567', email: 'juergen@example.de' }).text],
+  ];
+  for (const [label, text] of codes) {
+    const c = document.createElement('canvas'); const qr = encode(text, 'M'); drawQR(c, qr, { fg: '#2b1d14', bg: '#ffffff', scale: Math.floor(290 / (qr.size + 8)) });
+    const d = document.createElement('div'); d.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:18px';
+    c.style.cssText = 'width:290px;height:290px;image-rendering:pixelated;border-radius:10px'; d.append(c);
+    const t = document.createElement('div'); t.textContent = label; t.style.cssText = 'font:600 30px Geist'; d.append(t);
+    document.getElementById('codes').append(d);
+  }
+}
+document.body.dataset.ready = '1';
+</script></body></html>

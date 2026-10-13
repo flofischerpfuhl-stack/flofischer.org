@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Fernwork One kit · Style guide</title>
+<link rel="icon" href="img/logo.svg" type="image/svg+xml">
+<script src="theme-init.js"></script>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  .sg { width: 100%; max-width: 1480px; margin: 0 auto; padding: 32px var(--gutter) 0; }
+  .sg-intro { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px; margin-bottom: 24px; }
+  .sg-intro h1 { font-size: var(--text-2xl); line-height: var(--lh-2xl); letter-spacing: var(--tracking-tighter); font-weight: 600; }
+  .sg-intro p { color: var(--text-2); max-width: 720px; margin-top: 6px; }
+  .sg-toc { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 24px; }
+  .sg-cols { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 0; border: 1px solid var(--border-subtle); border-radius: 16px; overflow: hidden; }
+  .sg-col { background: var(--bg); color: var(--text-1); padding: 24px; min-width: 0; }
+  .sg-col + .sg-col { border-left: 1px solid var(--border-subtle); }
+  .sg-col__label { font-size: var(--text-xs); font-weight: 600; color: var(--text-3); margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+  .sg-sec { padding: 0 0 28px; margin-bottom: 28px; border-bottom: 1px solid var(--border-subtle); }
+  .sg-sec:last-child { border-bottom: 0; margin-bottom: 0; }
+  .sg-sec h2 { font-size: var(--text-md); line-height: var(--lh-md); font-weight: 600; margin-bottom: 4px; scroll-margin-top: 80px; }
+  .sg-sec > p { font-size: var(--text-sm); color: var(--text-3); margin-bottom: 16px; }
+  .sg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .sg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .sg-sw { border: 1px solid var(--border-subtle); border-radius: 10px; overflow: hidden; font-size: var(--text-xs); }
+  .sg-sw > div:first-child { height: 40px; }
+  .sg-sw > div:last-child { padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; color: var(--text-1); font-weight: 500; }
+  .sg-sw code { font: 400 11px/14px var(--font-mono); color: var(--text-3); }
+  .sg-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .sg-label { font-size: var(--text-xs); color: var(--text-3); margin: 14px 0 8px; font-weight: 500; }
+  .sg-focus { outline: 2px solid var(--accent-fill); outline-offset: 2px; }
+  .sg-static { position: static !important; display: block; animation: none !important; transform: none !important; }
+  .sg-static.fw-dialog, .sg-static.fw-cmd__panel { display: flex; flex-direction: column; width: 100%; max-width: 560px; }
+  .sg-type div { display: flex; align-items: baseline; gap: 16px; padding: 6px 0; border-bottom: 1px dashed var(--border-subtle); }
+  .sg-type code { width: 140px; flex: none; font: 400 var(--text-xs)/1 var(--font-mono); color: var(--text-3); }
+  .sg-wbdemo { height: 360px; border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; }
+  .sg-wbdemo .fw-workbench { height: 100%; }
+  .sg-wbdemo .fw-wb-main { --_list: 0px; --_insp: 220px; }
+  .sg-veil { position: relative; height: 380px; border-radius: 12px; overflow: hidden; display: grid; place-items: center; background: var(--veil); border: 1px solid var(--border-subtle); }
+  @media (max-width: 1100px) { .sg-cols { --cols: 1; } .sg-col + .sg-col { border-left: 0; border-top: 1px solid var(--border-subtle); } }
+</style>
+</head>
+<body>
+<main id="main">
+  <div class="sg">
+    <div class="sg-intro">
+      <div style="flex:1;min-width:280px">
+        <h1>Fernwork One kit</h1>
+        <p>Tokens, components and shell for every mockup. Light and dark render side by side; the app bar, rail, command bar (<span data-k="mod+k"></span>), drop veil (drag a file anywhere) and toasts on this page are live.</p>
+      </div>
+      <div class="fw-row-flex fw-wrap">
+        <button class="fw-btn" type="button" id="demo-cmd"><span data-icon="search"></span>Command bar</button>
+        <button class="fw-btn" type="button" id="demo-dialog">Dialog</button>
+        <button class="fw-btn" type="button" id="demo-sheet">Sheet</button>
+        <button class="fw-btn" type="button" id="demo-toast">Toast + Undo</button>
+        <button class="fw-btn" type="button" id="demo-chooser">Drop chooser</button>
+        <button class="fw-btn" type="button" id="demo-menu" aria-haspopup="menu" aria-expanded="false">Menu<span data-icon="chevron-down"></span></button>
+      </div>
+    </div>
+    <nav class="sg-toc fw-chips" id="toc" aria-label="Sections"></nav>
+    <div class="sg-cols">
+      <div class="sg-col" data-theme="light"><div class="sg-col__label"><span data-icon="sun" data-size="12"></span>Light</div><div class="sg-body"></div></div>
+      <div class="sg-col" data-theme="dark"><div class="sg-col__label"><span data-icon="moon" data-size="12"></span>Dark</div><div class="sg-body"></div></div>
+    </div>
+  </div>
+</main>
+<script type="module">
+import { mountShell, icon, kbd, enhance, renderCatalog, toast, openDialog, openSheet, openMenu, openCommandBar, openChooser, loadSamples, $, $$ } from './shell.js';
+mountShell({ archetype: 'instant', routing: 'auto', wide: true });
+$$('[data-k]').forEach((e) => (e.innerHTML = kbd(e.dataset.k)));
+const I = (n, s) => icon(n, { size: s || 16 });
+const SECTIONS = [];
+const sec = (id, title, note, html) => { SECTIONS.push([id, title]); return `<section class="sg-sec"><h2 id="${id}-%T">${title}</h2>${note ? `<p>${note}</p>` : ''}${html}</section>`; };
+const sw = (v, label) => `<div class="sg-sw"><div style="background:var(${v})"></div><div><span>${label || v.replace('--', '')}</span><code class="sg-val" data-var="${v}"></code></div></div>`;
+
+const html = [
+sec('tokens', 'Colour roles', 'Every colour comes from a role token; tool CSS never hard-codes colours.', `
+  <div class="sg-label">Surfaces & borders</div><div class="sg-swatches">${['--bg', '--surface-1', '--surface-2', '--surface-sunken', '--surface-overlay', '--border-subtle', '--border-strong'].map((v) => sw(v)).join('')}</div>
+  <div class="sg-label">Text</div><div class="sg-swatches">${['--text-1', '--text-2', '--text-3', '--text-disabled'].map((v) => sw(v)).join('')}</div>
+  <div class="sg-label">Accent & semantic</div><div class="sg-swatches">${['--accent-fill', '--accent-text', '--accent-subtle-bg', '--info', '--success', '--warning', '--danger'].map((v) => sw(v)).join('')}</div>
+  <div class="sg-label">Series (charts, CVD-safe)</div><div class="sg-swatches">${[1, 2, 3, 4, 5, 6, 7, 8].map((i) => sw('--series-' + i)).join('')}</div>`),
+sec('type', 'Type', 'Geist for UI, Geist Mono only for values, code, hashes and timecodes.', `<div class="sg-type">
+  <div><code>display 48/52</code><span class="fw-t-display fw-num">152.4</span></div>
+  <div><code>2xl 32/40</code><span class="fw-t-2xl">Do anything with a file</span></div>
+  <div><code>xl 24/32 · H1</code><span class="fw-t-xl">Convert images</span></div>
+  <div><code>lg 20/28</code><span class="fw-t-lg">Section title</span></div>
+  <div><code>md 16/24</code><span class="fw-t-md">Body copy for longer reading.</span></div>
+  <div><code>base 14/20</code><span>UI default: labels, buttons, menus.</span></div>
+  <div><code>sm 13/18</code><span class="fw-t-sm fw-muted">Dense UI and meta.</span></div>
+  <div><code>xs 12/16</code><span class="fw-t-xs fw-faint">Captions, hints, badges.</span></div>
+  <div><code>mono 13</code><span class="fw-mono fw-t-sm">e3b0c442 98fc1c14 9afbf4c8</span></div></div>`),
+sec('buttons', 'Buttons & icon buttons', 'One primary per view. 36 px controls (pointer), 44 px on touch; primary 40/48.', `
+  <div class="sg-row"><button class="fw-btn fw-btn--primary">${I('download')}Download all</button><button class="fw-btn">Secondary</button><button class="fw-btn fw-btn--ghost">Ghost</button><button class="fw-btn fw-btn--subtle">Subtle</button><button class="fw-btn fw-btn--danger">${I('trash-2')}Delete</button></div>
+  <div class="sg-row"><button class="fw-btn fw-btn--primary fw-btn--lg">Large primary</button><button class="fw-btn fw-btn--sm">Small</button><button class="fw-btn fw-btn--primary sg-focus">Focus ring</button><button class="fw-btn fw-btn--primary" disabled>Disabled</button><button class="fw-btn fw-btn--primary is-busy">Busy</button><button class="fw-btn is-copied">${I('check')}<span>Copied</span></button></div>
+  <div class="sg-row"><div class="fw-btn-group"><button class="fw-btn">Left</button><button class="fw-btn">Middle</button><button class="fw-btn">Right</button></div>
+    <button class="fw-iconbtn" aria-label="Settings" data-tip="Settings">${I('settings', 18)}</button><button class="fw-iconbtn fw-iconbtn--outline" aria-label="Copy" data-tip="Copy" data-tip-kbd="mod+c">${I('copy', 18)}</button><button class="fw-iconbtn" aria-pressed="true" aria-label="Pressed">${I('panel-right', 18)}</button><button class="fw-iconbtn fw-iconbtn--sm" aria-label="More">${I('ellipsis')}</button><button class="fw-iconbtn" disabled aria-label="Disabled">${I('redo-2', 18)}</button>
+    ${kbd('mod+k')} ${kbd('shift+mod+z')} ${kbd('esc')} ${kbd('enter')}</div>`),
+sec('inputs', 'Inputs', 'Sans for inputs; mono only for values. 16 px on touch.', `<div class="fw-stack" style="--gap:14px;max-width:520px">
+  <div class="fw-field"><label class="fw-field__label" for="i1-%T">File name</label><input class="fw-input" id="i1-%T" value="IMG_2041-edited"><span class="fw-field__hint">Without extension.</span></div>
+  <div class="fw-inputwrap">${I('search')}<input class="fw-input" placeholder="Search with icon" aria-label="Search"></div>
+  <div class="fw-field"><label class="fw-field__label" for="i2-%T">Timestamp</label><input class="fw-input fw-input--mono" id="i2-%T" value="1760000000000x" aria-invalid="true"><span class="fw-field__error">${I('circle-alert')} Not a number. Looks like milliseconds with a stray “x”.</span></div>
+  <div class="fw-row-flex" style="--gap:10px"><input class="fw-input" disabled value="Disabled" aria-label="Disabled"><select class="fw-select" aria-label="Format"><option>JPG</option><option>PNG</option></select></div>
+  <textarea class="fw-textarea fw-textarea--mono" aria-label="JSON">{ "name": "Fernwork", "private": true }</textarea>
+  <div class="sg-label" style="margin:4px 0 0">QueryInput (56 px)</div>
+  <div class="fw-query">${I('search', 20)}<input class="fw-query__input" value="5 ft in cm" aria-label="Query"></div>
+  <div class="sg-label" style="margin:4px 0 0">PasteIntake + detection chip</div>
+  <div class="fw-paste"><div class="fw-paste__box"><textarea class="fw-paste__field" rows="1" aria-label="Paste">eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.c2ln</textarea><div class="fw-paste__actions"><button class="fw-btn fw-btn--sm">${I('clipboard-paste')}Paste</button></div></div>
+    <div class="fw-paste__meta"><span class="fw-detect">${I('scan', 14)}Detected: JSON Web Token<button type="button">change</button></span><span>${I('lock', 12)} Runs on this device</span></div></div></div>`),
+sec('choice', 'Choice controls', 'Toggles, checks, radios, sliders (value always shown), steppers.', `<div class="fw-stack" style="--gap:14px;max-width:520px">
+  <div class="sg-row"><label class="fw-toggle"><input type="checkbox" checked> Keep metadata</label><label class="fw-toggle"><input type="checkbox"> Strip GPS</label></div>
+  <div class="sg-row"><label class="fw-check"><input type="checkbox" checked> Checked</label><label class="fw-check"><input type="checkbox"> Unchecked</label><label class="fw-radio"><input type="radio" name="r-%T" checked> Radio A</label><label class="fw-radio"><input type="radio" name="r-%T"> Radio B</label></div>
+  <div class="fw-slider"><label class="fw-slider__label" for="s1-%T">Quality</label><output class="fw-slider__value"></output><input id="s1-%T" type="range" min="0" max="100" value="82" data-unit=" %"></div>
+  <div class="sg-row"><div class="fw-stepper"><button type="button" aria-label="Decrease">${I('minus')}</button><input value="3" aria-label="Copies"><button type="button" aria-label="Increase">${I('plus')}</button></div></div></div>`),
+sec('nav', 'Segmented · chips · tabs', 'Composite widgets are one tab stop with arrow keys.', `
+  <div class="sg-row"><div class="fw-seg" aria-label="Mode"><button class="fw-seg__opt" aria-checked="true">Edit</button><button class="fw-seg__opt">Markup</button><button class="fw-seg__opt">Inspect</button><button class="fw-seg__opt">Export</button></div>
+    <div class="fw-seg fw-seg--sm" aria-label="Unit"><button class="fw-seg__opt" aria-checked="true">px</button><button class="fw-seg__opt">%</button></div></div>
+  <div class="sg-row" data-roving="a"><a class="fw-chip" aria-current="page" href="#">Images</a><a class="fw-chip" href="#">Video</a><a class="fw-chip" href="#">Audio</a><a class="fw-chip" href="#">${I('file-text')}Docs</a><a class="fw-chip fw-chip--sample" href="#">Try a sample</a><span class="fw-chip">heic<button class="fw-chip__x" aria-label="Remove">${I('x', 12)}</button></span></div>
+  <div class="fw-tabs" role="tablist"><button class="fw-tab" role="tab" aria-selected="true">Info</button><button class="fw-tab" role="tab">Selection<span class="fw-badge">3</span></button><button class="fw-tab" role="tab">Measure</button></div>
+  <div class="sg-label">Document tabs</div><div class="fw-doctabs" style="padding:4px;background:var(--surface-sunken);border-radius:8px"><button class="fw-doctab" aria-selected="true"><span class="fw-doctab__name">lease-agreement-2026.pdf</span><span class="fw-doctab__dirty"></span></button><button class="fw-doctab"><span class="fw-doctab__name">report.docx</span></button></div>`),
+sec('menus', 'Menu · ExportMenu · FormatPalette', 'Popovers render in the top layer; focus moves in, arrows + typeahead, Esc returns.', `<div class="sg-row" style="align-items:flex-start">
+  <div class="fw-popover sg-static" style="width:240px"><div class="fw-menu"><div class="fw-menu__group"><div class="fw-menu__label">Image</div>
+    <button class="fw-menu__item">JPG<span class="fw-menu__hint">~0.7 MB</span></button><button class="fw-menu__item is-active">PNG<span class="fw-menu__hint">~4.1 MB</span></button></div>
+    <div class="fw-menu__group"><div class="fw-menu__label">Data</div><button class="fw-menu__item">${I('copy')}Copy image<span class="fw-menu__hint">${kbd('shift+mod+c')}</span></button><button class="fw-menu__item fw-menu__item--danger">${I('trash-2')}Close all</button></div></div></div>
+  <div class="fw-popover fw-palette sg-static"><div class="fw-palette__search"><div class="fw-inputwrap">${I('search')}<input class="fw-input" placeholder="Find a format…" aria-label="Find a format"></div></div>
+    <div class="fw-palette__group"><div class="fw-palette__label">Best for photos</div><button class="fw-palette__opt" aria-selected="true"><span class="fw-palette__fmt">JPG</span><span class="fw-palette__why">Smallest, opens everywhere</span></button><button class="fw-palette__opt"><span class="fw-palette__fmt">WebP</span><span class="fw-palette__why">Smaller, modern browsers</span></button></div>
+    <div class="fw-palette__group"><div class="fw-palette__label">Keep transparency</div><button class="fw-palette__opt"><span class="fw-palette__fmt">PNG</span><span class="fw-palette__why">Lossless, larger</span></button></div></div></div>
+  <div class="sg-row"><button class="fw-target">JPG${I('chevron-down', 14)}</button><button class="fw-target fw-target--lg">MP4${I('chevron-down', 14)}</button><span class="fw-tooltip is-on sg-static" style="display:inline-flex">Copy ${kbd('mod+c')}</span></div>`),
+sec('feedback', 'Feedback', 'Verdicts in the UI font, InlineAlert next to the cause with a recovery action, toasts only for background events.', `
+  <div class="sg-row"><span class="fw-verdict fw-verdict--ok">${I('circle-check')} Match</span><span class="fw-verdict fw-verdict--ok">${I('circle-check')} Scans</span><span class="fw-verdict fw-verdict--bad">${I('circle-x')} No match</span><span class="fw-verdict fw-verdict--warn">${I('triangle-alert')} AA large only</span>
+    <span class="fw-badge">Draft</span><span class="fw-badge fw-badge--accent">New</span><span class="fw-badge fw-badge--info">Beta</span><span class="fw-badge fw-badge--warning">Large</span><span class="fw-badge fw-badge--danger">Failed</span><span class="fw-badge fw-badge--mono">SHA-256</span></div>
+  <div class="fw-stack" style="--gap:10px">
+  <div class="fw-banner fw-banner--ok"><span class="fw-banner__icon">${I('circle-check', 18)}</span><div class="fw-banner__text"><b>Checksum matches.</b> This file is exactly what the publisher released.</div></div>
+  <div class="fw-banner fw-banner--bad"><span class="fw-banner__icon">${I('circle-x', 18)}</span><div class="fw-banner__text"><b>Doesn’t match.</b> The file differs from the published SHA-256. Download it again.</div></div>
+  <div class="fw-alert fw-alert--danger"><span class="fw-alert__icon">${I('circle-alert')}</span><div class="fw-alert__body"><span><b>clip.mp4 couldn’t be read.</b> It’s 18 bytes, probably not a video.</span><div class="fw-alert__actions"><button class="fw-btn fw-btn--sm">Open as text</button><button class="fw-btn fw-btn--sm fw-btn--ghost">Remove</button></div><details><summary>Details</summary>moov atom not found</details></div></div>
+  <div class="fw-alert fw-alert--warning"><span class="fw-alert__icon">${I('triangle-alert')}</span><div class="fw-alert__body">Looks like milliseconds. <a href="#">Use ms</a></div></div>
+  <div class="fw-alert fw-alert--info"><span class="fw-alert__icon">${I('info')}</span><div class="fw-alert__body">Video engine downloads once (30 MB), then works offline.</div></div>
+  <div class="fw-toast fw-toast--success sg-static" style="display:flex;max-width:380px"><span class="fw-toast__icon">${I('circle-check', 18)}</span><div class="fw-toast__msg">Converted 12 photos · saved 11.8 MB</div><button class="fw-iconbtn fw-iconbtn--sm" aria-label="Dismiss">${I('x')}</button></div>
+  <div class="fw-toast fw-toast--neutral sg-static" style="display:flex;max-width:380px"><div class="fw-toast__msg">Image closed</div><button class="fw-toast__action">Undo</button><button class="fw-iconbtn fw-iconbtn--sm" aria-label="Dismiss">${I('x')}</button></div></div>`),
+sec('progress', 'Progress', 'Determinate with label, ETA and Cancel; engine downloads are their own step.', `<div class="fw-stack" style="--gap:16px;max-width:520px">
+  <div class="fw-progress"><div class="fw-progress__row"><span class="fw-progress__label">Getting video engine · 12 of 30 MB, once</span><span class="fw-progress__eta">~4 s</span><button class="fw-btn fw-btn--ghost fw-btn--sm">Cancel</button></div><div class="fw-progress__track"><div class="fw-progress__bar" style="--value:40%"></div></div></div>
+  <div class="fw-progress fw-progress--indeterminate fw-progress--thin"><div class="fw-progress__row"><span class="fw-progress__label">Reading file…</span></div><div class="fw-progress__track"><div class="fw-progress__bar"></div></div></div>
+  <div class="sg-row"><span class="fw-ring" style="--value:25"></span><span class="fw-ring" style="--value:60"></span><span class="fw-ring" style="--value:90"></span><span class="fw-spinner"></span><div class="fw-skel" style="width:160px;height:14px"></div></div></div>`),
+sec('intake', 'FileIntake · ItemCard · StickyActionBar (Queue)', 'Focusable intake; work starts on drop; each card is independent.', `<div class="fw-stack" style="--gap:12px">
+  <div class="fw-intake" style="min-height:180px" tabindex="0" role="button" aria-label="Choose images"><span class="fw-intake__icon">${I('image', 22)}</span><span class="fw-intake__title">Drop images here</span><span class="fw-intake__actions"><button class="fw-btn fw-btn--primary">${I('folder-open')}Choose files</button></span><span class="fw-intake__sub">or paste with ${kbd('mod+v')}<span class="fw-dot"></span><a href="#">Try a sample</a></span></div>
+  <div class="fw-intake is-over" style="min-height:120px"><span class="fw-intake__icon">${I('upload', 22)}</span><span class="fw-intake__title">Drag-over state</span></div>
+  <div class="fw-intake fw-intake--slim"><span class="fw-intake__icon">${I('plus', 18)}</span><span class="fw-intake__title">Add files</span><span class="fw-intake__sub">drop, paste ${kbd('mod+v')} or click</span></div>
+  <div class="fw-groupbar"><span class="fw-groupbar__text">12 photos <span class="fw-faint">→</span> <button class="fw-target">JPG${I('chevron-down', 14)}</button> <span class="fw-faint">·</span> 3 videos <span class="fw-faint">→</span> <button class="fw-target">MP4${I('chevron-down', 14)}</button></span><span class="fw-spacer"></span><button class="fw-btn fw-btn--ghost fw-btn--sm">${I('settings')}Settings</button></div>
+  <div class="fw-items">
+    <div class="fw-item"><div class="fw-item__thumb"><img alt="" src="samples/IMG_2041.jpg"></div><div class="fw-item__main"><span class="fw-item__name">IMG_2041.HEIC</span><span class="fw-item__meta">2.9 MB · HEIC → JPG</span></div><div class="fw-item__status"><span class="fw-delta">${I('circle-check')}<span>758 kB</span><b>−74 %</b></span></div><div class="fw-item__actions"><button class="fw-iconbtn fw-iconbtn--sm" aria-label="Download">${I('download')}</button><button class="fw-iconbtn fw-iconbtn--sm" aria-label="More">${I('ellipsis')}</button></div></div>
+    <div class="fw-item"><div class="fw-item__thumb"><img alt="" src="samples/IMG_2042.jpg"></div><div class="fw-item__main"><span class="fw-item__name">IMG_2042.HEIC</span><span class="fw-item__meta">3.2 MB · HEIC → JPG</span></div><div class="fw-item__status"><span class="fw-ring" style="--value:62"></span><span class="fw-num fw-muted">62 %</span></div><div class="fw-item__actions"><button class="fw-iconbtn fw-iconbtn--sm" aria-label="Download" disabled>${I('download')}</button><button class="fw-iconbtn fw-iconbtn--sm" aria-label="More">${I('ellipsis')}</button></div><div class="fw-item__progress" style="width:62%"></div></div>
+    <div class="fw-item"><div class="fw-item__thumb fw-item__thumb--icon">${I('film', 20)}</div><div class="fw-item__main"><span class="fw-item__name">holiday-clip-with-a-really-long-file-name-from-the-camera.mov</span><span class="fw-item__meta">48 MB · 0:42 · MOV → MP4</span></div><div class="fw-item__status"><span class="fw-faint">Queued</span></div><div class="fw-item__actions"><button class="fw-iconbtn fw-iconbtn--sm" aria-label="More">${I('ellipsis')}</button></div></div>
+    <div class="fw-item is-error"><div class="fw-item__thumb fw-item__thumb--icon">${I('file-question', 20)}</div><div class="fw-item__main"><span class="fw-item__name">clip.mp4</span><span class="fw-item__meta" style="color:var(--danger)">18 bytes, probably not a video</span></div><div class="fw-item__status"><button class="fw-btn fw-btn--sm">Open as text</button></div><div class="fw-item__actions"><button class="fw-iconbtn fw-iconbtn--sm" aria-label="Remove">${I('x')}</button></div></div>
+  </div>
+  <div class="fw-actionbar" style="position:static"><div class="fw-actionbar__summary"><span class="fw-actionbar__line">9 of 15 · ~6 s</span><span class="fw-actionbar__sub">18.2 MB → 6.4 MB</span></div><div class="fw-actionbar__actions"><button class="fw-btn fw-btn--ghost">Cancel</button><button class="fw-btn fw-btn--primary" disabled>${I('download')}Download all</button></div></div></div>`),
+sec('instant', 'ResultHero · ValueRow · OutputField (Instant)', 'Large tabular result, one primary Copy, rows with inline “Copied ✓”.', `<div class="fw-stack" style="--gap:12px">
+  <div class="fw-hero"><span class="fw-hero__label">5 ft =</span><div class="fw-hero__value">152.4<small>cm</small></div><div class="fw-hero__actions"><button class="fw-btn fw-btn--primary" data-copy="152.4 cm">${I('copy')}<span>Copy</span></button><button class="fw-btn">${I('pin')}Pin</button><button class="fw-btn fw-btn--ghost">${I('arrow-left-right')}Swap</button></div></div>
+  <div class="fw-rows"><div class="fw-vrow"><span class="fw-vrow__label">SHA-256</span><span class="fw-vrow__value">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span><button class="fw-iconbtn fw-iconbtn--sm" data-copy="e3b0c442" aria-label="Copy SHA-256" data-tip="Copy">${I('copy')}</button></div>
+    <div class="fw-vrow"><span class="fw-vrow__label">ISO 8601</span><span class="fw-vrow__value">2026-10-13T01:20:00.000Z</span><button class="fw-iconbtn fw-iconbtn--sm is-copied" aria-label="Copied">${I('check')}</button></div>
+    <div class="fw-vrow"><span class="fw-vrow__label">Relative</span><span class="fw-vrow__value fw-vrow__value--sans">in 3 hours</span><button class="fw-iconbtn fw-iconbtn--sm" aria-label="Copy">${I('copy')}</button></div></div>
+  <div class="fw-output"><div class="fw-output__value">https://shop.example.com/products/trail-shoe?color=moss</div><button class="fw-iconbtn fw-iconbtn--sm fw-output__copy" aria-label="Copy">${I('copy')}</button></div>
+  <div class="fw-output fw-output--empty"><div class="fw-output__value">Result appears here</div><button class="fw-iconbtn fw-iconbtn--sm fw-output__copy" disabled aria-label="Copy">${I('copy')}</button></div>
+  <div class="sg-label" style="margin:4px 0 0">Pins & Recent</div>
+  <div class="fw-recent fw-card" style="padding:4px"><a class="fw-recent__item" href="#"><span class="fw-recent__icon">${I('ruler')}</span><span class="fw-recent__main"><span class="fw-recent__title">5 ft in cm</span><span class="fw-recent__sub">Units</span></span><span class="fw-recent__when">2 h</span></a><a class="fw-recent__item" href="#"><span class="fw-recent__icon">${I('file-text')}</span><span class="fw-recent__main"><span class="fw-recent__title">lease-agreement-2026.pdf</span><span class="fw-recent__sub">Edit PDF</span></span><span class="fw-recent__when">1 d</span></a></div></div>`),
+sec('workbench', 'FrameBar · Stage · Inspector · ZoomHUD · StatusBar (Workbench)', 'Panels push the stage; mobile swaps panels for a 4-slot bottom bar with sheets.', `<div class="sg-wbdemo"><div class="fw-workbench">
+  <div class="fw-framebar"><button class="fw-filechip"><span class="fw-filechip__thumb"><img alt="" src="samples/IMG_2043.jpg"></span><span class="fw-filechip__name">IMG_2043.jpg</span>${I('chevron-down', 14)}</button><span class="fw-divider-v"></span><div class="fw-seg fw-seg--sm" aria-label="Mode"><button class="fw-seg__opt" aria-checked="true">Edit</button><button class="fw-seg__opt">Markup</button></div><span class="fw-spacer"></span><button class="fw-iconbtn fw-iconbtn--sm" aria-label="Undo">${I('undo-2')}</button><button class="fw-btn fw-btn--primary fw-btn--sm">${I('download')}Export</button></div>
+  <div class="fw-wb-main has-inspector"><div class="fw-stage"><img alt="" src="samples/IMG_2043.jpg" style="max-width:80%;max-height:80%;box-shadow:0 12px 32px -12px rgba(0,0,0,.35)"><div class="fw-zoom"><button class="fw-iconbtn" aria-label="Zoom out">${I('minus')}</button><button class="fw-zoom__pct">100 %</button><button class="fw-iconbtn" aria-label="Zoom in">${I('plus')}</button></div></div>
+  <aside class="fw-inspector"><section class="fw-insp-section"><div class="fw-insp-section__head">Info</div><dl class="fw-insp-kv" style="grid-template-columns:72px 1fr"><dt>Size</dt><dd>3.6 MB</dd><dt>Pixels</dt><dd>2400 × 1600</dd></dl></section></aside></div>
+  <div class="fw-statusbar"><span class="fw-statusbar__item">JPG</span><span class="fw-statusbar__item">2400 × 1600</span><span class="fw-statusbar__item">3.6 MB</span><span class="fw-statusbar__item fw-statusbar__save"><span class="fw-dotlive"></span>Saved on this device</span></div></div></div>
+  <div class="sg-label">BottomBar (mobile)</div><nav class="fw-bottombar" style="display:grid;border:1px solid var(--border-subtle);border-radius:12px"><button class="fw-bottombar__btn" aria-expanded="true">${I('sliders-horizontal')}Adjust</button><button class="fw-bottombar__btn">${I('pencil')}Markup</button><button class="fw-bottombar__btn">${I('scan')}Inspect</button><button class="fw-bottombar__btn">${I('download')}Export</button></nav>`),
+sec('overlays', 'Dialog · Command bar · Drop veil', 'Static renders; use the buttons at the top for the live versions.', `<div class="fw-stack" style="--gap:16px">
+  <div class="fw-dialog sg-static"><div class="fw-dialog__head"><h3 class="fw-dialog__title">Discard edits to IMG_2041?</h3><button class="fw-iconbtn fw-iconbtn--sm" aria-label="Close">${I('x')}</button></div><div class="fw-dialog__body">Only for irreversible data loss. Everything else acts immediately with Undo.</div><div class="fw-dialog__foot"><button class="fw-btn">Keep editing</button><button class="fw-btn fw-btn--danger">Discard</button></div></div>
+  <div class="fw-cmd__panel sg-static"><div class="fw-cmd__bar">${I('search', 18)}<input class="fw-cmd__input" value="5 ft in cm" aria-label="Command"><span>${kbd('esc', 'fw-kbd--ghost')}</span></div><div class="fw-cmd__list">
+    <div class="fw-cmd__answer" aria-selected="true"><div class="fw-cmd__answer-main"><span class="fw-cmd__answer-q">5 ft =</span><span class="fw-cmd__answer-v">152.4 <small>cm</small></span></div><div class="fw-cmd__answer-hints"><span>${kbd('enter')} copy</span><span>${kbd('mod+enter')} open in Units</span></div></div>
+    <div class="fw-cmd__group">Tools</div><div class="fw-cmd__item" aria-selected="false"><span class="fw-cmd__icon">${I('ruler')}</span><span class="fw-cmd__text"><span class="fw-cmd__name">Units</span><span class="fw-cmd__meta">Numbers</span></span></div></div>
+    <div class="fw-cmd__foot"><span>${kbd('up')}${kbd('down')} move</span><span>${kbd('enter')} open</span></div></div>
+  <div class="sg-veil"><div class="fw-veil__panel" style="animation:none"><div class="fw-veil__head"><div class="fw-veil__files"><span>${I('file-text', 20)}</span></div><div><div class="fw-veil__title">report.docx</div><div class="fw-veil__sub">1.0 kB</div></div></div>
+    <div class="fw-veil__list"><button class="fw-veil__action is-default is-target"><span class="fw-veil__action-icon">${I('folder-open', 18)}</span><span class="fw-veil__action-text"><span class="fw-veil__action-name">Open & edit</span><span class="fw-veil__action-sub">Open · Word, ODT, RTF</span></span>${kbd('enter')}</button><button class="fw-veil__action"><span class="fw-veil__action-icon">${I('file-text', 18)}</span><span class="fw-veil__action-text"><span class="fw-veil__action-name">Convert to PDF</span><span class="fw-veil__action-sub">Convert · layout preserved</span></span></button></div>
+    <div class="fw-veil__foot">${I('lock', 12)} Stays on this device · 0 uploads</div></div></div></div>`),
+sec('misc', 'EmptyState · Table · PageHeader · Catalog', '', `
+  <div class="fw-card"><div class="fw-empty"><div class="fw-empty__icon">${I('history', 22)}</div><div class="fw-empty__title">No recent files</div><div class="fw-empty__text">Files you open stay on this device and show up here.</div><button class="fw-btn fw-btn--primary">${I('folder-open')}Open file</button></div></div>
+  <div class="fw-table-wrap" style="margin-top:12px"><table class="fw-table"><thead><tr><th>Name</th><th class="is-num">Size</th><th>SHA-256</th></tr></thead><tbody><tr><td>IMG_2041.HEIC</td><td class="is-num">2.9 MB</td><td class="is-mono">e3b0c442…b855</td></tr><tr><td>report.docx</td><td class="is-num">1.0 kB</td><td class="is-mono">9f86d081…0a08</td></tr></tbody></table></div>
+  <div style="margin-top:20px"><header class="fw-page-header"><div class="fw-page-header__top"><div class="fw-page-header__titles"><h3 class="fw-h1">HEIC to JPG</h3><p class="fw-lede">Turn iPhone photos into JPGs that open everywhere.</p></div></div><nav class="fw-subchips" aria-label="Convert tools"><a class="fw-chip" aria-current="page" href="#">Images</a><a class="fw-chip" href="#">Video</a><a class="fw-chip" href="#">Audio</a><a class="fw-chip" href="#">Data</a><a class="fw-chip" href="#">Sheets</a><a class="fw-chip" href="#">Docs</a></nav></header></div>
+  <div style="margin-top:8px">${renderCatalog({ group: 'quick', compact: true })}</div>`),
+].join('');
+
+$$('.sg-col').forEach((col) => { col.querySelector('.sg-body').innerHTML = html.replaceAll('%T', col.dataset.theme); enhance(col); });
+$$('.sg-val').forEach((el) => { el.textContent = getComputedStyle(el.closest('.sg-col')).getPropertyValue(el.dataset.var).trim(); });
+$('#toc').innerHTML = SECTIONS.map(([id, t]) => `<a class="fw-chip" href="#${id}-light">${t.split(' ·')[0]}</a>`).join('');
+$('#demo-cmd').onclick = () => openCommandBar('2^10*3');
+$('#demo-dialog').onclick = () => openDialog({ title: 'Discard edits to IMG_2041?', body: 'You changed brightness and cropped the photo. This can’t be undone.', actions: [{ label: 'Keep editing' }, { label: 'Discard', danger: true, onClick: () => toast('Edits discarded', { type: 'neutral', action: { label: 'Undo' } }) }] });
+$('#demo-sheet').onclick = () => openSheet({ title: 'Settings', height: 'half', body: '<div class="fw-stack" style="--gap:16px"><label class="fw-toggle"><input type="checkbox" checked> Keep metadata</label><div class="fw-slider"><label class="fw-slider__label" for="sq">Quality</label><output class="fw-slider__value"></output><input id="sq" type="range" value="70" data-unit=" %"></div></div>' });
+$('#demo-toast').onclick = () => toast('Image closed', { type: 'neutral', action: { label: 'Undo', onClick: () => toast('Restored IMG_2041.HEIC') } });
+$('#demo-chooser').onclick = async () => openChooser(await loadSamples('report.docx'));
+$('#demo-menu').onclick = (e) => openMenu(e.currentTarget, [{ group: 'Theme', items: [{ label: 'Light', icon: 'sun', checked: true }, { label: 'Dark', icon: 'moon', checked: false }] }, { group: '', items: [{ label: 'Keyboard shortcuts', icon: 'keyboard', kbd: '?' }, { label: 'Delete', icon: 'trash-2', danger: true }] }]);
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title></title>
+<link rel="icon" href="../kit/img/logo.svg" type="image/svg+xml">
+<script src="../kit/theme-init.js"></script>
+<link rel="stylesheet" href="../kit/tokens.css">
+<link rel="stylesheet" href="../kit/components.css">
+<link rel="stylesheet" href="shell.css">
+</head>
+<body>
+<!-- Archetype A · Workbench skeleton (Images, Open, Canvas, Calculator, Textbench, PDF). ?leaf=<id>&empty=1 -->
+<main id="main">
+  <div class="fw-workbench" id="wb">
+    <div class="fw-framebar" role="toolbar" aria-label="Document" id="framebar"></div>
+    <div class="fw-wb-main has-list has-inspector" id="wb-main">
+      <aside class="fw-wb-list" aria-label="Open files" id="list"></aside>
+      <div class="fw-stage" id="stage" tabindex="0" aria-label="Canvas"></div>
+      <aside class="fw-inspector" aria-label="Inspector" id="inspector"></aside>
+    </div>
+    <div class="fw-statusbar" id="status"></div>
+    <nav class="fw-bottombar" aria-label="Tools" id="bottombar"></nav>
+  </div>
+</main>
+<script type="module">
+import { mountShell, getLeaf, getCat, toolsOf, chipOf, icon, esc, $, $$, h, enhance, formatBytes, extOf, toast, openSheet, openMenu, kbd, loadSamples, getRecent, hrefFor, shortAgo, isMobile } from '../kit/shell.js';
+
+const params = new URLSearchParams(location.search);
+const leaf = getLeaf(params.get('leaf') || 'image-edit') || getLeaf('image-edit');
+const cat = getCat(leaf.cat); const modes = toolsOf(cat.id); const cur = chipOf(leaf);
+let docs = [], active = 0, zoom = 100;
+
+mountShell({ leaf: leaf.id, archetype: 'workbench', routing: 'shell', accept: ['*'], acceptLabel: cat.label, onFiles: (f) => open(f),
+  shortcuts: [{ label: 'Toggle inspector', keys: 'mod+.' }] });
+document.title = `${leaf.name} · Fernwork`;
+
+function framebar() {
+  const d = docs[active];
+  $('#framebar').innerHTML = `
+    <button class="fw-filechip" type="button" id="filechip" aria-haspopup="menu" aria-expanded="false" ${d ? '' : 'disabled'}>
+      <span class="fw-filechip__thumb">${d?.url ? `<img alt="" src="${d.url}">` : icon('file', { size: 14 })}</span>
+      <span class="fw-filechip__name">${d ? esc(d.file.name) : esc(cat.label)}</span>${d ? icon('chevron-down', { size: 14 }) : ''}</button>
+    <span class="fw-divider-v fw-hide-compact"></span>
+    <div class="fw-seg fw-seg--sm fw-hide-compact" aria-label="Mode">${modes.map((m) => `<button class="fw-seg__opt" type="button" aria-checked="${m.id === cur.id}" data-value="${m.id}">${esc(m.chip)}</button>`).join('')}</div>
+    <span class="fw-spacer"></span>
+    <div class="fw-framebar__group fw-hide-compact">
+      <button class="fw-iconbtn fw-iconbtn--sm" type="button" aria-label="Undo" data-tip="Undo" data-tip-kbd="mod+z">${icon('undo-2')}</button>
+      <button class="fw-iconbtn fw-iconbtn--sm" type="button" aria-label="Redo" data-tip="Redo" data-tip-kbd="shift+mod+z" disabled>${icon('redo-2')}</button></div>
+    <span class="fw-divider-v fw-hide-compact"></span>
+    <div class="fw-framebar__group fw-hide-compact">
+      <button class="fw-iconbtn fw-iconbtn--sm" type="button" aria-label="Toggle file list" data-tip="Files" aria-pressed="true" id="t-list">${icon('panel-left')}</button>
+      <button class="fw-iconbtn fw-iconbtn--sm" type="button" aria-label="Toggle inspector" data-tip="Inspector" data-tip-kbd="mod+." aria-pressed="true" id="t-insp">${icon('panel-right')}</button></div>
+    <button class="fw-btn fw-btn--primary fw-btn--sm" type="button" id="export" ${d ? '' : 'disabled'}>${icon('download')}Export</button>
+    <button class="fw-iconbtn fw-iconbtn--sm" type="button" aria-label="More" data-tip="More" id="more">${icon('ellipsis')}</button>`;
+  enhance($('#framebar'));
+  $('#framebar .fw-seg')?.addEventListener('fw-change', (e) => { history.replaceState(null, '', hrefFor(e.detail.value)); toast(`${getLeaf(e.detail.value).chip} mode`, { type: 'info', duration: 1500 }); });
+  $('#t-list').onclick = (e) => { const on = $('#wb-main').classList.toggle('has-list'); e.currentTarget.setAttribute('aria-pressed', on); };
+  $('#t-insp').onclick = (e) => { const on = $('#wb-main').classList.toggle('has-inspector'); e.currentTarget.setAttribute('aria-pressed', on); };
+  $('#export').onclick = (e) => openMenu(e.currentTarget, [
+    { group: 'Image', items: [{ label: 'JPG', hint: '~0.7 MB', onSelect: () => toast(`Saved ${d.file.name.replace(/\.\w+$/, '')}-edited.jpg`) }, { label: 'PNG', hint: '~4.1 MB' }, { label: 'WebP', hint: '~0.5 MB' }] },
+    { group: 'Original', items: [{ label: `Save original (${extOf(d.file).toUpperCase()})`, icon: 'download' }] },
+    { group: 'Data', items: [{ label: 'Copy image', icon: 'copy', kbd: 'shift+mod+c' }, { label: 'Metadata as JSON', icon: 'braces' }] }], { placement: 'bottom-end' });
+  $('#more').onclick = (e) => openMenu(e.currentTarget, [{ label: 'Open file…', icon: 'folder-open', kbd: 'mod+o' }, { label: 'Close all', icon: 'x', onSelect: closeAll }, { label: 'Keyboard shortcuts', icon: 'keyboard', kbd: '?' }], { placement: 'bottom-end' });
+  $('#filechip').onclick = (e) => d && openMenu(e.currentTarget, docs.map((x, i) => ({ label: x.file.name, sub: formatBytes(x.file.size), checked: i === active, onSelect: () => { active = i; renderAll(); } })));
+}
+function list() {
+  $('#list').innerHTML = docs.map((d, i) => `<button class="fw-thumb-btn" type="button" aria-current="${i === active}" aria-label="${esc(d.file.name)}" data-i="${i}">${d.url ? `<img alt="" src="${d.url}">` : ''}</button>`).join('')
+    + `<button class="fw-btn fw-btn--ghost fw-btn--sm fw-btn--block" type="button" style="margin-top:8px" id="add">${icon('plus')}Add</button>`;
+  $$('[data-i]', $('#list')).forEach((b) => (b.onclick = () => { active = +b.dataset.i; renderAll(); }));
+  $('#add').onclick = () => { const i = h('<input type="file" multiple hidden>'); i.onchange = () => open([...i.files]); document.body.append(i); i.click(); setTimeout(() => i.remove(), 60000); };
+}
+function stage() {
+  const d = docs[active];
+  if (!d) {
+    const r = getRecent().slice(0, 3);
+    $('#stage').innerHTML = `<div class="wb-empty"><div class="fw-intake" data-intake aria-label="Open files">
+      <span class="fw-intake__icon">${icon(cat.icon, { size: 22 })}</span>
+      <span class="fw-intake__title"><span class="fw-pointer-copy">Drop a file to start</span><span class="fw-touch-copy">Choose a file to start</span></span>
+      <span class="fw-intake__actions"><button class="fw-btn fw-btn--primary" type="button" data-pick>${icon('folder-open')}Open file</button></span>
+      <span class="fw-intake__sub"><span class="fw-pointer-copy">${kbd('mod+o')} open · ${kbd('mod+v')} paste</span><span class="fw-dot fw-pointer-copy"></span><a href="#" data-sample="IMG_2041.jpg|IMG_2042.jpg|IMG_2043.jpg">Try sample photos</a></span>
+      <span class="fw-intake__privacy">${icon('lock', { size: 12 })} Opened on this device</span></div>
+      <div class="wb-recents"><div class="fw-label" style="margin:0 8px 6px">Recent</div><div class="fw-recent">${r.map((x) => { const l = getLeaf(x.leaf); return `<a class="fw-recent__item" href="${hrefFor(l)}"><span class="fw-recent__icon">${icon(l.icon)}</span><span class="fw-recent__main"><span class="fw-recent__title">${esc(x.file || l.name)}</span><span class="fw-recent__sub">${esc(x.file ? l.name : getCat(l.cat).label)}</span></span><span class="fw-recent__when">${shortAgo(x.t)}</span></a>`; }).join('')}</div></div></div>`;
+    enhance($('#stage'));
+    return;
+  }
+  $('#stage').innerHTML = `${d.url ? `<img class="wb-stage-img" alt="${esc(d.file.name)}" src="${d.url}" style="transform:scale(${zoom / 100})">` : `<div class="fw-empty"><div class="fw-empty__icon">${icon('file')}</div><div class="fw-empty__title">${esc(d.file.name)}</div><div class="fw-empty__text">The ${esc(cat.label)} mockup renders this file here.</div></div>`}
+    <div class="fw-zoom" role="group" aria-label="Zoom"><button class="fw-iconbtn" type="button" aria-label="Zoom out" data-tip="Zoom out" data-tip-kbd="-" data-z="-1">${icon('minus')}</button>
+      <button class="fw-zoom__pct" type="button" aria-label="Zoom level, click to fit" data-tip="Fit" data-tip-kbd="f" data-z="0">${zoom} %</button>
+      <button class="fw-iconbtn" type="button" aria-label="Zoom in" data-tip="Zoom in" data-tip-kbd="+" data-z="1">${icon('plus')}</button></div>`;
+  $$('[data-z]', $('#stage')).forEach((b) => (b.onclick = () => { const z = +b.dataset.z; zoom = z === 0 ? 100 : Math.max(25, Math.min(400, zoom + z * 25)); stage(); }));
+}
+function inspector() {
+  const d = docs[active];
+  if (!d) { $('#inspector').innerHTML = `<div class="fw-insp-section"><div class="fw-insp-section__head">Info</div><p class="fw-t-sm fw-faint">Open a file to see its details.</p></div>`; return; }
+  $('#inspector').innerHTML = `
+    <section class="fw-insp-section"><div class="fw-insp-section__head">Info</div>
+      <dl class="fw-insp-kv"><dt>Name</dt><dd>${esc(d.file.name)}</dd><dt>Type</dt><dd>${extOf(d.file).toUpperCase()} image</dd><dt>Size</dt><dd>${formatBytes(d.file.size)}</dd><dt>Dimensions</dt><dd>${d.w ? `${d.w} × ${d.h} px` : '…'}</dd><dt>Location</dt><dd>None</dd></dl></section>
+    <section class="fw-insp-section"><div class="fw-insp-section__head">Adjust</div>
+      <div class="fw-slider"><label class="fw-slider__label" for="a1">Brightness</label><output class="fw-slider__value"></output><input id="a1" type="range" min="-100" max="100" value="0"></div>
+      <div class="fw-slider"><label class="fw-slider__label" for="a2">Contrast</label><output class="fw-slider__value"></output><input id="a2" type="range" min="-100" max="100" value="12"></div>
+      <div class="fw-slider"><label class="fw-slider__label" for="a3">Saturation</label><output class="fw-slider__value"></output><input id="a3" type="range" min="-100" max="100" value="-8"></div></section>
+    <section class="fw-insp-section"><div class="fw-insp-section__head">Colours</div><div class="wb-swatches"><span style="background:#2f5d50"></span><span style="background:#7fa38f"></span><span style="background:#c9d6cf"></span><span style="background:#1d2b26"></span><span style="background:#a7b8a0"></span></div></section>`;
+  enhance($('#inspector'));
+}
+function status() {
+  const d = docs[active];
+  $('#status').innerHTML = d ? `<span class="fw-statusbar__item">${extOf(d.file).toUpperCase()}</span><span class="fw-statusbar__item">${d.w ? `${d.w} × ${d.h}` : ''}</span><span class="fw-statusbar__item">${formatBytes(d.file.size)}</span><span class="fw-statusbar__item">${active + 1} of ${docs.length}</span><span class="fw-statusbar__item">${zoom} %</span>
+    <span class="fw-statusbar__item fw-statusbar__save"><span class="fw-dotlive"></span>Saved on this device</span>` : `<span class="fw-statusbar__item">No file open</span><span class="fw-statusbar__item fw-statusbar__save">${icon('lock', { size: 12 })} On this device</span>`;
+}
+function bottombar() {
+  const slots = [['sliders-horizontal', 'Adjust'], ['pencil', 'Markup'], ['scan', 'Inspect'], ['download', 'Export']];
+  $('#bottombar').innerHTML = slots.map(([ic, l]) => `<button class="fw-bottombar__btn" type="button" aria-expanded="false" data-l="${l}">${icon(ic)}${l}</button>`).join('');
+  $$('.fw-bottombar__btn').forEach((b) => (b.onclick = () => { b.setAttribute('aria-expanded', 'true'); const sec = $(`#inspector .fw-insp-section:nth-child(${b.dataset.l === 'Adjust' ? 2 : 1})`)?.cloneNode(true); sec?.querySelector('.fw-insp-section__head')?.remove(); if (sec) { sec.style.padding = '0'; sec.style.border = '0'; }
+    openSheet({ title: b.dataset.l === 'Inspect' ? 'Info' : b.dataset.l, height: 'peek', body: sec || '', onClose: () => b.setAttribute('aria-expanded', 'false') }); }));
+}
+function renderAll() { $('#wb-main').classList.toggle('has-list', docs.length > 1); framebar(); list(); stage(); inspector(); status(); }
+async function open(files) {
+  for (const f of files) {
+    const d = { file: f, url: f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic|gif|avif)$/i.test(f.name) ? URL.createObjectURL(f) : null };
+    docs.push(d);
+    if (d.url) { const im = new Image(); im.onload = () => { d.w = im.naturalWidth; d.h = im.naturalHeight; inspector(); status(); }; im.src = d.url; }
+  }
+  active = docs.length - files.length; renderAll();
+}
+function closeAll() { const old = docs; docs = []; active = 0; renderAll(); toast(`Closed ${old.length} images`, { type: 'neutral', action: { label: 'Undo', onClick: () => { docs = old; renderAll(); } } }); }
+bottombar(); renderAll();
+if (!params.has('empty')) open(await loadSamples('IMG_2042.jpg|IMG_2043.jpg|IMG_2041.jpg'));
+document.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === '.') { e.preventDefault(); $('#t-insp')?.click(); } });
+</script>
+</body>
+</html>
