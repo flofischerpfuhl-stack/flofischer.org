@@ -100,12 +100,29 @@ const SMALL = new Set('a an and as at but by for in nor of on or the to via vs'.
 const WORD = /[\p{L}\p{N}][\p{L}\p{N}'’]*/gu;
 const isAllCaps = (w) => w.length > 1 && w === w.toUpperCase() && w !== w.toLowerCase();
 export const CASES = {
-  upper: { label: 'UPPER', fn: (s) => s.replace(/ß/g, 'SS').toUpperCase() },
-  lower: { label: 'lower', fn: (s) => s.toLowerCase() },
-  title: { label: 'Title Case', fn: (s) => { let first = true; return s.replace(WORD, (w, off) => { const keep = isAllCaps(w) || /^.+\p{Lu}/u.test(w); const small = !first && SMALL.has(w.toLowerCase()) && !/[.:!?]\s*$/.test(s.slice(0, off)); first = false; if (keep) return w; if (small) return w.toLowerCase(); return w[0].toUpperCase() + w.slice(1).toLowerCase(); }); } },
-  sentence: { label: 'Sentence case', fn: (s) => s.replace(/(^|[.!?]\s+|\n\s*)(\p{Ll})/gu, (m, a, c, off) => { const before = s.slice(Math.max(0, off - 12), off + 1); if (/[.]\s*$/.test(a) && /(^|\s)(\p{Ll}|ca|bzw|usw|vgl|etc|e\.g|i\.e|Nr|Dr|ggf|inkl)\.$/u.test(before.trimEnd())) return m; return a + c.toUpperCase(); }) },
-  camel: { label: 'camelCase', fn: (s) => s.replace(/[^\n]+/g, (l) => { const ws = l.match(WORD) || []; return ws.map((w, i) => (i ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w.toLowerCase())).join(''); }) },
-  snake: { label: 'snake_case', fn: (s) => s.replace(/[^\n]+/g, toSnake) },
-  kebab: { label: 'kebab-case', fn: (s) => s.replace(/[^\n]+/g, (l) => toSnake(l).replace(/_/g, '-')) },
+  upper: { label: 'UPPERCASE', fn: (s) => s.replace(/ß/g, 'SS').toUpperCase() },
+  lower: { label: 'lowercase', fn: (s) => s.toLowerCase() },
+  title: { label: 'Title Case', fn: (s) => { const keep = acronyms(s); let first = true; return s.replace(WORD, (w, off) => { const k = keep.has(off) || mixed(w); const small = !first && SMALL.has(w.toLowerCase()) && !/([.:!?]\s*|\n\s*)$/.test(s.slice(0, off)); first = false; if (k) return w; if (small) return w.toLowerCase(); return w[0].toUpperCase() + w.slice(1).toLowerCase(); }); } },
+  sentence: { label: 'Sentence case', fn: (s) => {
+    const keep = acronyms(s);
+    const low = s.replace(WORD, (w, off) => (keep.has(off) || mixed(w) ? w : w.toLowerCase()));
+    return low.replace(/(^|[.!?]\s+|\n\s*)(\p{Ll})/gu, (m, a, c, off) => { if (mixed((low.slice(off + a.length).match(WORD) || [''])[0])) return m; const before = low.slice(Math.max(0, off - 12), off + 1); if (/[.]\s*$/.test(a) && /(^|\s)(\p{Ll}|ca|bzw|usw|vgl|etc|e\.g|i\.e|nr|dr|ggf|inkl)\.$/u.test(before.trimEnd())) return m; return a + c.toUpperCase(); });
+  } },
+  camel: { label: 'camelCase', fn: (s) => perLine(s, (ws) => ws.map((w, i) => (i ? cap(w) : w.toLowerCase())).join('')) },
+  pascal: { label: 'PascalCase', fn: (s) => perLine(s, (ws) => ws.map(cap).join('')) },
+  snake: { label: 'snake_case', fn: (s) => perLine(s, (ws) => ws.map((w) => w.toLowerCase()).join('_')) },
+  kebab: { label: 'kebab-case', fn: (s) => perLine(s, (ws) => ws.map((w) => w.toLowerCase()).join('-')) },
 };
-function toSnake(l) { return (l.normalize('NFKD').replace(/[̀-ͯ]/g, '').match(/[A-Za-z0-9]+/g) || []).map((w) => w.toLowerCase()).join('_'); }
+const mixed = (w) => /\p{Ll}/u.test(w) && /.\p{Lu}/u.test(w); // iPhone, XMLHttpRequest, McDonald
+// ALL-CAPS words count as acronyms (NASA, PDF) only when their neighbours aren't shouting too
+function acronyms(s) {
+  const ws = [...s.matchAll(WORD)]; const out = new Set();
+  ws.forEach((m, i) => { if (!isAllCaps(m[0]) || m[0].length > 6) return; const p = ws[i - 1]?.[0], n = ws[i + 1]?.[0]; if ((p && isAllCaps(p)) || (n && isAllCaps(n))) return; out.add(m.index); });
+  return out;
+}
+// code-style cases work per line, split camelCase/PascalCase/ACRONYMWord boundaries and keep Unicode letters (größe, not gro_e)
+const ID_WORD = /[\p{L}\p{N}]+/gu;
+const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+function idWords(l) { return l.replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, '$1 $2').replace(/(\p{Lu})(\p{Lu}\p{Ll})/gu, '$1 $2').replace(/['’]/g, '').match(ID_WORD) || []; }
+function perLine(s, join) { return s.replace(/[^\n]+/g, (l) => join(idWords(l))); }
+function toSnake(l) { return idWords(l).map((w) => w.toLowerCase()).join('_'); }

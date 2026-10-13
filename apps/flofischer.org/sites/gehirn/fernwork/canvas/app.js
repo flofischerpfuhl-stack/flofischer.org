@@ -2,13 +2,14 @@
 // Diagram (Mermaid) and Mind map blocks, Export sheet, History, Undo for everything.
 import './icons-extra.js';
 import { mountShell, toast, openDialog, openPopover, openMenu, icon, esc, $, $$, h, kbd, isTyping, hasLayers, pushLayer,
-  isMobile, isCoarse, effectiveTheme, store, enhance, shortAgo, formatBytes, getLeaf } from '../kit/shell.js';
+  isMobile, isCoarse, effectiveTheme, store, enhance, shortAgo, formatBytes, canonicalId } from '../kit/shell.js';
 import * as S from './scene.js';
 import * as MM from './mindmap.js';
 import * as DG from './diagram.js';
 
 const params = new URLSearchParams(location.search);
-const LEAF = ['draw', 'mind-map', 'diagram'].includes(params.get('leaf')) ? params.get('leaf') : 'draw';
+// Revision 1 leaves: fernboard (the shelf) · presets draw, mind-map, mermaid (old ?leaf=diagram → mermaid)
+const LEAF = ((l) => (['draw', 'mind-map', 'mermaid'].includes(l) ? l : 'fernboard'))(canonicalId(params.get('leaf') || 'fernboard'));
 const raf = (fn) => requestAnimationFrame(fn);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -22,16 +23,25 @@ const FLOW = 'flowchart LR\n  A[Cart] --> B{Signed in?}\n  B -->|Yes| C[Pay]\n  
 const GANTT = 'gantt\n  dateFormat YYYY-MM-DD\n  title Launch\n  section Build\n  Editor     :a1, 2026-10-01, 10d\n  Export     :a2, after a1, 6d\n  section Ship\n  Beta       :b1, after a2, 5d\n  Release    :milestone, after b1, 0d';
 const LISBON = '# Trip to Lisbon\n- Travel\n  - Flight Fri 7:40\n  - Airport metro\n- Stay\n  - Alfama flat\n- Food\n  - Pastéis de nata\n  - Time Out Market\n- Sights\n  - Belém tower\n  - Tram 28';
 const MM_NEW = '# Central idea';
+// today's Mermaid templates (Class, State, ER, Pie, Timeline, Quadrant) as Insert items
+const CLASS = 'classDiagram\n  class Customer {\n    +name: string\n  }\n  class Order {\n    +id: int\n    +total() float\n  }\n  Customer "1" --> "*" Order : places';
+const STATE = 'stateDiagram-v2\n  [*] --> Draft\n  Draft --> Review : submit\n  Review --> Published : approve\n  Review --> Draft : changes\n  Published --> [*]';
+const ER = 'erDiagram\n  CUSTOMER ||--o{ ORDER : places\n  ORDER ||--|{ LINE_ITEM : contains\n  PRODUCT ||--o{ LINE_ITEM : "ordered in"';
+const PIE = 'pie title Time spent\n  "Build" : 45\n  "Review" : 25\n  "Meetings" : 30';
+const TIMELINE = 'timeline\n  title Product history\n  2024 : Idea : Prototype\n  2025 : Beta\n  2026 : Launch';
+const QUADRANT = 'quadrantChart\n  title Effort vs impact\n  x-axis Low effort --> High effort\n  y-axis Low impact --> High impact\n  quadrant-1 Plan it\n  quadrant-2 Do now\n  quadrant-3 Skip\n  quadrant-4 Later\n  Export: [0.3, 0.8]\n  Themes: [0.75, 0.6]\n  Icons: [0.2, 0.3]';
+const DIAGRAMS = { flowchart: [FLOW, 'Flowchart', [560, 240]], sequence: [SEQ, 'Sequence', [500, 330]], gantt: [GANTT, 'Gantt chart', [620, 260]], class: [CLASS, 'Class diagram', [420, 300]],
+  state: [STATE, 'State diagram', [420, 360]], er: [ER, 'ER diagram', [460, 320]], pie: [PIE, 'Pie chart', [420, 300]], timeline: [TIMELINE, 'Timeline', [560, 260]], quadrant: [QUADRANT, 'Quadrant chart', [440, 440]] };
 
 function T(type, props) { return S.make(type, props); }
 function arrowBetween(a, b, props = {}) { const el = T('arrow', { pts: [S.center(a), S.center(b)], start: a.id, end: b.id, ...props }); return el; }
 const TEMPLATES = [
   { id: 'blank', name: 'Blank board', sub: 'Start from nothing', icon: 'square-plus', make: () => [] },
-  { id: 'flowchart', name: 'Flowchart', sub: 'Steps and decisions', icon: 'workflow', leaf: 'diagram', make: () => [T('diagram', { x: 0, y: 0, w: 620, h: 250, code: FLOW, title: 'Checkout flow' })] },
-  { id: 'sequence', name: 'Sequence', sub: 'Who talks to whom', icon: 'arrow-left-right', leaf: 'diagram', make: () => [T('diagram', { x: 0, y: 0, w: 520, h: 330, code: SEQ, title: 'Login flow' })] },
+  { id: 'flowchart', name: 'Flowchart', sub: 'Steps and decisions', icon: 'workflow', leaf: 'mermaid', make: () => [T('diagram', { x: 0, y: 0, w: 620, h: 250, code: FLOW, title: 'Checkout flow' })] },
+  { id: 'sequence', name: 'Sequence', sub: 'Who talks to whom', icon: 'arrow-left-right', leaf: 'mermaid', make: () => [T('diagram', { x: 0, y: 0, w: 520, h: 330, code: SEQ, title: 'Login flow' })] },
   { id: 'mindmap', name: 'Mind map', sub: 'Branch out by keyboard', icon: 'network', leaf: 'mind-map', make: () => [T('mindmap', { x: 0, y: 0, w: 640, h: 360, md: LISBON, title: 'Trip to Lisbon' })] },
   { id: 'retro', name: 'Retro', sub: 'Three columns of stickies', icon: 'sticky-note', make: () => retro() },
-  { id: 'gantt', name: 'Timeline', sub: 'A Gantt chart from text', icon: 'calendar-clock', leaf: 'diagram', make: () => [T('diagram', { x: 0, y: 0, w: 640, h: 260, code: GANTT, title: 'Launch timeline' })] },
+  { id: 'gantt', name: 'Gantt chart', sub: 'Tasks over time', icon: 'calendar-clock', leaf: 'mermaid', make: () => [T('diagram', { x: 0, y: 0, w: 640, h: 260, code: GANTT, title: 'Launch timeline' })] },
 ];
 function retro() {
   const out = []; const cols = [['Went well', 'mint', ['Export sheet landed', 'Pairing on Fridays']], ['To improve', 'pink', ['Flaky e2e tests', 'Too many meetings']], ['Try next', 'sky', ['Demo every sprint']]];
@@ -93,7 +103,17 @@ const ckey = (code, th) => th + '|' + code;
 let cacheSaveT = 0;
 function persistCache() { clearTimeout(cacheSaveT); cacheSaveT = setTimeout(() => { const e = [...svgCache.entries()].slice(-24); store.set('canvas:svg', Object.fromEntries(e)); }, 400); }
 const mmCache = new Map();
-function mindSvg(md) { let s = mmCache.get(md); if (!s) { s = MM.staticSvg(MM.fromMarkdown(md)).svg; mmCache.set(md, s); if (mmCache.size > 60) mmCache.delete(mmCache.keys().next().value); } return s; }
+/** Collapsed mind maps (today's "Collapse all") show the main branches only, each with a "+n" count. */
+function collapseTree(root) {
+  const count = (n) => n.children.reduce((a, c) => a + 1 + count(c), 0);
+  return { ...root, children: root.children.map((c) => ({ ...c, text: count(c) ? `${c.text} +${count(c)}` : c.text, children: [] })) };
+}
+function mindSvg(md, collapsed = false) {
+  const k = (collapsed ? 'c|' : '') + md;
+  let s = mmCache.get(k);
+  if (!s) { const root = MM.fromMarkdown(md); s = MM.staticSvg(collapsed ? collapseTree(root) : root).svg; mmCache.set(k, s); if (mmCache.size > 60) mmCache.delete(mmCache.keys().next().value); }
+  return s;
+}
 const failed = new Set(), liveGood = new Map();
 function queueRender(code, th) {
   const k = ckey(code, th); if (svgCache.has(k) || pending.has(k) || failed.has(k)) return;
@@ -103,7 +123,7 @@ function queueRender(code, th) {
 function blockCtx(th = theme()) {
   return {
     block(el) {
-      if (el.type === 'mindmap') return { svg: mindSvg(el.md || MM_NEW) };
+      if (el.type === 'mindmap') return { svg: mindSvg(el.md || MM_NEW, el.collapsed) };
       if (!el.code?.trim()) return null;
       const k = ckey(el.code, th);
       if (svgCache.has(k)) return { svg: svgCache.get(k) };
@@ -130,7 +150,7 @@ function fitBlock(el, svg) {
   if (Math.abs(el.w - w) < 2 && Math.abs(el.h - h) < 2) return false;
   el.w = Math.round(w); el.h = Math.round(h); return true;
 }
-const blockSvg = (el, th = theme()) => (el.type === 'mindmap' ? mindSvg(el.md || MM_NEW) : svgCache.get(ckey(el.code, th)));
+const blockSvg = (el, th = theme()) => (el.type === 'mindmap' ? mindSvg(el.md || MM_NEW, el.collapsed) : svgCache.get(ckey(el.code, th)));
 async function fitAll(els, th = theme()) { await ensureRendered(els, th); let ch = false; for (const el of els) if (S.isBlock(el)) ch = fitBlock(el, blockSvg(el, th)) || ch; if (ch) S.updateBindings(els); return ch; }
 let repaintT = 0;
 function repaintAll() { cancelAnimationFrame(repaintT); repaintT = raf(() => { if (B.board) draw(); else renderShelfGrid(); }); }
@@ -158,8 +178,18 @@ async function toCanvas(svg, w, h, scale) {
 }
 
 // ───────────────────────── shell ─────────────────────────
+const onBoard = () => !!B.board && !B.focus;
 mountShell({
-  category: 'canvas', leaf: LEAF, archetype: 'workbench', accept: ['*'], acceptLabel: 'Canvas',
+  category: 'canvas', leaf: LEAF, archetype: 'workbench', accept: ['*'], acceptLabel: 'Fernboard',
+  // page commands in ⌘K ("On this page"); ⌘K itself is pure tool search
+  commands: [
+    { id: 'cv-new', label: 'New board', icon: 'plus', kbd: 'n', syn: ['blank', 'whiteboard', 'board'], hidden: () => !!B.board, run: () => createFrom('blank') },
+    { id: 'cv-insert', label: 'Insert diagram or mind map…', icon: 'square-plus', kbd: '/', syn: ['mermaid', 'flowchart', 'sequence', 'mind map', 'diagram', 'class', 'gantt'], hidden: () => !onBoard(), run: () => openInsert($('#cv-insert').offsetParent ? $('#cv-insert') : $('#m-insert')) },
+    { id: 'cv-export', label: 'Export board…', icon: 'download', kbd: 'shift+mod+e', syn: ['png', 'svg', 'pdf', 'download', 'save'], hidden: () => !onBoard(), run: () => openExport() },
+    { id: 'cv-history', label: 'History', icon: 'history', kbd: 'shift+mod+h', syn: ['versions', 'restore', 'undo'], hidden: () => !onBoard(), run: () => toggleHistory(true) },
+    { id: 'cv-open', label: 'Open file as new board…', icon: 'folder-open', kbd: 'mod+o', syn: ['open', 'import', 'excalidraw', 'mmd', 'markdown'], run: () => pickFiles() },
+    { id: 'cv-boards', label: 'All boards', icon: 'layout-template', syn: ['shelf', 'boards', 'list'], hidden: () => !B.board, run: () => showShelf({ push: true }) },
+  ],
   onFiles: (files, { source } = {}) => onFiles(files, source),
   onPasteText: (t) => onPasteText(t),
   shortcuts: [
@@ -174,11 +204,10 @@ main.innerHTML = `<div class="cv" id="cv">
   <div class="cv-shelf" id="shelf" hidden></div>
   <div class="cv-board" id="boardview" hidden></div>
 </div>`;
-document.title = 'Canvas · Fernwork';
 applyTheme();
 
 // ───────────────────────── shelf ─────────────────────────
-let shelfFilter = LEAF === 'mind-map' ? 'mindmap' : LEAF === 'diagram' ? 'diagram' : 'all';
+let shelfFilter = 'all';
 function boardKinds(bd) { const t = new Set(bd.elements.map((e) => e.type)); return { diagram: t.has('diagram'), mindmap: t.has('mindmap'), sketch: [...t].some((x) => !['diagram', 'mindmap'].includes(x)) }; }
 function thumbFor(els, { th = theme(), pad = 28 } = {}) {
   if (!els.length) return '';
@@ -187,15 +216,15 @@ function thumbFor(els, { th = theme(), pad = 28 } = {}) {
 }
 function showShelf({ push = false } = {}) {
   closeFocus(false); B.board = null;
-  if (push) history.pushState(null, '', location.pathname + (LEAF !== 'draw' ? `?leaf=${LEAF}` : ''));
-  $('#boardview').hidden = true; $('#shelf').hidden = false; document.title = 'Canvas · Fernwork';
+  if (push) history.pushState(null, '', location.pathname);
+  $('#boardview').hidden = true; $('#shelf').hidden = false; document.title = 'Fernboard · Fernwork';
   document.documentElement.classList.remove('cv-on-board');
   const sh = $('#shelf');
   sh.innerHTML = `<div class="cv-shelf__in">
     <header class="cv-shelf__head">
-      <div class="cv-shelf__titles"><h1 class="fw-h1">Canvas</h1><p class="fw-lede">Sketch, map and diagram on one board. Everything stays in this browser.</p></div>
+      <div class="cv-shelf__titles"><h1 class="fw-h1">Fernboard</h1><p class="fw-lede">Draw, mind-map and diagram on one board.</p></div>
       <div class="cv-shelf__actions">
-        <button class="fw-btn fw-hide-mobile" type="button" id="sh-open">${icon('folder-open')}Open file…</button>
+        <button class="fw-btn" type="button" id="sh-open">${icon('folder-open')}Open file…</button>
         <button class="fw-btn fw-btn--primary" type="button" id="sh-new">${icon('plus')}New board<kbd class="fw-kbd fw-kbd-hint cv-kbd-on-primary">N</kbd></button>
       </div>
     </header>
@@ -207,13 +236,14 @@ function showShelf({ push = false } = {}) {
     </section>
     <section class="cv-shelf__sec" aria-labelledby="boards-h">
       <div class="cv-shelf__bar"><h2 class="cv-sec-title" id="boards-h">Your boards</h2>
-        <div class="fw-chips cv-filter" role="group" aria-label="Show">${[['all', 'All'], ['sketch', 'Sketches'], ['mindmap', 'Mind maps'], ['diagram', 'Diagrams']].map(([v, l]) => `<button class="fw-chip" type="button" data-f="${v}" aria-pressed="${shelfFilter === v}">${l}</button>`).join('')}</div></div>
+        <div class="fw-chips cv-filter" role="group" aria-label="Show">${[['all', 'All'], ['sketch', 'Draw'], ['mindmap', 'Mind Map'], ['diagram', 'Mermaid']].map(([v, l]) => `<button class="fw-chip" type="button" data-f="${v}" aria-pressed="${shelfFilter === v}">${l}</button>`).join('')}</div>
+        <span class="fw-spacer"></span><button class="fw-btn fw-btn--ghost fw-btn--sm" type="button" id="trash-btn" hidden></button></div>
       <div class="cv-grid" id="grid"></div>
     </section>
-    <footer class="cv-shelf__foot" id="shelf-foot"></footer>
   </div>`;
   $('#sh-new').onclick = () => createFrom('blank');
-  $('#sh-open').onclick = pickFiles;
+  $('#sh-open').onclick = () => pickFiles();
+  $('#trash-btn').onclick = (e) => trashPopover(e.currentTarget);
   $$('[data-tpl]', sh).forEach((b) => (b.onclick = () => createFrom(b.dataset.tpl)));
   $$('.cv-filter .fw-chip', sh).forEach((b) => (b.onclick = () => { shelfFilter = b.dataset.f; $$('.cv-filter .fw-chip', sh).forEach((x) => x.setAttribute('aria-pressed', x === b)); renderShelfGrid(); }));
   renderTemplates(); renderShelfGrid();
@@ -230,7 +260,7 @@ function renderShelfGrid() {
   const grid = $('#grid'); if (!grid || B.board) return;
   const rows = index().filter((r) => !r.trashed).sort((a, b) => b.updated - a.updated);
   const boards = rows.map((r) => loadBoard(r.id)).filter(Boolean).filter((bd) => shelfFilter === 'all' || boardKinds(bd)[shelfFilter]);
-  if (!boards.length) grid.innerHTML = `<div class="fw-empty cv-grid__empty"><div class="fw-empty__icon">${icon('layout-template')}</div><div class="fw-empty__title">No ${shelfFilter === 'all' ? 'boards' : esc({ sketch: 'sketches', mindmap: 'mind maps', diagram: 'diagrams' }[shelfFilter])} yet</div><div class="fw-empty__text">Pick a template above or drop a file here.</div></div>`;
+  if (!boards.length) grid.innerHTML = `<div class="fw-empty cv-grid__empty"><div class="fw-empty__icon">${icon('layout-template')}</div><div class="fw-empty__title">No ${shelfFilter === 'all' ? 'boards' : esc({ sketch: 'drawings', mindmap: 'mind maps', diagram: 'Mermaid diagrams' }[shelfFilter])} yet</div><div class="fw-empty__text">Pick a template above or drop a file here.</div></div>`;
   else grid.innerHTML = boards.map((bd) => {
     const k = boardKinds(bd); const blocks = bd.elements.filter(S.isBlock).length;
     const meta = [shortAgo(bd.updated), blocks ? plural(blocks, 'block') : plural(bd.elements.length, 'object')].join(' · ');
@@ -242,22 +272,26 @@ function renderShelfGrid() {
   }).join('');
   $$('.cv-card__link', grid).forEach((a) => (a.onclick = (e) => { if (e.metaKey || e.ctrlKey) return; e.preventDefault(); openBoard(a.closest('.cv-card').dataset.id, { push: true }); }));
   $$('[data-more]', grid).forEach((b) => (b.onclick = () => boardMenu(b, b.dataset.more)));
-  const all = index(); const live = all.filter((r) => !r.trashed); const trashed = all.filter((r) => r.trashed);
-  const bytes = all.reduce((a, r) => a + (localStorage.getItem('fw:canvas:b:' + r.id)?.length || 0), 0) + (localStorage.getItem('fw:canvas:svg')?.length || 0);
-  $('#shelf-foot').innerHTML = `<span class="cv-foot__item">${icon('lock', { size: 14 })}Stored only in this browser</span><span class="cv-foot__item">${plural(live.length, 'board')} · ${formatBytes(bytes)}</span>
-    <span class="cv-foot__item">${icon('cloud-off', { size: 14 })}Works offline</span>
-    <button class="cv-foot__btn" type="button" id="trash-btn" ${trashed.length ? '' : 'disabled'}>${icon('trash-2', { size: 14 })}Trash (${trashed.length})</button>
-    <span class="cv-foot__item cv-foot__drop cv-pointer">Drop .excalidraw, .mmd, .md or images anywhere to open them as a new board</span>`;
-  $('#trash-btn').onclick = (e) => trashPopover(e.currentTarget);
+  // Trash: only shown while it holds something (functional, not a status line)
+  const trashed = index().filter((r) => r.trashed).length, tb = $('#trash-btn');
+  tb.hidden = !trashed; tb.innerHTML = `${icon('trash-2')}Trash · ${trashed}`;
 }
 function boardMenu(anchor, id) {
   const bd = loadBoard(id);
   openMenu(anchor, [
     { label: 'Open', icon: 'arrow-up-right', onSelect: () => openBoard(id, { push: true }) },
+    { label: 'Rename…', icon: 'pencil', onSelect: () => renameBoard(id) },
     { label: 'Duplicate', icon: 'copy', onSelect: () => { const c = newBoard(`${bd.name} copy`, JSON.parse(JSON.stringify(bd.elements))); renderShelfGrid(); toast(`Duplicated as “${c.name}”`); } },
     { label: 'Export…', icon: 'download', kbd: 'shift+mod+e', onSelect: () => openExport({ board: bd }) },
     { label: 'Move to trash', icon: 'trash-2', danger: true, onSelect: () => trashBoard(id) },
   ], { placement: 'bottom-end' });
+}
+function renameBoard(id) {
+  const bd = loadBoard(id);
+  const d = openDialog({ title: 'Rename board', size: 400, body: `<div class="fw-field"><label class="fw-field__label" for="rn">Name</label><input class="fw-input" id="rn" value="${esc(bd.name)}"></div>`, initialFocus: '#rn',
+    actions: [{ label: 'Cancel', ghost: true }, { label: 'Rename', primary: true, onClick: () => { const v = $('#rn').value.trim(); if (v && v !== bd.name) { bd.name = v; writeBoard(bd); renderShelfGrid(); } } }] });
+  d.el.querySelector('#rn').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); d.el.querySelector('.fw-btn--primary').click(); } });
+  setTimeout(() => d.el.querySelector('#rn')?.select(), 30);
 }
 function trashBoard(id) {
   const bd = loadBoard(id); bd.trashed = Date.now(); writeBoard(bd);
@@ -269,11 +303,11 @@ function trashPopover(anchor) {
   const p = openPopover(anchor, h(`<div class="cv-trash"><div class="fw-menu__label">Trash · deleted after 7 days</div>${rows.map((r) => `<div class="cv-trash__row"><span class="fw-ellipsis">${esc(r.name)}</span><span class="fw-faint fw-t-xs">${shortAgo(r.trashed)}</span><button class="fw-btn fw-btn--sm fw-btn--ghost" type="button" data-restore="${r.id}">Restore</button></div>`).join('')}</div>`), { placement: 'bottom-start', width: 340 });
   $$('[data-restore]', p.el).forEach((b) => (b.onclick = () => { const bd = loadBoard(b.dataset.restore); bd.trashed = null; writeBoard(bd); p.close(); renderShelfGrid(); toast(`Restored “${bd.name}”`); }));
 }
-function createFrom(tplId, { focusTitle = true } = {}) {
+function createFrom(tplId, { focusTitle = true, replace = false } = {}) {
   const t = TEMPLATES.find((x) => x.id === tplId) || TEMPLATES[0];
   const els = JSON.parse(JSON.stringify(t.cache || t.make())).map((e) => ({ ...e, id: S.uid(), seed: S.newSeed() }));
   const bd = newBoard(t.id === 'blank' ? 'Untitled board' : t.name, els);
-  openBoard(bd.id, { push: true, fresh: true, focusTitle: focusTitle && t.id === 'blank' });
+  openBoard(bd.id, { push: !replace, fresh: true, focusTitle: focusTitle && t.id === 'blank' });
   if (t.id !== 'blank') { const blk = B.els.find(S.isBlock); if (blk) { B.sel = new Set([blk.id]); draw(); } }
 }
 
@@ -332,7 +366,7 @@ function openBoard(id, { push = false, fresh = false, focusTitle = false } = {})
   B.board = bd; B.els = bd.elements || []; B.sel = new Set(); B.past = []; B.future = []; B.tool = 'select'; B.fresh = null; B.preview = null; B.nodes = new Map();
   $('#shelf').hidden = true; const v = $('#boardview'); v.hidden = false;
   document.documentElement.classList.add('cv-on-board');
-  document.title = `${bd.name} · Canvas · Fernwork`;
+  document.title = `${bd.name} · Fernboard · Fernwork`;
   buildBoardView();
   if (bd.view && !fresh) B.view = { ...bd.view }; else fitView(false);
   draw(); syncUndo(); setSaveState('saved');
@@ -407,7 +441,7 @@ function buildBoardView() {
   fitTitle();
   title.addEventListener('input', fitTitle);
   title.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); title.blur(); } if (e.key === 'Escape') { title.value = B.board.name; title.blur(); } });
-  title.addEventListener('blur', () => { const n = title.value.trim() || 'Untitled board'; title.value = n; fitTitle(); if (n !== B.board.name) { B.board.name = n; document.title = `${n} · Canvas · Fernwork`; save(); } stage.focus({ preventScroll: true }); });
+  title.addEventListener('blur', () => { const n = title.value.trim() || 'Untitled board'; title.value = n; fitTitle(); if (n !== B.board.name) { B.board.name = n; document.title = `${n} · Fernboard · Fernwork`; save(); } stage.focus({ preventScroll: true }); });
   $('#cv-docmenu').onclick = (e) => docMenu(e.currentTarget);
   $$('[data-tool]', v).forEach((b) => (b.onclick = () => setTool(b.dataset.tool)));
   $('#cv-insert').onclick = (e) => openInsert(e.currentTarget);
@@ -428,7 +462,7 @@ function buildBoardView() {
 function setSaveState(state, note) {
   const el = $('#cv-save'); if (!el) return;
   el.dataset.state = state;
-  const t = new Date(); el.dataset.tip = note || `Saved on this device · ${t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+  const t = new Date(); el.dataset.tip = note || `Saved ${t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
   el.innerHTML = state === 'saving' ? '<span class="cv-save__dot"></span><span class="cv-save__txt">Saving…</span>' : `${icon('check', { size: 14 })}<span class="cv-save__txt">${note ? 'Synced' : 'Saved'}</span>`;
 }
 function syncUndo() { const u = $('#cv-undo'), r = $('#cv-redo'); if (u) u.disabled = !B.past.length; if (r) r.disabled = !B.future.length; }
@@ -818,17 +852,23 @@ function closePops() { if (B.pop) { const p = B.pop; B.pop = null; p.close(false
 
 // ───────────────────────── insert menu ("/") ─────────────────────────
 const INSERTS = [
-  { id: 'sequence', label: 'Sequence diagram', sub: 'Who talks to whom, in order', icon: 'arrow-left-right', kw: 'diagram mermaid sequence uml api login' },
-  { id: 'flowchart', label: 'Flowchart', sub: 'Steps and decisions', icon: 'workflow', kw: 'diagram mermaid flow chart process' },
-  { id: 'gantt', label: 'Timeline', sub: 'Tasks over time (Gantt)', icon: 'calendar-clock', kw: 'diagram gantt schedule plan' },
+  { id: 'flowchart', label: 'Flowchart', sub: 'Mermaid · steps and decisions', icon: 'workflow', kw: 'diagram mermaid flow chart process' },
+  { id: 'sequence', label: 'Sequence diagram', sub: 'Mermaid · who talks to whom', icon: 'arrow-left-right', kw: 'diagram mermaid sequence uml api login' },
   { id: 'mindmap', label: 'Mind map', sub: 'Branch out by keyboard', icon: 'network', kw: 'mind map brainstorm outline tree ideas' },
+  { id: 'class', label: 'Class diagram', sub: 'Mermaid', icon: 'boxes', kw: 'diagram mermaid class uml' },
+  { id: 'state', label: 'State diagram', sub: 'Mermaid', icon: 'git-commit', kw: 'diagram mermaid state machine' },
+  { id: 'er', label: 'ER diagram', sub: 'Mermaid · tables and relations', icon: 'database', kw: 'diagram mermaid entity relationship database er' },
+  { id: 'gantt', label: 'Gantt chart', sub: 'Mermaid · tasks over time', icon: 'calendar-clock', kw: 'diagram mermaid gantt schedule plan' },
+  { id: 'pie', label: 'Pie chart', sub: 'Mermaid', icon: 'contrast', kw: 'diagram mermaid pie chart' },
+  { id: 'timeline', label: 'Timeline', sub: 'Mermaid', icon: 'activity', kw: 'diagram mermaid timeline history' },
+  { id: 'quadrant', label: 'Quadrant chart', sub: 'Mermaid', icon: 'layout-grid', kw: 'diagram mermaid quadrant matrix priority' },
   { id: 'sticky', label: 'Sticky note', sub: 'S', icon: 'sticky-note', kw: 'note sticky post-it' },
   { id: 'text', label: 'Text', sub: 'T', icon: 'type', kw: 'text label heading' },
   { id: 'image', label: 'Image…', sub: 'From this device', icon: 'image', kw: 'image photo picture upload' },
 ];
 function openInsert(anchor) {
   if (popOpen()) { closePops(); return; }
-  const el = h(`<div class="cv-insert"><div class="cv-insert__search">${icon('search')}<input class="cv-insert__input" type="text" placeholder="Insert…" aria-label="Insert" autocomplete="off" spellcheck="false"></div><div class="cv-insert__list" role="listbox" aria-label="Blocks"></div><div class="cv-insert__foot">${kbd('up')}${kbd('down')} choose · ${kbd('enter')} insert · ${kbd('mod+k')} search all tools</div></div>`);
+  const el = h(`<div class="cv-insert"><div class="cv-insert__search">${icon('search')}<input class="cv-insert__input" type="text" placeholder="Insert…" aria-label="Insert" autocomplete="off" spellcheck="false"></div><div class="cv-insert__list" role="listbox" aria-label="Blocks"></div><div class="cv-insert__foot">${kbd('up')}${kbd('down')} choose · ${kbd('enter')} insert</div></div>`);
   const list = el.querySelector('.cv-insert__list'), inp = el.querySelector('input'); let items = INSERTS, act = 0;
   const paint = () => { list.innerHTML = items.length ? items.map((it, i) => `<button class="cv-insert__item ${i === act ? 'is-active' : ''}" type="button" role="option" aria-selected="${i === act}" data-i="${i}"><span class="cv-insert__icon">${icon(it.icon, { size: 18 })}</span><span class="cv-insert__txt"><span class="cv-insert__label">${esc(it.label)}</span><span class="cv-insert__sub">${esc(it.sub)}</span></span></button>`).join('') : `<div class="cv-insert__none">Nothing matches. Try “diagram” or “map”.</div>`; $$('[data-i]', list).forEach((b) => (b.onclick = () => pick(items[+b.dataset.i]))); };
   const pick = (it) => { closePops(); insertBlock(it.id); };
@@ -854,7 +894,7 @@ function insertBlock(id, extra = {}) {
   if (id === 'image') return pickFiles('image/*');
   const before = snapshot(); let el;
   if (id === 'mindmap') { const [x, y] = placeNew(560, 340); el = S.make('mindmap', { x, y, w: 560, h: 340, md: extra.md || MM_NEW, title: extra.title || 'Mind map' }); }
-  else { const code = extra.code || { sequence: SEQ, flowchart: FLOW, gantt: GANTT }[id]; const sz = id === 'sequence' ? [500, 330] : id === 'gantt' ? [620, 260] : [560, 240]; const [x, y] = placeNew(...sz); el = S.make('diagram', { x, y, w: sz[0], h: sz[1], code, title: extra.title || { sequence: 'Sequence', flowchart: 'Flowchart', gantt: 'Timeline' }[id] }); }
+  else { const [code0, name, sz] = DIAGRAMS[id] || DIAGRAMS.flowchart; const code = extra.code || code0; const [x, y] = placeNew(...sz); el = S.make('diagram', { x, y, w: sz[0], h: sz[1], code, title: extra.title || name }); }
   B.els.push(el); B.sel = new Set([el.id]); commit(before);
   animateView(fitTarget([el], { maxZ: B.view.z }), 380);
   draw();
@@ -881,7 +921,7 @@ function openFocus(el, { fresh = false } = {}) {
       <input class="cv-focus__title" id="fx-title" value="${esc(el.title)}" aria-label="Block name" spellcheck="false">
       <span class="fw-badge cv-focus__kind" id="fx-kind">${isD ? esc(DG.kindOf(el.code)) : 'Mind map'}</span>
       <span class="fw-spacer"></span>
-      <span class="cv-focus__status fw-hide-mobile" id="fx-status" role="status" aria-live="polite"></span>
+      <button class="fw-btn fw-btn--ghost fw-btn--sm" type="button" id="fx-export" data-tip="Export this ${isD ? 'diagram' : 'mind map'}" data-tip-kbd="shift+mod+e">${icon('download')}<span class="fw-hide-mobile">Export</span></button>
       <button class="fw-btn fw-btn--primary fw-btn--sm" type="button" id="fx-done">Done<kbd class="fw-kbd fw-kbd-hint cv-kbd-on-primary">${isMac() ? '⌘' : 'Ctrl'}${icon('corner-down-left', { size: 12 })}</kbd></button>
     </header>
     <div class="cv-focus__seg fw-show-mobile"><div class="fw-seg" role="radiogroup" aria-label="View"><button class="fw-seg__opt" type="button" role="radio" aria-checked="true" data-pane="code">${isD ? 'Code' : 'Outline'}</button><button class="fw-seg__opt" type="button" role="radio" aria-checked="false" data-pane="preview">${isD ? 'Preview' : 'Map'}</button></div></div>
@@ -891,6 +931,7 @@ function openFocus(el, { fresh = false } = {}) {
         <div class="cv-focus__alert" id="fx-alert" hidden></div>
         <div class="cv-focus__tools" id="fx-tools"></div>
       </div>
+      <div class="cv-focus__resizer fw-hide-mobile" id="fx-resizer" role="separator" tabindex="0" aria-orientation="vertical" aria-label="Resize panes"></div>
       <div class="cv-focus__right">
         <div class="cv-prev" id="fx-prev"><div class="cv-prev__badge" id="fx-stale" hidden>${icon('history', { size: 14 })}Out of date · showing the last version that worked</div><div class="cv-prev__view" id="fx-view"></div>
           <div class="fw-zoom cv-prev__zoom"><button class="fw-iconbtn" type="button" aria-label="Zoom out" data-pz="out">${icon('minus')}</button><button class="fw-zoom__pct" type="button" id="fx-pct" aria-label="Fit preview">Fit</button><button class="fw-iconbtn" type="button" aria-label="Zoom in" data-pz="in">${icon('plus')}</button></div></div>
@@ -898,6 +939,13 @@ function openFocus(el, { fresh = false } = {}) {
     </div></div>`;
   enhance(f);
   $('#fx-back').onclick = () => closeFocus(true); $('#fx-done').onclick = () => closeFocus(true);
+  $('#fx-export').onclick = () => { closeFocus(true); B.sel = new Set([el.id]); draw(); openExport(); };
+  // resizable split (today's pane resizer), remembered
+  const body = f.querySelector('.cv-focus__body'), rz = $('#fx-resizer');
+  const setLeft = (px) => { const w = body.getBoundingClientRect().width; const v = clamp(px, 300, w - 320); body.style.setProperty('--fx-left', v + 'px'); return v; };
+  if (store.get('canvas:fx-left')) setLeft(store.get('canvas:fx-left'));
+  rz.addEventListener('pointerdown', (e) => { rz.setPointerCapture(e.pointerId); const x0 = body.getBoundingClientRect().left; const mv = (ev) => setLeft(ev.clientX - x0); const up = (ev) => { store.set('canvas:fx-left', setLeft(ev.clientX - x0)); rz.removeEventListener('pointermove', mv); rz.removeEventListener('pointerup', up); B.focus?.fitPreview?.(); }; rz.addEventListener('pointermove', mv); rz.addEventListener('pointerup', up); });
+  rz.addEventListener('keydown', (e) => { if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return; e.preventDefault(); const cur = f.querySelector('.cv-focus__left').getBoundingClientRect().width; store.set('canvas:fx-left', setLeft(cur + (e.key === 'ArrowLeft' ? -24 : 24))); });
   const ft = $('#fx-title'); fitFT();
   ft.addEventListener('input', (e) => { el.title = e.target.value; el.titled = true; fitFT(); draw(); });
   $('#fx-title').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); B.focus.focusMain?.(); } });
@@ -910,6 +958,7 @@ const isMac = () => /Mac|iPhone|iPad/.test(navigator.platform);
 function fitFT() { const ft = $('#fx-title'); if (ft && !isMobile()) ft.style.width = Math.min(360, S.measure(ft.value || ' ', 16, 600) + 22) + 'px'; }
 function focusKeys(e) {
   const mod = e.metaKey || e.ctrlKey;
+  if (mod && e.shiftKey && e.key.toLowerCase() === 'e') { e.preventDefault(); $('#fx-export')?.click(); return; }
   if ((e.key === 'Enter' && mod) || (e.key === 'Escape' && !hasLayers() && !$('#fx-editor .ce__ta:focus'))) { e.preventDefault(); closeFocus(true); return; }
   if (e.key === 'Escape' && $('#fx-editor .ce__ta:focus') && B.focus.escOnce) { e.preventDefault(); closeFocus(true); return; }
   if (e.key === 'Escape') B.focus.escOnce = true; else B.focus.escOnce = false;
@@ -926,7 +975,7 @@ function closeFocus(commitIt = true) {
 }
 function mountDiagramFocus(el, f, fresh) {
   const ed = new DG.CodeEditor($('#fx-editor'), { value: el.code, label: 'Mermaid code' });
-  const view = $('#fx-view'), stale = $('#fx-stale'), status = $('#fx-status'), alert = $('#fx-alert');
+  const view = $('#fx-view'), stale = $('#fx-stale'), alert = $('#fx-alert');
   let pz = { k: 1, x: 0, y: 0, fit: true }, t = 0, errT = 0, lastSvg = '';
   const applyPz = () => { const s = view.firstElementChild; if (s) s.style.transform = `translate(${pz.x}px, ${pz.y}px) scale(${pz.k})`; $('#fx-pct').textContent = pz.fit ? 'Fit' : `${Math.round(pz.k * 100)} %`; };
   const fitPreview = () => { const s = view.querySelector('svg'); if (!s) return; const vb = s.viewBox.baseVal, r = view.getBoundingClientRect(); if (!r.width || !vb?.width) return; const k = Math.min(1.6, (r.width - 48) / vb.width, (r.height - 48) / vb.height); pz = { k, x: (r.width - vb.width * k) / 2, y: (r.height - vb.height * k) / 2, fit: true }; s.style.width = vb.width + 'px'; s.style.height = vb.height + 'px'; applyPz(); };
@@ -950,22 +999,21 @@ function mountDiagramFocus(el, f, fresh) {
       if (ed.value !== code) return;
       svgCache.set(ckey(code, th), r.svg); persistCache();
       liveGood.set(el.id, code); clearTimeout(errT); setErr(null); show(r.svg);
-      status.innerHTML = `${icon('check', { size: 14 })}Rendered · ${r.ms} ms`; status.dataset.state = 'ok';
       $('#fx-kind').textContent = DG.kindOf(code); if (fitBlock(el, r.svg)) S.updateBindings(B.els); B.nodes.get(el.id) && (B.nodes.get(el.id).key = null); draw();
     } catch (err) {
       if (ed.value !== code || !err.human) return;
       clearTimeout(errT);
-      errT = setTimeout(() => { if (ed.value !== code) return; setErr(err.human); stale.hidden = !lastSvg; view.classList.toggle('is-stale', !!lastSvg); status.innerHTML = `${icon('circle-alert', { size: 14 })}Line ${err.human.line} needs a fix`; status.dataset.state = 'err'; }, immediate ? 0 : 650);
+      errT = setTimeout(() => { if (ed.value !== code) return; setErr(err.human); stale.hidden = !lastSvg; view.classList.toggle('is-stale', !!lastSvg); }, immediate ? 0 : 650);
     }
   };
   ed.onChange = (v) => { el.code = v; clearTimeout(t); t = setTimeout(() => run(v), 180); };
   B.focus.rerender = () => run(ed.value, true);
-  const cached = svgCache.get(ckey(el.code, theme())); if (cached) { liveGood.set(el.id, el.code); setTimeout(() => show(cached), 0); status.innerHTML = `${icon('check', { size: 14 })}Up to date`; status.dataset.state = 'ok'; }
+  const cached = svgCache.get(ckey(el.code, theme())); if (cached) { liveGood.set(el.id, el.code); setTimeout(() => show(cached), 0); }
   run(el.code, true);
   const kind = DG.kindOf(el.code);
   const SN = kind === 'Sequence' ? [['Message', '\n  A->>S: Message'], ['Reply', '\n  S-->>A: Reply'], ['Note', '\n  Note over A,S: Note'], ['Alt block', '\n  alt Success\n    S-->>A: OK\n  else Failure\n    S-->>A: Error\n  end']]
-    : kind === 'Flowchart' ? [['Step', '\n  X[New step]'], ['Decision', '\n  Y{Question?}'], ['Link', '\n  A --> X'], ['Labelled link', '\n  Y -->|Yes| X']] : [['Task', '\n  Task :t9, after a1, 3d'], ['Section', '\n  section Next']];
-  $('#fx-tools').innerHTML = `<span class="cv-focus__tlabel">Insert</span>${SN.map(([l], i) => `<button class="fw-chip fw-chip--sample" type="button" data-sn="${i}">${icon('plus', { size: 14 })}${l}</button>`).join('')}<span class="fw-spacer"></span><span class="cv-focus__hint cv-pointer">${kbd('tab')} indents · ${kbd('esc')} ${kbd('esc')} closes</span>`;
+    : kind === 'Flowchart' ? [['Step', '\n  X[New step]'], ['Decision', '\n  Y{Question?}'], ['Link', '\n  A --> X'], ['Labelled link', '\n  Y -->|Yes| X']] : kind === 'Gantt' ? [['Task', '\n  Task :t9, after a1, 3d'], ['Section', '\n  section Next']] : [];
+  $('#fx-tools').innerHTML = `${SN.length ? '<span class="cv-focus__tlabel">Insert</span>' : ''}${SN.map(([l], i) => `<button class="fw-chip fw-chip--sample" type="button" data-sn="${i}">${icon('plus', { size: 14 })}${l}</button>`).join('')}<span class="fw-spacer"></span><span class="cv-focus__hint cv-pointer">${kbd('tab')} indents · ${kbd('esc')} ${kbd('esc')} closes</span>`;
   $$('[data-sn]', f).forEach((b) => (b.onclick = () => { const ta = ed.ta; ta.focus(); const v = ta.value; if (ta.selectionStart === 0 && ta.selectionEnd === 0) ta.setSelectionRange(v.length, v.length); else { const e2 = v.indexOf('\n', ta.selectionEnd); const end = e2 < 0 ? v.length : e2; ta.setSelectionRange(end, end); } ed.insert(SN[+b.dataset.sn][1]); }));
   $$('[data-pz]', f).forEach((b) => (b.onclick = () => { const r = view.getBoundingClientRect(), m = b.dataset.pz === 'in' ? 1.25 : 0.8, cx = r.width / 2, cy = r.height / 2, k = clamp(pz.k * m, 0.2, 4); pz = { k, x: cx - ((cx - pz.x) * k) / pz.k, y: cy - ((cy - pz.y) * k) / pz.k, fit: false }; applyPz(); }));
   $('#fx-pct').onclick = () => fitPreview();
@@ -985,8 +1033,15 @@ function mountMindFocus(el, f, fresh) {
   $('#fx-stale').remove();
   const mv = new MM.MapView(view.firstElementChild);
   mv.onView = (v) => { $('#fx-pct').textContent = mv.auto ? 'Fit' : `${Math.round(v.k * 100)} %`; };
-  const status = $('#fx-status');
-  const sync = () => { el.md = MM.toMarkdown(root); if (!el.titled) { el.title = root.text || 'Mind map'; const ti = $('#fx-title'); if (ti && document.activeElement !== ti) { ti.value = el.title; fitFT(); } } if (fitBlock(el, mindSvg(el.md))) S.updateBindings(B.els); mv.update(root); status.innerHTML = `${icon('network', { size: 14 })}${plural(MM.countNodes(root), 'idea')}`; status.dataset.state = 'ok'; B.nodes.get(el.id) && (B.nodes.get(el.id).key = null); draw(); };
+  const shown = () => (el.collapsed ? collapseTree(root) : root);
+  const sync = () => { el.md = MM.toMarkdown(root); if (!el.titled) { el.title = root.text || 'Mind map'; const ti = $('#fx-title'); if (ti && document.activeElement !== ti) { ti.value = el.title; fitFT(); } } if (fitBlock(el, mindSvg(el.md, el.collapsed))) S.updateBindings(B.els); mv.update(shown()); B.nodes.get(el.id) && (B.nodes.get(el.id).key = null); draw(); };
+  // today's "Collapse all / Expand all": main branches only, on the map, the board and in exports
+  const zoom = f.querySelector('.cv-prev__zoom');
+  zoom.insertAdjacentHTML('afterbegin', `<button class="fw-iconbtn" type="button" id="fx-collapse" aria-pressed="${!!el.collapsed}">${icon(el.collapsed ? 'chevrons-up-down' : 'chevrons-down-up')}</button><span class="fw-divider-v"></span>`);
+  const cb = $('#fx-collapse');
+  const syncCb = () => { cb.setAttribute('aria-label', el.collapsed ? 'Expand all' : 'Collapse all'); cb.dataset.tip = el.collapsed ? 'Expand all' : 'Collapse all'; cb.innerHTML = icon(el.collapsed ? 'chevrons-up-down' : 'chevrons-down-up'); cb.setAttribute('aria-pressed', String(!!el.collapsed)); };
+  syncCb();
+  cb.onclick = () => { el.collapsed = !el.collapsed; if (!el.collapsed) delete el.collapsed; syncCb(); mv.auto = true; sync(); };
   const ol = new MM.Outliner(host, root, { onChange: () => sync(), onFocus: (id) => mv.setFocus(id) });
   mv.onNodeClick = (id) => { f.dataset.pane = 'code'; ol.focus(id); };
   $('#fx-tools').innerHTML = `<span class="cv-focus__hint">${kbd('enter')} new idea · ${kbd('tab')} branch · ${kbd('shift+tab')} out · ${kbd('alt+up')}${kbd('alt+down')} move</span>`;
@@ -994,7 +1049,7 @@ function mountMindFocus(el, f, fresh) {
   B.focus.fitPreview = () => setTimeout(() => { mv.auto = true; mv.fit(false); }, 30);
   $$('[data-pz]', f).forEach((b) => (b.onclick = () => mv.zoomBy(b.dataset.pz === 'in' ? 1.25 : 0.8)));
   $('#fx-pct').onclick = () => { mv.auto = true; mv.fit(true); };
-  setTimeout(() => { mv.update(root); mv.fit(false); sync(); }, 30);
+  setTimeout(() => { mv.update(shown()); mv.fit(false); sync(); }, 30);
   B.focus.focusMain = () => ol.focus(root.id);
   setTimeout(() => { const inp = host.querySelector('.ol-input'); inp?.focus(); if (fresh || root.text === 'Central idea') inp?.select(); }, 80);
   B.focus.outliner = ol;
@@ -1062,12 +1117,11 @@ function renderHistory() {
   const el = $('#history'); if (!el || !B.board) return;
   const snaps = B.board.snaps || [];
   el.innerHTML = `<div class="cv-hist__head"><h2 class="cv-hist__title">History</h2><button class="fw-iconbtn fw-iconbtn--sm" type="button" id="hist-x" aria-label="Close history" data-tip="Close" data-tip-kbd="esc">${icon('x')}</button></div>
-    <p class="cv-hist__sub">Kept on this device. A version is saved every 5 minutes of work and before anything destructive.</p>
     <div class="cv-hist__list" role="list">
       <button class="cv-hist__item" type="button" role="listitem" data-snap="now" aria-current="${!B.preview}"><span class="cv-hist__thumb">${B.els.length ? `<img alt="" src="${thumbFor(B.els, { pad: 20 })}">` : '<span class="cv-hist__empty">Empty</span>'}</span><span class="cv-hist__meta"><span class="cv-hist__label">Now</span><span class="cv-hist__time">${plural(B.els.length, 'object')}</span></span></button>
       ${snaps.map((s) => `<button class="cv-hist__item" type="button" role="listitem" data-snap="${s.id}" aria-current="${B.preview?.id === s.id}"><span class="cv-hist__thumb">${s.els.length ? `<img alt="" src="${thumbFor(s.els, { pad: 20 })}">` : '<span class="cv-hist__empty">Empty</span>'}</span><span class="cv-hist__meta"><span class="cv-hist__label">${s.named ? icon('bookmark-plus', { size: 13 }) : ''}${esc(s.label)}</span><span class="cv-hist__time">${new Date(s.t).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' })} · ${shortAgo(s.t)}</span></span></button>`).join('')}
     </div>
-    <div class="cv-hist__foot"><button class="fw-btn fw-btn--sm fw-btn--block" type="button" id="hist-cp">${icon('bookmark-plus')}Save a checkpoint<kbd class="fw-kbd fw-kbd-hint">${isMac() ? '⌘' : 'Ctrl'}S</kbd></button><span class="cv-hist__quota">${formatBytes((localStorage.getItem('fw:canvas:b:' + B.board.id) || '').length)} of history on this device</span></div>`;
+    <div class="cv-hist__foot"><button class="fw-btn fw-btn--sm fw-btn--block" type="button" id="hist-cp">${icon('bookmark-plus')}Save a checkpoint<kbd class="fw-kbd fw-kbd-hint">${isMac() ? '⌘' : 'Ctrl'}S</kbd></button></div>`;
   $('#hist-x').onclick = () => toggleHistory(false);
   $('#hist-cp').onclick = () => { addSnap('Checkpoint', B.els, { named: true }); writeBoard(B.board); renderHistory(); toast('Checkpoint saved'); };
   $$('[data-snap]', el).forEach((b) => (b.onclick = () => (b.dataset.snap === 'now' ? endPreview() : startPreview(snaps.find((s) => s.id === b.dataset.snap)))));
@@ -1117,29 +1171,35 @@ function openExport({ board } = {}) {
       <div data-only="png svg pdf">${seg('bg', 'Background', [['board', 'Board'], ['white', 'White'], ['transparent', 'Transparent']], o.bg)}</div>
       <div data-only="png svg pdf">${seg('th', 'Theme', [['shown', 'As shown'], ['light', 'Light'], ['dark', 'Dark']], o.th)}</div>
       <div class="cv-x__row"><label class="cv-x__label" for="x-name">Name</label><div class="cv-x__name"><input class="fw-input" id="x-name" value="${esc(o.name)}" spellcheck="false"><span class="cv-x__ext" id="x-ext"></span></div></div>
-      <p class="cv-x__note" id="x-note"></p>
     </div></div>`);
   const dlg = openDialog({ title: 'Export', body, size: 820, className: 'cv-x-dialog', initialFocus: '#x-copy',
     actions: [{ label: 'Copy as PNG', onClick: () => {}, close: false }, { label: 'Download', primary: true, onClick: () => {}, close: false }] });
   const [copyBtn, dlBtn] = $$('.fw-dialog__foot .fw-btn', dlg.el); copyBtn.id = 'x-copy'; dlBtn.id = 'x-download';
-  copyBtn.innerHTML = `${icon('copy')}Copy as PNG<kbd class="fw-kbd fw-kbd-hint">${isMac() ? '⇧⌘C' : 'Ctrl+Shift+C'}</kbd>`; dlBtn.innerHTML = `${icon('download')}Download`;
-  dlg.el.querySelector('.fw-dialog__foot').insertAdjacentHTML('afterbegin', `<span class="cv-x__privacy">${icon('lock', { size: 13 })}Made on this device</span><span class="fw-spacer"></span>`);
+  // Copy follows the format: PNG image, SVG markup (today's Mermaid "Copy SVG"), or the block's code
+  const copyLabel = () => (o.fmt === 'svg' ? 'Copy SVG' : o.fmt === 'mmd' || o.fmt === 'md' ? 'Copy code' : o.fmt === 'json' ? 'Copy board file' : 'Copy as PNG');
+  const paintCopy = () => { copyBtn.innerHTML = `${icon('copy')}${copyLabel()}${o.fmt === 'png' || o.fmt === 'pdf' ? `<kbd class="fw-kbd fw-kbd-hint">${isMac() ? '⇧⌘C' : 'Ctrl+Shift+C'}</kbd>` : ''}`; };
+  paintCopy(); dlBtn.innerHTML = `${icon('download')}Download`;
   copyBtn.focus();
   let cur = null, gen = 0;
   const els = () => (o.scope === 'selection' && sel.length ? sel : all);
   const ext = () => ({ png: '.png', svg: '.svg', pdf: '.pdf', json: '.fernboard', mmd: '.mmd', md: '.md' }[o.fmt]);
   const refresh = async () => {
     const my = ++gen; $$('[data-only]', body).forEach((d) => (d.hidden = !d.dataset.only.split(' ').includes(o.fmt)));
-    $('#x-ext').textContent = ext(); $('#x-prev').dataset.bg = o.bg;
+    $('#x-ext').textContent = ext(); $('#x-prev').dataset.bg = o.bg; paintCopy();
     const r = await buildExport(els(), o); if (my !== gen) return; cur = r;
     $('#x-img').src = svgUrl(r.svg);
     const W = Math.round(r.w * (o.fmt === 'png' ? o.scale : 1)), H = Math.round(r.h * (o.fmt === 'png' ? o.scale : 1));
     $('#x-dims').textContent = o.fmt === 'png' ? `${W} × ${H} px` : o.fmt === 'svg' || o.fmt === 'pdf' ? `${Math.round(r.w)} × ${Math.round(r.h)} pt · vector` : o.fmt === 'json' ? 'Editable board file' : 'Block source';
-    $('#x-note').innerHTML = { png: `Fitted to the content, never the viewport. ${o.bg === 'transparent' ? 'Transparent background.' : ''}`, svg: 'Vector, fonts embedded: opens the same anywhere, even offline.', pdf: 'Vector PDF sized to the content. Text stays sharp at any zoom.', json: 'Reopen it in Fernwork Canvas on any device. Diagrams stay editable.', mmd: 'Plain Mermaid source, ready for GitHub or docs.', md: 'Markdown outline: the mind map as a nested list.' }[o.fmt];
   };
   $$('[data-x]', body).forEach((s) => s.addEventListener('fw-change', (e) => { const v = e.detail.value; o[s.dataset.x] = s.dataset.x === 'scale' ? +v : v; Object.assign(exp, { fmt: o.fmt, scale: o.scale, bg: o.bg, th: o.th }); store.set('canvas:export', exp); refresh(); }));
   $('#x-name', body).addEventListener('input', (e) => { o.name = e.target.value; });
   copyBtn.onclick = async () => {
+    if (o.fmt === 'svg' || o.fmt === 'mmd' || o.fmt === 'md' || o.fmt === 'json') {
+      const r = cur || (await buildExport(els(), o));
+      const text = o.fmt === 'svg' ? r.svg : o.fmt === 'json' ? JSON.stringify({ type: 'fernboard', version: 1, name: bd.name, elements: els() }, null, 2) : blk.type === 'diagram' ? blk.code : blk.md;
+      try { await navigator.clipboard.writeText(text); flash(copyBtn, 'Copied'); toast(`Copied ${o.fmt === 'svg' ? 'SVG' : o.fmt === 'json' ? 'board file' : 'code'}`, { type: 'success' }); } catch { toast('Your browser blocked copying. Use Download instead.', { type: 'warning' }); }
+      return;
+    }
     copyBtn.classList.add('is-busy');
     try {
       const r = cur || (await buildExport(els(), o)); const c = await toCanvas(r.svg, r.w, r.h, o.scale);
@@ -1249,10 +1309,23 @@ function onPasteText(t) {
 }
 
 // ───────────────────────── routing ─────────────────────────
+// SEO presets land on exactly that tool: ?leaf=draw → a blank board, ?leaf=mind-map → the mind map editor,
+// ?leaf=mermaid → the Mermaid editor. The board is remembered per preset, so coming back continues it.
+function landPreset(leaf) {
+  const tpl = { draw: 'blank', 'mind-map': 'mindmap', mermaid: 'flowchart' }[leaf];
+  const key = 'canvas:preset:' + leaf, id = store.get(key), bd = id && loadBoard(id);
+  if (bd && !bd.trashed) openBoard(id);
+  else { createFrom(tpl, { focusTitle: false, replace: true }); store.set(key, B.board.id); }
+  history.replaceState(null, '', `?board=${encodeURIComponent(B.board.id)}`);
+  const blk = leaf !== 'draw' && B.els.find((e) => e.type === (leaf === 'mermaid' ? 'diagram' : 'mindmap'));
+  if (blk) setTimeout(() => openFocus(blk), 120);
+}
+let landed = false;
 function route() {
   const p = new URLSearchParams(location.search);
   if (p.get('board')) openBoard(p.get('board'));
   else if (p.get('new')) { history.replaceState(null, '', location.pathname); createFrom(p.get('new')); }
+  else if (!landed && LEAF !== 'fernboard') { landed = true; landPreset(LEAF); }
   else showShelf();
 }
 window.addEventListener('popstate', route);

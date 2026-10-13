@@ -1,0 +1,6 @@
+id,name,city,revenue,orders,active,since
+1001,Acme GmbH,Berlin,15230.50,42,true,2019-03-14
+1002,Beta Studio,Hamburg,4890.00,11,true,2021-07-01
+1003,Cobalt AG,München,23950.75,67,false,2017-11-20
+1004,Delta Bau,Köln,1200.00,3,true,2024-01-08
+1005,Ember Labs,Leipzig,8740.20,25,true,2022-05-30

@@ -12,6 +12,8 @@ const EXT = {
   data: 'json yaml yml xml toml parquet arrow feather sqlite sqlite3 db geojson ndjson',
   text: 'txt log ini conf cfg env srt vtt',
   cad: 'dxf dwg ifc',
+  points: 'las laz e57 pcd pts',
+  geo: 'shp shx kml gpx',
   model: 'stl obj gltf glb ply 3mf',
   archive: 'zip 7z tar gz rar',
 };
@@ -38,7 +40,7 @@ export const extOf = (f) => {
   const m = /\.([a-z0-9]+)$/i.exec(n);
   return m ? m[1].toLowerCase() : MIME_EXT[(f && f.type) || ''] || '';
 };
-/** 'image' | 'video' | 'audio' | 'pdf' | 'doc' | 'slides' | 'sheet' | 'data' | 'text' | 'cad' | 'model' | 'archive' | 'unknown' */
+/** 'image' | 'video' | 'audio' | 'pdf' | 'doc' | 'slides' | 'sheet' | 'data' | 'text' | 'cad' | 'model' | 'points' | 'geo' | 'archive' | 'unknown' */
 export function fileKind(f) {
   const e = extOf(f);
   if (BY_EXT[e]) return BY_EXT[e];
@@ -55,7 +57,7 @@ export const KIND_LABEL = {
   pdf: ['PDF', 'PDFs', 'file-text'], doc: ['document', 'documents', 'file-text'], slides: ['presentation', 'presentations', 'file-text'],
   sheet: ['spreadsheet', 'spreadsheets', 'file-spreadsheet'], data: ['data file', 'data files', 'file-json'],
   text: ['text file', 'text files', 'file-text'], cad: ['CAD drawing', 'CAD drawings', 'box'], model: ['3D model', '3D models', 'box'],
-  archive: ['archive', 'archives', 'file-archive'], unknown: ['file', 'files', 'file-question'], mixed: ['file', 'files', 'files'],
+  archive: ['archive', 'archives', 'file-archive'], points: ['point cloud', 'point clouds', 'scan'], geo: ['map file', 'map files', 'globe'], unknown: ['file', 'files', 'file-question'], mixed: ['file', 'files', 'files'],
 };
 const pretty = { jpg: 'JPG', jpeg: 'JPG', heic: 'HEIC', png: 'PNG', webp: 'WebP', docx: 'Word', doc: 'Word', xlsx: 'Excel', pptx: 'PowerPoint', mp4: 'MP4', mov: 'MOV', pdf: 'PDF' };
 
@@ -76,7 +78,8 @@ export function summarize(files) {
   return { n, kind, kinds, ext, label, icon, names: named ? list.map((f) => f.name) : [], size: sizes };
 }
 
-/** Actions offered by the drop veil for these files. Each: { id, label, sub, icon, leaf } (first = default). */
+/** Actions offered by the drop veil for these files. Each: { id, label, sub, icon, leaf } (first = default).
+ *  Revision 1: leaves are today's sub-tools; `sub` names the tool (no trust/marketing copy). */
 export function actionsFor(files) {
   const s = summarize(files);
   const { n, kind, ext } = s;
@@ -84,73 +87,79 @@ export function actionsFor(files) {
   switch (kind) {
     case 'image': {
       const to = ext === 'jpg' || ext === 'jpeg' ? 'PNG' : 'JPG';
-      const preset = ext === 'heic' || ext === 'heif' ? 'heic-to-jpg' : ext === 'png' ? 'png-to-jpg' : ext === 'webp' ? 'webp-to-png' : 'convert-images';
+      const preset = ext === 'heic' || ext === 'heif' ? 'heic-to-jpg' : ext === 'png' ? 'png-to-jpg' : ext === 'webp' ? 'webp-to-png' : ext === 'avif' ? 'avif-to-png' : ext === 'tif' || ext === 'tiff' ? 'tiff-to-png' : 'convert-images';
       return [
-        A('convert', n > 1 ? `Convert ${n} images to ${to}` : `Convert to ${to}`, 'Convert · works offline', 'arrow-left-right', preset),
-        A('compress', n > 1 ? 'Compress all' : 'Compress', 'Images · smaller files, same look', 'minimize-2', 'compress-image'),
-        A('edit', n > 1 ? 'Open in Images' : 'Edit image', 'Images · crop, adjust, mark up', 'sliders-horizontal', 'image-edit'),
-        n > 1 ? A('pdf', 'Combine into one PDF', 'PDF · one page per image', 'merge', 'merge-pdf')
-              : A('bg', 'Remove background', 'Images · on-device AI', 'scissors', 'remove-background'),
+        A('convert', n > 1 ? `Convert ${n} images to ${to}` : `Convert to ${to}`, 'Convert · Images', 'shuffle', preset),
+        A('compress', n > 1 ? 'Compress all' : 'Compress', 'Image Tools', 'minimize-2', 'compress-image'),
+        A('edit', n > 1 ? 'Open in Image Tools' : 'Edit image', 'Image Tools · crop, resize, adjust, annotate', 'sliders-horizontal', 'image-tools'),
+        n > 1 ? A('pdf', 'Combine into one PDF', 'PDF Tools', 'merge', 'merge-pdf')
+              : A('bg', 'Remove background', 'Image Tools', 'scissors', 'remove-background'),
       ];
     }
     case 'video': return [
-      A('convert', ext === 'mp4' ? 'Convert to WebM' : 'Convert to MP4', 'Convert · keeps quality', 'arrow-left-right', ext === 'mov' ? 'mov-to-mp4' : 'convert-video'),
-      A('mp3', 'Extract audio as MP3', 'Convert · audio only', 'music', 'mp4-to-mp3'),
-      A('gif', 'Make a GIF', 'Convert · trim and loop', 'image', 'mp4-to-gif'),
-      A('open', 'Play', 'Open · frame by frame', 'play', 'open-file'),
+      A('convert', ext === 'mp4' ? 'Convert to WebM' : 'Convert to MP4', 'Convert · Video', 'shuffle', ext === 'mov' ? 'mov-to-mp4' : ext === 'mkv' ? 'mkv-to-mp4' : ext === 'webm' ? 'webm-to-mp4' : 'convert-video'),
+      A('mp3', 'Extract audio as MP3', 'Convert · Audio', 'music', 'mp4-to-mp3'),
+      A('gif', 'Make a GIF', 'Convert · Video', 'image', 'mp4-to-gif'),
     ];
     case 'audio': return [
-      A('convert', ext === 'mp3' ? 'Convert to WAV' : 'Convert to MP3', 'Convert', 'arrow-left-right', 'convert-audio'),
-      A('open', 'Play', 'Open · waveform', 'play', 'open-file'),
+      A('convert', ext === 'mp3' ? 'Convert to WAV' : 'Convert to MP3', 'Convert · Audio', 'shuffle', ext === 'mp3' ? 'mp3-to-wav' : ext === 'wav' ? 'wav-to-mp3' : ext === 'flac' ? 'flac-to-mp3' : ext === 'm4a' ? 'm4a-to-mp3' : 'convert-audio'),
     ];
     case 'pdf': return n > 1 ? [
-      A('merge', `Merge ${n} PDFs`, 'PDF · drag to reorder pages', 'merge', 'merge-pdf'),
-      A('compress', 'Compress all', 'PDF · smaller for email', 'minimize-2', 'compress-pdf'),
+      A('merge', `Merge ${n} PDFs`, 'PDF Tools', 'merge', 'merge-pdf'),
+      A('compress', 'Compress all', 'PDF Tools', 'minimize-2', 'compress-pdf'),
     ] : [
-      A('edit', 'Open & edit', 'PDF · text, images, forms', 'pencil', 'edit-pdf'),
-      A('compress', 'Compress', 'PDF · smaller for email', 'minimize-2', 'compress-pdf'),
-      A('sign', 'Sign', 'PDF · draw or type', 'signature', 'sign-pdf'),
-      A('ocr', 'Make searchable', 'PDF · read text from scans', 'scan-text', 'ocr-pdf'),
+      A('edit', 'Open & edit', 'PDF Tools', 'pencil', 'edit-pdf'),
+      A('compress', 'Compress', 'PDF Tools', 'minimize-2', 'compress-pdf'),
+      A('sign', 'Sign', 'PDF Tools', 'signature', 'sign-pdf'),
+      A('ocr', 'Make searchable (OCR)', 'PDF Tools', 'scan-text', 'ocr-pdf'),
     ];
-    case 'doc': return [
-      A('open', 'Open & edit', 'Open · Word, ODT, RTF', 'folder-open', 'word-viewer'),
-      A('pdf', 'Convert to PDF', 'Convert · layout preserved', 'file-text', 'docx-to-pdf'),
-      A('text', 'Extract text', 'Text · plain text in Textbench', 'text-cursor', 'docx-to-txt'),
+    case 'doc': return ext === 'md' || ext === 'markdown' ? [
+      A('open', 'Open', 'Viewers · Markdown', 'eye', 'viewer-markdown'),
+      A('pdf', 'Convert to PDF', 'Convert · Documents', 'file-text', 'markdown-to-pdf'),
+    ] : [
+      A('open', 'Open', 'Viewers · Documents', 'eye', 'viewer-documents'),
+      A('pdf', 'Convert to PDF', 'Convert · Documents', 'file-text', ext === 'odt' ? 'odt-to-pdf' : ext === 'rtf' ? 'rtf-to-pdf' : ext === 'html' || ext === 'htm' ? 'html-to-pdf' : 'docx-to-pdf'),
+      ...(ext === 'docx' ? [A('text', 'Extract text', 'Convert · Documents', 'text-cursor', 'docx-to-txt')] : []),
     ];
     case 'slides': return [
-      A('open', 'Open', 'Open · slides and notes', 'folder-open', 'powerpoint-viewer'),
-      A('pdf', 'Convert to PDF', 'Convert', 'file-text', 'convert-docs'),
+      A('open', 'Open', 'Viewers · PowerPoint', 'eye', 'viewer-pptx'),
     ];
     case 'sheet': return [
-      A('open', 'Open', 'Open · sort, filter, search', 'folder-open', ext === 'csv' ? 'csv-viewer' : 'excel-viewer'),
-      A('convert', ext === 'csv' ? 'Convert to XLSX' : 'Convert to CSV', 'Convert', 'arrow-left-right', ext === 'csv' ? 'csv-to-xlsx' : 'xlsx-to-csv'),
-      ...(ext === 'csv' ? [A('json', 'Convert to JSON', 'Convert · one object per row', 'braces', 'csv-to-json')] : []),
+      A('open', 'Open', 'Viewers · Tables / Sheets', 'eye', 'viewer-table'),
+      A('convert', ext === 'csv' ? 'Convert to XLSX' : 'Convert to CSV', 'Convert · Tables', 'shuffle', ext === 'csv' ? 'csv-to-xlsx' : 'xlsx-to-csv'),
+      ...(ext === 'csv' ? [A('json', 'Convert to JSON', 'Convert · Data', 'braces', 'csv-to-json')] : []),
     ];
-    case 'data': return ext === 'json' || ext === 'ndjson' || ext === 'geojson' ? [
-      A('format', 'Format JSON', 'Text · pretty-print and explore', 'braces', 'format-json'),
-      A('csv', 'Convert to CSV', 'Convert', 'sheet', 'json-to-csv'),
-      A('open', 'Open as table', 'Open', 'folder-open', 'open-file'),
+    case 'data': return ext === 'json' || ext === 'ndjson' ? [
+      A('format', 'Format JSON', 'Text · JSON Formatter', 'braces', 'json-formatter'),
+      A('csv', 'Convert to CSV', 'Convert · Data', 'sheet', 'json-to-csv'),
+      A('convert', 'Convert to YAML, XML…', 'Convert · Data', 'shuffle', 'convert-data'),
+    ] : ext === 'geojson' ? [
+      A('open', 'Open on a map', 'Viewers · Shapefile', 'eye', 'viewer-shapefile'),
+      A('format', 'Format JSON', 'Text · JSON Formatter', 'braces', 'json-formatter'),
+    ] : ext === 'sqlite' || ext === 'sqlite3' || ext === 'db' ? [
+      A('open', 'Open', 'Viewers · Database', 'eye', 'viewer-database'),
+    ] : ext === 'parquet' || ext === 'arrow' || ext === 'feather' ? [
+      A('open', 'Open', 'Viewers · Tables / Sheets', 'eye', 'viewer-table'),
     ] : [
-      A('open', 'Open', 'Open · browse the data', 'folder-open', ext === 'sqlite' || ext === 'db' ? 'sqlite-viewer' : ext === 'parquet' ? 'parquet-viewer' : 'open-file'),
-      A('convert', 'Convert', 'Convert · JSON, CSV, YAML', 'arrow-left-right', 'convert-data'),
+      A('convert', 'Convert', 'Convert · Data', 'shuffle', 'convert-data'),
     ];
     case 'text': return n === 2 ? [
-      A('compare', 'Compare the two', 'Text · side by side', 'git-compare', 'compare-text'),
-      A('open', 'Open in Textbench', 'Text', 'text-cursor', 'textbench'),
+      A('compare', 'Compare the two', 'Text · Text Diff', 'git-compare', 'text-diff'),
+      A('count', 'Word count', 'Text · Word Count', 'list-checks', 'word-count'),
     ] : [
-      A('open', 'Open in Textbench', 'Text · edit, count, transform', 'text-cursor', 'textbench'),
-      A('count', 'Word count', 'Text', 'list-checks', 'word-count'),
+      A('count', 'Word count', 'Text · Word Count', 'list-checks', 'word-count'),
+      A('text', 'Clean up text', 'Text · Text Cleanup', 'eraser', 'text-cleanup'),
     ];
-    case 'cad': return [A('open', 'Open drawing', 'Open · layers, measure', 'box', ext === 'ifc' ? 'ifc-viewer' : 'dxf-viewer')];
-    case 'model': return [A('open', 'Open 3D model', 'Open · orbit, measure', 'box', 'stl-viewer')];
+    case 'cad': return [ext === 'ifc' ? A('open', 'Open model', 'Viewers · IFC Model', 'eye', 'viewer-ifc') : A('open', 'Open drawing', 'Viewers · DXF Drawing', 'eye', 'viewer-dxf')];
+    case 'model': return [ext === 'ply' ? A('open', 'Open point cloud', 'Viewers · Point Cloud', 'eye', 'viewer-pointcloud') : A('open', 'Open 3D model', 'Viewers · STL / OBJ', 'eye', 'viewer-stl')];
+    case 'points': return [A('open', 'Open point cloud', 'Viewers · Point Cloud', 'eye', 'viewer-pointcloud')];
+    case 'geo': return [A('open', 'Open on a map', 'Viewers · Shapefile', 'eye', 'viewer-shapefile')];
     case 'mixed': return [
-      A('convert', `Convert ${n} files`, 'Convert · grouped by type', 'arrow-left-right', 'convert-images'),
-      A('open', 'Open all', 'Open · one tab each', 'folder-open', 'open-file'),
-      A('checksum', 'Checksum all', 'Developer · SHA-256', 'fingerprint', 'checksum'),
+      A('convert', `Convert ${n} files`, 'Convert', 'shuffle', 'convert-images'),
+      A('checksum', 'Hash all files', 'Security · Hash Generator', 'fingerprint', 'hash-generator'),
     ];
     default: return [
-      A('checksum', 'Checksum (SHA-256)', 'Developer · works for any file', 'fingerprint', 'checksum'),
-      A('text', 'Try opening as text', 'Text · shows readable parts', 'text-cursor', 'textbench'),
+      A('checksum', 'Hash this file', 'Security · Hash Generator', 'fingerprint', 'hash-generator'),
     ];
   }
 }

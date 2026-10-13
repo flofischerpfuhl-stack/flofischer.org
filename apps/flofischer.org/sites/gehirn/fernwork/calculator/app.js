@@ -1,11 +1,11 @@
 // Calc Paper · Fernwork Calculator mockup (archetype A, Workbench).
 // A notebook where every line evaluates live (results in a right gutter) + a split graph pane.
 import {
-  mountShell, $, $$, esc, h, icon, kbd, toast, openMenu, openDialog, openPopover, copyText, store, isMobile, isCoarse,
-  isTyping, hasLayers, pushLayer, enhance, navigate, effectiveTheme,
+  mountShell, $, $$, esc, h, icon, kbd, toast, openMenu, openDialog, copyText, store, isMobile, isCoarse,
+  isTyping, hasLayers, pushLayer, enhance, canonicalId,
 } from '../kit/shell.js';
 import { ICONS } from '../kit/icons.js';
-import { evaluateSheet, lex, pretty, fmtNumber } from './engine.js';
+import { evaluateSheet, lex, pretty, fmtNumber, mathFor } from './engine.js';
 import { Graph } from './graph.js';
 
 // ── extra Lucide icons (ISC), registered at runtime; listed under "Kit additions" ──
@@ -21,20 +21,27 @@ Object.assign(ICONS, {
 
 // ── state ──
 const params = new URLSearchParams(location.search);
-if (/^(de|en)$/.test(params.get('fmt') || '')) store.set('calc:numfmt', params.get('fmt'));
-const DEFAULT_FMT = store.get('calc:numfmt') || (/^de/i.test(navigator.language) ? 'de' : 'en');
+if (/^(de|en|pt)$/.test(params.get('fmt') || '')) store.set('calc:numfmt', params.get('fmt'));
+// Owner rule: decimal point by default; the decimal comma only via the explicit, remembered "Number format" option.
+const DEFAULT_FMT = /^(de|en|pt)$/.test(store.get('calc:numfmt') || '') ? store.get('calc:numfmt') : 'pt';
+const FMT_LABEL = { pt: '1234.5', en: '1,234.5', de: '1.234,5' };
+const LEAF = canonicalId(params.get('leaf') || 'calculator');
 const uid = () => Math.random().toString(36).slice(2, 9);
 const H = 3600e3;
 function seedSheets() {
   const t = Date.now();
   return [
-    { id: 'scratch', name: 'Scratch', updated: t - 0.2 * H, lines: ['price = 1.200', 'vat = 19%', 'price * (1 + vat)', '5 km in mi', 'f(x) = x^3/10 - x', 'g(x) = sin(x)', 'f(2,5)', 'sin(pi/6', ''] },
-    { id: 'budget', name: 'Flat budget', updated: t - 26 * H, lines: ['# Monthly flat costs', 'rent = 1.150', 'power = 64,50', 'internet = 39,99', 'sum', 'Per person: line5 / 2', '', 'Deposit: 3 * rent', '19% of 1.200'] },
-    { id: 'physics', name: 'Physics homework', updated: t - 3 * 24 * H, angle: 'deg', lines: ['# Projectile, 12 m/s at 35°', 'v = 12', 'k = 35', 'flight = 2 * v * sin(k) / 9,81', 'range = v^2 * sin(2 * k) / 9,81', 'h(x) = tan(k) * x - 9,81 * x^2 / (2 * v^2 * cos(k)^2)', 'asin(0,5)'] },
-    { id: 'kitchen', name: 'Kitchen', updated: t - 6 * 24 * H, lines: ['250 g in oz', '180 °C in °F', '3 cups in ml', '2 h + 30 min in min', '1,5 * 400 g'] },
+    // sample sheets are written with a decimal point (the default format); ?fmt=de shows the explicit German option
+    { id: 'scratch', name: 'Scratch', updated: t - 0.2 * H, lines: ['price = 1200', 'vat = 19%', 'price * (1 + vat)', '5 km in mi', 'f(x) = x^3/10 - x', 'g(x) = sin(x)', 'f(2.5)', 'sin(pi/6', ''] },
+    { id: 'budget', name: 'Flat budget', updated: t - 26 * H, lines: ['# Monthly flat costs', 'rent = 1150', 'power = 64.50', 'internet = 39.99', 'sum', 'Per person: line5 / 2', '', 'Deposit: 3 * rent', '19% of 1200'] },
+    { id: 'physics', name: 'Physics homework', updated: t - 3 * 24 * H, angle: 'deg', lines: ['# Projectile, 12 m/s at 35°', 'v = 12', 'k = 35', 'flight = 2 * v * sin(k) / 9.81', 'range = v^2 * sin(2 * k) / 9.81', 'h(x) = tan(k) * x - 9.81 * x^2 / (2 * v^2 * cos(k)^2)', 'asin(0.5)'] },
+    { id: 'kitchen', name: 'Kitchen', updated: t - 6 * 24 * H, lines: ['250 g in oz', '180 °C in °F', '3 cups in ml', '2 h + 30 min in min', '1.5 * 400 g'] },
   ].map((s) => ({ angle: 'rad', fmt: DEFAULT_FMT, view: null, colors: {}, hidden: {}, graph: 'auto', gw: 48, table: false, ...s }));
 }
 let sheets = store.get('calc:sheets');
+// round-1 sample sheets were stored in German notation: reseed them once (the user's own sheets are kept)
+if (Array.isArray(sheets) && !store.get('calc:r1')) { const seeds = seedSheets(); sheets = sheets.filter((s) => s.id !== 'percent').map((s) => seeds.find((x) => x.id === s.id) || s); }
+store.set('calc:r1', true);
 if (!Array.isArray(sheets) || !sheets.length || params.has('reset')) sheets = seedSheets();
 let sheet = sheets.find((s) => s.id === (params.get('sheet') || store.get('calc:current'))) || sheets[0];
 
@@ -54,8 +61,15 @@ if (location.hash.startsWith('#paper=')) {
     setTimeout(() => toast(`Opened “${sheet.name}” from a link · now in your sheets`, { type: 'info' }), 600);
   } catch { /* bad link: ignore */ }
 }
-if (params.has('leaf') && params.get('leaf') === 'percentage' && !q) {
-  sheet = sheets.find((s) => s.id === 'percent') || { ...newSheetObj(), id: 'percent', name: 'Percentages', lines: ['19% of 1.200', '1.200 + 19%', '1.428 - 19%', '50 / 200 * 100', ''] };
+// SEO presets land on a ready sheet: ?leaf=percentage → percentages, ?leaf=grapher → curves with the graph open
+const fmtNum = (n) => (DEFAULT_FMT === 'de' ? String(n).replace('.', ',') : String(n));
+if (LEAF === 'percentage' && !q) {
+  sheet = sheets.find((s) => s.id === 'percent') || { ...newSheetObj(), id: 'percent', name: 'Percentages', lines: ['19% of 1200', '1200 + 19%', '1428 - 19%', '50 / 200 * 100', ''] };
+  if (!sheets.includes(sheet)) sheets.unshift(sheet);
+}
+if (LEAF === 'grapher' && !q) {
+  sheet = sheets.find((s) => s.id === 'graphs') || { ...newSheetObj(), id: 'graphs', name: 'Graphs', lines: ['f(x) = sin(x)', `g(x) = ${fmtNum(0.1)} * x^2 - 2`, ''], graph: 'on' };
+  sheet.graph = 'on';
   if (!sheets.includes(sheet)) sheets.unshift(sheet);
 }
 if (q || location.hash || params.has('leaf') || params.has('sheet') || params.has('reset') || params.has('fmt')) history.replaceState(null, '', location.pathname);
@@ -73,7 +87,7 @@ const mobile = () => isMobile();
 
 // ── shell ──
 const shell = mountShell({
-  leaf: 'calculator', archetype: 'workbench',
+  leaf: ['grapher', 'percentage'].includes(LEAF) ? LEAF : 'calculator', archetype: 'workbench',
   accept: ['text'], acceptLabel: 'Calc Paper',
   onFiles: async (files) => { const t = await files[0].text(); importText(t, files[0].name.replace(/\.\w+$/, '')); },
   onPasteText: (t) => { insertAtCaret(t); return true; },
@@ -82,6 +96,17 @@ const shell = mountShell({
     { label: 'Copy “line = result”', keys: 'shift+mod+c' }, { label: 'Apply quick fix', keys: 'mod+.' },
     { label: 'Duplicate line', keys: 'mod+d' }, { label: 'Show or hide the graph', keys: 'mod+g' },
     { label: 'Export graph as PNG', keys: 'mod+s' }, { label: 'Graph: pan / zoom / fit', keys: '← → + − F' },
+    { label: 'Show or hide the keypad', keys: 'mod+shift+k' },
+  ],
+  // page commands in ⌘K ("On this page"); the command bar itself is pure tool search
+  commands: [
+    { id: 'calc-keys', label: 'Show or hide the keypad', icon: 'calculator', kbd: 'mod+shift+k', syn: ['keypad', 'keys', 'scientific', 'memory', 'buttons'], run: () => toggleKeys() },
+    { id: 'calc-graph', label: 'Show or hide the graph', icon: 'chart-spline', kbd: 'mod+g', syn: ['graph', 'plot', 'grapher'], run: () => toggleGraph() },
+    { id: 'calc-new', label: 'New sheet', icon: 'file-plus', kbd: 'alt+n', syn: ['sheet', 'new', 'blank'], run: () => newSheet() },
+    { id: 'calc-png', label: 'Export graph as PNG', icon: 'image', kbd: 'mod+s', syn: ['export', 'download', 'png', 'save'], run: () => (ev.plots.length ? exportPNG() : toast('Nothing on the graph yet. Add a line with x, like f(x) = x^2', { type: 'info' })) },
+    { id: 'calc-link', label: 'Copy link to this sheet', icon: 'link', syn: ['share', 'link', 'url'], run: () => copyLink() },
+    { id: 'calc-fmt', label: 'Number format…', icon: 'languages', syn: ['decimal comma', 'german numbers', 'komma', 'decimal point', 'thousands separator'], run: () => fmtMenu($('#cp-more')) },
+    { id: 'calc-clear', label: 'Clear sheet', icon: 'eraser', syn: ['clear', 'reset', 'empty'], searchOnly: true, run: () => clearSheet() },
   ],
   recent: { note: sheet.name },
 });
@@ -92,7 +117,7 @@ $('#main').innerHTML = `
 <div class="fw-workbench cp" id="wb">
   <div class="fw-framebar cp-framebar" role="toolbar" aria-label="Sheet" id="framebar"></div>
   <div class="fw-wb-main" id="wb-main">
-    <div class="fw-stage cp-stage" id="stage">
+    <div class="fw-stage fw-stage--fill cp-stage" id="stage">
       <div class="cp-split" id="split">
         <section class="cp-paper" id="paper" aria-label="Calc Paper">
           <div class="cp-lines" id="lines"></div>
@@ -117,7 +142,6 @@ $('#main').innerHTML = `
       </div>
     </div>
   </div>
-  <div class="fw-statusbar" id="status"></div>
   <div class="cp-pad" id="pad"></div>
 </div>`;
 
@@ -163,7 +187,7 @@ function render() {
   syncRows();
   const rows = $$('#lines .cp-line');
   rows.forEach((row, i) => paintRow(row, i));
-  renderGhosts(); renderGraphSide(); renderStatus(); renderDisplay();
+  renderGhosts(); renderGraphSide(); renderDisplay();
 }
 function paintRow(row, i) {
   const r = ev.results[i], src = sheet.lines[i];
@@ -217,7 +241,7 @@ function paintRow(row, i) {
       ${e.fix ? `<button class="cp-fix" type="button" data-fix="${i}">${icon('wand-sparkles', { size: 14 })}${esc(e.fix.label)}${isActive && !isCoarse() ? `<span class="cp-fix__kbd">${kbd('mod+.')}</span>` : ''}</button>` : ''}
       ${e.raw ? `<details class="cp-note__raw"><summary>Details</summary><code>${esc(e.raw)}</code></details>` : ''}</div>`);
   }
-  if (r.echo && r.kind !== 'error') notes.push(`<div class="cp-note cp-note--echo">${icon('languages', { size: 14 })}<span>Read as <code>${esc(r.echo)}</code></span><button class="cp-link" type="button" data-fmt>${sheet.fmt === 'de' ? 'German numbers' : 'English numbers'}</button></div>`);
+  if (r.echo && r.kind !== 'error') notes.push(`<div class="cp-note cp-note--echo">${icon('languages', { size: 14 })}<span>Read as <code>${esc(r.echo)}</code></span><button class="cp-link" type="button" data-fmt>Number format ${FMT_LABEL[sheet.fmt]}</button></div>`);
   if (r.hint && !quiet) notes.push(`<div class="cp-note cp-note--hint">${icon('sliders-horizontal', { size: 14 })}<span class="cp-note__msg">${esc(r.hint.msg)}</span><button class="cp-fix" type="button" data-hint="${i}">${icon('plus', { size: 14 })}${esc(r.hint.fix.label)}</button></div>`);
   const nb = row.querySelector('.cp-notes');
   const nh = notes.join('');
@@ -272,7 +296,7 @@ function renderGhosts() {
   g.hidden = !show;
   if (!show || g.dataset.on) return;
   g.dataset.on = '1';
-  const ex = sheet.fmt === 'de' ? ['2^10 * 3', '19% of 1.200', '5 km in mi', 'f(x) = x^2 - 2', '180 °C in °F'] : ['2^10 * 3', '19% of 1,200', '5 km in mi', 'f(x) = x^2 - 2', '180 °C in °F'];
+  const ex = ['2^10 * 3', sheet.fmt === 'de' ? '19% of 1.200' : sheet.fmt === 'en' ? '19% of 1,200' : '19% of 1200', '5 km in mi', 'f(x) = x^2 - 2', '180 °C in °F'];
   g.innerHTML = `<span class="cp-ghosts__label">Try</span>${ex.map((e) => `<button class="fw-chip cp-ghost" type="button" data-ex="${esc(e)}">${esc(pretty(e))}</button>`).join('')}`;
 }
 $('#ghosts').addEventListener('click', (e) => {
@@ -304,7 +328,6 @@ function renderGraphSide() {
   const gb = $('#gbar');
   const lh = plots.map((p) => `<button class="cp-legend" type="button" aria-pressed="${!sheet.hidden[p.key]}" data-key="${esc(p.key)}" style="--c:${p.color}" data-tip="${sheet.hidden[p.key] ? 'Show' : 'Hide'}"><i></i><span>${esc(p.text)}</span></button>`).join('');
   const html = `<div class="cp-legends" role="group" aria-label="Curves">${lh || '<span class="cp-muted cp-t-sm">No curves yet</span>'}</div>
-    ${sheet.angle === 'deg' ? '<span class="fw-badge cp-degbadge" data-tip="sin, cos and tan read degrees">Trig in degrees</span>' : ''}
     <button class="fw-iconbtn fw-iconbtn--sm" type="button" id="t-table" aria-pressed="${!!sheet.table}" aria-label="Value table" data-tip="Value table">${icon('table-2')}</button>`;
   if (gb.dataset.h !== html) { gb.innerHTML = html; gb.dataset.h = html; }
   // sliders
@@ -391,19 +414,19 @@ function framebar() {
     <div class="fw-seg fw-seg--sm cp-angle" aria-label="Angle unit" id="angle">
       <button class="fw-seg__opt" type="button" aria-checked="${sheet.angle === 'rad'}" data-value="rad" data-tip="Radians, for paper and graph">RAD</button>
       <button class="fw-seg__opt" type="button" aria-checked="${sheet.angle === 'deg'}" data-value="deg" data-tip="Degrees, for paper and graph">DEG</button></div>
-    <button class="cp-fmtchip fw-hide-compact" type="button" id="fmtchip" aria-haspopup="menu" data-tip="Number format">${sheet.fmt === 'de' ? '1.234,5' : '1,234.5'}${icon('chevron-down', { size: 12 })}</button>
     <span class="fw-spacer"></span>
     <div class="fw-framebar__group fw-hide-compact">
       <button class="fw-iconbtn fw-iconbtn--sm" type="button" id="undo" aria-label="Undo" data-tip="Undo" data-tip-kbd="mod+z">${icon('undo-2')}</button>
       <button class="fw-iconbtn fw-iconbtn--sm" type="button" id="redo" aria-label="Redo" data-tip="Redo" data-tip-kbd="shift+mod+z">${icon('redo-2')}</button></div>
     <span class="fw-divider-v fw-hide-compact"></span>
+    <button class="fw-iconbtn fw-iconbtn--sm cp-graphbtn fw-hide-compact" type="button" id="t-keys" aria-pressed="${keysOn()}" aria-label="Keypad" data-tip="Keypad: scientific keys and memory" data-tip-kbd="mod+shift+k">${icon('calculator')}</button>
     <button class="fw-iconbtn fw-iconbtn--sm cp-graphbtn" type="button" id="t-graph" aria-pressed="false" aria-label="Graph" data-tip="Graph" data-tip-kbd="mod+g">${icon('chart-spline')}</button>
     <button class="fw-btn fw-btn--primary fw-btn--sm fw-hide-compact" type="button" id="cp-export" aria-haspopup="menu">${icon('download')}Export${icon('chevron-down', { size: 14 })}</button>
     <button class="fw-iconbtn fw-iconbtn--sm" type="button" id="cp-more" aria-label="More" data-tip="More">${icon('ellipsis')}</button>`;
   enhance($('#framebar'));
   $('#angle').addEventListener('fw-change', (e) => setAngle(e.detail.value));
   $('#sheetchip').onclick = (e) => sheetMenu(e.currentTarget);
-  $('#fmtchip').onclick = (e) => fmtMenu(e.currentTarget);
+  $('#t-keys').onclick = () => toggleKeys();
   $('#undo').onclick = () => undoStep(); $('#redo').onclick = () => redoStep();
   $('#t-graph').onclick = () => toggleGraph();
   $('#cp-export').onclick = (e) => exportMenu(e.currentTarget);
@@ -415,7 +438,6 @@ function setAngle(a) {
   $$('#angle .fw-seg__opt').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.value === a)));
   $$('.cp-mangle .fw-seg__opt').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.value === a)));
   render();
-  toast(a === 'deg' ? 'Degrees: sin(90) = 1, on paper and graph' : 'Radians: sin(pi/2) = 1, on paper and graph', { type: 'info', duration: 2200 });
 }
 function toggleGraph(force) {
   if (mobile()) return openMobileGraph();
@@ -426,7 +448,7 @@ function sheetMenu(anchor) {
   const ago = (t) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
   const count = (s) => s.lines.filter((l) => l.trim()).length;
   openMenu(anchor, [
-    { group: 'Sheets · saved on this device', items: sheets.slice().sort((a, b) => b.updated - a.updated).map((s) => ({ label: s.name, sub: `${count(s)} line${count(s) === 1 ? '' : 's'} · ${ago(s.updated)}`, checked: s === sheet, onSelect: () => switchSheet(s) })) },
+    { group: 'Sheets', items: sheets.slice().sort((a, b) => b.updated - a.updated).map((s) => ({ label: s.name, sub: `${count(s)} line${count(s) === 1 ? '' : 's'} · ${ago(s.updated)}`, checked: s === sheet, onSelect: () => switchSheet(s) })) },
     { items: [
       { label: 'New sheet', icon: 'file-plus', kbd: 'alt+n', onSelect: () => newSheet() },
       { label: 'Rename…', icon: 'pencil', onSelect: () => renameSheet() },
@@ -442,7 +464,6 @@ function switchSheet(s) {
   store.set('calc:current', sheet.id);
   $('#sheetname').textContent = sheet.name;
   $$('#angle .fw-seg__opt').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.value === sheet.angle)));
-  $('#fmtchip').innerHTML = `${sheet.fmt === 'de' ? '1.234,5' : '1,234.5'}${icon('chevron-down', { size: 12 })}`;
   $('#lines').innerHTML = ''; $('#ghosts').dataset.on = ''; $('#sliders').dataset.ids = '';
   graph.pins = []; graph.setView(sheet.view);
   render(); focusLine(active);
@@ -459,15 +480,15 @@ function deleteSheet() {
   switchSheet(sheets[0]);
   toast(`Deleted “${old.name}”`, { type: 'neutral', action: { label: 'Undo', onClick: () => { sheets.splice(idx, 0, old); switchSheet(old); } } });
 }
-function fmtMenu(anchor) {
-  openMenu(anchor, [{ group: 'Number format', items: [
-    { label: 'German · 1.234,5', sub: '1.000 means one thousand', checked: sheet.fmt === 'de', onSelect: () => setFmt('de') },
-    { label: 'English · 1,234.5', sub: '1.000 means one', checked: sheet.fmt === 'en', onSelect: () => setFmt('en') },
-  ] }], { placement: 'bottom-start' });
-}
+const FMT_ITEMS = () => [
+  { label: 'Decimal point · 1234.5', checked: sheet.fmt === 'pt', onSelect: () => setFmt('pt') },
+  { label: 'With thousands · 1,234.5', checked: sheet.fmt === 'en', onSelect: () => setFmt('en') },
+  { label: 'Decimal comma · 1.234,5', sub: '1.000 means one thousand', checked: sheet.fmt === 'de', onSelect: () => setFmt('de') },
+];
+function fmtMenu(anchor) { openMenu(anchor, [{ group: 'Number format', items: FMT_ITEMS() }], { placement: 'bottom-end' }); }
+/** Explicit choice: applies to this sheet and is remembered for new sheets. */
 function setFmt(f) {
   sheet.fmt = f; store.set('calc:numfmt', f); save();
-  $('#fmtchip').innerHTML = `${f === 'de' ? '1.234,5' : '1,234.5'}${icon('chevron-down', { size: 12 })}`;
   $('#ghosts').dataset.on = ''; render(); renderPad();
 }
 function exportMenu(anchor) {
@@ -488,15 +509,40 @@ function exportMenu(anchor) {
 }
 function moreMenu(anchor) {
   const r = ev.results[active];
+  const sym = r?.kind === 'plot' && r.plot?.node;
   openMenu(anchor, [
+    ...(sym ? [{ group: `Line ${active + 1} · ${r.plot.label}`, items: [
+      { label: 'Add derivative', icon: 'chart-spline', sub: `Plots d/d${r.plot.param} on the next line`, onSelect: () => addDerivative(active) },
+      { label: 'Simplify', icon: 'wand-sparkles', onSelect: () => simplifyLine(active) },
+    ] }] : []),
     { items: [
-      ...(mobile() ? [{ label: 'Export…', icon: 'download', onSelect: () => exportMenu(anchor) }, { label: sheet.fmt === 'de' ? 'Numbers: German 1.234,5' : 'Numbers: English 1,234.5', icon: 'languages', onSelect: () => setFmt(sheet.fmt === 'de' ? 'en' : 'de') }] : []),
-      { label: 'Open this line in Units', icon: 'ruler', sub: r?.units ? sheet.lines[active] : 'For lines like “5 km in mi”', onSelect: () => { if (r?.units) navigate('units', { query: { q: sheet.lines[active] } }); else toast('This line has no unit conversion', { type: 'info' }); } },
+      ...(mobile() ? [{ label: 'Export…', icon: 'download', onSelect: () => exportMenu(anchor) }] : []),
       { label: 'Duplicate line', icon: 'copy', kbd: 'mod+d', onSelect: () => duplicateLine() },
       { label: 'Clear sheet', icon: 'eraser', onSelect: () => clearSheet() },
-      { label: 'Keyboard shortcuts', icon: 'keyboard', kbd: '?', onSelect: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' })) },
     ] },
+    { group: 'Number format', items: FMT_ITEMS() },
+    ...(mobile() ? [] : [{ items: [{ label: 'Keyboard shortcuts', icon: 'keyboard', kbd: '?', onSelect: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' })) }] }]),
   ], { placement: 'bottom-end' });
+}
+// symbolic help for curve lines (today's "Derivative by x" and "Simplified" rows)
+const lhsOf = (line) => (/^\s*(?:[A-Za-z_]\w*\s*\([^)]*\)|y)\s*=\s*/.exec(line) || [''])[0];
+const tidy = (t) => t.replace(/\s*\*\s*/g, ' * ').replace(/\s*\^\s*/g, '^').replace(/\s+/g, ' ').trim();
+const asFmt = (t) => (sheet.fmt === 'de' ? t.replace(/(\d)\.(\d)/g, '$1,$2') : t);
+function addDerivative(i) {
+  const r = ev.results[i]; if (!r?.plot?.node) return;
+  let d;
+  try { d = mathFor(sheet.angle).derivative(r.plot.node, r.plot.param); } catch { return toast('No derivative for this line', { type: 'info' }); }
+  const names = new Set(ev.results.filter((x) => x.plot).map((x) => x.plot.name));
+  let n = r.plot.name === 'y' ? 'dy' : 'd' + r.plot.name; while (names.has(n) && n !== 'dy') n = 'd' + n;
+  const line = n === 'dy' ? `y = ${asFmt(tidy(d.toString()))}` : `${n}(${r.plot.param}) = ${asFmt(tidy(d.toString()))}`;
+  remember('struct'); sheet.lines.splice(i + 1, 0, line); changed(); focusLine(i + 1); flashRow(i + 1);
+}
+function simplifyLine(i) {
+  const r = ev.results[i]; if (!r?.plot?.node) return;
+  let t; try { t = asFmt(tidy(mathFor(sheet.angle).simplify(r.plot.node).toString())); } catch { return; }
+  const lhs = lhsOf(sheet.lines[i]);
+  if (tidy(sheet.lines[i].slice(lhs.length)) === t) return toast('Already as simple as it gets', { type: 'info' });
+  remember('struct'); sheet.lines[i] = lhs + t; changed(); focusLine(i); flashRow(i);
 }
 function clearSheet() {
   remember('struct'); const old = sheet.lines.slice();
@@ -519,26 +565,13 @@ function copyLink() {
   const data = btoa(unescape(encodeURIComponent(JSON.stringify({ n: sheet.name, l: sheet.lines, a: sheet.angle, f: sheet.fmt })))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const url = `${location.origin}${location.pathname}#paper=${data}`;
   copyText(url, null);
-  toast('Link copied · opens this sheet, nothing is uploaded', { type: 'success' });
+  toast('Link copied', { type: 'success' });
 }
 function sheetText() { return sheet.lines.map((l, i) => { const r = ev.results[i]; return r?.text && r.kind !== 'plot' ? `${l}  = ${r.text}` : l; }).join('\n'); }
 function sheetMd() { return `| # | Line | Result |\n|---|---|---|\n` + sheet.lines.map((l, i) => l.trim() ? `| ${i + 1} | \`${l.replace(/\|/g, '\\|')}\` | ${ev.results[i]?.text || ''} |` : '').filter(Boolean).join('\n'); }
 function importText(t, name) {
   const s = { ...newSheetObj(), name: name || 'Imported', lines: t.split(/\r?\n/).map((l) => l.replace(/\s+=\s+[^=]*$/, '')).slice(0, 500) };
   sheets.unshift(s); switchSheet(s); toast(`Opened ${s.lines.length} lines as “${s.name}”`);
-}
-
-// ── status bar ──
-function renderStatus() {
-  const vals = ev.results.filter((r) => r.value != null).length, nplots = ev.plots.length, errs = ev.results.filter((r, i) => r.kind === 'error' && !(i === active && Date.now() - typingAt < 650)).length;
-  $('#status').innerHTML = `<span class="fw-statusbar__item">Line ${active + 1} of ${sheet.lines.length}</span>
-    <span class="fw-statusbar__item">${vals} result${vals === 1 ? '' : 's'}</span>
-    ${nplots ? `<span class="fw-statusbar__item">${icon('chart-spline', { size: 12 })}${nplots} curve${nplots === 1 ? '' : 's'}</span>` : ''}
-    ${errs ? `<button class="fw-statusbar__item cp-st-err" type="button" id="st-err">${icon('circle-alert', { size: 12 })}${errs} to fix</button>` : ''}
-    <span class="fw-statusbar__item">${sheet.angle.toUpperCase()}</span>
-    <span class="fw-statusbar__item">${sheet.fmt === 'de' ? 'German numbers' : 'English numbers'}</span>
-    <span class="fw-statusbar__item fw-statusbar__save"><span class="fw-dotlive"></span>Saved on this device</span>`;
-  $('#st-err')?.addEventListener('click', () => { const i = ev.results.findIndex((r) => r.kind === 'error'); if (i >= 0) focusLine(i); });
 }
 
 // ── persistence ──
@@ -577,7 +610,7 @@ function focusLine(i, caret) {
   inp.setSelectionRange(c, c);
   inp.closest('.cp-line').scrollIntoView({ block: 'nearest' });
   $$('#lines .cp-line').forEach((r, k) => paintRow(r, k));
-  renderStatus(); renderDisplay();
+  renderDisplay();
 }
 function syncScroll(inp) { const hl = inp.parentElement.querySelector('.cp-hl__in'); hl.style.transform = `translateX(${-inp.scrollLeft}px)`; }
 
@@ -588,12 +621,12 @@ lines.addEventListener('input', (e) => {
   const i = +inp.closest('.cp-line').dataset.i;
   active = i; sheet.lines[i] = inp.value; typingAt = Date.now();
   changed(); syncScroll(inp);
-  clearTimeout(lines._t); lines._t = setTimeout(() => { $$('#lines .cp-line').forEach((r, k) => paintRow(r, k)); renderStatus(); renderDisplay(); }, 700);
+  clearTimeout(lines._t); lines._t = setTimeout(() => { $$('#lines .cp-line').forEach((r, k) => paintRow(r, k)); renderDisplay(); }, 700);
 });
 lines.addEventListener('focusin', (e) => {
   const inp = e.target.closest('.cp-input'); if (!inp) return;
   const i = +inp.closest('.cp-line').dataset.i;
-  if (i !== active) { active = i; $$('#lines .cp-line').forEach((r, k) => paintRow(r, k)); renderStatus(); renderDisplay(); }
+  if (i !== active) { active = i; $$('#lines .cp-line').forEach((r, k) => paintRow(r, k)); renderDisplay(); }
 });
 document.addEventListener('selectionchange', () => {
   const inp = document.activeElement; if (!inp?.matches?.('.cp-input')) return;
@@ -696,6 +729,7 @@ document.addEventListener('keydown', (e) => {
   const inPaper = !!document.activeElement?.closest?.('.cp-paper') || document.activeElement === document.body || document.activeElement?.id === 'main';
   if (mod && !e.altKey && (e.key === 'z' || e.key === 'Z') && inPaper && !hasLayers()) { e.preventDefault(); e.shiftKey ? redoStep() : undoStep(); return; }
   if (mod && !e.shiftKey && (e.key === 'g' || e.key === 'G')) { e.preventDefault(); toggleGraph(); return; }
+  if (mod && e.shiftKey && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); toggleKeys(); return; }
   if (mod && !e.shiftKey && (e.key === 's' || e.key === 'S')) { e.preventDefault(); if (ev.plots.length) exportPNG(); else download(`${slug(sheet.name)}.txt`, new Blob([sheetText()], { type: 'text/plain' })); return; }
   if (e.altKey && !mod && e.code === 'KeyN') { e.preventDefault(); newSheet(); return; }
   if (mod || e.altKey || hasLayers() || isTyping()) return;
@@ -703,31 +737,94 @@ document.addEventListener('keydown', (e) => {
   if (e.key.length === 1 && e.key !== '/' && e.key !== '?') { focusLine(active); }
 });
 
-// ── mobile: keypad sheet with the live line above it ──
+// ── keypad: fixed on phones (live line above the keys); on desktop an optional panel under the paper ──
+// Keys are today's Calculate keypad + scientific grid + memory (MC MR M+ M−), so nothing from today is lost.
 const PAD = {
   n: [['(', '('], [')', ')'], ['%', '%'], ['÷', ' ÷ ', 'op'], ['7'], ['8'], ['9'], ['×', ' × ', 'op'], ['4'], ['5'], ['6'], ['−', ' − ', 'op'], ['1'], ['2'], ['3'], ['+', ' + ', 'op'], ['0'], ['dec'], ['bksp'], ['=', 'enter', 'eq']],
   f: [['sin', 'sin('], ['cos', 'cos('], ['tan', 'tan('], ['√', '√'], ['asin', 'asin('], ['acos', 'acos('], ['atan', 'atan('], ['x²', '^2'], ['ln', 'ln('], ['log', 'log10('], ['eˣ', 'e^'], ['xʸ', '^'], ['π', 'pi'], ['e', 'e'], ['x', 'x'], ['!', '!'], ['f(x) =', 'f(x) = ', 'wide2'], ['bksp'], ['=', 'enter', 'eq']],
+  m: [['sinh', 'sinh('], ['cosh', 'cosh('], ['tanh', 'tanh('], ['³√', 'cbrt('], ['abs', 'abs('], ['exp', 'exp('], ['floor', 'floor('], ['ceil', 'ceil('], ['round', 'round('], ['mod', ' mod '], ['±', '', 'sign'], ['ans', 'ans'], ['MC', '', 'mc'], ['MR', '', 'mr'], ['M+', '', 'm+'], ['M−', '', 'm-'], ['(', '('], [')', ')'], ['bksp'], ['=', 'enter', 'eq']],
   u: [['km', ' km'], ['mi', ' mi'], ['m', ' m'], ['ft', ' ft'], ['kg', ' kg'], ['lb', ' lb'], ['g', ' g'], ['oz', ' oz'], ['°C', ' °C'], ['°F', ' °F'], ['h', ' h'], ['min', ' min'], ['L', ' L'], ['cup', ' cups'], ['%', '%'], ['in →', ' in ', 'op'], ['0'], ['dec'], ['bksp'], ['=', 'enter', 'eq']],
 };
+// desktop panel: scientific block · number block · memory block, all visible at once
+const DPAD = {
+  sci: [['sin', 'sin('], ['cos', 'cos('], ['tan', 'tan('], ['asin', 'asin('], ['acos', 'acos('], ['atan', 'atan('],
+    ['sinh', 'sinh('], ['cosh', 'cosh('], ['tanh', 'tanh('], ['√', 'sqrt('], ['³√', 'cbrt('], ['abs', 'abs('],
+    ['ln', 'ln('], ['log', 'log10('], ['exp', 'exp('], ['floor', 'floor('], ['ceil', 'ceil('], ['round', 'round('],
+    ['x²', '^2'], ['xʸ', '^'], ['π', 'pi'], ['e', 'e'], ['mod', ' mod '], ['!', '!']],
+  num: [['7'], ['8'], ['9'], ['÷', ' ÷ ', 'op'], ['(', '('], ['4'], ['5'], ['6'], ['×', ' × ', 'op'], [')', ')'], ['1'], ['2'], ['3'], ['−', ' − ', 'op'], ['%', '%'], ['0'], ['dec'], ['±', '', 'sign'], ['+', ' + ', 'op'], ['=', 'enter', 'eq']],
+  mem: [['MC', '', 'mc'], ['MR', '', 'mr'], ['M+', '', 'm+'], ['M−', '', 'm-'], ['ans', 'ans'], ['x', 'x'], ['f(x) =', 'f(x) = '], ['bksp']], // 3 columns, f(x) = spans 2
+};
+const keysOn = () => !!store.get('calc:keys');
+function toggleKeys(force) {
+  if (mobile()) { padTab = padTab === 'm' ? 'n' : 'm'; renderPad(); return; }
+  store.set('calc:keys', force ?? !keysOn());
+  $('#t-keys')?.setAttribute('aria-pressed', String(keysOn()));
+  renderPad(); requestAnimationFrame(() => graph.resize?.());
+}
+let memory = typeof store.get('calc:mem') === 'number' ? store.get('calc:mem') : null;
+function keyHtml([lab, ins, kind], dec) {
+  if (lab === 'dec') return `<button class="cp-key" type="button" data-ins="${dec}" aria-label="Decimal separator">${dec}</button>`;
+  if (lab === 'bksp') return `<button class="cp-key cp-key--fn" type="button" data-act="bksp" aria-label="Delete, hold to clear the line" data-key="bksp">${icon('delete', { size: 22 })}</button>`;
+  const ACT = { sign: 'Toggle sign', mc: 'Clear memory', mr: 'Recall memory', 'm+': 'Add this result to memory', 'm-': 'Subtract this result from memory' };
+  if (ACT[kind]) return `<button class="cp-key cp-key--fn ${kind[0] === 'm' ? 'cp-key--mem' : ''}" type="button" data-act="${kind}" data-key="${esc(lab)}" aria-label="${ACT[kind]}" ${kind === 'mc' || kind === 'mr' ? (memory == null ? 'disabled' : '') : ''}>${esc(lab)}</button>`;
+  const insert = ins ?? lab;
+  return `<button class="cp-key ${kind === 'op' ? 'cp-key--op' : ''} ${kind === 'eq' ? 'cp-key--eq' : ''} ${/^[a-zƒ√∛³π°!]|^x|^e/i.test(lab) && kind !== 'op' && kind !== 'eq' ? 'cp-key--fn' : ''}" type="button" ${insert === 'enter' ? 'data-act="enter"' : `data-ins="${esc(insert)}"`} data-key="${esc(lab)}" aria-label="${esc(lab)}">${esc(lab)}</button>`;
+}
+const memText = () => (memory == null ? '' : fmtNumber(memory, sheet.fmt));
 function renderPad() {
   const pad = $('#pad');
   const dec = sheet.fmt === 'de' ? ',' : '.';
+  const desk = !mobile();
+  pad.classList.toggle('is-desk', desk);
+  pad.hidden = desk && !keysOn();
+  if (desk) {
+    pad.innerHTML = pad.hidden ? '' : `<div class="cp-dpad" role="group" aria-label="Keypad">
+      <div class="cp-dpad__blk cp-dpad__sci" data-roving="a">${DPAD.sci.map((k) => keyHtml(k, dec)).join('')}</div>
+      <div class="cp-dpad__blk cp-dpad__num" data-roving="a">${DPAD.num.map((k) => keyHtml(k, dec)).join('')}</div>
+      <div class="cp-dpad__blk cp-dpad__mem"><div class="cp-dpad__memval" id="memval" aria-live="polite">${memory == null ? '<span class="cp-muted">Memory empty</span>' : `<span class="cp-muted">M</span> ${esc(memText())}`}</div>
+        <div class="cp-dpad__memkeys" data-roving="a">${DPAD.mem.map((k) => keyHtml(k, dec)).join('')}</div></div></div>`;
+    enhance(pad);
+    return;
+  }
   const keys = PAD[padTab] || PAD.n;
   pad.innerHTML = `
     <div class="cp-display" id="display"></div>
     <div class="cp-padtabs" role="tablist" aria-label="Keypad">
-      ${[['n', '123'], ['f', 'ƒx'], ['abc', 'abc'], ['u', 'units']].map(([k, l]) => `<button class="cp-padtab" type="button" role="tab" aria-selected="${padTab === k}" data-tab="${k}">${l}</button>`).join('')}
+      ${[['n', '123'], ['f', 'ƒx'], ['m', 'more'], ['u', 'units'], ['abc', 'abc']].map(([k, l]) => `<button class="cp-padtab" type="button" role="tab" aria-selected="${padTab === k}" data-tab="${k}">${l}</button>`).join('')}
       <button class="cp-padtab cp-padtab--icon" type="button" data-act="graph" aria-label="Graph">${icon('chart-spline', { size: 18 })}</button>
     </div>
     ${padTab === 'abc' ? `<div class="cp-abc"><p>Typing with your keyboard.</p><button class="fw-btn fw-btn--subtle" type="button" data-tab="n">${icon('calculator')}Back to keypad</button></div>` :
-    `<div class="cp-keys" role="group" aria-label="Keys" data-roving="a">${keys.map(([lab, ins, kind]) => {
-      if (lab === 'dec') return `<button class="cp-key" type="button" data-ins="${dec}" aria-label="Decimal separator">${dec}</button>`;
-      if (lab === 'bksp') return `<button class="cp-key cp-key--fn" type="button" data-act="bksp" aria-label="Delete, hold to clear the line">${icon('delete', { size: 22 })}</button>`;
-      const insert = ins ?? lab;
-      return `<button class="cp-key ${kind === 'op' ? 'cp-key--op' : ''} ${kind === 'eq' ? 'cp-key--eq' : ''} ${/^[a-zƒ√π°!]|^x|^e/i.test(lab) && kind !== 'op' && kind !== 'eq' ? 'cp-key--fn' : ''}" type="button" ${insert === 'enter' ? 'data-act="enter"' : `data-ins="${esc(insert)}"`} data-key="${esc(lab)}" aria-label="${esc(lab)}">${esc(lab)}</button>`;
-    }).join('')}</div>`}`;
+    `<div class="cp-keys" role="group" aria-label="Keys" data-roving="a">${keys.map((k) => keyHtml(k, dec)).join('')}</div>`}`;
   enhance(pad);
   renderDisplay();
+}
+// value the memory keys work with: this line's result, or the line above when this one is still empty
+function currentValue() {
+  let i = active, r = ev.results[i];
+  if (!(sheet.lines[i] || '').trim() && i > 0) r = ev.results[i - 1];
+  return typeof r?.value === 'number' && Number.isFinite(r.value) ? r.value : null;
+}
+function memoryKey(act) {
+  if (act === 'mc') { memory = null; }
+  else if (act === 'mr') { if (memory == null) return; insertAtCaret(fmtNumber(memory, sheet.fmt).replace(sheet.fmt === 'de' ? /\./g : /,/g, '')); }
+  else {
+    const v = currentValue();
+    if (v == null) { toast('No number on this line to add to memory', { type: 'info', duration: 1800 }); return; }
+    memory = (memory ?? 0) + (act === 'm+' ? v : -v);
+  }
+  store.set('calc:mem', memory);
+  if (mobile()) { renderPad(); return; }
+  const mv = $('#memval'); if (mv) mv.innerHTML = memory == null ? '<span class="cp-muted">Memory empty</span>' : `<span class="cp-muted">M</span> ${esc(memText())}`;
+  $$('#pad [data-act="mc"], #pad [data-act="mr"]').forEach((b) => (b.disabled = memory == null));
+  mv?.animate?.([{ background: 'var(--accent-subtle-bg)' }, { background: 'transparent' }], { duration: 600 });
+}
+function toggleSign() {
+  const inp = curInput(); if (!inp) return;
+  const v = sheet.lines[active] || '', a = inp.selectionStart, b = inp.selectionEnd;
+  const [s0, e0] = a !== b ? [a, b] : [lhsOf(v).length, v.length];
+  const part = v.slice(s0, e0).trim(); if (!part && a === b) return;
+  const out = /^-\((.*)\)$/.test(part) ? part.slice(2, -1) : /^-[\w.,]+$/.test(part) ? part.slice(1) : /^[\w.,]+$/.test(part) ? `-${part}` : `-(${part || 0})`;
+  remember('struct'); sheet.lines[active] = v.slice(0, s0) + out + v.slice(e0); changed(); focusLine(active, s0 + out.length);
 }
 function renderDisplay() {
   const d = $('#display'); if (!d || !ev) return;
@@ -735,7 +832,7 @@ function renderDisplay() {
   if (!src.trim() && i > 0 && ev.results[i - 1]?.copy) { i = i - 1; r = ev.results[i]; src = sheet.lines[i]; committed = true; }
   const val = r?.kind === 'error' ? (r.error.preview ? r.error.preview : '') : r?.kind === 'plot' ? '' : r?.text || '';
   const msg = r?.kind === 'error' && !r.error.typing && Date.now() - typingAt > 650 ? r.error.msg : r?.kind === 'plot' ? 'on the graph' : '';
-  d.innerHTML = `<div class="cp-display__expr"><span class="cp-display__ln">${i + 1}</span><span class="cp-display__src">${esc(pretty(src)) || '&nbsp;'}${committed ? ' =' : ''}</span></div>
+  d.innerHTML = `<div class="cp-display__expr"><span class="cp-display__ln">${i + 1}</span>${memory != null ? `<span class="cp-display__mem" aria-label="Memory ${esc(memText())}">M ${esc(memText())}</span>` : ''}<span class="cp-display__src">${esc(pretty(src)) || '&nbsp;'}${committed ? ' =' : ''}</span></div>
     <button class="cp-display__res ${committed ? 'is-committed' : ''} ${r?.kind === 'error' ? 'is-err' : ''}" type="button" ${val ? '' : 'disabled'} aria-label="${val ? `Copy ${esc(val)}` : 'No result yet'}">
       ${msg ? `<span class="cp-display__msg">${esc(msg)}</span>` : ''}<span class="cp-display__val ${val ? '' : 'cp-muted'}">${val ? `${committed ? '' : '= '}${esc(val)}` : msg ? '' : '0'}</span>${val ? icon('copy', { size: 16 }) : ''}</button>`;
   d.querySelector('.cp-display__res').onclick = () => copyResult(i);
@@ -743,7 +840,7 @@ function renderDisplay() {
 let holdT = 0, held = false;
 $('#pad').addEventListener('pointerdown', (e) => {
   const k = e.target.closest('.cp-key, .cp-padtab, [data-tab], .cp-display__res'); if (!k) return;
-  if (k.closest('.cp-keys') || k.classList.contains('cp-padtab')) e.preventDefault(); // keep the caret in the line
+  if (k.closest('.cp-keys, .cp-dpad') || k.classList.contains('cp-padtab')) e.preventDefault(); // keep the caret in the line
   if (k.dataset.act === 'bksp') { held = false; holdT = setTimeout(() => { held = true; clearLine(); }, 550); }
   k.classList.add('is-down');
 });
@@ -752,16 +849,17 @@ $('#pad').addEventListener('pointercancel', () => clearTimeout(holdT));
 $('#pad').addEventListener('click', (e) => {
   const t = e.target.closest('[data-tab]');
   if (t) { padTab = t.dataset.tab; renderPad(); focusLine(active); if (padTab === 'abc') toast('Your keyboard is up · tap 123 to come back', { type: 'info', duration: 1800 }); return; }
-  const k = e.target.closest('.cp-key, [data-act]'); if (!k) return;
+  const k = e.target.closest('.cp-key, [data-act]'); if (!k || k.disabled) return;
   const act = k.dataset.act;
   if (act === 'graph') return openMobileGraph();
   if (document.activeElement !== curInput()) focusLine(active);
+  if (act === 'mc' || act === 'mr' || act === 'm+' || act === 'm-') return memoryKey(act);
+  if (act === 'sign') return toggleSign();
   if (act === 'bksp') { if (held) return; const inp = curInput(); remember('type'); if (inp.selectionStart === 0 && inp.selectionEnd === 0 && active > 0) { const prev = sheet.lines[active - 1]; sheet.lines[active - 1] = prev + sheet.lines[active]; sheet.lines.splice(active, 1); changed(); focusLine(active - 1, prev.length); } else document.execCommand('delete'); return; }
   if (act === 'enter') { const inp = curInput(); splitLine(active, inp.value.length, inp.value.length); return; }
   if (k.dataset.ins != null) {
     let ins = k.dataset.ins;
     const inp = curInput(); const before = inp.value.slice(0, inp.selectionStart);
-    if (ins === '(' || ins === ')') { /* as typed */ }
     if (/^ /.test(ins) && /\s$/.test(before)) ins = ins.trimStart();
     insertAtCaret(ins);
   }
@@ -835,7 +933,7 @@ function closeMobileGraph() {
 
 // ── theme: recolour curves and the canvas ──
 window.addEventListener('fw-theme-change', () => { const go = () => { graph.readTheme(); render(); }; setTimeout(go, 30); setTimeout(go, 320); });
-matchMedia('(max-width: 767px)').addEventListener('change', () => { if (!mobile() && mg) closeMobileGraph(); syncRows(); render(); });
+matchMedia('(max-width: 767px)').addEventListener('change', () => { if (!mobile() && mg) closeMobileGraph(); syncRows(); render(); renderPad(); });
 
 // toasts sit right above the keypad (or the graph's list) on phones
 function setToastOffset() {

@@ -1,6 +1,7 @@
 // Fernwork kit · inline answers (math, units, time, colour) and paste detectors (URL, JWT, hash, UUID, Base64,
-// epoch/ISO, colour, WIFI:, vCard, JSON). Pure functions, no DOM. Used by the command bar, the home search and
-// instant tools. Real build: lazy-load calc-engine (mathjs) only when MATH_HINT matches; this is a tiny stand-in.
+// epoch/ISO, colour, WIFI:, vCard, JSON). Pure functions, no DOM. Revision 1: NOT used by the shell any more (the
+// command bar is a pure tool search); kept for pages that import it directly (Calculator: convertUnits) and for
+// in-tool detection (e.g. JSON Formatter noticing a JWT). Real build: lazy-load calc-engine (mathjs) only when MATH_HINT matches; this is a tiny stand-in.
 
 // ── number formatting ─────────────────────────────────────────────────────────
 const NF = new Intl.NumberFormat('en-US', { maximumFractionDigits: 10 });
@@ -248,6 +249,7 @@ export function toHsl({ r, g, b }) {
 
 // ── answer(q): the top row of the command bar ─────────────────────────────────
 // Returns null or { kind, q, value, unit?, copy, sub?, open: leafId, openLabel, swatch? }
+const UNIT_LEAF = { length: 'units-length', area: 'units-area', volume: 'units-volume', mass: 'units-weight', temp: 'units-temperature', speed: 'units-speed', time: 'units-time', pressure: 'units-pressure', energy: 'units-energy', data: 'units-data', angle: 'units-angle' };
 export function answer(q) {
   const s = String(q || '').trim();
   if (!s || s.length > 200) return null;
@@ -255,16 +257,16 @@ export function answer(q) {
   if (u) {
     const a = Math.abs(u.value);
     const v = a !== 0 && (a < 1e-4 || a >= 1e12) ? fmtNum(u.value, { sig: 6 }) : new Intl.NumberFormat('en-US', { maximumFractionDigits: a >= 100 ? 2 : a >= 1 ? 4 : 6 }).format(u.value);
-    return { kind: 'unit', q: `${u.from} =`, value: v, unit: u.unit, copy: `${v} ${u.unit}`, open: 'units', openLabel: 'Units' };
+    return { kind: 'unit', q: `${u.from} =`, value: v, unit: u.unit, copy: `${v} ${u.unit}`, open: UNIT_LEAF[u.dim] || 'units-length', openLabel: 'Units' };
   }
   const ep = parseEpoch(s);
-  if (ep) return { kind: 'time', q: `Unix ${ep.unit}`, value: fmtUTC(ep.ms), copy: new Date(ep.ms).toISOString(), sub: relTime(ep.ms), open: 'time', openLabel: 'Time' };
+  if (ep) return { kind: 'time', q: `Unix ${ep.unit}`, value: fmtUTC(ep.ms), copy: new Date(ep.ms).toISOString(), sub: relTime(ep.ms), open: 'timestamp', openLabel: 'Timestamp' };
   if (ISO_RE.test(s)) {
     const ms = Date.parse(s.length === 10 ? s + 'T00:00:00Z' : s);
-    if (!isNaN(ms)) return { kind: 'time', q: 'ISO date → Unix seconds', value: String(Math.floor(ms / 1000)), copy: String(Math.floor(ms / 1000)), sub: relTime(ms), open: 'time', openLabel: 'Time' };
+    if (!isNaN(ms)) return { kind: 'time', q: 'ISO date → Unix seconds', value: String(Math.floor(ms / 1000)), copy: String(Math.floor(ms / 1000)), sub: relTime(ms), open: 'timestamp', openLabel: 'Timestamp' };
   }
   const c = parseColor(s);
-  if (c) return { kind: 'color', q: s, value: s.startsWith('#') ? `rgb(${c.r} ${c.g} ${c.b})` : toHex(c), copy: s.startsWith('#') ? `rgb(${c.r} ${c.g} ${c.b})` : toHex(c), sub: toHsl(c), swatch: toHex(c), open: 'pick-color', openLabel: 'Color' };
+  if (c) return { kind: 'color', q: s, value: s.startsWith('#') ? `rgb(${c.r} ${c.g} ${c.b})` : toHex(c), copy: s.startsWith('#') ? `rgb(${c.r} ${c.g} ${c.b})` : toHex(c), sub: toHsl(c), swatch: toHex(c), open: 'color-picker', openLabel: 'Color Picker' };
   if (detect(s).length) return null;
   const m = evalMath(s);
   if (m && 'value' in m) return { kind: 'math', q: s.replace(/\s+/g, ' ') + ' =', value: fmtNum(m.value), copy: rawNum(m.value), open: 'calculator', openLabel: 'Calculator' };
@@ -287,8 +289,8 @@ export function detect(text) {
     let n = 0, host = '';
     try { const u = new URL(s.startsWith('www.') ? 'https://' + s : s); host = u.hostname.replace(/^www\./, ''); u.searchParams.forEach((_, k) => { if (TRACKERS.test(k)) n++; }); } catch { /* ignore */ }
     out.push({ type: 'url', label: n ? `Link with ${n} tracker${n > 1 ? 's' : ''}` : 'Link', detail: host, value: s, actions: [
-      { leaf: 'clean-link', label: 'Clean link', sub: n ? `Remove ${n} tracker${n > 1 ? 's' : ''} before sharing` : 'Check for trackers', primary: true },
-      { leaf: 'qr-code', label: 'QR code', sub: 'Make a code for this link' },
+      { leaf: 'url-cleaner', label: 'URL Cleaner', sub: n ? `Remove ${n} tracker${n > 1 ? 's' : ''} before sharing` : 'Check for trackers', primary: true },
+      { leaf: 'qr-generator', label: 'QR Code Generator', sub: 'Make a code for this link' },
     ] });
     return out;
   }
@@ -299,8 +301,7 @@ export function detect(text) {
     try { pay = JSON.parse(b64urlDecode(p) || '{}'); } catch { /* */ }
     const exp = pay.exp ? relTime(pay.exp * 1000) : '';
     out.push({ type: 'jwt', label: 'JSON Web Token', detail: [head.alg, pay.exp ? (pay.exp * 1000 < Date.now() ? 'expired ' + exp : 'expires ' + exp) : ''].filter(Boolean).join(' · '), value: s, actions: [
-      { leaf: 'inspect', label: 'Inspect', sub: 'Decode header and claims', primary: true },
-      { leaf: 'keys-hmac', label: 'Keys & HMAC', sub: 'Verify the signature' },
+      { leaf: 'jwt-decoder', label: 'JWT Decoder', sub: 'Decode header and claims', primary: true },
     ] });
     return out;
   }
@@ -308,8 +309,7 @@ export function detect(text) {
   const uu = /^[0-9a-f]{8}-[0-9a-f]{4}-([0-9a-f])[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/i.exec(s);
   if (uu) {
     out.push({ type: 'uuid', label: `UUID v${uu[1]}`, detail: uu[1] === '7' ? 'time-ordered' : uu[1] === '4' ? 'random' : '', value: s, actions: [
-      { leaf: 'inspect', label: 'Inspect', sub: 'Version, variant and timestamp', primary: true },
-      { leaf: 'generate', label: 'Generate', sub: 'Make new UUIDs' },
+      { leaf: 'uuid-generator', label: 'UUID Generator', sub: 'Make new UUIDs', primary: true },
     ] });
     return out;
   }
@@ -317,8 +317,7 @@ export function detect(text) {
   const HASH = { 32: 'MD5', 40: 'SHA-1', 64: 'SHA-256', 128: 'SHA-512' };
   if (/^[0-9a-f]+$/i.test(s) && HASH[s.length]) {
     out.push({ type: 'hash', label: `${HASH[s.length]} hash`, detail: `${s.length} hex characters`, value: s, actions: [
-      { leaf: 'checksum', label: 'Checksum', sub: 'Verify a file against this hash', primary: true },
-      { leaf: 'inspect', label: 'Inspect', sub: 'Show bytes and encodings' },
+      { leaf: 'hash-generator', label: 'Hash Generator', sub: 'Compare against a file or text', primary: true },
     ] });
     return out;
   }
@@ -326,15 +325,14 @@ export function detect(text) {
   const ep = parseEpoch(s);
   if (ep || ISO_RE.test(s)) {
     out.push({ type: 'time', label: ep ? `Unix time in ${ep.unit}` : 'ISO 8601 date', detail: ep ? relTime(ep.ms) : '', value: s, actions: [
-      { leaf: 'time', label: 'Time', sub: 'All formats and time zones', primary: true },
+      { leaf: 'timestamp', label: 'Timestamp', sub: 'All formats and time zones', primary: true },
     ] });
     return out;
   }
   // Colour
   if (parseColor(s)) {
     out.push({ type: 'color', label: 'Colour', detail: toHex(parseColor(s)), value: s, actions: [
-      { leaf: 'pick-color', label: 'Pick color', sub: 'HEX, RGB, HSL, OKLCH', primary: true },
-      { leaf: 'contrast', label: 'Check contrast', sub: 'Against white and black' },
+      { leaf: 'color-picker', label: 'Color Picker', sub: 'HEX, RGB, HSL, OKLCH, contrast', primary: true },
     ] });
     return out;
   }
@@ -342,7 +340,7 @@ export function detect(text) {
   if (/^WIFI:/i.test(s)) {
     const ssid = /S:((?:\\.|[^;])*)/i.exec(s)?.[1] || 'network';
     out.push({ type: 'wifi', label: `Wi-Fi network “${ssid}”`, detail: /T:(\w+)/i.exec(s)?.[1] || '', value: s, actions: [
-      { leaf: 'wifi-qr', label: 'Wi-Fi QR code', sub: 'Guests scan to join', primary: true },
+      { leaf: 'wifi-qr', label: 'QR Code Generator', sub: 'Wi-Fi code guests scan to join', primary: true },
     ] });
     return out;
   }
@@ -350,7 +348,7 @@ export function detect(text) {
   if (/^BEGIN:VCARD/i.test(s)) {
     const fn = /\nFN[^:]*:(.+)/i.exec(s)?.[1]?.trim() || 'contact';
     out.push({ type: 'vcard', label: `Contact card · ${fn}`, detail: 'vCard', value: s, actions: [
-      { leaf: 'qr-code', label: 'QR code', sub: 'Share the contact as a code', primary: true },
+      { leaf: 'qr-generator', label: 'QR Code Generator', sub: 'Share the contact as a code', primary: true },
     ] });
     return out;
   }
@@ -361,7 +359,7 @@ export function detect(text) {
       const k = Array.isArray(j) ? j.length : Object.keys(j).length;
       const n = `${k} ${Array.isArray(j) ? 'item' : 'key'}${k === 1 ? '' : 's'}`;
       out.push({ type: 'json', label: 'JSON', detail: n, value: s, actions: [
-        { leaf: 'format-json', label: 'Format JSON', sub: 'Pretty-print and explore', primary: true },
+        { leaf: 'json-formatter', label: 'JSON Formatter', sub: 'Pretty-print and explore', primary: true },
         { leaf: 'json-to-csv', label: 'JSON to CSV', sub: 'Make a table' },
       ] });
       return out;
@@ -372,7 +370,7 @@ export function detect(text) {
     const d = b64urlDecode(s);
     if (d && /^[\x20-\x7e\s -￿]+$/.test(d) && d.replace(/[^\x20-\x7e]/g, '').length / d.length > .9) {
       out.push({ type: 'base64', label: 'Base64 text', detail: `“${d.slice(0, 32)}${d.length > 32 ? '…' : ''}”`, value: s, actions: [
-        { leaf: 'inspect', label: 'Inspect', sub: 'Decode Base64', primary: true },
+        { leaf: 'encode-decode', label: 'Encode / Decode', sub: 'Decode Base64', primary: true },
       ] });
     }
   }

@@ -1,6 +1,6 @@
-// Checksum worker: streams a File/Blob through one (or a few) incremental hashers and reports progress with throughput.
-// Web Crypto's digest() cannot stream (it needs the whole file in memory and gives no progress), so big files use
-// hash-wasm (MIT, vendored) here; small files and text are hashed with crypto.subtle on the main thread.
+// Hash worker: streams a File/Blob once through up to five incremental hashers and reports progress with throughput.
+// Web Crypto's digest() cannot stream (it needs the whole file in memory and gives no progress), so files use
+// hash-wasm (MIT, vendored) here; text is hashed with crypto.subtle on the main thread.
 importScripts(
   'vendor/hash-wasm/md5.umd.min.js',
   'vendor/hash-wasm/sha1.umd.min.js',

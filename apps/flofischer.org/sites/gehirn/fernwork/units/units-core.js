@@ -200,6 +200,7 @@ U('power', 'kw', 'kW', 'kilowatt', 1e3, { ci: ['kilowatts', 'Kilowatt'] });
 U('power', 'megaw', 'MW', 'megawatt', 1e6, { csSym: true, ci: ['megawatts', 'Megawatt'] });
 U('power', 'hp', 'hp', 'horsepower', 745.69987158227022, { sys: 'hp', plural: 'horsepower', ci: ['bhp'], note: 'mechanical' });
 U('power', 'ps', 'PS', 'metric horsepower', 735.49875, { sys: 'hp', plural: 'metric horsepower', csSym: true, cs: ['ps', 'Ps'], ci: ['Pferdestärke', 'Pferdestärken', 'cv'] });
+U('power', 'ftlbfs', 'ft·lbf/s', 'foot-pound per second', 1.3558179483314004, { sys: 'imperial', plural: 'foot-pounds per second', ci: ['ft lbf/s', 'ft-lb/s', 'ftlb/s', 'ft·lb/s', 'foot pounds per second'] });
 U('power', 'btuh', 'BTU/h', 'BTU per hour', 0.29307107017222, { sys: 'imperial', plural: 'BTU per hour', ci: ['btu/hr'] });
 amb('hp', ['hp', 'ps']);
 
@@ -246,6 +247,7 @@ U('angle', 'turn', 'turn', 'turn', 2 * PI, { sys: 'angle', ci: ['turns', 'rev', 
 U('angle', 'pct', '%', 'percent grade', null, { sys: 'slope', plural: 'percent grade', to: (x) => Math.atan(x / 100), from: (r) => Math.tan(r) * 100, ci: ['percent', 'pct', 'Prozent', '% grade', '% slope'] });
 U('angle', 'permil', '‰', 'per mille grade', null, { sys: 'slope', plural: 'per mille grade', to: (x) => Math.atan(x / 1000), from: (r) => Math.tan(r) * 1000, ci: ['permille', 'per mille', 'Promille'] });
 U('angle', 'ratio', '1:n', 'slope ratio', null, { sys: 'slope', plural: 'slope ratio', to: (n) => Math.atan(1 / n), from: (r) => 1 / Math.tan(r), ci: ['ratio', '1:x', 'Verhältnis'] });
+U('angle', 'riserun', 'rise/run', 'rise over run', null, { sys: 'slope', plural: 'rise over run', to: (x) => Math.atan(x), from: (r) => Math.tan(r), ci: ['rise over run', 'riserun'] });
 amb('°', ['deg', 'c']); amb("'", ['ft', 'arcmin']); amb('′', ['ft', 'arcmin']); amb('"', ['in', 'arcsec']); amb('″', ['in', 'arcsec']); amb("''", ['in', 'arcsec']);
 
 // Frequency (Hz)
@@ -253,6 +255,7 @@ U('frequency', 'hz', 'Hz', 'hertz', 1, { sys: 'si', plural: 'hertz' });
 U('frequency', 'khz', 'kHz', 'kilohertz', 1e3, { sys: 'si', plural: 'kilohertz' });
 U('frequency', 'mhz', 'MHz', 'megahertz', 1e6, { sys: 'si', plural: 'megahertz' });
 U('frequency', 'ghz', 'GHz', 'gigahertz', 1e9, { sys: 'si', plural: 'gigahertz' });
+U('frequency', 'rads', 'rad/s', 'radian per second', 1 / (2 * PI), { sys: 'rot', plural: 'radians per second', ci: ['rad/sec', 'radians per second'] });
 U('frequency', 'rpm', 'rpm', 'revolution per minute', 1 / 60, { sys: 'rot', plural: 'revolutions per minute', ci: ['U/min', 'r/min', 'bpm', 'rev/min', 'revolutions per minute', 'Umdrehungen pro Minute'] });
 
 // Fuel economy (km/L)
@@ -280,11 +283,11 @@ const PAIR = {
   ns: 'us', us: 'ms', ms: 's', s: 'min', min: 'h', h: 'min', d: 'h', wk: 'd', mo: 'd', yr: 'd',
   pa: 'hpa', hpa: 'inhg', kpa: 'psi', mpa: 'psi', bar: 'psi', mbar: 'inhg', psi: 'bar', inhg: 'hpa', atm: 'bar', mmhg: 'hpa', torr: 'hpa',
   j: 'cal', kj: 'kcal', mj: 'kwh', wh: 'j', kwh: 'mj', cal: 'j', kcal: 'kj', btu: 'kj', ftlbf: 'j', ev: 'j',
-  mw: 'w', w: 'hp', kw: 'hp', megaw: 'hp', hp: 'kw', ps: 'kw', btuh: 'w',
+  mw: 'w', w: 'hp', kw: 'hp', megaw: 'hp', hp: 'kw', ps: 'kw', ftlbfs: 'w', btuh: 'w',
   B: 'bit', kB: 'KiB', MB: 'MiB', GB: 'GiB', TB: 'TiB', PB: 'TB', KiB: 'kB', MiB: 'MB', GiB: 'GB', TiB: 'TB', bit: 'B', kbit: 'kB', Mbit: 'MB', Gbit: 'GB', Tbit: 'TB',
   bps: 'Bps', kbps: 'kBps', mbps: 'MBps', gbps: 'MBps', Bps: 'bps', kBps: 'kbps', MBps: 'mbps', GBps: 'gbps', MiBps: 'mbps',
-  deg: 'rad', arcmin: 'deg', arcsec: 'deg', rad: 'deg', gon: 'deg', turn: 'deg', pct: 'deg', permil: 'deg', ratio: 'pct',
-  hz: 'rpm', khz: 'hz', mhz: 'khz', ghz: 'mhz', rpm: 'hz',
+  deg: 'rad', arcmin: 'deg', arcsec: 'deg', rad: 'deg', gon: 'deg', turn: 'deg', pct: 'deg', permil: 'deg', ratio: 'pct', riserun: 'deg',
+  hz: 'rpm', rads: 'rpm', khz: 'hz', mhz: 'khz', ghz: 'mhz', rpm: 'hz',
   l100km: 'mpgus', kml: 'l100km', mpgus: 'l100km', mpguk: 'l100km',
 };
 // families for best-fit target sizes
@@ -293,7 +296,7 @@ const FAM = [['mm', 'cm', 'm', 'km'], ['in', 'ft', 'yd', 'mi'], ['mg', 'g', 'kg'
   ['j', 'kj', 'mj'], ['wh', 'kwh'], ['mw', 'w', 'kw', 'megaw'], ['hz', 'khz', 'mhz', 'ghz'], ['pa', 'hpa', 'kpa', 'mpa'], ['mm2', 'cm2', 'm2', 'ha', 'km2'], ['in2', 'ft2', 'acre', 'mi2']];
 // compound outputs per category (key = ids joined by '+')
 export const COMPOUNDS = {
-  length: [['ft', 'in']], mass: [['st', 'lb'], ['lb', 'oz']], time: [['h', 'min', 's'], ['d', 'h', 'min']], angle: [['deg', 'arcmin', 'arcsec']],
+  length: [['ft', 'in']], mass: [['st', 'lb'], ['lb', 'oz']], time: [['h', 'min', 's'], ['d', 'h', 'min'], ['yr', 'mo', 'd', 'h', 'min', 's']], angle: [['deg', 'arcmin', 'arcsec']],
 };
 export const FREQUENT = {
   length: ['cm', 'm', 'km', 'in', 'ft', 'mi'], mass: ['g', 'kg', 'lb', 'oz', 'st'], temperature: ['c', 'f', 'k'], volume: ['ml', 'l', 'cup', 'flozus', 'galus'],
@@ -452,6 +455,7 @@ const RE_CLOCK = /^\s*(-)?(\d{1,3}):([0-5]?\d)(?::([0-5]?\d(?:[.,]\d+)?))?\s*(h|
  *   leftText, sepText, rightText, amb: [{ raw, chosen, options }], numAmb: [{ raw, read, alt }], notes: [], bare
  * }
  * ctx.from / ctx.to: unit ids used for a bare number ("82") and as the preferred target.
+ * ctx.cat: the page category, tried first ("oz" on the Volume page = fluid ounces).
  * ctx.over: { raw alias → unit id } chosen readings for ambiguous tokens.
  */
 export function parse(query, ctx = {}) {
@@ -515,6 +519,7 @@ export function parse(query, ctx = {}) {
   // category resolution: the first category every token can agree on
   const order = [];
   const pushCats = (ids) => ids.forEach((id) => { const c = UNITS[id].cat; if (!order.includes(c)) order.push(c); });
+  if (ctx.cat && CAT[ctx.cat]) order.push(ctx.cat);
   terms.forEach((t) => t.ids && pushCats(t.ids));
   if (tgtC) tgtC.forEach(pushCats);
   if (!terms.some((t) => t.ids) && ctx.from) pushCats([ctx.from]);
@@ -785,7 +790,8 @@ export function splitCompound(base, units, { prec = 'auto' } = {}) {
   parts.push({ u: lastU, v: lv });
   // carry (5 ft 12 in → 6 ft 0 in)
   for (let k = parts.length - 1; k > 0; k--) {
-    const ratio = Math.round(parts[k - 1].u.f / parts[k].u.f);
+    const fr = parts[k - 1].u.f / parts[k].u.f, ratio = Math.round(fr);
+    if (Math.abs(fr - ratio) > 1e-9) continue;
     if (parts[k].v >= ratio - 1e-9) { parts[k].v = +(parts[k].v - ratio).toPrecision(12); parts[k - 1].v += 1; }
   }
   return { sign, parts, exact };
@@ -829,6 +835,8 @@ const SLOPE_F = {
   'pct>deg': '° = atan(% ÷ 100)', 'deg>pct': '% = tan(°) × 100', 'permil>deg': '° = atan(‰ ÷ 1000)', 'deg>permil': '‰ = tan(°) × 1000',
   'ratio>deg': '° = atan(1 ÷ n)', 'deg>ratio': 'n = 1 ÷ tan(°)', 'pct>ratio': 'n = 100 ÷ %', 'ratio>pct': '% = 100 ÷ n', 'permil>pct': '% = ‰ ÷ 10', 'pct>permil': '‰ = % × 10',
   'ratio>permil': '‰ = 1000 ÷ n', 'permil>ratio': 'n = 1000 ÷ ‰',
+  'riserun>deg': '° = atan(rise/run)', 'deg>riserun': 'rise/run = tan(°)', 'riserun>pct': '% = rise/run × 100', 'pct>riserun': 'rise/run = % ÷ 100',
+  'riserun>permil': '‰ = rise/run × 1000', 'permil>riserun': 'rise/run = ‰ ÷ 1000', 'riserun>ratio': 'n = 1 ÷ (rise/run)', 'ratio>riserun': 'rise/run = 1 ÷ n',
 };
 /** Human formula for a parse result: { main, step } */
 export function formulaFor(r, { fmt = 'en' } = {}) {

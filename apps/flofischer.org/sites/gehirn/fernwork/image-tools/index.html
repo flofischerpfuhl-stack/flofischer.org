@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<title>Edit image · Fernwork</title>
+<title>Image Tools · Fernwork</title>
 <link rel="icon" href="../kit/img/logo.svg" type="image/svg+xml">
 <script src="../kit/theme-init.js"></script>
 <link rel="stylesheet" href="../kit/tokens.css">
@@ -13,19 +13,21 @@
 <link rel="stylesheet" href="lightbox.css">
 </head>
 <body>
-<!-- Images · "Lightbox" workspace (archetype A). URL: ?leaf=image-edit|image-markup|image-inspect|image-export|remove-background|image-ocr|compress-image…  &demo=1 loads the sample shoot. -->
+<!-- Image Tools workbench. URL: ?leaf=image-tools|compress-image|resize-image|crop-image|remove-background|annotate-image|blur-image|image-metadata
+     &mode=edit|markup|inspect|export · &demo=1 loads the sample images · &fresh=1 starts without the saved session. -->
 <main id="main">
   <div class="fw-workbench lb is-empty" id="wb" data-mode="edit">
     <div class="fw-framebar lb-framebar" role="toolbar" aria-label="Image" id="framebar"></div>
     <div class="lb-main has-inspector" id="lb-main">
       <div class="fw-stage lb-stage" id="stage" tabindex="0" aria-label="Image canvas" aria-describedby="stage-desc">
-        <p class="fw-sr" id="stage-desc">Arrow keys switch photos. F fits, 1 shows 100 %, backslash compares.</p>
+        <p class="fw-sr" id="stage-desc">Drag or use the arrow keys to pan, scroll or pinch to zoom. F fits, 1 shows 100 %. Switch images in the filmstrip below.</p>
         <div class="lb-view" id="view">
           <canvas class="lb-canvas" id="cv" aria-hidden="true"></canvas>
-          <canvas class="lb-canvas lb-canvas--old" id="cv-old" aria-hidden="true"></canvas>
+          <canvas class="lb-canvas lb-canvas--old" id="cv-old" aria-hidden="true" hidden></canvas>
           <img class="lb-after" id="after" alt="" hidden>
           <div class="lb-ocr" id="ocr" hidden></div>
           <svg class="lb-draft" id="draft" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <div class="lb-selbox" id="selbox" hidden></div>
           <div class="lb-crop" id="crop" hidden></div>
           <div class="lb-scan" id="scan" hidden></div>
         </div>
@@ -35,7 +37,7 @@
         <button class="lb-holdcmp" type="button" id="m-compare" aria-label="Hold to compare with the original" aria-pressed="false"></button>
         <div class="lb-empty" id="empty"></div>
       </div>
-      <aside class="fw-inspector lb-panel" aria-label="Inspector" id="panel"></aside>
+      <aside class="fw-inspector lb-panel" aria-label="Options" id="panel"></aside>
     </div>
     <div class="lb-dock" id="dock"></div>
     <div class="lb-mbar" id="mbar"></div>

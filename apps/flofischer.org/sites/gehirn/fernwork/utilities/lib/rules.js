@@ -165,10 +165,10 @@ function unwrapOnce(u) {
  * cleanLink(text, { keep: Set<key>, remove: Set<key> }) → result
  * keep/remove override the defaults (keys are "param:<name>", "path", "unwrap", "hash").
  */
-export function cleanLink(text, { keep = new Set(), remove = new Set() } = {}) {
+export function cleanLink(text, { keep = new Set(), remove = new Set(), dropHash = false } = {}) {
   const original = String(text || '').trim();
   const parsed = parseLoose(original);
-  if (!parsed) return { ok: false, original };
+  if (!parsed) return { ok: false, original, scheme: /^[a-z][a-z0-9+.-]*:/i.test(original) && !/^https?:/i.test(original) ? original.split(':')[0] : null };
   const notes = [];
   if (parsed.added) notes.push({ kind: 'info', text: 'Added https:// (the link had no scheme)' });
   let u = parsed.u;
@@ -208,22 +208,24 @@ export function cleanLink(text, { keep = new Set(), remove = new Set() } = {}) {
     if (!removed) out.searchParams.append(k, v);
   }
   changes.push(...params);
-  // 4 · hash: text-fragment highlights (keep by default, removable)
-  if (/^#:~:text=/.test(u.hash)) {
-    const key = 'hash'; const rem = remove.has(key);
-    changes.push({ key, kind: 'hash', name: '#:~:text', value: decodeURIComponent(u.hash.slice(9)), tracker: false, removed: rem, reason: 'Highlighted text (shows what you selected)', known: true });
+  // 4 · #fragment: kept by default (it jumps to a section), removable; text-fragment highlights explained
+  if (u.hash && u.hash !== '#') {
+    const key = 'hash'; const isText = /^#:~:text=/.test(u.hash);
+    const rem = keep.has(key) ? false : remove.has(key) ? true : !!dropHash;
+    changes.push({ key, kind: 'hash', name: isText ? '#:~:text' : '#', value: isText ? decodeURIComponent(u.hash.slice(9)) : decodeURIComponent(u.hash.slice(1)), tracker: false, removed: rem, reason: isText ? 'Highlighted text (shows what you selected)' : 'Jumps to a section of the page', known: true });
     if (rem) out.hash = '';
   }
   let url = out.href;
   if (out.search === '' ) url = url.replace('?#', '#').replace(/\?$/, '');
-  const removedCount = changes.filter((c) => c.removed && c.kind !== 'unwrap').length;
+  const removedCount = changes.filter((c) => c.removed && c.kind !== 'unwrap' && c.kind !== 'hash').length;
+  const hashRemoved = changes.some((c) => c.kind === 'hash' && c.removed);
   const unwrapped = changes.some((c) => c.kind === 'unwrap' && c.removed);
   if (short) notes.push({ kind: 'warn', short: true, text: `Short link: can’t expand offline. Expanding ${host} would ask its server, which logs the click. Open it once, then paste the full link here.` });
   if (u.protocol === 'http:') notes.push({ kind: 'warn', text: 'Not encrypted (http). Anyone on the network can see this page.' });
   if (/(^|\.)xn--/.test(host)) notes.push({ kind: 'warn', text: `Look-alike domain: ${host} uses special characters. Check the address carefully.` });
   return {
     ok: true, original, url, host, site: site?.name || null, siteId: site?.id || null, short, hops, changes, notes,
-    removedCount, unwrapped, lenBefore: original.length, lenAfter: url.length, changed: url !== parsed.u.href || removedCount > 0,
+    removedCount, hashRemoved, unwrapped, lenBefore: original.length, lenAfter: url.length, changed: url !== parsed.u.href || removedCount > 0,
   };
 }
 
@@ -252,11 +254,11 @@ export function isMessage(text) {
   if (links.length > 1) return true;
   return links.length === 1 && t.replace(links[0].text, '').trim().length > 0 && /\s/.test(t);
 }
-export function cleanMessage(text, overrides = {}) {
+export function cleanMessage(text, overrides = {}, opts = {}) {
   const links = findLinks(text);
   let out = '', i = 0, total = 0;
   const items = links.map((l, n) => {
-    const r = cleanLink(l.text, overrides[n] || {});
+    const r = cleanLink(l.text, { ...opts, ...(overrides[n] || {}) });
     out += text.slice(i, l.start) + (r.ok ? (l.text.startsWith('http') ? r.url : r.url.replace(/^https:\/\//, '')) : l.text); i = l.end;
     total += r.ok ? r.removedCount : 0;
     return { ...l, r };

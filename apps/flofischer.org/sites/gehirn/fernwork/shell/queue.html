@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="shell.css">
 </head>
 <body>
-<!-- Archetype B · Queue skeleton (Convert, Checksum batch). ?leaf=<id> picks the preset. -->
+<!-- Archetype B · Queue skeleton (Convert sub-tools, Hash Generator batch). ?leaf=<id> picks the sub-tool or preset. -->
 <main id="main">
   <div class="fw-page">
     <div id="page-header"></div>
@@ -51,19 +51,18 @@ const CHIP = {
   'convert-video': { kinds: ['video'], noun: 'videos', target: 'MP4', icon: 'film' },
   'convert-audio': { kinds: ['audio', 'video'], noun: 'audio or video', target: 'MP3', icon: 'music' },
   'convert-data': { kinds: ['data', 'text'], noun: 'data files', target: 'CSV', icon: 'braces' },
-  'convert-sheets': { kinds: ['sheet'], noun: 'spreadsheets', target: 'XLSX', icon: 'sheet' },
-  'convert-docs': { kinds: ['doc', 'slides', 'text'], noun: 'documents', target: 'PDF', icon: 'file-text' },
-  'checksum': { kinds: ['*'], noun: 'any files', target: 'SHA-256', icon: 'fingerprint' },
+  'convert-tables': { kinds: ['sheet'], noun: 'spreadsheets', target: 'XLSX', icon: 'sheet' },
+  'convert-documents': { kinds: ['doc', 'slides', 'text'], noun: 'documents', target: 'PDF', icon: 'file-text' },
+  'hash-generator': { kinds: ['*'], noun: 'any files', target: 'SHA-256', icon: 'fingerprint' },
 }[chip.id] || { kinds: ['*'], noun: 'files', target: 'PDF', icon: 'file' };
-const PRESET_TARGET = { 'heic-to-jpg': 'JPG', 'png-to-jpg': 'JPG', 'jpg-to-png': 'PNG', 'webp-to-png': 'PNG', 'png-to-webp': 'WebP', 'avif-to-png': 'PNG', 'tiff-to-png': 'PNG', 'mov-to-mp4': 'MP4', 'mkv-to-mp4': 'MP4', 'webm-to-mp4': 'MP4', 'mp4-to-gif': 'GIF', 'mp4-to-mp3': 'MP3', 'wav-to-mp3': 'MP3', 'flac-to-mp3': 'MP3', 'm4a-to-mp3': 'MP3', 'csv-to-json': 'JSON', 'json-to-csv': 'CSV', 'xlsx-to-csv': 'CSV', 'csv-to-xlsx': 'XLSX', 'ods-to-xlsx': 'XLSX', 'docx-to-pdf': 'PDF', 'odt-to-pdf': 'PDF', 'markdown-to-pdf': 'PDF', 'html-to-pdf': 'PDF', 'docx-to-txt': 'TXT' };
+const PRESET_TARGET = { 'heic-to-jpg': 'JPG', 'png-to-jpg': 'JPG', 'jpg-to-png': 'PNG', 'webp-to-png': 'PNG', 'png-to-webp': 'WebP', 'avif-to-png': 'PNG', 'tiff-to-png': 'PNG', 'mov-to-mp4': 'MP4', 'mkv-to-mp4': 'MP4', 'webm-to-mp4': 'MP4', 'mp4-to-gif': 'GIF', 'mp4-to-mp3': 'MP3', 'wav-to-mp3': 'MP3', 'flac-to-mp3': 'MP3', 'm4a-to-mp3': 'MP3', 'mp3-to-wav': 'WAV', 'mp3-to-ogg': 'OGG', 'xlsx-to-ods': 'ODS', 'odt-to-docx': 'DOCX', 'rtf-to-pdf': 'PDF', 'csv-to-json': 'JSON', 'json-to-csv': 'CSV', 'xlsx-to-csv': 'CSV', 'csv-to-xlsx': 'XLSX', 'ods-to-xlsx': 'XLSX', 'docx-to-pdf': 'PDF', 'odt-to-pdf': 'PDF', 'markdown-to-pdf': 'PDF', 'html-to-pdf': 'PDF', 'docx-to-txt': 'TXT' };
 let target = PRESET_TARGET[leaf.id] || CHIP.target;
 const sampleSpec = CHIP.kinds.includes('image') ? 'IMG_2041.jpg>IMG_2041.HEIC|IMG_2042.jpg>IMG_2042.HEIC|IMG_2043.jpg>IMG_2043.HEIC'
   : CHIP.kinds.includes('doc') ? 'report.docx' : CHIP.kinds.includes('data') ? 'data.json' : 'report.docx|IMG_2041.jpg';
 
-mountShell({ leaf: leaf.id, archetype: 'queue', routing: 'shell', accept: CHIP.kinds, acceptLabel: leaf.name, onFiles: (files) => addFiles(files) });
+mountShell({ leaf: leaf.id, archetype: 'queue', accept: CHIP.kinds, acceptLabel: leaf.name, onFiles: (files) => addFiles(files) });
 document.title = `${leaf.name} · Fernwork`;
-renderPageHeader($('#page-header'), { leaf, aside: `<button class="fw-iconbtn" type="button" aria-label="Keyboard shortcuts" data-tip="Shortcuts" data-tip-kbd="?">${icon('keyboard', { size: 18 })}</button>` });
-$('#page-header .fw-iconbtn').onclick = () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }));
+renderPageHeader($('#page-header'), { leaf });
 
 // ── intake (empty state → slim strip) ──
 function renderIntake(slim) {
@@ -74,8 +73,7 @@ function renderIntake(slim) {
         <span class="fw-intake__icon">${icon(CHIP.icon, { size: 22 })}</span>
         <span class="fw-intake__title"><span class="fw-pointer-copy">Drop ${esc(CHIP.noun)} here</span><span class="fw-touch-copy">Choose ${esc(CHIP.noun)}</span></span>
         <span class="fw-intake__actions"><button class="fw-btn fw-btn--primary" type="button" data-pick>${icon('folder-open')}Choose files</button></span>
-        <span class="fw-intake__sub"><span class="fw-pointer-copy">or paste with ${kbd('mod+v')}</span><span class="fw-dot fw-pointer-copy"></span><a href="#" data-sample="${sampleSpec}">Try a sample</a></span>
-        <span class="fw-intake__privacy">${icon('lock', { size: 12 })} Converted on this device</span></div>`;
+        <span class="fw-intake__sub"><span class="fw-pointer-copy">or paste with ${kbd('mod+v')}</span><span class="fw-dot fw-pointer-copy"></span><a href="#" data-sample="${sampleSpec}">Try a sample</a></span></div>`;
   enhance($('#intake'));
 }
 renderIntake(false);
@@ -126,7 +124,7 @@ function updateGroup() {
   if (working.length) {
     const left = working.reduce((s, i) => s + (100 - i.p), 0) / 100 * 1.1;
     $('#ab-line').textContent = `Converting ${done.length + 1 > n ? n : done.length + 1} of ${n}`;
-    $('#ab-sub').textContent = `about ${Math.max(1, Math.round(left))} s left · on this device`;
+    $('#ab-sub').textContent = `about ${Math.max(1, Math.round(left))} s left`;
     $('#ab-primary').disabled = true;
   } else {
     $('#ab-line').innerHTML = `${n} ${noun} · ${formatBytes(inB)} → ${formatBytes(outB)}`;

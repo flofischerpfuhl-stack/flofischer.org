@@ -3,7 +3,7 @@
 <head>
 <meta name="robots" content="noindex, nofollow">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>Units · Fernwork</title>
 <link rel="icon" href="../kit/img/logo.svg" type="image/svg+xml">
@@ -13,42 +13,12 @@
 <link rel="stylesheet" href="units.css">
 </head>
 <body>
-<!-- Numbers › Units · "Units: One Line" (archetype C, Instant). ?q=<query> is canonical and shareable; ?leaf=cm-to-inches etc. are presets. -->
+<!-- Units, round 2. Pair pages are the landing (?leaf=lbs-to-kg, or ?leaf=units-pressure&pair=bar-psi for any pair);
+     the 14 category pages are hubs (?leaf=units-weight&from=kg&to=lb&v=70, today's from/to/v params). -->
 <main id="main">
   <div class="fw-page u-page" id="page">
     <div id="page-header"></div>
-
-    <div class="u-mpins" id="mpins" aria-label="Pinned conversions"></div>
-
-    <section class="u-composer" id="composer" aria-label="Conversion input">
-      <div class="u-meta" id="meta" aria-live="polite"></div>
-      <div class="u-mpair" id="mpair"></div>
-      <div class="u-qrow">
-        <div class="fw-query u-query" id="qbox">
-          <span class="u-query__icon" data-icon="ruler" data-size="20"></span>
-          <div class="u-query__field">
-            <div class="u-ghost" id="ghost" aria-hidden="true"><span class="u-ghost__typed"></span><span class="u-ghost__hint"></span></div>
-            <label class="fw-sr" for="q">Conversion, for example 5 ft 3 in in cm</label>
-            <input class="fw-query__input" id="q" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
-              enterkeyhint="done" aria-describedby="meta" placeholder="Type a conversion: 5′3″ in cm · 70 kg to lb · −40 °C in °F">
-          </div>
-          <button class="fw-iconbtn fw-iconbtn--sm u-clear" type="button" id="clear" aria-label="Clear" data-tip="Clear" hidden><span data-icon="x"></span></button>
-          <kbd class="fw-kbd fw-kbd--ghost u-slash fw-kbd-hint" aria-hidden="true">/</kbd>
-        </div>
-        <button class="fw-btn fw-btn--primary u-mcopy" type="button" id="mcopy" disabled><span data-icon="copy"></span><span>Copy</span></button>
-      </div>
-    </section>
-
-    <nav class="u-cats" id="cats" aria-label="Categories"></nav>
-
-    <div class="u-layout">
-      <div class="u-main">
-        <div id="hero"></div>
-        <section class="u-all" id="all" hidden></section>
-        <section class="u-empty" id="empty" hidden></section>
-      </div>
-      <aside class="u-aside" id="aside" aria-label="Pinned and recent"></aside>
-    </div>
+    <div id="app"></div>
   </div>
 </main>
 <script type="module" src="app.js"></script>

@@ -3,7 +3,7 @@
 import QR from '../vendor/qrcode.mjs';
 import jsQR from '../vendor/jsqr.mjs';
 
-export const ECC = { standard: 'M', high: 'H' };
+export const ECC_LABEL = { L: 'Low · 7 %', M: 'Medium · 15 %', Q: 'Quartile · 25 %', H: 'High · 30 %' };
 export const CAPACITY = { L: 2953, M: 2331, Q: 1663, H: 1273 };
 const enc = new TextEncoder();
 export const byteLen = (s) => enc.encode(s).length;
@@ -47,7 +47,7 @@ export function drawQR(canvas, qr, { fg = '#000', bg = '#fff', scale = 8, margin
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 
 /** SVG string (one path, crisp at any size). */
-export function toSVG(qr, { fg = '#000', bg = '#fff', margin = 4, logoHref = null, sizeMm = null } = {}) {
+export function toSVG(qr, { fg = '#000', bg = '#fff', margin = 4, logoHref = null, sizeMm = null, px = null } = {}) {
   const n = qr.size, W = n + margin * 2; let d = '';
   const lb = logoHref ? logoBox(qr) : null;
   for (let r = 0; r < n; r++) {
@@ -58,7 +58,7 @@ export function toSVG(qr, { fg = '#000', bg = '#fff', margin = 4, logoHref = nul
       else if (run) { d += `M${c - run + margin} ${r + margin}h${run}v1h-${run}z`; run = 0; }
     }
   }
-  const dim = sizeMm ? ` width="${sizeMm}mm" height="${sizeMm}mm"` : '';
+  const dim = px ? ` width="${px}" height="${px}"` : sizeMm ? ` width="${sizeMm}mm" height="${sizeMm}mm"` : '';
   const logo = lb ? `<rect x="${lb.x + margin}" y="${lb.y + margin}" width="${lb.s}" height="${lb.s}" rx="1.2" fill="${bg}"/><image href="${logoHref}" x="${lb.x + margin + 0.6}" y="${lb.y + margin + 0.6}" width="${lb.s - 1.2}" height="${lb.s - 1.2}"/>` : '';
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${W}"${dim} shape-rendering="crispEdges"><rect width="${W}" height="${W}" fill="${bg}"/><path d="${d}" fill="${fg}"/>${logo}</svg>`;
 }
@@ -133,8 +133,10 @@ export function build(type, f) {
       if (!f.title || !f.start) return { text: '', empty: true };
       const s = new Date(f.start), e = f.end ? new Date(f.end) : new Date(s.getTime() + 3600e3);
       if (isNaN(s)) return { text: '', error: 'Pick a start time.' };
+      if (f.end && !(e > s)) return { text: '', error: 'The end must be after the start.' };
       const L = ['BEGIN:VEVENT', `UID:${f.uid || 'fw-' + s.getTime().toString(36)}@fernwork.net`, `DTSTAMP:${icsUtc(new Date(f.stamp || Date.now()))}`, `DTSTART:${icsUtc(s)}`, `DTEND:${icsUtc(e)}`, `SUMMARY:${icsEsc(f.title)}`];
       if (f.where) L.push(`LOCATION:${icsEsc(f.where)}`);
+      if (f.desc) L.push(`DESCRIPTION:${icsEsc(f.desc)}`);
       L.push('END:VEVENT'); return { text: L.join('\n') };
     }
   }
@@ -172,7 +174,7 @@ export function parse(text) {
   }
   if (/BEGIN:VEVENT/i.test(s)) {
     const t = unfold(s); const g = (k) => (new RegExp(`^${k}(?:;[^:]*)?:(.*)$`, 'im').exec(t)?.[1] || '').replace(/\\([,;\\])/g, '$1').replace(/\\n/g, '\n').trim();
-    return { type: 'event', title: g('SUMMARY'), where: g('LOCATION'), start: icsDate(g('DTSTART')), end: icsDate(g('DTEND')), raw: /BEGIN:VCALENDAR/i.test(s) ? s : `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Fernwork//QR//EN\n${s.trim()}\nEND:VCALENDAR` };
+    return { type: 'event', title: g('SUMMARY'), where: g('LOCATION'), desc: g('DESCRIPTION'), start: icsDate(g('DTSTART')), end: icsDate(g('DTEND')), raw: /BEGIN:VCALENDAR/i.test(s) ? s : `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Fernwork//QR//EN\n${s.trim()}\nEND:VCALENDAR` };
   }
   if (/^mailto:/i.test(s)) { const u = new URL(s); return { type: 'email', to: decodeURIComponent(u.pathname), subject: u.searchParams.get('subject') || '', body: u.searchParams.get('body') || '' }; }
   if (/^MATMSG:/i.test(s)) return { type: 'email', to: /TO:([^;]*)/.exec(s)?.[1] || '', subject: /SUB:([^;]*)/.exec(s)?.[1] || '', body: /BODY:([^;]*)/.exec(s)?.[1] || '' };

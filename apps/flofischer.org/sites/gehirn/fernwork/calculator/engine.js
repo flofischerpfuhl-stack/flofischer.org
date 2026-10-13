@@ -32,10 +32,10 @@ function makeMath(angle) {
 const MATH = { rad: null, deg: null };
 export const mathFor = (angle = 'rad') => (MATH[angle] ||= makeMath(angle));
 
-// ── number formatting (sheet number format: 'de' = 1.234,5 · 'en' = 1,234.5) ──
+// ── number formatting: 'pt' = 1234.5 (default, decimal point) · 'en' = 1,234.5 · 'de' = 1.234,5 (explicit option only) ──
 const NF = {};
-const nf = (fmt, max) => (NF[fmt + max] ||= new Intl.NumberFormat(fmt === 'de' ? 'de-DE' : 'en-US', { maximumFractionDigits: max, useGrouping: true }));
-export function fmtNumber(v, fmt = 'en', { sig = 12, maxFrac = 10 } = {}) {
+const nf = (fmt, max) => (NF[fmt + max] ||= new Intl.NumberFormat(fmt === 'de' ? 'de-DE' : 'en-US', { maximumFractionDigits: max, useGrouping: fmt !== 'pt' }));
+export function fmtNumber(v, fmt = 'pt', { sig = 12, maxFrac = 10 } = {}) {
   if (typeof v !== 'number') return String(v);
   if (Number.isNaN(v)) return 'undefined';
   if (!Number.isFinite(v)) return v > 0 ? '∞' : '−∞';
@@ -74,12 +74,26 @@ export function readNumbers(src, fmt) {
         out += m[0].replace(/\./g, '').replace(',', '.'); changed = true; i += m[0].length; continue;
       }
       if (fmt === 'de' && !sq && (m = /^\d+,\d+/.exec(rest))) { out += m[0].replace(',', '.'); conv = true; i += m[0].length; continue; }
-      if (fmt === 'en' && !sq && (m = /^\d{1,3}(?:,\d{3})+(?:\.\d+)?(?![\d,])/.exec(rest))) { out += m[0].replace(/,/g, ''); i += m[0].length; continue; }
+      if (fmt !== 'de' && !sq && (m = /^\d{1,3}(?:,\d{3})+(?:\.\d+)?(?![\d,])/.exec(rest))) { out += m[0].replace(/,/g, ''); i += m[0].length; continue; }
       m = /^\d+(?:\.\d+)?(?:e[+-]?\d+)?/i.exec(rest); out += m[0]; i += m[0].length; continue;
     }
     out += c; i++;
   }
   return { text: out, changed, conv };
+}
+
+/** "1,5" or "3 + 1,25" outside brackets (not 1,200-style grouping): positions of decimal-comma numbers. */
+function decimalCommas(src) {
+  const out = []; let depth = 0;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (c === '(' || c === '[') depth++; else if (c === ')' || c === ']') depth = Math.max(0, depth - 1);
+    if (depth || !/\d/.test(c) || (i && /[\w.]/.test(src[i - 1]))) continue;
+    const m = /^\d+,\d+(?![\d,.])/.exec(src.slice(i));
+    if (m && !/^\d{1,3}(?:,\d{3})+$/.test(m[0])) out.push({ at: i, tok: m[0] });
+    if (m) i += m[0].length - 1; else { const n = /^\d+/.exec(src.slice(i)); i += n[0].length - 1; }
+  }
+  return out;
 }
 
 // ── natural phrases → mathjs ──
@@ -175,7 +189,7 @@ function isSingleUnitUse(node, parent) {
  * results[i] = { kind, text, copy, value, unit, name, error, echo, hint, plot }
  *   kind: empty | comment | heading | value | assign | fn | plot | error | pending
  */
-export function evaluateSheet(lines, { angle = 'rad', fmt = 'en' } = {}) {
+export function evaluateSheet(lines, { angle = 'rad', fmt = 'pt' } = {}) {
   const m = mathFor(angle);
   const scope = new Map();
   const results = [];
@@ -216,6 +230,17 @@ export function evaluateSheet(lines, { angle = 'rad', fmt = 'en' } = {}) {
       const at = pc.extra + off;
       r.error = { msg: 'Extra )', detail: 'there is no ( to close', at: [at, at + 1], fix: { label: 'Remove )', apply: raw.slice(0, at) + raw.slice(at + 1) } };
       return;
+    }
+
+    // decimal comma typed while the sheet uses a decimal point: say so and offer the fix (comma is an explicit option)
+    if (fmt !== 'de') {
+      const dc = decimalCommas(src);
+      if (dc.length) {
+        r.kind = 'error';
+        const fixed = dc.reduce((t, d) => t.slice(0, d.at) + d.tok.replace(',', '.') + t.slice(d.at + d.tok.length), src);
+        r.error = { msg: 'Use a point for decimals', detail: 'decimal comma: ⋯ › Number format', at: [dc[0].at + off, dc[0].at + off + dc[0].tok.length], fix: { label: `Use ${dc[0].tok.replace(',', '.')}`, apply: raw.slice(0, off) + fixed + raw.slice(off + src.length) } };
+        return;
+      }
     }
 
     // locale reading + natural phrases + references
@@ -292,7 +317,7 @@ export function evaluateSheet(lines, { angle = 'rad', fmt = 'en' } = {}) {
     r.kind = 'plot'; r.name = name;
     const key = name === 'y' ? `L${idx}` : name;
     const code = bodyNode.compile();
-    r.plot = { key, name, line: idx, param: params[0], code, free: [...free], label: name === 'y' ? 'y' : `${name}(${params[0]})` };
+    r.plot = { key, name, line: idx, param: params[0], code, node: bodyNode, free: [...free], label: name === 'y' ? 'y' : `${name}(${params[0]})` };
     if (free.size) {
       const v = [...free][0];
       r.hint = { msg: `${v} isn’t defined yet`, fix: { label: `Add slider ${v}`, kind: 'slider', name: v, line: idx } };

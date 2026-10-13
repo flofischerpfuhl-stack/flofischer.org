@@ -64,6 +64,7 @@ export function formats(c) {
     rgb: `rgb(${R} ${G} ${B}${al})`,
     hsl: `hsl(${Math.round(hs.h)} ${Math.round(hs.s * 100)}% ${Math.round(hs.l * 100)}%${al})`,
     oklch: `oklch(${r1(ok.l * 100, 1)}% ${r1(ok.c, 3)} ${r1(ok.h, 1)}${al})`,
+    hsv: (() => { const v = toHsv(c); return `hsv(${Math.round(v.h)} ${Math.round(v.s * 100)}% ${Math.round(v.v * 100)}%)`; })(),
   };
 }
 
@@ -87,18 +88,31 @@ export function parse(input, { partial = true } = {}) {
   m = /^(rgba?|hsla?|oklch|oklab|hsv)\(\s*([^)]*)\)$/.exec(s);
   if (!m) return null;
   const parts = m[2].replace(/\s*\/\s*/, ' / ').split(/[\s,]+/).filter(Boolean);
-  const slash = parts.indexOf('/'); let a = 1;
+  const slash = parts.indexOf('/'); let a = 1; let clipped = false;
   if (slash >= 0) { a = num(parts[slash + 1], 1); parts.splice(slash, 2); } else if (parts.length === 4) a = num(parts.pop(), 1);
   if (parts.length < 3) return null;
   let c;
   if (m[1].startsWith('rgb')) c = { r: num(parts[0], 255) / 255, g: num(parts[1], 255) / 255, b: num(parts[2], 255) / 255 };
   else if (m[1].startsWith('hsl')) c = fromHsl({ h: parseFloat(parts[0]), s: num(parts[1].endsWith('%') ? parts[1] : parts[1] + '%', 1), l: num(parts[2].endsWith('%') ? parts[2] : parts[2] + '%', 1) });
-  else if (m[1] === 'oklch') c = fromOklch({ l: parts[0].endsWith('%') ? parseFloat(parts[0]) / 100 : parseFloat(parts[0]), c: num(parts[1], 0.4), h: parseFloat(parts[2]) || 0 });
+  else if (m[1] === 'oklch') { const L = parts[0].endsWith('%') ? parseFloat(parts[0]) / 100 : parseFloat(parts[0]); const raw = fromOklchRaw({ l: L, c: num(parts[1], 0.4), h: parseFloat(parts[2]) || 0 }); if (!inGamut(raw)) clipped = true; c = fromOklch({ l: parts[0].endsWith('%') ? parseFloat(parts[0]) / 100 : parseFloat(parts[0]), c: num(parts[1], 0.4), h: parseFloat(parts[2]) || 0 }); }
   else if (m[1] === 'oklab') c = fromOklab({ L: parts[0].endsWith('%') ? parseFloat(parts[0]) / 100 : parseFloat(parts[0]), A: num(parts[1], 0.4), B: num(parts[2], 0.4) });
   else c = fromHsv({ h: parseFloat(parts[0]), s: num(parts[1], 1), v: num(parts[2], 1) });
   if ([c.r, c.g, c.b, a].some((v) => Number.isNaN(v))) return null;
-  return { r: clamp(c.r), g: clamp(c.g), b: clamp(c.b), a: clamp(a) };
+  return { r: clamp(c.r), g: clamp(c.g), b: clamp(c.b), a: clamp(a), ...(clipped ? { clipped: true } : {}) };
 }
+
+/** Any CSS colour the browser knows (named colours like steelblue, color(), lab() …) via a 1×1 canvas. */
+let _cv = null;
+export function parseCss(input) {
+  const s = String(input || '').trim();
+  if (!s || typeof CSS === 'undefined' || !CSS.supports('color', s)) return null;
+  _cv ||= Object.assign(document.createElement('canvas'), { width: 1, height: 1 });
+  const g = _cv.getContext('2d', { willReadFrequently: true });
+  g.clearRect(0, 0, 1, 1); g.fillStyle = '#000'; g.fillStyle = s; g.fillRect(0, 0, 1, 1);
+  const d = g.getImageData(0, 0, 1, 1).data;
+  return { r: d[0] / 255, g: d[1] / 255, b: d[2] / 255, a: d[3] / 255 };
+}
+export const parseAny = (s, o) => parse(s, o) || parseCss(s);
 
 // ── contrast ─────────────────────────────────────────────────────────────────
 export function luminance(c) { return 0.2126 * toLin(clamp(c.r)) + 0.7152 * toLin(clamp(c.g)) + 0.0722 * toLin(clamp(c.b)); }

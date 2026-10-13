@@ -1,18 +1,19 @@
-// Open · PowerPoint (PPTX). Real parsing with the bundled JSZip (same origin): slide size, shapes, fills, text runs,
+// Viewers · PowerPoint Viewer (PPTX). Real parsing with the bundled JSZip (same origin): slide size, shapes, fills, text runs,
 // bullets, title/author. Slides render on an isolated white "paper" palette, so they stay readable in dark mode.
 import { formatBytes } from '../../kit/shell.js';
 
 const EMU_PX = 9525, PT = 96 / 72;
-const human = (d, why, details) => Object.assign(new Error(details), { human: true, title: `${d.name} couldn’t be opened`, why, details, alt: ['text', 'hex'] });
+const human = (d, why, details) => Object.assign(new Error(details), { human: true, title: `${d.name} couldn’t be opened`, why, details, ...(/\.(ppt|key|odp)$/i.test(d.name) ? { route: null } : {}) });
 const q = (el, sel) => el.getElementsByTagName(sel)[0] || null;
 const qa = (el, sel) => [...el.getElementsByTagName(sel)];
 const kid = (el, name) => el && [...el.children].find((c) => c.tagName === name) || null;
 
 export default {
-  id: 'slides', label: 'Presentation', asLabel: 'Presentation (PPTX)', icon: 'presentation', exts: ['pptx'],
-  listLabel: 'Slides', listIcon: 'layout-grid', selIcon: 'mouse-pointer-2', selHint: 'Click a text box or shape on the slide.',
+  id: 'slides', label: 'Presentation', icon: 'presentation',
+  listLabel: 'Slides', listIcon: 'layout-grid', listOpen: () => true, listWidth: 'slides', selIcon: 'mouse-pointer-2',
   measureLabel: 'This slide', measureIcon: 'presentation',
   modes: [{ id: 'slide', label: 'Slides', icon: 'presentation' }, { id: 'outline', label: 'Outline', icon: 'list' }],
+  keys: [{ label: 'Previous / next slide', keys: '[' }, { label: 'First / last slide', keys: 'home' }],
   steps(d) {
     return [
       { label: 'Loading slide engine (bundled · 97 KB)', cached: 'Slide engine ready', engine: 'pptx', ms: 380, run: () => window.JSZip ? null : loadVendor('vendor/jszip-3.10.1.min.js') },
@@ -49,29 +50,27 @@ export default {
     if (sh) selection = `<div class="ov-seltitle">${ctx.icon(sh.text ? 'type' : 'shapes', { size: 16 })}${sh.text ? 'Text box' : 'Shape'} · ${ctx.esc(sh.name || '')}</div>` + ctx.kv([sh.text ? ['Text', ctx.esc(sh.text.slice(0, 160))] : null, ['Position', `${cm(sh.x)} · ${cm(sh.y)}`], ['Size', `${cm(sh.w)} × ${cm(sh.h)}`], sh.fill ? ['Fill', `<span class="ov-swatch" style="background:#${sh.fill}"></span><span class="ov-mono">#${sh.fill}</span>`] : null, sh.size ? ['Font size', `${sh.size} pt`] : null]);
     const words = s.shapes.reduce((n, x) => n + (x.text.match(/\S+/g) || []).length, 0);
     const measure = ctx.kv([['Slide', `${d.cur + 1} of ${D.slides.length}`], ['Title', ctx.esc(s.title || 'Untitled')], ['Words', ctx.nf(words)], ['Objects', `${s.shapes.length} shapes and text boxes`]]);
-    return { info, selection, measure };
+    return { info, infoLabel: 'Presentation', selection, measure, measureLabel: 'This slide' };
   },
-  status(d, ctx) { const D = d.data; return [`Slide ${d.cur + 1} of ${D.slides.length}`, ratio(D.w, D.h), `${[...D.fonts][0] || 'Theme font'} → Geist`]; },
   exports(d, ctx) {
     const b = ctx.baseName(d.name);
     return [
       { group: 'Image', items: [
         { label: 'This slide as PNG', sub: `Slide ${d.cur + 1} · 1920 × 1080`, icon: 'image', file: `${b}-slide-${d.cur + 1}.png`, onSelect: () => slidePNG(d, ctx) },
-        { label: 'All slides as PDF', sub: `${d.data.slides.length} pages · landscape`, icon: 'file-text', file: `${b}.pdf`, onSelect: () => printPDF(d, ctx) }] },
+        { label: 'Print / PDF', sub: `All ${d.data.slides.length} slides · landscape`, icon: 'file-text', file: `${b}.pdf`, onSelect: () => printPDF(d, ctx) }] },
       { group: 'Data', items: [
         { label: 'Outline as Markdown', sub: 'Titles and bullet points', icon: 'list', file: `${b}-outline.md`, onSelect: () => { const name = `${b}-outline.md`; ctx.download(name, outlineMd(d.data), 'text/markdown'); ctx.toast(`Saved ${name}`); } },
-        { label: 'All text as TXT', sub: 'For search or translation', icon: 'type', file: `${b}.txt`, onSelect: () => { const name = `${b}.txt`; ctx.download(name, d.data.slides.map((s, i) => `--- Slide ${i + 1} ---\n` + s.shapes.map((x) => x.text).filter(Boolean).join('\n')).join('\n\n'), 'text/plain'); ctx.toast(`Saved ${name}`); } }] },
+        { label: 'Download text', sub: 'All slide text as .txt', icon: 'type', file: `${b}.txt`, onSelect: () => { const name = `${b}.txt`; ctx.download(name, d.data.slides.map((s, i) => `--- Slide ${i + 1} ---\n` + s.shapes.map((x) => x.text).filter(Boolean).join('\n')).join('\n\n'), 'text/plain'); ctx.toast(`Saved ${name}`); } }] },
     ];
   },
-  commands(d, t, ctx) {
-    const out = []; let m;
-    if ((m = t.match(/^(?:slide|go to|goto|page)\s*(\d+)$/)) || (m = t.match(/^(\d+)$/))) { const n = +m[1]; if (n >= 1 && n <= d.data.slides.length) out.push({ label: `Go to slide ${n}`, sub: d.data.slides[n - 1].title, icon: 'presentation', run: () => d.ctl.go(n - 1) }); }
-    d.data.slides.forEach((s, i) => { if (t.length > 2 && s.title.toLowerCase().includes(t)) out.push({ label: `Slide ${i + 1} · ${s.title}`, sub: 'Go to slide', icon: 'presentation', run: () => d.ctl.go(i) }); });
-    if (/^(pdf|print)/.test(t)) out.push({ label: 'Save all slides as PDF', sub: `${ctx.baseName(d.name)}.pdf`, icon: 'file-text', run: () => printPDF(d, ctx) });
-    if (/^outl/.test(t)) out.push({ label: 'Show outline', sub: 'Titles and bullets as text', icon: 'list', run: () => ctx.setMode(d, 'outline') });
-    return out.slice(0, 5);
+  commands(d, ctx) {
+    return [
+      ...d.data.slides.map((sl, i) => ({ id: 'go' + i, label: `Slide ${i + 1} · ${sl.title}`, sub: 'Go to slide', icon: 'presentation', searchOnly: true, run: () => d.ctl.go(i) })),
+      { id: 'pdf', label: 'Print / save all slides as PDF', icon: 'file-text', run: () => printPDF(d, ctx) },
+      { id: 'outline', label: 'Show outline', sub: 'Titles and bullets as text', icon: 'list', run: () => ctx.setMode(d, 'outline') },
+    ];
   },
-  mobileSlots(d) { return [{ id: 'list', label: 'Slides', icon: 'layout-grid' }, { id: 'outline', label: d.mode === 'outline' ? 'Slides' : 'Outline', icon: d.mode === 'outline' ? 'presentation' : 'list', run: (doc, ctx) => ctx.setMode(doc, doc.mode === 'outline' ? 'slide' : 'outline') }, { id: 'info', label: 'Info', icon: 'info' }, { id: 'export', label: 'Export', icon: 'download' }]; },
+  mobileSlots(d) { return [{ id: 'list', label: 'Slides', icon: 'layout-grid' }, { id: 'info', label: 'Info', icon: 'info' }, { id: 'export', label: 'Export', icon: 'download' }]; },
 };
 function loadVendor(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('engine missing')); document.head.append(s); }); }
 const ratio = (w, h) => { const r = w / h; return Math.abs(r - 16 / 9) < 0.01 ? '16:9' : Math.abs(r - 4 / 3) < 0.01 ? '4:3' : `${w}×${h}`; };
@@ -158,7 +157,7 @@ function mountView(d, el, ctx) {
   let sx = null; stage.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') sx = e.clientX; });
   stage.addEventListener('pointerup', (e) => { if (sx != null && Math.abs(e.clientX - sx) > 50) go(d.cur + (e.clientX < sx ? 1 : -1)); sx = null; });
   stage.addEventListener('wheel', (e) => { if (!e.ctrlKey) return; e.preventDefault(); zoomBy(Math.exp(-e.deltaY * 0.01)); }, { passive: false });
-  function go(i) { const n = Math.max(0, Math.min(D.slides.length - 1, i)); if (n === d.cur && frame.firstElementChild) return; d.cur = n; d.selShape = null; show(); if (d.mode === 'outline') renderOutline(); d.fmt.updateList(d); ctx.refresh('insp status'); }
+  function go(i) { const n = Math.max(0, Math.min(D.slides.length - 1, i)); if (n === d.cur && frame.firstElementChild) return; d.cur = n; d.selShape = null; show(); if (d.mode === 'outline') renderOutline(); d.fmt.updateList(d); ctx.refresh('insp'); }
   function zoomBy(f) { d.fitZ = false; k = Math.max(0.1, Math.min(4, k * f)); layout(); ctx.refresh('zoom'); }
   const ro = new ResizeObserver(layout); ro.observe(stage);
   show(); renderOutline();

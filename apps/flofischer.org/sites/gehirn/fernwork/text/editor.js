@@ -192,18 +192,17 @@ export function langExt(kind, size = 0) {
   if (kind === 'log') return [logHighlight];
   return [];
 }
-export function makeState(doc, { kind = 'text', wrap = kind !== 'json' && kind !== 'log', extra = [] } = {}) {
+export function makeState(doc, { kind = 'text', wrap = kind !== 'json' && kind !== 'log', numbers = true, readOnly = false, hint = '', extra = [] } = {}) {
   return EditorState.create({
     doc,
     extensions: [
-      lineNumbers({ formatNumber: (n) => fmt.format(n) }),
-      errGutter,
-      highlightActiveLineGutter(),
+      numbers ? [lineNumbers({ formatNumber: (n) => fmt.format(n) }), errGutter, highlightActiveLineGutter()] : [],
+      readOnly ? [EditorState.readOnly.of(true)] : [],
       highlightSpecialChars({ addSpecialChars: /[\u00a0\u00ad\u200b-\u200d\u2060\ufeff]/, render: specialChar }),
       history(),
       folding,
       drawSelection(),
-      highlightActiveLine(),
+      numbers ? highlightActiveLine() : [],
       bracketMatching(),
       highlightSelectionMatches(),
       search({ top: true }),
@@ -212,7 +211,7 @@ export function makeState(doc, { kind = 'text', wrap = kind !== 'json' && kind !
       roConf.of([]),
       layers, errorLine, flashField,
       EditorState.tabSize.of(2),
-      placeholder(''),
+      placeholder(hint),
       keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap, ...searchKeymap, indentWithTab]),
       ...extra,
     ],

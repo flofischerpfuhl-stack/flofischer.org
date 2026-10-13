@@ -13,6 +13,8 @@ const THEME = {
     actorBkg: '#ecfdf3', actorBorder: '#7dd3a0', actorTextColor: '#111111', actorLineColor: '#a1a1aa', signalColor: '#3f3f46', signalTextColor: '#111111',
     labelBoxBkgColor: '#ecfdf3', labelBoxBorderColor: '#7dd3a0', labelTextColor: '#111111', loopTextColor: '#111111', activationBkgColor: '#dcfce7', activationBorderColor: '#7dd3a0',
     noteBkgColor: '#fffbeb', noteBorderColor: '#fcd34d', noteTextColor: '#111111', sequenceNumberColor: '#ffffff',
+    // pie / quadrant: the colour-blind-safe series palette (DESIGN.md), so slices are distinguishable
+    pie1: '#86efac', pie2: '#93c5fd', pie3: '#fdba74', pie4: '#c4b5fd', pie5: '#fca5a5', pie6: '#5eead4', pieStrokeColor: '#ffffff', pieOuterStrokeColor: '#d4d4d8', pieSectionTextColor: '#111111',
   },
   dark: {
     darkMode: true, background: '#18181b', fontFamily: 'Geist, system-ui, sans-serif', fontSize: '15px',
@@ -22,6 +24,7 @@ const THEME = {
     actorBkg: '#11291b', actorBorder: '#2f7a4c', actorTextColor: '#ededed', actorLineColor: '#5a5a62', signalColor: '#d4d4d8', signalTextColor: '#ededed',
     labelBoxBkgColor: '#11291b', labelBoxBorderColor: '#2f7a4c', labelTextColor: '#ededed', loopTextColor: '#ededed', activationBkgColor: '#1a3a26', activationBorderColor: '#2f7a4c',
     noteBkgColor: '#3a300d', noteBorderColor: '#7a6420', noteTextColor: '#fdf6d8', sequenceNumberColor: '#111113',
+    pie1: '#2f7a4c', pie2: '#2b4f8a', pie3: '#9a4a12', pie4: '#5b3f9e', pie5: '#8f2d2d', pie6: '#1d6b63', pieStrokeColor: '#18181b', pieOuterStrokeColor: '#3a3a3f', pieSectionTextColor: '#ededed',
   },
 };
 let current = null, chain = Promise.resolve(), n = 0;
@@ -35,7 +38,7 @@ function init(theme) {
 export function kindOf(code) {
   const first = (String(code).split('\n').find((l) => l.trim() && !l.trim().startsWith('%%')) || '').trim();
   const k = first.split(/\s+/)[0];
-  return { sequenceDiagram: 'Sequence', flowchart: 'Flowchart', graph: 'Flowchart', classDiagram: 'Class', stateDiagram: 'State', 'stateDiagram-v2': 'State', erDiagram: 'Entity', gantt: 'Gantt', pie: 'Pie', journey: 'Journey', timeline: 'Timeline', mindmap: 'Mind map', gitGraph: 'Git' }[k] || 'Diagram';
+  return { sequenceDiagram: 'Sequence', flowchart: 'Flowchart', graph: 'Flowchart', classDiagram: 'Class', stateDiagram: 'State', 'stateDiagram-v2': 'State', erDiagram: 'Entity', gantt: 'Gantt', pie: 'Pie', journey: 'Journey', timeline: 'Timeline', mindmap: 'Mind map', gitGraph: 'Git', quadrantChart: 'Quadrant' }[k] || 'Diagram';
 }
 /** Render Mermaid code → { svg, ms } or throw { human } (serialised: Mermaid is not re-entrant). */
 export function render(code, theme = 'light') {

@@ -1,7 +1,8 @@
-// Open · icon additions (Lucide, ISC). Registered into the kit icon table at runtime so icon() and data-icon work.
+// Viewers · icon additions (Lucide, ISC). Registered into the kit icon table at runtime so icon() and data-icon work.
 // Kit addition candidates: table, presentation, sheet-view, arrow-up-down, crosshair, rotate-3d, file-x, list-tree, filter, axis-3d.
 import { ICONS } from '../kit/icons.js';
 Object.assign(ICONS, {
+  building: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
   table: '<path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>',
   'table-view': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/><circle cx="16" cy="15" r="2"/>',
   presentation: '<path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/>',

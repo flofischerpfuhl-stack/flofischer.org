@@ -31,8 +31,7 @@ function prevNonWs(t, i) { i--; while (i >= 0 && isWs(t.charCodeAt(i))) i--; ret
 /** Parse error → { pos, line, col, message, hint, fix: { from, to, insert, label } | null } */
 export function explainError(text, err) {
   const m = /position (\d+)/.exec(err.message);
-  let pos = m ? +m[1] : 0;
-  if (!m && /Unexpected end/.test(err.message)) pos = text.length;
+  let pos = m ? +m[1] : errorPos(text);
   const at = text[pos];
   const p = prevNonWs(text, pos); const prev = text[p];
   let message = 'Unexpected character', hint = '', fix = null;
@@ -53,6 +52,25 @@ export function explainError(text, err) {
   const line = (before.match(/\n/g) || []).length + 1;
   const col = pos - before.lastIndexOf('\n');
   return { pos, line, col, message, hint, fix, raw: err.message };
+}
+
+/** Where a strict JSON parse fails (engines don't always say: Chrome omits the position for some errors). */
+export function errorPos(t) {
+  let i = 0; const n = t.length;
+  const ws = () => { while (i < n) { const c = t.charCodeAt(i); if (c === 32 || c === 10 || c === 13 || c === 9) i++; else break; } };
+  const fail = () => { throw i; };
+  function str() { i++; while (i < n) { const c = t.charCodeAt(i); if (c === 92) { i += 2; continue; } if (c === 34) { i++; return; } if (c < 32) fail(); i++; } fail(); }
+  function num() { const m = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/.exec(t.slice(i, i + 400)); if (!m) fail(); i += m[0].length; }
+  function val(depth) {
+    ws(); const c = t[i];
+    if (c === '{') { i++; ws(); if (t[i] === '}') { i++; return; } for (;;) { ws(); if (t[i] !== '"') fail(); str(); ws(); if (t[i] !== ':') fail(); i++; val(depth + 1); ws(); if (t[i] === ',') { i++; continue; } if (t[i] === '}') { i++; return; } fail(); } }
+    if (c === '[') { i++; ws(); if (t[i] === ']') { i++; return; } for (;;) { val(depth + 1); ws(); if (t[i] === ',') { i++; continue; } if (t[i] === ']') { i++; return; } fail(); } }
+    if (c === '"') return str();
+    if (c === '-' || (c >= '0' && c <= '9')) return num();
+    for (const w of ['true', 'false', 'null']) if (t.startsWith(w, i)) { i += w.length; return; }
+    fail();
+  }
+  try { if (t.charCodeAt(0) === 0xfeff) return 0; val(0); ws(); return i < n ? i : n; } catch (p) { return typeof p === 'number' ? Math.min(p, n) : 0; }
 }
 
 /** Repair as a list of minimal edits against the ORIGINAL text (so the editor can apply one undoable change). */
@@ -124,7 +142,8 @@ export function summarize(v) {
   if (v && typeof v === 'object') {
     const keys = Object.keys(v);
     let big = null; for (const k of keys) if (Array.isArray(v[k]) && (!big || v[k].length > v[big].length)) big = k;
-    return { type: 'object', keys: keys.length, biggest: big, count: big ? v[big].length : keys.length, label: big ? `${fmtN(v[big].length)} ${big}` : `${keys.length} keys` };
+    const many = big && v[big].length >= 10;
+    return { type: 'object', keys: keys.length, biggest: big, count: many ? v[big].length : keys.length, label: many ? `${fmtN(v[big].length)} ${big}` : `${keys.length} ${keys.length === 1 ? 'key' : 'keys'}` };
   }
   return { type: typeof v, label: typeof v };
 }

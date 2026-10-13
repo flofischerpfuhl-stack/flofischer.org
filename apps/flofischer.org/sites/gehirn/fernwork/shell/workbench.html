@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="shell.css">
 </head>
 <body>
-<!-- Archetype A · Workbench skeleton (Images, Open, Canvas, Calculator, Textbench, PDF). ?leaf=<id>&empty=1 -->
+<!-- Archetype A · Workbench skeleton (PDF Tools until it has a mockup; any workbench leaf). ?leaf=<id>&empty=1 -->
 <main id="main">
   <div class="fw-workbench" id="wb">
     <div class="fw-framebar" role="toolbar" aria-label="Document" id="framebar"></div>
@@ -30,11 +30,11 @@
 import { mountShell, getLeaf, getCat, toolsOf, chipOf, icon, esc, $, $$, h, enhance, formatBytes, extOf, toast, openSheet, openMenu, kbd, loadSamples, getRecent, hrefFor, shortAgo, isMobile } from '../kit/shell.js';
 
 const params = new URLSearchParams(location.search);
-const leaf = getLeaf(params.get('leaf') || 'image-edit') || getLeaf('image-edit');
+const leaf = getLeaf(params.get('leaf') || 'image-tools') || getLeaf('image-tools');
 const cat = getCat(leaf.cat); const modes = toolsOf(cat.id); const cur = chipOf(leaf);
 let docs = [], active = 0, zoom = 100;
 
-mountShell({ leaf: leaf.id, archetype: 'workbench', routing: 'shell', accept: ['*'], acceptLabel: cat.label, onFiles: (f) => open(f),
+mountShell({ leaf: leaf.id, archetype: 'workbench', accept: ['*'], acceptLabel: cat.label, onFiles: (f) => open(f),
   shortcuts: [{ label: 'Toggle inspector', keys: 'mod+.' }] });
 document.title = `${leaf.name} · Fernwork`;
 
@@ -44,8 +44,8 @@ function framebar() {
     <button class="fw-filechip" type="button" id="filechip" aria-haspopup="menu" aria-expanded="false" ${d ? '' : 'disabled'}>
       <span class="fw-filechip__thumb">${d?.url ? `<img alt="" src="${d.url}">` : icon('file', { size: 14 })}</span>
       <span class="fw-filechip__name">${d ? esc(d.file.name) : esc(cat.label)}</span>${d ? icon('chevron-down', { size: 14 }) : ''}</button>
-    <span class="fw-divider-v fw-hide-compact"></span>
-    <div class="fw-seg fw-seg--sm fw-hide-compact" aria-label="Mode">${modes.map((m) => `<button class="fw-seg__opt" type="button" aria-checked="${m.id === cur.id}" data-value="${m.id}">${esc(m.chip)}</button>`).join('')}</div>
+    ${modes.length > 1 ? `<span class="fw-divider-v fw-hide-compact"></span>
+    <div class="fw-seg fw-seg--sm fw-hide-compact" aria-label="Sub-tool">${modes.map((m) => `<button class="fw-seg__opt" type="button" aria-checked="${m.id === cur.id}" data-value="${m.id}">${esc(m.chip)}</button>`).join('')}</div>` : ''}
     <span class="fw-spacer"></span>
     <div class="fw-framebar__group fw-hide-compact">
       <button class="fw-iconbtn fw-iconbtn--sm" type="button" aria-label="Undo" data-tip="Undo" data-tip-kbd="mod+z">${icon('undo-2')}</button>
@@ -57,7 +57,7 @@ function framebar() {
     <button class="fw-btn fw-btn--primary fw-btn--sm" type="button" id="export" ${d ? '' : 'disabled'}>${icon('download')}Export</button>
     <button class="fw-iconbtn fw-iconbtn--sm" type="button" aria-label="More" data-tip="More" id="more">${icon('ellipsis')}</button>`;
   enhance($('#framebar'));
-  $('#framebar .fw-seg')?.addEventListener('fw-change', (e) => { history.replaceState(null, '', hrefFor(e.detail.value)); toast(`${getLeaf(e.detail.value).chip} mode`, { type: 'info', duration: 1500 }); });
+  $('#framebar .fw-seg')?.addEventListener('fw-change', (e) => { location.href = hrefFor(e.detail.value); });
   $('#t-list').onclick = (e) => { const on = $('#wb-main').classList.toggle('has-list'); e.currentTarget.setAttribute('aria-pressed', on); };
   $('#t-insp').onclick = (e) => { const on = $('#wb-main').classList.toggle('has-inspector'); e.currentTarget.setAttribute('aria-pressed', on); };
   $('#export').onclick = (e) => openMenu(e.currentTarget, [
@@ -81,8 +81,7 @@ function stage() {
       <span class="fw-intake__icon">${icon(cat.icon, { size: 22 })}</span>
       <span class="fw-intake__title"><span class="fw-pointer-copy">Drop a file to start</span><span class="fw-touch-copy">Choose a file to start</span></span>
       <span class="fw-intake__actions"><button class="fw-btn fw-btn--primary" type="button" data-pick>${icon('folder-open')}Open file</button></span>
-      <span class="fw-intake__sub"><span class="fw-pointer-copy">${kbd('mod+o')} open · ${kbd('mod+v')} paste</span><span class="fw-dot fw-pointer-copy"></span><a href="#" data-sample="IMG_2041.jpg|IMG_2042.jpg|IMG_2043.jpg">Try sample photos</a></span>
-      <span class="fw-intake__privacy">${icon('lock', { size: 12 })} Opened on this device</span></div>
+      <span class="fw-intake__sub"><span class="fw-pointer-copy">${kbd('mod+o')} open · ${kbd('mod+v')} paste</span><span class="fw-dot fw-pointer-copy"></span><a href="#" data-sample="IMG_2041.jpg|IMG_2042.jpg|IMG_2043.jpg">Try sample photos</a></span></div>
       <div class="wb-recents"><div class="fw-label" style="margin:0 8px 6px">Recent</div><div class="fw-recent">${r.map((x) => { const l = getLeaf(x.leaf); return `<a class="fw-recent__item" href="${hrefFor(l)}"><span class="fw-recent__icon">${icon(l.icon)}</span><span class="fw-recent__main"><span class="fw-recent__title">${esc(x.file || l.name)}</span><span class="fw-recent__sub">${esc(x.file ? l.name : getCat(l.cat).label)}</span></span><span class="fw-recent__when">${shortAgo(x.t)}</span></a>`; }).join('')}</div></div></div>`;
     enhance($('#stage'));
     return;
@@ -108,8 +107,8 @@ function inspector() {
 }
 function status() {
   const d = docs[active];
-  $('#status').innerHTML = d ? `<span class="fw-statusbar__item">${extOf(d.file).toUpperCase()}</span><span class="fw-statusbar__item">${d.w ? `${d.w} × ${d.h}` : ''}</span><span class="fw-statusbar__item">${formatBytes(d.file.size)}</span><span class="fw-statusbar__item">${active + 1} of ${docs.length}</span><span class="fw-statusbar__item">${zoom} %</span>
-    <span class="fw-statusbar__item fw-statusbar__save"><span class="fw-dotlive"></span>Saved on this device</span>` : `<span class="fw-statusbar__item">No file open</span><span class="fw-statusbar__item fw-statusbar__save">${icon('lock', { size: 12 })} On this device</span>`;
+  $('#status').innerHTML = d ? `<span class="fw-statusbar__item">${extOf(d.file).toUpperCase()}</span><span class="fw-statusbar__item">${d.w ? `${d.w} × ${d.h}` : ''}</span><span class="fw-statusbar__item">${formatBytes(d.file.size)}</span><span class="fw-statusbar__item">${active + 1} of ${docs.length}</span><span class="fw-statusbar__item">${zoom} %</span>` : '';
+  $('#status').hidden = !d; // a status bar only while it shows live working info
 }
 function bottombar() {
   const slots = [['sliders-horizontal', 'Adjust'], ['pencil', 'Markup'], ['scan', 'Inspect'], ['download', 'Export']];

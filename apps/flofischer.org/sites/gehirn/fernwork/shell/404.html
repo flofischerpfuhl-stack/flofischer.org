@@ -18,27 +18,26 @@
     <div class="nf__mark"><img src="../kit/img/logo.svg" alt=""></div>
     <div class="nf__code">404</div>
     <h1>This page wandered off</h1>
-    <p>Nothing lives at <span class="nf__path" id="path">/tools/heic-converter</span>. Maybe one of these is what you were after:</p>
+    <p>Nothing lives at <span class="nf__path" id="path">/tools/heic-converter</span>. Maybe one of these:</p>
     <div class="fw-query">
       <span data-icon="search" data-size="20"></span>
       <input class="fw-query__input" id="nf-search" type="text" autocomplete="off" spellcheck="false" placeholder="Search tools, e.g. “heic”" aria-label="Search tools">
     </div>
     <div class="nf__popular" id="nf-popular" aria-label="Suggestions"></div>
-    <div class="nf__links"><a class="fw-btn" id="home-link" href="index.html"><span data-icon="house"></span>Go to home</a><button class="fw-btn fw-btn--ghost" type="button" id="report">Report a broken link</button></div>
+    <div class="nf__links"><a class="fw-btn" id="home-link" href="index.html"><span data-icon="house"></span>Go to home</a></div>
   </div>
 </main>
 <script type="module">
-import { mountShell, attachSearch, getLeaf, hrefFor, esc, search, toast, $ } from '../kit/shell.js';
-mountShell({ archetype: 'doc', routing: 'shell', searchInput: '#nf-search' });
+import { mountShell, attachSearch, getLeaf, hrefFor, esc, search, $ } from '../kit/shell.js';
+mountShell({ archetype: 'doc', searchInput: '#nf-search' });
 const path = new URLSearchParams(location.search).get('path') || '/tools/heic-converter';
 $('#path').textContent = path;
 // suggestions from the broken URL itself ("heic-converter" → HEIC to JPG …), else popular
 const words = path.split(/[\/\-_.]+/).filter((w) => w.length > 2 && !['tools', 'html', 'www'].includes(w));
 let picks = [...new Map(words.flatMap((w) => search(w, { limit: 3, kinds: ['leaf'] })).map((r) => [r.item.id, r.item])).values()].slice(0, 4);
-if (picks.length < 4) picks = picks.concat(['compress-pdf', 'merge-pdf', 'format-json', 'qr-code'].map(getLeaf)).filter((x, i, a) => a.indexOf(x) === i).slice(0, 5);
+if (picks.length < 4) picks = picks.concat(['compress-pdf', 'merge-pdf', 'json-formatter', 'qr-generator'].map(getLeaf)).filter((x, i, a) => a.indexOf(x) === i).slice(0, 5);
 $('#nf-popular').innerHTML = picks.map((l) => `<a class="fw-chip" href="${hrefFor(l)}" data-leaf="${l.id}">${esc(l.name)}</a>`).join('');
 attachSearch($('#nf-search'));
-$('#report').onclick = () => toast('Thanks, we’ll fix that link', { type: 'success' });
 </script>
 </body>
 </html>

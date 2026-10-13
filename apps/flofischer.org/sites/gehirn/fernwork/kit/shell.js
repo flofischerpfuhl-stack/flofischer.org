@@ -2,12 +2,12 @@
 //   import { mountShell, toast, openDialog, … } from '../kit/shell.js';
 //   mountShell({ category: 'convert', leaf: 'heic-to-jpg', archetype: 'queue', accept: ['image'], onFiles(files) { … } });
 import { icon, hydrateIcons } from './icons.js';
-import { GROUPS, CATEGORIES, LEAVES, ACTIONS, leaf as getLeaf, category as getCat, toolsOf, presetsOf, chipOf, POPULAR } from './registry.js';
-import { answer, detect, fmtNum, relTime, cleanUrl, parseColor, toHex, toHsl, convertUnits, evalMath } from './eval.js';
+import { GROUPS, CATEGORIES, LEAVES, ACTIONS, ALIASES, canonicalId, leaf as getLeaf, category as getCat, toolsOf, presetsOf, chipOf, POPULAR } from './registry.js';
 import { fileKind, summarize, actionsFor, handoff, consumeHandoff, formatBytes, extOf, mimeFor, KIND_LABEL } from './files.js';
+// Revision 1: the command bar is a pure tool search. Inline answers and paste detectors (eval.js) are no longer part of
+// the shell; pages that need math/units/colour helpers import '../kit/eval.js' directly.
 
-export { icon, hydrateIcons, GROUPS, CATEGORIES, LEAVES, ACTIONS, getLeaf, getCat, toolsOf, presetsOf, chipOf, POPULAR,
-  answer, detect, fmtNum, relTime, cleanUrl, parseColor, toHex, toHsl, convertUnits, evalMath,
+export { icon, hydrateIcons, GROUPS, CATEGORIES, LEAVES, ACTIONS, ALIASES, canonicalId, getLeaf, getCat, toolsOf, presetsOf, chipOf, POPULAR,
   fileKind, summarize, actionsFor, handoff, consumeHandoff, formatBytes, extOf, mimeFor };
 
 // ─────────────────────────────── utilities ───────────────────────────────
@@ -50,8 +50,8 @@ export const store = {
 const H = 3600e3;
 const DEMO_RECENT = [
   { leaf: 'edit-pdf', file: 'lease-agreement-2026.pdf', ago: 2 * H },
-  { leaf: 'format-json', file: 'package.json', ago: 5 * H },
-  { leaf: 'units', note: '5 ft in cm', ago: 26 * H },
+  { leaf: 'json-formatter', file: 'package.json', ago: 5 * H },
+  { leaf: 'lbs-to-kg', note: '165 lbs', ago: 26 * H },
   { leaf: 'wifi-qr', note: 'Wi-Fi “Guest”', ago: 3 * 24 * H },
   { leaf: 'compress-image', file: '12 photos', ago: 6 * 24 * H },
 ];
@@ -59,10 +59,13 @@ const DEMO_RECENT = [
 export function getRecent() {
   let r = store.get('recent');
   if (!Array.isArray(r)) r = DEMO_RECENT.map(({ ago, ...x }) => ({ ...x, t: Date.now() - ago }));
-  return r.filter((x) => getLeaf(x.leaf));
+  // resolve round-1 ids (ALIASES) to today's leaves, drop unknown ones and duplicates
+  const seen = new Set();
+  return r.map((x) => ({ ...x, leaf: canonicalId(x.leaf) })).filter((x) => x.leaf && !seen.has(x.leaf) && seen.add(x.leaf));
 }
 export function addRecent(entry) {
   if (!entry || !getLeaf(entry.leaf)) return;
+  entry = { ...entry, leaf: canonicalId(entry.leaf) };
   const r = getRecent().filter((x) => x.leaf !== entry.leaf);
   r.unshift({ ...entry, t: Date.now() });
   store.set('recent', r.slice(0, 12));
@@ -255,7 +258,7 @@ export function openDialog({ title = '', body = '', actions = [], size, sheetOnM
     <div class="fw-dialog__head"><h2 class="fw-dialog__title" id="${id}">${esc(title)}</h2>
     <button class="fw-iconbtn fw-iconbtn--sm" type="button" data-close aria-label="Close">${icon('x')}</button></div>
     <div class="fw-dialog__body"></div>${actions.length ? '<div class="fw-dialog__foot"></div>' : ''}</dialog>`);
-  if (size) d.style.width = `min(${size}px, calc(100vw - 32px))`;
+  if (size) d.style.setProperty('--dlg-w', size + 'px'); // a CSS var, so the mobile bottom-sheet width still wins
   fill(d.querySelector('.fw-dialog__body'), body);
   let closed = false;
   const api = { el: d, close };
@@ -395,25 +398,18 @@ function withQuery(href, query) {
 }
 /** Best href for a leaf right now (sync). Uses page `routes`, then an existing area mockup, else the shell skeleton. */
 export function hrefFor(idOrLeaf, query = {}) {
-  const l = typeof idOrLeaf === 'string' ? getLeaf(idOrLeaf) : idOrLeaf;
+  let l = typeof idOrLeaf === 'string' ? getLeaf(idOrLeaf) : idOrLeaf;
   if (!l) return homeHref();
   if (state.routes[l.id]) return withQuery(state.routes[l.id], query);
+  if (l.aliasOf) { if (state.routes[l.aliasOf]) return withQuery(state.routes[l.aliasOf], query); l = getLeaf(l.aliasOf); }
   if (state.routing !== 'shell' && state.areas[l.area] === true) return withQuery(new URL(`${l.area}/`, ROOT_URL).href, { leaf: l.id, ...query });
   return withQuery(new URL(`shell/${ARCH_FILE[l.arch] || 'instant.html'}`, ROOT_URL).href, { leaf: l.id, ...query });
 }
+// All area mockups exist (a directory listing is not available when hosted, so no probing).
+const KNOWN_AREAS = ['convert', 'image-tools', 'viewers', 'canvas', 'text', 'security', 'calculator', 'units', 'utilities'];
 async function probeAreas() {
-  // Which area mockups exist? One GET of the mockups root (python http.server lists folders) — no 404 noise.
   if (state.routing === 'shell') return;
-  let cache = null; try { cache = JSON.parse(sessionStorage.getItem('fw:areas') || 'null'); } catch { /* */ }
-  if (!cache) {
-    cache = {};
-    try {
-      const html = await (await fetch(ROOT_URL, { cache: 'no-store' })).text();
-      for (const m of html.matchAll(/href="([\w-]+)\/"/g)) cache[m[1]] = true;
-    } catch { /* offline or no listing: stay on skeletons */ }
-    try { sessionStorage.setItem('fw:areas', JSON.stringify(cache)); } catch { /* */ }
-  }
-  state.areas = cache; refreshLeafLinks();
+  state.areas = Object.fromEntries(KNOWN_AREAS.map((a) => [a, true])); refreshLeafLinks();
 }
 /** Re-point every [data-leaf] link (call after rendering your own leaf links). */
 export function refreshLeafLinks(root = document) { $$('a[data-leaf]', root).forEach((a) => { a.href = hrefFor(a.dataset.leaf, a.dataset.query ? Object.fromEntries(new URLSearchParams(a.dataset.query)) : {}); }); }
@@ -429,12 +425,17 @@ export async function navigate(id, { query, newTab, files, action } = {}) {
 const norm = (s) => String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9#%+]+/g, ' ').trim();
 const STOP = new Set(['to', 'in', 'a', 'an', 'the', 'of', 'for', 'my', 'with', 'and', 'into', 'from', 'online', 'free', 'tool', 'app', 'how']);
 let INDEX = null;
-function buildIndex() {
-  INDEX = [...LEAVES.map((l) => ({ item: l, kind: 'leaf' })), ...ACTIONS.map((a) => ({ item: a, kind: 'action' }))].map((e) => {
-    const it = e.item; const cat = it.cat ? getCat(it.cat) : null;
-    return { ...e, name: norm(it.name), words: norm(it.name).split(' '), syn: (it.syn || []).map(norm), chip: norm(it.chip), cat: norm(cat?.label), desc: it.descInherited ? '' : norm(it.desc) };
-  });
+function indexEntry(e) {
+  const it = e.item; const cat = it.cat ? getCat(it.cat) : null;
+  return { ...e, name: norm(it.name), words: norm(it.name).split(' '), syn: (it.syn || []).map(norm), chip: norm(it.chip), cat: norm(cat?.label), desc: it.descInherited ? '' : norm(it.desc) };
 }
+function buildIndex() {
+  INDEX = [...LEAVES.map((l) => ({ item: l, kind: 'leaf' })), ...ACTIONS.map((a) => ({ item: a, kind: 'action' }))].map(indexEntry);
+}
+/** Page commands (mountShell({ commands }) / setCommands()): [{ id, label, sub, icon, kbd, syn, run }]. */
+let pageCommands = [];
+export function setCommands(list = []) { pageCommands = (list || []).map((c, i) => ({ id: c.id || 'cmd-' + i, name: c.label || c.name, kind: 'command', ...c })); }
+const commandsNow = () => pageCommands.filter((c) => !c.hidden?.());
 function isSubseq(q, s) { let i = 0; for (const c of s) if (c === q[i]) i++; return i === q.length; }
 function scoreToken(t, e) {
   let b = 0;
@@ -454,23 +455,25 @@ function scoreToken(t, e) {
   if (t.length >= 3 && isSubseq(t, e.name.replace(/ /g, ''))) b = Math.max(b, 18);
   return b;
 }
-/** search('heic', { limit, kinds }) → [{ item, kind: 'leaf'|'action', score, marks: [[start,end]] }] */
+/** search('heic', { limit, kinds }) → [{ item, kind: 'leaf'|'action'|'command', score, marks: [[start,end]] }] */
 export function search(q, { limit = 8, kinds } = {}) {
   if (!INDEX) buildIndex();
   const nq = norm(q); if (!nq) return [];
   const toks = nq.split(' ');
   const res = [];
-  for (const e of INDEX) {
+  for (const e of [...INDEX, ...commandsNow().map((c) => indexEntry({ item: c, kind: 'command' }))]) {
     if (kinds && !kinds.includes(e.kind)) continue;
     let sum = 0, n = 0, dead = false;
     for (const t of toks) { const s = scoreToken(t, e); if (!s) { if (STOP.has(t)) continue; dead = true; break; } sum += s; n++; }
     if (dead || !n) continue;
     let score = sum / n;
     if (e.name.startsWith(nq)) score += 40; else if (e.syn.some((s) => s.startsWith(nq))) score += 18;
-    if (e.item.popular) score += 4; if (e.item.kind === 'tool') score += 3;
+    if (e.item.popular) score += 4; if (e.item.kind === 'tool') score += 3; if (e.kind === 'command') score += 6;
     res.push({ item: e.item, kind: e.kind, score, marks: marksFor(e.item.name, toks) });
   }
-  return res.sort((a, b) => b.score - a.score).slice(0, limit);
+  res.sort((a, b) => b.score - a.score);
+  const top = res[0]?.score || 0; // drop weak fuzzy noise ("heic" ⊂ "Fahrenheit…") when strong matches exist
+  return res.filter((r) => r.score >= top * 0.45).slice(0, limit);
 }
 function marksFor(name, toks) {
   const lower = name.toLowerCase(); const r = [];
@@ -484,18 +487,20 @@ function markName(name, marks) {
 }
 
 // ─────────────────────────────── results list (command bar, home search, switcher) ───────────────────────────────
+// Revision 1: pure tool search (owner decision). No inline answers, no paste detectors.
+const GROUP_OF = { leaf: 'Tools', action: 'Settings', command: 'On this page' };
 function buildEntries(q, { tools = true } = {}) {
   const s = q.trim(); const out = [];
   if (!s) {
+    commandsNow().filter((c) => !c.searchOnly).slice(0, 4).forEach((c) => out.push({ type: 'command', group: GROUP_OF.command, item: c }));
     getRecent().slice(0, 4).forEach((r) => out.push({ type: 'recent', group: 'Recent', r, item: getLeaf(r.leaf) }));
     POPULAR.slice(0, 5).forEach((id) => out.push({ type: 'leaf', group: 'Popular', item: getLeaf(id) }));
     return out;
   }
-  const a = answer(s); if (a) out.push({ type: 'answer', a, q: s });
-  for (const det of detect(s)) for (const act of det.actions) out.push({ type: 'detect', group: det, det, act, item: getLeaf(act.leaf) });
-  const found = tools ? search(s, { limit: a || out.length ? 5 : 9 }) : [];
-  for (const r of found) out.push({ type: r.kind === 'action' ? 'action' : 'leaf', group: r.kind === 'action' ? 'Settings' : 'Tools', item: r.item, marks: r.marks });
-  if (a && !found.length && getLeaf(a.open)) out.push({ type: 'leaf', group: 'Tools', item: getLeaf(a.open), marks: [] });
+  const found = tools ? search(s, { limit: 10 }) : [];
+  const order = { command: 0, leaf: 1, action: 2 };
+  found.sort((a, b) => (order[a.kind] - order[b.kind]) || (b.score - a.score));
+  for (const r of found) out.push({ type: r.kind, group: GROUP_OF[r.kind], item: r.item, marks: r.marks });
   return out;
 }
 function leafMeta(l) {
@@ -505,7 +510,7 @@ function leafMeta(l) {
 }
 /**
  * createResults(listEl, { input, onDone }) → { render(q), move(d), activate(alt) }.
- * Renders answers, detections, tools, settings and recents with full keyboard + aria (listbox/option).
+ * Renders page commands, tools (incl. SEO presets), settings and recents with full keyboard + aria (listbox/option).
  */
 export function createResults(listEl, { input, onDone = () => {}, tools = true } = {}) {
   let entries = [], sel = 0, lastQ = '';
@@ -516,31 +521,21 @@ export function createResults(listEl, { input, onDone = () => {}, tools = true }
     let html = '', lastGroup = null;
     entries.forEach((e, i) => {
       const id = `${lid}-o${i}`;
-      if (e.type === 'answer') {
-        const a = e.a;
-        html += `<div class="fw-cmd__answer" role="option" id="${id}" data-idx="${i}">
-          ${a.swatch ? `<span class="fw-cmd__swatch" style="background:${a.swatch}"></span>` : ''}
-          <div class="fw-cmd__answer-main"><span class="fw-cmd__answer-q">${esc(a.q)}</span>
-          <span class="fw-cmd__answer-v">${esc(a.value)}${a.unit ? ` <small>${esc(a.unit)}</small>` : ''}</span>
-          ${a.sub ? `<span class="fw-cmd__meta">${esc(a.sub)}</span>` : ''}</div>
-          <div class="fw-cmd__answer-hints">${a.copy ? `<span>${kbd('enter')} copy</span>` : ''}<span>${kbd('mod+enter')} open in ${esc(a.openLabel)}</span></div></div>`;
-        return;
-      }
-      const g = e.type === 'detect' ? `Detected · ${e.det.label}${e.det.detail ? ' · ' + e.det.detail : ''}` : e.group;
+      const g = e.group;
       if (g !== lastGroup) { html += `<div class="fw-cmd__group" role="presentation">${esc(g)}</div>`; lastGroup = g; }
       const it = e.item; let name, meta;
-      if (e.type === 'detect') { name = esc(e.act.label); meta = esc(e.act.sub); }
-      else if (e.type === 'recent') { name = esc(it.name); meta = esc([e.r.file || e.r.note, shortAgo(e.r.t)].filter(Boolean).join(' · ')); }
+      if (e.type === 'recent') { name = esc(it.name); meta = esc([e.r.file || e.r.note, shortAgo(e.r.t)].filter(Boolean).join(' · ')); }
       else if (e.type === 'action') { name = markName(it.name, e.marks); meta = it.kind === 'setting' ? 'Setting' : 'Action'; }
+      else if (e.type === 'command') { name = markName(it.name, e.marks); meta = esc(it.sub || ''); }
       else { name = markName(it.name, e.marks); meta = esc(leafMeta(it)); }
-      html += `<div class="fw-cmd__item" role="option" id="${id}" data-idx="${i}" ${it?.id ? `data-leaf-id="${it.id}"` : ''}>
+      const dataAttr = e.type === 'command' ? `data-command-id="${esc(it.id)}"` : it?.id ? `data-leaf-id="${it.id}"` : '';
+      const right = e.type === 'command' && it.kbd ? kbd(it.kbd) : `${e.type === 'action' || e.type === 'command' ? 'Run' : 'Open'} ${kbd('enter')}`;
+      html += `<div class="fw-cmd__item" role="option" id="${id}" data-idx="${i}" ${dataAttr}>
         <span class="fw-cmd__icon">${icon(it?.icon || 'arrow-right')}</span>
-        <span class="fw-cmd__text"><span class="fw-cmd__name">${name}</span><span class="fw-cmd__meta">${meta}</span></span>
-        <span class="fw-cmd__enter">${e.type === 'action' ? 'Run' : 'Open'} ${kbd('enter')}</span></div>`;
+        <span class="fw-cmd__text"><span class="fw-cmd__name">${name}</span>${meta ? `<span class="fw-cmd__meta">${meta}</span>` : ''}</span>
+        <span class="fw-cmd__enter">${right}</span></div>`;
     });
-    if (!entries.length) html = /^[\d(.\-]/.test(q.trim())
-      ? `<div class="fw-cmd__empty"><strong>Keep typing…</strong>Add a unit or an operator, like “5 ft in cm” or “2^10*3”.</div>`
-      : `<div class="fw-cmd__empty"><strong>Nothing for “${esc(q.trim())}” yet</strong>Try “compress pdf”, “json”, “5 km in mi” or paste a link.</div>`;
+    if (!entries.length) html = `<div class="fw-cmd__empty"><strong>No tool called “${esc(q.trim())}”</strong>Try “compress pdf”, “json”, “lbs to kg” or “qr”.</div>`;
     listEl.innerHTML = html; hydrateIcons(listEl); select(0, false);
   }
   function select(i, scroll = true) {
@@ -553,16 +548,8 @@ export function createResults(listEl, { input, onDone = () => {}, tools = true }
   }
   async function activate(alt = false) {
     const e = entries[sel]; if (!e) return;
-    const row = $(`[data-idx="${sel}"]`, listEl);
-    if (e.type === 'answer') {
-      if (alt || !e.a.copy) { onDone(); navigate(e.a.open, { query: { q: e.q } }); return; }
-      await copyText(e.a.copy);
-      row.classList.add('is-copied'); const hint = row.querySelector('.fw-cmd__answer-hints span');
-      if (hint) { const old = hint.innerHTML; hint.innerHTML = `${icon('check')} Copied`; setTimeout(() => { hint.innerHTML = old; row.classList.remove('is-copied'); }, 1500); }
-      return;
-    }
     onDone();
-    if (e.type === 'detect') navigate(e.act.leaf, { query: { q: e.det.value }, newTab: alt });
+    if (e.type === 'command') e.item.run?.();
     else if (e.type === 'action') runAction(e.item.id);
     else navigate(e.item.id, { newTab: alt });
   }
@@ -589,26 +576,25 @@ export function runAction(id) {
   else if (id === 'theme-system') setTheme('system');
   else if (id === 'shortcuts') openShortcuts();
   else if (id === 'go-home') location.href = homeHref();
-  else if (id === 'install') toast('Use Install in your browser’s address bar. Fernwork then works offline.', { type: 'info' });
+  else if (id === 'install') toast('Use Install in your browser’s address bar.', { type: 'info' });
   else if (id === 'clear-recent') { const undo = clearRecent(); toast('Recent tools cleared', { type: 'neutral', action: { label: 'Undo', onClick: undo } }); }
 }
 
 // ─────────────────────────────── command bar ───────────────────────────────
 let cmd = null;
-/** openCommandBar('5 ft in cm') — ⌘K / '/' palette. Also answers math & units and detects pasted values. */
+/** openCommandBar('heic') — ⌘K / '/' palette: search over tools, sub-tools, SEO presets (synonyms), page commands, settings. */
 export function openCommandBar(initial = '') {
   if (cmd) { if (initial) { cmd.input.value = initial; cmd.results.render(initial); } cmd.input.focus(); return cmd; }
   const prev = document.activeElement;
-  const d = h(`<dialog class="fw-cmd" aria-label="Search or type anything">
+  const d = h(`<dialog class="fw-cmd" aria-label="Search tools">
     <div class="fw-cmd__panel">
       <div class="fw-cmd__bar">${icon('search', { size: 18 })}
         <input class="fw-cmd__input" type="text" role="combobox" aria-expanded="true" aria-autocomplete="list" autocomplete="off" autocapitalize="off" spellcheck="false"
-          placeholder="Search tools, type 5 ft in cm, or paste anything…" aria-label="Search or type anything">
+          placeholder="Search tools…" aria-label="Search tools">
         <span class="fw-hide-mobile">${kbd('esc', 'fw-kbd--ghost')}</span>
         <button class="fw-btn fw-btn--ghost fw-btn--sm fw-show-mobile" type="button" data-close>Cancel</button></div>
       <div class="fw-cmd__list"></div>
-      <div class="fw-cmd__foot"><span>${kbd('up')}${kbd('down')} move</span><span>${kbd('enter')} open</span><span>${kbd('mod+enter')} new tab</span>
-        <span style="margin-left:auto">${icon('lock', { size: 12 })} Runs on this device</span></div>
+      <div class="fw-cmd__foot"><span>${kbd('up')}${kbd('down')} move</span><span>${kbd('enter')} open</span><span>${kbd('mod+enter')} new tab</span></div>
     </div></dialog>`);
   document.body.append(d);
   const input = d.querySelector('input'), list = d.querySelector('.fw-cmd__list');
@@ -634,7 +620,7 @@ export const closeCommandBar = () => cmd?.close();
 
 /**
  * attachSearch(inputEl, { anchor }) — inline results dropdown under any input (home hero search, 404).
- * Same engine as the command bar: answers, detections, tools.
+ * Same engine as the command bar (tool search).
  */
 export function attachSearch(input, { anchor = input.closest('.fw-query') || input } = {}) {
   let pop = null, results = null;
@@ -658,15 +644,21 @@ export function attachSearch(input, { anchor = input.closest('.fw-query') || inp
 
 // ─────────────────────────────── catalog (home map, switcher) ───────────────────────────────
 /** renderCatalog({ group, compact }) → HTML string of category columns with their tools. */
-export function renderCatalog({ group, compact = false, current } = {}) {
-  const cats = CATEGORIES.filter((c) => !group || c.group === group);
+/** Revision 1: one flat map in today's nav order; sub-tools by their sidebar label (chip). A category with a single
+ *  tool (PDF Tools, Image Tools, Calculator, Canvas) lists its popular presets instead. `max` caps long lists. */
+export function renderCatalog({ group, compact = false, current, max = 8 } = {}) {
+  const cats = CATEGORIES.filter((c) => !group || !CATEGORIES.some((x) => x.group === group) || c.group === group);
   return `<div class="fw-catalog ${compact ? 'fw-catalog--compact' : ''}">${cats.map((c) => {
     const tools = toolsOf(c.id);
-    const fillers = compact ? [] : LEAVES.filter((l) => l.cat === c.id && l.kind === 'preset').sort((a, b) => (b.popular || 0) - (a.popular || 0));
-    const shown = tools.length >= 5 ? tools : [...tools, ...fillers].slice(0, 7);
+    const presets = tools.length === 1 ? presetsOf(tools[0].id).filter((p) => !p.pair) : [];
+    const items = tools.length === 1 ? presets.map((p) => ({ l: p, label: p.name })) : tools.map((t) => ({ l: t, label: t.chip || t.name }));
+    const lim = compact ? Math.min(max, 5) : max;
+    const shown = items.length > lim ? items.slice(0, lim - 1) : items;
+    const more = items.length - shown.length;
     return `<section class="fw-catalog__cat" aria-labelledby="cat-${c.id}${compact ? '-c' : ''}">
       <a class="fw-catalog__head" id="cat-${c.id}${compact ? '-c' : ''}" href="${hrefFor(tools[0])}" data-leaf="${tools[0].id}"><span class="fw-catalog__icon">${icon(c.icon)}</span>${esc(c.label)}</a>
-      ${shown.map((t) => `<a class="fw-catalog__leaf" href="${hrefFor(t)}" data-leaf="${t.id}" ${current === t.id ? 'aria-current="page"' : ''}>${esc(c.id === 'convert' ? t.chip : t.name)}</a>`).join('')}
+      ${shown.map(({ l, label }) => `<a class="fw-catalog__leaf" href="${hrefFor(l)}" data-leaf="${l.id}" ${current === l.id ? 'aria-current="page"' : ''}>${esc(label)}</a>`).join('')}
+      ${more > 0 ? `<a class="fw-catalog__leaf fw-catalog__more" href="${hrefFor(tools[0])}" data-leaf="${tools[0].id}">${more} more…</a>` : ''}
     </section>`;
   }).join('')}</div>`;
 }
@@ -675,7 +667,7 @@ function openSwitcher(anchor) {
   if (isMobile()) return openSwitcherSheet();
   const content = h(`<div>
     <div class="fw-switcher__search"><div class="fw-inputwrap">${icon('search')}<input class="fw-input" type="text" placeholder="Find a tool…" aria-label="Find a tool" autocomplete="off"></div></div>
-    <div class="fw-switcher__body">${GROUPS.map((g) => `<div class="fw-switcher__grouplabel">${esc(g.label)}</div>${renderCatalog({ group: g.id, current: state.leaf?.id })}`).join('')}</div>
+    <div class="fw-switcher__body">${renderCatalog({ current: chipOf(state.leaf)?.id, max: 15 })}</div>
     <div class="fw-switcher__results fw-cmd__list" hidden></div></div>`);
   const p = openPopover(anchor, content, { className: 'fw-switcher', label: 'All tools' });
   const input = content.querySelector('input'), body = content.querySelector('.fw-switcher__body'), list = content.querySelector('.fw-switcher__results');
@@ -687,12 +679,14 @@ function openSwitcherSheet() {
   const curCat = state.cat?.id;
   const recent = getRecent().slice(0, 6);
   const body = h(`<div>
-    <div class="fw-query" style="margin-bottom:12px">${icon('search', { size: 18 })}<input class="fw-query__input" type="text" placeholder="Search tools or type 5 ft in cm" aria-label="Search tools" autocomplete="off"></div>
+    <div class="fw-query" style="margin-bottom:12px">${icon('search', { size: 18 })}<input class="fw-query__input" type="text" placeholder="Search tools" aria-label="Search tools" autocomplete="off"></div>
     <div class="fw-ts-browse">
       ${recent.length ? `<div class="fw-tslist__group" style="padding-top:4px">Recent</div><div class="fw-recent-chips">${recent.map((r) => `<a class="fw-chip" href="${hrefFor(r.leaf)}" data-leaf="${r.leaf}">${icon(getLeaf(r.leaf).icon)}${esc(getLeaf(r.leaf).name)}</a>`).join('')}</div>` : ''}
-      ${GROUPS.map((g) => `<div class="fw-tslist__group">${esc(g.label)}</div><div class="fw-tslist">${CATEGORIES.filter((c) => c.group === g.id).map((c) => `
-        <button class="fw-tslist__cat" type="button" aria-expanded="${c.id === curCat}"><span class="fw-catalog__icon">${icon(c.icon)}</span>${esc(c.label)}${icon('chevron-right')}</button>
-        <div class="fw-tslist__leaves">${toolsOf(c.id).map((t) => `<a class="fw-tslist__leaf" href="${hrefFor(t)}" data-leaf="${t.id}" ${chipOf(state.leaf || {})?.id === t.id ? 'aria-current="page"' : ''}>${esc(t.name)}</a>`).join('')}</div>`).join('')}</div>`).join('')}
+      <div class="fw-tslist__group">All tools</div><div class="fw-tslist">${CATEGORIES.map((c) => { const tools = toolsOf(c.id);
+        return tools.length === 1
+          ? `<a class="fw-tslist__cat" href="${hrefFor(tools[0])}" data-leaf="${tools[0].id}" ${c.id === curCat ? 'aria-current="page"' : ''}><span class="fw-catalog__icon">${icon(c.icon)}</span>${esc(c.label)}</a>`
+          : `<button class="fw-tslist__cat" type="button" aria-expanded="${c.id === curCat}"><span class="fw-catalog__icon">${icon(c.icon)}</span>${esc(c.label)}${icon('chevron-right')}</button>
+        <div class="fw-tslist__leaves">${tools.map((t) => `<a class="fw-tslist__leaf" href="${hrefFor(t)}" data-leaf="${t.id}" ${chipOf(state.leaf || {})?.id === t.id ? 'aria-current="page"' : ''}>${esc(t.chip || t.name)}</a>`).join('')}</div>`; }).join('')}</div>
     </div>
     <div class="fw-cmd__list fw-ts-results" hidden style="margin:0 -8px"></div></div>`);
   const s = openSheet({ title: 'All tools', body, height: 'full', className: 'fw-switcher-sheet' });
@@ -707,13 +701,13 @@ function openSwitcherSheet() {
 // ─────────────────────────────── shortcuts sheet ───────────────────────────────
 export function openShortcuts() {
   const rows = [
-    ['Search or type anything', 'mod+k'], ['Focus search', '/'], ['Keyboard shortcuts', '?'], ['Go home', 'g h'],
+    ['Search tools', 'mod+k'], ['Focus search', '/'], ['Keyboard shortcuts', '?'], ['Go home', 'g h'],
     ['Open a file', 'mod+o'], ['Paste files or text', 'mod+v'], ['Export / download', 'mod+s'], ['Undo', 'mod+z'], ['Redo', 'shift+mod+z'], ['Close the top layer', 'esc'],
     ...(state.opts.shortcuts || []).map((s) => [s.label, s.keys]),
   ];
   const wb = [['Move / select', 'v'], ['Hand (hold Space)', 'h'], ['Crop', 'c'], ['Brush', 'b'], ['Text', 't'], ['Shape', 'u'], ['Pick colour', 'i'], ['Measure', 'm'], ['Export', 'e'], ['Fit', 'f'], ['100 %', '1']];
   const list = (r) => `<div class="fw-shortcuts">${r.map(([l, k]) => `<div class="fw-shortcuts__row"><span>${esc(l)}</span><span class="fw-shortcuts__keys">${kbd(k)}</span></div>`).join('')}</div>`;
-  openDialog({ title: 'Keyboard shortcuts', size: 640, body: `<div class="fw-stack" style="--gap:20px"><div>${list(rows)}</div><div><div class="fw-section-title" style="margin-bottom:6px">In workbench tools (Images, PDF, Canvas, Open)</div>${list(wb)}</div></div>` });
+  openDialog({ title: 'Keyboard shortcuts', size: 640, body: `<div class="fw-stack" style="--gap:20px"><div>${list(rows)}</div><div><div class="fw-section-title" style="margin-bottom:6px">In workbench tools (Image Tools, PDF Tools, Viewers, Canvas)</div>${list(wb)}</div></div>` });
 }
 
 // ─────────────────────────────── drop veil ───────────────────────────────
@@ -760,19 +754,18 @@ function renderVeil(items, files = null) {
     const target = state.leaf;
     const others = drag.actions.filter((a) => a.leaf !== target?.id && a.leaf !== chipOf(target || {})?.id).slice(0, 3);
     el.innerHTML = `<div class="fw-veil__direct"><div class="fw-veil__direct-icon">${icon('upload', { size: 28 })}</div>
-      <div><div class="fw-veil__title">Drop to add ${esc(sum.label)}</div><div class="fw-veil__sub">to ${esc(state.opts.acceptLabel || target?.name || 'this tool')} · stays on this device</div></div></div>
+      <div><div class="fw-veil__title">Drop to add ${esc(sum.label)}</div><div class="fw-veil__sub">to ${esc(state.opts.acceptLabel || target?.name || 'this tool')}</div></div></div>
       ${others.length ? `<div class="fw-veil__others">${others.map((a, i) => actionHtml(a, i, false)).join('')}</div>` : ''}`;
   } else {
     const n = sum.n;
     const title = unknown ? (files ? `Fernwork can’t read .${esc(sum.ext || '?')} yet` : 'Fernwork doesn’t know this file type yet') : esc(sum.label);
     const sub = files ? esc([sum.names.length > 1 ? sum.names.slice(0, 2).join(', ') + (n > 2 ? ` +${n - 2}` : '') : '', formatBytes(sum.size)].filter(Boolean).join(' · '))
-      : unknown ? 'Drop it anyway: we’ll suggest what can help' : 'Drop on an action, or anywhere to choose';
+      : unknown ? 'Drop it anyway to see what can help' : 'Drop on an action, or anywhere to choose';
     el.innerHTML = `<div class="fw-veil__panel" role="dialog" aria-label="What should Fernwork do with ${esc(sum.label)}?">
       <div class="fw-veil__head"><div class="fw-veil__files">${'<span>' + icon(sum.icon || 'file', { size: 20 }) + '</span>'}${n > 1 ? '<span></span>' : ''}${n > 2 ? '<span></span>' : ''}</div>
         <div style="min-width:0"><div class="fw-veil__title fw-ellipsis">${title}</div><div class="fw-veil__sub fw-ellipsis">${sub}</div></div></div>
       <div class="fw-veil__list" role="list">${drag.actions.map((a, i) => actionHtml(a, i, i === 0)).join('')}</div>
-      ${unknown && files ? `<div class="fw-veil__search"><div class="fw-inputwrap">${icon('search')}<input class="fw-input" type="text" placeholder="Search for a tool that can help…" aria-label="Search tools"></div></div>` : ''}
-      <div class="fw-veil__foot">${icon('lock', { size: 12 })} Stays on this device · 0 uploads</div></div>`;
+      ${unknown && files ? `<div class="fw-veil__search"><div class="fw-inputwrap">${icon('search')}<input class="fw-input" type="text" placeholder="Search for a tool that can help…" aria-label="Search tools"></div></div>` : ''}</div>`;
   }
   hydrateIcons(el);
 }
@@ -846,8 +839,8 @@ function initDrop() {
     }
     if (isTyping(e.target) || hasLayers()) return;
     const text = cd.getData('text'); if (!text?.trim()) return;
-    if (state.opts.onPasteText?.(text) === true) return;
-    e.preventDefault(); openCommandBar(text.trim());
+    // Revision 1: only the page may take pasted text (onPasteText); the command bar no longer detects pasted values.
+    if (state.opts.onPasteText?.(text) === true) e.preventDefault();
   });
 }
 
@@ -929,8 +922,7 @@ export function renderPageHeader(target, { leaf: l = state.leaf, title, lede, ch
 }
 function footerHtml(wide) {
   return `<footer class="fw-footer ${wide ? 'fw-footer--wide' : ''}">
-    <span class="fw-footer__trust">${icon('shield-check')} On this device · 0 uploads</span><span>No cookies, no tracking</span>
-    <nav class="fw-footer__links" aria-label="Legal"><a href="#">Open source</a><a href="#">Imprint</a><a href="#">Privacy</a><a href="#">Terms</a></nav></footer>`;
+    <nav class="fw-footer__links" aria-label="Legal"><a href="#">Imprint</a><a href="#">Privacy</a><a href="#">Terms</a></nav></footer>`;
 }
 
 // ─────────────────────────────── app bar / rail ───────────────────────────────
@@ -945,26 +937,65 @@ function appBarHtml() {
         <span class="fw-ellipsis">${esc(label)}</span>${icon('chevron-down', { size: 14 })}</button>
     </div>
     <div class="fw-appbar__center">
-      <button class="fw-cmdpill" type="button" id="fw-cmdpill" aria-label="Search or type anything (${MOD}K)">${icon('search')}<span class="fw-cmdpill__text">Search or type anything…</span>${kbd('mod+k')}</button>
+      <button class="fw-cmdpill" type="button" id="fw-cmdpill" aria-label="Search tools (${MOD}K)">${icon('search')}<span class="fw-cmdpill__text">Search tools…</span>${kbd('mod+k')}</button>
     </div>
     <div class="fw-appbar__end">
-      <button class="fw-privacy-chip" type="button" id="fw-privacy" aria-haspopup="dialog" aria-expanded="false">${icon('lock', { size: 14 })}<span>On this device</span></button>
       <button class="fw-iconbtn fw-hide-mobile" type="button" id="fw-recent" aria-label="Recent" data-tip="Recent" aria-haspopup="dialog" aria-expanded="false">${icon('history', { size: 18 })}</button>
       <button class="fw-iconbtn fw-hide-mobile" type="button" id="fw-theme-toggle" data-fw-theme-toggle></button>
       <button class="fw-iconbtn fw-show-mobile" type="button" id="fw-search-mobile" aria-label="Search">${icon('search', { size: 20 })}</button>
-      <button class="fw-iconbtn fw-show-mobile" type="button" id="fw-more" aria-label="More" aria-haspopup="menu" aria-expanded="false">${icon('ellipsis', { size: 20 })}</button>
+      <button class="fw-iconbtn" type="button" id="fw-more" aria-label="More" data-tip="More" aria-haspopup="menu" aria-expanded="false">${icon('ellipsis', { size: 20 })}</button>
     </div></header>`;
 }
+// Revision 1: one flat list in today's nav order. Open rail: the active category lists its sub-tools (today's sidebar
+// labels). Collapsed rail: hovering or focusing a category with sub-tools opens a flyout listing them (→ / click).
 function railHtml() {
-  const cur = state.cat?.id;
-  return `<nav class="fw-rail" aria-label="Tool categories">${GROUPS.map((g) => `<div class="fw-rail__group"><div class="fw-rail__label fw-label">${esc(g.label)}</div>
-    ${CATEGORIES.filter((c) => c.group === g.id).map((c) => {
-      const tools = toolsOf(c.id);
-      return `<a class="fw-rail__item ${c.id === cur ? 'is-active' : ''}" href="${hrefFor(tools[0])}" data-leaf="${tools[0].id}" data-tip="${esc(c.label)}" data-tip-place="right" ${c.id === cur ? 'aria-current="true"' : ''} aria-label="${esc(c.label)}">
+  const cur = state.cat?.id; const curTool = chipOf(state.leaf)?.id;
+  return `<nav class="fw-rail" aria-label="Tools"><div class="fw-rail__group">
+    ${CATEGORIES.map((c) => {
+      const tools = toolsOf(c.id); const multi = tools.length > 1;
+      return `<a class="fw-rail__item ${c.id === cur ? 'is-active' : ''}" href="${hrefFor(tools[0])}" data-leaf="${tools[0].id}" data-cat="${c.id}" ${multi ? 'aria-haspopup="true" aria-expanded="false"' : `data-tip="${esc(c.label)}" data-tip-place="right"`} ${c.id === cur ? 'aria-current="true"' : ''} aria-label="${esc(c.label)}">
         ${icon(c.icon, { size: 20 })}<span class="fw-rail__name">${esc(c.label)}</span></a>
-        <div class="fw-rail__leaves">${tools.map((t) => `<a class="fw-rail__leaf" href="${hrefFor(t)}" data-leaf="${t.id}" ${chipOf(state.leaf || {})?.id === t.id ? 'aria-current="page"' : ''}>${esc(t.name)}</a>`).join('')}</div>`;
-    }).join('')}</div>`).join('')}
+        ${multi ? `<div class="fw-rail__leaves">${tools.map((t) => `<a class="fw-rail__leaf" href="${hrefFor(t)}" data-leaf="${t.id}" ${curTool === t.id ? 'aria-current="page"' : ''}>${esc(t.chip || t.name)}</a>`).join('')}</div>` : ''}`;
+    }).join('')}</div>
     <div class="fw-rail__foot"><button class="fw-rail__item" type="button" id="fw-rail-pin" data-tip-place="right"></button></div></nav>`;
+}
+// Flyout for the collapsed rail (also used on workbenches, where the rail never opens).
+let fly = null;
+function closeFlyout() { if (!fly) return; clearTimeout(fly.t); fly.item.setAttribute('aria-expanded', 'false'); fly.pop(); fly.el.remove(); fly = null; }
+function openFlyout(item, focusFirst = false) {
+  if (document.body.classList.contains('is-rail-pinned') && !document.documentElement.classList.contains('fw-arch-workbench')) return;
+  if (fly?.item === item) { clearTimeout(fly.t); return; }
+  closeFlyout();
+  const c = getCat(item.dataset.cat); const curTool = chipOf(state.leaf)?.id;
+  const el = h(`<div class="fw-popover fw-rail-flyout" role="group" aria-label="${esc(c.label)}"><div class="fw-rail-flyout__title">${esc(c.label)}</div>
+    ${toolsOf(c.id).map((t) => `<a class="fw-rail-flyout__leaf" href="${hrefFor(t)}" data-leaf="${t.id}" ${curTool === t.id ? 'aria-current="page"' : ''}>${esc(t.chip || t.name)}</a>`).join('')}</div>`);
+  document.body.append(el); toTop(el);
+  const r = item.getBoundingClientRect();
+  el.style.left = (r.right + 8) + 'px'; el.style.top = Math.max(8, Math.min(r.top - 6, innerHeight - el.offsetHeight - 8)) + 'px';
+  item.setAttribute('aria-expanded', 'true');
+  const pop = pushLayer(() => { item.focus(); closeFlyout(); }, el);
+  fly = { el, item, pop, t: 0 };
+  const later = () => { clearTimeout(fly?.t); if (fly) fly.t = setTimeout(closeFlyout, 220); };
+  el.addEventListener('pointerenter', () => clearTimeout(fly?.t));
+  el.addEventListener('pointerleave', later);
+  item.addEventListener('pointerleave', later, { once: true });
+  const links = $$('a', el);
+  el.addEventListener('keydown', (e) => {
+    const i = links.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); links[(i + (e.key === 'ArrowDown' ? 1 : -1) + links.length) % links.length].focus(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); item.focus(); closeFlyout(); }
+    else if (e.key === 'Tab') closeFlyout();
+  });
+  if (focusFirst) (links.find((a) => a.getAttribute('aria-current')) || links[0]).focus();
+}
+function initRailFlyouts() {
+  $$('.fw-rail__item[aria-haspopup]').forEach((item) => {
+    let t = 0;
+    item.addEventListener('pointerenter', (e) => { if (e.pointerType === 'touch') return; t = setTimeout(() => openFlyout(item), 120); });
+    item.addEventListener('pointerleave', () => clearTimeout(t));
+    item.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') { e.preventDefault(); openFlyout(item, true); } });
+  });
+  document.addEventListener('pointerdown', (e) => { if (fly && !fly.el.contains(e.target) && !fly.item.contains(e.target)) closeFlyout(); }, true);
 }
 function syncPin() {
   const pinned = document.body.classList.contains('is-rail-pinned');
@@ -976,30 +1007,23 @@ function openRecentPopover(anchor) {
   const r = getRecent();
   const content = h(`<div style="width:340px">
     <div class="fw-menu__label" style="display:flex;align-items:center;padding:8px 10px 6px">Recent<button class="fw-btn fw-btn--ghost fw-btn--sm" style="margin-left:auto;height:24px" type="button" data-clear>Clear</button></div>
-    <div class="fw-recent">${r.length ? r.slice(0, 8).map((x) => { const l = getLeaf(x.leaf); return `<a class="fw-recent__item" href="${hrefFor(l)}" data-leaf="${l.id}"><span class="fw-recent__icon">${icon(l.icon)}</span><span class="fw-recent__main"><span class="fw-recent__title">${esc(l.name)}</span>${x.file || x.note ? `<span class="fw-recent__sub">${esc(x.file || x.note)}</span>` : ''}</span><span class="fw-recent__when">${shortAgo(x.t)}</span></a>`; }).join('') : '<div class="fw-empty" style="padding:24px"><div class="fw-empty__text">Tools you use show up here.</div></div>'}</div>
-    <div class="fw-export__file" style="border:0;border-top:1px solid var(--border-subtle);margin:4px 0 0;padding:8px 10px 4px">${icon('lock', { size: 12 })} Saved on this device only</div></div>`);
+    <div class="fw-recent">${r.length ? r.slice(0, 8).map((x) => { const l = getLeaf(x.leaf); return `<a class="fw-recent__item" href="${hrefFor(l)}" data-leaf="${l.id}"><span class="fw-recent__icon">${icon(l.icon)}</span><span class="fw-recent__main"><span class="fw-recent__title">${esc(l.name)}</span>${x.file || x.note ? `<span class="fw-recent__sub">${esc(x.file || x.note)}</span>` : ''}</span><span class="fw-recent__when">${shortAgo(x.t)}</span></a>`; }).join('') : '<div class="fw-empty" style="padding:24px"><div class="fw-empty__text">Tools you use show up here.</div></div>'}</div></div>`);
   const p = openPopover(anchor, content, { placement: 'bottom-end', label: 'Recent' });
   content.querySelector('[data-clear]').onclick = () => { const undo = clearRecent(); p.close(); toast('Recent cleared', { type: 'neutral', action: { label: 'Undo', onClick: undo } }); };
 }
-function openPrivacyPopover(anchor) {
-  const content = h(`<div style="width:320px;padding:12px 12px 8px">
-    <div style="display:flex;gap:12px;align-items:flex-start"><span class="fw-catalog__icon" style="color:var(--accent-text)">${icon('shield-check')}</span>
-    <div><div class="fw-section-title">On this device · 0 uploads</div><p class="fw-t-sm fw-muted" style="margin-top:4px">Files you open are processed by code running in this tab. Nothing is sent to a server, and Fernwork works offline.</p></div></div>
-    <dl class="fw-insp-kv" style="margin:12px 0 4px;grid-template-columns:1fr auto"><dt>Uploads this session</dt><dd class="fw-mono">0</dd><dt>Tracking</dt><dd>None</dd><dt>Works offline</dt><dd>Yes</dd></dl>
-    <a href="#" class="fw-t-sm">How Fernwork keeps files private</a></div>`);
-  openPopover(anchor, content, { placement: 'bottom-end', label: 'Privacy' });
-}
+/** ⋯ menu (all widths): theme (phones), shortcuts (desktop), install, and the legal links (REVIEW-1: legal lives here + home). */
 function openMoreMenu(anchor) {
-  const pref = getThemePref();
+  const pref = getThemePref(); const mobile = isMobile();
+  const legal = (label) => ({ label, onSelect: () => { location.href = (state.opts.legalBase || '#') + label.toLowerCase(); } });
   openMenu(anchor, [
-    { group: 'Theme', items: [
+    ...(mobile ? [{ group: 'Theme', items: [
       { label: 'Light', icon: 'sun', checked: pref === 'light', onSelect: () => setTheme('light') },
       { label: 'Dark', icon: 'moon', checked: pref === 'dark', onSelect: () => setTheme('dark') },
-      { label: 'Match system', icon: 'monitor', checked: pref === 'system', onSelect: () => setTheme('system') }] },
+      { label: 'Match system', icon: 'monitor', checked: pref === 'system', onSelect: () => setTheme('system') }] }] : []),
     { group: '', items: [
-      { label: 'Recent', icon: 'history', onSelect: () => openSwitcherSheet() },
-      { label: 'Install Fernwork', icon: 'download', onSelect: () => runAction('install') },
-      { label: 'Privacy', icon: 'shield-check', onSelect: () => openPrivacyPopover(anchor) }] },
+      ...(mobile ? [{ label: 'Recent', icon: 'history', onSelect: () => openSwitcherSheet() }] : [{ label: 'Keyboard shortcuts', icon: 'keyboard', kbd: '?', onSelect: () => openShortcuts() }]),
+      { label: 'Install Fernwork', icon: 'download', onSelect: () => runAction('install') }] },
+    { group: 'Legal', items: [legal('Imprint'), legal('Privacy'), legal('Terms')] },
   ], { placement: 'bottom-end' });
 }
 
@@ -1022,6 +1046,8 @@ let mounted = false;
  *   searchInput  selector focused by '/' instead of opening the command bar (home)
  *   shortcuts  [{ label, keys: 'mod+shift+e' }] added to the '?' sheet
  *   handoff    true (default) → calls onFiles with files handed over from the previous page
+ *   commands   [{ id, label, sub, icon, kbd, syn, run, searchOnly, hidden() }] page commands shown in ⌘K ("On this page")
+ *   railOpen   override the default rail state (open on ≥1280 px unless the user collapsed it; workbenches stay collapsed)
  * Returns { leaf, category, toast, openCommandBar, setTheme, … }.
  */
 export function mountShell(opts = {}) {
@@ -1032,11 +1058,14 @@ export function mountShell(opts = {}) {
   state.arch = opts.archetype || state.leaf?.arch || 'instant';
   state.routing = opts.routing || 'auto';
   state.routes = opts.routes || {};
-  try { state.areas = JSON.parse(sessionStorage.getItem('fw:areas') || '{}'); } catch { /* */ }
+  state.areas = Object.fromEntries(KNOWN_AREAS.map((a) => [a, true]));
   const root = document.documentElement; root.classList.add('fw-arch-' + state.arch);
   const body = document.body;
   body.classList.add('fw-shell');
-  if (store.get('rail-pinned') === true && state.arch !== 'workbench') body.classList.add('is-rail-pinned');
+  setCommands(opts.commands);
+  const pinPref = store.get('rail-pinned');
+  const railOpen = opts.railOpen ?? (pinPref == null ? matchMedia('(min-width: 1280px)').matches : pinPref === true);
+  if (railOpen && state.arch !== 'workbench') body.classList.add('is-rail-pinned');
   if (opts.rail === false || state.arch === 'doc') body.classList.add('no-rail');
   if (state.leaf && !document.title) document.title = `${state.leaf.name} · Fernwork`;
 
@@ -1044,20 +1073,20 @@ export function mountShell(opts = {}) {
   main.id = 'main'; main.tabIndex = -1; main.classList.add('fw-main');
   const wrap = h('<div class="fw-body"></div>');
   main.before(wrap); wrap.append(main);
-  if (opts.footer ?? state.arch !== 'workbench') wrap.insertAdjacentHTML('beforeend', footerHtml(opts.wide));
+  if (opts.footer === true || (opts.footer == null && state.arch === 'home')) wrap.insertAdjacentHTML('beforeend', footerHtml(opts.wide));
   wrap.before(h(`<a class="fw-skip" href="#main">${state.arch === 'home' ? 'Skip to search' : 'Skip to tool'}</a>`));
   wrap.before(h(appBarHtml()));
   if (!body.classList.contains('no-rail')) wrap.before(h(railHtml()));
-  syncPin(); syncThemeButtons();
+  syncPin(); syncThemeButtons(); initRailFlyouts();
 
   $('#fw-cmdpill').onclick = () => openCommandBar();
   $('#fw-search-mobile').onclick = () => openCommandBar();
   $('#fw-switcher').onclick = (e) => { if (e.currentTarget.getAttribute('aria-expanded') === 'true') return; openSwitcher(e.currentTarget); };
   $('#fw-recent').onclick = (e) => { if (e.currentTarget.getAttribute('aria-expanded') !== 'true') openRecentPopover(e.currentTarget); };
-  $('#fw-privacy').onclick = (e) => { if (e.currentTarget.getAttribute('aria-expanded') !== 'true') openPrivacyPopover(e.currentTarget); };
+  // (privacy chip removed: no marketing clutter in the app bar)
   $('#fw-more').onclick = (e) => { if (e.currentTarget.getAttribute('aria-expanded') !== 'true') openMoreMenu(e.currentTarget); };
   $('#fw-theme-toggle').onclick = toggleTheme;
-  $('#fw-rail-pin')?.addEventListener('click', () => { body.classList.toggle('is-rail-pinned'); store.set('rail-pinned', body.classList.contains('is-rail-pinned')); syncPin(); });
+  $('#fw-rail-pin')?.addEventListener('click', () => { closeFlyout(); body.classList.toggle('is-rail-pinned'); store.set('rail-pinned', body.classList.contains('is-rail-pinned')); syncPin(); });
 
   if (opts.pageHeader) { const t = typeof opts.pageHeader === 'string' ? $(opts.pageHeader) : opts.pageHeader; if (t) renderPageHeader(t); }
   enhance(document);
@@ -1070,7 +1099,7 @@ export function mountShell(opts = {}) {
   return api();
 }
 function api() {
-  return { leaf: state.leaf, category: state.cat, archetype: state.arch, toast, openCommandBar, openDialog, openSheet, openPopover, openMenu, setTheme, navigate, hrefFor, openChooser, enhance };
+  return { leaf: state.leaf, category: state.cat, archetype: state.arch, toast, openCommandBar, openDialog, openSheet, openPopover, openMenu, setTheme, navigate, hrefFor, openChooser, enhance, setCommands };
 }
 let gAt = 0;
 function initKeys() {

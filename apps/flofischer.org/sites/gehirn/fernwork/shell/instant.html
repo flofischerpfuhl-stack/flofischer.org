@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="shell.css">
 </head>
 <body>
-<!-- Archetype C · Instant skeleton (Units, Inspect, Time, Clean link, Color, Generate, QR). ?leaf=<id>&q=<value> -->
+<!-- Archetype C · Instant skeleton (any instant leaf: Units, URL Cleaner, Timestamp, Color Picker…). ?leaf=<id>&q=<value> -->
 <main id="main">
   <div class="fw-page">
     <div id="page-header"></div>
@@ -31,7 +31,7 @@
       </div>
       <div id="result"></div>
       <section class="fw-section" id="recent-sec">
-        <div class="fw-section__head"><h2 class="fw-section__title">Recent</h2><span class="fw-section__more">Saved on this device · <a href="#" id="clear-hist">Clear</a></span></div>
+        <div class="fw-section__head"><h2 class="fw-section__title">Recent</h2><span class="fw-section__more"><a href="#" id="clear-hist">Clear</a></span></div>
         <div class="fw-recent fw-card" style="padding:4px" id="hist"></div>
       </section>
     </div>
@@ -42,26 +42,25 @@
   </div>
 </main>
 <script type="module">
-import { mountShell, renderPageHeader, getLeaf, icon, esc, $, $$, h, enhance, copyText, cleanUrl, detect, convertUnits, parseColor, toHex, toHsl, relTime, fmtNum, answer, toast, navigate, kbd } from '../kit/shell.js';
+import { mountShell, renderPageHeader, getLeaf, chipOf, icon, esc, $, $$, h, enhance, copyText, toast, navigate, kbd } from '../kit/shell.js';
+import { cleanUrl, convertUnits, parseColor, toHex, toHsl, relTime, fmtNum, answer } from '../kit/eval.js';
 
 const params = new URLSearchParams(location.search);
-const leaf = getLeaf(params.get('leaf') || 'units') || getLeaf('units');
-mountShell({ leaf: leaf.id, archetype: 'instant', routing: 'shell', recent: params.get('q') ? { note: params.get('q').slice(0, 40) } : undefined,
+const leaf = getLeaf(params.get('leaf') || 'units-length') || getLeaf('units-length');
+mountShell({ leaf: leaf.id, archetype: 'instant', recent: params.get('q') ? { note: params.get('q').slice(0, 40) } : undefined,
   onPasteText: (t) => { set(t); return true; } }); // paste anywhere on the page fills the input
 document.title = `${leaf.name} · Fernwork`;
 renderPageHeader($('#page-header'), { leaf });
 
-const PH = {
-  'clean-link': 'Paste a link to remove trackers', units: 'Type a conversion, e.g. 5 ft in cm', 'cm-to-inches': 'Type a length, e.g. 180 cm in in',
-  time: 'Paste a Unix timestamp or a date', 'unix-timestamp': 'Paste a Unix timestamp', 'pick-color': 'Type or paste a colour: #15803d, rgb(), hsl()',
-  contrast: 'Two colours, e.g. #15803d on #ffffff', inspect: 'Paste anything: JWT, Base64, URL, hash, UUID', 'qr-code': 'Text, link, Wi-Fi or contact for the code',
-};
+const tool = chipOf(leaf);
+const kind = leaf.cat === 'units' ? 'units' : tool.id === 'url-cleaner' ? 'clean-link' : tool.id === 'timestamp' ? 'time' : tool.id === 'color-picker' ? 'pick-color' : tool.id;
+const PH = { 'clean-link': 'Paste a link to remove trackers', units: 'Type a conversion, e.g. 5 ft in cm', time: 'Paste a Unix timestamp or a date',
+  'pick-color': 'Type or paste a colour: #15803d, rgb(), hsl()', 'qr-generator': 'Text, link, Wi-Fi or contact for the code' };
 const SAMPLE = { 'clean-link': 'https://shop.example.com/products/trail-shoe?utm_source=newsletter&utm_medium=email&utm_campaign=autumn&fbclid=IwAR2xk&color=moss',
-  units: '5 ft in cm', time: '1760000000', 'pick-color': '#15803d', inspect: 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMiLCJleHAiOjE5MDAwMDAwMDB9.c2ln' };
-const kind = leaf.id === 'cm-to-inches' ? 'units' : leaf.id === 'unix-timestamp' ? 'time' : leaf.id;
+  units: leaf.pair ? `1 ${leaf.pair[0]} in ${leaf.pair[1]}` : '5 ft in cm', time: '1760000000', 'pick-color': '#15803d' };
 const input = $('#in');
-input.placeholder = PH[leaf.id] || PH[kind] || 'Paste or type here';
-$('#meta').innerHTML = `<span>${icon('lock', { size: 12 })} Runs on this device</span>${SAMPLE[kind] ? `<span aria-hidden="true">·</span><a href="#" id="sample">Try a sample</a>` : ''}`;
+input.placeholder = leaf.pair ? `Type a value in ${leaf.pair[0]}` : PH[kind] || 'Paste or type here';
+$('#meta').innerHTML = SAMPLE[kind] ? `<a href="#" id="sample">Try a sample</a>` : '';
 $('#sample')?.addEventListener('click', (e) => { e.preventDefault(); set(SAMPLE[kind]); });
 
 function rowsHtml(rows) {
@@ -74,10 +73,6 @@ function heroActions(copy, extra = '') {
 let current = '';
 function render() {
   const s = input.value.trim(); $('#clear-btn').hidden = !s; $('#paste-btn').hidden = !!s && !matchMedia('(pointer:coarse)').matches;
-  const det = detect(s)[0];
-  const metaDet = det ? `<span class="fw-detect">${icon('scan', { size: 14 })}Detected: ${esc(det.label)}<button type="button" id="change-det">change</button></span>` : '';
-  $('#meta').querySelector('.fw-detect')?.remove();
-  if (metaDet) $('#meta').insertAdjacentHTML('afterbegin', metaDet);
   let html = '', copy = '';
   if (!s) {
     html = `<div class="fw-hero fw-hero--empty"><span class="fw-hero__label">${icon('text-cursor')} Result appears as you type</span>
@@ -88,10 +83,10 @@ function render() {
       html = `<div class="fw-hero"><span class="fw-hero__label">${r.removed.length ? `<span class="fw-verdict fw-verdict--ok">${icon('circle-check')} ${r.removed.length} tracker${r.removed.length > 1 ? 's' : ''} removed</span>` : `<span class="fw-verdict fw-verdict--ok">${icon('circle-check')} No known trackers</span>`}</span>
         <div class="i-result-url">${esc(r.url)}</div>
         ${r.removed.length ? `<div class="i-removed fw-t-sm fw-faint">Removed ${r.removed.map((k) => `<s class="fw-mono">${esc(k)}</s>`).join(' ')}</div>` : ''}
-        ${heroActions(r.url, `<a class="fw-btn" href="#" data-goto="qr-code">${icon('qr-code')}QR code</a><button class="fw-btn fw-btn--ghost" type="button">${icon('share-2')}Share</button>`)}</div>`;
+        ${heroActions(r.url, `<a class="fw-btn" href="#" data-goto="qr-generator">${icon('qr-code')}QR code</a><button class="fw-btn fw-btn--ghost" type="button">${icon('share-2')}Share</button>`)}</div>`;
     } catch { html = `<div class="fw-alert fw-alert--danger"><span class="fw-alert__icon">${icon('circle-alert')}</span><div class="fw-alert__body">That doesn’t look like a link. Links start with https:// or www.</div></div>`; }
   } else if (kind === 'units') {
-    const u = convertUnits(s) || convertUnits(s + ' in cm');
+    const u = convertUnits(s) || (leaf.pair ? convertUnits(`${s} ${leaf.pair[0]} in ${leaf.pair[1]}`) : null) || convertUnits(s + ' in cm');
     if (u) {
       const a = answer(s); copy = a ? a.copy : `${fmtNum(u.value)} ${u.unit}`;
       html = `<div class="fw-hero"><span class="fw-hero__label">${esc(u.from)} =</span><div class="fw-hero__value">${esc(a ? a.value : fmtNum(u.value))}<small>${esc(u.unit)}</small></div>
@@ -105,15 +100,15 @@ function render() {
       html = `<div class="fw-hero"><span class="fw-hero__label">${esc(a.q)} · ${esc(relTime(ms))}</span><div class="fw-hero__value" style="font-size:32px;line-height:40px">${esc(new Date(ms).toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' }))}</div>${heroActions(copy)}</div>
         ${rowsHtml([['ISO 8601', new Date(ms).toISOString()], ['Unix seconds', String(Math.floor(ms / 1000))], ['Unix milliseconds', String(ms)], ['UTC', new Date(ms).toUTCString()], ['Relative', relTime(ms), true]])}`;
     }
-  } else if (kind === 'pick-color' || kind === 'contrast' || kind === 'palette') {
+  } else if (kind === 'pick-color') {
     const c = parseColor(s);
     if (c) { copy = toHex(c);
-      html = `<div class="fw-hero"><div class="fw-row-flex" style="--gap:16px"><span class="i-swatch" style="background:${toHex(c)}"></span><div><span class="fw-hero__label">Colour</span><div class="fw-hero__value fw-hero__value--mono">${toHex(c)}</div></div></div>${heroActions(copy, `<a class="fw-btn" href="#" data-goto="contrast">${icon('contrast')}Check contrast</a>`)}</div>
+      html = `<div class="fw-hero"><div class="fw-row-flex" style="--gap:16px"><span class="i-swatch" style="background:${toHex(c)}"></span><div><span class="fw-hero__label">Colour</span><div class="fw-hero__value fw-hero__value--mono">${toHex(c)}</div></div></div>${heroActions(copy, `<a class="fw-btn" href="#" data-goto="contrast-checker">${icon('contrast')}Check contrast</a>`)}</div>
         ${rowsHtml([['HEX', toHex(c)], ['RGB', `rgb(${c.r} ${c.g} ${c.b})`], ['HSL', toHsl(c)]])}`;
     }
   }
   if (!html) {
-    html = `<div class="fw-hero"><span class="fw-hero__label">${det ? esc(det.label) : 'Result'}</span><div class="fw-stack" style="--gap:10px"><div class="fw-skel" style="height:28px;width:60%"></div><div class="fw-skel" style="height:14px;width:40%"></div></div>
+    html = `<div class="fw-hero"><span class="fw-hero__label">Result</span><div class="fw-stack" style="--gap:10px"><div class="fw-skel" style="height:28px;width:60%"></div><div class="fw-skel" style="height:14px;width:40%"></div></div>
       <p class="fw-t-sm fw-faint">Skeleton: the ${esc(leaf.name)} mockup fills this area.</p></div>`;
   }
   $('#result').innerHTML = html; enhance($('#result')); current = copy;
@@ -126,7 +121,7 @@ $('#clear-btn').onclick = () => { const old = input.value; set(''); input.focus(
 $('#paste-btn').onclick = async () => { try { set(await navigator.clipboard.readText()); } catch { input.focus(); toast('Press ' + (navigator.platform.includes('Mac') ? '⌘V' : 'Ctrl+V') + ' to paste', { type: 'info' }); } };
 $('#mbar-copy').onclick = (e) => copyText(current, e.currentTarget);
 // recent values for this tool
-const HIST = { 'clean-link': ['youtube.com/watch?v=… · 2 trackers', 'amazon.de/dp/… · 6 trackers'], units: ['5 ft in cm', '100 kg in lb', '20 °C in °F'], time: ['1760000000', '2026-10-13'], 'pick-color': ['#15803d', '#2563eb'] }[kind] || [];
+const HIST = { 'clean-link': ['youtube.com/watch?v=… · 2 trackers', 'amazon.de/dp/… · 6 trackers'], units: leaf.pair ? [] : ['5 ft in cm', '100 kg in lb', '20 °C in °F'], time: ['1760000000', '2026-10-13'], 'pick-color': ['#15803d', '#2563eb'] }[kind] || [];
 $('#hist').innerHTML = HIST.map((x) => `<a class="fw-recent__item" href="#" data-v="${esc(x)}"><span class="fw-recent__icon">${icon(leaf.icon)}</span><span class="fw-recent__main"><span class="fw-recent__title fw-mono" style="font-size:13px;font-weight:400">${esc(x)}</span></span><span class="fw-recent__when">${['2 h', '1 d', '4 d'][HIST.indexOf(x)]}</span></a>`).join('');
 $('#recent-sec').hidden = !HIST.length;
 $('#hist').addEventListener('click', (e) => { const a = e.target.closest('[data-v]'); if (!a) return; e.preventDefault(); if (!a.dataset.v.includes('…')) set(a.dataset.v); });

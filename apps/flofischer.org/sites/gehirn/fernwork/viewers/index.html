@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<title>Open file · Fernwork</title>
+<title></title>
 <link rel="icon" href="../kit/img/logo.svg" type="image/svg+xml">
 <script src="../kit/theme-init.js"></script>
 <link rel="stylesheet" href="../kit/tokens.css">
@@ -13,22 +13,22 @@
 <link rel="stylesheet" href="viewers.css">
 </head>
 <body>
-<!-- Open · universal viewer (archetype A, Workbench). Every file opens as a document tab in one shared frame.
-     URL: ?open=grundriss.dxf,kunden.sqlite (samples) · ?fresh (forget this browser's session) · ?leaf=dxf-viewer … -->
+<!-- Viewers · one page per format, same viewer frame. ?leaf=viewer-dxf (or a preset: csv-viewer, sqlite-viewer …)
+     ?sample=1 opens the page's sample · ?fresh forgets the stored file · ?fast skips the staged-progress pacing -->
 <main id="main">
-  <div class="fw-workbench ov is-empty" id="wb">
-    <div class="fw-framebar ov-framebar" role="toolbar" aria-label="Document" id="framebar"></div>
-    <div class="fw-wb-main ov-main" id="wb-main">
-      <aside class="fw-wb-list ov-list" id="list"></aside>
+  <div class="fw-workbench vw is-empty no-status" id="wb">
+    <div class="fw-framebar vw-framebar" role="toolbar" aria-label="File" id="framebar"></div>
+    <div class="fw-wb-main vw-main" id="wb-main">
+      <aside class="fw-wb-list ov-list" id="list" aria-label="List"></aside>
       <div class="fw-stage ov-stage" id="stage">
-        <div class="ov-docs" id="docs"></div>
-        <div class="ov-empty" id="empty"></div>
+        <div class="vw-doc" id="doc"></div>
+        <div class="vw-empty" id="empty"></div>
         <div class="fw-zoom ov-zoom" role="group" aria-label="Zoom" id="zoom" hidden></div>
       </div>
-      <aside class="fw-inspector ov-insp" aria-label="Inspector" id="inspector"></aside>
+      <aside class="fw-inspector ov-insp" aria-label="Details" id="inspector"></aside>
     </div>
-    <div class="fw-statusbar ov-status" id="status"></div>
-    <nav class="fw-bottombar ov-bottombar" aria-label="Document tools" id="bottombar"></nav>
+    <div class="fw-statusbar vw-status" id="status"></div>
+    <nav class="fw-bottombar vw-bottombar" aria-label="Viewer tools" id="bottombar"></nav>
   </div>
 </main>
 <script type="module" src="app.js"></script>

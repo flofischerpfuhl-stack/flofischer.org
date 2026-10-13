@@ -1,5 +1,80 @@
 # Fernwork One kit
 
+## Revision 1 (2026-10-13) — read this first
+
+Owner review (`design/REVIEW-1.md`) changed the information architecture and the command bar. Summary for area agents:
+
+**1. Registry = today's fernwork.net nav (`registry.js`).** Ten categories in today's order, one flat list (no groups):
+Convert · PDF Tools · Image Tools · Viewers · Units · Calculator · Text · Security · Utilities · Canvas.
+Removed: Open, Developer, Numbers, Share, Color. Category ids → mockup folder (`area`):
+`convert`→convert, `pdf`→pdf (no mockup: shell skeleton), `image-tools`→image-tools, `viewers`→viewers, `units`→units,
+`calculator`→calculator, `text`→text, `security`→security, `utilities`→utilities, `canvas`→canvas.
+
+Leaf fields: `name` = full name (H1, `<title>`, search: "JSON Formatter", "Length Converter", "DXF Viewer"); `chip` = today's
+sidebar label (rail leaves, sub-tool chips, home map: "Length", "DXF Drawing", "Tables / Sheets"); `hash` = today's
+`#hash`; `pair` (units presets) = `[from, to]`, e.g. `['lb', 'kg']`.
+
+| Category | Sub-tools (`kind: 'tool'`, one page each) | Presets (`kind: 'preset'`, SEO landings) |
+|---|---|---|
+| Convert | `convert-images` `convert-video` `convert-audio` `convert-data` `convert-tables` `convert-documents` | heic-to-jpg, png-to-jpg, jpg-to-png, webp-to-png, png-to-webp, avif-to-png, tiff-to-png, mov/mkv/webm-to-mp4, mp4-to-gif, mp4/wav/flac/m4a-to-mp3, mp3-to-wav, mp3-to-ogg, csv-to-json, json-to-csv, xlsx-to-csv, csv-to-xlsx, ods-to-xlsx, xlsx-to-ods, docx-to-pdf, odt-to-pdf, odt-to-docx, rtf-to-pdf, markdown-to-pdf, html-to-pdf, docx-to-txt |
+| PDF Tools | `pdf-tools` (one workbench) | edit-pdf, merge-pdf, split-pdf, compress-pdf, sign-pdf, ocr-pdf, redact-pdf |
+| Image Tools | `image-tools` (one workbench) | compress-image, resize-image, crop-image, remove-background, annotate-image, blur-image, image-metadata |
+| Viewers | `viewer-markdown` `viewer-svg` `viewer-table` `viewer-documents` `viewer-pptx` `viewer-dxf` `viewer-pointcloud` `viewer-shapefile` `viewer-ifc` `viewer-stl` `viewer-database` | csv-viewer, excel-viewer, parquet-viewer (→ table), docx-viewer (→ documents), sqlite-viewer (→ database) |
+| Units | `units-length` `units-area` `units-volume` `units-weight` `units-temperature` `units-speed` `units-time` `units-pressure` `units-energy` `units-power` `units-data` `units-angle` `units-frequency` `units-fuel` | conversion pairs (REVIEW-1 answer 3): lbs-to-kg, kg-to-lbs, oz-to-grams, grams-to-oz, cm-to-inches, inches-to-cm, feet-to-meters, meters-to-feet, km-to-miles, miles-to-km, c-to-f, f-to-c, mph-to-kmh, kmh-to-mph, ml-to-oz, oz-to-ml, liters-to-gallons, gallons-to-liters, sqft-to-sqm, mb-to-gb, l100km-to-mpg |
+| Calculator | `calculator` (one page, Calc Paper = Calculate + Grapher) | grapher, percentage |
+| Text | `json-formatter` `text-diff` `regex-tester` `word-count` `case-converter` `text-cleanup` `ascii-banner` `image-to-ascii` | — |
+| Security | `hash-generator` `encode-decode` `hmac-kdf` `text-encryption` `password-generator` `uuid-generator` `jwt-decoder` | sha256-checksum, base64-decode |
+| Utilities | `qr-generator` `qr-reader` `url-cleaner` `timestamp` `color-picker` | wifi-qr, contrast-checker |
+| Canvas | `fernboard` (one board app) | draw, mind-map, mermaid |
+
+**Old ids still resolve** (`ALIASES`): `getLeaf('format-json')` returns a copy of the JSON Formatter leaf that keeps
+`id: 'format-json'` and adds `aliasOf: 'json-formatter'`, so round-1 pages that key tables by id keep working. `hrefFor`,
+Recent and the rail use today's id (`canonicalId(id)`). Don't use old ids in new code.
+
+**2. Command bar = pure tool search** (owner decision). Searches tools, sub-tools, SEO presets (names + synonyms incl.
+"pfund in kg"), page commands and settings. No inline answers, no paste detectors, no "Open in …" rows. The home search and
+the 404 search use the same engine. `shell.js` no longer imports or re-exports `eval.js` (`answer`, `detect`,
+`convertUnits`, `evalMath`, `parseColor`, `toHex`, `toHsl`, `relTime`, `fmtNum`, `cleanUrl`): import them from
+`../kit/eval.js` directly if your page needs them (Calculator does). Detection may still help *inside* a tool. Pasting text
+outside inputs now does nothing unless your page handles it via `onPasteText`.
+
+**3. Declutter.** No trust/marketing lines anywhere in the kit: the ⌘K footer line, the veil's "stays on this device",
+the privacy popover, `.fw-veil__foot`, `.fw-footer__trust`, `.fw-privacy-chip` are gone; `.fw-intake__privacy` is now
+`display:none` (remove it from your markup). Footer only on home (legal links). The ⋯ menu (`#fw-more`) is now shown on
+all widths: theme (phones), keyboard shortcuts (desktop), install, **Legal: Imprint · Privacy · Terms**. App bar background
+is solid (no blur).
+
+**4. Rail and sub-tool navigation.** The rail is one flat list. On ≥ 1280 px it is open by default (unless the user
+collapsed it; workbenches stay 56 px) and the current category lists its sub-tools (`chip` labels). In the collapsed rail
+and on workbenches, hovering/focusing a category with sub-tools opens a **flyout** with them (→ opens it from the keyboard,
+↑/↓ move, ← / Esc close). Sub-tool chips under the H1 (`pageHeader`) show `chip` labels and are 44 px on touch.
+`mountShell({ railOpen })` overrides the default. Single-tool categories (PDF, Image Tools, Calculator, Canvas) show no
+leaves/chips; their presets appear on the home map and in search.
+
+**5. New/changed API**
+- `mountShell({ commands: [{ id, label, sub, icon, kbd, syn, run, searchOnly, hidden() }] })` → page commands in ⌘K
+  ("On this page": the first 4 when the query is empty, all when they match). Change them later with `setCommands(list)`
+  (exported, and on the `mountShell` return value). Replaces the MutationObserver/injection shims.
+- `canonicalId(id)`, `ALIASES` exported from `shell.js`/`registry.js`.
+- `renderCatalog({ compact, current, max = 8 })`: flat; `group` is accepted but ignored.
+- `openDialog({ size })` now sets `--dlg-w`, so below 600 px the bottom sheet is full width again (drop your `!important` workaround).
+- `.fw-stage--fill` (new modifier): children fill the stage instead of being centred (Calculator's `place-items: normal` workaround).
+- `.fw-pointer-copy` / `.fw-touch-copy` work everywhere (not only inside `.fw-intake`).
+- `.fw-intake--slim` keeps its slim height on phones.
+- Touch (`pointer: coarse`) targets are 44 px: `.fw-chip` / sub-chips, `.fw-seg__opt` (also `--sm`), `.fw-iconbtn--sm`,
+  `.fw-input`/`.fw-select`, toast action + close; `.fw-detect button` gets a 44 px hit area.
+- `.fw-chip`, `.fw-chips`, `.fw-subchips` are `position: relative` (a `.fw-sr` inside a scrolling chip row no longer widens the page).
+- Drop veil: no `backdrop-filter` (it cost ~70 ms/frame in software rendering); a denser solid veil instead. No blur left in the kit.
+- `files.js`: veil actions point at today's tools (`sub` = "Category · Sub-tool"); new kinds `points` (las laz e57 pcd pts →
+  Point Cloud) and `geo` (shp shx kml gpx → Shapefile). Video/audio "Play" actions removed (no player today). Action ids unchanged.
+- Icons added: shuffle, boxes, wrench, weight, thermometer, beaker, square, gauge, fuel, zap, triangle-right, activity,
+  arrow-down-up, sparkles, presentation, hard-drive (drop your runtime copies when convenient; yours still override).
+- `eval.js` answers/detectors now point at today's leaves (units → `units-<dimension>`, time → `timestamp`, colour →
+  `color-picker`, URL → `url-cleaner`, JWT → `jwt-decoder`, hash → `hash-generator`, Base64 → `encode-decode`,
+  Wi-Fi/vCard → `qr-generator`). Not used by the shell.
+
+---
+
 Shared tokens, components, shell and recorder for every Fernwork One mockup. Live style guide (every component, light
 and dark side by side): **http://127.0.0.1:8790/kit/**. Reference pages that use everything below:
 **http://127.0.0.1:8790/shell/** (home), `shell/queue.html`, `shell/instant.html`, `shell/workbench.html`, `shell/404.html`.
@@ -15,8 +90,8 @@ build step, no CDN. Everything binding is in `design/DESIGN.md`; this file only 
 | `tokens.css` | All DESIGN §6 tokens, light + dark (`[data-theme]` on `<html>` or **any subtree**, OS preference otherwise), reduced motion. |
 | `components.css` | Every DESIGN §5 component, prefixed `fw-`. |
 | `shell.js` | ES module: `mountShell()` + every shell behaviour and helper (re-exports everything below). |
-| `registry.js` | Categories and leaves (DESIGN §2): one name per leaf, synonyms, archetype, icon, mock area. |
-| `eval.js` | Inline answers (math, units, time, colour) and paste detectors (URL, JWT, hash, UUID, Base64, epoch/ISO, colour, `WIFI:`, vCard, JSON), `cleanUrl()`. Pure functions. |
+| `registry.js` | Categories and leaves (today's nav, Revision 1): name, chip, synonyms, archetype, icon, mock area, aliases. |
+| `eval.js` | Math, units, time, colour helpers and value detectors, `cleanUrl()`. Pure functions. Not used by the shell (Revision 1); import directly. |
 | `files.js` | `fileKind()`, `summarize()`, `actionsFor()` (drop-veil actions per type), `handoff()` / `consumeHandoff()`, `formatBytes()`. |
 | `icons.js` | Lucide subset (ISC), stroke 1.75: `icon(name, { size })`, `<span data-icon="name" data-size="20">`. |
 | `fonts/` | Geist 400/500/600 (latin + latin-ext) and Geist Mono 400/500/600 (OFL). Loaded by `tokens.css`. |
@@ -54,7 +129,7 @@ const shell = mountShell({ leaf: 'units', archetype: 'instant', pageHeader: '#pa
 </html>
 ```
 
-`mountShell` wraps `<main>` and adds: skip link ("Skip to tool"), app bar, icon rail, footer (not on workbenches), toast
+`mountShell` wraps `<main>` and adds: skip link ("Skip to tool"), app bar, icon rail, footer (home only), toast
 region, tooltip, drop veil, global keys, Escape stack. **Call it before rendering anything that uses kit helpers**
 (intakes, `hrefFor`, chips), then render.
 
@@ -69,12 +144,14 @@ region, tooltip, drop veil, global keys, Escape stack. **Call it before renderin
 | `accept` | `['image']`, `['*']` or `(summary) => bool` | File kinds this page takes directly. Kinds: `image video audio pdf doc slides sheet data text cad model archive unknown`. |
 | `acceptLabel` | string | Shown in the direct veil: "Drop to add 3 images · to **HEIC to JPG**". |
 | `onFiles(files, {source})` | fn | Called for drops, pastes, picker, samples and handoffs. `source`: `drop│paste│picker│sample│handoff`. |
-| `onPasteText(text)` | fn → `true` | Paste outside inputs. Return `true` if handled; otherwise the command bar opens prefilled (detectors run). |
+| `onPasteText(text)` | fn → `true` | Paste outside inputs. Return `true` if handled (the default paste is then prevented); otherwise nothing happens. |
 | `dropActions(summary, files)` | fn → actions | Extra veil actions, prepended: `{ id, label, sub, icon, leaf }` or `{ …, run(files) }`. |
 | `pageHeader` | selector/el | Render the standard PageHeader (H1 = leaf name, one line, sub-tool chips) into it. |
-| `footer` | bool | Default: on, except workbench. `wide: true` aligns it to 1200 px. |
+| `footer` | bool | Default: home only (legal links). `wide: true` aligns it to 1200 px. |
+| `commands` | array | Page commands in ⌘K (Revision 1, see top). |
+| `railOpen` | bool | Override the default rail state (open ≥ 1280 px). |
 | `rail` | bool | `false` hides the rail (home, 404). |
-| `routing` | `'auto'│'shell'` | `auto` (default): links to other leaves go to `/<area>/?leaf=<id>` when that mockup folder exists, else to the shell skeletons. |
+| `routing` | `'auto'│'shell'` | `auto` (default): links to other leaves go to `<area>/?leaf=<id>` (all areas except `pdf`), else to the shell skeletons. |
 | `routes` | `{ leafId: href }` | Point leaves at **your** pages (e.g. `{ 'cm-to-inches': './?q=180+cm+in+in' }`). |
 | `searchInput` | selector | `/` focuses this instead of opening the command bar. |
 | `shortcuts` | `[{ label, keys: 'mod+shift+e' }]` | Added to the `?` sheet. |
@@ -90,11 +167,9 @@ region, tooltip, drop veil, global keys, Escape stack. **Call it before renderin
 - `openCommandBar(query?)`, `closeCommandBar()`, `openShortcuts()`, `openChooser(files)` (the post-drop action list).
 - `pushLayer(closeFn)` → `pop()`: put **your own** closable layers (editor search panel, inline popups) on the one Escape stack. Never add a document-level Escape listener.
 
-### Search, answers, detectors
-- `search(q, { limit, kinds: ['leaf','action'] })` → ranked `{ item, kind, score, marks }` (fuzzy + synonyms).
-- `answer(q)` → `{ kind: 'math'│'unit'│'time'│'color', q, value, unit?, copy, sub?, open, openLabel, swatch? }` or `null`. E.g. `answer('5 ft in cm').value === '152.4'`.
-- `detect(text)` → `[{ type: 'url'│'jwt'│'uuid'│'hash'│'time'│'color'│'wifi'│'vcard'│'json'│'base64', label, detail, value, actions: [{ leaf, label, sub, primary }] }]`.
-- Also exported: `convertUnits`, `evalMath`, `parseColor`, `toHex`, `toHsl`, `relTime`, `fmtNum`, `cleanUrl`.
+### Search
+- `search(q, { limit, kinds: ['leaf','action','command'] })` → ranked `{ item, kind, score, marks }` (fuzzy + synonyms).
+- `answer()`, `detect()` and the other `eval.js` helpers are **not** exported by `shell.js` any more (Revision 1): import `../kit/eval.js`.
 - `attachSearch(input)` — inline results dropdown under any input (same engine as ⌘K).
 - `createResults(listEl, { input, onDone })` — the raw results list if you build your own palette.
 
@@ -114,9 +189,9 @@ region, tooltip, drop veil, global keys, Escape stack. **Call it before renderin
 
 ### Stable selectors (for recordings and tests)
 `#fw-cmdpill` (search pill) · `.fw-cmd__input` · `.fw-cmd__answer` · `.fw-cmd__item[data-leaf-id="units"]` · `#fw-switcher` ·
-`#fw-theme-toggle` · `#fw-recent` · `#fw-privacy` · `#fw-search-mobile` · `#fw-more` · `#fw-rail-pin` · `.fw-rail__item[data-leaf]` ·
+`#fw-theme-toggle` · `#fw-recent` · `#fw-search-mobile` · `#fw-more` · `.fw-rail-flyout` · `#fw-rail-pin` · `.fw-rail__item[data-leaf]` ·
 `.fw-veil` · `.fw-veil__action[data-action="pdf"]` (ids from `actionsFor`: `convert compress edit pdf bg mp3 gif open merge sign ocr text json format csv compare count checksum`) ·
-`.fw-toast` · `.fw-subchips .fw-chip[data-leaf="convert-video"]` · `.fw-tslist__cat`, `.fw-tslist__leaf` (mobile switcher sheet).
+`.fw-toast` · `.fw-subchips .fw-chip[data-leaf="convert-video"]` · `.fw-rail__item[data-cat="units"]` · `.fw-tslist__cat`, `.fw-tslist__leaf` (mobile switcher sheet).
 
 ## 4. Class reference (components.css)
 
@@ -164,7 +239,7 @@ sticky `.fw-actionbar-wrap` (full-bleed on mobile). Errors inline on the card (`
 read `?q=` (the command bar and detectors send values there). `.fw-paste` or `.fw-query` (autofocus on pointer devices) →
 `.fw-hero` (+ one primary Copy) → `.fw-rows` → Recent. Mobile: sticky Copy in `.fw-actionbar-wrap`. See `shell/instant.html`.
 
-Handoffs ("Open in…", "Send to…"): `navigate('qr-code', { query: { q: value } })` or with `files`.
+Handoffs ("Open in…", "Send to…"): `navigate('qr-generator', { query: { q: value } })` or with `files`.
 
 ## 6. Recorder (`/home/flo/AgentWork/fernwork-ux/video/rec.mjs`)
 
@@ -203,3 +278,8 @@ Segment API: `moveTo(target, { duration, at: { x: 0.2, y: 0.5 } })`, `click`, `t
 `compose(segments, out, { fade = 0.45, crf = 20 })` → H.264 High, yuv420p, 30 fps, +faststart. `verify()` returns
 `{ duration, fps, size, mb, faststart, stills }`. Run long recordings with a timeout; one browser per Recorder.
 Headless only (never the real display); the recorder launches `/usr/bin/chromium` headless itself.
+
+### Revision 1b (coordinator)
+- When the rail is pinned open (≥ 768 px), the page header's sub-tool chips are hidden — the rail already lists the
+  sub-tools, so the page shows no duplicate navigation. Chips remain when the rail is collapsed, on workbench pages and
+  on mobile.
