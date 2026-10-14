@@ -115,6 +115,18 @@ export default {
       return withSiteHeaders(new Response("Not found", { status: 404 }), pathname);
     }
 
+    // A directory index is only served under its trailing-slash URL, otherwise
+    // relative links inside it (e.g. /fernwork → convert/) resolve one level too
+    // high. The asset layer answers that with a redirect, which fetch() would
+    // otherwise follow silently.
+    if (!pathname.endsWith("/")) {
+      const res = await env.ASSETS.fetch(new URL(`/${site}${pathname}`, url.origin), { redirect: "manual" });
+      if (res.status >= 300 && res.status < 400 && res.headers.get("location") === `/${site}${pathname}/`) {
+        url.pathname = `${url.pathname}/`;
+        return Response.redirect(url.toString(), 308);
+      }
+    }
+
     const found = await tryPaths(
       env,
       url.origin,
