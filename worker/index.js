@@ -9,6 +9,22 @@
  * Dev:    /__seele, /__gehirn, /__root path prefixes + ?__site=
  */
 
+import { MOCKUPS } from "./mockups.js";
+
+function mockupName(site, pathname) {
+  if (site !== "gehirn") return null;
+  const first = pathname.split("/")[1] || "";
+  return MOCKUPS.has(first) ? first : null;
+}
+
+function asMockup(response) {
+  const headers = new Headers(response.headers);
+  headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  headers.set("Cache-Control", "no-cache");
+  headers.set("Referrer-Policy", "no-referrer");
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 function siteFromHost(hostname) {
   const host = hostname.toLowerCase().replace(/^www\./, "");
   if (host.startsWith("seele.")) return "seele";
@@ -101,12 +117,21 @@ export default {
       return withSiteHeaders(new Response("Not found", { status: 404 }), pathname);
     }
 
+    const mockup = mockupName(site, pathname);
+    if (mockup && pathname === `/${mockup}`) {
+      url.pathname = prefixMatch ? `/__${site}/${mockup}/` : `/${mockup}/`;
+      return Response.redirect(url.toString(), 308);
+    }
+
     const found = await tryPaths(
       env,
       url.origin,
       candidatePaths(site, pathname)
     );
-    if (found) return withSiteHeaders(found, pathname);
+    if (found) {
+      const res = withSiteHeaders(found, pathname);
+      return mockup ? asMockup(res) : res;
+    }
 
     const notFound = await tryPaths(env, url.origin, [
       `/${site}/404.html`,
