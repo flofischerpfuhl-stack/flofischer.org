@@ -1,3 +1,5 @@
+import { mockupName } from "./mockups.js";
+
 /**
  * Host-based static routing for flofischer.org
  *
@@ -50,11 +52,13 @@ function withSiteHeaders(response, pathname) {
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-Frame-Options", "SAMEORIGIN");
-  if (pathname === "/fernwork" || pathname.startsWith("/fernwork/")) {
-    // Unlisted Fernwork redesign mockups: reachable only by link, never indexed.
-    // The QR reader mockup needs the camera.
+  const mockup = mockupName(pathname);
+  if (mockup) {
+    // Unlisted mockups (worker/mockups.js): reachable only by link, never indexed.
+    // The Fernwork QR reader mockup needs the camera.
     headers.set("X-Robots-Tag", "noindex, nofollow");
-    headers.set("Permissions-Policy", "camera=(self), microphone=(), geolocation=()");
+    const camera = mockup === "fernwork" ? "camera=(self)" : "camera=()";
+    headers.set("Permissions-Policy", `${camera}, microphone=(), geolocation=()`);
   } else {
     headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   }

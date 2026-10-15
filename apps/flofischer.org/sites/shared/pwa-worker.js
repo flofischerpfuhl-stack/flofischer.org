@@ -64,13 +64,15 @@ async function networkFirstStatic(request) {
   }
 }
 
+const MOCKUPS = ["fernwork", "builder"]; // keep in sync with worker/mockups.js
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-  // Unlisted mockups under /fernwork/ change often: never serve them from the cache.
-  if (url.pathname.startsWith("/fernwork/")) return;
+  // Unlisted mockups (see worker/mockups.js) change often: never serve them from the cache.
+  if (MOCKUPS.some((m) => url.pathname.startsWith(`/${m}/`))) return;
   if (request.mode === "navigate") {
     event.respondWith(networkFirst(request));
     return;
