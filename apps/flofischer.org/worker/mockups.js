@@ -7,6 +7,7 @@
 export const MOCKUPS = new Set([
   "fernwork", // Fernwork One redesign mockups
   "builder", // HimmelCAD Builder UI redesign (builder-ui-lab)
+  "win", // one-time Windows PC remote-access setup page (SSH + Tailscale)
 ]);
 
 export function mockupName(pathname) {
