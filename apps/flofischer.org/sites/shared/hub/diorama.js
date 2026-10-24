@@ -613,6 +613,7 @@ async function start() {
     if (readyFrames > 30) pacedResolution(frameMs);
 
     readyFrames += 1;
+    if (readyFrames === 3) savePoster();
     if (readyFrames === 1) {
       setLoadingProgress(97);
       loaderOverlay?.classList.add("has-preview");
@@ -620,13 +621,30 @@ async function start() {
       setLoadingProgress(99);
     } else if (readyFrames === 3) {
       setLoadingProgress(100);
-      const minimumVisibleMs = new URLSearchParams(location.search).get("loader") === "preview" ? 8000 : 1100;
+      // a return visit showed last time's first frame instead of the loader: cross-fade straight to the live scene
+      if (document.documentElement.classList.contains("has-diorama-poster")) document.documentElement.classList.add("diorama-live");
+      const minimumVisibleMs = document.documentElement.classList.contains("has-diorama-poster") ? 0
+        : new URLSearchParams(location.search).get("loader") === "preview" ? 8000 : 1100;
       const remaining = Math.max(0, minimumVisibleMs - (performance.now() - loaderStartedAt));
       window.setTimeout(() => {
         loaderOverlay?.classList.add("is-off");
         loaderOverlay?.setAttribute("aria-hidden", "true");
       }, remaining);
     }
+  }
+  // the first live frame becomes the poster for the next visit (index.html shows it); called right after a render, while
+  // the drawing buffer still holds the frame
+  function savePoster() {
+    const poster = window.__dioramaPoster;
+    if (!poster || !window.caches) return;
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      caches.open(poster.cache)
+        .then((cache) => cache.keys().then((keys) => Promise.all(keys.filter((k) => !k.url.endsWith(poster.key)).map((k) => cache.delete(k))))
+          .then(() => cache.put(poster.key, new Response(blob, { headers: { "content-type": blob.type } }))))
+        .then(() => { try { localStorage.setItem("ff-diorama-poster", poster.key); } catch {} })
+        .catch(() => {});
+    }, "image/webp", 0.86);
   }
   renderer.setAnimationLoop(animate);
   if (isLocal) {

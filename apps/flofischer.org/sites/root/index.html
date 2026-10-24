@@ -59,6 +59,24 @@
 </head>
 <body class="realm-diorama" data-title-en="Flo Fischer" data-title-de="Flo Fischer">
   <canvas id="diorama-world" aria-label="Freely rotatable floating island between Seele and Gehirn"></canvas>
+  <div class="diorama-poster" data-diorama-poster aria-hidden="true"></div>
+  <script>
+    // A return visit starts on the island itself: diorama.js keeps the first live frame (Cache Storage, per view size
+    // and diorama version) and this shows it before three.js has even loaded; the loader only runs on a first visit.
+    (() => {
+      const key = "/__diorama-poster/v=19/" + Math.round(innerWidth / 40) + "x" + Math.round(innerHeight / 40);
+      window.__dioramaPoster = { cache: "ff-diorama-poster", key };
+      let saved = null;
+      try { saved = localStorage.getItem("ff-diorama-poster"); } catch {}
+      if (saved !== key || !window.caches) return;
+      const root = document.documentElement;
+      root.classList.add("has-diorama-poster");
+      caches.open("ff-diorama-poster").then((c) => c.match(key)).then((hit) => (hit ? hit.blob() : null)).then((blob) => {
+        if (!blob) throw new Error("no poster");
+        document.querySelector("[data-diorama-poster]").style.backgroundImage = 'url("' + URL.createObjectURL(blob) + '")';
+      }).catch(() => root.classList.remove("has-diorama-poster"));
+    })();
+  </script>
   <div class="film-grain" aria-hidden="true"></div>
   <div class="scanlines" aria-hidden="true"></div>
   <div class="diorama-vignette" aria-hidden="true"></div>

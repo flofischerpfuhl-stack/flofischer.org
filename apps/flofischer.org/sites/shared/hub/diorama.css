@@ -17,6 +17,34 @@ body.is-orbiting #diorama-world {
   cursor: grabbing;
 }
 
+.diorama-poster {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  background: #171317 center / cover no-repeat;
+  transition: opacity 420ms ease, visibility 0s linear 420ms;
+}
+
+/* a return visit: last time's first frame sits under grain and vignette like the live canvas; no loader */
+.has-diorama-poster .diorama-poster {
+  opacity: 1;
+  visibility: visible;
+  transition: none;
+}
+
+.has-diorama-poster .diorama-loader {
+  display: none;
+}
+
+.has-diorama-poster.diorama-live .diorama-poster {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 420ms ease, visibility 0s linear 420ms;
+}
+
 #diorama-world.is-over-portal {
   cursor: pointer;
 }
