@@ -3,13 +3,17 @@
  * bar, grenade button, screen flashes) stays on the session's canvas pass, projected through this camera.
  * World mapping: session x → three x, distance ahead z → three −z, the squad stands at the origin.
  *
- * Scenery is procedural per world (no photo backdrops, nothing to blur): a gradient sky dome, three layers of distant
- * hills, mesas, mountains or volcanoes, the sculpted props of the world along the road (scripts/games-sculpt) and,
- * on the meadows and dunes, wind-blown grass at the roadside.
+ * Scenery is procedural per world (no photo backdrops, nothing to blur): a baked panorama (world/panorama.js: painted
+ * sky with clouds and sun, terrain with trees, houses and the landmark) on one plane at the back, the sculpted props of
+ * the world along the road (scripts/games-sculpt), a looping strip of roadside dressing (world/roadside.js: fences,
+ * lamps, flowers, stones, ruins, snow banks or crystals, gravel shoulders) and, on the meadows and dunes, wind-blown
+ * grass at the roadside.
  */
 import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, MergedCrowd, Particles, TextPlane, projector, LOW_GPU } from './three-kit.js';
 import { loadModel } from './models.js';
 import { tuft, windy } from './world/island.js';
+import { Panorama } from './world/panorama.js';
+import { RoadLoop } from './world/roadside.js';
 import { ROAD, WEAPONS, BOSSES, PICKUPS, gateText, gateGood, laserOn, laserWarn, geyserState } from './fern-rangers.js';
 
 // The sculpted cast: the squad mixes the four Ranger species; aliens and robots come the other way.
@@ -31,25 +35,21 @@ const THEMES = {
   meadow: {
     ground: 't-grass', sky: { top: 0x4f9ef0, horizon: 0xe4f3ff }, fog: 0xd2e8fa,
     light: { sun: 0xfff1d6, sky: 0xd6ecff, ground: 0x4f6e2c, intensity: 2.6, ambient: 1.2 }, exposure: 1.05,
-    ridges: [{ c: [0x6fa85a, 0x8fbf6e], h: 7, dist: 115, rough: 0.6 }, { c: [0x8db886, 0xa9cfa0], h: 12, dist: 165, rough: 0.8 }, { c: [0xa9c9de, 0xc8def0], h: 24, dist: 235, rough: 1.2 }],
     near: ['TREE_ROUND', 'BUSH', 'TREE_ROUND', 'ROCK', 'BUSH'], far: ['COTTAGE', 'TREE_ROUND', 'WINDMILL', 'TREE_ROUND', 'COTTAGE'], grass: { colour: [0.27, 0.55, 0.32], height: 0.24 },
   },
   dunes: {
     ground: 't-sand', sky: { top: 0x5f93db, horizon: 0xffe2b0 }, fog: 0xf6dcb4,
     light: { sun: 0xffd29a, sky: 0xffe3c2, ground: 0x9a6b3a, intensity: 2.6, ambient: 1.1 }, exposure: 1.05,
-    ridges: [{ c: [0xd99a5c, 0xe8b276], h: 6, dist: 115, rough: 0.5, mesa: true }, { c: [0xc8784a, 0xdc9a68], h: 14, dist: 170, rough: 0.7, mesa: true }, { c: [0xe2b48a, 0xf0caa0], h: 20, dist: 240, rough: 0.9 }],
     near: ['CACTUS', 'DESERT_ROCK', 'CACTUS', 'PALM'], far: ['MESA', 'DESERT_ROCK', 'PALM'], grass: { colour: [0.11, 0.42, 0.5], height: 0.18 },
   },
   frost: {
     ground: 't-snow', sky: { top: 0x3f78c8, horizon: 0xeaf5ff }, fog: 0xdfecfa,
     light: { sun: 0xffffff, sky: 0xe0f0ff, ground: 0xb0c4d8, intensity: 2.3, ambient: 1.1 }, exposure: 0.95,
-    ridges: [{ c: [0x9ab4d0, 0xffffff], h: 9, dist: 115, rough: 0.8, snow: 0.6 }, { c: [0x7f9cc0, 0xffffff], h: 20, dist: 170, rough: 1.3, snow: 0.55 }, { c: [0xa8bfdc, 0xf4f8ff], h: 34, dist: 245, rough: 1.6, snow: 0.45 }],
     near: ['PINE_SNOW', 'SNOW_ROCK', 'PINE_SNOW', 'ICE_CRYSTAL'], far: ['PINE_SNOW', 'OBSERVATORY', 'PINE_SNOW'], grass: null,
   },
   ember: {
     ground: 't-lavarock', sky: { top: 0x2a1b40, horizon: 0xe0704a }, fog: 0x6a3446,
     light: { sun: 0xffb27a, sky: 0xff9a6a, ground: 0x3a1408, intensity: 2.2, ambient: 1.0 }, exposure: 1.05,
-    ridges: [{ c: [0x2a2022, 0x3a2e30], h: 8, dist: 115, rough: 0.8, lava: true }, { c: [0x3a2830, 0x4a3438], h: 18, dist: 170, rough: 1.1, volcano: true }, { c: [0x5a3446, 0x6a4050], h: 28, dist: 240, rough: 1.4, volcano: true }],
     near: ['BASALT', 'FERNSTONE', 'BASALT', 'ROCK'], far: ['VOLCANO', 'BASALT'], grass: { colour: [0.06, 0.35, 0.22], height: 0.15 }, ufo: true,
   },
 };
@@ -64,38 +64,6 @@ function canvasTex(w, h, draw, repeat) {
   return t;
 }
 const hash = (n) => { const s = Math.sin(n * 12.9898) * 43758.5453; return s - Math.floor(s); };
-
-/** A far ridge line as one flat, vertex-coloured strip (lighter at the top, foggy at the foot). */
-function ridge(spec, seed, fog, haze) {
-  const pts = [];
-  for (let x = -340; x <= 340; x += 3) {
-    let y = 0;
-    for (const [f, a] of [[0.011, 1], [0.027, 0.5], [0.061, 0.25 * spec.rough], [0.13, 0.12 * spec.rough]]) y += Math.sin(x * f + seed * 3.1 + a * 7) * a + Math.sin(x * f * 1.7 - seed) * a * 0.5;
-    y = (y * 0.5 + 0.8) * spec.h;
-    if (spec.mesa) y = Math.round(y / (spec.h * 0.45)) * spec.h * 0.45 + Math.max(0, Math.sin(x * 0.05 + seed)) * 1.2;
-    if (spec.volcano) { const cone = Math.max(0, 1 - Math.abs(((x + seed * 40) % 160 + 160) % 160 - 80) / 40); y = Math.max(y * 0.6, cone * spec.h * 1.5); }
-    pts.push([x, Math.max(0.5, y)]);
-  }
-  const pos = [], col = [], idx = [];
-  const lo = new THREE.Color(spec.c[0]), hi = new THREE.Color(spec.c[1]), c = new THREE.Color(), snow = new THREE.Color(0xffffff), lava = new THREE.Color(0xff6a2a);
-  const top = Math.max(...pts.map((p) => p[1]));
-  pts.forEach(([x, y], i) => {
-    pos.push(x, -2, 0, x, y, 0);
-    // distance haze is painted in (the fog would swallow layers this far out)
-    c.copy(lo).lerp(fog, Math.min(1, haze + 0.3)); col.push(c.r, c.g, c.b);
-    c.copy(lo).lerp(hi, 0.9);
-    if (spec.snow && y > top * spec.snow) c.lerp(snow, 0.85);
-    if (spec.volcano && y > top * 0.92) c.lerp(lava, 0.6);
-    c.lerp(fog, haze);
-    col.push(c.r, c.g, c.b);
-    if (i) { const a = (i - 1) * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
-  });
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-  g.setIndex(idx);
-  return new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, fog: false }));
-}
 
 /** Instanced sculpted props that scroll past along the roadside; positions come from a hash of their slot. */
 class Roadside {
@@ -175,23 +143,9 @@ export class FernRangers3D {
 
   build() {
     const s = this.scene;
-    // sky dome: the world's colours, a sun glow; drawn behind everything (depth at the far plane)
-    this.skyMat = new THREE.ShaderMaterial({
-      side: THREE.BackSide, depthWrite: false, fog: false,
-      uniforms: { uTop: { value: new THREE.Color() }, uHorizon: { value: new THREE.Color() }, uSun: { value: new THREE.Vector3(-0.35, 0.28, -0.9).normalize() } },
-      vertexShader: 'varying vec3 vDir; void main() { vDir = normalize(position); vec4 p = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_Position = p.xyww; }',
-      fragmentShader: `uniform vec3 uTop, uHorizon, uSun; varying vec3 vDir;
-        void main() {
-          float h = clamp(vDir.y * 2.2 + 0.05, 0.0, 1.0);
-          vec3 col = mix(uHorizon, uTop, pow(h, 0.75));
-          col += vec3(1.0, 0.88, 0.7) * pow(max(dot(normalize(vDir), uSun), 0.0), 32.0) * 0.6;
-          gl_FragColor = vec4(col, 1.0);
-          #include <colorspace_fragment>
-        }`,
-    });
-    this.sky = new THREE.Mesh(new THREE.SphereGeometry(450, 32, 16), this.skyMat);
-    this.sky.frustumCulled = false; this.sky.renderOrder = 10;
-    s.add(this.sky);
+    // the horizon: one baked panorama plane (rebaked per world and screen size)
+    this.pano = new Panorama();
+    s.add(this.pano.mesh);
     this.far = new THREE.Group(); s.add(this.far);
     // Opaque near ground and road (cheap: early depth rejects everything behind them) plus thin transparent strips at
     // the far end that fade into the fog. Texture offsets of strip and main plane are kept continuous.
@@ -293,8 +247,6 @@ export class FernRangers3D {
     this.themeName = key;
     const th = THEMES[name] || THEMES.meadow;
     this.th = th;
-    this.skyMat.uniforms.uTop.value.set(th.sky.top); this.skyMat.uniforms.uHorizon.value.set(th.sky.horizon);
-    if (dark) { this.skyMat.uniforms.uTop.value.multiplyScalar(0.75); this.skyMat.uniforms.uHorizon.value.multiplyScalar(0.85); }
     this.tile = 10;
     for (const [m, len] of [[this.ground, this.nearLen], [this.groundFar, this.strip]]) {
       m.material.map = texture(th.ground, { repeat: [400 / this.tile, len / this.tile] });
@@ -306,16 +258,6 @@ export class FernRangers3D {
     L.hemi.color.set(th.light.sky); L.hemi.groundColor.set(th.light.ground); L.hemi.intensity = th.light.ambient;
     this.renderer.toneMappingExposure = th.exposure * (dark ? 0.92 : 1);
     this.scene.fog = new THREE.Fog(th.fog, 50, FAR + 70);
-    // far scenery: three ridge layers (and the mothership over the Ember Isles)
-    for (const c of [...this.far.children]) { this.far.remove(c); c.geometry?.dispose(); }
-    const fogC = new THREE.Color(th.fog);
-    th.ridges.forEach((spec, i) => { const m = ridge(spec, i + name.length, fogC, 0.18 + i * 0.2); m.position.z = -spec.dist; m.renderOrder = 5 - i; this.far.add(m); });
-    if (th.ufo && BOSS_CAST.mothership.model) {
-      const ufo = new THREE.Group();
-      for (const g of BOSS_CAST.mothership.model) ufo.add(new THREE.Mesh(g.geometry, g.mat === 'glow' ? new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false, fog: false }) : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.3, metalness: 0.3, fog: false })));
-      ufo.scale.setScalar(16); ufo.position.set(40, 48, -200); ufo.rotation.x = 0.15; ufo.name = 'ufo';
-      this.far.add(ufo);
-    }
     // roadside props and grass for this world
     if (this.roadside) this.roadside.dispose(this.scene);
     if (this.farProps) this.farProps.dispose(this.scene);
@@ -323,8 +265,16 @@ export class FernRangers3D {
     const near = await Promise.all(th.near.map((n) => loadModel(n, 'lo').catch(() => null)));
     const far = await Promise.all(th.far.map((n) => loadModel(n, 'lo').catch(() => null)));
     if (this.themeName !== key) return;
+    const world = ['meadow', 'dunes', 'frost', 'ember'].indexOf(name);
+    this.pano.build({ world: Math.max(0, world), dark, low: LOW_GPU, fog: th.fog, light: th.light });
+    this.panoDirty = true;
+    if (this.loop) { this.scene.remove(this.loop.group, this.loop.static); this.loop.dispose(); }
+    this.loop = new RoadLoop({ world: Math.max(0, world), road: ROAD, P: 128, low: LOW_GPU, dark });
+    this.scene.add(this.loop.group, this.loop.static);
     this.roadside = new Roadside(this.scene, near, 40);
     this.farProps = new Roadside(this.scene, far, 12);
+    // far props stand outside the shadow box: no shadow pass for them
+    for (const k of this.farProps.kinds) for (const { mesh } of k.meshes) mesh.castShadow = false;
     if (this.grass) { this.scene.remove(this.grass); this.grass = null; }
     if (th.grass && !LOW_GPU) this.grass = this.makeGrass(th.grass);
     applyIbl(this.scene, this.env, 0.55);
@@ -333,7 +283,8 @@ export class FernRangers3D {
 
   /** Grass tufts along both roadsides; they loop with the road (one instanced mesh, swaying in the wind). */
   makeGrass(spec) {
-    const N = 1100, geo = tuft(Math.random, 6);
+    // (fewer than before: the roadside loop now carries flowers and tufts on the verge too)
+    const N = 760, geo = tuft(Math.random, 6);
     const mesh = new THREE.InstancedMesh(geo, windy(new THREE.MeshLambertMaterial({ side: THREE.DoubleSide }), this.uniforms), N);
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); mesh.frustumCulled = false;
     const col = new THREE.Color();
@@ -357,6 +308,7 @@ export class FernRangers3D {
     const wantHalf = 3.7 / 8.4;
     this.camera.fov = Math.min(84, Math.max(46, (2 * Math.atan(wantHalf / aspect) * 180) / Math.PI));
     this.camera.updateProjectionMatrix();
+    this.panoDirty = true;
   }
 
   /**
@@ -405,12 +357,16 @@ export class FernRangers3D {
     const cam = this.camera;
     const camX = s.px * 0.35;
     const shake = s.shake > 0 && !view.reduced ? s.shake : 0;
+    if (this.panoDirty && this.pano.scene) {
+      // bake from the centred camera; the plane then follows the camera sideways
+      this.panoDirty = false;
+      cam.position.set(0, 4.1, 6.4); cam.lookAt(0, 0.8, -7); cam.updateMatrixWorld();
+      this.pano.bake(this.renderer, cam);
+    }
     cam.position.set(camX + (Math.random() - 0.5) * shake * 0.25, 4.1 + (Math.random() - 0.5) * shake * 0.2, 6.4);
     cam.lookAt(camX * 0.7, 0.8, -7);
-    this.sky.position.copy(cam.position);
-    this.far.position.x = camX * 0.9;
-    const ufo = this.far.getObjectByName('ufo');
-    if (ufo) { ufo.position.y = 48 + Math.sin(s.t * 0.4) * 1.5; ufo.rotation.y = s.t * 0.05; }
+    if (this.pano.base) this.pano.mesh.position.set(this.pano.base.x + camX * 0.98, this.pano.base.y, this.pano.base.z);
+    this.loop?.update(s.pos);
     const L = this.lights.light;
     L.position.set(-5 + s.px * 0.3, 12, 4); L.target.position.set(s.px * 0.3, 0, -6);
 

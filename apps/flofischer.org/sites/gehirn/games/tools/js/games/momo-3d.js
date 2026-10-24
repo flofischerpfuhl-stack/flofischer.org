@@ -6,8 +6,13 @@
  * Performance: every crowd (enemies, sparks, shots, decals, particles) is one instanced mesh per material, filled from
  * the session's pools each frame without allocating; only Momo, the boss and the tall props cast real shadows (the
  * horde gets blob shadows), and the shadow map is redrawn every second frame.
+ *
+ * The arena of each world (world/arena.js) is a painted overlay on the ground texture (paths, plaza, stones, flowers,
+ * ripples, ice, lava cracks), a broken ring of low walls with torch pillars and banners, and low clutter on the floor,
+ * all static and merged into a few chunked meshes.
  */
-import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, MergedCrowd, Particles, BlobShadows } from './three-kit.js';
+import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, MergedCrowd, Particles, BlobShadows, LOW_GPU } from './three-kit.js';
+import { buildArena, overlayGround } from './world/arena.js';
 import { loadModel } from './models.js';
 import { KINDS, WEAPONS } from './momo.js';
 
@@ -311,6 +316,7 @@ export class Momo3D {
     this.bossList = Object.values(this.bosses);
     for (const b of this.bossList) for (const m of b.mats) m.userData.base = m.color.clone();
     applyIbl(s, this.env, 0.55);
+    this.overlay = overlayGround(this.ground.material);
   }
 
   buildBosses() {
@@ -392,6 +398,13 @@ export class Momo3D {
     L.hemi.color.set(th.light.sky); L.hemi.groundColor.set(th.light.ground); L.hemi.intensity = th.light.ambient;
     this.renderer.toneMappingExposure = th.exposure * (dark ? 0.9 : 1);
     this.rim.scale.setScalar(sess.R); this.rim.material.color.set(th.rim);
+    // the arena's ground paint, wall ring and floor clutter
+    if (this.arena) { this.scene.remove(this.arena.group); this.arena.dispose(); }
+    this.arena = buildArena({ world: sess.L.world, R: sess.R, dark, low: LOW_GPU });
+    this.scene.add(this.arena.group);
+    const ov = this.overlay;
+    ov.uOver.value = this.arena.overlay; ov.uOverExt.value.set(...this.arena.ext);
+    ov.uGlowMap.value = this.arena.glow; ov.uGlowC.value.setRGB(...(this.arena.glow ? [1.8, 0.55, 0.16] : [0, 0, 0]));
     // props around the arena (static: filled once per world)
     for (const c of this.props.values()) for (const ch of c.channels) { ch.mesh.count = 0; if (ch.shadow) ch.shadow.count = 0; }
     let seed = 7 + sess.L.world * 101;

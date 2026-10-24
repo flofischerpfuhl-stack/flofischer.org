@@ -4,7 +4,10 @@
  * next to the boxes shows the player's progress from profile.js: stars, world and level, best scores, play time,
  * coins, achievements, and the save export.
  */
-import { THREE, createRenderer, addLights, studioEnvironment, applyIbl } from './three-kit.js';
+import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, Particles, LOW_GPU } from './three-kit.js';
+import { Baker } from './world/decor.js';
+import { buildStage } from './world/stage.js';
+import { propsReady } from './world/tower-scenery.js';
 import { profile, game as gameProfile, starsTotal, exportCode, importCode, onChange, ACHIEVEMENTS } from './profile.js';
 import { icon } from '../../../assets/kit/icons.js';
 
@@ -185,13 +188,27 @@ export function mountHub(host, { onPlay }) {
   const scene = new THREE.Scene();
   const env = studioEnvironment(renderer);
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+  window.__hubView = { renderer, scene, camera }; // test/bench hook
   const lights = addLights(scene, { dir: [-3, 5, 6], shadowBox: 4, mapSize: 1024, intensity: 2.2, ambient: 1.0 });
   scene.background = stageBackdrop();
-  // stage: a soft round podium and a gradient backdrop
-  const podium = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.8, 0.25, 64), new THREE.MeshStandardMaterial({ color: 0x141821, roughness: 0.28, metalness: 0.35 }));
-  podium.position.y = -1.09; podium.receiveShadow = true; scene.add(podium);
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(3.7, 0.012, 8, 96), new THREE.MeshBasicMaterial({ color: 0x3fae6c, toneMapped: false }));
-  rim.rotation.x = Math.PI / 2; rim.position.y = -0.965; scene.add(rim);
+  // The stage (world/stage.js: podium, curtains, sign, lights, ferns, Fernstones) is baked into one image with depth
+  // whenever the view's size changes; live are only the boxes, their shadows on the podium and drifting motes.
+  const baker = new Baker();
+  scene.add(baker.quad);
+  let stage = null, bakeDirty = true, texReady = -1;
+  propsReady.then(() => { stage = buildStage({ env }); bakeDirty = true; });
+  const catcher = new THREE.Mesh(new THREE.CircleGeometry(3.6, 64), new THREE.ShadowMaterial({ opacity: 0.38, depthWrite: false }));
+  catcher.rotation.x = -Math.PI / 2; catcher.position.y = -0.962; catcher.receiveShadow = true; catcher.renderOrder = -900; catcher.visible = !LOW_GPU; scene.add(catcher);
+  const motes = new Particles(scene, 40, new THREE.SphereGeometry(1, 6, 4), new THREE.MeshBasicMaterial({ color: 0xffe2b0, transparent: true, opacity: 0.7, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
+  function bake() {
+    if (!stage) return;
+    const ready = stage.textures.filter((t) => t.image && (t.image.width || t.image.naturalWidth)).length;
+    if (!bakeDirty && ready === texReady) return;
+    bakeDirty = false; texReady = ready;
+    baker.bake(renderer, stage.scene, camera, LOW_GPU ? 1 : renderer.getPixelRatio() >= 1.4 ? 1.5 : 2);
+    scene.background = null;
+    stage.scene.traverse((o) => { if (o.isLight && o.shadow?.map) { o.shadow.map.dispose(); o.shadow.map = null; } });
+  }
 
   const boxes = GAMES.map((info, i) => {
     const front = canvasTexture(1024, 1322, (g, W, H, art) => drawFront(g, W, H, info, art));
@@ -255,6 +272,7 @@ export function mountHub(host, { onPlay }) {
     const dist = Math.max(fitW, fitH) / (2 * Math.tan((camera.fov * Math.PI) / 360));
     camera.position.set(0, 0.35, dist + 0.6); camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
+    bakeDirty = true;
   }
 
   function frame(t) {
@@ -278,6 +296,13 @@ export function mountHub(host, { onPlay }) {
       const idle = i === focus && !drag ? Math.sin(t / 1400) * 0.12 : 0;
       b.group.rotation.y = L.ry + b.spin + idle;
     });
+    bake();
+    motes.begin();
+    if (stage && !LOW_GPU) for (const m of stage.motes) {
+      const tt = t / 1000;
+      motes.add(m.x + Math.sin(tt * 0.3 + m.s * 9) * 0.3, m.y + Math.sin(tt * 0.2 + m.s * 5) * 0.25, m.z, 0.005 + m.s * 0.007, 0xffe2b0);
+    }
+    motes.end();
     renderer.render(scene, camera);
     raf = requestAnimationFrame(frame);
   }

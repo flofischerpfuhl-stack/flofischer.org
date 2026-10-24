@@ -11,6 +11,7 @@ import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, LOW_GPU 
 import { loadModel } from './models.js';
 import { buildIsland } from './world/island.js';
 import { THEMES, WORLD_ORDER } from './world/themes.js';
+import { Batch, mtx } from './world/decor.js';
 import { icon } from '../../../assets/kit/icons.js';
 
 const SPACING = 30;          // distance between islands
@@ -76,6 +77,7 @@ export function mountOverworld(host, { levels, hero = 'RANGER_BUNNY', companion 
   const env = studioEnvironment(renderer);
   scene.fog = new THREE.Fog(0xcfe7fb, 40, 120);
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 300);
+  window.__owView = { renderer, scene, camera }; // test/bench hook (the overworld last mounted)
   const lights = addLights(scene, { dir: [-10, 16, 9], shadowBox: 13, mapSize: 2048, intensity: 2.4, ambient: 1.1 });
   const fogC = new THREE.Color();
   // sky dome: horizon colour below, the world's sky colour overhead, a warm glow where the sun is
@@ -83,18 +85,32 @@ export function mountOverworld(host, { levels, hero = 'RANGER_BUNNY', companion 
     side: THREE.BackSide, depthWrite: false, fog: false,
     uniforms: { uTop: { value: new THREE.Color() }, uHorizon: { value: new THREE.Color() }, uBelow: { value: new THREE.Color() }, uSun: { value: new THREE.Vector3(-0.45, 0.35, -0.8).normalize() } },
     vertexShader: 'varying vec3 vDir; void main() { vDir = normalize(position); vec4 p = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_Position = p.xyww; }',
+    // soft cloud banks above the horizon and a sea of clouds below the islands: three octaves of value noise on the
+    // sky plane (a few dozen ALU per pixel, no textures), plus the sun's disc
     fragmentShader: `uniform vec3 uTop, uHorizon, uBelow, uSun; varying vec3 vDir;
+      float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+      float n2(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+        return mix(mix(h21(i), h21(i + vec2(1, 0)), f.x), mix(h21(i + vec2(0, 1)), h21(i + vec2(1, 1)), f.x), f.y); }
       void main() {
-        float h = clamp(vDir.y * 1.8 + 0.1, 0.0, 1.0);
+        vec3 d = normalize(vDir);
+        float h = clamp(d.y * 1.8 + 0.1, 0.0, 1.0);
         vec3 col = mix(uHorizon, uTop, pow(h, 0.7));
-        col = mix(col, uBelow, smoothstep(0.0, -0.45, vDir.y));
-        col += vec3(1.0, 0.9, 0.7) * pow(max(dot(normalize(vDir), uSun), 0.0), 24.0) * 0.5;
+        col = mix(col, uBelow, smoothstep(0.0, -0.45, d.y));
+        float sd = max(dot(d, uSun), 0.0);
+        col += vec3(1.0, 0.9, 0.7) * (pow(sd, 24.0) * 0.5 + smoothstep(0.9991, 0.9996, sd) * 0.8);
+        vec2 q = d.xz / (abs(d.y) + 0.22);
+        float c = n2(q * 1.1) * 0.55 + n2(q * 2.3 + 3.1) * 0.3 + n2(q * 5.1 + 7.7) * 0.15;
+        float up = smoothstep(0.02, 0.14, d.y) * smoothstep(0.62, 0.22, d.y), down = smoothstep(-0.06, -0.2, d.y);
+        float m = smoothstep(0.52, 0.74, c) * (up * 0.75 + down * 0.9);
+        vec3 cloud = mix(uHorizon, vec3(1.0), 0.72) * (0.86 + 0.14 * smoothstep(0.5, 0.8, n2(q * 1.1 + vec2(0.0, 0.4))));
+        col = mix(col, cloud, m);
         gl_FragColor = vec4(col, 1.0);
         #include <colorspace_fragment>
       }`,
   });
   const skyDome = new THREE.Mesh(new THREE.SphereGeometry(200, 32, 16), skyMat);
-  skyDome.frustumCulled = false; skyDome.renderOrder = -10;
+  // drawn after the opaque scene at the far plane, so only the pixels the islands leave free pay for the sky
+  skyDome.frustumCulled = false; skyDome.renderOrder = 999;
   scene.add(skyDome);
 
   // clouds: soft sprites drifting below and between the islands
@@ -114,6 +130,14 @@ export function mountOverworld(host, { levels, hero = 'RANGER_BUNNY', companion 
     s.scale.setScalar(8 + Math.random() * 10);
     scene.add(s); clouds.push(s);
   }
+
+  // a few birds wheeling over the islands (one instanced mesh of two-triangle wings)
+  const birdGeo = new THREE.BufferGeometry();
+  birdGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0.12, -0.5, 0.12, -0.05, 0, 0, -0.1, 0, 0, 0.12, 0.5, 0.12, -0.05, 0, 0, -0.1], 3));
+  birdGeo.computeVertexNormals();
+  const birds = new THREE.InstancedMesh(birdGeo, new THREE.MeshBasicMaterial({ color: 0x3a3a4a, side: THREE.DoubleSide, fog: true }), 12);
+  birds.instanceMatrix.setUsage(THREE.DynamicDrawUsage); birds.frustumCulled = false; scene.add(birds);
+  const bm = new THREE.Matrix4(), bq = new THREE.Quaternion(), be = new THREE.Euler(), bv = new THREE.Vector3(), bs = new THREE.Vector3();
 
   // per world: island (built lazily), node pads, badges
   const padGeo = new THREE.CylinderGeometry(0.42, 0.48, 0.18, 32);
@@ -150,6 +174,7 @@ export function mountOverworld(host, { levels, hero = 'RANGER_BUNNY', companion 
         wd.group.add(pad, label, stars, ring);
         wd.nodes.push({ lv, pad, label, stars, ring, pos: new THREE.Vector3(p.x, p.y + NODE_Y + 0.08, p.z), t: 0.04 + (k / Math.max(1, wd.levels.length - 1)) * 0.92 });
       });
+      wd.group.add(pathLamps(isl, wd.theme));
       paintNodes();
       lights.light.shadow.needsUpdate = true; renderer.shadowMap.needsUpdate = true;
       return isl;
@@ -291,6 +316,13 @@ export function mountOverworld(host, { levels, hero = 'RANGER_BUNNY', companion 
     lights.light.position.set(camX - 10, 16, 9); lights.light.target.position.set(camX, 0, 0); lights.light.target.updateMatrixWorld();
     for (const w2 of W) if (w2.island) w2.island.update(time);
     for (const c of clouds) { c.position.x += dt * 0.3; if (c.position.x > SPACING * 4 + 5) c.position.x = -15; }
+    if (!LOW_GPU) for (let i = 0; i < birds.count; i++) {
+      const a = time * (0.18 + (i % 3) * 0.03) + i * 0.52, r = 9 + (i % 4) * 1.6, flap = Math.sin(time * 9 + i * 1.7);
+      bv.set(camX + Math.cos(a) * r, wd.y + 5.5 + Math.sin(a * 1.7 + i) * 0.8 + (i % 2) * 0.9, wd.z - 3 + Math.sin(a) * r * 0.55);
+      bq.setFromEuler(be.set(0, -a, 0)); bm.compose(bv, bq, bs.set(0.5, 0.5 * (0.35 + 0.65 * Math.abs(flap)) * Math.sign(flap || 1), 0.5));
+      birds.setMatrixAt(i, bm);
+    }
+    birds.instanceMatrix.needsUpdate = true;
     // node rings pulse; the selected node's badge bobs
     ringMat.opacity = 0.55 + Math.sin(time * 4) * 0.35;
     // hero: hop along the path, idle bob otherwise
@@ -405,3 +437,23 @@ const STAR_GEO = (() => {
 })();
 const STAR_MAT = new THREE.MeshStandardMaterial({ color: 0xffcf3a, roughness: 0.3, metalness: 0.2, emissive: 0x6b4a00, emissiveIntensity: 0.4 });
 const STAR_DIM = new THREE.MeshStandardMaterial({ color: 0x6b6f78, roughness: 0.6 });
+
+/** Lamp posts with lit lanterns beside the island path, one merged mesh plus one self-lit mesh per island. */
+function pathLamps(isl, theme) {
+  const g = new THREE.Group(), base = new Batch(), glow = new Batch();
+  const post = new THREE.CylinderGeometry(1, 1, 1, 6), box = new THREE.BoxGeometry(1, 1, 1), cone = new THREE.ConeGeometry(1, 1, 4);
+  const metal = theme === 'ember' ? 0x2a2a34 : theme === 'dunes' ? 0x6a4a30 : 0x3a3f4a;
+  const lamp = new THREE.Color(theme === 'ember' ? 0x6ff0d8 : 0xffc870).multiplyScalar(1.8);
+  const n = 9;
+  for (let k = 0; k < n; k++) {
+    const t = 0.08 + (k / (n - 1)) * 0.84, p = isl.curve.getPoint(t), tan = isl.curve.getTangent(t);
+    const side = k % 2 ? 1 : -1, x = p.x - tan.z * 0.62 * side, z = p.z + tan.x * 0.62 * side, y = isl.heightAt(x, z);
+    base.add(post, mtx([x, y + 0.32, z], [0, 0, 0], [0.025, 0.64, 0.025]), metal);
+    base.add(box, mtx([x, y + 0.66, z], [0, 0, 0], [0.11, 0.025, 0.11]), metal);
+    base.add(cone, mtx([x, y + 0.76, z], [0, Math.PI / 4, 0], [0.1, 0.07, 0.1]), metal);
+    glow.add(box, mtx([x, y + 0.705, z], [0, 0, 0], [0.07, 0.07, 0.07]), lamp);
+  }
+  const m = base.mesh({ roughness: 0.6 }); m.castShadow = false; m.receiveShadow = false;
+  g.add(m, glow.mesh({ glow: true }));
+  return g;
+}

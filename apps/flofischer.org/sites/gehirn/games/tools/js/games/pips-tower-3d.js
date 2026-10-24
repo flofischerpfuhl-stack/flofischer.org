@@ -4,10 +4,17 @@
  * gates, keys and teleport pads, and the sculpted cast: Pip with Biscuit, Zorblings, Klonkbots, Buzzbots and the boss.
  * The simulation stays 2D (board x right, y down, 360 × 640); here board (x, y) maps to three (x − 180, 320 − y) on the
  * z = 0 plane, which faces the camera head-on so the overlay can use a plain scale + offset.
+ *
+ * Everything static (sky, hills, the plateau, the tower with its rooms and roof: world/tower-scenery.js) is baked once
+ * per level and screen size into a colour + depth image (decor.js Baker) and drawn back as one full-screen quad; only
+ * the moving things are real geometry each frame, plus a shadow catcher on the back wall, torch flames and the
+ * world's ambient particles (pollen, dust, snow, embers).
  */
-import { THREE, studioEnvironment, createRenderer, texture, mat, addLights, MergedCrowd, Particles } from './three-kit.js';
+import { THREE, studioEnvironment, createRenderer, texture, mat, addLights, MergedCrowd, Particles, LOW_GPU } from './three-kit.js';
 import { loadModel } from './models.js';
 import { BOARD_W, BOARD_H } from './pips-tower.js';
+import { Baker } from './world/decor.js';
+import { buildTowerScenery, propsReady } from './world/tower-scenery.js';
 
 const DEPTH = 64;          // wall depth (z from −32 to +32)
 const HUD = 56;            // CSS px the HUD covers at the top
@@ -19,11 +26,12 @@ const load = async (name) => {
   const [model, shadowModel] = await Promise.all([loadModel(name, 'lo'), loadModel(name, 'sh').catch(() => null)]);
   return { model, shadowModel };
 };
+await propsReady;
 const CAST = Object.fromEntries(await Promise.all(['PIP', 'BISCUIT', 'ZORBLING', 'KLONKBOT', 'BUZZBOT', 'BLORB', 'KLONK_TANK', 'FROST_WALKER']
   .map(async (n) => [n, await load(n)])));
 // Model, scale (board px per model unit) and the model's lowest point (it stands on the body's feet).
 const FIG = {
-  hero: { model: 'PIP', s: 50, base: 0 },
+  hero: { model: 'PIP', s: 64, base: 0 },
   zorbling: { model: 'ZORBLING', s: 56, base: 0 },
   klonkbot: { model: 'KLONKBOT', s: 47, base: 0 },
   buzzbot: { model: 'BUZZBOT', s: 68, base: 0.34 },
@@ -57,41 +65,6 @@ const LOOKS = [
     bg: { top: 0x2a1b40, horizon: 0xe0704a, far: 0x5a3040, near: 0x2c1e26, glow: 0xff9a4a, kind: 3 },
   },
 ];
-
-const BACKDROP_VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }';
-// Gradient sky, a soft sun (or moon), two layers of world-shaped silhouettes (hills, mesas, peaks, volcanoes), an
-// aurora over Frostpeak and stars at night. Cheap: a few noise taps per pixel, no textures.
-const BACKDROP_FS = `
-varying vec2 vUv;
-uniform vec3 top, horizon, farC, nearC, glow; uniform float kind, night, aspect, time;
-float h1(float n){ return fract(sin(n) * 43758.5453); }
-float n1(float x){ float i = floor(x), f = fract(x); return mix(h1(i), h1(i + 1.), f * f * (3. - 2. * f)); }
-float shape(float x, float seed){
-  if (kind < .5) return .55 * n1(x * 2.2 + seed) + .25 * n1(x * 5.1 + seed * 2.);
-  if (kind < 1.5) { float n = n1(x * 1.7 + seed); return smoothstep(.42, .5, n) * .55 + .12 * n1(x * 6. + seed); }
-  if (kind < 2.5) { float t = abs(fract(x * 1.3 + seed * .37) - .5); return .75 - t * 1.4 + .12 * n1(x * 7. + seed); }
-  float c = abs(fract(x * .55 + seed * .21) - .5); return max(.0, .62 - c * 2.4) + .1 * n1(x * 4. + seed);
-}
-void main(){
-  vec2 uv = vUv; float x = uv.x * aspect;
-  vec3 c = mix(horizon, top, smoothstep(.2, 1., uv.y));
-  vec2 sp = vec2(.72 * aspect, .78);
-  float d = length(vec2(x, uv.y) - sp);
-  c += glow * (.55 * exp(-d * 9.) + .18 * exp(-d * 2.5)) * (1. - night * .6);
-  if (kind > 1.5 && kind < 2.5) { // aurora ribbons
-    float a = sin(x * 3. + sin(x * 1.3 + time * .2) * 2.) * .5 + .5;
-    float band = exp(-pow((uv.y - .82 - .05 * sin(x * 2.1)) * 14., 2.)) * a;
-    c += vec3(.25, .9, .7) * band * (.18 + night * .5);
-  }
-  if (night > .5) { float s = h1(floor(x * 140.) + floor(uv.y * 90.) * 157.); c += vec3(step(.996, s)) * smoothstep(.45, .8, uv.y); }
-  float hf = .26 + shape(x * .8, 3.) * .2;
-  float hn = .12 + shape(x * 1.3 + 9., 11.) * .14;
-  vec3 fc = mix(farC, horizon, .35);
-  c = mix(c, fc, smoothstep(hf + .004, hf - .004, uv.y));
-  c = mix(c, nearC, smoothstep(hn + .004, hn - .004, uv.y));
-  if (kind > 2.5) c += glow * .35 * exp(-uv.y * 9.); // the lava glow under the dusk
-  gl_FragColor = vec4(c * (1. - night * .55), 1.);
-}`;
 
 /** Merge box geometries (position, normal, uv, index) into one, so the tower's walls are one draw call. */
 function merge(geos) {
@@ -134,13 +107,11 @@ export class PipsTower3D {
 
   build() {
     const s = this.scene;
-    this.bgMat = new THREE.ShaderMaterial({
-      vertexShader: BACKDROP_VS, fragmentShader: BACKDROP_FS, depthWrite: false,
-      uniforms: Object.fromEntries(['top', 'horizon', 'farC', 'nearC', 'glow'].map((k) => [k, { value: new THREE.Color() }]).concat([['kind', { value: 0 }], ['night', { value: 0 }], ['aspect', { value: 1 }], ['time', { value: 0 }]])),
-    });
-    this.backdrop = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), this.bgMat);
-    this.backdrop.position.z = -1600; this.backdrop.renderOrder = -1;
-    s.add(this.backdrop);
+    this.baker = new Baker();
+    s.add(this.baker.quad);
+    // the live shadow catcher on the back wall: only the moving things cast onto it (the static shade is baked)
+    this.catcher = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShadowMaterial({ opacity: 0.32, depthWrite: false }));
+    this.catcher.receiveShadow = true; this.catcher.renderOrder = -900; this.catcher.visible = !LOW_GPU; s.add(this.catcher);
     this.lights = addLights(s, { dir: [-260, 520, 620], shadowBox: 420, mapSize: 2048, intensity: 2.5, ambient: 1.25, sky: 0xe8f0ff, ground: 0x8a6a48 });
     this.lights.light.shadow.camera.far = 2000;
     this.lights.light.shadow.bias = -0.0004;
@@ -174,6 +145,13 @@ export class PipsTower3D {
     this.bossCrowds = {};
     this.fx = new Particles(s, 700);
     this.glow = new Particles(s, 200, new THREE.SphereGeometry(1, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
+    // ambient life: drifting motes (normal and glowing), chimney smoke
+    const ball = new THREE.SphereGeometry(1, 6, 4);
+    this.amb = new Particles(s, 140, ball, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false }));
+    this.ambGlow = new Particles(s, 90, ball, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
+    this.smoke = new Particles(s, 24, new THREE.IcosahedronGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.22, depthWrite: false }));
+    for (const p of [this.amb, this.ambGlow, this.smoke]) p.mesh.renderOrder = 3;
+    this.ac = new THREE.Color();
     this.ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.06, 6, 40), new THREE.MeshBasicMaterial({ color: 0xffd36b, transparent: true, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
     this.ring.visible = false; s.add(this.ring);
     this.mPin = new THREE.MeshStandardMaterial({ color: 0xffc94a, metalness: 0.9, roughness: 0.22 });
@@ -191,33 +169,22 @@ export class PipsTower3D {
     return this.bossCrowds[key];
   }
 
-  /** Static tower geometry for a level (rebuilt when the level changes). */
+  /** The level: the baked diorama (rebuilt when the level, world or theme changes) and the live, moving parts. */
   buildLevel(sess, dark) {
     if (this.tower) { this.scene.remove(this.tower); this.tower.traverse((o) => { o.geometry?.dispose(); }); }
     const tower = (this.tower = new THREE.Group());
     const L = sess.L, look = (this.look = LOOKS[sess.world] || LOOKS[0]);
     const b = L.bounds || [40, 40, 320, 600];
-    this.renderer.toneMappingExposure = look.exposure;
-    const night = dark ? 0.72 : 1;
-    const back = new THREE.Mesh(new THREE.PlaneGeometry(b[2] - b[0], b[3] - b[1]), mat(new THREE.Color(look.back[1]).multiplyScalar(night), { map: texture(look.back[0], { repeat: [3, 6] }), roughness: 0.9 }));
-    back.position.set(BX((b[0] + b[2]) / 2), BY((b[1] + b[3]) / 2), -DEPTH / 2);
-    back.receiveShadow = true; tower.add(back);
-    if (sess.zone) { // Pip's room glows softly
-      const [zx0, zy0, zx1, zy1] = sess.zone;
-      const glow = new THREE.Mesh(new THREE.PlaneGeometry(zx1 - zx0, zy1 - zy0), new THREE.MeshBasicMaterial({ color: 0x7ff0d0, transparent: true, opacity: 0.1, depthWrite: false }));
-      glow.position.set(BX((zx0 + zx1) / 2), BY((zy0 + zy1) / 2), -DEPTH / 2 + 0.5); tower.add(glow);
+    this.renderer.toneMappingExposure = look.exposure * (dark ? 0.92 : 1);
+    // the diorama depends only on the level and the theme: a retry keeps the scenery and its bake
+    if (this.sceneryFor !== L || this.sceneryDark !== dark) {
+      this.scenery?.dispose();
+      this.scenery = buildTowerScenery({ L, world: sess.world, dark, low: LOW_GPU, look });
+      this.sceneryFor = L; this.sceneryDark = dark;
+      this.bakeDirty = true; this.texReady = -1;
     }
-    // all stone walls in one mesh
-    const walls = new THREE.Mesh(merge(L.walls.map((sg) => wallBox(sg))), mat(new THREE.Color(look.wall[1]).multiplyScalar(night), { map: texture(look.wall[0], { repeat: [1, 1] }), roughness: 0.85 }));
-    walls.castShadow = true; walls.receiveShadow = true; tower.add(walls);
-    if (look.snow) { // snow caps on the flat tops
-      const caps = L.walls.filter(([ax, ay, bx, by]) => Math.abs(by - ay) < Math.abs(bx - ax)).map(([ax, ay, bx, by]) => wallBox([ax, ay - 8, bx, by - 8], 5, DEPTH + 4));
-      if (caps.length) { const m = new THREE.Mesh(merge(caps), mat(0xffffff, { roughness: 0.7 })); m.receiveShadow = true; tower.add(m); }
-    }
-    if (look.seams) { // glowing seams along the basalt's foot
-      const seam = new THREE.Mesh(new THREE.BoxGeometry(b[2] - b[0] + 20, 3, DEPTH + 2), new THREE.MeshBasicMaterial({ color: 0xff7a2a, toneMapped: false }));
-      seam.position.set(BX((b[0] + b[2]) / 2), BY(b[3]) - 9, 0); tower.add(seam);
-    }
+    this.catcher.scale.set(b[2] - b[0], b[3] - b[1], 1);
+    this.catcher.position.set(BX((b[0] + b[2]) / 2), BY((b[1] + b[3]) / 2), -DEPTH / 2 + 0.5);
     const wood = mat(0xffffff, { map: texture('t-wood', { repeat: [1, 1] }), roughness: 0.8 });
     this.breakables = sess.breakables.map((w) => { const m = new THREE.Mesh(wallBox([w.ax, w.ay, w.bx, w.by]), wood); m.castShadow = true; tower.add(m); return m; });
     // gates: a golden frame with bars
@@ -265,17 +232,6 @@ export class PipsTower3D {
       tower.add(pad, exit);
       return { pad, exit };
     });
-    // roof and flag
-    const roofShape = new THREE.Shape();
-    roofShape.moveTo(BX(b[0] - 22), BY(b[1] - 2)); roofShape.lineTo(BX((b[0] + b[2]) / 2), BY(b[1] - 54)); roofShape.lineTo(BX(b[2] + 22), BY(b[1] - 2)); roofShape.closePath();
-    const roof = new THREE.Mesh(new THREE.ExtrudeGeometry(roofShape, { depth: DEPTH + 24, bevelEnabled: true, bevelSize: 3, bevelThickness: 3, bevelSegments: 2 }), mat(new THREE.Color(look.roof).multiplyScalar(night), { roughness: 0.6 }));
-    roof.position.z = -(DEPTH + 24) / 2; roof.castShadow = true; tower.add(roof);
-    const flagPole = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 46, 8), mat(0x6b4a2a));
-    flagPole.position.set(BX((b[0] + b[2]) / 2), BY(b[1] - 54) + 22, 0); tower.add(flagPole);
-    const flag = new THREE.Mesh(new THREE.PlaneGeometry(30, 18), mat(look.flag, { side: THREE.DoubleSide }));
-    flag.position.set(BX((b[0] + b[2]) / 2) + 15, BY(b[1] - 54) + 36, 0); this.flag = flag; tower.add(flag);
-    const mound = new THREE.Mesh(new THREE.CylinderGeometry(330, 380, 60, 40, 1), mat(new THREE.Color(look.mound[1]).multiplyScalar(dark ? 0.55 : 1), { roughness: 0.95, map: texture(look.mound[0], { repeat: [6, 1] }) }));
-    mound.position.set(0, BY(b[3]) - 37, -60); mound.receiveShadow = true; tower.add(mound);
     // pins
     this.pinMeshes = sess.pins.map((pin) => {
       const g = new THREE.Group();
@@ -311,18 +267,39 @@ export class PipsTower3D {
       m.castShadow = true; m.traverse?.((o) => { o.castShadow = true; });
       tower.add(m); return m;
     });
+    // the flag on the roof's finial
+    const flagPole = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 46, 8), mat(0x6b4a2a));
+    flagPole.position.set(BX((b[0] + b[2]) / 2), BY(b[1] - 62) + 25, 0); tower.add(flagPole);
+    const flag = new THREE.Mesh(new THREE.PlaneGeometry(30, 18), mat(look.flag, { side: THREE.DoubleSide }));
+    flag.geometry.translate(15, 0, 0);
+    flag.position.set(BX((b[0] + b[2]) / 2), BY(b[1] - 62) + 39, 0); this.flag = flag; tower.add(flag);
     this.scene.add(tower);
-    // light and sky of the world
+    // light of the world (for the live parts; the baked scene has its own)
     const li = this.lights;
     li.light.color.set(look.sun); li.hemi.color.set(look.sky); li.hemi.groundColor.set(look.ground);
     li.light.intensity = look.intensity * (dark ? 0.7 : 1); li.hemi.intensity = look.ambient * (dark ? 0.72 : 1);
-    const u = this.bgMat.uniforms;
-    u.top.value.set(look.bg.top); u.horizon.value.set(look.bg.horizon); u.farC.value.set(look.bg.far); u.nearC.value.set(look.bg.near); u.glow.value.set(look.bg.glow);
-    u.kind.value = look.bg.kind; u.night.value = dark ? 1 : 0;
     this.level = sess;
   }
 
+  /** Bake the static diorama for the current level and view (again when a texture finishes loading). */
+  bake() {
+    const sc = this.scenery;
+    const ready = sc.textures.filter((t) => t.image && (t.image.width || t.image.naturalWidth)).length;
+    if (!this.bakeDirty && ready === this.texReady) return;
+    this.bakeDirty = false; this.texReady = ready;
+    this.baker.shift(this.camera, 0, 0);
+    this.camera.position.set(0, this.camY, this.dist);
+    const size = this.renderer.getDrawingBufferSize(new THREE.Vector2());
+    // supersampled (the bake is also the anti-aliasing of all that detail); dense screens need less
+    const ss = LOW_GPU ? 1 : size.x * size.y > 2.6e6 || this.renderer.getPixelRatio() >= 1.4 ? 1.5 : 2;
+    sc.fit(this.camera, size.y * ss);
+    this.baker.bake(this.renderer, sc.scene, this.camera, ss);
+    // the bake's shadow map is only needed while baking
+    sc.scene.traverse((o) => { if (o.isDirectionalLight && o.shadow.map) { o.shadow.map.dispose(); o.shadow.map = null; } });
+  }
+
   resize(w, h, dpr) {
+    if (w !== this.w || h !== this.h || dpr !== this.renderer.getPixelRatio()) this.bakeDirty = true;
     this.w = w; this.h = h;
     this.renderer.setPixelRatio(dpr); this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
@@ -339,13 +316,8 @@ export class PipsTower3D {
     this.camY = centreY + (HUD / 2) / pxPerUnit;
     this.camera.position.set(0, this.camY, this.dist);
     this.camera.lookAt(0, this.camY, 0);
-    this.camera.near = this.dist * 0.1; this.camera.far = this.dist + 3000;
+    this.camera.near = this.dist * 0.1; this.camera.far = this.dist + 7000;
     this.camera.updateProjectionMatrix();
-    // backdrop covers the view at its depth
-    const bd = this.dist + 1600, vh = 2 * bd * tanH * 1.04, vw = vh * this.camera.aspect;
-    this.backdrop.scale.set(vw, vh, 1);
-    this.backdrop.position.set(0, this.camY, -1600);
-    this.bgMat.uniforms.aspect.value = vw / vh;
   }
 
   layoutFor() {
@@ -357,10 +329,12 @@ export class PipsTower3D {
 
   render(sess, view) {
     if (this.level !== sess || this.dark !== view.dark) { this.dark = view.dark; this.buildLevel(sess, view.dark); this.resize(this.w, this.h, this.renderer.getPixelRatio()); }
-    this.bgMat.uniforms.time.value = sess.t;
+    this.bake();
+    // shake moves the whole picture (baked and live alike) in screen space
     const shake = sess.shake > 0 && !view.reduced ? sess.shake * 6 : 0;
-    this.camera.position.set((Math.random() - 0.5) * shake, this.camY + (Math.random() - 0.5) * shake, this.dist);
-    if (this.flag) this.flag.rotation.y = Math.sin(sess.t * 3) * 0.25;
+    const tanH = Math.tan((this.camera.fov * Math.PI) / 360), k = shake / (this.dist * tanH);
+    this.baker.shift(this.camera, (Math.random() - 0.5) * k / this.camera.aspect, (Math.random() - 0.5) * k);
+    if (this.flag) this.flag.rotation.y = Math.sin(sess.t * 3) * 0.3;
 
     sess.pins.forEach((pin, i) => {
       const g = this.pinMeshes[i];
@@ -395,6 +369,7 @@ export class PipsTower3D {
     this.drawParticles(sess);
     this.drawCharacters(sess);
     this.drawFx(sess);
+    this.drawAmbient(sess, view);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -438,7 +413,7 @@ export class PipsTower3D {
     else if (h.dead && (h.cause === 'goo' || h.cause === 'gas')) this.paint(C.hero, 0, this.tint.setRGB(0.75, 1.1, 0.7));
     const side = h.x > BOARD_W / 2 ? -1 : 1;
     const sad = !!sess.result && !sess.result.won;
-    C.biscuit.add(BX(h.x + side * 25), feet + (happy ? Math.abs(Math.sin(t * 12 + 1)) * 10 : 0), -8, -side * 0.6, 52, {
+    C.biscuit.add(BX(h.x + side * 31), feet + (happy ? Math.abs(Math.sin(t * 12 + 1)) * 10 : 0), -8, -side * 0.6, 62, {
       phase: t * (happy ? 14 : 3), swing: happy ? 1 : 0.2, squash: sad ? 0.35 : 0,
     });
     for (const en of sess.enemies) {
@@ -494,6 +469,50 @@ export class PipsTower3D {
       if (!p.dead && p.t === 'lava') gl.add(BX(p.x), BY(p.y), 18, 9 + Math.sin(sess.t * 5 + i) * 2, 0x5a1800);
     }
     fx.end(); gl.end();
+  }
+
+  /** The world's ambient life (cheap: one instanced draw each); none on software WebGL. */
+  drawAmbient(sess, view) {
+    const a = this.amb, g = this.ambGlow, sm = this.smoke, c = this.ac;
+    a.begin(); g.begin(); sm.begin();
+    const sc = this.scenery;
+    if (!LOW_GPU && sc && !view.reduced) {
+      const t = sess.t, kind = sc.ambient.kind, dark = this.dark;
+      const h = (i, k) => { const v = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return v - Math.floor(v); };
+      const wrap = (v, lo, hi) => lo + ((((v - lo) % (hi - lo)) + (hi - lo)) % (hi - lo));
+      const n = kind === 'snow' ? 110 : kind === 'ember' ? 60 : kind === 'dust' ? 60 : dark ? 50 : 36;
+      for (let i = 0; i < n; i++) {
+        const x0 = (h(i, 1) * 2 - 1) * 640, z = -170 + h(i, 2) * 260, sp = 0.5 + h(i, 3);
+        if (kind === 'snow') {
+          const y = wrap(380 - t * 26 * sp - h(i, 4) * 760, -360, 400), x = x0 + Math.sin(t * 0.9 * sp + i) * 16 + t * 6;
+          a.add(wrap(x, -660, 660), y, z, 1.1 + h(i, 5) * 1.6, c.setRGB(1, 1, 1));
+        } else if (kind === 'dust') {
+          const x = wrap(x0 + t * 18 * sp, -660, 660), y = -320 + h(i, 4) * 300 + Math.sin(t * 0.7 + i) * 12;
+          a.add(x, y, z, 0.7 + h(i, 5) * 0.9, c.setRGB(1, 0.86, 0.62));
+        } else if (kind === 'ember') {
+          const y = wrap(-330 + t * 30 * sp + h(i, 4) * 700, -340, 380), x = x0 + Math.sin(t * 1.3 * sp + i) * 14;
+          if (i % 3) g.add(x, y, z, 0.8 + h(i, 5) * 1.1, c.setRGB(1.6, 0.55 + h(i, 6) * 0.3, 0.12));
+          else a.add(x, wrap(380 - t * 12 * sp - h(i, 4) * 700, -340, 380), z, 1 + h(i, 5), c.setRGB(0.45, 0.4, 0.42));
+        } else { // pollen by day, fireflies at night
+          const x = x0 + Math.sin(t * 0.4 * sp + i * 2) * 40, y = -300 + h(i, 4) * (dark ? 520 : 380) + Math.sin(t * 0.8 * sp + i) * 20;
+          const pulse = dark ? 0.6 + 0.4 * Math.sin(t * 3 * sp + i * 5) : 1;
+          g.add(x, y, z, (dark ? 1.6 : 0.9 + h(i, 5) * 0.7) * pulse, dark ? c.setRGB(0.9, 1.4, 0.45) : c.setRGB(1, 0.95, 0.55));
+        }
+      }
+      // torch and lantern flames flicker over their baked glow
+      sc.torches.forEach((tr, i) => {
+        if (tr.smoke) {
+          for (let k = 0; k < 10; k++) {
+            const ph = (t * 0.28 + k / 10) % 1, s = (5 + ph * 16) * Math.min(1, (1 - ph) * 4);
+            sm.add(tr.x + ph * 34 + Math.sin(t + k) * 4, tr.y + 6 + ph * 110, tr.z, s, c.setRGB(0.92, 0.92, 0.95), k);
+          }
+          return;
+        }
+        const f = 0.75 + 0.18 * Math.sin(t * 11 + i * 1.7) + 0.1 * Math.sin(t * 23 + i * 3.1);
+        g.add(tr.x, tr.y + 1, tr.z + 2, tr.size * 0.42 * f, c.set(tr.color).multiplyScalar(0.5));
+      });
+    }
+    a.end(); g.end(); sm.end();
   }
 
   dispose() { this.renderer.dispose(); }
