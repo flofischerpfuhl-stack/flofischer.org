@@ -1,0 +1,531 @@
+{
+  "name": "Fernwork — Private browser tools for remote work",
+  "short_name": "Fernwork",
+  "description": "Free, private productivity tools that run entirely in your browser. Convert files, edit PDFs, view DXF/IFC/STL, hash data, and more — zero backend, zero tracking.",
+  "id": "/",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
+  "orientation": "any",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "productivity",
+    "utilities",
+    "business"
+  ],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
+  },
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "PDF tools",
+      "short_name": "PDF",
+      "url": "./tools/pdf-tools",
+      "description": "Merge, split, sign, OCR PDFs",
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Converters",
+      "short_name": "Convert",
+      "url": "./tools/converters",
+      "description": "Convert images, video, audio, docs",
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Image Tools",
+      "short_name": "Images",
+      "url": "./tools/image-tools",
+      "description": "Edit images on one local canvas",
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "File Viewers",
+      "short_name": "Viewers",
+      "url": "./tools/viewers",
+      "description": "View and edit documents, sheets, DXF, IFC, STL, PPTX, more",
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Canvas",
+      "short_name": "Canvas",
+      "url": "./tools/canvas",
+      "description": "Sketch diagrams locally",
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Utilities",
+      "short_name": "Utilities",
+      "url": "./tools/utilities",
+      "description": "QR, color picker, timestamps",
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "./tools/viewers#docx",
+      "accept": {
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+          ".docx"
+        ],
+        "application/vnd.oasis.opendocument.text": [
+          ".odt",
+          ".fodt"
+        ],
+        "application/rtf": [
+          ".rtf"
+        ],
+        "text/rtf": [
+          ".rtf"
+        ],
+        "application/epub+zip": [
+          ".epub"
+        ],
+        "text/html": [
+          ".html",
+          ".htm"
+        ],
+        "text/markdown": [
+          ".md",
+          ".markdown"
+        ],
+        "text/plain": [
+          ".txt"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/viewers#table",
+      "accept": {
+        "text/csv": [
+          ".csv"
+        ],
+        "text/tab-separated-values": [
+          ".tsv"
+        ],
+        "application/x-ndjson": [
+          ".ndjson",
+          ".jsonl"
+        ],
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+          ".xlsx"
+        ],
+        "application/vnd.ms-excel": [
+          ".xls"
+        ],
+        "application/vnd.oasis.opendocument.spreadsheet": [
+          ".ods"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/canvas#draw",
+      "accept": {
+        "application/json": [
+          ".excalidraw"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/image-tools",
+      "accept": {
+        "image/png": [
+          ".png"
+        ],
+        "image/jpeg": [
+          ".jpg",
+          ".jpeg"
+        ],
+        "image/webp": [
+          ".webp"
+        ],
+        "image/svg+xml": [
+          ".svg"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/canvas#mindmap",
+      "accept": {
+        "text/markdown": [
+          ".md",
+          ".markdown"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/canvas#mermaid",
+      "accept": {
+        "text/plain": [
+          ".mmd",
+          ".mermaid"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/pdf-tools",
+      "accept": {
+        "application/pdf": [
+          ".pdf"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/viewers#dxf",
+      "accept": {
+        "application/acad": [
+          ".dxf"
+        ],
+        "application/x-acad": [
+          ".dxf"
+        ],
+        "application/dxf": [
+          ".dxf"
+        ],
+        "image/vnd.dxf": [
+          ".dxf"
+        ],
+        "image/x-dxf": [
+          ".dxf"
+        ],
+        "text/plain": [
+          ".dxf"
+        ],
+        "application/octet-stream": [
+          ".dxf"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/viewers#shape",
+      "accept": {
+        "application/vnd.shp": [
+          ".shp"
+        ],
+        "application/x-esri-shape": [
+          ".shp"
+        ],
+        "application/octet-stream": [
+          ".shp"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/viewers#ifc",
+      "accept": {
+        "application/x-step": [
+          ".ifc"
+        ],
+        "application/ifc": [
+          ".ifc"
+        ],
+        "model/ifc": [
+          ".ifc"
+        ],
+        "text/plain": [
+          ".ifc"
+        ],
+        "application/octet-stream": [
+          ".ifc"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/viewers#pointcloud",
+      "accept": {
+        "model/e57": [
+          ".e57"
+        ],
+        "application/vnd.astm-e57": [
+          ".e57"
+        ],
+        "application/octet-stream": [
+          ".e57",
+          ".ply",
+          ".pcd",
+          ".xyz",
+          ".pts",
+          ".las",
+          ".laz"
+        ],
+        "text/plain": [
+          ".xyz",
+          ".pts"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/viewers#stl",
+      "accept": {
+        "model/stl": [
+          ".stl"
+        ],
+        "application/sla": [
+          ".stl"
+        ],
+        "application/vnd.ms-pki.stl": [
+          ".stl"
+        ],
+        "model/obj": [
+          ".obj"
+        ],
+        "application/x-tgif": [
+          ".obj"
+        ],
+        "application/octet-stream": [
+          ".stl",
+          ".obj"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/viewers#svg",
+      "accept": {
+        "image/svg+xml": [
+          ".svg"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/viewers#markdown",
+      "accept": {
+        "text/markdown": [
+          ".md",
+          ".markdown"
+        ],
+        "text/x-markdown": [
+          ".md"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/viewers#pptx",
+      "accept": {
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation": [
+          ".pptx"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    },
+    {
+      "action": "./tools/viewers#database",
+      "accept": {
+        "application/vnd.sqlite3": [
+          ".sqlite",
+          ".sqlite3",
+          ".db"
+        ],
+        "application/x-sqlite3": [
+          ".sqlite",
+          ".sqlite3",
+          ".db"
+        ]
+      },
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/icons/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Fernwork — private browser tools for remote work"
+    }
+  ],
+  "prefer_related_applications": false
+}

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0C5B36"/>
+      <stop offset="46%" stop-color="#2FD17A"/>
+      <stop offset="100%" stop-color="#107A46"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#000000"/>
+  <g transform="translate(98 75)">
+    <rect x="0" y="0" width="430" height="480" rx="46" fill="#050505" stroke="#1C6E45" stroke-opacity="0.45"/>
+    <image href="favicon.svg" x="30" y="-4" width="370" height="488" preserveAspectRatio="xMidYMid meet"/>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif">
+    <text x="585" y="250" font-size="86" fill="#ffffff" font-weight="760">Fern<tspan fill="url(#brand)">work</tspan></text>
+    <text x="590" y="312" font-size="30" fill="#B8C9BE" font-weight="520">Private browser tools for remote work.</text>
+    <g font-size="21" font-weight="640">
+      <g>
+        <rect x="590" y="370" width="128" height="42" rx="21" fill="#ffffff" fill-opacity="0.08" stroke="#7FE8A4" stroke-opacity="0.18"/>
+        <text x="654" y="398" fill="#EAF7EF" text-anchor="middle">PDF</text>
+      </g>
+      <g>
+        <rect x="732" y="370" width="148" height="42" rx="21" fill="#ffffff" fill-opacity="0.08" stroke="#7FE8A4" stroke-opacity="0.18"/>
+        <text x="806" y="398" fill="#EAF7EF" text-anchor="middle">Convert</text>
+      </g>
+      <g>
+        <rect x="894" y="370" width="148" height="42" rx="21" fill="#ffffff" fill-opacity="0.08" stroke="#7FE8A4" stroke-opacity="0.18"/>
+        <text x="968" y="398" fill="#EAF7EF" text-anchor="middle">Viewers</text>
+      </g>
+    </g>
+    <circle cx="602" cy="480" r="6" fill="#2FD17A"/>
+    <text x="620" y="488" font-size="22" font-weight="520" fill="#B8C9BE">100% client-side &#8226; no upload &#8226; no tracking</text>
+  </g>
+</svg>
