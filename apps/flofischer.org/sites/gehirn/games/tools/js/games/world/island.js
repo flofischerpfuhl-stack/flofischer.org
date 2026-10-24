@@ -71,10 +71,12 @@ export async function buildIsland({ theme = 'meadow', seed = 1, rx = 9, rz = 7, 
   const heightAt = (x, z) => {
     let h = baseHeight(x, z);
     const w = waterDistance(x, z);
-    // the water bed: banks slope into a basin below the water line; the stream bed follows it to the rim
+    // the banks: near the water the ground settles just above the water line (raised where the island falls away
+    // towards the rim, so the stream runs in a channel right to the edge); inside the water it drops into the bed,
+    // so the surface always meets the bank and never hangs over it
     const bed = waterY - 0.22 - smoothstep(0, -0.8, w) * 0.15;
-    h = lerp(h, Math.min(h, bed), smoothstep(0.55, -0.05, w));
-    h = Math.min(h, lerp(h, waterY + 0.05, smoothstep(1.1, 0.3, w)));
+    h = lerp(h, waterY + 0.05, smoothstep(1.0, 0.2, w));
+    h = lerp(h, bed, smoothstep(0.0, -0.2, w));
     return h;
   };
 
@@ -203,7 +205,8 @@ function buildCliff(T, { rx, rz, rimFactor, heightAt, noise, DEPTH }) {
     }
   }
   const cidx = [];
-  for (let r = 0; r < CR; r++) for (let s = 0; s < CS; s++) { const a = r * (CS + 1) + s, b = a + 1, d = a + CS + 1, e = d + 1; cidx.push(a, d, b, b, d, e); }
+  // wound so the faces look outwards (the camera is free to look at the island from the side)
+  for (let r = 0; r < CR; r++) for (let s = 0; s < CS; s++) { const a = r * (CS + 1) + s, b = a + 1, d = a + CS + 1, e = d + 1; cidx.push(a, b, d, b, e, d); }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(cpos, 3));
   geo.setAttribute('color', new THREE.Float32BufferAttribute(ccol, 3));

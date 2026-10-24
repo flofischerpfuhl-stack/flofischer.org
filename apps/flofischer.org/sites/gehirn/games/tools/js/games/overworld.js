@@ -8,40 +8,16 @@
  * mountOverworld(host, { levels, hero, companion, state, onPlay }) → { activate(), deactivate(), refresh(), focus(i) }
  *   levels: [{ name, world, boss }]     state: { stars(i), best(i), open(i), worldOpen(w), need(w), current() }
  */
-import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, furPatch, LOW_GPU } from './three-kit.js';
+import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, LOW_GPU } from './three-kit.js';
 import { loadModel } from './models.js';
 import { buildIsland } from './world/island.js';
 import { THEMES, WORLD_ORDER } from './world/themes.js';
 import { Batch, mtx } from './world/decor.js';
+import { figure } from './world/figure.js';
 import { icon } from '../../../assets/kit/icons.js';
 
 const SPACING = 30;          // distance between islands
 const NODE_Y = 0.05;
-const MATS = {
-  matte: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.66, metalness: 0.02 }),
-  gloss: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.22, metalness: 0.04 }),
-  glow: () => new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }),
-};
-
-/** A figure from the baked cast as one group, with handles for the hop animation. */
-function figure(model) {
-  const root = new THREE.Group(), body = new THREE.Group();
-  root.add(body);
-  const legs = [];
-  for (const g of model) {
-    const m = MATS[g.mat]();
-    if (g.geometry.attributes.aFur && g.mat !== 'glow') furPatch(m);
-    const mesh = new THREE.Mesh(g.geometry, m);
-    mesh.castShadow = g.mat !== 'glow';
-    if (g.ch === 'legL' || g.ch === 'legR') {
-      const pivot = new THREE.Group(); pivot.position.set(...g.pivot);
-      mesh.position.set(-g.pivot[0], -g.pivot[1], -g.pivot[2]);
-      pivot.add(mesh); body.add(pivot); legs.push({ pivot, side: g.ch === 'legL' ? 1 : -1 });
-    } else body.add(mesh);
-  }
-  return { root, body, legs };
-}
-
 /** Number badge for a node, drawn once into a small canvas texture. */
 function badge(text, { bg, fg }) {
   const c = document.createElement('canvas'); c.width = c.height = 128;

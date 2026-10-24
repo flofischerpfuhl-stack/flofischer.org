@@ -173,7 +173,7 @@ body[data-fw-cat="games"] { overflow: hidden; }
 /* the menu becomes the overworld: no veil, no padding, the islands fill the stage */
 .gm-menu.has-ow { padding: 0; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; overflow: hidden; }
 .gm-menu.has-ow > .gm-card { display: none; }
-.gm-owhost { position: absolute; inset: 0; }
+.gm-owhost { position: absolute; inset: 0; background: linear-gradient(180deg, #a9cdf2 0%, #d9ebfb 70%, #eef6fd 100%); } /* the sky until the first frame */
 .gm-owhost[hidden] { display: none; }
 
 /* ───────────── Overworld: islands under the menu, world title, stars, level card ───────────── */
@@ -182,7 +182,7 @@ body[data-fw-cat="games"] { overflow: hidden; }
 .gm-ow__top {
   position: absolute; inset: var(--space-2) var(--space-2) auto var(--space-2); z-index: 1;
   display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-2); pointer-events: none;
-  padding-right: calc(var(--hit-min) + var(--space-2)); /* room for the full screen button */
+  padding-right: calc(var(--space-8) + var(--space-2)); /* room for the full screen button */
 }
 .gm-ow__world, .gm-ow__stars {
   display: flex; flex-direction: column; gap: 2px; padding: 6px var(--space-3); border-radius: var(--radius-sm);
@@ -231,6 +231,10 @@ body[data-fw-cat="games"] { overflow: hidden; }
 html.gm-max-open, html.gm-max-open body { overflow: hidden; }
 /* menus and results: a corner button; in play the HUD carries its own */
 .gm-fs { position: absolute; top: var(--space-2); right: var(--space-2); z-index: 4; }
+/* the stage's own full screen button stays small next to the overworld's chips; touch keeps a full-size hit area */
+.gm-fs.gm-hud__btn.fw-iconbtn { width: var(--space-8); height: var(--space-8); }
+.gm-fs svg { width: 16px; height: 16px; }
+.gm-fs::after { content: ""; position: absolute; inset: calc((var(--space-8) - var(--hit-min)) / 2); }
 .gm-stage[data-screen="play"] .gm-fs { display: none; }
 
 /* ───────────── Arcade hub: 3D game boxes on a stage; a plaque and a big button in the scene are the menu ───────────── */
@@ -241,15 +245,10 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
 }
 .gm-hub__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
 .gm-hub__canvas:active { cursor: grabbing; }
-.gm-hub__nav {
-  position: absolute; inset: auto 0 var(--space-3) 0; z-index: 1;
-  display: flex; justify-content: center; gap: var(--space-2); pointer-events: none;
-}
-.gm-hub__nav > * { pointer-events: auto; background: rgba(9, 9, 11, .55); color: #fff; border-color: rgba(255, 255, 255, .18); }
-.gm-hub__hint {
-  position: absolute; inset: auto 0 calc(var(--space-3) + var(--hit-min) + var(--space-2)) 0; margin: 0; text-align: center; pointer-events: none;
-  color: var(--text-2); font-size: var(--text-xs); line-height: var(--lh-xs);
-}
+/* the last visit's still covers the stage until the live scene is complete, then the canvas fades in over it */
+.gm-hub__stage.has-poster { background-size: cover; background-position: center; }
+.gm-hub__stage.has-poster > .gm-hub__canvas { opacity: 0; transition: opacity .25s ease; }
+.gm-hub__stage.has-poster > .gm-hub__canvas.is-ready { opacity: 1; }
 /* the plaque and the button in the scene are the menu; this panel only serves screen readers and keyboards */
 .gm-hub__save { position: absolute; z-index: 2; top: var(--space-3); left: var(--space-3); }
 .gm-hub__save > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
@@ -276,8 +275,6 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
 .gm-hub__saverow { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 
 @media (max-width: 767px) {
-  .gm-hub__nav { inset: 0 0 auto 0; top: 38%; justify-content: space-between; padding: 0 var(--space-2); }
-  .gm-hub__hint { display: none; }
   .main-content.gm-main { padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
   body[data-fw-cat="games"] .page-header.fw-page-header-host { margin-bottom: var(--space-2); }
   /* While a level runs the stage takes the whole page. */
@@ -285,7 +282,6 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
   .gm-levels { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .gm-card { padding: var(--space-5) var(--space-4); }
   .gm-art { width: calc(100% + 2 * var(--space-4)); margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-4)) 0; aspect-ratio: 16 / 7; }
-  .gm-stage { border-radius: var(--radius-sm); }
 }
 @media (max-width: 359px) {
   .gm-levels { grid-template-columns: repeat(3, minmax(0, 1fr)); }

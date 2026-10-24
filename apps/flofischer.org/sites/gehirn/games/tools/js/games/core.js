@@ -139,8 +139,17 @@ const starsHtml = (n, cls = '') => [0, 1, 2].map((i) => `<span class="gm-star${i
 
 // ─────────────────────────────── host ───────────────────────────────
 const STEP = 1 / 60;
+// asked once per page; the probe's context is released right away (browsers cap the live WebGL contexts)
+let webgl = null;
 const hasWebGL = () => {
-  try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
+  if (webgl === null) {
+    try {
+      const gl = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl');
+      webgl = !!gl;
+      gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    } catch { webgl = false; }
+  }
+  return webgl;
 };
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const isDark = () => {
@@ -293,7 +302,10 @@ export function mountGame(root, game) {
       screens.menu.classList.add('has-ow');
       if (screen === 'menu' && active) ow.activate();
       return ow;
-    }).catch((err) => { console.warn('[games] overworld unavailable, using the level grid', err); ow = null; });
+    }).catch((err) => {
+      console.warn('[games] overworld unavailable, using the level grid', err); ow = null;
+      host.hidden = true; screens.menu.classList.remove('has-ow');
+    });
     return owLoading;
   }
   let lastPicked = null;
@@ -510,6 +522,9 @@ export function mountGame(root, game) {
 
   renderMenu();
   setScreen('menu');
+  // with WebGL the overworld is the menu: its sky covers the stage from the start, so neither the level grid nor the
+  // last level shows while it loads (the grid comes back only if the overworld fails)
+  if (worlds && hasWebGL()) { root.querySelector('.gm-owhost').hidden = false; screens.menu.classList.add('has-ow'); }
 
   const controller = {
     activate() { if (active) return; active = true; resize(); loadGl(); loadOverworld(); if (ow && screen === 'menu') { ow.refresh(); ow.activate(); } if (screen === 'play' || screen === 'result') startLoop(); },

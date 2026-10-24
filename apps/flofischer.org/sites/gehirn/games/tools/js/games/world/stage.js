@@ -120,19 +120,23 @@ export function buildStage({ env = null, figures = [], dark = false } = {}) {
     const cone = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 1.5, 6.4, 24, 1, true), beamMat);
     cone.position.set(x * 0.6, 2.2, -3.0); cone.rotation.z = rz; scene.add(cone);
   }
-  // the heroes of the three games wait at the sides of the stage (the baked figures, fur and all), each in a small
-  // pool of light
+  // the heroes of the three games wait at the sides of the stage, each in a small pool of light (a figure without a
+  // model is drawn live by the caller, only its pool is baked)
   for (const f of figures) {
-    if (!f.model) continue;
-    const g = modelInstances(f.model, [mtx(f.pos, [0, f.rot, 0], f.scale)], { shadow: true });
-    scene.add(g);
+    if (f.model) scene.add(modelInstances(f.model, [mtx(f.pos, [0, f.rot, 0], f.scale)], { shadow: true }));
     const pool = glowQuad(1.4, 0xffd7a0, C.pool); pool.rotation.x = -Math.PI / 2; pool.position.set(f.pos[0], f.pos[1] + 0.01, f.pos[2]); scene.add(pool);
   }
   // ferns, the plant Fernwork is named after: big ones on the floor at the sides and against the curtains,
   // small ones at the foot of the podium
-  const FERNS = [[-3.4, -0.965, -2.75, 1.25, 1], [3.45, -0.965, -2.7, 1.2, 2], [-4.6, -1.32, -2.2, 1.6, 3], [4.6, -1.32, -2.3, 1.55, 4],
-    [-3.55, -1.32, 2.35, 0.8, 5], [3.6, -1.32, 2.3, 0.85, 6], [-1.2, -0.965, -2.95, 0.7, 7], [1.25, -0.965, -2.95, 0.7, 8]];
-  for (const [x, y, z, sc, seed] of FERNS) scene.add(modelInstances(fernModel({ seed, fronds: 10 }), [mtx([x, y, z], [0, seed * 1.3, 0], sc)], { shadow: true }));
+  // [x, y, z, scale, seed, tall]: a dense, tall hedge along the curtains, thick clumps on the floor at both sides of
+  // the podium, smaller ones at its front corners
+  const P = -0.965, F = -1.32;
+  const FERNS = [[-3.3, P, -2.6, 1.35, 1, 1.3], [3.35, P, -2.55, 1.3, 2, 1.3], [-2.3, P, -3.0, 1.15, 9, 1.25], [2.35, P, -3.0, 1.15, 10, 1.25],
+    [-1.2, P, -3.15, 0.95, 7, 1.2], [1.25, P, -3.15, 0.95, 8, 1.2], [0, P, -3.3, 0.8, 11, 1.1],
+    [-4.6, F, -2.2, 1.8, 3, 1.35], [4.6, F, -2.3, 1.75, 4, 1.35], [-5.5, F, -0.9, 1.9, 12, 1.4], [5.5, F, -1.0, 1.85, 13, 1.4],
+    [-4.9, F, 0.6, 1.5, 14, 1.2], [4.95, F, 0.55, 1.5, 15, 1.2], [-5.7, F, 1.9, 1.6, 16, 1.3], [5.7, F, 1.85, 1.6, 17, 1.3],
+    [-3.7, F, 2.4, 1.0, 5, 1.1], [3.75, F, 2.35, 1.05, 6, 1.1], [-4.4, F, 3.1, 0.85, 18, 1], [4.45, F, 3.05, 0.85, 19, 1]];
+  for (const [x, y, z, sc, seed, tall] of FERNS) scene.add(modelInstances(fernModel({ seed, fronds: 16, tall }), [mtx([x, y, z], [0, seed * 1.3, 0], sc)], { shadow: true }));
   scene.add(glow.mesh({ glow: true }));
   scene.add(Object.assign(trim.mesh({ roughness: 0.5, metalness: 0.4 }), { receiveShadow: true }));
   const motes = Array.from({ length: 40 }, () => ({ x: (rand() - 0.5) * 7, y: -0.8 + rand() * 5, z: -2 + rand() * 2.5, s: rand() }));

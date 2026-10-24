@@ -9,6 +9,7 @@ import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, Particle
 import { Baker } from './world/decor.js';
 import { loadModel } from './models.js';
 import { buildStage } from './world/stage.js';
+import { figure } from './world/figure.js';
 import { propsReady } from './world/tower-scenery.js';
 import { profile, game as gameProfile, starsTotal, exportCode, importCode, onChange, ACHIEVEMENTS } from './profile.js';
 import { icon } from '../../../assets/kit/icons.js';
@@ -196,16 +197,36 @@ function canvasTexture(w, h, draw) {
   return t;
 }
 
-export function mountHub(host, { onPlay }) {
+// A still of the finished scene from the last visit (Cache Storage, per theme and view size) is shown before the 3D
+// set-up blocks the page for a moment; the live canvas fades in over it once stage, heroes and covers are complete.
+// The service worker drops this cache with every release (sw.js activate), so a poster never outlives its scene.
+const POSTER_CACHE = 'fw-games-hub-poster-v1';
+const siteDark = () => { const t = document.documentElement.getAttribute('data-theme'); return t ? t === 'dark' : !!window.matchMedia?.('(prefers-color-scheme: dark)').matches; };
+const posterKey = (dark, w, h) => `/__fw-hub-poster/${dark ? 'dark' : 'light'}/${Math.round(w / 40)}x${Math.round(h / 40)}`;
+async function findPoster(host) {
+  const r = host.getBoundingClientRect();
+  if (!window.caches || r.width < 50 || r.height < 50) return '';
+  try {
+    const hit = await (await caches.open(POSTER_CACHE)).match(posterKey(siteDark(), r.width, r.height));
+    return hit ? URL.createObjectURL(await hit.blob()) : '';
+  } catch { return ''; /* no Cache Storage (private mode, plain http): the scene simply builds in view */ }
+}
+
+/** → Promise<controller>: the poster paints first, then the scene is set up. */
+export async function mountHub(host, opts) {
+  const poster = await findPoster(host);
+  if (poster) {
+    host.style.background = `center / cover no-repeat url("${poster}")`;
+    await new Promise((res) => requestAnimationFrame(() => setTimeout(res, 0)));
+  }
+  return buildHub(host, opts, poster);
+}
+
+function buildHub(host, { onPlay }, poster) {
   host.classList.add('gm-hub');
   host.innerHTML = `
     <div class="gm-hub__stage">
       <canvas class="gm-hub__canvas" aria-hidden="true"></canvas>
-      <div class="gm-hub__nav">
-        <button type="button" class="fw-iconbtn fw-iconbtn--outline" data-hub="prev" aria-label="Previous game">${icon('chevron-left', { size: 20 })}</button>
-        <button type="button" class="fw-iconbtn fw-iconbtn--outline" data-hub="next" aria-label="Next game">${icon('chevron-right', { size: 20 })}</button>
-      </div>
-      <p class="gm-hub__hint">Drag a box to spin it · press the big button to play</p>
       <details class="gm-hub__save"><summary class="fw-iconbtn gm-hud__btn" aria-label="Move your progress" title="Move your progress">${icon('upload', { size: 18 })}</summary>
         <div class="gm-hub__savebody">
           <p class="gm-hub__small">Progress is saved in this browser. Copy the code to continue on another device.</p>
@@ -217,6 +238,8 @@ export function mountHub(host, { onPlay }) {
     <!-- the plaque and the button in the scene show this; screen readers and keyboards use it here -->
     <aside class="gm-hub__panel sr-only" aria-live="polite"></aside>`;
   const canvas = host.querySelector('canvas');
+  const stageEl = host.querySelector('.gm-hub__stage');
+  if (poster) { stageEl.style.backgroundImage = `url("${poster}")`; stageEl.classList.add('has-poster'); host.style.background = ''; }
   const panel = host.querySelector('.gm-hub__panel');
   const renderer = createRenderer(canvas);
   const scene = new THREE.Scene();
@@ -234,14 +257,52 @@ export function mountHub(host, { onPlay }) {
   const HEROES = [['RANGER_FOX', [-2.1, -0.965, 1.2], 0.45, 0.95], ['RANGER_BUNNY', [-2.6, -0.965, 0.45], 0.65, 0.9],
     ['PIP', [2.1, -0.965, 1.2], -0.45, 0.95], ['BISCUIT', [1.65, -0.965, 1.65], -0.3, 0.95], ['MOMO', [2.6, -0.965, 0.45], -0.65, 0.9]];
   // the stage follows the site theme (light or dark Fernwork look); a theme switch rebuilds and rebakes it
-  const siteDark = () => { const t = document.documentElement.getAttribute('data-theme'); return t ? t === 'dark' : !!window.matchMedia?.('(prefers-color-scheme: dark)').matches; };
   let dark = siteDark(), heroModels = null;
+  // the heroes are live (the stage bakes only their pools of light), so they can breathe, look around, wave and hop
+  const heroes = [];
   const rebuild = () => {
     if (!heroModels) return;
-    stage = buildStage({ env, dark, figures: HEROES.map(([, pos, rot, scale], k) => ({ model: heroModels[k], pos, rot, scale })) });
+    stage = buildStage({ env, dark, figures: HEROES.map(([, pos, rot, scale]) => ({ pos, rot, scale })) });
     bakeDirty = true;
   };
-  Promise.all([propsReady, ...HEROES.map(([n]) => loadModel(n, 'lo').catch(() => null))]).then(([, ...models]) => { heroModels = models; rebuild(); });
+  Promise.all([propsReady, ...HEROES.map(([n]) => loadModel(n, 'lo').catch(() => null))]).then(([, ...models]) => {
+    heroModels = models;
+    models.forEach((m, k) => {
+      if (!m) return;
+      const [name, pos, rot, scale] = HEROES[k], f = figure(m);
+      f.root.position.set(...pos); f.root.rotation.y = rot; f.root.scale.setScalar(scale);
+      applyIbl(f.root, env, 0.7); scene.add(f.root);
+      // each hero has its own rhythm; the next wave or hop comes after a random pause
+      heroes.push({ ...f, name, rot, phase: k * 1.7, next: 2 + k * 1.3 + Math.random() * 2, act: null, actT: 0 });
+    });
+    rebuild();
+  });
+  const actFor = (hero) => (hero.arms.length && hero.name !== 'BISCUIT' && Math.random() < 0.6 ? 'wave' : 'hop');
+  function animateHeroes(time, dt) {
+    for (const hr of heroes) {
+      const t = time + hr.phase;
+      hr.next -= dt;
+      if (!hr.act && hr.next <= 0) { hr.act = actFor(hr); hr.actT = 0; }
+      // idle: breathing, a slow look around, arms hanging loose
+      hr.body.scale.y = 1 + Math.sin(t * 2.1) * 0.012;
+      let turn = Math.sin(t * 0.45) * 0.22 + Math.sin(t * 1.3) * 0.05, lift = 0, armZ = 0.05 + Math.sin(t * 2.1) * 0.03;
+      let legs = 0, wave = 0;
+      if (hr.act) {
+        hr.actT += dt;
+        const D = hr.act === 'wave' ? 1.6 : 0.9, k = Math.min(1, hr.actT / D);
+        if (hr.act === 'hop') { lift = Math.abs(Math.sin(k * Math.PI * 2)) * 0.16; legs = Math.sin(k * Math.PI * 4) * 0.45; turn *= 0.3; }
+        else { wave = Math.sin(k * Math.PI); turn = turn * (1 - wave) + 0.25 * wave * -Math.sign(hr.rot || 1); }
+        if (k >= 1) { hr.act = null; hr.next = 3.5 + Math.random() * 5; }
+      }
+      hr.root.rotation.y = hr.rot + turn;
+      hr.body.position.y = lift;
+      for (const l of hr.legs) l.pivot.rotation.x = legs * l.side;
+      for (const a of hr.arms) {
+        const waving = wave > 0 && a.ch === 'armR';
+        a.pivot.rotation.z = a.side * (waving ? wave * (2.2 + Math.sin(t * 14) * 0.3) : armZ);
+      }
+    }
+  }
   const onTheme = () => { const d = siteDark(); if (d !== dark) { dark = d; rebuild(); plaque.userData.tint?.(); renderPanel(); } };
   new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', onTheme);
@@ -256,6 +317,20 @@ export function mountHub(host, { onPlay }) {
     baker.bake(renderer, stage.scene, camera, LOW_GPU ? 1 : renderer.getPixelRatio() >= 1.4 ? 1.5 : 2);
     scene.background = null;
     stage.scene.traverse((o) => { if (o.isLight && o.shadow?.map) { o.shadow.map.dispose(); o.shadow.map = null; } });
+    performance.mark?.('fw-hub-baked');
+    bakedAt = performance.now();
+  }
+
+  // the poster for the next visit: taken once the scene is complete, once per theme and view size
+  const posters = new Set();
+  let bakedAt = 0;
+  const settled = () => stage && bakedAt && heroes.length && GAMES.every((g) => 'art' in g) && performance.now() - bakedAt > 500;
+  // right after a render, while the drawing buffer still holds the frame
+  function savePoster() {
+    const key = posterKey(dark, w, h);
+    if (posters.has(key) || !window.caches) return;
+    posters.add(key);
+    canvas.toBlob((blob) => { if (blob) caches.open(POSTER_CACHE).then((c) => c.put(key, new Response(blob, { headers: { 'content-type': blob.type } }))).catch(() => {}); }, 'image/webp', 0.82);
   }
 
   const boxes = GAMES.map((info, i) => {
@@ -334,6 +409,8 @@ export function mountHub(host, { onPlay }) {
         <div><dt>Best level score</dt><dd class="fw-num">${bestEntry ? bestEntry[1].toLocaleString('en') : '—'}</dd></div>
         <div><dt>Play time</dt><dd class="fw-num">${gp.seconds ? fmtTime(gp.seconds) : '—'}</dd></div>
       </dl>
+      <button type="button" class="fw-btn" data-hub="prev">Previous game</button>
+      <button type="button" class="fw-btn" data-hub="next">Next game</button>
       <button type="button" class="fw-btn fw-btn--primary fw-btn--lg gm-hub__play" data-hub="play" ${info.soon ? 'disabled' : ''}>${icon('play', { size: 18 })}${info.soon ? 'In development' : gp.plays ? 'Continue' : 'Play'}</button>
       <div class="gm-hub__profile">
         <div class="gm-hub__chip">${icon('sparkles', { size: 14 })}<span class="fw-num">${p.coins.toLocaleString('en')}</span> coins</div>
@@ -384,6 +461,7 @@ export function mountHub(host, { onPlay }) {
     const since = (performance.now() - pressed) / 1000;
     cap.position.y = 0.1 - (since < 0.3 ? Math.sin((since / 0.3) * Math.PI) * 0.07 : 0);
     capMat.emissiveIntensity = 0.45 + Math.sin(t / 450) * 0.2;
+    animateHeroes(t / 1000, dt);
     bake();
     motes.begin();
     if (stage && !LOW_GPU && dark) for (const m of stage.motes) {
@@ -392,6 +470,10 @@ export function mountHub(host, { onPlay }) {
     }
     motes.end();
     renderer.render(scene, camera);
+    if (settled()) {
+      if (!canvas.classList.contains('is-ready')) canvas.classList.add('is-ready');
+      else savePoster();
+    }
     raf = requestAnimationFrame(frame);
   }
 
@@ -416,12 +498,14 @@ export function mountHub(host, { onPlay }) {
   };
   canvas.addEventListener('pointerdown', (e) => {
     try { canvas.setPointerCapture(e.pointerId); } catch { /* synthetic pointer */ }
-    drag = { x: e.clientX, t: performance.now(), moved: 0, start: boxes[focus].spin };
+    // a drag on the front box spins it; a swipe anywhere else brings the next or previous game forward
+    drag = { x: e.clientX, t: performance.now(), moved: 0, start: boxes[focus].spin, spin: hit(e) === focus };
   });
   canvas.addEventListener('pointermove', (e) => {
-    if (!drag) { if (e.pointerType === 'mouse') canvas.style.cursor = onButton(e) || hit(e) >= 0 ? 'pointer' : 'grab'; return; }
+    if (!drag) { if (e.pointerType === 'mouse') canvas.style.cursor = onButton(e) || hit(e) >= 0 || ray.intersectObjects(heroes.map((x) => x.root), true).length ? 'pointer' : 'grab'; return; }
     const dx = e.clientX - drag.x;
     drag.moved = Math.max(drag.moved, Math.abs(dx));
+    if (!drag.spin) return;
     const b = boxes[focus];
     const prev = b.spin;
     b.spin = drag.start + dx * 0.012;
@@ -429,10 +513,14 @@ export function mountHub(host, { onPlay }) {
   });
   const end = (e) => {
     if (!drag) return;
-    const tap = drag.moved < 6;
+    const tap = drag.moved < 6, swipe = !drag.spin && Math.abs(e.clientX - drag.x) > 50 ? Math.sign(e.clientX - drag.x) : 0;
     drag = null;
+    if (swipe) { setFocus(focus - swipe); return; }
     if (tap) {
       if (onButton(e)) { play(); return; }
+      // a tap on a hero makes it hop or wave
+      const hh = ray.intersectObjects(heroes.map((x) => x.root), true)[0];
+      if (hh) { const hr = heroes.find((x) => x.root.getObjectById(hh.object.id)); if (hr && !hr.act) { hr.act = actFor(hr); hr.actT = 0; } return; }
       const i = hit(e);
       if (i >= 0 && i !== focus) setFocus(i);
       else if (i === focus) play();

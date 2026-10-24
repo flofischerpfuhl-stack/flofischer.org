@@ -3,15 +3,15 @@
  * (pinnae) that shrink towards the tip, dark green at the heart and fresh green at the tips, and one or two young
  * fronds still rolled up as fiddleheads. One vertex-coloured mesh, both sides of every leaflet lit.
  *
- * fernModel({ seed, fronds, size }) → [{ ch: 'body', mat: 'matte', pivot, geometry }] (the baked-model format, so
+ * fernModel({ seed, fronds, size, tall }) → [{ ch: 'body', mat: 'matte', pivot, geometry }] (the baked-model format, so
  * modelInstances(), Roadside and the island props can place it like any sculpt)
  */
 import { THREE } from '../three-kit.js';
 
 const cache = new Map();
 
-export function fernModel({ seed = 1, fronds = 9, size = 1 } = {}) {
-  const key = `${seed}:${fronds}:${size}`;
+export function fernModel({ seed = 1, fronds = 9, size = 1, tall = 1 } = {}) {
+  const key = `${seed}:${fronds}:${size}:${tall}`;
   if (cache.has(key)) return cache.get(key);
   let s = seed * 9301 + 49297;
   const r = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
@@ -72,9 +72,11 @@ export function fernModel({ seed = 1, fronds = 9, size = 1 } = {}) {
       }
     }
   };
+  // two rings: wide arching fronds outside, longer, steeper ones in the heart (tall > 1 makes the heart taller)
   for (let k = 0; k < fronds; k++) {
-    const az = (k / fronds) * Math.PI * 2 + (r() - 0.5) * 0.5;
-    frond(az, (0.75 + r() * 0.35) * size, 1.15 + r() * 0.5, 0.95 + r() * 0.5);
+    const inner = k % 3 === 2, az = (k / fronds) * Math.PI * 2 + (r() - 0.5) * 0.5;
+    if (inner) frond(az, (0.95 + r() * 0.3) * size * tall, 1.5 + r() * 0.35, 1.05 + r() * 0.3);
+    else frond(az, (0.75 + r() * 0.35) * size * (0.6 + tall * 0.4), 1.15 + r() * 0.5, 0.95 + r() * 0.5);
   }
   frond(r() * 6.28, 0, 0, 0, 0.07 * size);
   frond(r() * 6.28, 0, 0, 0, 0.055 * size);
