@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <script type="importmap">{ "imports": { "three": "./vendor/three-0.170.0/three.module.min.js" } }</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Games | Fernwork</title>
+  <meta name="description" content="Two free browser games inspired by the mobile ads everyone has seen: Gate Rush (shoot the numbers, grow your squad) and Pin Rescue (pull the pins, save the hero). Runs locally, works on phones.">
+  <script src="../assets/theme.js?v=20260419p"></script>
+  <link rel="stylesheet" href="../assets/kit/tokens.css?v=20261023t">
+  <link rel="stylesheet" href="../assets/style.css?v=20261023t">
+  <link rel="stylesheet" href="../assets/kit/components.css?v=20261023t">
+  <link rel="stylesheet" href="./games.css?v=20261024a">
+  <meta property="og:site_name" content="Fernwork">
+  <meta property="og:title" content="Games | Fernwork">
+  <meta property="og:description" content="Two free browser games inspired by the mobile ads everyone has seen: Gate Rush (shoot the numbers, grow your squad) and Pin Rescue (pull the pins, save the hero). Runs locally, works on phones.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://fernwork.net/tools/games">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="https://fernwork.net/assets/icons/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Games | Fernwork">
+  <meta name="twitter:description" content="Two free browser games inspired by the mobile ads everyone has seen: Gate Rush (shoot the numbers, grow your squad) and Pin Rescue (pull the pins, save the hero). Runs locally, works on phones.">
+  <meta name="twitter:image" content="https://fernwork.net/assets/icons/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/icon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../assets/icons/icon-192.png">
+  <link rel="shortcut icon" href="../assets/icons/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/icons/apple-touch-icon.png">
+  <link rel="mask-icon" href="../assets/icons/favicon.svg" color="#15803d">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="color-scheme" content="dark light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Fernwork">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <script type="module">
+    import { injectSeo, registerServiceWorker } from '../assets/seo.js?v=20260628c';
+    injectSeo();
+  </script>
+</head>
+<body>
+  <main class="main-content gm-main">
+    <h1 class="sr-only">Fernwork Games: Gate Rush and Pin Rescue</h1>
+    <p class="sr-only">Gate Rush: your squad fires non-stop, you steer through number gates and shoot them up to outgun the zombie horde. Pin Rescue: pull the pins in the right order so lava, water, gold and enemies end up where they should. Twelve levels each, touch, mouse and keyboard.</p>
+    <noscript>
+      <div style="max-width:800px;margin:24px auto;padding:16px;border:1px solid #444;border-radius:8px;font-family:system-ui,sans-serif;line-height:1.5;">
+        <h2 style="margin-top:0;">JavaScript required</h2>
+        <p>Fernwork runs entirely in your browser. Enable JavaScript and reload the page to play.</p>
+      </div>
+    </noscript>
+    <div class="page-header">
+      <div class="breadcrumb" id="breadcrumb"></div>
+    </div>
+    <div class="tab-bar" id="games-tabs"></div>
+    <div class="tab-content gm-tab" id="tab-gate-rush"><div class="gm-host" data-game="gate-rush"></div></div>
+    <div class="tab-content gm-tab" id="tab-pin-rescue"><div class="gm-host" data-game="pin-rescue"></div></div>
+  </main>
+  <script type="module">
+    import { initNav, setupTabs } from '../assets/nav.js?v=20261024a';
+    import { mountGames } from './js/games/games.js?v=20261024a';
+    initNav();
+    const games = mountGames();
+    setupTabs({
+      containerId: 'games-tabs',
+      pageTitle: 'Games',
+      tabs: [
+        { id: 'gate-rush', label: 'Gate Rush' },
+        { id: 'pin-rescue', label: 'Pin Rescue' }
+      ],
+      onChange: (id) => games.show(id)
+    });
+  </script>
+</body>
+</html>
