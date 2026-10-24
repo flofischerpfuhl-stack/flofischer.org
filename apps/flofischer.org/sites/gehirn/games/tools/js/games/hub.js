@@ -34,6 +34,12 @@ export const GAMES = [
     blurb: 'When the arenas of Fernhaven fill with aliens, Momo grabs her wrench and holds them off alone. Level up, pick your gadgets and build the perfect combo before the boss arrives.',
     levels: 44,
   },
+  {
+    id: 'tanks', title: 'Bounce Brigade', color: '#3f8a2e', accent: '#ffcf3a', cover: 'cover-tanks',
+    tagline: 'Bank the shot. Mind the mines.',
+    blurb: 'The Klonkbot tank corps has rolled into Fernhaven’s parks and plazas. Captain Hazel takes her little tank in: bounce shells off the walls, shoot theirs out of the air and blast the crates with mines.',
+    levels: 44,
+  },
 ];
 
 const BOX = { w: 1.3, h: 1.68, d: 0.14 };

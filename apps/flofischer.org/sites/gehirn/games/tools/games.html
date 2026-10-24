@@ -6,7 +6,7 @@
   <script type="importmap">{ "imports": { "three": "./vendor/three-0.170.0/three.module.min.js" } }</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Games | Fernwork</title>
-  <meta name="description" content="Three free browser games: Fern Rangers (shoot the numbers, grow your squad), Pip’s Tower (pull the pins, save the Fernstones) and Momo’s Last Stand (hold the arena). Runs locally, works on phones.">
+  <meta name="description" content="Four free browser games: Fern Rangers (shoot the numbers, grow your squad), Pip’s Tower (pull the pins, save the Fernstones), Momo’s Last Stand (hold the arena) and Bounce Brigade (toy tank duels with bouncing shells). Runs locally, works on phones.">
   <script src="../assets/theme.js?v=20260419p"></script>
   <link rel="stylesheet" href="../assets/kit/tokens.css?v=20261023t">
   <link rel="stylesheet" href="../assets/style.css?v=20261023t">
@@ -15,14 +15,14 @@
   <link rel="canonical" href="https://fernwork.net/tools/games">
   <meta property="og:site_name" content="Fernwork">
   <meta property="og:title" content="Games | Fernwork">
-  <meta property="og:description" content="Three free browser games: Fern Rangers (shoot the numbers, grow your squad), Pip’s Tower (pull the pins, save the Fernstones) and Momo’s Last Stand (hold the arena). Runs locally, works on phones.">
+  <meta property="og:description" content="Four free browser games: Fern Rangers (shoot the numbers, grow your squad), Pip’s Tower (pull the pins, save the Fernstones), Momo’s Last Stand (hold the arena) and Bounce Brigade (toy tank duels with bouncing shells). Runs locally, works on phones.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fernwork.net/tools/games">
   <meta property="og:locale" content="en_US">
   <meta property="og:image" content="https://fernwork.net/assets/icons/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Games | Fernwork">
-  <meta name="twitter:description" content="Three free browser games: Fern Rangers (shoot the numbers, grow your squad), Pip’s Tower (pull the pins, save the Fernstones) and Momo’s Last Stand (hold the arena). Runs locally, works on phones.">
+  <meta name="twitter:description" content="Four free browser games: Fern Rangers (shoot the numbers, grow your squad), Pip’s Tower (pull the pins, save the Fernstones), Momo’s Last Stand (hold the arena) and Bounce Brigade (toy tank duels with bouncing shells). Runs locally, works on phones.">
   <meta name="twitter:image" content="https://fernwork.net/assets/icons/og-image.png">
   <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/icon-32.png">
@@ -46,7 +46,7 @@
 </head>
 <body>
   <main class="main-content gm-main">
-    <h1 class="sr-only">Fernwork Games: Fern Rangers, Pip’s Tower and Momo’s Last Stand</h1>
+    <h1 class="sr-only">Fernwork Games: Fern Rangers, Pip’s Tower, Momo’s Last Stand and Bounce Brigade</h1>
     <p class="sr-only">Fern Rangers: your squad fires non-stop, you steer through number gates and shoot them up to outgun the zombie horde. Pip’s Tower: pull the pins in the right order so lava, water, gold and enemies end up where they should. Twelve levels each, touch, mouse and keyboard.</p>
     <noscript>
       <div style="max-width:800px;margin:24px auto;padding:16px;border:1px solid #444;border-radius:8px;font-family:system-ui,sans-serif;line-height:1.5;">
@@ -62,10 +62,11 @@
     <div class="tab-content gm-tab" id="tab-fern-rangers"><div class="gm-host" data-game="fern-rangers"></div></div>
     <div class="tab-content gm-tab" id="tab-pips-tower"><div class="gm-host" data-game="pips-tower"></div></div>
     <div class="tab-content gm-tab" id="tab-momo"><div class="gm-host" data-game="momo"></div></div>
+    <div class="tab-content gm-tab" id="tab-tanks"><div class="gm-host" data-game="tanks"></div></div>
   </main>
   <script type="module">
     import { initNav, setupTabs } from '../assets/nav.js?v=20261024a';
-    import { mountGames } from './js/games/games.js?v=20261024b';
+    import { mountGames } from './js/games/games.js?v=20261025a';
     initNav();
     const games = mountGames();
     setupTabs({
@@ -75,7 +76,8 @@
       tabs: [
         { id: 'fern-rangers', label: 'Fern Rangers' },
         { id: 'pips-tower', label: 'Pip’s Tower' },
-        { id: 'momo', label: 'Momo’s Last Stand' }
+        { id: 'momo', label: 'Momo’s Last Stand' },
+        { id: 'tanks', label: 'Bounce Brigade' }
       ],
       onChange: (id) => games.show(id)
     });

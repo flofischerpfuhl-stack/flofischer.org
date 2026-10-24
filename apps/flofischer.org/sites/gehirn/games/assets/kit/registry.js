@@ -195,6 +195,7 @@ export const LEAVES = [
   T('games', 'fern-rangers', 'Fern Rangers', 'Fern Rangers', '#fern-rangers', { sub: 'fern-rangers', icon: 'crosshair', desc: 'Steer your squad through number gates and outgun the horde.', syn: ['game', 'games', 'play', 'shooter', 'arcade', 'zombie', 'gates', 'squad', 'runner'] }),
   T('games', 'pips-tower', 'Pip’s Tower', 'Pip’s Tower', '#pips-tower', { sub: 'pips-tower', icon: 'pin', desc: 'Pull the pins in the right order to save the hero.', syn: ['game', 'games', 'play', 'puzzle', 'pull the pin', 'pin', 'rescue', 'pips tower', 'tower'] }),
   T('games', 'momo', 'Momo’s Last Stand', 'Momo’s Last Stand', '#momo', { sub: 'momo', icon: 'wrench', desc: 'Hold the arena against the alien horde and pick an upgrade card each level-up.', syn: ['game', 'games', 'play', 'arena', 'survivor', 'horde', 'roguelite', 'upgrade', 'cards', 'momo', 'red panda'] }),
+  T('games', 'tanks', 'Bounce Brigade', 'Bounce Brigade', '#tanks', { sub: 'tanks', icon: 'crosshair', desc: 'Toy tank duels: bank your shells off the walls, lay mines and beat the Klonkbot tank corps.', syn: ['game', 'games', 'play', 'tank', 'tanks', 'ricochet', 'bounce', 'mines', 'arena', 'hedgehog', 'hazel'] }),
 ];
 
 /** Older (mockup round) ids → today's leaves, so stored Recent entries and links keep resolving. */

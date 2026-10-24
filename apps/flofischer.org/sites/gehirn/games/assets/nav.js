@@ -122,7 +122,8 @@ const TOOLS = [
     subs: [
       { id: 'fern-rangers', label: 'Fern Rangers', hash: '#fern-rangers' },
       { id: 'pips-tower', label: 'Pip’s Tower', hash: '#pips-tower' },
-      { id: 'momo', label: 'Momo’s Last Stand', hash: '#momo' }
+      { id: 'momo', label: 'Momo’s Last Stand', hash: '#momo' },
+      { id: 'tanks', label: 'Bounce Brigade', hash: '#tanks' }
     ]
   }
 ];

@@ -9,6 +9,7 @@ const LOADERS = {
   'fern-rangers': () => import('./fern-rangers.js').then((m) => m.fernRangers),
   'pips-tower': () => import('./pips-tower.js').then((m) => m.pipsTower),
   momo: () => import('./momo.js').then((m) => m.momo),
+  tanks: () => import('./tanks.js').then((m) => m.tanks),
 };
 
 export function mountGames() {
