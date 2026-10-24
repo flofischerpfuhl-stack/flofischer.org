@@ -4,7 +4,7 @@
  * the game draws all of that detail per frame as one full-screen quad (the cost no longer grows with the detail).
  * Everything here runs while a level is built, never per frame.
  */
-import { THREE } from '../three-kit.js';
+import { THREE, furPatch } from '../three-kit.js';
 import { rng, createNoise, smoothstep, lerp } from './noise.js';
 
 export { rng, createNoise, smoothstep, lerp };
@@ -242,6 +242,7 @@ export function modelInstances(model, matrices, { shadow = false, tints = null, 
     const mat = part.mat === 'glow'
       ? new THREE.MeshBasicMaterial({ vertexColors: true, fog })
       : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: part.mat === 'gloss' ? 0.25 : 0.7, metalness: 0.02, fog });
+    if (part.geometry.attributes.aFur && part.mat !== 'glow') furPatch(mat);
     const im = new THREE.InstancedMesh(part.geometry, mat, matrices.length);
     matrices.forEach((m, i) => { im.setMatrixAt(i, m); if (tints) im.setColorAt(i, tints[i]); });
     im.castShadow = shadow && part.mat !== 'glow'; im.receiveShadow = part.mat !== 'glow';

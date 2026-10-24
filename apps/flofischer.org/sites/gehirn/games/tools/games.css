@@ -1,5 +1,6 @@
 /**
- * Fernwork — Games page (tools/games.html): the game stage fills the viewport under the page header; menus, pause
+ * Fernwork — Games page (tools/games.html): the game stage fills the whole content area (no page header: the sidebar and
+ * the app bar already say where you are); menus, pause
  * and result screens are kit cards over the canvas. Kit tokens only (npm run check:type).
  */
 
@@ -10,9 +11,10 @@ body[data-fw-cat="games"] { overflow: hidden; }
   flex-direction: column;
   height: calc(100dvh - var(--appbar-h) - env(safe-area-inset-top));
   min-height: 0;
-  padding-bottom: var(--space-4);
 }
-.gm-main > .page-header { flex: none; }
+/* the scene runs edge to edge: up to the app bar, up to the sidebar, no frame */
+.main-content.gm-main { padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+.gm-main > .page-header { display: none; }
 .gm-main > .tab-content.active { display: flex; flex: 1 1 auto; min-height: 0; }
 .gm-host, .gm-game { display: flex; flex: 1 1 auto; min-width: 0; min-height: 0; }
 
@@ -22,8 +24,6 @@ body[data-fw-cat="games"] { overflow: hidden; }
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
   background: var(--stage);
   touch-action: none;
   user-select: none;
@@ -233,12 +233,11 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
 .gm-fs { position: absolute; top: var(--space-2); right: var(--space-2); z-index: 4; }
 .gm-stage[data-screen="play"] .gm-fs { display: none; }
 
-/* ───────────── Arcade hub: 3D game boxes on a stage, progress panel beside them ───────────── */
-.gm-hub { gap: var(--space-3); }
+/* ───────────── Arcade hub: 3D game boxes on a stage; a plaque and a big button in the scene are the menu ───────────── */
+.gm-hub { position: relative; }
 .gm-hub__stage {
   position: relative; flex: 1 1 auto; min-width: 0; min-height: 0; overflow: hidden;
-  border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
-  background: radial-gradient(120% 90% at 50% 20%, #2b3340 0%, #12151b 60%, #0b0d11 100%);
+  background: var(--surface-sunken);
 }
 .gm-hub__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
 .gm-hub__canvas:active { cursor: grabbing; }
@@ -248,14 +247,16 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
 }
 .gm-hub__nav > * { pointer-events: auto; background: rgba(9, 9, 11, .55); color: #fff; border-color: rgba(255, 255, 255, .18); }
 .gm-hub__hint {
-  position: absolute; inset: var(--space-3) 0 auto 0; margin: 0; text-align: center; pointer-events: none;
-  color: rgba(255, 255, 255, .6); font-size: var(--text-xs); line-height: var(--lh-xs);
+  position: absolute; inset: auto 0 calc(var(--space-3) + var(--hit-min) + var(--space-2)) 0; margin: 0; text-align: center; pointer-events: none;
+  color: var(--text-2); font-size: var(--text-xs); line-height: var(--lh-xs);
 }
-.gm-hub__panel {
-  flex: 0 0 320px; min-width: 0; overflow: auto;
-  display: flex; flex-direction: column; gap: var(--space-3);
-  padding: var(--space-4); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
-  background: var(--surface-1);
+/* the plaque and the button in the scene are the menu; this panel only serves screen readers and keyboards */
+.gm-hub__save { position: absolute; z-index: 2; top: var(--space-3); left: var(--space-3); }
+.gm-hub__save > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.gm-hub__save > summary::-webkit-details-marker { display: none; }
+.gm-hub__savebody {
+  margin-top: var(--space-2); width: min(300px, calc(100vw - 2 * var(--space-4))); padding: var(--space-3);
+  border-radius: var(--radius-md); background: var(--surface-overlay); color: var(--text-1); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-3);
 }
 .gm-hub__kicker { margin: 0; color: var(--text-3); font-size: var(--text-2xs); line-height: var(--lh-2xs); text-transform: uppercase; letter-spacing: .06em; }
 .gm-hub__title { margin: 0; font-size: var(--text-xl); line-height: var(--lh-xl); font-weight: var(--weight-semibold); letter-spacing: var(--tracking-tight); }
@@ -271,15 +272,13 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
   border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-2);
   font-size: var(--text-xs); line-height: var(--lh-xs);
 }
-.gm-hub__save summary { cursor: pointer; color: var(--text-2); font-size: var(--text-sm); line-height: var(--lh-sm); }
 .gm-hub__small { margin: var(--space-2) 0; color: var(--text-3); font-size: var(--text-xs); line-height: var(--lh-xs); }
 .gm-hub__saverow { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 
 @media (max-width: 767px) {
-  .gm-hub { flex-direction: column; }
-  .gm-hub__stage { flex: 1 1 58%; min-height: 260px; }
-  .gm-hub__panel { flex: 1 1 42%; padding: var(--space-3); }
-  .gm-main { padding: var(--space-2) var(--space-2) max(var(--space-2), env(safe-area-inset-bottom)); }
+  .gm-hub__nav { inset: 0 0 auto 0; top: 38%; justify-content: space-between; padding: 0 var(--space-2); }
+  .gm-hub__hint { display: none; }
+  .main-content.gm-main { padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
   body[data-fw-cat="games"] .page-header.fw-page-header-host { margin-bottom: var(--space-2); }
   /* While a level runs the stage takes the whole page. */
   body.gm-playing .gm-main > .page-header { display: none; }

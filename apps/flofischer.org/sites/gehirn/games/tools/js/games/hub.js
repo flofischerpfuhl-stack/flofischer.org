@@ -1,11 +1,13 @@
 /**
- * Fernwork Arcade — the games landing view (tools/games#arcade): the three games as 3D boxes on a lit stage.
- * Drag or swipe a box to spin it (front, spine, back), tap one to bring it forward, Play opens the game. The panel
- * next to the boxes shows the player's progress from profile.js: stars, world and level, best scores, play time,
- * coins, achievements, and the save export.
+ * Fernwork Arcade — the games landing view (the bare tools/games URL): the three games as 3D boxes on a stage that
+ * fills the content area, in Fernwork's light or dark look. Drag or swipe a box to spin it (front, spine, back), tap one
+ * to bring it forward; the big arcade button (or a tap on the front box) opens the game. A plaque at the podium's
+ * front edge shows the game and the player's progress from profile.js; a visually hidden panel carries the same for
+ * screen readers and keyboards, and a small corner menu holds the save export.
  */
 import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, Particles, LOW_GPU } from './three-kit.js';
 import { Baker } from './world/decor.js';
+import { loadModel } from './models.js';
 import { buildStage } from './world/stage.js';
 import { propsReady } from './world/tower-scenery.js';
 import { profile, game as gameProfile, starsTotal, exportCode, importCode, onChange, ACHIEVEMENTS } from './profile.js';
@@ -96,6 +98,30 @@ function drawLogo(g, W, H, info) {
   g.drawImage(c, 0, H * 0.05); g.restore();
 }
 
+/** The plaque in front of the focused box: the game's name and the player's progress. */
+function drawPlaque(g, W, H, info, dark) {
+  if (!info) return;
+  // Fernwork card colours: light card with dark ink in the light theme, near-black card in the dark one
+  const K = dark ? { a: '#121514', b: '#0b0d0c', edge: 'rgba(74,222,128,.45)', title: info.accent, sub: 'rgba(237,237,237,.75)', key: '#4ade80', val: '#ededed' }
+    : { a: '#ffffff', b: '#f4f6f3', edge: 'rgba(21,128,61,.35)', title: '#111111', sub: '#52525b', key: '#15803d', val: '#111111' };
+  const gp = gameProfile(info.id), p = profile();
+  const stars = starsTotal(info.id), cleared = Object.values(gp.stars).filter((v) => v > 0).length;
+  const best = Object.values(gp.best).reduce((a, b) => Math.max(a, b), 0);
+  const where = gp.last ? gp.last.replace(/^w(\d)-(\d+|boss)$/, (_, wd, n) => `World ${wd} · ${n === 'boss' ? 'Boss' : `Level ${Number(n)}`}`) : 'Not started yet';
+  const grd = g.createLinearGradient(0, 0, 0, H); grd.addColorStop(0, K.a); grd.addColorStop(1, K.b);
+  g.fillStyle = grd; g.fillRect(0, 0, W, H);
+  g.strokeStyle = K.edge; g.lineWidth = 4; g.strokeRect(14, 14, W - 28, H - 28);
+  g.textBaseline = 'alphabetic'; g.textAlign = 'left';
+  g.fillStyle = K.title; g.font = '800 62px Geist, system-ui, sans-serif'; g.fillText(info.title, 44, 96);
+  g.fillStyle = K.sub; g.font = '500 30px Geist, system-ui, sans-serif'; g.fillText(info.soon ? 'Coming soon' : info.tagline, 44, 142);
+  const rows = [['★ STARS', `${stars} / ${info.levels * 3}`], ['PROGRESS', where], ['LEVELS', `${cleared} / ${info.levels}`], ['BEST', best ? best.toLocaleString('en') : '—'], ['PLAY TIME', gp.seconds ? fmtTime(gp.seconds) : '—'], ['COINS', p.coins.toLocaleString('en')]];
+  rows.forEach(([k, v], i) => {
+    const col = i % 2, row = Math.floor(i / 2), x = 44 + col * 480, y = 212 + row * 62;
+    g.fillStyle = K.key; g.font = '700 22px Geist, system-ui, sans-serif'; g.fillText(k, x, y);
+    g.fillStyle = K.val; g.font = '700 34px Geist, system-ui, sans-serif'; g.fillText(v, x + 170, y + 2);
+  });
+}
+
 /** Back cover: blurb, live progress, feature list. Redrawn whenever the profile changes. */
 function drawBack(g, W, H, info, art) {
   g.fillStyle = '#121418'; g.fillRect(0, 0, W, H);
@@ -179,9 +205,17 @@ export function mountHub(host, { onPlay }) {
         <button type="button" class="fw-iconbtn fw-iconbtn--outline" data-hub="prev" aria-label="Previous game">${icon('chevron-left', { size: 20 })}</button>
         <button type="button" class="fw-iconbtn fw-iconbtn--outline" data-hub="next" aria-label="Next game">${icon('chevron-right', { size: 20 })}</button>
       </div>
-      <p class="gm-hub__hint">Drag a box to spin it</p>
+      <p class="gm-hub__hint">Drag a box to spin it · press the big button to play</p>
+      <details class="gm-hub__save"><summary class="fw-iconbtn gm-hud__btn" aria-label="Move your progress" title="Move your progress">${icon('upload', { size: 18 })}</summary>
+        <div class="gm-hub__savebody">
+          <p class="gm-hub__small">Progress is saved in this browser. Copy the code to continue on another device.</p>
+          <div class="gm-hub__saverow"><button type="button" class="fw-btn fw-btn--sm" data-hub="export">${icon('copy', { size: 14 })}Copy save code</button>
+          <button type="button" class="fw-btn fw-btn--sm fw-btn--ghost" data-hub="import">${icon('upload', { size: 14 })}Load a code</button></div>
+        </div>
+      </details>
     </div>
-    <aside class="gm-hub__panel" aria-live="polite"></aside>`;
+    <!-- the plaque and the button in the scene show this; screen readers and keyboards use it here -->
+    <aside class="gm-hub__panel sr-only" aria-live="polite"></aside>`;
   const canvas = host.querySelector('canvas');
   const panel = host.querySelector('.gm-hub__panel');
   const renderer = createRenderer(canvas);
@@ -196,7 +230,21 @@ export function mountHub(host, { onPlay }) {
   const baker = new Baker();
   scene.add(baker.quad);
   let stage = null, bakeDirty = true, texReady = -1;
-  propsReady.then(() => { stage = buildStage({ env }); bakeDirty = true; });
+  // the heroes on the stage: a Ranger pair on the left, Pip with Biscuit and Momo on the right
+  const HEROES = [['RANGER_FOX', [-2.1, -0.965, 1.2], 0.45, 0.95], ['RANGER_BUNNY', [-2.6, -0.965, 0.45], 0.65, 0.9],
+    ['PIP', [2.1, -0.965, 1.2], -0.45, 0.95], ['BISCUIT', [1.65, -0.965, 1.65], -0.3, 0.95], ['MOMO', [2.6, -0.965, 0.45], -0.65, 0.9]];
+  // the stage follows the site theme (light or dark Fernwork look); a theme switch rebuilds and rebakes it
+  const siteDark = () => { const t = document.documentElement.getAttribute('data-theme'); return t ? t === 'dark' : !!window.matchMedia?.('(prefers-color-scheme: dark)').matches; };
+  let dark = siteDark(), heroModels = null;
+  const rebuild = () => {
+    if (!heroModels) return;
+    stage = buildStage({ env, dark, figures: HEROES.map(([, pos, rot, scale], k) => ({ model: heroModels[k], pos, rot, scale })) });
+    bakeDirty = true;
+  };
+  Promise.all([propsReady, ...HEROES.map(([n]) => loadModel(n, 'lo').catch(() => null))]).then(([, ...models]) => { heroModels = models; rebuild(); });
+  const onTheme = () => { const d = siteDark(); if (d !== dark) { dark = d; rebuild(); plaque.userData.tint?.(); renderPanel(); } };
+  new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', onTheme);
   const catcher = new THREE.Mesh(new THREE.CircleGeometry(3.6, 64), new THREE.ShadowMaterial({ opacity: 0.38, depthWrite: false }));
   catcher.rotation.x = -Math.PI / 2; catcher.position.y = -0.962; catcher.receiveShadow = true; catcher.renderOrder = -900; catcher.visible = !LOW_GPU; scene.add(catcher);
   const motes = new Particles(scene, 40, new THREE.SphereGeometry(1, 6, 4), new THREE.MeshBasicMaterial({ color: 0xffe2b0, transparent: true, opacity: 0.7, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
@@ -225,6 +273,39 @@ export function mountHub(host, { onPlay }) {
     Promise.all([loadImage(info.cover), document.fonts?.ready]).then(([art]) => { front.redraw(art); back.redraw(art); spine.redraw(); info.art = art; });
     return { info, group, mesh, front, back, spin: 0, spinVel: 0, target: 0, x: 0 };
   });
+  // the plaque in front of the focused box (title, stats) and the big arcade button that starts the game
+  const plaqueTex = canvasTexture(1024, 400, (g, W, H, info) => drawPlaque(g, W, H, info, dark));
+  const plaque = new THREE.Group();
+  {
+    const wood = new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0.05 });
+    const brassM = new THREE.MeshStandardMaterial({ roughness: 0.3 });
+    plaque.userData.tint = () => { wood.color.set(dark ? 0x241a12 : 0xefe9df); brassM.color.set(dark ? 0xd8a84a : 0x16a34a); brassM.metalness = dark ? 0.9 : 0.25; };
+    plaque.userData.tint();
+    const board = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.92, 0.08), wood); board.castShadow = true;
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(2.16, 0.8), new THREE.MeshBasicMaterial({ map: plaqueTex, toneMapped: false }));
+    face.position.z = 0.041;
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(2.36, 0.98, 0.05), brassM); frame.position.z = -0.02;
+    // two short brass feet hold the tilted board on the podium
+    const feet = [-0.8, 0.8].map((x) => { const f = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.36), brassM); f.position.set(x, -0.5, -0.12); return f; });
+    plaque.add(frame, board, face, ...feet);
+    plaque.rotation.x = -0.82;
+    scene.add(plaque);
+  }
+  const button = new THREE.Group();
+  const capMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x16a34a, emissiveIntensity: 0.6, roughness: 0.25, metalness: 0.05 });
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.12, 40), capMat);
+  {
+    const brassM = new THREE.MeshStandardMaterial({ color: 0xd8a84a, metalness: 0.9, roughness: 0.28 });
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.34, 0.12, 40), new THREE.MeshStandardMaterial({ color: 0x1b1d22, roughness: 0.4 }));
+    const ringM = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.025, 10, 48), brassM); ringM.rotation.x = Math.PI / 2; ringM.position.y = 0.065;
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 0.5, 20), brassM); post.position.y = -0.3;
+    cap.position.y = 0.1;
+    const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: canvasTexture(512, 112, (g, W, H, txt) => { g.clearRect(0, 0, W, H); g.font = `900 ${H * 0.55}px Geist, system-ui, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 10; g.strokeStyle = 'rgba(0,0,0,.6)'; g.strokeText(txt || 'PLAY', W / 2, H / 2); g.fillStyle = '#fff'; g.fillText(txt || 'PLAY', W / 2, H / 2); }) }));
+    label.scale.set(0.62, 0.14, 1); label.position.set(0, 0.33, 0.05); button.userData.label = label;
+    button.add(post, base, ringM, cap, label);
+    button.traverse((o) => { o.castShadow = true; });
+        scene.add(button);
+  }
   applyIbl(scene, env, 0.7);
 
   let focus = 0, active = false, raf = 0, last = 0, w = 1, h = 1, drag = null;
@@ -235,6 +316,9 @@ export function mountHub(host, { onPlay }) {
 
   function renderPanel() {
     const info = GAMES[focus], gp = gameProfile(info.id), p = profile();
+    plaqueTex.redraw(info);
+    capMat.color.set(info.soon ? 0x6b7280 : info.color); capMat.emissive.set(info.soon ? 0x111111 : info.color).multiplyScalar(0.55);
+    button.userData.label.material.map.redraw(info.soon ? 'SOON' : gp.plays ? 'CONTINUE' : 'PLAY');
     const stars = starsTotal(info.id), cleared = Object.values(gp.stars).filter((v) => v > 0).length;
     const last = gp.last ? gp.last.replace(/^w(\d)-(\d+|boss)$/, (_, wd, n) => `World ${wd} · ${n === 'boss' ? 'Boss' : `Level ${Number(n)}`}`) : 'Not started yet';
     const bestEntry = Object.entries(gp.best).sort((a, b) => b[1] - a[1])[0];
@@ -255,22 +339,22 @@ export function mountHub(host, { onPlay }) {
         <div class="gm-hub__chip">${icon('sparkles', { size: 14 })}<span class="fw-num">${p.coins.toLocaleString('en')}</span> coins</div>
         <div class="gm-hub__chip">${icon('check', { size: 14 })}<span class="fw-num">${unlocked}</span> / ${Math.max(unlocked, ACHIEVEMENTS.length)} achievements</div>
       </div>
-      <details class="gm-hub__save"><summary>Move your progress</summary>
-        <p class="gm-hub__small">Progress is saved in this browser. Copy the code to continue on another device.</p>
-        <div class="gm-hub__saverow"><button type="button" class="fw-btn fw-btn--sm" data-hub="export">${icon('copy', { size: 14 })}Copy save code</button>
-        <button type="button" class="fw-btn fw-btn--sm fw-btn--ghost" data-hub="import">${icon('upload', { size: 14 })}Load a code</button></div>
-      </details>`;
+`;
   }
 
   function resize() {
     const r = canvas.getBoundingClientRect();
     w = Math.max(1, r.width); h = Math.max(1, r.height);
     renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1)); renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    // keep the focused box and its neighbours' edges in view on every screen shape
-    const fitW = 2.4 / camera.aspect, fitH = 3.0;
+    // the whole scene is the menu: wide screens show the heroes at the sides, phones frame box, plaque and button
+    camera.fov = 30; camera.aspect = w / h;
+    const wide = camera.aspect > 1;
+    const fitW = (wide ? 7.4 : 2.9) / camera.aspect, fitH = 3.6;
     const dist = Math.max(fitW, fitH) / (2 * Math.tan((camera.fov * Math.PI) / 360));
-    camera.position.set(0, 0.35, dist + 0.6); camera.lookAt(0, 0, 0);
+    camera.position.set(0, 0.55, dist + 0.6); camera.lookAt(0, -0.12, 0);
+    // plaque and button stand at the podium's front edge, close to the camera, so the focused cover stays whole
+    plaque.position.set(wide ? -0.38 : -0.28, -0.74, 3.35); plaque.scale.setScalar(wide ? 0.58 : 0.5);
+    button.position.set(wide ? 0.78 : 0.66, -0.8, 3.2); button.scale.setScalar(wide ? 0.8 : 0.7);
     camera.updateProjectionMatrix();
     bakeDirty = true;
   }
@@ -296,9 +380,13 @@ export function mountHub(host, { onPlay }) {
       const idle = i === focus && !drag ? Math.sin(t / 1400) * 0.12 : 0;
       b.group.rotation.y = L.ry + b.spin + idle;
     });
+    // the button breathes softly and sinks when pressed
+    const since = (performance.now() - pressed) / 1000;
+    cap.position.y = 0.1 - (since < 0.3 ? Math.sin((since / 0.3) * Math.PI) * 0.07 : 0);
+    capMat.emissiveIntensity = 0.45 + Math.sin(t / 450) * 0.2;
     bake();
     motes.begin();
-    if (stage && !LOW_GPU) for (const m of stage.motes) {
+    if (stage && !LOW_GPU && dark) for (const m of stage.motes) {
       const tt = t / 1000;
       motes.add(m.x + Math.sin(tt * 0.3 + m.s * 9) * 0.3, m.y + Math.sin(tt * 0.2 + m.s * 5) * 0.25, m.z, 0.005 + m.s * 0.007, 0xffe2b0);
     }
@@ -309,10 +397,20 @@ export function mountHub(host, { onPlay }) {
 
   // input: drag to spin the focused box, tap a side box to focus it
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
-  const hit = (e) => {
+  const aim = (e) => {
     const r = canvas.getBoundingClientRect();
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
+  };
+  const onButton = (e) => { aim(e); return ray.intersectObject(button, true).length > 0; };
+  const play = () => {
+    if (GAMES[focus].soon) return;
+    pressed = performance.now();
+    setTimeout(() => onPlay(GAMES[focus].id), 160);
+  };
+  let pressed = 0;
+  const hit = (e) => {
+    aim(e);
     const hits = ray.intersectObjects(boxes.map((b) => b.mesh));
     return hits.length ? boxes.findIndex((b) => b.mesh === hits[0].object) : -1;
   };
@@ -321,7 +419,7 @@ export function mountHub(host, { onPlay }) {
     drag = { x: e.clientX, t: performance.now(), moved: 0, start: boxes[focus].spin };
   });
   canvas.addEventListener('pointermove', (e) => {
-    if (!drag) return;
+    if (!drag) { if (e.pointerType === 'mouse') canvas.style.cursor = onButton(e) || hit(e) >= 0 ? 'pointer' : 'grab'; return; }
     const dx = e.clientX - drag.x;
     drag.moved = Math.max(drag.moved, Math.abs(dx));
     const b = boxes[focus];
@@ -334,9 +432,10 @@ export function mountHub(host, { onPlay }) {
     const tap = drag.moved < 6;
     drag = null;
     if (tap) {
+      if (onButton(e)) { play(); return; }
       const i = hit(e);
       if (i >= 0 && i !== focus) setFocus(i);
-      else if (i === focus) { boxes[focus].spinVel = 9; }
+      else if (i === focus) play();
     }
   };
   canvas.addEventListener('pointerup', end);
@@ -348,7 +447,7 @@ export function mountHub(host, { onPlay }) {
     const act = e.target.closest('[data-hub]')?.dataset.hub;
     if (act === 'prev') setFocus(focus - 1);
     else if (act === 'next') setFocus(focus + 1);
-    else if (act === 'play' && !GAMES[focus].soon) onPlay(GAMES[focus].id);
+    else if (act === 'play') play();
     else if (act === 'export') {
       const code = exportCode();
       try { await navigator.clipboard.writeText(code); e.target.closest('button').lastChild.textContent = 'Copied'; }
@@ -362,6 +461,7 @@ export function mountHub(host, { onPlay }) {
     if (!active || e.target.closest?.('input, textarea')) return;
     if (e.key === 'ArrowLeft') { setFocus(focus - 1); e.preventDefault(); }
     else if (e.key === 'ArrowRight') { setFocus(focus + 1); e.preventDefault(); }
+    else if (e.key === 'Enter' && !e.target.closest?.('button, summary, a')) { play(); e.preventDefault(); }
   });
   onChange(() => { renderPanel(); for (const b of boxes) b.back.redraw(b.info.art || null); });
   new ResizeObserver(() => { if (active) resize(); }).observe(canvas);

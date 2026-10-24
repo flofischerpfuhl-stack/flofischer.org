@@ -270,8 +270,13 @@ export function setupTabs(config) {
     const tabDef = views.find(t => t.id === tabId);
     const label = tabDef ? tabDef.label : tabId;
     document.title = home && tabId === home.id ? `${pageTitle} | Fernwork` : `${label} — ${pageTitle} | Fernwork`;
-    const leaf = leafForLocation(window.location.pathname, '#' + tabId);
-    if (leaf && leaf.kind === 'tool' && getLeaf(leaf.id) !== currentLeaf()) setCurrentLeaf(leaf);
+    if (home && tabId === home.id) {
+      // the landing view is the category itself: no sub-tool is current (the registry would default to the first)
+      document.querySelectorAll('.fw-rail__leaf[aria-current], .fw-rail-flyout__leaf[aria-current], .fw-subchips .fw-chip[aria-current]').forEach((a) => a.removeAttribute('aria-current'));
+    } else {
+      const leaf = leafForLocation(window.location.pathname, '#' + tabId);
+      if (leaf && leaf.kind === 'tool') setCurrentLeaf(leaf);
+    }
 
     if (onChange) onChange(tabId);
   }

@@ -133,8 +133,8 @@ export async function buildIsland({ theme = 'meadow', seed = 1, rx = 9, rz = 7, 
   group.add(hangers(T, { rx, rz, rimFactor, noise, rand, DEPTH, fallTheta }));
 
   // ── water (or lava / ice): pond and stream surface, the fall over the rim, mist at its foot ──
-  group.add(waterSurface(T, { pond, fall, waterDistance, waterY, uniforms }));
-  const fallGroup = waterfall(T, { fall, fallTheta, rx, rz, waterY, DEPTH, uniforms });
+  group.add(waterSurface(T, { pond, fall, waterDistance, rimDistance, waterY, uniforms }));
+  const fallGroup = waterfall(T, { fall, pond, rimDistance, streamHalf, waterY, DEPTH, uniforms });
   group.add(fallGroup);
 
   // ── grass and flowers ──
@@ -274,7 +274,7 @@ function mergeNonIndexed(geos) {
 
 // ─────────────────────────────── water ───────────────────────────────
 
-function waterSurface(T, { pond, fall, waterDistance, waterY, uniforms }) {
+function waterSurface(T, { pond, fall, waterDistance, rimDistance, waterY, uniforms }) {
   // a grid over the pond and stream, keeping only cells that are water; the edge fades to the bank colour
   const minX = Math.min(pond.x - pond.r * 1.4, fall.x * 1.08) - 0.4, maxX = Math.max(pond.x + pond.r * 1.4, fall.x * 1.08) + 0.4;
   const minZ = Math.min(pond.z - pond.r * 1.2, fall.z * 1.08) - 0.4, maxZ = Math.max(pond.z + pond.r * 1.2, fall.z * 1.08) + 0.4;
@@ -283,7 +283,8 @@ function waterSurface(T, { pond, fall, waterDistance, waterY, uniforms }) {
   const LIM = 0.06;
   for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
     const x = minX + i * step, z = minZ + j * step, w = waterDistance(x, z);
-    if (w > LIM + step) continue;
+    // the surface stops at the rim: the stream ends in the notch where the fall begins, nothing hangs over the edge
+    if (w > LIM + step || rimDistance(x, z) < 0.002) continue;
     id[i + j * nx] = pos.length / 3;
     pos.push(x, waterY, z); edge.push(smoothstep(-0.25, LIM, w));
   }
@@ -322,19 +323,24 @@ function waterSurface(T, { pond, fall, waterDistance, waterY, uniforms }) {
 }
 
 /** The stream's fall over the rim: a curved ribbon with streaks scrolling down, mist (or sparks) at the bottom. */
-function waterfall(T, { fall, fallTheta, rx, rz, waterY, DEPTH, uniforms }) {
+function waterfall(T, { fall, pond, rimDistance, streamHalf, waterY, DEPTH, uniforms }) {
   const g = new THREE.Group();
-  const out = new THREE.Vector3(Math.cos(fallTheta) / rx, 0, Math.sin(fallTheta) / rz).normalize();
+  // the fall continues the stream: same direction, same width, starting where the water surface ends at the rim
+  const out = new THREE.Vector3(fall.x - pond.x, 0, fall.z - pond.z).normalize();
   const side = new THREE.Vector3(-out.z, 0, out.x);
-  const H = Math.min(DEPTH * 0.8, 6.5), W = 0.62, SEGS = 24;
+  let k = 0;
+  while (k < 1.2 && rimDistance(fall.x - out.x * k, fall.z - out.z * k) < 0.002) k += 0.01;
+  const lip = { x: fall.x - out.x * k, z: fall.z - out.z * k };
+  const H = Math.min(DEPTH * 0.8, 6.5), W = streamHalf * 2.3, SEGS = 28;
   const pos = [], uv = [], idx = [];
   for (let i = 0; i <= SEGS; i++) {
     const t = i / SEGS;
-    const y = waterY - 0.02 - t * H;
-    const o = 0.08 + Math.sqrt(t) * 0.55 + t * 0.3; // arcs out a little, then drops
-    const w = W * (1 + t * 0.6);
+    // over the lip first (a short curl), then falling and drifting out from the cliff
+    const y = waterY - 0.01 - Math.pow(t, 1.35) * H;
+    const o = Math.sqrt(t) * 0.75 + t * 0.35;
+    const w = W * (1 + t * 0.55);
     for (const s of [-1, 1]) {
-      pos.push(fall.x + out.x * o + side.x * s * w / 2, y, fall.z + out.z * o + side.z * s * w / 2);
+      pos.push(lip.x + out.x * o + side.x * s * w / 2, y, lip.z + out.z * o + side.z * s * w / 2);
       uv.push(s < 0 ? 0 : 1, t);
     }
     if (i < SEGS) { const a = i * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }

@@ -113,8 +113,9 @@ export function reflectiveIbl(material, env, intensity) {
         vec3 e = ny > 0.0 ? mix( uIblSide, uIblUp, ny ) : mix( uIblSide, uIblDown, -ny );
         return PI * e * envMapIntensity;
       }`);
+    material.userData.extraCompile?.(sh);
   };
-  material.customProgramCacheKey = () => 'reflective-ibl';
+  material.customProgramCacheKey = () => 'reflective-ibl' + (material.userData.extraKey || '');
   material.needsUpdate = true;
   return material;
 }
@@ -132,8 +133,77 @@ export function cheapIbl(material, intensity) {
         vec3 e = ny > 0.0 ? mix( uIblSide, uIblUp, ny ) : mix( uIblSide, uIblDown, -ny );
         iblIrradiance += PI * e * uIblInt;
       }`);
+    material.userData.extraCompile?.(sh);
   };
-  material.customProgramCacheKey = () => 'cheap-ibl';
+  material.customProgramCacheKey = () => 'cheap-ibl' + (material.userData.extraKey || '');
+  material.needsUpdate = true;
+  return material;
+}
+
+/**
+ * Fur strands: a small tiling strand texture laid along each vertex's growth direction (attribute aFur: xyz
+ * direction in the surface, w strength; baked by scripts/games-blender/export.py). One texture lookup per pixel on fur;
+ * mipmapping averages it out to the plain colour at a distance, so small figures do not shimmer.
+ */
+let furTex = null;
+function furTexture() {
+  if (furTex) return furTex;
+  const S = 128, c = document.createElement('canvas'); c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = 'rgb(128,128,128)'; g.fillRect(0, 0, S, S);
+  let seed = 7;
+  const r = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  // short, thin strands in clumps that share a lean, running along y (the growth direction): dark at the root,
+  // light at the tip; drawn wrapped so the tile repeats without seams
+  for (let k = 0; k < 90; k++) {
+    const cx = r() * S, cy = r() * S, lean = (r() - 0.5) * 0.5;
+    for (let i = 0; i < 12; i++) {
+      const x = cx + (r() - 0.5) * 12, y = cy + (r() - 0.5) * 10, len = 6 + r() * 9, w = 0.6 + r() * 0.7;
+      const dx = Math.sin(lean + (r() - 0.5) * 0.15) * len, dy = Math.cos(lean) * len;
+      const grad = g.createLinearGradient(x, y, x + dx, y + dy);
+      grad.addColorStop(0, 'rgba(25,25,25,0.75)');
+      grad.addColorStop(0.6, 'rgba(225,225,225,0.7)');
+      grad.addColorStop(1, 'rgba(255,255,255,0.15)');
+      g.strokeStyle = grad; g.lineWidth = w; g.lineCap = 'round';
+      for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) {
+        g.beginPath(); g.moveTo(x + ox, y + oy); g.quadraticCurveTo(x + ox + dx * 0.3 + lean * 2, y + oy + dy * 0.5, x + ox + dx, y + oy + dy); g.stroke();
+      }
+    }
+  }
+  // keep the average at mid grey: at a distance the fur looks exactly like before
+  const d = g.getImageData(0, 0, S, S), px = d.data;
+  let sum = 0;
+  for (let i = 0; i < px.length; i += 4) sum += px[i];
+  const k = 128 / (sum / (px.length / 4));
+  for (let i = 0; i < px.length; i += 4) px[i] = px[i + 1] = px[i + 2] = Math.min(255, px[i] * k);
+  g.putImageData(d, 0, 0);
+  furTex = new THREE.CanvasTexture(c);
+  furTex.wrapS = furTex.wrapT = THREE.RepeatWrapping;
+  furTex.colorSpace = THREE.NoColorSpace;
+  furTex.anisotropy = 4;
+  return furTex;
+}
+/** Adds the fur strands to a material whose geometry carries `aFur`; works with and without the IBL patches. */
+export function furPatch(material, { amount = 0.7, across = 26, along = 20 } = {}) {
+  const tex = furTexture();
+  const patch = (sh) => {
+    sh.uniforms.uFurTex = { value: tex };
+    sh.vertexShader = 'attribute vec4 aFur;\nvarying vec3 vFurUV;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+      {
+        vec3 fFlow = aFur.xyz;
+        vec3 fPerp = normalize(cross(fFlow, normal) + vec3(1e-5));
+        vFurUV = vec3(dot(position, fPerp) * ${across.toFixed(1)}, dot(position, fFlow) * ${along.toFixed(1)}, aFur.w);
+      }`);
+    sh.fragmentShader = 'uniform sampler2D uFurTex;\nvarying vec3 vFurUV;\n' + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+      if (vFurUV.z > 0.01) {
+        float fs = texture2D(uFurTex, vFurUV.xy).r;
+        diffuseColor.rgb *= mix(1.0, 0.45 + 1.1 * fs, vFurUV.z * ${amount.toFixed(2)});
+      }`);
+  };
+  material.userData.extraCompile = patch;
+  material.userData.extraKey = ':fur';
+  // without an IBL patch (yet), the fur patch is the whole onBeforeCompile
+  if (!material.userData.ibl) { material.onBeforeCompile = patch; material.customProgramCacheKey = () => 'fur'; }
   material.needsUpdate = true;
   return material;
 }
@@ -322,7 +392,9 @@ export class MergedCrowd {
       glow: () => new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }),
     };
     this.channels = model.map((g) => {
-      const mesh = new THREE.InstancedMesh(g.geometry, mats[g.mat](), max);
+      const m = mats[g.mat]();
+      if (g.geometry.attributes.aFur && g.mat !== 'glow') furPatch(m);
+      const mesh = new THREE.InstancedMesh(g.geometry, m, max);
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       mesh.frustumCulled = false; mesh.count = 0; mesh.castShadow = false; mesh.receiveShadow = false;
       for (let i = 0; i < max; i++) mesh.setColorAt(i, WHITE);

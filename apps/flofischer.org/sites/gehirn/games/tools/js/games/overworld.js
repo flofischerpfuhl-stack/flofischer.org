@@ -2,12 +2,13 @@
  * The overworld: a game's four worlds as floating islands in one sky (world/island.js). Level nodes sit on each
  * island's path; the game's hero stands on the current node and hops along the path to the one you pick; a card
  * shows the level (stars, best score) with Play. Worlds open with stars (profile.js STAR_GATES); a locked island is
- * shown under a haze with what it needs. Swipe, the arrows or the arrow keys switch worlds.
+ * shown under a haze with what it needs. The arrows or Shift+arrow keys switch worlds. The camera is free: drag to
+ * orbit, wheel or pinch to zoom, right drag or two fingers to pan, double click to reset.
  *
  * mountOverworld(host, { levels, hero, companion, state, onPlay }) → { activate(), deactivate(), refresh(), focus(i) }
  *   levels: [{ name, world, boss }]     state: { stars(i), best(i), open(i), worldOpen(w), need(w), current() }
  */
-import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, LOW_GPU } from './three-kit.js';
+import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, furPatch, LOW_GPU } from './three-kit.js';
 import { loadModel } from './models.js';
 import { buildIsland } from './world/island.js';
 import { THEMES, WORLD_ORDER } from './world/themes.js';
@@ -28,7 +29,9 @@ function figure(model) {
   root.add(body);
   const legs = [];
   for (const g of model) {
-    const mesh = new THREE.Mesh(g.geometry, MATS[g.mat]());
+    const m = MATS[g.mat]();
+    if (g.geometry.attributes.aFur && g.mat !== 'glow') furPatch(m);
+    const mesh = new THREE.Mesh(g.geometry, m);
     mesh.castShadow = g.mat !== 'glow';
     if (g.ch === 'legL' || g.ch === 'legR') {
       const pivot = new THREE.Group(); pivot.position.set(...g.pivot);
@@ -194,6 +197,10 @@ export function mountOverworld(host, { levels, hero = 'RANGER_BUNNY', companion 
   // ── state ──
   let lastList = '';
   let world = 0, sel = 0, active = false, raf = 0, last = 0, hop = null, camX = 0, drag = null, followX = 0, followZ = 0;
+  // free camera: yaw/pitch around the island, zoom, pan (t* are the targets the view eases to)
+  // (yaw and pitch are offsets from the default view, so a phone keeps its steeper look)
+  const view = { yaw: 0, pitch: 0, zoom: 1, panX: 0, panZ: 0, tYaw: 0, tPitch: 0, tZoom: 1, tPanX: 0, tPanZ: 0 };
+  const pointers = new Map();
   const camTarget = new THREE.Vector3();
 
   function worldOf(i) { return levels[i]?.world ?? 0; }
@@ -301,16 +308,26 @@ export function mountOverworld(host, { levels, hero = 'RANGER_BUNNY', companion 
     let focusX = 0;
     if (tall && heroFig && worldOf(sel) === world) focusX = Math.max(-5, Math.min(5, heroFig.root.position.x - wd.x));
     followX += (focusX - followX) * (1 - Math.exp(-dt * 2.5));
+    // the view: the default framing (whole island on wide screens, the hero's stretch on phones) plus what the player
+    // did with it: orbit (drag), zoom (wheel, pinch), pan (right drag, two fingers)
+    view.yaw += (view.tYaw - view.yaw) * (1 - Math.exp(-dt * 8));
+    view.pitch += (view.tPitch - view.pitch) * (1 - Math.exp(-dt * 8));
+    view.zoom += (view.tZoom - view.zoom) * (1 - Math.exp(-dt * 8));
+    view.panX += (view.tPanX - view.panX) * (1 - Math.exp(-dt * 8));
+    view.panZ += (view.tPanZ - view.panZ) * (1 - Math.exp(-dt * 8));
+    let dist, yaw0, pitch0;
     if (tall) {
-      // phones: steeper and closer, centred on the hero's stretch of path
       const hz = heroFig && worldOf(sel) === world ? heroFig.root.position.z : wd.z;
       followZ += (hz - followZ) * (1 - Math.exp(-dt * 2.5));
       camTarget.set(camX + followX, wd.y - 0.3, followZ + 0.6);
-      camera.position.set(camTarget.x + 1.2, camTarget.y + 17, camTarget.z + 13);
+      dist = 21.4; yaw0 = 0.09; pitch0 = 0.92;
     } else {
       camTarget.set(camX + 0.4, wd.y - 1.2, wd.z);
-      camera.position.set(camX + 3.2 * fit, wd.y + 10.5 * fit, wd.z + 17 * fit);
+      dist = 20.2 * fit; yaw0 = 0.185; pitch0 = 0.545;
     }
+    camTarget.x += view.panX; camTarget.z += view.panZ;
+    const r = dist * view.zoom, yaw = yaw0 + view.yaw, pitch = Math.max(0.22, Math.min(1.3, pitch0 + view.pitch)), cp = Math.cos(pitch);
+    camera.position.set(camTarget.x + Math.sin(yaw) * cp * r, camTarget.y + Math.sin(pitch) * r, camTarget.z + Math.cos(yaw) * cp * r);
     camera.lookAt(camTarget);
     skyDome.position.copy(camera.position);
     lights.light.position.set(camX - 10, 16, 9); lights.light.target.position.set(camX, 0, 0); lights.light.target.updateMatrixWorld();
@@ -369,20 +386,52 @@ export function mountOverworld(host, { levels, hero = 'RANGER_BUNNY', companion 
     }
     return best;
   }
-  canvas.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, moved: 0 }; });
-  canvas.addEventListener('pointermove', (e) => { if (drag) drag.moved = Math.max(drag.moved, Math.abs(e.clientX - drag.x)); });
-  canvas.addEventListener('pointerup', (e) => {
+  // drag orbits, right drag or two fingers pan, wheel or pinch zoom; a tap still picks a level
+  const pinch = () => { const [a, b] = [...pointers.values()]; return { d: Math.hypot(a.x - b.x, a.y - b.y), x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; };
+  const panBy = (dx, dy) => {
+    const k = 0.03 * view.zoom, c = Math.cos(view.yaw), s = Math.sin(view.yaw); // (the small default yaw is left out)
+    view.tPanX = Math.max(-9, Math.min(9, view.tPanX - (dx * c + dy * s) * k));
+    view.tPanZ = Math.max(-7, Math.min(7, view.tPanZ - (-dx * s + dy * c) * k));
+  };
+  canvas.addEventListener('pointerdown', (e) => {
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* synthetic pointer */ }
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    drag = { x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY, moved: 0, pan: e.button === 2 || e.shiftKey, pinch: pointers.size === 2 ? pinch() : null };
+    if (pointers.size > 1) drag.moved = 99;
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (!drag) return;
-    const dx = e.clientX - drag.x, moved = drag.moved;
+    if (pointers.size === 2) {
+      const p = pinch();
+      if (drag.pinch) { view.tZoom = Math.max(0.45, Math.min(1.7, view.tZoom * (drag.pinch.d / Math.max(1, p.d)))); panBy(p.x - drag.pinch.x, p.y - drag.pinch.y); }
+      drag.pinch = p; return;
+    }
+    const dx = e.clientX - drag.lx, dy = e.clientY - drag.ly;
+    drag.lx = e.clientX; drag.ly = e.clientY;
+    drag.moved = Math.max(drag.moved, Math.hypot(e.clientX - drag.x, e.clientY - drag.y));
+    if (drag.moved < 6) return;
+    if (drag.pan) panBy(dx, dy);
+    else { view.tYaw -= dx * 0.006; view.tPitch = Math.max(-0.4, Math.min(0.6, view.tPitch + dy * 0.004)); }
+  });
+  canvas.addEventListener('wheel', (e) => { e.preventDefault(); view.tZoom = Math.max(0.45, Math.min(1.7, view.tZoom * Math.exp(e.deltaY * 0.0012))); }, { passive: false });
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  canvas.addEventListener('dblclick', () => Object.assign(view, { tYaw: 0, tPitch: 0, tZoom: 1, tPanX: 0, tPanZ: 0 }));
+  canvas.addEventListener('pointercancel', (e) => { pointers.delete(e.pointerId); drag = null; });
+  canvas.addEventListener('pointerup', (e) => {
+    pointers.delete(e.pointerId);
+    if (!drag) return;
+    const moved = drag.moved;
+    if (pointers.size) { drag.pinch = null; return; }
     drag = null;
-    if (moved > 40 && Math.abs(dx) > 40) { setWorld(world + (dx < 0 ? 1 : -1)); return; }
     if (moved < 8 && state.worldOpen(world)) {
       const i = pick(e);
       if (i >= 0 && state.open(i)) { if (i === sel && !hop) onPlay(i); else moveTo(i); }
       else if (i >= 0) { sel = i; paintNodes(); renderCard(); }
     }
   });
-  canvas.style.touchAction = 'pan-y';
+  canvas.style.touchAction = 'none';
   host.addEventListener('click', (e) => {
     const b = e.target.closest('[data-ow], [data-ow-level]');
     if (!b) return;
