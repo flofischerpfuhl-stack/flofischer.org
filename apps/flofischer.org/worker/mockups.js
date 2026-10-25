@@ -5,6 +5,7 @@
  * Agent skill: mockup-hosten.
  */
 export const MOCKUPS = new Set([
+  "fernlings", // Fernworld starter Fernlings as spinnable 3D models
   "fernwork", // Fernwork One redesign mockups
   "builder", // HimmelCAD Builder UI redesign (builder-ui-lab)
   "win", // one-time Windows PC remote-access setup page (SSH + Tailscale)

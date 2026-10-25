@@ -1,0 +1,82 @@
+{
+  "lines": [
+    {
+      "name": "Mossel",
+      "stages": [
+        {
+          "name": "Mossel",
+          "file": "mossel.glb",
+          "height": "0,4 m",
+          "note": "Grün",
+          "ready": true
+        },
+        {
+          "name": "Moorgrim",
+          "file": "moorgrim.glb",
+          "height": "1,0 m",
+          "note": "Grün",
+          "ready": true
+        },
+        {
+          "name": "Groveprince",
+          "file": "groveprince.glb",
+          "height": "2,2 m",
+          "note": "Grün",
+          "ready": true
+        }
+      ]
+    },
+    {
+      "name": "Glimmo",
+      "stages": [
+        {
+          "name": "Glimmo",
+          "file": "glimmo.glb",
+          "height": "0,5 m",
+          "note": "Glut",
+          "ready": true
+        },
+        {
+          "name": "Coalbear",
+          "file": "coalbear.glb",
+          "height": "1,3 m",
+          "note": "Glut",
+          "ready": true
+        },
+        {
+          "name": "Emberward",
+          "file": "emberward.glb",
+          "height": "2,0 m",
+          "note": "Glut",
+          "ready": true
+        }
+      ]
+    },
+    {
+      "name": "Plashling",
+      "stages": [
+        {
+          "name": "Plashling",
+          "file": "plashling.glb",
+          "height": "0,45 m",
+          "note": "Flut",
+          "ready": true
+        },
+        {
+          "name": "Spraycount",
+          "file": "spraycount.glb",
+          "height": "1,2 m",
+          "note": "Flut",
+          "ready": true
+        },
+        {
+          "name": "Tideduke",
+          "file": "tideduke.glb",
+          "height": "2,4 m",
+          "note": "Flut",
+          "ready": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<title>Fernlings 3D</title>
+<style>
+  :root { --bg: #f4f3ee; --panel: #ffffffd9; --text: #1d2420; --muted: #5d6660; --accent: #2f7d4a; --line: #00000014; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #17191a; --panel: #23262acc; --text: #eef0ec; --muted: #a3aaa5; --accent: #6fcf8f; --line: #ffffff1a; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .bar { position: fixed; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; padding: 6px; border-radius: 999px;
+         background: var(--panel); backdrop-filter: blur(12px); box-shadow: 0 2px 12px #0002; max-width: calc(100% - 24px); overflow-x: auto; scrollbar-width: none; }
+  .bar::-webkit-scrollbar { display: none; }
+  .top { top: max(12px, env(safe-area-inset-top)); }
+  .bottom { bottom: max(12px, env(safe-area-inset-bottom)); }
+  button { font: inherit; border: 0; border-radius: 999px; padding: 9px 15px; min-height: 40px; background: transparent; color: var(--text); white-space: nowrap; cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  button:disabled { color: var(--muted); opacity: .55; cursor: default; }
+  @media (prefers-color-scheme: dark) { button[aria-pressed="true"] { color: #0f1a13; } }
+  .info { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(max(12px, env(safe-area-inset-bottom)) + 64px);
+          text-align: center; pointer-events: none; }
+  .info h1 { margin: 0; font-size: 22px; font-weight: 650; }
+  .info p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+  .tools { position: fixed; right: max(12px, env(safe-area-inset-right)); top: calc(max(12px, env(safe-area-inset-top)) + 64px);
+           display: flex; flex-direction: column; gap: 6px; }
+  .tools button { background: var(--panel); backdrop-filter: blur(12px); box-shadow: 0 2px 10px #0002; width: 44px; height: 44px; padding: 0; font-size: 18px; }
+  .tools button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .msg[hidden] { display: none; }
+  .msg { position: fixed; inset: 0; display: grid; place-items: center; color: var(--muted); pointer-events: none; text-align: center; padding: 24px; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/addons/" } }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<nav class="bar top" id="lines" aria-label="Linie"></nav>
+<div class="tools">
+  <button id="spin" aria-pressed="true" title="Automatisch drehen" aria-label="Automatisch drehen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button>
+  <button id="reset" title="Ansicht zurücksetzen" aria-label="Ansicht zurücksetzen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4M17 12h4M12 3v4M12 17v4"/><circle cx="12" cy="12" r="3"/></svg></button>
+</div>
+<div class="info"><h1 id="name"></h1><p id="meta"></p></div>
+<nav class="bar bottom" id="stages" aria-label="Stufe"></nav>
+<div class="msg" id="msg">Lädt …</div>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const data = await (await fetch('./models.json')).json();
+const $ = (id) => document.getElementById(id);
+const canvas = $('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, 1, 0.01, 200);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 2.2;
+controls.maxPolarAngle = Math.PI * 0.55;
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8f86, 1.6));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.position.set(3, 6, 4);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.radius = 6;
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 0.6);
+fill.position.set(-4, 2, -3);
+scene.add(fill);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(1, 64), new THREE.ShadowMaterial({ opacity: 0.18 }));
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const draco = new DRACOLoader().setDecoderPath('./vendor/addons/libs/draco/gltf/');
+const loader = new GLTFLoader().setDRACOLoader(draco);
+const cache = new Map();
+const load = (file) => {
+  if (!cache.has(file)) cache.set(file, loader.loadAsync('./models/' + file).then((g) => {
+    g.scene.traverse((o) => { if (o.isMesh) { o.castShadow = true; } });
+    return g.scene;
+  }));
+  return cache.get(file);
+};
+
+const ready = (s) => s.ready !== false;
+let line = data.lines.find((l) => l.stages.some(ready)) || data.lines[0];
+let stage = Math.max(0, line.stages.findIndex(ready)); // index, or 'all'
+const holder = new THREE.Group();
+scene.add(holder);
+
+function button(label, pressed, onClick, disabled = false) {
+  const b = document.createElement('button');
+  b.textContent = label;
+  b.setAttribute('aria-pressed', String(pressed));
+  b.disabled = disabled;
+  if (disabled) b.title = 'Kommt noch';
+  b.addEventListener('click', onClick);
+  return b;
+}
+function renderNav() {
+  $('lines').replaceChildren(...data.lines.map((l) => button(l.name, l === line, () => {
+    line = l; stage = Math.max(0, l.stages.findIndex(ready)); renderNav(); show();
+  }, !l.stages.some(ready))));
+  const done = line.stages.filter(ready).length;
+  $('stages').replaceChildren(
+    ...line.stages.map((s, i) => button(ready(s) ? s.name : s.name + ' · bald', stage === i, () => { stage = i; renderNav(); show(); }, !ready(s))),
+    button(done === line.stages.length ? 'Alle drei' : 'Alle', stage === 'all', () => { stage = 'all'; renderNav(); show(); }, done < 2),
+  );
+}
+
+function frame(object) {
+  const box = new THREE.Box3().setFromObject(object);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const radius = Math.max(size.x, size.y, size.z) * 0.75 + 0.05;
+  const dist = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.aspect < 1 ? 1.35 : 1);
+  controls.target.copy(center);
+  camera.position.copy(center).add(new THREE.Vector3(0.35, 0.25, 1).normalize().multiplyScalar(dist));
+  camera.near = dist / 100; camera.far = dist * 20; camera.updateProjectionMatrix();
+  ground.scale.setScalar(Math.max(size.x, size.z) * 1.6 + 0.3);
+  sun.shadow.camera.left = sun.shadow.camera.bottom = -radius * 2;
+  sun.shadow.camera.right = sun.shadow.camera.top = radius * 2;
+  sun.shadow.camera.updateProjectionMatrix();
+  controls.minDistance = dist * 0.3; controls.maxDistance = dist * 3;
+  controls.update();
+}
+
+let token = 0;
+async function show() {
+  const my = ++token;
+  $('msg').textContent = 'Lädt …';
+  $('msg').hidden = false;
+  try {
+    const stages = stage === 'all' ? line.stages.filter(ready) : [line.stages[stage]];
+    const objects = await Promise.all(stages.map((s) => load(s.file)));
+    if (my !== token) return;
+    holder.clear();
+    let x = 0;
+    objects.forEach((o, i) => {
+      const box = new THREE.Box3().setFromObject(o);
+      const width = box.max.x - box.min.x;
+      if (i > 0) x += width / 2 + 0.25;
+      o.position.x = stage === 'all' ? x : 0;
+      holder.add(o);
+      x += width / 2;
+    });
+    if (stage === 'all') holder.children.forEach((o) => { o.position.x -= x / 2; });
+    frame(holder);
+    $('name').textContent = stage === 'all' ? line.name + ' – Linie' : stages[0].name;
+    $('meta').textContent = stage === 'all'
+      ? stages.map((s) => `${s.name} ${s.height}`).join(' · ')
+      : [stages[0].height, stages[0].note].filter(Boolean).join(' · ');
+    $('msg').hidden = true;
+  } catch (error) {
+    if (my !== token) return;
+    $('msg').textContent = 'Modell konnte nicht geladen werden: ' + (error?.message || error);
+  }
+}
+
+$('spin').addEventListener('click', () => {
+  controls.autoRotate = !controls.autoRotate;
+  $('spin').setAttribute('aria-pressed', String(controls.autoRotate));
+});
+$('reset').addEventListener('click', () => frame(holder));
+controls.addEventListener('start', () => { controls.autoRotate = false; $('spin').setAttribute('aria-pressed', 'false'); });
+
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', () => { resize(); if (holder.children.length) frame(holder); });
+resize();
+renderNav();
+show();
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
