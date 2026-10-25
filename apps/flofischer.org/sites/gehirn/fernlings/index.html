@@ -128,8 +128,11 @@ function frame(object) {
   const box = new THREE.Box3().setFromObject(object);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
-  const radius = Math.max(size.x, size.y, size.z) * 0.75 + 0.05;
-  const dist = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.aspect < 1 ? 1.35 : 1);
+  // Fit the bounding sphere into both the vertical and the (narrower, in portrait) horizontal field of view.
+  const radius = size.length() / 2 + 0.02;
+  const vHalf = THREE.MathUtils.degToRad(camera.fov / 2);
+  const hHalf = Math.atan(Math.tan(vHalf) * camera.aspect);
+  const dist = radius / Math.sin(Math.min(vHalf, hHalf)) * 1.02;
   controls.target.copy(center);
   camera.position.copy(center).add(new THREE.Vector3(0.35, 0.25, 1).normalize().multiplyScalar(dist));
   camera.near = dist / 100; camera.far = dist * 20; camera.updateProjectionMatrix();
