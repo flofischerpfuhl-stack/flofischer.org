@@ -44,6 +44,7 @@ body[data-fw-cat="games"] { overflow: hidden; }
 }
 .gm-hud[hidden] { display: none; }
 .gm-hud > * { pointer-events: auto; }
+.gm-hud__status { display: flex; flex: 1 1 auto; min-width: 0; align-items: center; gap: var(--space-2); }
 .gm-hud__btn.fw-iconbtn {
   flex: none; width: var(--hit-min); height: var(--hit-min);
   border-radius: var(--radius-pill);
@@ -71,6 +72,23 @@ body[data-fw-cat="games"] { overflow: hidden; }
 }
 .gm-hud__label { font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: .04em; opacity: .75; }
 .gm-hud__score .fw-num { font-size: var(--text-md); font-weight: var(--weight-semibold); line-height: 1.2; }
+
+/* Keep every action on one row; the status card combines level, bar and score on phones. */
+@media (max-width: 479px) {
+  .gm-hud { gap: var(--space-1); padding: var(--space-1); }
+  .gm-hud__status {
+    flex: 1 1 0; flex-direction: column; align-items: stretch; justify-content: center; gap: 0;
+    min-height: var(--hit-min); padding: 2px var(--space-1); border-radius: var(--radius-sm);
+    background: rgba(9, 9, 11, .5); color: #fff;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .gm-hud__mid { flex: none; margin: 0; padding: 0; gap: 2px; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .gm-hud__level { font-size: var(--text-2xs); line-height: var(--lh-2xs); }
+  .gm-hud__bar { height: 4px; }
+  .gm-hud__score { flex: none; min-width: 0; flex-direction: row; justify-content: space-between; gap: var(--space-1); padding: 0; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .gm-hud__label { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .gm-hud__score .fw-num { font-size: var(--text-xs); line-height: var(--lh-xs); }
+}
 
 .gm-hint {
   position: absolute; left: 50%; top: calc(var(--hit-min) + var(--space-5)); z-index: 2;

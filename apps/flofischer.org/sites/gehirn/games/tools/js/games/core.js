@@ -194,13 +194,16 @@ export function mountGame(root, game) {
       <canvas class="gm-canvas" aria-label="${game.title} playfield" role="img"></canvas>
       <div class="gm-hud" hidden>
         <button type="button" class="fw-iconbtn gm-hud__btn" data-act="pause" aria-label="Pause" data-tip="Pause (Esc)">${icon('pause', { size: 20 })}</button>
+        <button type="button" class="fw-iconbtn gm-hud__btn" data-act="restart" aria-label="Restart level" title="Restart level (R)" data-tip="Restart level (R)">${icon('rotate-ccw', { size: 20 })}</button>
         <button type="button" class="fw-iconbtn gm-hud__btn" data-act="help" aria-label="How to play" data-tip="How to play (H)">${icon('circle-help', { size: 20 })}</button>
         <button type="button" class="fw-iconbtn gm-hud__btn" data-act="puzzle-hint" aria-label="Owlberts Rätselhinweis" title="Owlberts Rätselhinweis" hidden>?</button>
+        <div class="gm-hud__status">
         <div class="gm-hud__mid">
           <div class="gm-hud__level" data-ref="level"></div>
           <div class="gm-hud__bar"><span data-ref="bar"></span></div>
         </div>
         <div class="gm-hud__score"><span class="gm-hud__label" data-ref="label"></span><span class="fw-num" data-ref="score">0</span></div>
+        </div>
         <button type="button" class="fw-iconbtn gm-hud__btn" data-act="fullscreen" aria-label="Full screen" data-tip="Full screen (F)">${icon('maximize', { size: 20 })}</button>
       </div>
       <button type="button" class="fw-iconbtn gm-hud__btn gm-fs" data-act="fullscreen" aria-label="Full screen" data-tip="Full screen (F)">${icon('maximize', { size: 20 })}</button>
@@ -260,7 +263,7 @@ export function mountGame(root, game) {
           <p class="gm-result__reason" data-ref="reason"></p>
           <dl class="gm-result__score"><div><dt>Score</dt><dd class="fw-num" data-ref="rscore"></dd></div><div><dt>Best</dt><dd class="fw-num" data-ref="rbest"></dd></div><div data-ref="rcoinsbox" hidden><dt>Coins</dt><dd class="fw-num" data-ref="rcoins"></dd></div></dl>
           <button type="button" class="fw-btn fw-btn--primary fw-btn--lg" data-act="next">Next level${icon('arrow-right', { size: 18 })}</button>
-          <button type="button" class="fw-btn" data-act="retry">${icon('rotate-ccw', { size: 16 })}Try again</button>
+          <button type="button" class="fw-btn" data-act="retry">${icon('rotate-ccw', { size: 16 })}Restart level</button>
           <button type="button" class="fw-btn fw-btn--ghost" data-act="menu">${icon('layout-grid', { size: 16 })}All levels</button>
         </div>
       </section>
@@ -556,6 +559,7 @@ export function mountGame(root, game) {
     currentLoad = { level:i, started:performance.now(), bytes:new Map(), millisecondsByPhase:{}, events:[] };
     loadHistory.push(currentLoad);if(loadHistory.length>12)loadHistory.shift();
     sound.unlock();
+    session?.cancelInput?.();
     level = i; settlementTime = 0; acc = 0;
     if (!retry) runStarter = selectedStarter;
     session = game.create(i, { sound, preview: false, starter: runStarter, hint: requestTip });
@@ -789,7 +793,8 @@ export function mountGame(root, game) {
     if (act === 'play') startLevel(nextOpenLevel());
     else if (act === 'pause') pause();
     else if (act === 'resume') resume();
-    else if (act === 'restart' || act === 'retry' || act === 'load-retry') startLevel(level, { retry: true });
+    else if (act === 'restart') { if (screen === 'play' || screen === 'pause') startLevel(level, { retry: true }); }
+    else if (act === 'retry' || act === 'load-retry') startLevel(level, { retry: true });
     else if (act === 'next') startLevel(Math.min(level + 1, game.levels.length - 1));
     else if (act === 'menu') toMenu();
     else if (act === 'sound') { sound.toggle(); syncSoundButton(); }
