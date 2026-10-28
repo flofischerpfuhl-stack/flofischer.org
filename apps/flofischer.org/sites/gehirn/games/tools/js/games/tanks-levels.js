@@ -62,7 +62,7 @@ export const LEVELS = [
     '....................',
     '.........P..........',
     '....................',
-  ], { hint: 'Aim with the mouse, click or Space to fire. Move with WASD' }),
+  ], { hint: 'Move into cover, aim at a rival toy and fire' }),
   level(0, 'Two Rookies', [
     '....................',
     '..r.............r...',
@@ -118,7 +118,7 @@ export const LEVELS = [
     '....................',
     '.........P..........',
     '....................',
-  ], { hint: 'Right-click or E lays a mine. Back off and shoot it: the blast breaks crates' }),
+  ], { hint: 'Lay a mine, move clear and fire at it to break crates' }),
   level(0, 'Cross Fire', [
     'r........r.........r',
     '....................',

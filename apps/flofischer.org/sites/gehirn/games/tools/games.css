@@ -83,6 +83,7 @@ body[data-fw-cat="games"] { overflow: hidden; }
   animation: gm-hint 3.2s var(--ease-out) both;
 }
 .gm-hint[hidden] { display: none; }
+.gm-game[data-game="momo"] .gm-hint { top: auto; bottom: var(--space-16); }
 @keyframes gm-hint {
   0% { opacity: 0; transform: translate(-50%, 8px); }
   10%, 85% { opacity: 1; transform: translate(-50%, 0); }

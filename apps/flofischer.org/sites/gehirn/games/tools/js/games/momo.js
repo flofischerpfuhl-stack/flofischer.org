@@ -1243,7 +1243,7 @@ export class MomoSession {
       const b = this.banner, age = b.dur - this.bannerT;
       g.globalAlpha = Math.min(1, this.bannerT * 2, age * 6);
       const sc = age < 0.15 ? 0.7 + age * 2 : 1;
-      label(g, b.text, w / 2, h * 0.3, Math.round(Math.min(40, w / 14) * sc), b.color, 'rgba(0,0,0,.6)', 900);
+      label(g, b.text, w / 2, Math.max(160, h * 0.3), Math.round(Math.min(40, w / 14) * sc), b.color, 'rgba(0,0,0,.6)', 900);
       g.globalAlpha = 1;
     }
     if (this.choice) this.drawCards(g, view);
