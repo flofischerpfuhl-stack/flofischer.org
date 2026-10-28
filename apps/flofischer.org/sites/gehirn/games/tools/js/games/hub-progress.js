@@ -4,7 +4,7 @@ export const UPGRADES = [
   { key: 'rangers-squad', title: 'Verstärkung', description: 'Ein zusätzlicher Legionär zu Beginn eines Rangers-Kampagnenlevels pro Stufe.', cost: 120, max: 3 },
   { key: 'rangers-rate', title: 'Sporenzelle', description: '5 % höhere Feuerrate pro Stufe in der Rangers-Kampagne.', cost: 160, max: 3 },
   { key: 'pip-hint', title: 'Owlberts Notizbuch', description: 'Ein optionaler Lösungshinweis pro Versuch in Pips Turm.', cost: 100, max: 1 },
-  { key: 'momo-card', title: 'Keepstone-Übung', description: 'Wähle zu Beginn eines Laufs in Hexennacht eine zusätzliche Karte deiner Natur.', cost: 180, max: 1 },
+  { key: 'momo-card', title: 'Keepstone-Übung', description: 'Wähle zu Beginn eines Laufs in Fernling-Arena eine zusätzliche Karte deiner Natur.', cost: 180, max: 1 },
 ];
 export function purchaseUpgrade(key) {
   const item = UPGRADES.find(x => x.key === key), level = upgradeLevel(key), p = profile();

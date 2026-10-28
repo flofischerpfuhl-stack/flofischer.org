@@ -84,6 +84,13 @@ body[data-fw-cat="games"] { overflow: hidden; }
 }
 .gm-hint[hidden] { display: none; }
 .gm-game[data-game="momo"] .gm-hint { top: auto; bottom: var(--space-16); }
+/* Bounce instructions finish at GO. Upright phones use the free band above the thumb controls during the opening. */
+@media (max-width: 479px) and (orientation: portrait) {
+  .gm-game[data-game="tanks"] .gm-hint {
+    top: auto; bottom: calc(env(safe-area-inset-bottom) + 136px);
+    left: 14px; max-width: calc(100% - 120px); transform: none; animation: none;
+  }
+}
 @keyframes gm-hint {
   0% { opacity: 0; transform: translate(-50%, 8px); }
   10%, 85% { opacity: 1; transform: translate(-50%, 0); }
@@ -188,7 +195,15 @@ body[data-fw-cat="games"] { overflow: hidden; }
   font: inherit; font-weight: 650;
 }
 .gm-starter-picker span { color: var(--text-3); font-size:var(--text-2xs); line-height: 1.35; }
-.gm-loading { background: var(--bg); }
+.gm-menu.has-ow > .gm-starter-picker { display: none; }
+/* Shared loading stays docked over the last completed scene. */
+.gm-loading { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; place-items: end center; z-index: 5; }
+.gm-loading .gm-card { width: min(420px, 100%); padding: var(--space-4); gap: var(--space-2); }
+.gm-loading .gm-title { font-size: var(--text-lg); }
+.gm-loading p { margin: 0; }
+.gm-loading small { color: var(--text-3); }
+.gm-loading__progress { width: 100%; height: 10px; accent-color: var(--accent); }
+.gm-loading__progress[hidden] { display: none; }
 .gm-ow__loading {
   position: absolute; inset: 0; z-index: 3; display: flex; align-items: center;
   justify-content: center; flex-direction: column; gap: 12px;
@@ -196,7 +211,7 @@ body[data-fw-cat="games"] { overflow: hidden; }
 }
 .gm-ow__loading[hidden] { display: none; }
 
-/* ───────────── Overworld: islands under the menu, world title, stars, level card ───────────── */
+/* ───────────── Overworld: native travel scenes, passive title and accessible controls ───────────── */
 .gm-ow { position: absolute; inset: 0; overflow: hidden; }
 .gm-ow__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: pointer; }
 .gm-ow__top {
@@ -433,37 +448,103 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
 }
 
 /* Fernhaven canteen; all scene interactions also have ordinary keyboard buttons. */
-.fw-canteen__heading {position:absolute;left:24px;top:20px;pointer-events:none;color:#233c32;text-shadow:0 1px 10px #e3eadd}
-.fw-canteen__heading span {font-size:var(--text-2xs);letter-spacing:.18em;font-weight:800}
-.fw-canteen__heading h1 {font:700 clamp(var(--text-xl),3vw,var(--text-2xl))/1.1 system-ui;margin:4px 0}
-.fw-canteen__heading p {margin:0;font-size:var(--text-xs)}
-.fw-canteen__services {position:absolute;right:20px;top:20px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:60%}
-.fw-canteen button {border:1px solid #b5c1b4;background:#fffaf0;color:#28382e;padding:10px 13px;border-radius:8px;font:600 var(--text-sm) system-ui;cursor:pointer;min-height:42px}
-.fw-canteen button:hover {background:#e7efdc}
-.fw-canteen button:focus-visible {outline:3px solid #b47b29;outline-offset:3px}
+/* Fernhaven: camera stations, labels and artwork belong to the room. */
+.fw-canteen__heading {position:absolute;left:24px;top:20px;pointer-events:none;color:var(--text-1);padding:9px 13px;border-radius:12px;background:var(--surface-overlay)}
+.fw-canteen__heading span {font-size:var(--text-2xs);letter-spacing:.18em;font-weight:800;color:var(--text-3)}
+.fw-canteen__heading h1 {font-size:clamp(var(--text-xl),3vw,var(--text-2xl));line-height:1.1;margin:4px 0}
+.fw-canteen__heading p {margin:0;font-size:var(--text-xs);color:var(--text-2)}
+.fw-canteen__services {position:absolute;right:20px;top:20px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:55%;z-index:2}
+.fw-canteen button {border:1px solid var(--border-strong);background:var(--surface-overlay);color:var(--text-1);padding:10px 13px;border-radius:8px;font:600 var(--text-sm) var(--font-ui);cursor:pointer;min-height:44px}
+.fw-canteen button:hover {background:var(--surface-hover)}
+.fw-canteen button:focus-visible {outline:3px solid var(--accent-fill);outline-offset:3px}
 .fw-canteen button:disabled {opacity:.5;cursor:default}
-.fw-canteen__game {position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:min(480px,calc(100% - 32px));box-sizing:border-box;background:#fffcf2f5;color:#293b31;border:1px solid #d0cdbb;border-radius:16px;padding:15px 18px;box-shadow:0 6px 25px #172c3026}
-.fw-canteen__game p {margin:5px 0;font:500 var(--text-sm)/1.4 system-ui}
-.fw-canteen__gamehead {display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:center}
-.fw-canteen__gamehead p {font-size:var(--text-2xs);letter-spacing:.06em;color:#66725b}
-.fw-canteen__game h2 {font:750 var(--text-xl)/1.15 system-ui;margin:0}
-.fw-canteen__gamehead button {font-size:var(--text-xl);padding:0 13px}
-.fw-canteen__game .fw-canteen__blurb {font-size:var(--text-xs);color:#52604e}
-.fw-canteen__progress {font-size:var(--text-2xs);color:#6c7157;margin:8px 0}
-.fw-canteen .fw-canteen__play {width:100%;background:#315c46;color:#fff;border-color:#315c46}
-.fw-canteen__loading {position:absolute;inset:0;display:grid;place-items:center;background:#d5dfd6;z-index:5;color:#283b30}
-.fw-canteen__loading[hidden] {display:none}
-.fw-canteen__dialog {position:fixed;width:min(490px,calc(100vw - 36px));max-height:85dvh;overflow:auto;box-sizing:border-box;border:1px solid #b8bba7;border-radius:16px;background:#fffcf3;color:#293b31;padding:24px;box-shadow:0 10px 60px #10251b55}
-.fw-canteen__dialog::backdrop {background:#15261d88}
-.fw-canteen__dialog h2 {font:700 var(--text-xl) system-ui;margin:0 36px 12px 0}
-.fw-canteen__dialog p {font:400 var(--text-sm)/1.5 system-ui}
-.fw-canteen__dialog article {border-top:1px solid #d4d7c5;padding:10px 0}
-.fw-canteen__dialog h3 {font:650 var(--text-md) system-ui;margin:5px 0}
-.fw-canteen__dialog h3 small {float:right;color:#718067}
+.fw-canteen__places {position:absolute;inset:0;pointer-events:none}
+.fw-canteen__places button {position:absolute;transform:translate(-50%,-100%);pointer-events:auto;display:grid;gap:2px;box-shadow:var(--shadow-2);white-space:nowrap}
+.fw-canteen__places button:after {content:'';position:absolute;bottom:-7px;left:calc(50% - 6px);border:6px solid transparent;border-top-color:var(--surface-overlay);border-bottom:0}
+.fw-canteen__places span {font-size:var(--text-2xs);font-weight:450;color:var(--text-2)}
+.fw-canteen__game {position:absolute;bottom:24px;right:24px;width:315px;max-width:38%;box-sizing:border-box;background:var(--surface-overlay);color:var(--text-1);border:1px solid var(--border-subtle);border-radius:16px;padding:18px;box-shadow:var(--shadow-3)}
+.fw-canteen__game p {margin:8px 0;font-size:var(--text-sm);line-height:1.4}
+.fw-canteen__gamehead p {font-size:var(--text-2xs);letter-spacing:.06em;color:var(--text-3)}
+.fw-canteen__game h2 {font-size:var(--text-xl);line-height:1.15;margin:0}
+.fw-canteen__game .fw-canteen__blurb {font-size:var(--text-xs);color:var(--text-2)}
+.fw-canteen__progress {font-size:var(--text-2xs);color:var(--text-3);margin:12px 0}
+.fw-canteen .fw-canteen__play {width:100%;background:var(--accent-fill);color:var(--accent-on);border-color:var(--accent)}
+.fw-canteen__games {display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
+.fw-canteen__games button {min-width:0;padding:3px;overflow:hidden;min-height:44px;opacity:.65;border-width:2px}
+.fw-canteen__games button[aria-pressed=true] {border-color:var(--accent-fill);opacity:1}
+.fw-canteen__games img {width:100%;height:auto;display:block;border-radius:3px}
+.fw-canteen__games span {display:none}
+.fw-canteen__loading {position:absolute;inset:0;display:grid;place-items:center;background:var(--bg);z-index:5;color:var(--text-1)}
+.fw-canteen [hidden] {display:none!important}
+.fw-canteen__dialog {position:absolute;left:auto;right:24px;top:95px;bottom:24px;width:min(350px,42%);height:fit-content;max-height:calc(100% - 120px);margin:0;overflow:auto;box-sizing:border-box;border:1px solid var(--border-subtle);border-radius:16px;background:var(--surface-overlay);color:var(--text-1);padding:20px;box-shadow:var(--shadow-3);z-index:4}
+.fw-canteen__dialog h2 {font-size:var(--text-xl);margin:0 30px 12px 0}
+.fw-canteen__dialog p {font-size:var(--text-sm);line-height:1.5}
+.fw-canteen__dialog article {border-top:1px solid var(--border-subtle);padding:10px 0}
+.fw-canteen__dialog h3 {font-size:var(--text-md);margin:5px 0}
+.fw-canteen__dialog h3 small {float:right;color:var(--text-3)}
 .fw-canteen .fw-canteen__close {position:absolute;top:10px;right:10px;border:none;font-size:var(--text-xl);padding:0 12px}
-.fw-canteen__dialog textarea {display:block;width:100%;box-sizing:border-box;margin:12px 0;font-size:var(--text-xs)}
-.fw-canteen__dialog.is-atelier {position:absolute;left:auto;right:18px;top:110px;bottom:auto;width:285px;max-height:65%;margin:0;z-index:4}
+.fw-canteen__dialog textarea {display:block;width:100%;box-sizing:border-box;margin:12px 0;font-size:var(--text-xs);background:var(--surface-1);color:var(--text-1);border:1px solid var(--border-strong)}
 .fw-canteen__forms {display:flex;flex-wrap:wrap;gap:6px}
-.fw-canteen__forms button[aria-pressed=true] {background:#315c46;color:white}
+.fw-canteen__forms button[aria-pressed=true] {background:var(--accent-fill);color:var(--accent-on)}
 .fw-canteen .gm-hub__canvas {touch-action:none}
-@media(max-width:639px){.fw-canteen__heading{left:16px;top:14px}.fw-canteen__heading p{display:none}.fw-canteen__services{right:12px;top:14px;max-width:55%;gap:4px}.fw-canteen__services button{font-size:var(--text-2xs);padding:6px;min-height:34px}.fw-canteen__game{bottom:12px;padding:10px 12px}.fw-canteen__game .fw-canteen__blurb{display:none}.fw-canteen__dialog.is-atelier{top:auto;bottom:12px;left:12px;right:12px;width:auto;max-height:30%}.fw-canteen__dialog.is-atelier h2{font-size:var(--text-lg)}.fw-canteen__dialog.is-atelier p{margin:5px 0}.fw-canteen__dialog.is-atelier .fw-canteen__forms button{min-height:30px;padding:5px 9px}}
+.fw-canteen.is-overview .fw-canteen__game {display:none}
+@media(max-width:639px){
+ .fw-canteen__heading{left:12px;top:12px;padding:7px 10px}.fw-canteen__heading p{display:none}.fw-canteen__heading h1{font-size:var(--text-lg)}
+ .fw-canteen__services{right:12px;top:12px;max-width:54%;gap:4px}.fw-canteen__services button{font-size:var(--text-2xs);padding:6px 8px;min-height:44px}
+ .fw-canteen__game{bottom:12px;right:12px;left:12px;width:auto;max-width:none;padding:12px 14px}.fw-canteen__game .fw-canteen__blurb{display:none}.fw-canteen__game p{margin:4px 0}.fw-canteen__game h2{font-size:var(--text-lg)}
+ .fw-canteen__games{position:absolute;left:14px;right:14px;top:-52px;margin:0;display:flex;justify-content:center}.fw-canteen__games button{width:60px;background:var(--surface-1);box-shadow:var(--shadow-2)}.fw-canteen__games img{height:36px;width:54px;object-fit:cover}
+ .fw-canteen__dialog{top:auto;bottom:12px;left:12px;right:12px;width:auto;max-height:39%;padding:14px}.fw-canteen__dialog h2{font-size:var(--text-lg)}.fw-canteen__dialog p{margin:5px 0}
+}
+@media(max-height:480px) and (min-width:640px){.fw-canteen__heading p,.fw-canteen__blurb{display:none}.fw-canteen__game{bottom:12px;padding:12px}.fw-canteen__games{margin-top:8px}.fw-canteen__dialog{top:72px;bottom:12px;max-height:calc(100% - 84px)}}
+
+/* Hub DOM is an assistive alternative. Ordinary pointer navigation is entirely raycasted in the room. */
+.fw-canteen .sr-only,.fw-canteen__dialog.is-fallback {position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;border:0!important}
+/* Expedition chapter navigation stays present as the authored region changes. */
+.gm-ow__world,.gm-ow__stars {background:var(--surface-overlay);color:var(--text-1);border:1px solid var(--border-subtle);box-shadow:var(--shadow-1)}
+.gm-ow__journey {position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:center;gap:3px;max-width:calc(100% - 28px);padding:6px;background:var(--surface-overlay);border:1px solid var(--border-subtle);border-radius:var(--radius-md);box-shadow:var(--shadow-2);z-index:2}
+.gm-ow__journey:before {content:'';position:absolute;left:25px;right:25px;top:27px;height:2px;background:var(--border-strong);z-index:-1}
+.gm-ow__journey button {display:flex;align-items:center;gap:7px;min-height:44px;padding:5px 12px;border:1px solid transparent;border-radius:var(--radius-sm);font:600 var(--text-xs) var(--font-ui);color:var(--text-2);background:var(--surface-overlay);cursor:pointer;white-space:nowrap}
+.gm-ow__journey button[aria-current=step] {background:var(--accent-subtle-bg);border-color:var(--accent-border);color:var(--text-1)}
+.gm-ow__journey button:hover {background:var(--surface-hover)}
+.gm-ow__journey small {display:block;font-size:var(--text-2xs);font-weight:400;color:var(--text-3);margin-top:2px}
+.gm-ow__regionmark {width:24px;height:24px;display:grid;place-items:center;background:var(--region);color:#263a35;border-radius:50%;font-size:var(--text-xs)}
+.gm-ow__context {position:absolute;left:20px;top:70px;margin:0;color:var(--text-1);background:var(--surface-overlay);padding:6px 10px;border-radius:var(--radius-sm);font-size:var(--text-xs);box-shadow:var(--shadow-1)}
+.gm-ow__tools {position:absolute;right:20px;bottom:100px;display:flex;gap:6px;z-index:2}
+.gm-ow__card {left:auto;right:20px;bottom:148px;transform:none;width:270px}
+.gm-ow__loading {inset:auto auto 92px 50%;transform:translateX(-50%);padding:12px 20px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);box-shadow:var(--shadow-2);background:var(--surface-overlay);flex-direction:row;white-space:nowrap;font-size:var(--text-sm)}
+.gm-ow.is-travelling .gm-ow__canvas {filter:saturate(.75);transition:filter .3s}
+.gm-ow__list {position:absolute;right:20px;bottom:145px;z-index:4;max-height:55%;width:min(350px,calc(100% - 40px));box-sizing:border-box;overflow:auto;list-style:none;padding:8px;margin:0;background:var(--surface-overlay);border:1px solid var(--border-subtle);border-radius:var(--radius-md);box-shadow:var(--shadow-3)}
+.gm-ow__list[hidden] {display:none}
+.gm-ow__list button {display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:9px;border:0;border-radius:var(--radius-sm);background:transparent;color:var(--text-1);font:500 var(--text-sm) var(--font-ui);text-align:left;cursor:pointer}
+.gm-ow__list button[aria-current=step] {background:var(--accent-subtle-bg)}
+.gm-ow__list button:disabled {color:var(--text-3);cursor:default}
+.gm-ow__list span {font-size:var(--text-xs);white-space:nowrap}
+.gm-ow button:focus-visible {outline:2px solid var(--accent-fill);outline-offset:2px}
+@media(max-width:639px){
+ .gm-ow__journey{bottom:10px;width:calc(100% - 20px);justify-content:space-between;gap:0;padding:4px;box-sizing:border-box}.gm-ow__journey button{padding:4px 6px;flex-direction:column;gap:3px;font-size:var(--text-2xs);min-width:0;flex:1}.gm-ow__journey small{display:none}.gm-ow__regionmark{width:22px;height:22px}
+ .gm-ow__card{left:12px;right:12px;bottom:128px;width:auto;padding:10px 12px;gap:3px 10px;grid-template-columns:1fr auto}.gm-ow__play{grid-column:2;grid-row:1 / 3;min-height:44px}.gm-ow__cardstars{grid-column:1;grid-row:2}.gm-ow__best{display:none}.gm-ow__cardhead strong{font-size:var(--text-sm)}
+ .gm-ow__tools{bottom:80px;right:12px}.gm-ow__context{top:65px;left:12px;font-size:var(--text-2xs);max-width:calc(100% - 42px)}.gm-ow__list{bottom:128px;left:12px;right:12px;width:auto}.gm-ow__loading{bottom:205px;max-width:calc(100% - 60px);white-space:normal;box-sizing:border-box;width:max-content}
+}
+@media(max-height:480px) and (min-width:640px){.gm-ow__journey{left:12px;right:auto;bottom:10px;transform:none}.gm-ow__journey button{padding:3px 8px}.gm-ow__journey small{display:none}.gm-ow__card{right:12px;bottom:65px;width:235px}.gm-ow__tools{right:12px;bottom:12px}.gm-ow__context{top:58px}}
+
+/* The expedition is operated inside its 3D scene; equivalent controls remain available to assistive tech. */
+.gm-ow__sr {position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}
+.gm-ow__sr:focus-within {width:auto!important;height:auto!important;clip:auto!important;clip-path:none!important;left:12px!important;right:12px!important;top:auto!important;bottom:16px!important;margin:0!important;padding:8px!important;z-index:10}
+.gm-ow__hint {position:absolute;bottom:12px;left:50%;transform:translateX(-50%);margin:0;padding:6px 12px;max-width:calc(100% - 32px);box-sizing:border-box;border-radius:20px;background:var(--surface-overlay);color:var(--text-2);font-size:var(--text-2xs);white-space:nowrap;pointer-events:none}
+.gm-ow__canvas:focus-visible {outline:2px solid var(--accent-fill);outline-offset:-4px}
+.gm-ow__context {pointer-events:none}
+@media(max-width:639px){.gm-ow__hint{font-size:var(--text-2xs);white-space:normal;text-align:center;bottom:8px;width:max-content}}
+
+@media(max-width:639px){.gm-ow__world{max-width:calc(100vw - 185px)}.gm-ow__world .gm-ow__kicker{font-size:var(--text-2xs);line-height:var(--lh-2xs)}.gm-ow__world strong{font-size:var(--text-sm);line-height:var(--lh-sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gm-ow__context{top:66px;max-width:calc(100% - 42px)}}
+
+.gm-ow__stars{white-space:nowrap;flex-shrink:0}.gm-ow__world{min-width:0}
+
+.gm-ow__world .gm-ow__kicker{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+/* Native progress describes the active loading step in the existing hub/map status. */
+.gm-scene-loading__progress {display:block;width:100%;height:9px;accent-color:var(--accent-fill)}
+.gm-scene-loading__progress[hidden] {display:none}
+.gm-scene-loading__body {display:flex;flex-direction:column;gap:10px;width:min(360px,calc(100% - 32px));text-align:center;font:500 var(--text-sm) var(--font-ui)}
+.gm-scene-loading__body small,.gm-ow__loading small {font-size:var(--text-2xs);line-height:1.4;color:var(--text-3)}
+.gm-ow__loading {flex-direction:column;align-items:stretch;gap:6px;white-space:normal;width:min(360px,calc(100% - 60px));box-sizing:border-box;text-align:center}
+.gm-ow__loading .fw-btn {align-self:center}

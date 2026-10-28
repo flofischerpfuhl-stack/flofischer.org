@@ -364,7 +364,7 @@ export function buildTowerScenery({
   add("fw_tools_garden", [-226, -285, 92], 30, [0, -0.5, 0.1]);
   add("fw_shelves_oak", [253, -283, -18], 48, [0, -0.2, 0]);
   add("fw_books_stack", [254, -232, 8], 22);
-  add("fw_petra_raw_fossil", [0, 301, -16], 12, [Math.PI / 2, 0, 0]);
+  add("fw_petra_raw_fossil", [0, 301, -16], 12, [Math.PI / 2, 0, 0], W.rock);
   // Excavated fossils and roots are on the recessed face, behind all fluid/characters.
   for (let i = 0; i < 5; i++) {
     add(
@@ -372,6 +372,7 @@ export function buildTowerScenery({
       [(i % 2 ? 1 : -1) * (79 + random() * 25), 250 - i * 112, -31],
       8 + random() * 3,
       [Math.PI / 2, 0, random() * 0.5],
+      new T.Color(W.rock).multiplyScalar(0.75),
     );
     if (world === 0)
       add(

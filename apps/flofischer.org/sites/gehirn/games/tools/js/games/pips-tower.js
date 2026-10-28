@@ -1,17 +1,17 @@
 /**
- * Pip’s Tower — a pull-the-pin physics puzzle game in four worlds. Golden pins hold back Fernstones, water, lava, sand,
+ * Pip’s Tower — a pull-the-pin physics puzzle game in four worlds. Golden pins hold back Groschen, water, lava, sand,
  * goo, gas, boulders and bombs; blue flaps swing back and forth on every tap; pressure plates open (or shut) the doors of
- * their colour while enough weight rests on them. Pull, flip and weigh in the right order so the Fernstones reach Pip and
+ * their colour while enough weight rests on them. Pull, flip and weigh in the right order so the Groschen reach Pip and
  * nothing deadly does.
  *
- *   World 1 Viridis  Fernstones, water, lava (water turns it into stone), wax Klonks (burn in lava),
+ *   World 1 Viridis  Groschen, water, lava (water turns it into stone), wax Klonks (burn in lava),
  *                              flaps (route what falls on them; reusable, so the order and the timing matter)
  *   World 2 Sahrun      sand (granular; it smothers a whole lava pool), boulders, bombs, wooden walls, Klonkbots (lava-proof,
  *                              short out in water), pressure plates and doors (anything heavy presses: water, sand, a
  *                              boulder, an enemy standing guard; lift the weight and the door switches back)
  *   World 3 Hibern          ice (lava melts it to water, bombs shatter it), keys that open the gate they fall on,
- *                              Pip walks to Fernstones on his floor when the way is clear (and weighs on plates)
- *   World 4 Vulkara        hex slime (eats Fernstones, water dissolves it, lava burns it), teleport pads,
+ *                              Pip walks to Groschen on his floor when the way is clear (and weighs on plates)
+ *   World 4 Vulkara        hex slime (eats Groschen, water dissolves it, lava burns it), teleport pads,
  *                              rising gas (deadly to Pip, escapes upwards, burns off on lava), Buzzbots (fly, short out)
  *   Bosses                     one per world, each must take hazards in a fixed order (lava, crush, water, bomb) and
  *                              tests that world's mechanic
@@ -177,7 +177,7 @@ export class PipsTowerSession {
   }
 
   get score() { return this.collected * 10 + this.enemies.reduce((n, e) => n + (e.dead ? (e.type === 'chief' ? 500 : 100) : 0), 0); }
-  hud() { return { progress: Math.min(1, this.collected / this.need), score: this.score, label: 'Score' }; }
+  hud() { return { progress: Math.min(1, this.collected / this.need), score: this.collected, label: `Goldziel ${this.need}` }; }
 
   get puzzleHintAvailable() {
     return !this.preview && !this.result && !this.hero.dead && !this.puzzleHintUsed && upgradeLevel('pip-hint') > 0;
@@ -565,7 +565,7 @@ export class PipsTowerSession {
         return true;
       }
       case 'gemgoo': {
-        // goo eats Fernstones and grows (each blob once in a while)
+        // goo eats Groschen and grows (each blob once in a while)
         const goo = of('goo'), gem = of('gem');
         if (this.t < goo.cool) return false;
         gem.t = 'goo'; gem.cool = this.t + 0.5; goo.cool = this.t + 0.5; this.eaten++;
@@ -854,7 +854,7 @@ export class PipsTowerSession {
     this.collected++;
     this.coins.push({ x: p.x, y: p.y, life: 0.45, max: 0.45 });
     this.sound.play('coin', 45);
-    if (this.collected === this.need) { this.hero.mood = 'happy'; this.popups.push({ text: 'ENOUGH FERNSTONES!', x: clamp(this.hero.x, 130, 230), y: this.hero.y - 70, life: 1.2, max: 1.2, color: '#5eead4', big: true }); }
+    if (this.collected === this.need) this.hero.mood = 'happy';
   }
 
   failNow(reason) {
@@ -881,13 +881,13 @@ export class PipsTowerSession {
     return this.clearLine(e.x, e.y - 14, h.x, h.y - 14);
   }
 
-  /** Walking levels: Pip heads for the nearest Fernstone on his floor while the way there is clear and safe. */
+  /** Walking levels: Pip heads for the nearest Groschen on his floor while the way there is clear and safe. */
   planWalk() {
     const h = this.hero;
     h.walk = 0;
     if (h.dead || this.pending?.lose || this.result || Math.abs(h.vy) > 60) return;
     let best = null, bestD = Infinity;
-    // a Fernstone with a boulder resting on it stays where it is: Pip does not dig under a boulder
+    // a Groschen with a boulder resting on it stays where it is: Pip does not dig under a boulder
     const under = (p) => this.rocks.some((r) => r.alive && r.kind === 'boulder' && Math.abs(r.x - p.x) < r.r + 10 && r.y < p.y && r.y > p.y - 90);
     for (const p of this.parts) {
       if (p.dead || p.t !== 'gem' || p.y < h.y - 34 || p.y > h.y + 16 || under(p)) continue;
@@ -923,17 +923,17 @@ export class PipsTowerSession {
         if (Math.abs(e.x - hero.x) < reach && Math.abs(ey - hero.y) < (e.type === 'chief' ? 60 : 30)) { this.kill(hero, e.type); break; }
       }
     }
-    // Fernstones that land in Pip's room fly to him
+    // Groschen that land in Pip's room fly to him
     if (!hero.dead && this.zone) {
       const [zx0, zy0, zx1, zy1] = this.zone;
       for (const p of this.parts) {
-        // landed (or slow) Fernstones only: one falling through the room into lava is not saved yet
+        // landed (or slow) Groschen only: one falling through the room into lava is not saved yet
         if (!p.dead && p.t === 'gem' && p.x > zx0 && p.x < zx1 && p.y > zy0 && p.y < zy1 && p.vx * p.vx + p.vy * p.vy < 160 * 160) this.collect(p);
       }
     }
     for (const pt of this.portals) pt.pulse = Math.max(0, pt.pulse - dt * 2);
     if (this.pending) {
-      // a won level waits while Pip still walks to the Fernstones left on his floor
+      // a won level waits while Pip still walks to the Groschen left on his floor
       if (this.pending.lose || !hero.walk) this.pending.t -= dt;
       if (this.pending.t <= 0) {
         if (this.pending.lose) this.result = { won: false, stars: 0, score: this.score, reason: this.pending.reason };
@@ -944,7 +944,7 @@ export class PipsTowerSession {
     const enemiesLeft = this.enemies.filter((e) => !e.dead).length;
     const gemsLeft = this.parts.reduce((n, p) => n + (!p.dead && p.t === 'gem' ? 1 : 0), 0);
     if (this.collected + gemsLeft < this.need) {
-      this.failNow(this.eaten > this.melted ? 'The hex slime consumed the Fernstones.' : this.melted ? 'The lava melted the Fernstones.' : 'Too many Fernstones were lost.');
+      this.failNow(this.eaten > this.melted ? 'The hex slime consumed the Groschen.' : this.melted ? 'The lava melted the Groschen.' : 'Too many Groschen were lost.');
       return;
     }
     if (this.collected >= this.need && enemiesLeft === 0) {
@@ -957,7 +957,7 @@ export class PipsTowerSession {
     const allOut = this.controls.every((c) => c.state === 'out' || (c.kind === 'flap' && c.state === 'in' && !this.loaded(c.plat)));
     this.idle = allOut ? this.idle + dt : 0;
     if (allOut && (this.calm > 1.2 || this.idle > 10)) {
-      this.failNow(enemiesLeft ? (this.chief && !this.chief.dead ? 'The hex golem is still active.' : 'An automaton is still active.') : `Only ${this.collected} of ${this.need} Fernstones reached Pip.`);
+      this.failNow(enemiesLeft ? (this.chief && !this.chief.dead ? 'The hex golem is still active.' : 'An automaton is still active.') : `Only ${this.collected} of ${this.need} Groschen reached Pip.`);
     }
   }
 
@@ -980,7 +980,7 @@ export class PipsTowerSession {
     const [two, three] = this.L.stars;
     const stars = frac >= three ? 3 : frac >= two ? 2 : 1;
     this.hero.mood = 'happy';
-    this.result = { won: true, stars, score: this.score, reason: `${this.collected} of ${this.totalGems} Fernstones saved (${Math.round(two * 100)} % for ★★, ${Math.round(three * 100)} % for ★★★).` };
+    this.result = { won: true, stars, score: this.score, reason: `${this.collected} of ${this.totalGems} Groschen saved (${Math.round(two * 100)} % for ★★, ${Math.round(three * 100)} % for ★★★).` };
     this.sound.play('good');
     this.burst(this.hero.x, this.hero.y - 60, ['#f43f5e', '#facc15', '#22c55e', '#3b82f6', '#a855f7'], 50, 260);
   }
@@ -1068,12 +1068,17 @@ export class PipsTowerSession {
     if (this.shake > 0) g.translate((Math.random() - 0.5) * 12 * this.shake * amp, (Math.random() - 0.5) * 12 * this.shake * amp);
     g.translate(ox, oy); g.scale(s, s);
     this.drawTower(g, view, pal);
-    const COL = { water: ['#3b82f6', '#60a5fa'], lava: ['#ea580c', '#fbbf24'], stone: ['#57534e', '#78716c'], sand: ['#d6a35c', '#f0c987'], goo: ['#7e22ce', '#c084fc'], gas: ['rgba(163,230,53,.35)', 'rgba(217,249,157,.45)'], gem: ['#0f766e', '#5eead4'] };
+    const COL = { water: ['#3b82f6', '#60a5fa'], lava: ['#ea580c', '#fbbf24'], stone: ['#57534e', '#78716c'], sand: ['#d6a35c', '#f0c987'], goo: ['#7e22ce', '#c084fc'], gas: ['rgba(163,230,53,.35)', 'rgba(217,249,157,.45)'], gem: ['#ca8a04', '#fef08a'] };
     for (const p of this.parts) {
       if (p.dead) continue;
       const c = COL[p.t];
       g.fillStyle = c[0]; g.beginPath(); g.arc(p.x, p.y, PR * (p.t === 'gas' ? 1.9 : p.t === 'gem' ? 1.1 : 1.4), 0, 6.283); g.fill();
       g.fillStyle = c[1]; g.beginPath(); g.arc(p.x - 1, p.y - 1, PR * 0.8, 0, 6.283); g.fill();
+      if (p.t === 'gem') {
+        g.strokeStyle = '#a16207'; g.lineWidth = 0.8;
+        g.beginPath(); g.arc(p.x, p.y, PR * 0.68, 0, 6.283); g.stroke();
+        g.beginPath(); g.moveTo(p.x, p.y - 2); g.lineTo(p.x, p.y + 2); g.stroke();
+      }
     }
     for (const pt of this.portals) {
       const [x0, y0, x1, y1] = pt.from;
@@ -1088,7 +1093,7 @@ export class PipsTowerSession {
     for (const c of this.coins) {
       const q = 1 - c.life / c.max;
       const x = c.x + (this.hero.x - c.x) * q, y = c.y + (this.hero.y - 40 - c.y) * q - Math.sin(q * Math.PI) * 30;
-      g.fillStyle = '#5eead4'; g.beginPath(); g.arc(x, y, PR * (1.2 - q * 0.5), 0, 6.283); g.fill();
+      g.fillStyle = '#facc15'; g.beginPath(); g.arc(x, y, PR * (1.2 - q * 0.5), 0, 6.283); g.fill();
     }
     for (const f of this.fx) {
       if (f.ring) {
@@ -1248,8 +1253,8 @@ const PALETTE2D = [
 export const pipsTower = {
   id: 'pips-tower',
   title: 'Pip’s Tower',
-  tagline: 'Explore the fossil vaults with Pip and Biscuit. Recover Fernstones for the museum and outwit Granny Grausel’s automatons.',
-  howTo: 'Tap or click a pin to pull it; a hinged platform swings back and forth on every tap (with a keyboard, keys 1–9 use the numbered ones). Water turns lava into stone, lava melts Fernstones and burns wax Klonks, Klonkbots short out in water, weight on a coloured plate switches the doors of its colour. Esc pauses, R restarts.',
+  tagline: 'Explore the fossil vaults with Pip and Biscuit. Recover lost gold Groschen and outwit Granny Grausel’s automatons.',
+  howTo: 'Tap or click a pin to pull it; a hinged platform swings back and forth on every tap (with a keyboard, keys 1–9 use the numbered ones). Water turns lava into stone, lava melts Groschen and burns wax Klonks, Klonkbots short out in water, weight on a coloured plate switches the doors of its colour. Esc pauses, R restarts.',
   hero: 'PIP_KESSEL',
   companion: 'BISCUIT_GLEAMPUP',
   levels: LEVELS,

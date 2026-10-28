@@ -16,12 +16,12 @@
  *   plates: [{ at: [x0, x1, y] on the floor at y, need: weight (10), door / doors: [[x1, y1, x2, y2], …] that open while
  *          the plate is pressed, shut: [[…]] doors that close while it is pressed }] — a door slides into the wall at its
  *          first point. A particle weighs 1, a boulder 14, a bomb 8, Pip and the walking enemies 12–16, the boss 40.
- *   fill:  [material, x0, y0, x1, y1] rectangles packed with gem (Fernstones), water, lava, sand, goo or gas
+ *   fill:  [material, x0, y0, x1, y1] rectangles packed with gem (Groschen), water, lava, sand, goo or gas
  *   ice:   [x0, y0, x1, y1] blocks (lava melts them into water, bombs shatter them)
  *   boulders / bombs / keys: [x, y]   enemies: [x, y, 'zorbling' | 'klonkbot' | 'buzzbot']
  *   portals: [{ from: [x0, y0, x1, y1] pad, to: [x, y] exit }]   chief: { at: [x, y], weak: ['lava', 'crush', …] }
- *   hero: Pip's start; walk: Pip walks to Fernstones on his floor; zone: Pip's room — Fernstones landing there are his
- *   need:  share of the Fernstones Pip needs; stars: [share for ★★, share for ★★★]
+ *   hero: Pip's start; walk: Pip walks to Groschen on his floor; zone: Pip's room — Groschen landing there are his
+ *   need:  share of the Groschen Pip needs; stars: [share for ★★, share for ★★★]
  *   lesson: the level teaches one new element (it may be solved by the first sensible pull; all others may not)
  *   solution: [[control, seconds to wait after pulling it], …] — test/unit/games/levels.test.mjs replays it and checks
  *   that the listed traps (`fails`, wrong orders or wrong pins) really fail.
@@ -30,10 +30,10 @@ const OUTER = [[40, 40, 40, 600], [320, 40, 320, 600], [40, 600, 320, 600]];
 const level = (o) => ({ need: 0.5, stars: [0.6, 0.85], ...o, walls: [...OUTER, ...(o.walls || [])] });
 const world = (w, list) => list.map((o, i) => level({ ...o, world: w, boss: i === list.length - 1 }));
 
-// ─────────────── World 1 · Viridis: Fernstones, water, lava → stone, wax Klonks ───────────────
+// ─────────────── World 1 · Viridis: Groschen, water, lava → stone, wax Klonks ───────────────
 const MEADOWS = [
   {
-    name: 'First Pull', lesson: true, hint: 'Tap the pin under the Fernstones',
+    name: 'First Pull', lesson: true, hint: 'Tap the pin under the Groschen',
     walls: [[200, 330, 200, 600], [182, 262, 286, 300]],
     pins: [[176, 250, 8, 250], [176, 250, 176, 132]],
     fill: [['gem', 52, 160, 170, 244]],
@@ -41,7 +41,7 @@ const MEADOWS = [
     solution: [[0, 4]], fails: [[1, 3, 0]],
   },
   {
-    name: 'Choose Wisely', lesson: true, hint: 'Lava melts Fernstones',
+    name: 'Choose Wisely', lesson: true, hint: 'Lava melts Groschen',
     walls: [[180, 60, 180, 262]],
     pins: [[180, 268, 10, 268], [180, 268, 350, 268]],
     fill: [['gem', 56, 160, 172, 260], ['lava', 188, 180, 306, 260]],
@@ -265,7 +265,7 @@ const FROST = [
     solution: [[0, 5]], fails: [[1, 0]],
   },
   {
-    name: 'Stroll', lesson: true, walk: true, hint: 'Pip walks to the Fernstones when the way is clear',
+    name: 'Stroll', lesson: true, walk: true, hint: 'Pip walks to the Groschen when the way is clear',
     walls: [[150, 60, 150, 200], [230, 60, 230, 200]],
     pins: [[128, 600, 128, 440], [150, 206, 230, 206]],
     fill: [['gem', 52, 520, 122, 594], ['lava', 156, 120, 224, 200]],
@@ -372,7 +372,7 @@ const FROST = [
 // ─────────────── World 4 · Vulkara: hex slime, teleport pads, rising gas, Buzzbots ───────────────
 const EMBER = [
   {
-    name: 'Hex Slime', lesson: true, hint: 'Hex slime consumes Fernstones. Water dissolves it',
+    name: 'Hex Slime', lesson: true, hint: 'Hex slime consumes Groschen. Water dissolves it',
     walls: [[180, 60, 180, 214]],
     pins: [[180, 220, 10, 220], [180, 220, 350, 220], [40, 400, 340, 400]],
     fill: [['water', 52, 120, 172, 212], ['gem', 188, 130, 306, 212], ['goo', 52, 370, 308, 394]],

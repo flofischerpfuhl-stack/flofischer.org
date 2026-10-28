@@ -1,8 +1,8 @@
 /** Bounce Brigade: authored remote-controlled toys on a Concordia tournament tabletop. */
 import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, LOW_GPU } from './three-kit.js';
 import { RoundedBoxGeometry } from '../../vendor/three-0.170.0/RoundedBoxGeometry.js';
-import { BounceArt, ToyInstances } from './tanks-art.js';
-import { TabletopWorld } from './tanks-tabletop.js';
+import { BounceArt, ToyInstances, requiredToys } from './tanks-art.js';
+import { TabletopWorld, TABLETOP_FOLIAGE } from './tanks-tabletop.js';
 import { SMAAPass } from '../../vendor/three-0.170.0/postprocessing/SMAAPass.js';
 import * as Profile from './profile.js';
 import { W, H, T } from './tanks-levels.js';
@@ -117,6 +117,7 @@ export class Tanks3D {
     this.time = 0;
     this.build();
     this.prepared=null;this.disposed=false;this.prepareEpoch=0;
+    this.art=new BounceArt();this.tabletops=new Map();this.preparing=Promise.resolve();
     const v = new THREE.Vector3(), out = { x: 0, y: 0, s: 1 };
     this._proj = (x, y, h = 0) => {
       v.set(x - W / 2, h, y - H / 2).project(this.camera);
@@ -222,16 +223,33 @@ export class Tanks3D {
     this.teamMarks = new Decals(s, 1, 'float r = length(vUv - .5) * 2.0; gl_FragColor = vec4(vC, vA * smoothstep(.72,.78,r) * (1.0-smoothstep(.9,.97,r)));');
   }
 
-  async prepare(session) {
-    await this.postAA?.lookupReady;
+  prefetch(session,{signal}={}) {
+    const ids=[...requiredToys(session),'RUBBER_SHELL','TOURNAMENT_MINE','TIMBER_BREAK_WALL',...TABLETOP_FOLIAGE[session.L.world]];
+    return this.art.library.prefetch([...ids.map(id=>({id,lod:'lo'})),{id:'MINER_HUMAN',lod:'far'}],{signal});
+  }
+
+  prepare(session,options={}) {
     const epoch=++this.prepareEpoch;
-    const art=new BounceArt();let tabletop;
+    const job=this.preparing.then(()=>this.prepareLevel(session,options,epoch));
+    this.preparing=job.catch(()=>undefined);return job;
+  }
+
+  async prepareLevel(session,{onProgress,signal}={},epoch) {
+    const check=()=>{signal?.throwIfAborted();if(this.disposed||epoch!==this.prepareEpoch)throw new DOMException('Bounce preparation superseded','AbortError');};
+    check();await this.postAA?.lookupReady;check();
+    const art=this.art;let tabletop,newTable=false;
     try {
-      await art.prepare(session);
-      const [shell,mine,crate]=await Promise.all(['RUBBER_SHELL','TOURNAMENT_MINE','FERNSTONE_CACHE'].map(id=>art.library.template(id,'lo')));
-      tabletop=await TabletopWorld.create(art.library,session.L.world,this.env);
-      if(this.disposed||epoch!==this.prepareEpoch)throw new Error('Bounce preparation superseded');
-      this.clearAssets();this.art=art;this.tabletop=tabletop;this.scene.add(tabletop.root);
+      await art.prepare(session,{onProgress,signal});check();
+      const [shell,mine,crate]=await Promise.all(['RUBBER_SHELL','TOURNAMENT_MINE','TIMBER_BREAK_WALL'].map(id=>art.library.template(id,'lo')));
+      onProgress?.({phase:'prepare',stage:'Turniertisch vorbereiten …',done:false});
+      tabletop=this.tabletops.get(session.L.world);
+      if(!tabletop){tabletop=await TabletopWorld.create(art.library,session.L.world,this.env);newTable=true;}
+      check();this.clearAssets();art.clearActors();
+      if(newTable)this.tabletops.set(session.L.world,tabletop);
+      // Only the current and most recently visited regional table retain GPU scenery.
+      this.tabletops.delete(session.L.world);this.tabletops.set(session.L.world,tabletop);
+      while(this.tabletops.size>2){const [key,old]=this.tabletops.entries().next().value;this.tabletops.delete(key);old.dispose();}
+      this.tabletop=tabletop;this.scene.add(tabletop.root);
       this.shellBatch=new ToyInstances(shell,this.scene,96);this.mineBatch=new ToyInstances(mine,this.scene,32);this.crateBatch=new ToyInstances(crate,this.scene,W*H);
       this.session=this.prepared=session;this.rev=-1;this.themeKey=null;
       const ringKey=Profile.profile().cosmetics?.equipped?.['tournament-ring']||'fern';
@@ -250,15 +268,16 @@ export class Tanks3D {
       for(const tk of session.tanks){const actor=art.actor(tk,this.scene);applyIbl(actor.root,this.env,.7);actor.pose(tk,session);}
       applyIbl(this.scene,this.env,.65);
       this.setTheme(session,false);this.layout(session);this.rev=session.rev;
-    } catch(error) {if(this.art!==art){tabletop?.dispose();art.dispose();}else this.clearAssets();throw error;}
+      onProgress?.({phase:'prepare',stage:'Turniertisch bereit',done:true});
+    } catch(error) {if(newTable&&this.tabletop!==tabletop)tabletop?.dispose();throw error;}
   }
 
   clearAssets(){
     if(this.session){delete this.session.visualMuzzle;delete this.session.visualMine;}
-    this.tabletop?.dispose();this.tabletop=null;
+    this.tabletop?.root.removeFromParent();this.tabletop=null;
     this.shellBatch?.dispose();this.mineBatch?.dispose();this.crateBatch?.dispose();
     this.shellBatch=this.mineBatch=this.crateBatch=null;
-    this.art?.dispose();this.art=null;this.prepared=null;
+    this.prepared=null;
   }
 
   setTheme(sess, dark) {
@@ -303,7 +322,7 @@ export class Tanks3D {
       const t = sess.grid[y * W + x], cx = x - W / 2 + 0.5, cz = y - H / 2 + 0.5;
       if (t === T.WALL) wall(x, y);
       else if (t === T.CRATE) {
-        m.compose(p.set(cx, 0, cz), q.setFromAxisAngle(v3.set(0, 1, 0), (rand() - 0.5) * 0.12), sc.setScalar(.56));
+        m.compose(p.set(cx, 0, cz), q.setFromAxisAngle(v3.set(0, 1, 0), (rand() - 0.5) * 0.12), sc.set(.64,.43,3.7));
         this.crateBatch.add(m); rand();
       } else if (t === T.ICE) { m.compose(p.set(cx, 0.004, cz), q.identity(), sc.set(1, 1, 1)); this.ice.setMatrixAt(ni++, m); }
       else if (t === T.PIT) {
@@ -514,7 +533,7 @@ export class Tanks3D {
     this.smoke.end(); this.sparks.end(); this.flames.end();
   }
   dispose(){
-    if(this.disposed)return;this.disposed=true;this.prepareEpoch++;this.clearAssets();
+    if(this.disposed)return;this.disposed=true;this.prepareEpoch++;this.clearAssets();this.art.dispose();for(const table of this.tabletops.values())table.dispose();this.tabletops.clear();
     const geos=new Set(),mats=new Set(),textures=new Set();
     this.scene.traverse(o=>{if(o.geometry)geos.add(o.geometry);if(o.isInstancedMesh)o.dispose();for(const m of o.material?(Array.isArray(o.material)?o.material:[o.material]):[]){mats.add(m);if(m.map&&m.map!==this.ground.material.map&&m.map!==this.walls.material.map)textures.add(m.map);}});
     for(const g of Object.values(this.geo))if(g?.isBufferGeometry)geos.add(g);

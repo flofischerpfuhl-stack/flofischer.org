@@ -2,6 +2,7 @@
  * boss/escape capsules retain a scene graph for live authored socket queries. */
 import { THREE as T, TextPlane, applyIbl } from './three-kit.js';
 import { gateGood, gateText, laserOn, laserWarn, geyserState } from './fern-rangers.js';
+import { RANGER_SCALE } from './fern-rangers-formation.js';
 import { PICKUP_ASSET, transform, ownMaterials } from './fern-rangers-art.js';
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 export function propClips(template) {
@@ -19,7 +20,8 @@ export function propClips(template) {
 }
 export class RangerProps {
     constructor(scene, art, env) { this.scene = scene; this.art = art; this.env = env; this.batches = new Map(); this.labels = []; this.labelIndex = 0; this.v = new T.Vector3(); this.q = new T.Quaternion(); this.scale = new T.Vector3(); this.m = new T.Matrix4(); this.temp = new T.Matrix4(); this.fx = []; this.lastTurret = false; this.hazard = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshBasicMaterial({ transparent: true, opacity: .65, depthWrite: false }), 96); this.hazard.instanceMatrix.setUsage(T.DynamicDrawUsage); this.hazard.frustumCulled = false; this.scene.add(this.hazard); this.hazardCount = 0; this.color = new T.Color(); }
-    async prepare(s) {
+    async prepare(s,{onProgress,signal}={}) {
+        const check=()=>signal?.throwIfAborted();check();
         const ids = new Set(['LANDING_POD', 'ESCAPE_POD', 'FERNSTONE_GRENADE']);
         for (const e of s.ents) {
             const id = this.id(e);
@@ -32,26 +34,31 @@ export class RangerProps {
         if (s.ents.some(e => e.kind === 'pickup' && e.type === 'turret'))
             ids.add('TURRET_DROP');
         for (const id of ids) {
+            check();if(this.batches.has(id))continue;onProgress?.({phase:'prepare',stage:'Feldausrüstung vorbereiten …',id,done:false});
             const t = await this.art.template(id, 'lo');
             this.batches.set(id, await this.art.batch(id, 100, 'lo', propClips(t)));
         }
         if (s.ents.some(e => e.kind === 'cage'))
             for (const id of ['MINER_HUMAN', 'MINER_HALFGROWN', 'MINER_DWARF'])
                 await this.art.batch(id, 16, 'lo');
+        if(s.ents.some(e=>e.kind==='fork'))await this.art.channel('fw_wall_stone_straight',320);
+        if(!this.escapePod){
         const escape = await this.art.library.create('ESCAPE_POD', 'lo');
         escape.materials = ownMaterials(escape.scene);
         this.scene.add(escape.scene);
         escape.scene.visible = false;
         applyIbl(escape.scene, this.env, .55);
         this.escapePod = escape;
-        if (ids.has('TURRET_DROP'))
+        }
+        if (ids.has('TURRET_DROP')&&!this.turretActor)
             this.turretActor = await this.art.actor('TURRET_DROP', 'lo');
-        for (let i = 0; i < 40; i++) {
+        for (let i = this.labels.length; i < 40; i++) {
             const p = new TextPlane(2.2, .46, 256);
             p.mesh.visible = false;
             this.scene.add(p.mesh);
             this.labels.push(p);
         }
+        if(!this.fx.length){
         const glow = new T.MeshBasicMaterial({ color: 0x7ee7ff, transparent: true, opacity: .5, depthWrite: false, blending: T.AdditiveBlending });
         for (let i = 0; i < 12; i++) {
             const o = new T.Mesh(new T.CylinderGeometry(.3, .6, 3, 12, 1, true), glow);
@@ -59,8 +66,10 @@ export class RangerProps {
             this.scene.add(o);
             this.fx.push(o);
         }
+        }check();this.reset();
     }
-    id(e) { return e.kind === 'gate' ? (e.op === 'rate' ? 'FIRE_RATE_CELL_GATE' : gateGood(e) ? 'LANDING_GATE_FRAME' : 'JAMMER_GATE_FRAME') : e.kind === 'pickup' ? PICKUP_ASSET[e.type] : ({ barrel: 'FUEL_BARREL', crate: 'FERNSTONE_WEAPON_CASE', cage: 'MINER_CAGE', block: 'ROAD_BLOCK', laser: 'LASER_FENCE_PYLON', fork: 'ROAD_DIVIDER', geyser: 'LAVA_GEYSER_RIM' })[e.kind]; }
+    reset(){this.begin();this.lastTurret=false;this.escapeFor=null;this.escapeStart=null;this.turretAt=undefined;this.hazard.count=0;}
+    id(e) { return e.kind === 'gate' ? (e.op === 'rate' ? 'FIRE_RATE_CELL_GATE' : gateGood(e) ? 'LANDING_GATE_FRAME' : 'JAMMER_GATE_FRAME') : e.kind === 'pickup' ? PICKUP_ASSET[e.type] : ({ barrel: 'FUEL_BARREL', crate: 'FERNSTONE_WEAPON_CASE', cage: 'MINER_CAGE', block: 'ROAD_BLOCK', laser: 'LASER_FENCE_PYLON', fork: null, geyser: 'LAVA_GEYSER_RIM' })[e.kind]; }
     begin() { this.labelIndex = 0; this.hazardCount = 0; for (const p of this.labels)
         p.mesh.visible = false; for (const f of this.fx)
         f.visible = false; if (this.escapePod)
@@ -78,11 +87,11 @@ export class RangerProps {
             if (!e.alive)
                 return;
             const width = e.x1 - e.x0, scale = width / (e.op === 'rate' ? 3.2 : 4.4);
-            this.put(id, x, 0, -z, { width: scale, height: 1.15 });
-            this.text(gateText(e), x, e.op === 'rate' ? 2.79 : 3.49, -z + .46, width * .8, gateGood(e) ? '#f5fcff' : '#ffc4b8');
+            this.put(id, x, 0, -z, { width: scale, height: .78 });
+            // Large, camera-projected decision text is drawn by session.drawLabels.
         }
         else if (e.kind === 'cage') {
-            this.put(id, x, 0, -z, { clip: e.alive ? 'Rest' : 'Open', time: age });
+            this.put(id,x,0,-z,{size:RANGER_SCALE,clip:e.alive?'Rest':'Open',time:age});
             for (let i = 0; i < 3; i++) {
                 const name = ['MINER_HUMAN', 'MINER_HALFGROWN', 'MINER_DWARF'][i];
                 const elapsed=Math.max(0,age-.72), out=!e.alive&&age>.72;
@@ -94,7 +103,7 @@ export class RangerProps {
                 const clip=crouched?'Duck_Crouch':!out?'Idle':cheering?'Rescue_Cheer':'Walk';
                 const time=crouched?(out?elapsed*4:s.t):!out?s.t:cheering?elapsed-2.2:elapsed/[.924,.588,.168][i];
                 const floor=.305*(1-clamp((distance-crouchExit)/.35));
-                this.art.batches.get(name+':lo').add(transform(x+(i-1)*.65,floor,-z+Math.min(2.5,distance),0),clip,time,{loop:!cheering});
+                this.art.batches.get(name+':lo').add(transform(x+(i-1)*.65*RANGER_SCALE,floor*RANGER_SCALE,-z+Math.min(2.5,distance)*RANGER_SCALE,0,RANGER_SCALE),clip,time,{loop:!cheering});
             }
         }
         else if (e.kind === 'crate') {
@@ -105,8 +114,7 @@ export class RangerProps {
             this.put(id, x, 0, -z, { size: width / 2.01 });
         }
         else if (e.kind === 'fork') {
-            for (let d = 0; d < e.len; d += 2)
-                this.put(id, x, 0, -z - d, { yaw: Math.PI / 2 });
+            for(let d=0;d<e.len;d+=.65)this.art.channels.get('fw_wall_stone_straight').add(x,0,-z-d,Math.PI/2,.25);
         }
         else if (e.kind === 'laser') {
             this.put(id, e.x0, 0, -z);
@@ -147,10 +155,10 @@ export class RangerProps {
                 const x = e.x >= 0 ? -4.8 : 4.8, y = age < .55 ? (1 - age / .55) ** 2 * 5 : age > 3 ? (age - 3) ** 2 * 6 : 0;
                 // Human doorway contract requires uniform 3.97x pod. It lands beside the
                 // road and opens only on the ground; personnel exit after .72 seconds.
-                this.put('LANDING_POD', x, y, z, { size: 3.97, clip: age > .55 ? 'Open' : 'Rest', time: age - .55 });
+                this.put('LANDING_POD', x, y*RANGER_SCALE, z, { size: 3.97*RANGER_SCALE, clip: age > .55 ? 'Open' : 'Rest', time: age - .55 });
                 if (age > 1.27 && age < 3) {
                     const exit = clamp((age - 1.27) / .65), walk = clamp((age - 1.92) / .85);
-                    this.art.troop(2, x + Math.sign(-x) * walk * 2.3, z + (0.51 + exit * .4) * 3.97, s.t, { y: .215 * 3.97 * (1 - clamp((exit - .65) / .35)), yaw: walk ? Math.sign(-x) * Math.PI / 2 : 0 });
+                    this.art.troop(2, x + Math.sign(-x) * walk * 2.3*RANGER_SCALE, z + (0.51 + exit * .4) * 3.97*RANGER_SCALE, s.t, { size:RANGER_SCALE,y: .215 * 3.97*RANGER_SCALE * (1 - clamp((exit - .65) / .35)), yaw: walk ? Math.sign(-x) * Math.PI / 2 : 0 });
                 }
             }
         }

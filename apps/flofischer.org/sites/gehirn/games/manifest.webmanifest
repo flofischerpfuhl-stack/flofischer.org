@@ -1,7 +1,7 @@
 {
   "name": "Fernworld Games",
   "short_name": "Fernworld",
-  "description": "Vier Abenteuer in Fernworld: Fern Rangers, Pip’s Tower, Hexennacht und Bounce Brigade.",
+  "description": "Vier Abenteuer in Fernworld: Fern Rangers, Pip’s Tower, Fernling-Arena und Bounce Brigade.",
   "id": "./",
   "start_url": "./tools/games.html",
   "scope": "./",
@@ -34,7 +34,7 @@
       "url": "./tools/games.html#pips-tower"
     },
     {
-      "name": "Hexennacht",
+      "name": "Fernling-Arena",
       "url": "./tools/games.html#momo"
     },
     {

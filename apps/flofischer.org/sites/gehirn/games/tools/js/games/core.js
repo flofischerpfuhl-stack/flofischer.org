@@ -22,6 +22,7 @@
  *
  * Tests reach the running game through window.__fwGames[game.id] (state, fast-forward, finish).
  */
+import { formatLoadProgress, loadingCacheStats } from '../../games-assets/fernworld/runtime/loading-cache.js';
 import { icon } from '../../../assets/kit/icons.js';
 import * as Profile from './profile.js';
 import { HELP, TIPS, glyph, introSeen, markIntro, tipSeen, markTip, tipsOn, setTipsOn, tipText } from './games-help.js';
@@ -64,8 +65,9 @@ export function gameProgress(gameId, levels) {
 }
 
 // ─────────────────────────────── sound (synthesised, no files) ───────────────────────────────
+const soundChannels = new Set();
 export class Sound {
-  constructor() { this.on = readJSON('sound', true) !== false; this.ctx = null; this.last = new Map(); }
+  constructor() { this.on = readJSON('sound', true) !== false; this.ctx = null; this.last = new Map(); soundChannels.add(this); }
   unlock() {
     if (!this.on) return;
     if (!this.ctx) {
@@ -80,7 +82,19 @@ export class Sound {
     }
     if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
   }
-  toggle() { this.on = !this.on; writeJSON('sound', this.on); if (this.on) this.unlock(); else this.ctx?.suspend?.().catch(() => {}); return this.on; }
+  toggle() {
+    const enabled = !this.on;
+    writeJSON('sound', enabled);
+    // All four games share the saved preference, including already mounted games.
+    for (const channel of soundChannels) {
+      channel.on = enabled;
+      if (!enabled) channel.ctx?.suspend?.().catch(() => {});
+      channel.onChange?.();
+    }
+    if (enabled) this.unlock();
+    return enabled;
+  }
+  dispose() { soundChannels.delete(this); this.ctx?.close?.().catch(() => {}); }
   tone(freq, dur, { type = 'square', vol = 0.3, to = null, delay = 0 } = {}) {
     const c = this.ctx, t = c.currentTime + delay;
     const o = c.createOscillator(), g = c.createGain();
@@ -198,8 +212,8 @@ export function mountGame(root, game) {
       </div>
       <section class="gm-screen gm-menu" aria-label="${game.title} menu">
         <div class="gm-owhost" hidden></div>
-        ${starters.length ? `<label class="gm-starter-picker">Your Fernling
-          <select data-ref="starter" aria-label="Choose your Fernling">${starters.map(s => `<option value="${s.id}">${s.label}</option>`).join('')}</select>
+        ${starters.length ? `<label class="gm-starter-picker">Dein Fernling
+          <select data-ref="starter" aria-label="Deinen Fernling wählen">${starters.map(s => `<option value="${s.id}">${s.label}</option>`).join('')}</select>
           <span data-ref="starter-description"></span></label>` : ''}
         <div class="gm-card">
           ${game.art ? `<img class="gm-art" src="${game.art}" alt="" decoding="async">` : ''}
@@ -219,10 +233,13 @@ export function mountGame(root, game) {
       </section>
       <section class="gm-screen gm-loading" aria-live="polite" hidden>
         <div class="gm-card gm-card--small">
-          <h2 class="gm-title" data-ref="loading-title">Preparing your adventure</h2>
-          <p data-ref="loading-message">Loading this region and its characters…</p>
-          <button type="button" class="fw-btn fw-btn--primary" data-act="load-retry" hidden>Try again</button>
-          <button type="button" class="fw-btn fw-btn--ghost" data-act="menu">Back to the map</button>
+          <h2 class="gm-title" data-ref="loading-title">Dein Abenteuer wird vorbereitet</h2>
+          <p data-ref="loading-message">Spieldaten laden …</p>
+          <progress class="gm-loading__progress" data-ref="loading-progress" aria-label="Aktueller Ladeschritt"></progress>
+          <small data-ref="loading-detail">Modelle · Bewegungen · Licht</small>
+          <button type="button" class="fw-btn fw-btn--primary" data-act="load-retry" hidden>Erneut versuchen</button>
+          <button type="button" class="fw-btn fw-btn--primary" data-act="load-reload" hidden>Seite neu laden</button>
+          <button type="button" class="fw-btn fw-btn--ghost" data-act="menu">Zur Karte</button>
         </div>
       </section>
       <section class="gm-screen gm-pause" aria-label="Paused" hidden>
@@ -231,6 +248,7 @@ export function mountGame(root, game) {
           <button type="button" class="fw-btn fw-btn--primary fw-btn--lg" data-act="resume">${icon('play', { size: 18 })}Resume</button>
           <button type="button" class="fw-btn" data-act="restart">${icon('rotate-ccw', { size: 16 })}Restart level</button>
           <button type="button" class="fw-btn fw-btn--ghost" data-act="help">${icon('circle-help', { size: 16 })}How to play</button>
+          <button type="button" class="fw-btn fw-btn--ghost" data-act="sound" aria-pressed="true"></button>
           <button type="button" class="fw-btn fw-btn--ghost" data-act="menu">${icon('layout-grid', { size: 16 })}All levels</button>
         </div>
       </section>
@@ -273,6 +291,40 @@ export function mountGame(root, game) {
   // The 3D view (Three.js) loads on first activation; until then, or without WebGL, the 2D renderer draws everything.
   let gl = null, glLoading = null, glScale = 1, slowFrames = 0;
   let levelRequest = 0, preparedSession = null, prepareQueue = Promise.resolve();
+  let loadController = null, prefetchController = null, prefetchTimer = 0, loadingMap = false;
+  const loadHistory = []; let currentLoad = null;
+  function cancelPrefetch() { clearTimeout(prefetchTimer); prefetchController?.abort(); prefetchController = null; }
+  function reportProgress(event, request = levelRequest) {
+    if (request !== levelRequest || screen !== 'loading' || currentLoad?.error) return;
+    ref('loading-message').textContent = formatLoadProgress(event);
+    const bar = ref('loading-progress');
+    if (event.phase === 'download' && event.total > 0 && !event.done) { bar.max = event.total; bar.value = Math.min(event.loaded, event.total); }
+    else bar.removeAttribute('value');
+    if (currentLoad) {
+      if(event.done&&Number.isFinite(event.milliseconds))currentLoad.millisecondsByPhase[event.phase]=(currentLoad.millisecondsByPhase[event.phase]??0)+event.milliseconds;
+      currentLoad.events.push({ at: performance.now() - currentLoad.started, ...event });
+      if (currentLoad.events.length > 256) currentLoad.events.shift();
+      if (event.phase === 'download' && event.url && !event.cacheHit) currentLoad.bytes.set(event.url, event.loaded ?? 0);
+      const count = currentLoad.bytes.size, total = [...currentLoad.bytes.values()].reduce((a,b)=>a+b,0);
+      ref('loading-detail').textContent = count ? `${count} Dateien · ${(total/1048576).toLocaleString('de',{maximumFractionDigits:1})} MB geladen · danach Modelle und Licht` : 'Modelle · Bewegungen · Licht';
+    }
+  }
+  function schedulePrefetch(i) {
+    cancelPrefetch();
+    if (!active || screen !== 'menu' || !progress.open(i)) return;
+    // Selection debounce, never a simulated loading percentage or eager world sweep.
+    prefetchTimer = setTimeout(async () => {
+      const controller = new AbortController(); prefetchController = controller;
+      try {
+        await ow?.ready;
+        if (controller.signal.aborted || !active || screen !== 'menu') return;
+        const renderer = await loadGl();
+        if (controller.signal.aborted || !active || screen !== 'menu' || !renderer?.prefetch) return;
+        const candidate = game.create(i, { sound, preview: true, starter: selectedStarter, hint: () => false });
+        await renderer.prefetch(candidate, { signal: controller.signal });
+      } catch (error) { if (error.name !== 'AbortError') console.warn('[games] selected level prefetch deferred', error); }
+    }, 700);
+  }
   // 3D renders at up to 1.5× (the crisp 2D overlay keeps the full ratio). Only a device that keeps missing frames
   // steps its 3D resolution down (85 %, then 70 %); everything else, shadows included, stays as it is.
   const glDpr = () => Math.min(view.dpr, 1.5) * glScale;
@@ -316,19 +368,24 @@ export function mountGame(root, game) {
     starterSelect.value = selectedStarter;
     ref('starter-description').textContent = starters.find(s => s.id === selectedStarter)?.description ?? '';
   }
-  starterSelect?.addEventListener('change', () => {
-    if (screen !== 'menu' || !starters.some(s => s.id === starterSelect.value)) return;
-    selectedStarter = starterSelect.value;
+  function chooseStarter(id) {
+    if (screen !== 'menu' || !starters.some(s => s.id === id)) return;
+    selectedStarter = id;
     writeJSON(`starter:${game.id}`, selectedStarter);
     preview = null;
     syncStarter();
-  });
+    ow?.refreshHero?.();
+    schedulePrefetch(lastPicked ?? nextOpenLevel());
+  }
+  starterSelect?.addEventListener('change', () => chooseStarter(starterSelect.value));
   syncStarter();
 
   function setScreen(name) {
+    if(screen==='play'&&name!=='play')session?.cancelInput?.();
     screen = name;
     stage.dataset.screen = name;
-    for (const [key, el] of Object.entries(screens)) el.hidden = key !== name;
+    for (const [key, el] of Object.entries(screens)) el.hidden = key !== name && !(key === 'menu' && name === 'loading' && loadingMap);
+    screens.menu.inert = name === 'loading';
     if (ow) { if (name === 'menu' && active) { ow.refresh(); ow.activate(); } else ow.deactivate(); }
     hud.hidden = !(name === 'play' || name === 'pause');
     if (active) document.body.classList.toggle('gm-playing', name === 'play' || name === 'pause');
@@ -358,6 +415,9 @@ export function mountGame(root, game) {
     owLoading = import('./overworld.js').then((m) => {
       ow = m.mountOverworld(host, {
         gameId: game.id, levels: game.levels, hero: game.hero, companion: game.companion, title: game.title,
+        getHero: starters.length ? () => selectedStarter.toUpperCase() : undefined,
+        starters, onStarter: chooseStarter,
+        getSound: () => sound.on, onSound: () => sound.toggle(),
         state: {
           stars: progress.star, best: progress.bestOf, open: progress.open, worldOpen: progress.worldOpen,
           need: (w) => game.worldRequirement?.(w) ?? (w === 4
@@ -365,11 +425,14 @@ export function mountGame(root, game) {
             : `Beat the World ${w} boss and collect ${Profile.STAR_GATES[w]} stars`),
           current: () => lastPicked ?? nextOpenLevel(),
         },
+        onSelect: (i) => schedulePrefetch(i),
+        onProgress: (event) => { if (screen === 'loading') reportProgress(event); },
         onPlay: (i) => { lastPicked = i; sound.unlock(); sound.play('click'); startLevel(i); },
       });
       host.hidden = false;
       screens.menu.classList.add('has-ow');
       if (screen === 'menu' && active) ow.activate();
+      ow.ready?.then(() => schedulePrefetch(ow.selected ?? lastPicked ?? nextOpenLevel()));
       return ow;
     }).catch((err) => {
       console.warn('[games] overworld unavailable, using the level grid', err); ow = null;
@@ -394,10 +457,12 @@ export function mountGame(root, game) {
     syncSoundButton();
   }
   function syncSoundButton() {
-    const b = root.querySelector('[data-act="sound"]');
-    b.innerHTML = `${icon(sound.on ? 'volume-2' : 'volume-x', { size: 16 })}${sound.on ? 'Sound on' : 'Sound off'}`;
-    b.setAttribute('aria-pressed', String(sound.on));
+    for (const b of root.querySelectorAll('[data-act="sound"]')) {
+      b.innerHTML = `${icon(sound.on ? 'volume-2' : 'volume-x', { size: 16 })}${sound.on ? 'Ton an' : 'Ton aus'}`;
+      b.setAttribute('aria-pressed', String(sound.on));
+    }
   }
+  sound.onChange = () => { syncSoundButton(); ow?.syncSound?.(); };
 
   // ── sizing and drawing ──
   function resize() {
@@ -413,6 +478,7 @@ export function mountGame(root, game) {
     if (screen === 'loading') return;
     if (ow && screen === 'menu') { g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, canvas.width, canvas.height); return; }
     const s = session || preview || (preview = game.create(screen === 'menu' ? nextOpenLevel() : level, { sound, preview: true, starter: selectedStarter, hint: () => false }));
+    if (s === session && Number.isFinite(s.levelHintUntil) && s.t >= s.levelHintUntil) ref('hint').hidden = true;
     g.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
     g.clearRect(0, 0, view.w, view.h);
     let t0 = performance.now();
@@ -471,14 +537,24 @@ export function mountGame(root, game) {
     if (raf) cancelAnimationFrame(raf);
     raf = 0;
     setScreen('loading');
-    ref('loading-title').textContent = 'This adventure could not load';
-    ref('loading-message').textContent = 'Please try again. Your saved progress is unchanged.';
-    root.querySelector('[data-act="load-retry"]').hidden = false;
+    ref('loading-title').textContent = 'Das Abenteuer konnte nicht geladen werden';
+    const updated=error?.code==='ASSET_VERSION_MISMATCH';
+    ref('loading-message').textContent = updated ? 'Das Spiel wurde aktualisiert. Lade die Seite neu.' : 'Versuche es erneut. Dein Spielstand bleibt erhalten.';
+    root.querySelector('[data-act="load-reload"]').hidden = !updated;
+    ref('loading-progress').removeAttribute('value');
+    ref('loading-progress').hidden = true;
+    if (currentLoad) currentLoad.error = String(error);
+    root.querySelector('[data-act="load-retry"]').hidden = updated;
   }
 
   async function startLevel(i, { retry = false } = {}) {
     if (!Number.isInteger(i) || i < 0 || i >= game.levels.length) return;
     const request = ++levelRequest;
+    loadingMap = screen === 'menu' || (screen === 'loading' && loadingMap);
+    cancelPrefetch();loadController?.abort();loadController = new AbortController();
+    const signal = loadController.signal;
+    currentLoad = { level:i, started:performance.now(), bytes:new Map(), millisecondsByPhase:{}, events:[] };
+    loadHistory.push(currentLoad);if(loadHistory.length>12)loadHistory.shift();
     sound.unlock();
     level = i; settlementTime = 0; acc = 0;
     if (!retry) runStarter = selectedStarter;
@@ -487,22 +563,26 @@ export function mountGame(root, game) {
     preparedSession = null;
     preview = null;
     playT = 0; tickN = 0; clearTips();
-    ref('loading-title').textContent = 'Preparing your adventure';
-    ref('loading-message').textContent = 'Loading this region and its characters…';
+    ref('loading-title').textContent = 'Dein Abenteuer wird vorbereitet';
+    ref('loading-progress').hidden = false;ref('loading-progress').removeAttribute('value');
+    ref('loading-message').textContent = 'Szene vorbereiten …';
+    ref('loading-detail').textContent = 'Modelle · Bewegungen · Licht';
     root.querySelector('[data-act="load-retry"]').hidden = true;
+    root.querySelector('[data-act="load-reload"]').hidden = true;
     setScreen('loading');
     // A cancelled load cannot overwrite a newer renderer preparation.
     const work = prepareQueue.catch(() => {}).then(async () => {
       if (request !== levelRequest) return;
       const renderer = await loadGl();
       if (request !== levelRequest) return;
-      await renderer?.prepare?.(preparing);
+      await renderer?.prepare?.(preparing, { signal, onProgress: event => reportProgress(event, request) });
       if (request === levelRequest) preparedSession = preparing;
     });
     prepareQueue = work;
     try { await work; } catch (error) { if (request === levelRequest) showLoadError(error); return; }
     if (request !== levelRequest) return;
     startedAt = performance.now();
+    currentLoad.milliseconds = startedAt-currentLoad.started;currentLoad.complete = true;
     const k = progress.keys[i];
     ref('level').textContent = worlds ? `${k.n === 'boss' ? `World ${k.world} boss` : `${k.world}-${k.n}`} · ${game.levels[i].name}` : `${i + 1} · ${game.levels[i].name}`;
     setScreen(active ? 'play' : 'pause');
@@ -550,7 +630,7 @@ export function mountGame(root, game) {
   }
   function pause() { if (screen === 'play') { setScreen('pause'); draw(); } }
   function resume() { if (screen === 'pause') { setScreen('play'); startLoop(); } }
-  function toMenu() { levelRequest++; session = null; preparedSession = null; preview = null; renderMenu(); setScreen('menu'); draw(); }
+  function toMenu() { levelRequest++;loadController?.abort();cancelPrefetch(); session = null; preparedSession = null; preview = null; renderMenu(); setScreen('menu'); draw();schedulePrefetch(lastPicked ?? nextOpenLevel()); }
 
   // ── help: the How to play card ──
   const helpData = HELP[game.id] || null;
@@ -582,6 +662,7 @@ export function mountGame(root, game) {
   }
   function openHelp() {
     if (!helpData || helpOpen) return;
+    session?.cancelInput?.();
     helpReturn = document.activeElement;
     helpOpen = true;
     if (raf) { cancelAnimationFrame(raf); raf = 0; }
@@ -704,6 +785,7 @@ export function mountGame(root, game) {
     if (!act) return;
     sound.unlock();
     if (act !== 'pause') sound.play('click');
+    if (act === 'load-reload') { location.reload(); return; }
     if (act === 'play') startLevel(nextOpenLevel());
     else if (act === 'pause') pause();
     else if (act === 'resume') resume();
@@ -749,6 +831,7 @@ export function mountGame(root, game) {
     if (!/^(Shift|Control|Alt|Meta)/.test(e.key)) { inputMode = 'keys'; view.touch = false; }
     if (e.code === 'KeyH' && screen !== 'result') { openHelp(); e.preventDefault(); return; }
     if (e.code === 'KeyF') { toggleFullscreen(); e.preventDefault(); return; }
+    if (e.code === 'KeyM') { sound.toggle(); ow?.syncSound?.(); e.preventDefault(); return; }
     if (e.key === 'Escape' && stage.classList.contains('is-max') && screen !== 'play') { toggleFullscreen(); e.preventDefault(); return; }
     if (screen === 'menu' && ow && ow.key(e)) { e.preventDefault(); return; }
     if (screen === 'play' && session) {
@@ -775,14 +858,15 @@ export function mountGame(root, game) {
   if (worlds && hasWebGL()) { root.querySelector('.gm-owhost').hidden = false; screens.menu.classList.add('has-ow'); }
 
   const controller = {
-    activate() { if (active) return; active = true; resize(); loadGl().catch(err => console.warn('[games] renderer load deferred to retry', err)); loadOverworld(); if (ow && screen === 'menu') { ow.refresh(); ow.activate(); } if (screen === 'play' || screen === 'result') startLoop(); },
-    deactivate() { pause(); active = false; if (raf) cancelAnimationFrame(raf); raf = 0; ow?.deactivate(); },
+    activate() { if (active) return; active = true; resize(); loadOverworld();if(!worlds)schedulePrefetch(lastPicked ?? nextOpenLevel()); if (ow && screen === 'menu') { ow.refresh(); ow.activate(); } if (screen === 'play' || screen === 'result') startLoop(); },
+    deactivate() { cancelPrefetch();loadController?.abort();if(screen==='loading'){levelRequest++;session=null;preparedSession=null;setScreen('menu');}pause(); active = false; if (raf) cancelAnimationFrame(raf); raf = 0; ow?.deactivate(); },
   };
   // Test hooks (also handy from the console): state, deterministic fast-forward, jump to a result.
   window.__fwGames = window.__fwGames || {};
   window.__fwGames[game.id] = {
     get screen() { return screen; },
     get gl() { return !!gl; },
+    loading: () => ({ cache:loadingCacheStats(), history:loadHistory.map(item=>({...item,bytes:Object.fromEntries(item.bytes)})) }),
     perf: () => ({ ...perf, glScale, shadows: !!gl?.renderer?.shadowMap?.enabled }),
     get level() { return level; },
     get session() { return session; },

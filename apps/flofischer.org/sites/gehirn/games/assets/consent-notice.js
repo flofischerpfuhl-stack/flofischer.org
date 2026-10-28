@@ -106,6 +106,18 @@ function keepBottomBarsClear(banner) {
     timer = 0;
     if (!banner.isConnected) return;
     banner.style.removeProperty('bottom');
+    // Games keep their cancellable loading dock visible on desktop too. The
+    // storage notice must not intercept Back/Retry while a model is loading.
+    const noticeRect = banner.getBoundingClientRect();
+    const docks = [...document.querySelectorAll('.gm-loading:not([hidden]) .gm-card')]
+      .map(el => el.getBoundingClientRect())
+      .filter(r => r.width && r.height && r.left < noticeRect.right && r.right > noticeRect.left
+        && r.bottom > noticeRect.top && r.top < noticeRect.bottom);
+    if (docks.length) {
+      const top = Math.min(...docks.map(r => r.top));
+      banner.style.bottom = `${Math.max(0, Math.min(innerHeight - noticeRect.height - 8, Math.ceil(innerHeight - top + 8)))}px`;
+      return;
+    }
     // Tools that place the notice themselves (Image Tools puts it at the top of the stage) are left alone.
     if (innerWidth > 767 || banner.getBoundingClientRect().top < innerHeight / 2) return;
     const previous = banner.style.visibility;

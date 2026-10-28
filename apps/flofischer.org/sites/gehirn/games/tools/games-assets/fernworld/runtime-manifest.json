@@ -3,10 +3,16 @@
   "status": "runtime-ready; used by the Fernworld game integration",
   "files": [
     {
+      "file": "runtime/loading-cache.js",
+      "source": "scripts/games-blender/fernworld/runtime/loading-cache.js",
+      "bytes": 8193,
+      "sha256": "c07f90a767d95d7956960454ae839a506d5d28cdc0dca84222c97245eeba00aa"
+    },
+    {
       "file": "runtime/asset-library.js",
       "source": "scripts/games-blender/fernworld/runtime/asset-library.js",
-      "bytes": 8561,
-      "sha256": "eb4e4836b09ebe1dc9042615d41f33e539b8ff3053bbbb5cf2f8f3490413ef84"
+      "bytes": 10680,
+      "sha256": "77aa324c4c4857ee7e4a288d9c28b6ecc9aa0e849c3c8228a463ed8f46c18829"
     },
     {
       "file": "runtime/channel-library.js",

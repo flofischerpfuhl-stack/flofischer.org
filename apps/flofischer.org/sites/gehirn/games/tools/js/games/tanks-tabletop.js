@@ -3,7 +3,7 @@ import { THREE as T, mat, applyIbl } from './three-kit.js';
 import { RoundedBoxGeometry } from '../../vendor/three-0.170.0/RoundedBoxGeometry.js';
 import { bakeCrowd, BakedCrowd } from '../../games-assets/fernworld/runtime/baked-crowd.js';
 import { ToyInstances } from './tanks-art.js';
-const foliage=[['ALPINE_FERN','ALPINE_BLOOM'],['SUCCULENT_ROSETTE','DESERT_BLOOM'],['ALPINE_DWARF_PINE','SNOWCAP_SHRUB'],['BASALT_ROOT_SHRUB','EMBER_BLOOM']];
+export const TABLETOP_FOLIAGE=[['ALPINE_FERN','ALPINE_BLOOM'],['SUCCULENT_ROSETTE','DESERT_BLOOM'],['ALPINE_DWARF_PINE','SNOWCAP_SHRUB'],['BASALT_ROOT_SHRUB','EMBER_BLOOM']];
 const colours=[0x55b582,0xe5bc55,0x6ab9dc,0xae89ce];
 const labels=['VIRIDIS · FERNHAVEN CUP','SAHRUN · FOSSIL CLUB','HIBERN · FIRNWATCH CUP','VULKARA · CONCORDIA FINAL'];
 const mx=new T.Matrix4(),p=new T.Vector3(),s=new T.Vector3(),q=new T.Quaternion(),up=new T.Vector3(0,1,0);
@@ -14,7 +14,7 @@ const spectatorPhase=i=>(i*.7639320225)%2;
 const spectatorTime=(i,time)=>time*(.92+(i%5)*.04)+spectatorPhase(i);
 export class TabletopWorld {
   static async create(library,world,env){
-    const [a,b,spectator]=await Promise.all([...foliage[world].map(id=>library.template(id,'lo')),library.template('MINER_HUMAN','far')]);
+    const [a,b,spectator]=await Promise.all([...TABLETOP_FOLIAGE[world].map(id=>library.template(id,'lo')),library.template('MINER_HUMAN','far')]);
     const table=new TabletopWorld(world);
     try{
       for(const [k,template]of [a,b].entries()){

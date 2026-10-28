@@ -1,13 +1,14 @@
 /** Fern Rangers: authored campaign and Sturmbastion assets, bounded motion
  * batches, native sockets and shared WebGL context. Gameplay stays in sessions. */
 import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, TextPlane, projector, LOW_GPU } from './three-kit.js';
+import { RANGER_SCALE, TROOP_PROFILES, warmCampaignFormations, campaignFormation, nearestMuzzle, shotSegment } from './fern-rangers-formation.js';
 import { RangersArt, ENEMY_ASSET, BOSS_ASSET } from './fern-rangers-art.js';
-import { RangerSettlements } from './fern-rangers-scenery.js';
+import { RangerSettlements, RangerRoute } from './fern-rangers-scenery.js';
 import { RangerProps } from './fern-rangers-props.js';
 import { Sturmbastion3D } from './fern-rangers-sturmbastion-3d.js';
 import { tuft, windy } from './world/island.js';
 
-import { RoadLoop } from './world/roadside.js';
+import { RangerPanorama } from './fern-rangers-panorama.js';
 import { ROAD, WEAPONS, BOSSES, LANES_MAX } from './fern-rangers.js';
 
 const FAR = 92;
@@ -15,22 +16,22 @@ const THEMES = {
   meadow: {
     ground: 't-grass', sky: { top: 0x4f9ef0, horizon: 0xe4f3ff }, fog: 0xd2e8fa,
     light: { sun: 0xfff1d6, sky: 0xd6ecff, ground: 0x4f6e2c, intensity: 2.6, ambient: 1.2 }, exposure: 1.05,
-    near: ['woodland_birch_young','woodland_bush_flowering','meadow_fern_arching','fw_granite_moss'], far: ['woodland_oak_old','fw_wall_stone_arch','fw_bridge_wood'], grass: { colour: [0.27, 0.55, 0.32], height: 0.24 },
+    near: ['woodland_birch_young','woodland_bush_flowering','meadow_fern_arching','fw_granite_moss'], far: ['woodland_oak_old','woodland_birch_young'], grass: { colour: [0.27, 0.55, 0.32], height: 0.24 },
   },
   dunes: {
     ground: 't-sand', sky: { top: 0x5f93db, horizon: 0xffe2b0 }, fog: 0xf6dcb4,
     light: { sun: 0xffd29a, sky: 0xffe3c2, ground: 0x9a6b3a, intensity: 2.6, ambient: 1.1 }, exposure: 1.05,
-    near: ['woodland_palm_sahrun','fw_sandstone_bedded','meadow_reed'], far: ['fw_wall_stone_arch','fw_pillar_carved','woodland_palm_sahrun'], grass: { colour: [0.11, 0.42, 0.5], height: 0.18 },
+    near: ['woodland_palm_sahrun','fw_sandstone_bedded','meadow_reed'], far: ['fw_sandstone_bedded','woodland_palm_sahrun'], grass: { colour: [0.11, 0.42, 0.5], height: 0.18 },
   },
   frost: {
     ground: 't-snow', sky: { top: 0x3f78c8, horizon: 0xeaf5ff }, fog: 0xdfecfa,
     light: { sun: 0xffffff, sky: 0xe0f0ff, ground: 0xb0c4d8, intensity: 2.3, ambient: 1.1 }, exposure: 0.95,
-    near: ['woodland_spruce_tiered','fw_snow_wind_drift','fw_ice_crystal_cluster'], far: ['fw_cliff_straight','fw_wall_stone_arch','woodland_spruce_tiered'], grass: null,
+    near: ['woodland_spruce_tiered','fw_snow_wind_drift','fw_ice_crystal_cluster'], far: ['fw_cliff_straight','woodland_spruce_tiered'], grass: null,
   },
   ember: {
     ground: 't-lavarock', sky: { top: 0x2a1b40, horizon: 0xe0704a }, fog: 0x6a3446,
     light: { sun: 0xffb27a, sky: 0xff9a6a, ground: 0x3a1408, intensity: 2.2, ambient: 1.0 }, exposure: 1.05,
-    near: ['fw_basalt_columns','fw_petra_raw_fossil','fw_lava_fissure'], far: ['fw_cliff_corner','fw_wall_stone_arch','fw_basalt_columns'], grass: { colour: [0.06, 0.35, 0.22], height: 0.15 }, ufo: true,
+    near: ['fw_basalt_columns','fw_petra_raw_fossil','fw_lava_fissure'], far: ['fw_cliff_corner','fw_basalt_columns'], grass: { colour: [0.06, 0.35, 0.22], height: 0.15 }, ufo: true,
   },
 };
 
@@ -95,7 +96,7 @@ export class FernRangers3D {
     this.renderer = createRenderer(canvas);
     // Shadows are rendered every second frame: figures move a few centimetres per frame, the lag is invisible.
     this.renderer.shadowMap.autoUpdate = false;
-    this.frame = 0;
+    this.frame = 0;this.preparing=Promise.resolve();this.prepareEpoch=0;this.disposed=false;
     this.campaignScene = new THREE.Scene();
     // Real reflections only where they show (figures, gates, barrels); ground, road and props get the same soft
     // environment light from a gradient (three-kit cheapIbl) instead of two cube-map lookups per pixel.
@@ -112,6 +113,7 @@ export class FernRangers3D {
 
   build() {
     const s = this.scene;
+    this.pano = new RangerPanorama(); s.add(this.pano.mesh);
     this.far = new THREE.Group(); s.add(this.far);
     // Opaque near ground and road (cheap: early depth rejects everything behind them) plus thin transparent strips at
     // the far end that fade into the fog. Texture offsets of strip and main plane are kept continuous.
@@ -124,14 +126,14 @@ export class FernRangers3D {
     this.ground.position.y = -0.02;
     this.groundFar = plane(400, STRIP, 20 - NEAR_LEN, cheap(mat(0xffffff, { roughness: 0.95, transparent: true, depthWrite: false })));
     this.groundFar.material.alphaMap = fade; this.groundFar.position.y = -0.02;
-    const asphalt = texture('t-asphalt', { repeat: [1, NEAR_LEN / 6] });
+    const asphalt = this.routeTexture('meadow',NEAR_LEN);
     this.road = plane(ROAD * 2, NEAR_LEN, 20, cheap(mat(0xffffff, { roughness: 0.85, map: asphalt })));
     const asphaltFar = asphalt.clone(); asphaltFar.repeat.set(1, STRIP / 6);
     this.roadFar = plane(ROAD * 2, STRIP, 20 - NEAR_LEN, cheap(mat(0xffffff, { roughness: 0.85, map: asphaltFar, transparent: true, depthWrite: false })));
     this.roadFar.material.alphaMap = fade;
     this.nearLen = NEAR_LEN; this.strip = STRIP;
     this.emberBanks=[-1,1].map(side=>{const bank=new THREE.Mesh(new THREE.BoxGeometry(17,.24,NEAR_LEN+STRIP),cheap(mat(0x343942,{map:texture('t-lavarock',{repeat:[1.7,(NEAR_LEN+STRIP)/10]}),roughness:.95})));bank.position.set(side*(ROAD+8.5),-.13,20-(NEAR_LEN+STRIP)/2);bank.visible=false;s.add(bank);return bank;});
-    const curbTex = canvasTex(64, 64, (g, w, h) => { g.fillStyle = '#f4f4f5'; g.fillRect(0, 0, w, h); g.fillStyle = '#4c8f3a'; g.fillRect(0, 0, w, h / 2); }, [1, (FAR + 40) / 2]);
+    const curbTex = canvasTex(64,64,(g,w,h)=>{g.fillStyle='#8f8e7c';g.fillRect(0,0,w,h);g.fillStyle='#6c6b5f';g.fillRect(0,0,w,3);g.fillStyle='#aba997';g.fillRect(0,4,w,3);},[1,(FAR+40)/1.3]);
     this.curbs = [-1, 1].map((side) => {
       const m = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, FAR + 40), cheap(mat(0xffffff, { map: curbTex, roughness: 0.6 })));
       m.position.set(side * (ROAD + 0.12), 0.07, -(FAR + 40) / 2 + 20); m.receiveShadow = true; m.castShadow = true;
@@ -139,9 +141,9 @@ export class FernRangers3D {
     });
     this.curbTex = curbTex;
     this.dashes = new THREE.InstancedMesh(new THREE.BoxGeometry(0.14, 0.01, 1.6), cheap(mat(0xffffff, { roughness: 0.6 })), 40);
-    this.dashes.receiveShadow = true; s.add(this.dashes);
+    this.dashes.receiveShadow = true; this.dashes.visible=false; s.add(this.dashes);
     // finish line
-    const checker = canvasTex(128, 32, (g) => { for (let i = 0; i < 16; i++) for (let j = 0; j < 4; j++) { g.fillStyle = (i + j) % 2 ? '#111' : '#fff'; g.fillRect(i * 8, j * 8, 8, 8); } });
+    const checker=canvasTex(128,32,g=>{g.fillStyle='#9b937d';g.fillRect(0,0,128,32);g.fillStyle='#dbcea5';g.fillRect(0,3,128,3);g.fillRect(0,26,128,3);for(let i=0;i<8;i++){g.beginPath();g.moveTo(i*16+2,16);g.lineTo(i*16+8,9);g.lineTo(i*16+14,16);g.lineTo(i*16+8,23);g.fill();}});
     this.finish = new THREE.Group();
     const strip = new THREE.Mesh(new THREE.PlaneGeometry(ROAD * 2, 1.2), cheap(mat(0xffffff, { map: checker })));
     strip.rotation.x = -Math.PI / 2; strip.position.y = 0.012; strip.receiveShadow = true; this.finish.add(strip);
@@ -149,15 +151,15 @@ export class FernRangers3D {
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 3.4, 10), mat(0xf5f5f5, { metalness: 0.3 }));
       pole.position.set(side * (ROAD + 0.4), 1.7, 0); pole.castShadow = true; this.finish.add(pole);
     }
-    const banner = new TextPlane(ROAD * 2 + 0.8, 0.9, 512); banner.set('FERNHAVEN', { fill: '#fde047' });
-    const bannerBg = new THREE.Mesh(new THREE.BoxGeometry(ROAD * 2 + 1, 0.9, 0.1), mat(0x2f7d3a));
+    const banner = new TextPlane(ROAD * 2 + 0.8, 0.9, 512); banner.set('SEKTOR FREI', { fill: '#fde047' });
+    const bannerBg = new THREE.Mesh(new THREE.BoxGeometry(ROAD * 2 + 1, 0.9, 0.1), mat(0x345b68));
     bannerBg.position.set(0, 3.2, 0); banner.mesh.position.set(0, 3.2, 0.06);
     this.finish.add(bannerBg, banner.mesh);
     s.add(this.finish);
 
     this.lights = addLights(s, { shadowBox: 13, mapSize: 2048 });
     // all tracers in one instanced draw; matrices are written straight into the instance buffer (see drawShots)
-    this.bullets = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.045, 0.8, 2, 6), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }), SHOTS_MAX);
+    this.bullets = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.045, 0.8, 2, 6), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, transparent: true, opacity: 0.95, blending: THREE.NormalBlending, depthWrite: false }), SHOTS_MAX);
     this.bullets.frustumCulled = false; this.bullets.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     s.add(this.bullets);
     const additive = (color, opacity = 0.9) => new THREE.MeshBasicMaterial({ color, toneMapped: false, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false });
@@ -181,19 +183,38 @@ export class FernRangers3D {
     this.grass = null;
   }
 
+  routeTexture(name,len) {
+    const palette={meadow:['#777b69','#8c8e7c','#626956'],dunes:['#a58b68','#b59e79','#907a5a'],frost:['#87959d','#a7b0b3','#73838b'],ember:['#605961','#766b70','#4c474f']}[name]||['#777b69','#8c8e7c','#626956'];
+    return canvasTex(512,512,(g,w,h)=>{
+      g.fillStyle=palette[2];g.fillRect(0,0,w,h);
+      for(let row=0;row<12;row++)for(let col=-1;col<9;col++){
+        const x=col*64+(row%2)*32,y=row*44,shade=hash(row*31+col*19);
+        g.fillStyle=palette[shade>.5?0:1];g.fillRect(x+2,y+2,60,40);
+        g.fillStyle='rgba(242,229,195,.07)';g.fillRect(x+3,y+3,58,2);
+      }
+      // Worn earthen shoulders blend into the verge, without highway markings.
+      const fade=g.createLinearGradient(0,0,w,0);fade.addColorStop(0,'rgba(91,77,53,.55)');fade.addColorStop(.13,'rgba(91,77,53,0)');fade.addColorStop(.87,'rgba(91,77,53,0)');fade.addColorStop(1,'rgba(91,77,53,.55)');g.fillStyle=fade;g.fillRect(0,0,w,h);
+    },[1,len/8]);
+  }
+  groundTexture(name,len) {
+    const p={meadow:['#6f8753','#7c945e','#647d4a'],dunes:['#c0a279','#cbb18c','#b69970'],frost:['#dce6e9','#e8edef','#cddbe0'],ember:['#49434b','#51494e','#403d46']}[name];
+    return canvasTex(512,512,(g,w,h)=>{g.fillStyle=p[0];g.fillRect(0,0,w,h);for(let i=0;i<2400;i++){g.fillStyle=p[i%2+1];const x=hash(i*1.21)*w,y=hash(i*4.77)*h;g.globalAlpha=.13+hash(i)*.15;g.fillRect(x,y,3+hash(i*7)*9,2+hash(i*3)*5);}g.globalAlpha=1;},[400/this.tile,len/this.tile]);
+  }
+
   async setTheme(name, dark) {
-    const key = name + (dark ? ':d' : '');
+    const key=name;
     if (key === this.themeName) return;
-    this.themeName = key;
+    this.themeName = key; this.renderDark = dark;
     const th = THEMES[name] || THEMES.meadow;
     this.th = th;
     for(const bank of this.emberBanks)bank.visible=name==='ember';
     this.tile = 10;
     for (const [m, len] of [[this.ground, this.nearLen], [this.groundFar, this.strip]]) {
-      m.material.map = texture(th.ground, { repeat: [400 / this.tile, len / this.tile] });
+      m.material.map?.dispose();m.material.map=this.groundTexture(name,len);
+      m.material.color.set(name === 'meadow' ? 0xb8c6a5 : 0xffffff);
       m.material.needsUpdate = true;
     }
-    for (const m of [this.road, this.roadFar]) m.material.color.set(name === 'ember' ? 0x9a8a84 : 0xffffff);
+    for(const [m,len] of [[this.road,this.nearLen],[this.roadFar,this.strip]]){m.material.map?.dispose();m.material.map=this.routeTexture(name,len);m.material.color.set(0xffffff);m.material.needsUpdate=true;}
     const L = this.lights;
     L.light.color.set(th.light.sun); L.light.intensity = th.light.intensity;
     L.hemi.color.set(th.light.sky); L.hemi.groundColor.set(th.light.ground); L.hemi.intensity = th.light.ambient;
@@ -208,9 +229,10 @@ export class FernRangers3D {
     if (this.themeName !== key) return;
     const world = ['meadow', 'dunes', 'frost', 'ember'].indexOf(name);
     this.scene.background = new THREE.Color(th.fog);
+    await this.pano.build({library:this.art.library,world:Math.max(0,world),dark,low:LOW_GPU,fog:th.fog,light:th.light}); this.panoDirty = true;
     if (this.loop) { this.scene.remove(this.loop.group, this.loop.static); this.loop.dispose(); }
     this.settlements?.dispose();this.settlements=await RangerSettlements.create(this.art.library,this.scene,Math.max(0,world),this.env);
-    this.loop = new RoadLoop({ world: Math.max(0, world), road: ROAD, P: 128, low: LOW_GPU, dark });
+    this.loop = new RangerRoute({ world: Math.max(0, world), road: ROAD, P: 128, low: LOW_GPU, dark });
     this.scene.add(this.loop.group, this.loop.static);
     this.roadside = new Roadside(this.scene, near, 40);
     this.farProps = new Roadside(this.scene, far, 12);
@@ -241,63 +263,110 @@ export class FernRangers3D {
   }
 
   resize(w, h, dpr) {
-    this.w = w; this.h = h;
+    const changed=this.w!==w||this.h!==h||this.dpr!==dpr;this.w=w;this.h=h;this.dpr=dpr;
     this.renderer.setPixelRatio(dpr); this.renderer.setSize(w, h, false);
     const aspect = w / h;
-    this.camera.aspect = aspect;
+    this.campaignCamera.aspect = aspect;
     // Keep about 7.6 road units visible across the squad row, whatever the screen shape.
     const wantHalf = 3.7 / 8.4;
-    this.camera.fov = Math.min(84, Math.max(46, (2 * Math.atan(wantHalf / aspect) * 180) / Math.PI));
-    this.camera.updateProjectionMatrix();
+    this.campaignCamera.fov = Math.min(84, Math.max(46, (2 * Math.atan(wantHalf / aspect) * 180) / Math.PI));
+    this.campaignCamera.updateProjectionMatrix();
+    this.panoDirty ||= changed;
   }
 
   /**
    * Before a level runs: build the pooled gates and props it will need and draw everything once, so every shader
    * (including shadow variants and the enemy crowds) is compiled now and not when the first alien walks in.
    */
-  async prepare(s) {
-    if (this.prepared === s) return;
+  prepare(s,options={}) {
+    const epoch=++this.prepareEpoch;this.prepareController?.abort();const controller=new AbortController();this.prepareController=controller;
+    const signal=options.signal?AbortSignal.any([options.signal,controller.signal]):controller.signal;
+    const job=this.preparing.catch(()=>{}).then(()=>this.prepareLevel(s,{...options,signal},epoch));this.preparing=job.catch(()=>{});return job;
+  }
+  async prepareLevel(s,{onProgress,signal}={},epoch) {
+    const started=performance.now(),check=()=>{signal?.throwIfAborted();if(this.disposed||epoch!==this.prepareEpoch)throw new DOMException('Rangers preparation superseded','AbortError');};
+    const stage=name=>{check();onProgress?.({phase:'prepare',stage:name,done:false});};check();
+    if(this.prepared===s){onProgress?.({phase:'prepare',stage:'Trupp bereit',done:true,cache:'session'});return;}
     this.prepared=null;
-    if (s.mode === 'sturmbastion') {
-      this.bonus ||= new Sturmbastion3D(this.renderer, this.env);
-      await this.bonus.prepare(s); this.prepared=s; return;
-    }
-    this.native?.dispose(); this.art?.dispose();
-    this.art=new RangersArt(this.scene,this.env);
-    this.native=new RangerProps(this.scene,this.art,this.env);
-    this.themeName=null;
-    const types=new Set(s.ents.filter(e=>e.kind==='enemy'&&e.type!=='boss').map(e=>e.type));
-    if(s.boss) types.add(BOSSES[s.boss.boss].minion);
-    if(types.has('blorb')) types.add('zorbling');
-    await this.art.prepareTroops();
-    for(const type of types) { await this.art.batch(ENEMY_ASSET[type],320,'far'); await this.art.batch(ENEMY_ASSET[type],320,'lo'); }
-    if(types.has('blorb'))await this.art.prepareHulkSockets();
-    await this.native.prepare(s);
-    if(s.boss) this.bossActor=await this.art.actor(BOSS_ASSET[s.boss.boss],'lo'); else this.bossActor=null;
-    await this.setTheme(s.themeName,false);
-    this.prepared=s;
-    this.render(s,{dark:false,reduced:true});
-    await this.renderer.compileAsync(this.scene,this.camera);
+    try {
+      if(s.mode==='sturmbastion') {
+        this.campaignScene.visible=false;this.bonus ||= new Sturmbastion3D(this.renderer,this.env);this.bonus.scene.visible=true;
+        await this.bonus.prepare(s,{onProgress,signal});check();this.prepared=s;
+        this.prepareMetrics={milliseconds:performance.now()-started,mode:'sturmbastion',reused:!!this.bonus.prepareMetrics?.reused};return;
+      }
+      this.campaignScene.visible=true;if(this.bonus)this.bonus.scene.visible=false;
+      const reused=this.regionKey===s.themeName&&!!this.art;
+      if(!reused){this.clearCampaign();this.regionKey=s.themeName;this.art=new RangersArt(this.campaignScene,this.env);this.native=new RangerProps(this.campaignScene,this.art,this.env);this.themeName=null;}
+      this.art.library.setProgressListener(onProgress,signal);this.resetCampaignVisuals();
+      const before=this.art.batches.size+this.art.channels.size+this.art.actors.length;
+      const types=new Set(s.ents.filter(e=>e.kind==='enemy'&&e.type!=='boss').map(e=>e.type));if(s.boss)types.add(BOSSES[s.boss.boss].minion);if(types.has('blorb'))types.add('zorbling');
+      stage('Legionäre und Bewegungen vorbereiten …');await this.art.prepareTroops();check();warmCampaignFormations(s);
+      for(const type of types){stage('Automaten vorbereiten …');await this.art.batch(ENEMY_ASSET[type],320,'far');check();await this.art.batch(ENEMY_ASSET[type],320,'lo');check();}
+      if(types.has('blorb')){await this.art.prepareHulkSockets();check();}
+      stage('Tore und Ausrüstung vorbereiten …');await this.native.prepare(s,{onProgress,signal});check();
+      if(s.boss){const id=BOSS_ASSET[s.boss.boss];if(this.bossActorId!==id){this.bossActor=await this.art.actor(id,'lo');this.bossActorId=id;}check();}
+      else if(this.bossActor)this.bossActor.scene.visible=false;
+      stage('Marschroute und Horizont vorbereiten …');await this.setTheme(s.themeName,!!this.renderDark);check();
+      const grown=this.art.batches.size+this.art.channels.size+this.art.actors.length!==before;
+      this.prepared=s;this.render(s,{dark:!!this.renderDark,reduced:true});check();
+      let compile=0;if(!this.campaignCompiled||grown){onProgress?.({phase:'compile',done:false});const t=performance.now();await this.renderer.compileAsync(this.campaignScene,this.campaignCamera);check();compile=performance.now()-t;onProgress?.({phase:'compile',done:true,milliseconds:compile});this.campaignCompiled=true;}
+      this.prepareMetrics={milliseconds:performance.now()-started,mode:'campaign',region:this.regionKey,reused,compiled:compile,batches:this.art.batches.size,channels:this.art.channels.size,actors:this.art.actors.length,templates:this.art.templates.size};
+      onProgress?.({phase:'prepare',stage:'Trupp bereit',done:true,cache:reused?'region':'cold'});
+    } catch(error) {
+      this.prepared=null;
+      if(s.mode==='sturmbastion'){this.bonus?.dispose();this.bonus=null;}else this.clearCampaign();
+      throw error;
+    } finally {this.art?.library.setProgressListener(null);this.bonus?.art.library.setProgressListener(null);}
+  }
+  resetCampaignVisuals() {
+    this.art.reset();this.native.reset();this.finishFor=null;this.finishUp=null;this.troopPlaces=[];
+    this.bullets.count=0;for(const fx of [this.flashes,this.sparks,this.gooFx,this.grenadeFx]){fx.begin();fx.end();}
+    for(const list of [this.rings,this.laneWarn,this.discWarn,this.beams])for(const o of list)o.visible=false;this.bubble.visible=false;
+  }
+  clearCampaign() {
+    this.native?.dispose();this.art?.dispose();this.native=null;this.art=null;this.bossActor=null;this.bossActorId=null;this.regionKey=null;this.campaignCompiled=false;
+    this.roadside?.dispose(this.campaignScene);this.farProps?.dispose(this.campaignScene);this.roadside=this.farProps=null;
+    if(this.loop){this.campaignScene.remove(this.loop.group,this.loop.static);this.loop.dispose();this.loop=null;}
+    this.settlements?.dispose();this.settlements=null;
+    if(this.grass){this.grass.removeFromParent();this.grass.geometry.dispose();this.grass.material.dispose();this.grass.dispose();this.grass=null;}
+    this.pano?.scene?.traverse(o=>{o.geometry?.dispose();o.material?.dispose?.();});if(this.pano)this.pano.scene=null;this.themeName=null;
   }
 
   render(s, view) {
+    if(this.prepared!==s)return;
     if(s.mode==='sturmbastion'){this.bonus.resize(this.w,this.h);return this.bonus.render(s,view);}
-    if(this.prepared!==s) return;
+    // Theme events redraw through render(); toggling darkness must not reload
+    // or dispose a running landscape. Only its baked sky/light state changes.
+    if(this.renderDark!==!!view.dark) {
+      this.renderDark=!!view.dark;const dark=this.renderDark;
+      this.renderer.toneMappingExposure=this.th.exposure*(dark?.92:1);
+      this.pano.sky.material.uniforms.night.value=dark?1:0;
+      this.pano.scene.fog.color.set(this.th.fog).multiplyScalar(dark?.55:1);
+      for(const o of this.pano.scene.children) {
+        if(o.isHemisphereLight)o.intensity=this.th.light.ambient*(dark?.6:1);
+        if(o.isDirectionalLight)o.intensity=this.th.light.intensity*(dark?.5:1);
+      }
+      this.panoDirty=true;
+    }
     this.art.begin(); this.native.begin();
     this.uniforms.uTime.value = s.t;
     const cam = this.camera;
     const camX = s.px * 0.35;
     const shake = s.shake > 0 && !view.reduced ? s.shake : 0;
-    cam.position.set(camX + (Math.random() - 0.5) * shake * 0.25, 5.6 + (Math.random() - 0.5) * shake * 0.2, 9.2);
-    cam.lookAt(camX * 0.7, 1.0, -8);
+    if(this.panoDirty && this.pano.scene) {
+      this.panoDirty=false; cam.position.set(0,4.1,6.4);cam.lookAt(0,.8,-7);cam.updateMatrixWorld();const t=performance.now();this.art.library.progress({phase:'bake',id:'rangers-backdrop',done:false});this.pano.bake(this.renderer,cam);this.art.library.progress({phase:'bake',id:'rangers-backdrop',done:true,milliseconds:performance.now()-t});
+    }
+    cam.position.set(camX + (Math.random() - 0.5) * shake * 0.25, 4.1 + (Math.random() - 0.5) * shake * 0.2, 6.4);
+    cam.lookAt(camX * 0.7, .8, -7);
+    if(this.pano.base)this.pano.mesh.position.set(this.pano.base.x+camX*.98,this.pano.base.y,this.pano.base.z);
     this.loop?.update(s.pos);this.settlements?.update(s.pos);
     const L = this.lights.light;
     L.position.set(-5 + s.px * 0.3, 12, 4); L.target.position.set(s.px * 0.3, 0, -6);
 
     const pos = s.pos;
-    const gOff = (pos / this.tile) % 1, rOff = (pos / 6) % 1;
+    const gOff = (pos / this.tile) % 1, rOff = (pos / 8) % 1;
     if (this.ground.material.map) { this.ground.material.map.offset.y = gOff; this.groundFar.material.map.offset.y = (gOff + this.nearLen / this.tile) % 1; }
-    this.road.material.map.offset.y = rOff; this.roadFar.material.map.offset.y = (rOff + this.nearLen / 6) % 1;
+    this.road.material.map.offset.y = rOff; this.roadFar.material.map.offset.y = (rOff + this.nearLen / 8) % 1;
     this.curbTex.offset.y = (pos / 2) % 1;
     const m = this._dash || (this._dash = new THREE.Matrix4());
     let n = 0;
@@ -334,30 +403,34 @@ export class FernRangers3D {
   drawRoadside(s) {
     const pos = s.pos;
     if (this.roadside) {
-      const R = this.roadside, kinds = this.th.near.length;
+      const R = this.roadside;
       R.begin();
-      // two rows per side; every slot picks its prop, offset, size and turn from a hash of its distance
-      for (let i = 0; i < 36; i++) {
-        const d = Math.floor(pos / 5) * 5 + i * 5 - 10;
-        const z = d - pos;
-        if (z > FAR - 5) break;
-        for (const side of [-1, 1]) {
-          const h = hash(d * 1.7 + side * 31);
-          R.add(Math.floor(h * kinds), side * (ROAD + 1.5 + hash(d + side) * 3.2), -z, h * 6, 0.85 + hash(d * 3 + side) * 0.5);
-          if (hash(d * 2.3 + side) > 0.45) R.add(Math.floor(hash(d * 5 + side) * kinds), side * (ROAD + 6 + hash(d * 7 - side) * 6), -z - 2.5, hash(d) * 6, 0.9 + hash(d * 9) * 0.6);
+      // Authored little vignettes alternate with open verges. A tree stands
+      // behind its shrubs/rocks, never interchanged with a wall or bridge.
+      for (let i=0;i<9;i++) {
+        const d=Math.floor(pos/16)*16+i*16-16, z=d-pos;
+        if(z>FAR-5)break;
+        const slot=Math.round(d/16), side=slot%2?1:-1;
+        const x=side*(ROAD+3.2), yaw=side*.24;
+        if(s.themeName==='meadow') {
+          R.add(0,x,-z,yaw,1.15); R.add(1,x+side*1.8,-z-1.4,-yaw,.9); R.add(2,x-side*.8,-z+1.3,yaw,.9); R.add(3,x+side*2.6,-z+1.8,0,.8);
+        } else if(s.themeName==='dunes') {
+          R.add(0,x+side,-z-1,side*.3,1.2); R.add(1,x-side*.7,-z+1.4,side*.25,1.1); R.add(2,x+side*1.7,-z+.8,0,.8);
+        } else if(s.themeName==='frost') {
+          R.add(0,x+side*.6,-z-1,side*.2,1.1); R.add(1,x-side*.7,-z+.8,0,1.25); R.add(2,x+side*1.7,-z+1.6,side*.3,.75);
+        } else {
+          R.add(0,x+side*.5,-z-1,side*.2,1.15); R.add(1,x-side*.6,-z+.8,.2,.8); R.add(2,x+side*1.5,-z+1.8,0,.9);
         }
       }
       R.end();
     }
     if (this.farProps && !LOW_GPU) {
-      const F = this.farProps, kinds = this.th.far.length;
-      F.begin();
-      for (let i = 0; i < 8; i++) {
-        const d = Math.floor(pos / 16) * 16 + i * 16 - 16;
-        const z = d - pos;
-        if (z > FAR + 10) break;
-        const side = hash(d * 0.37) > 0.5 ? 1 : -1;
-        F.add(Math.floor(hash(d * 1.13) * kinds), side * (ROAD + 13 + hash(d * 2.9) * 14), -z, side < 0 ? 0.6 + hash(d) : -0.6 - hash(d), 1 + hash(d * 4.1) * 0.4, s.t);
+      const F = this.farProps; F.begin();
+      for(let i=0;i<6;i++) {
+        const d=Math.floor(pos/24)*24+i*24-24,z=d-pos;if(z>FAR+10)break;
+        const slot=Math.round(d/24),side=slot%2?1:-1;
+        F.add(0,side*(ROAD+13),-z,side*.2,1.4,s.t);
+        F.add(1,side*(ROAD+16),-z-4,side*.3,1.2,s.t);
       }
       F.end();
     }
@@ -378,15 +451,17 @@ export class FernRangers3D {
   drawSquad(s) {
     const lost=s.result&&!s.result.won;
     if(!lost) {
-      const count=Math.min(28,s.n);
-      for(let i=0;i<count;i++) {
-        const row=Math.floor(i/5),col=i%5, x=(col-2)*.7;
-        // Full authored person scale. One giant stands behind the formation.
-        this.art.troop(i,s.px+(i===17?-1.7:x),i===17?1.8:row*.68-.8,s.t);
+      this.troopPlaces=campaignFormation(s);
+      for(const p of this.troopPlaces) {
+        const muzzle=this.art.troop(p.i,s.px+p.x,p.z,s.t,{size:p.size,speed:s.speed,firing:s.muzzle});
+        if(muzzle){p.mx=muzzle.x;p.my=muzzle.y;p.mz=muzzle.z;}
       }
     }
     this.bubble.visible=s.buffs.bubble>0&&!lost;
-    if(this.bubble.visible){this.bubble.position.set(s.px,1,-.1);this.bubble.scale.set(2.4,2.1,2.4);}
+    if(this.bubble.visible){
+      const places=this.troopPlaces||[],near=Math.max(0,...places.map(p=>p.z)),far=Math.min(0,...places.map(p=>p.z)),r=s.radius+.7;
+      const h=(s.n>=18?TROOP_PROFILES.GIANT_LEGIONARY.max[1]:TROOP_PROFILES.CAPTAIN_HAZEL.max[1])*RANGER_SCALE;this.bubble.position.set(s.px,h/2,(near+far)/2);this.bubble.scale.set(r,h/2+.2,Math.max(r,(near-far)/2+.7));
+    }
     this.native.turret(s);
   }
   drawEntities(s) {
@@ -400,7 +475,7 @@ export class FernRangers3D {
         if(!e.alive&&((e.type==='blorb'&&e.split&&age>=1.2)||(age>2&&e.type!=='boss')))continue;
         if(e.type==='boss'){this.drawBoss(e,s,z,age);continue;}
         const birth=e.spawnHull,birthAge=birth?s.t-birth.time:99;if(birthAge<1.2)continue;const k=birth?Math.max(0,1-(birthAge-1.2)/.6):0,socket=birth?this.art.hulkSockets[birth.side<0?0:1]:null;
-        this.art.machine(e.type,e.x*(1-k)+(birth?birth.x+socket.x:0)*k,-z*(1-k)+(birth?-birth.d+s.pos+socket.z:0)*k,s.t,{active:e.active&&!e.frozen,speed:e.speed||1,phase:e.phase||0,disabled:!e.alive,age,near:z<15,split:e.split,hitAge:s.t-(e.hitAt??-99),fireAge:s.t-(e.fireAt??-99),wheelPhase:e.phase/(3*Math.max(.1,e.speed||1))});
+        this.art.machine(e.type,e.x*(1-k)+(birth?birth.x+socket.x:0)*k,-z*(1-k)+(birth?-birth.d+s.pos+socket.z:0)*k,s.t,{active:e.active&&!e.frozen,speed:e.speed||1,phase:e.phase||0,disabled:!e.alive,age,near:z<15,split:e.split,hitAge:s.t-(e.hitAt??-99),fireAge:s.t-(e.fireAt??-99),alert:e.alert||0,shield:e.shield>0,frozen:e.frozen>0,wheelPhase:e.phase/(3*Math.max(.1,e.speed||1))});
       } else this.native.entity(e,s,z,age);
     }
   }
@@ -436,12 +511,10 @@ export class FernRangers3D {
       if (z > FAR) continue;
       const h = S.heft[i], lg = h > 1 ? Math.log2(h) : 0;
       // heavier tracers: a little thicker, clearly longer (streaks), see also the colour above
-      const wd = 1.6 * Math.min(1.7, 1 + lg * 0.18), len = Math.min(2.4, 1 + lg * 0.3);
-      const o = n * 16;
-      a[o] = wd; a[o + 1] = 0; a[o + 2] = 0; a[o + 3] = 0;
-      a[o + 4] = 0; a[o + 5] = 0; a[o + 6] = len; a[o + 7] = 0;
-      a[o + 8] = 0; a[o + 9] = -wd; a[o + 10] = 0; a[o + 11] = 0;
-      a[o + 12] = S.x[i]; a[o + 13] = S.turret[i] ? .78 : 1.12; a[o + 14] = -z - 0.4 * len; a[o + 15] = 1;
+      const wd = .7 * Math.min(1.5, 1 + lg * 0.18), len = Math.min(2.4, 1 + lg * 0.3);
+      const segment=shotSegment(S.x[i],z,nearestMuzzle(this.troopPlaces||[],S.x[i]),h,!!S.turret[i]);if(!segment.visible)continue;
+      const v=this._shotVector||(this._shotVector=new THREE.Vector3()),q=this._shotQ||(this._shotQ=new THREE.Quaternion()),m=this._shotMatrix||(this._shotMatrix=new THREE.Matrix4()),p=this._shotPosition||(this._shotPosition=new THREE.Vector3()),sc=this._shotScale||(this._shotScale=new THREE.Vector3()),axis=this._shotAxis||(this._shotAxis=new THREE.Vector3(0,1,0));
+      const {head,tail}=segment;v.set(head.x-tail.x,head.y-tail.y,head.z-tail.z);const length=Math.max(.02,v.length());v.normalize();q.setFromUnitVectors(axis,v);p.set((head.x+tail.x)/2,(head.y+tail.y)/2,(head.z+tail.z)/2);m.compose(p,q,sc.set(wd,length/.89,wd));m.toArray(a,n*16);
       n++;
     }
     const im = this.bullets.instanceMatrix;
@@ -454,7 +527,7 @@ export class FernRangers3D {
       const big = 1 + Math.min(0.8, Math.log2(heft) * 0.2), col = colorOf(w.color);
       for (let i = 0; i < lanes; i++) {
         const k = s.laneFlash[i];
-        if (k > 0.3) f.add(s.px + s.laneX[i] + 0.06, 1.12, -0.9, (0.12 * k + 0.04) * big, col);
+        if (k > .3) { const p=nearestMuzzle(this.troopPlaces||[],s.px+s.laneX[i]); if(p) f.add(p.mx,p.my,p.mz,(.05*k+.01)*big,col); }
       }
     }
     f.end();
@@ -523,6 +596,11 @@ export class FernRangers3D {
       return { x: a.x, y: a.y, s: Math.hypot(b.x - a.x, b.y - a.y) };
     };
   }
+  squadBadgeAnchor() {
+    const project=this.projectFn(),places=this.troopPlaces||[],bounds={left:Infinity,right:-Infinity,top:Infinity,bottom:-Infinity};
+    for(const p of places){const h=TROOP_PROFILES[p.id].max[1]*p.size+.025;for(const x of[p.left,p.right])for(const d of[p.front,p.back])for(const y of[0,h]){const q=project((this.prepared?.px||0)+x,d,y);bounds.left=Math.min(bounds.left,q.x);bounds.right=Math.max(bounds.right,q.x);bounds.top=Math.min(bounds.top,q.y);bounds.bottom=Math.max(bounds.bottom,q.y);}}
+    const base=project(this.prepared?.px||0,0,0);return {x:base.x,s:base.s,bodyTop:Number.isFinite(bounds.top)?bounds.top:base.y,bodyBounds:Number.isFinite(bounds.top)?bounds:undefined};
+  }
   /** Screen x on the squad's row → road x (for mouse steering). */
   layoutFor() {
     if(this.prepared?.mode==='sturmbastion')return this.bonus.layoutFor();
@@ -532,6 +610,8 @@ export class FernRangers3D {
     return { ppu, toWorldX: (sx) => (sx - o.x) / ppu };
   }
   dispose() {
+    this.disposed=true;this.prepareEpoch++;this.prepareController?.abort();
+    this.pano?.target?.dispose();this.pano?.scene?.traverse(o=>{o.geometry?.dispose();o.material?.dispose?.();});
     this.native?.dispose();this.art?.dispose();this.bonus?.dispose();this.loop?.dispose();this.settlements?.dispose();
     this.roadside?.dispose(this.campaignScene);this.farProps?.dispose(this.campaignScene);
     const geo=new Set(),mats=new Set(),tex=new Set();this.campaignScene.traverse(o=>{if(o.geometry)geo.add(o.geometry);for(const m of o.material?(Array.isArray(o.material)?o.material:[o.material]):[]){mats.add(m);for(const v of Object.values(m))if(v?.isTexture)tex.add(v);}});

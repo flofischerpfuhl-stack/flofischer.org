@@ -166,7 +166,9 @@ export class ToyActor {
 
 export class BounceArt {
   constructor(){this.library=new AssetLibrary();this.templates=new Map();this.layering=new Map();this.actors=new Map();}
-  async prepare(session){
+  async prepare(session,{onProgress,signal}={}){
+    this.library.setProgressListener(onProgress,signal);
+    signal?.throwIfAborted();
     await Promise.all(requiredToys(session).map(async id=>{
       const template=await this.library.template(id,'lo');
       const masks=await this.library.contract(id,'motionLayering');
@@ -180,5 +182,6 @@ export class BounceArt {
     }
     return this.actors.get(tk.id);
   }
-  dispose(){for(const a of this.actors.values())a.dispose();this.actors.clear();this.library.dispose();}
+  clearActors(){for(const a of this.actors.values())a.dispose();this.actors.clear();}
+  dispose(){this.clearActors();this.templates.clear();this.layering.clear();this.library.dispose();}
 }

@@ -1,4 +1,4 @@
-/** Hexennacht: canonical starter lines, moves and temporary fossil ownership. */
+/** Fernling-Arena: canonical starter lines, moves and temporary fossil ownership. */
 export const NATURES=Object.freeze(['green','ember','tide','rock','wind','spark','frost','ore','chime','light','night','star']);
 export const SLOTS=Object.freeze(['blaster','drones','wrench','zap','mines']);
 const SHAPES=Object.freeze(['shot','orbit','arc','chain','trap']);
@@ -13,7 +13,7 @@ const MOVES=Object.freeze({
  tide:Object.freeze(['bubble_shot','droplet_ring','return_wave','ripple_chain','geyser_pools']),
 });
 const COMBOS=Object.freeze({ember:Object.freeze(['firestorm','ember_crown']),green:Object.freeze(['seed_storm','leaf_crown']),tide:Object.freeze(['bubble_storm','pearl_crown'])});
-export const TRAITS=Object.freeze({boots:'Quick Paws',magnet:'Keen Nose',armour:'Thick Hide',snacks:'Deep Rest',overclock:"Momo’s Call"});
+export const TRAITS=Object.freeze({boots:'Quick Paws',magnet:'Keen Nose',armour:'Thick Hide',snacks:'Deep Rest',overclock:'Ruhiger Atem'});
 export const COMBO_PARTNERS=Object.freeze({blaster:'overclock',drones:'magnet',wrench:'armour',zap:'boots',mines:'snacks'});
 export const EVOLUTION_LEVELS=Object.freeze([5,10]);
 export const CAPACITIES=Object.freeze({weapons:4,passives:4});

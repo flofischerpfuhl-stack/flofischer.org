@@ -11,6 +11,7 @@
  * enemies that reach the squad, to gates you chose and to hazards you walked into, never to something unavoidable.
  */
 import { clamp, lerp, rng, label, roundRect } from './core.js';
+import { RANGER_SCALE, TROOP_PROFILES, placeSquadBadge } from './fern-rangers-formation.js';
 import { LEVELS } from './fern-rangers-levels.js';
 import { upgradeLevel } from './profile.js';
 import { STURMBASTION_LEVELS } from './fern-rangers-sturmbastion-levels.js';
@@ -239,6 +240,10 @@ export class FernRangersSession {
   }
 
   // ── input ──
+  cancelInput() {
+    this.keys = { l: false, r: false }; this.keyDir = 0;
+    this.drag = null; this.tx = this.px;
+  }
   pointer(type, x, y, e = {}) {
     const lay = this.layout;
     if (!lay || this.result) { if (type === 'up') this.drag = null; return; }
@@ -305,7 +310,7 @@ export class FernRangersSession {
     this.pos += this.speed * dt;
 
     // bunch up while a hazard, a goo blob or a boss strike is close; spread out again after
-    let tight = this.goo.length > 0;
+    let tight = this.goo.length > 0 || !!fork;
     if (!tight) for (const w of this.warnings) if (!w.done) { tight = true; break; }
     if (!tight) {
       for (const e of this.ents) {
@@ -614,7 +619,7 @@ export class FernRangersSession {
     }
     e.hp -= dmg; e.flash = 0.08; e.hitAt=this.t;
     if (e.kind === 'enemy') {
-      if (e.type !== 'boss') e.d += 0.06 * dmg / (e.type === 'blorb' ? 4 : 1);
+      if (e.type !== 'boss' && e.hp > 0) e.d += 0.06 * dmg / (e.type === 'blorb' ? 4 : 1);
       // hit sparks: heavier tracers throw more and faster sparks; a budget per step keeps a hail of hits affordable
       if (this.sparkBudget > 0) {
         const k = b.heft > 3 ? 3 : 2;
@@ -635,7 +640,7 @@ export class FernRangersSession {
         this.settlementSeconds = 4.5;
         this.shake = 1.2; this.boom(e.x, e.d, 4); this.popupWorld('BOSS DOWN!', e.x, e.d, 3, '#fde047', 1.3);
         this.warnings.length = 0; this.goo.length = 0;
-        for (const o of this.ents) if (o.kind === 'enemy' && o.alive) { o.alive = false; o.fade = 1; }
+        for (const o of this.ents) if (o.kind === 'enemy' && o.alive) { o.alive = false; o.fade = 1; o.disabledAt = this.t; this.visual('machine-disabled', { entity: o, x: o.x, d: o.d }); }
         // the level ends right here (no empty walk to a finish line further on)
         this.goal = Math.min(this.goal, this.pos + 3);
       } else if (e.type === 'blorb') {
@@ -769,7 +774,8 @@ export class FernRangersSession {
         if (z < -2.5) { e.alive = false; continue; }
         if (z > R * 0.75 + e.r * 0.5) continue;
         if (Math.abs(e.x - this.px) > R + e.r - 0.15) continue;
-        e.alive = false; e.fade = 1;
+        e.alive = false; e.fade = 1; e.disabledAt = this.t;
+        this.visual('machine-disabled', { entity: e, x: e.x, d: e.d });
         const dmg = Math.max(1, Math.ceil((e.hp + e.shield * 0.5) * ENEMY[e.type].dmg));
         this.spray(e.x, e.d, 0.5, '#999274', 8, 2);
         this.hurt(Math.min(dmg, this.n), 'The Commune automatons forced an emergency recall');
@@ -1050,7 +1056,20 @@ export class FernRangersSession {
       if (!e.alive) continue;
       const z = e.d - this.pos;
       if (z > VIEW_Z || z < -1) continue;
-      if (e.kind === 'enemy' && (e.type === 'blorb' || e.type === 'boss' || e.shield > 0)) {
+      if (e.kind === 'enemy' && e.type !== 'boss' && z > 22) continue;
+      if (this.projFn && e.kind === 'gate') {
+        // Decision text belongs in the screen overlay: stable contrast and a
+        // minimum readable size, independent of tiny authored number plates.
+        const p = this.proj((e.x0 + e.x1) / 2, z - .18, 1.42);
+        const size = Math.round(Math.max(18, Math.min(44, p.s * .62)) * (1 + (e.pulse || 0) * .08));
+        const text = gateText(e);
+        g.font = `900 ${size}px Geist, Inter, system-ui, sans-serif`;
+        const width = g.measureText(text).width + size * .6;
+        g.fillStyle = gateGood(e) ? 'rgba(13,66,102,.94)' : 'rgba(112,24,38,.94)';
+        roundRect(g, p.x - width / 2, p.y - size * .7, width, size * 1.4, size * .18); g.fill();
+        g.strokeStyle = gateGood(e) ? '#8be7ff' : '#ffaab7'; g.lineWidth = 2; g.stroke();
+        label(g, text, p.x, p.y, size, '#fff', 'rgba(0,0,0,.7)', 900);
+      } else if (e.kind === 'enemy' && (e.type === 'blorb' || e.type === 'boss' || e.shield > 0)) {
         const top = this.proj(e.x, z, e.type === 'boss' ? BOSSES[e.boss].h + 0.9 : e.type === 'blorb' ? 2.25 : 1.75);
         const txt = e.shield > 0 ? `${Math.ceil(e.shield)}⛨` : String(Math.ceil(e.hp));
         label(g, txt, top.x, top.y, Math.round(Math.max(11, Math.min(26, top.s * (e.type === 'boss' ? 0.5 : 0.36)))), e.shield > 0 ? '#e2e8f0' : '#fff', 'rgba(0,0,0,.65)');
@@ -1070,12 +1089,23 @@ export class FernRangersSession {
     const { w, h } = view;
     // squad count bubble
     if (this.n > 0 && !(this.result && !this.result.won)) {
-      const top = this.proj(this.px, -0.4, 1.2 + this.radius * 0.5);
+      const height=this.projFn?(this.n>=18?TROOP_PROFILES.GIANT_LEGIONARY.max[1]:TROOP_PROFILES.CAPTAIN_HAZEL.max[1])*RANGER_SCALE+.22:1.2+this.radius*.5;
+      const top=this.proj(this.px,-.4,height),anchor=view.gl?.squadBadgeAnchor?.();if(anchor){top.x=anchor.x;top.s=anchor.s;}
       const sc = 1 + this.countPop * 0.35;
       const txt = String(this.n);
       const size = Math.round(Math.max(18, Math.min(30, top.s * 0.42)) * sc);
       g.font = `800 ${size}px Geist, Inter, system-ui, sans-serif`;
       const tw = g.measureText(txt).width + size * 0.9;
+      if(anchor){
+        const obstacles=[];for(const e of this.ents){if(e.kind!=='gate'||!e.alive)continue;const z=e.d-this.pos;if(z< -1||z>64)continue;const p=this.proj((e.x0+e.x1)/2,z-.18,1.42),gs=Math.round(Math.max(18,Math.min(44,p.s*.62))*(1+(e.pulse||0)*.08));g.font=`900 ${gs}px Geist, Inter, system-ui, sans-serif`;const gw=g.measureText(gateText(e)).width+gs*.6;obstacles.push({left:p.x-gw/2,right:p.x+gw/2,top:p.y-gs*.7,bottom:p.y+gs*.7});
+          // Conservative projection of the delivered native gate bounds after
+          // RangerProps' .78 height scale. Keep the badge off its frame too.
+          const post=Math.min(.42,(e.x1-e.x0)*.14);for(const [x0,x1,y0,y1]of[[e.x0-.05,e.x0+post,0,2.73],[e.x1-post,e.x1+.05,0,2.73],[e.x0,e.x1,2.3,2.73]]){const frame=[];for(const x of[x0,x1])for(const d of[z-.67,z+.67])for(const h of[y0,y1])frame.push(this.proj(x,d,h));obstacles.push({left:Math.min(...frame.map(p=>p.x)),right:Math.max(...frame.map(p=>p.x)),top:Math.min(...frame.map(p=>p.y)),bottom:Math.max(...frame.map(p=>p.y))});}}
+        if(this.grenades>0&&!this.result)obstacles.push({left:w-86,right:w,top:h-98,bottom:h});
+        if(this.revives>0||Object.values(this.buffs).some(t=>t>0))obstacles.push({left:0,right:w*.7,top:h-48,bottom:h});
+        const badge=placeSquadBadge({x:top.x,bodyTop:anchor.bodyTop,bodyBounds:anchor.bodyBounds,width:tw,height:size*1.5,viewWidth:w,viewHeight:h,previous:this.strengthBadge,now:this.t,hudBottom:this.boss?.alive?138:72,obstacles});top.x=badge.x;top.y=badge.y;this.strengthBadge={...badge,width:tw,height:size*1.5,obstacles};
+        if(badge.connector){g.save();g.lineCap='round';g.beginPath();g.moveTo(badge.connector.from.x,badge.connector.from.y);g.lineTo(badge.connector.to.x,badge.connector.to.y);g.strokeStyle='rgba(9,30,18,.75)';g.lineWidth=4;g.stroke();g.strokeStyle='#ecfff0';g.lineWidth=2;g.stroke();g.restore();}
+      }
       g.fillStyle = this.buffs.bubble > 0 ? '#7c3aed' : '#16a34a'; roundRect(g, top.x - tw / 2, top.y - size * 0.75, tw, size * 1.5, size * 0.75); g.fill();
       g.strokeStyle = '#fff'; g.lineWidth = 2; g.stroke();
       label(g, txt, top.x, top.y + 1, size, '#fff', 'rgba(0,0,0,.25)');

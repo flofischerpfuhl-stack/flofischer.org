@@ -7,13 +7,15 @@ import { Batch, mtx } from './world/decor.js';
  * independent of this 160-person visual sample. All source scales are metres. */
 export class Sturmbastion3D {
     constructor(renderer, env) { this.renderer = renderer; this.env = env; this.scene = new T.Scene(); this.scene.background = new T.Color(0xa3c4ce); this.scene.fog = new T.Fog(0xa3c4ce, 65, 100); this.camera = new T.PerspectiveCamera(54, 1, .1, 140); this.camera.position.set(0, 22, 15); this.camera.lookAt(0, 0, -17); addLights(this.scene, { shadowBox: 20, mapSize: 1024 }); this.art = new RangersArt(this.scene, env); this.props = new Map(); this.labels = []; this.static = new T.Group(); this.scene.add(this.static); this.w = 1; this.h = 1; }
-    async prepare(s) {
+    async prepare(s,{onProgress,signal}={}) {
+        const started=performance.now(),warm=!!this.loaded,check=()=>signal?.throwIfAborted();check();this.art.library.setProgressListener(onProgress,signal);
+        try {onProgress?.({phase:'prepare',stage:'Sturmbastion vorbereiten …',done:false});
         if (!this.loaded) {
             await this.art.prepareTroops();
             for (const id of ['KLONK', 'HULK'])
                 await this.art.batch(id, 160, 'far');
             for (const id of ['STURMBASTION_CORRIDOR_TILE', 'STURMBASTION_GATE_FRAME', 'STURMBASTION_DEFLECTOR', 'ROAD_BLOCK']) {
-                const t = await this.art.template(id, 'lo');
+                check();const t = await this.art.template(id, 'lo');
                 this.props.set(id, await this.art.batch(id, 60, 'lo', propClips(t)));
             }
             this.sender = await this.art.actor('STURMBASTION_SENDER', 'lo');
@@ -22,7 +24,7 @@ export class Sturmbastion3D {
             const base = new Batch(), glow = new Batch();
             // Harbour wall, quay lamps and vegetation are shared authored channel assets.
             for (const id of ['fw_wall_stone_straight', 'fw_street_light_sporecell', 'fw_basalt_columns', 'meadow_reed', 'fw_bridge_wood']) {
-                const groups = await this.art.library.model(id, 'lo');
+                check();const groups = await this.art.library.model(id, 'lo');
                 for (let k = 0; k < (id === 'fw_bridge_wood' ? 2 : 5); k++)
                     for (const side of [-1, 1]) {
                         const x = side * ({ fw_wall_stone_straight: 8, fw_street_light_sporecell: 6.2, fw_basalt_columns: 14, meadow_reed: 10.5, fw_bridge_wood: 9 }[id]), z = -k * (id === 'fw_bridge_wood' ? 28 : 12) - 4;
@@ -52,9 +54,10 @@ export class Sturmbastion3D {
             applyIbl(this.scene, this.env, .55);
             this.loaded = true;
         }
-        this.session = s;
-        this.render(s);
-        await this.renderer.compileAsync(this.scene, this.camera);
+        check();this.art.reset();this.resultAt=null;this.session=s;this.labelCount=0;this.transport.begin();this.transport.end();
+        this.render(s);if(!warm){onProgress?.({phase:'compile',done:false});const t=performance.now();await this.renderer.compileAsync(this.scene,this.camera);check();onProgress?.({phase:'compile',done:true,milliseconds:performance.now()-t});}
+        this.prepareMetrics={milliseconds:performance.now()-started,reused:warm,batches:this.art.batches.size,actors:this.art.actors.length};onProgress?.({phase:'prepare',stage:'Sturmbastion bereit',done:true,cache:warm?'bonus':'cold'});
+        }finally{this.art.library.setProgressListener(null);}
     }
     resize(w, h) { this.w = w; this.h = h; this.camera.aspect = w / h; this.camera.fov = w < h ? 63 : 48; this.camera.updateProjectionMatrix(); }
     put(id, x, z, { y = 0, clip = 'Rest', time = 0, yaw = 0, width = 1 } = {}) { const m = transform(x, y, -z, yaw).clone(); m.scale(new T.Vector3(width, 1, 1)); this.props.get(id).add(m, clip, time, { loop: false }); }

@@ -1,5 +1,6 @@
 import { mockupName } from "./mockups.js";
 import { fetchGameModel } from "./game-models.js";
+import { GAME_ASSET_VERSION } from "./game-asset-version.js";
 
 /**
  * Host-based static routing for flofischer.org
@@ -48,7 +49,7 @@ function candidatePaths(site, pathname) {
   return out;
 }
 
-function withSiteHeaders(response, pathname, encodeBody = "automatic") {
+function withSiteHeaders(response, pathname, encodeBody = "automatic", immutableGameAsset = false) {
   const headers = new Headers(response.headers);
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -74,7 +75,10 @@ function withSiteHeaders(response, pathname, encodeBody = "automatic") {
   }
 
   if (mockup === "games") {
-    headers.set("Cache-Control", `no-cache, must-revalidate${encodeBody === "manual" ? ", no-transform" : ""}`);
+    const cache = immutableGameAsset && (response.ok || response.status === 304)
+      ? "public, max-age=31536000, immutable"
+      : "no-cache, must-revalidate";
+    headers.set("Cache-Control", `${cache}${encodeBody === "manual" ? ", no-transform" : ""}`);
     headers.set("Referrer-Policy", "no-referrer");
   }
 
@@ -126,9 +130,17 @@ export default {
       return withSiteHeaders(new Response("Not found", { status: 404 }), pathname);
     }
 
+    // Version belongs to the exact decoded asset tree, not just the HTML entry.
+    // Never serve changed bytes under an older immutable URL.
+    const versionedGameAsset = site === "gehirn"
+      && pathname.startsWith("/games/tools/games-assets/")
+      && ["GET", "HEAD"].includes(request.method) && url.searchParams.has("v");
+    if (versionedGameAsset && url.searchParams.get("v") !== GAME_ASSET_VERSION) {
+      return withSiteHeaders(new Response(request.method === "HEAD" ? null : "The game was updated. Reload the page.", { status: 409 }), pathname);
+    }
     if (site === "gehirn") {
       const model = await fetchGameModel(request, env, pathname);
-      if (model) return withSiteHeaders(model, pathname, "manual");
+      if (model) return withSiteHeaders(model, pathname, "manual", versionedGameAsset);
     }
 
     // A directory index is only served under its trailing-slash URL, otherwise
@@ -148,7 +160,7 @@ export default {
       url.origin,
       candidatePaths(site, pathname)
     );
-    if (found) return withSiteHeaders(found, pathname);
+    if (found) return withSiteHeaders(found, pathname, "automatic", versionedGameAsset);
 
     const notFound = await tryPaths(env, url.origin, [
       `/${site}/404.html`,

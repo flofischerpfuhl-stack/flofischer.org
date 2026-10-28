@@ -1,4 +1,4 @@
-/** Hexennacht — naturgebundene Fernlings verteidigen die Abtei bis zum Morgen.
+/** Fernling-Arena — naturgebundene Fernlings befreien die Gärten der Abtei.
  * Feste Datenpools, deterministische Level und unveränderte Progress-IDs.
  * Sim (x,y) entspricht Three (x,0,z); nur die Darstellung verwendet echte Modelle.
  */
@@ -7,11 +7,13 @@ import { LEVELS, WORLDS } from './momo-levels.js';
 import { upgradeLevel } from './profile.js';
 import { STARTERS, starter, makeWeapon, moveName, moveEffect, ownMove, weaponKey, evolveToLevel, fossilOffer, grantFossil, clearAttackPayload, stampAttackPayload, NATURE_COLORS, TRAITS } from './fernling-canon.js';
 
+import { FREED_RECOIL, FREED_BREAK, FREED_ESCAPE } from './momo-motion.js';
+
 const TAU = Math.PI * 2;
 export const MOMO_R = 0.42;
 const MOMO_SPEED = 4.4, MOMO_HP = 100, SPAWN_DIST = 16.5, GEN_R = 1.0, BOSS_AT = 32;
 const MAX_ENEMIES = 280, MAX_SHOTS = 200, MAX_GEMS = 320, MAX_FOE_SHOTS = 90, MAX_HAZ = 40, MAX_PARTS = 520;
-const MAX_MINES = 12, MAX_BOLTS = 6, MAX_FREED = 70, MAX_POPS = 36, MAX_RINGS = 14;
+const MAX_MINES = 12, MAX_BOLTS = 6, MAX_FREED = 350, MAX_POPS = 36, MAX_RINGS = 14;
 const NUM = Array.from({ length: 1000 }, (_, i) => String(i));
 const num = (v) => NUM[Math.min(999, Math.max(0, Math.round(v)))];
 
@@ -53,7 +55,7 @@ export const PASSIVES = {
   magnet: { name: 'Keen Nose', color: '#60a5fa', desc: '+40 % Sammelradius' },
   armour: { name: 'Thick Hide', color: '#94a3b8', desc: '−8 % erlittener Schaden' },
   snacks: { name: 'Deep Rest', color: '#fb7185', desc: '+0,4 Leben pro Sekunde' },
-  overclock: { name: 'Momo’s Call', color: '#facc15', desc: '−7 % Wartezeit zwischen Moves' },
+  overclock: { name: 'Ruhiger Atem', color: '#facc15', desc: '−7 % Wartezeit zwischen Moves' },
 };
 /** Evolutions: weapon (maxed) + partner passive (maxed). */
 export const EVOLUTIONS = {
@@ -76,7 +78,7 @@ class Pool {
 const blankEnemy = () => ({
   kind: 0, def: null, x: 0, y: 0, kx: 0, ky: 0, hp: 0, maxHp: 0, r: 0, speed: 0, dmg: 0, xp: 1, score: 0, mass: 1,
   elite: false, boss: false, fly: false, dead: false, hidden: false, flash: 0, atk: 0, phase: 0, face: 0, shield: 0,
-  toGen: false, shootT: 0, charge: 0, slow: 0, droneCd: 0, droneCd0: 0, droneCd1: 0, droneCd2: 0, droneCd3: 0, hitB: 0, hitW: 0, hitZ: 0, hitH: 0, scale: 1, spawnIn: 0,
+  toGen: false, shootT: 0, charge: 0, slow: 0, droneCd: 0, droneCd0: 0, droneCd1: 0, droneCd2: 0, droneCd3: 0, hitB: 0, hitW: 0, hitZ: 0, hitH: 0, scale: 1, spawnIn: 0, stride: 0, moving: 0, hitAt: -10, castAt: -10, freedAt: -1,
 });
 const ENEMY_BLANK = blankEnemy();
 /** Reset a pooled enemy in place (no allocation). */
@@ -121,7 +123,7 @@ export class MomoSession {
     this.bolts = new Pool(MAX_BOLTS, () => clearAttackPayload({ pts: new Float32Array(40), n: 0, life: 0 }));
     this.parts = new Pool(MAX_PARTS, () => ({ x: 0, y: 0, h: 0, vx: 0, vy: 0, vh: 0, life: 0, max: 1, size: 0.1, color: 0xffffff, grav: 9 }));
     this.rings = new Pool(MAX_RINGS, () => ({ x: 0, y: 0, r: 0, life: 0, max: 1, color: 0xffffff }));
-    this.freed = new Pool(MAX_FREED, () => ({ kind: 0, x: 0, y: 0, face: 0, life: 0, age: 0, scale: 1, elite: false }));
+    this.freed = new Pool(MAX_FREED, () => ({ kind: 0, x: 0, y: 0, face: 0, life: 0, age: 0, scale: 1, elite: false, kx: 0, ky: 0, stride: 0, broken: false, visible: true, outside: 0 }));
     this.pops = new Pool(MAX_POPS, () => ({ text: '', x: 0, y: 0, h: 0, life: 0, max: 1, color: '#fff', size: 1 }));
     // spatial grid over the playfield (enemies only; the boss is checked on its own)
     this.gcs = 2; this.gExt = this.R + 16; this.gDim = Math.ceil((2 * this.gExt) / this.gcs);
@@ -229,6 +231,10 @@ export class MomoSession {
   }
 
   // ── input ──
+  cancelInput() {
+    this.keys = { u: false, d: false, l: false, r: false };
+    this.stick = null; this.mouse = null;
+  }
   pointer(type, x, y, e = {}) {
     if (this.choice) {
       if (type === 'down' && this.choice.t > 0.25 && this.cardRects) {
@@ -367,7 +373,7 @@ export class MomoSession {
     }
     const sp = Math.hypot(this.vx, this.vy);
     this.moving = Math.min(1, sp / MOMO_SPEED);
-    this.walk += dt * (2 + sp * 2.6);
+    this.walk += sp * dt;
     if (sp > 0.4 && Math.hypot(this.inX, this.inY) > 0.1) this.face = turn(this.face, Math.atan2(this.inX, this.inY), dt * 14);
   }
 
@@ -552,6 +558,7 @@ export class MomoSession {
       e.kx *= Math.exp(-dt * 7); e.ky *= Math.exp(-dt * 7);
       e.x += (vx + e.kx) * dt + sx * Math.min(1, dt * 10);
       e.y += (vy + e.ky) * dt + sy * Math.min(1, dt * 10);
+      e.stride+=Math.hypot(vx,vy)*dt; e.moving=Math.hypot(vx,vy);
       e.face = turn(e.face, Math.atan2(dx, dy), dt * 6);
       e.phase += dt * (1.5 + spd * 3);
       // contact with Momo
@@ -564,6 +571,7 @@ export class MomoSession {
     }
   }
   spit(e) {
+    e.castAt=this.time;
     const s = this.foeShots.spawn(); if (!s) return;
     const dx = this.x - e.x, dy = this.y - e.y, d = Math.hypot(dx, dy) || 1, sp = 4.4;
     s.kind = 0; s.x = e.x + (dx / d) * 0.5; s.y = e.y + (dy / d) * 0.5; s.vx = (dx / d) * sp; s.vy = (dy / d) * sp;
@@ -842,7 +850,7 @@ export class MomoSession {
         return true;
       }
     }
-    e.hp -= dmg; e.flash = 0.1;
+    e.hp -= dmg; e.flash = 0.1; e.hitAt=this.time;
     if (knock && !e.boss) { const dx = e.x - fx, dy = e.y - fy, d = Math.hypot(dx, dy) || 1; e.kx += (dx / d) * knock / e.mass; e.ky += (dy / d) * knock / e.mass; }
     if (this.pops.n < 14 || ((e.boss || e.elite) && this.pops.n < 24)) this.popup(num(dmg), e.x, e.y, (e.boss ? e.def.h : e.def.h * e.scale) + 0.2, e.boss || e.elite ? '#fde047' : '#ffffff', e.boss ? 0.8 : 0.6);
     this.sound.play('hit', 70);
@@ -855,9 +863,7 @@ export class MomoSession {
     this.kills++;
     this.score += e.score;
     const def = e.def;
-    this.effect('hex_break', e.x, e.y, e.face, e.elite ? 1.2 : .7);
-    const c = this.freed.spawn();
-    if (c) { c.kind = e.kind; c.x = e.x; c.y = e.y; c.face = e.face; c.life = 3.2; c.age = 0; c.scale = e.scale; c.elite = e.elite; }
+    this.releaseFernling(e);
     this.sound.play('kill', 60);
     if (e.elite) {
       this.elitesKilled++;
@@ -878,6 +884,11 @@ export class MomoSession {
         this.spawnEnemy('zorbling', this.x + Math.sin(a) * SPAWN_DIST, this.y + Math.cos(a) * SPAWN_DIST, false);
       }
     }
+  }
+  releaseFernling(e) {
+    const c=this.freed.spawn();
+    if(c){c.kind=e.kind;c.x=e.x;c.y=e.y;c.face=e.face;c.life=30;c.age=0;c.scale=e.scale;c.elite=e.elite;c.kx=e.kx;c.ky=e.ky;c.stride=0;c.broken=false;c.visible=true;c.outside=0;}
+    return c;
   }
   bossDown(b) {
     this.kills++;
@@ -992,7 +1003,7 @@ export class MomoSession {
   }
   compactEnemies() {
     const it = this.en.items;
-    for (let i = this.en.n - 1; i >= 0; i--) if (it[i].dead) this.en.removeAt(i);
+    for (let i = this.en.n - 1; i >= 0; i--) if (it[i].dead && it[i].freedAt < 0) this.en.removeAt(i);
   }
 
   hurt(amount, fx, fy) {
@@ -1043,7 +1054,11 @@ export class MomoSession {
     this.result = { won: true, stars, score: this.score, reason: why, stats: { kills: this.kills } };
     // The remaining Fernlings lose their hex and leave alive.
     const it = this.en.items;
-    for (let i = 0; i < this.en.n; i++) { const e = it[i]; if (!e.dead && !e.boss) { this.spray(e.x, e.y, 0.5, 0xc084fc, 4, 2); const c = this.freed.spawn(); if (c) { c.kind = e.kind; c.x = e.x; c.y = e.y; c.face = e.face; c.life = 3.2; c.age = 0; c.scale = e.scale; c.elite = e.elite; } e.dead = true; } }
+    for(let i=0;i<this.en.n;i++){const e=it[i];if(!e.dead&&!e.boss){
+      // Keep the victory crowd in its existing slots: every creature gets the
+      // full release without allocating a second victory crowd.
+      e.dead=true;e.freedAt=this.time;e.stride=0;
+    }}
     this.compactEnemies();
     this.foeShots.n = 0; this.haz.n = 0; this.shots.n = 0; this.mines.n = 0; this.bolts.n = 0;
     this.say('MORGENLICHT!', 2.5, '#fde047');
@@ -1107,7 +1122,18 @@ export class MomoSession {
     const G = this.rings.items;
     for (let i = this.rings.n - 1; i >= 0; i--) { G[i].life -= dt; if (G[i].life <= 0) this.rings.removeAt(i); }
     const C = this.freed.items;
-    for (let i = this.freed.n - 1; i >= 0; i--) { const c = C[i]; c.life -= dt; c.age += dt; if (c.age > 1.3) { c.face = Math.atan2(c.x, c.y); c.x += Math.sin(c.face) * dt * 4.6; c.y += Math.cos(c.face) * dt * 4.6; } if (c.life <= 0) this.freed.removeAt(i); }
+    for (let i=this.freed.n-1;i>=0;i--) {
+      const c=C[i],previous=c.age;c.age+=dt;c.life-=dt;
+      // The winning impact carries through; paws then plant while the curse cracks.
+      if(previous<FREED_RECOIL){const span=Math.min(dt,FREED_RECOIL-previous),k=(1-Math.exp(-span*9))/9;c.x+=c.kx*k;c.y+=c.ky*k;c.kx*=Math.exp(-span*9);c.ky*=Math.exp(-span*9);}
+      if(!c.broken&&c.age>=FREED_BREAK){c.broken=true;this.effect('hex_break',c.x,c.y,c.face,c.elite?1.2:.7);}
+      if(c.age>.75&&previous<FREED_ESCAPE)c.face=turn(c.face,Math.atan2(c.x,c.y),Math.min(dt,FREED_ESCAPE-previous)*5);
+      if(c.age>FREED_ESCAPE){const span=Math.min(dt,c.age-FREED_ESCAPE),speed=4.6*Math.min(1,(c.age-FREED_ESCAPE)/.4);c.face=turn(c.face,Math.atan2(c.x,c.y),span*5);const travel=span*speed;c.x+=Math.sin(c.face)*travel;c.y+=Math.cos(c.face)*travel;c.stride+=travel;}
+      // The renderer reports the entire current pose outside the real camera
+      // frustum. Retain for a short margin; 2D fallback uses an off-field exit.
+      if(c.age>FREED_ESCAPE)c.outside=c.visible?0:c.outside+dt;
+      if(c.outside>.2||(Math.hypot(c.x,c.y)>this.R+18&&Math.hypot(c.x-this.x,c.y-this.y)>24))this.freed.removeAt(i);
+    }
     const O = this.pops.items;
     for (let i = this.pops.n - 1; i >= 0; i--) { O[i].life -= dt; O[i].h += dt * 1.4; if (O[i].life <= 0) this.pops.removeAt(i); }
     const B = this.bolts.items;
@@ -1286,7 +1312,7 @@ export class MomoSession {
       g.fillStyle = this.boss.phase2 ? '#f97316' : '#ef4444'; roundRect(g, bx, by, Math.max(0, bw * this.boss.hp / this.boss.maxHp), 14, 6); g.fill();
       label(g, BOSSES[L.boss].name, w / 2, by + 7, 11, '#fff', 'rgba(0,0,0,.7)');
     } else {
-      const text = this.result ? (this.result.won ? 'DIE ABTEI IST SICHER' : 'MOMO RUFT DICH ZURÜCK') : L.goal === 'boss' ? `BOSS IN ${fmtTime(BOSS_AT - this.t)}` : this.goalText();
+      const text = this.result ? (this.result.won ? 'DIE ABTEI IST SICHER' : 'ZEIT ZUM AUSRUHEN') : L.goal === 'boss' ? `BOSS IN ${fmtTime(BOSS_AT - this.t)}` : this.goalText();
       label(g, text, w / 2, 96, 15, '#fff', 'rgba(0,0,0,.65)', 800);
     }
   }
@@ -1306,7 +1332,7 @@ export class MomoSession {
     const cw = narrow ? Math.min(w - 32, 380) : 214, chh = narrow ? 96 : 272, gap = narrow ? 12 : 18;
     const totalW = narrow ? cw : n * cw + (n - 1) * gap, totalH = narrow ? n * chh + (n - 1) * gap : chh;
     const x0 = (w - totalW) / 2, y0 = Math.max(116, (h - totalH) / 2 + 20);
-    label(g, ch.reason === 'workshop' ? 'WERKSTATT-HILFE — WÄHLE EINE KARTE' : ch.reason === 'chest' ? 'BEFREIUNG — WÄHLE EINE KARTE' : ch.reason === 'kit' ? 'MOMOS HILFE — WÄHLE EINE KARTE' : `LEVEL ${this.level} — WÄHLE EINE KARTE`, w / 2, y0 - 30, narrow ? 18 : 24, '#fde047', 'rgba(0,0,0,.7)', 900);
+    label(g, ch.reason === 'workshop' ? 'WERKSTATT-HILFE — WÄHLE EINE KARTE' : ch.reason === 'chest' ? 'BEFREIUNG — WÄHLE EINE KARTE' : ch.reason === 'kit' ? 'STARTVORRAT — WÄHLE EINE KARTE' : `LEVEL ${this.level} — WÄHLE EINE KARTE`, w / 2, y0 - 30, narrow ? 18 : 24, '#fde047', 'rgba(0,0,0,.7)', 900);
     const rects = this.cardRects = this.cardRects || [];
     rects.length = n;
     for (let i = 0; i < n; i++) {
@@ -1401,10 +1427,10 @@ export function drawIcon(g, id, x, y, r, color) {
 
 export const momo = {
   id: 'momo',
-  title: 'Hexennacht',
+  title: 'Fernling-Arena',
   starters: Object.values(STARTERS).map(s => ({ id: s.id, label: s.label, description: ({ ember: 'Feuer und Wärme · entwickelt sich zu Coalbear und Emberward', green: 'Samen und Ranken · entwickelt sich zu Moorgrim und Groveprince', tide: 'Blasen und Wellen · entwickelt sich zu Spraycount und Tideduke' })[s.nature] })),
   defaultStarter: 'glimmo',
-  tagline: 'Halte mit Momo und deinem Fernling die Abtei bis zum Morgen. Befreie die verzauberte Schar und entwickle deine Naturkräfte.',
+  tagline: 'Wähle deinen Fernling, entwickle seine Naturkräfte und halte bis zum Morgen durch. Brich den Bann der verzauberten Schar.',
   howTo: 'Bewege deinen Fernling per Touch, gedrückter Maustaste oder WASD/Pfeiltasten. Er greift selbst an. Bei einem Levelaufstieg wählst du mit 1–3 eine Karte. Entwicklung auf Level 5 und 10. Seltene Fossilkarten geben einen fremden Move bis Levelende. Esc pausiert, R startet neu.',
   levels: LEVELS,
   hero: 'GLIMMO',

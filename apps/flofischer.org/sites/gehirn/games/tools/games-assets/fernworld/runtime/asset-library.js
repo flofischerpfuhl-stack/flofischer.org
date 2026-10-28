@@ -3,6 +3,7 @@
  * materials and clips. Each actor gets independent nodes, morph weights and bones.
  * No implicit centering, fitting, placement, shadow or lighting policy is applied.
  */
+import { loadBytes, loadJSON, invalidateDownload } from './loading-cache.js';
 import { GLTFLoader } from '../vendor/GLTFLoader.js';
 import { recipeClips } from './rigid-clips.js';
 import { articulatedClips, inPlaceWalkRoll } from './articulated-clips.js';
@@ -51,8 +52,9 @@ export function disposeScene(scene) {
 }
 
 export class AssetLibrary {
-  constructor({ base = DEFAULT_BASE } = {}) {
+  constructor({ base = DEFAULT_BASE, onProgress = null, signal = null } = {}) {
     this.base = new URL(base, import.meta.url);
+    this.onProgress = onProgress; this.signal = signal;this.lifetime=new AbortController();
     this.loader = new GLTFLoader();
     this.jsonCache = new Map();
     this.templates = new Map();
@@ -63,15 +65,17 @@ export class AssetLibrary {
 
   assertAlive() { if (this.disposed) throw new Error('Asset library has been disposed'); }
 
+  loadSignal(signal=this.signal) { return signal ? AbortSignal.any([signal,this.lifetime.signal]) : this.lifetime.signal; }
+  setProgressListener(onProgress, signal = null) { this.onProgress = onProgress; this.signal = signal; }
+  progress(event) { this.onProgress?.(event); }
+
   json(file) {
     this.assertAlive();
     if (!this.jsonCache.has(file)) {
-      const promise = fetch(new URL(file, this.base)).then(response => {
-        if (!response.ok) throw new Error(`Asset metadata ${file}: HTTP ${response.status}`);
-        return response.json();
-      }).then(data => { this.assertAlive(); return data; }).catch(error => {
-        this.jsonCache.delete(file); throw error;
-      });
+      const promise = loadJSON(new URL(file, this.base), { onProgress: event => this.progress(event), signal: this.loadSignal() })
+        .then(data => { this.assertAlive(); return data; }).catch(error => {
+          this.jsonCache.delete(file); throw error;
+        });
       this.jsonCache.set(file, promise);
     }
     return this.jsonCache.get(file);
@@ -94,7 +98,14 @@ export class AssetLibrary {
 
   async _gltf(file) {
     this.assertAlive();
-    const data = await this.loader.loadAsync(new URL(file, this.base).href);
+    const url = new URL(file, this.base);
+    const bytes = await loadBytes(url, { onProgress: event => this.progress(event), signal: this.loadSignal() });
+    this.assertAlive();
+    const started = performance.now(); this.progress({ phase: 'parse', url: url.href, done: false });
+    let data;
+    try { data = await this.loader.parseAsync(bytes, new URL('.', url).href); }
+    catch(error) { invalidateDownload(url); throw error; }
+    this.progress({ phase: 'parse', url: url.href, done: true, milliseconds: performance.now() - started });
     if (this.disposed) { disposeScene(data.scene); throw new Error('Asset library disposed during load'); }
     this.resources.add(data.scene);
     return data;
@@ -192,9 +203,29 @@ export class AssetLibrary {
     return actor;
   }
 
+  /** Network-only speculation. No mutable nodes or GPU allocation. */
+  async prefetch(ids, { signal, onProgress } = {}) {
+    for (const item of ids) {
+      if (signal?.aborted) throw new DOMException('Laden abgebrochen', 'AbortError');
+      const id=typeof item === 'string'?item:item.id;
+      // Prefetch has an independent subscriber signal, even while a prepare runs.
+      const options={signal:this.loadSignal(signal),onProgress};
+      const selection=await loadJSON(new URL('selected-assets.json',this.base),options);
+      const entry=selection.assets.find(asset=>asset.id===id);
+      if(!entry)throw new Error(`Unknown selected Fernworld asset: ${id}`);
+      const catalog=await loadJSON(new URL(entry.catalog,this.base),options);
+      const definition=catalog.assets.find(asset=>asset.id===id);
+      if(!definition)throw new Error(`Missing selected definition: ${id}`);
+      const lod = item.lod ?? definition.defaultLod ?? entry.defaultLod;
+      const file = entry.pipeline === 'channel-mesh-v1' ? entry.files[`${lod === 'shadow' ? 'sh' : lod}.json`]
+        : definition.lods?.[lod]?.file ?? definition.file;
+      if (file) await loadBytes(new URL(file, this.base), options);
+    }
+  }
+
   dispose() {
     if (this.disposed) return;
-    this.disposed = true;
+    this.disposed = true;this.lifetime.abort();
     for (const actor of this.actors) actor.release();
     for (const scene of this.resources) disposeScene(scene);
     this.resources.clear(); this.templates.clear(); this.jsonCache.clear();

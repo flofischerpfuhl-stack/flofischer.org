@@ -59,6 +59,7 @@ export class TankSession {
     this.preview = !!env.preview;
     this.rand = rng(L.seed);
     this.hint = L.hint;
+    this.levelHintUntil = READY; // The full instruction is an opening card; active play stays unobscured.
     this.t = 0; this.result = null; this.score = 0; this.kills = 0; this.shots = 0;
     this.grid = new Uint8Array(W * H);
     this.grid.set(L.grid);
@@ -114,6 +115,11 @@ export class TankSession {
   floorAt(x, y) { const t = this.tile(x, y); return t; }
 
   // ── input ──
+  cancelInput() {
+    for (const key of Object.keys(this.keys)) this.keys[key] = false;
+    this.pad.reset();
+    this.fireQueued = false; this.mineQueued = false;
+  }
   pointer(type, x, y, e = {}) {
     if (this.result) { this.pad.reset(); return; }
     if (e.pointerType === 'mouse' || e.pointerType === 'pen' || !e.pointerType) {
@@ -905,18 +911,18 @@ export class TankSession {
         g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 2; g.beginPath(); g.arc(q.x, q.y, 9, 0, TAU); g.moveTo(q.x - 14, q.y); g.lineTo(q.x - 5, q.y); g.moveTo(q.x + 5, q.y); g.lineTo(q.x + 14, q.y); g.stroke();
       }
     }
-    // small screens: a team ring on the ground under every tank (Hazel mint, rival clubs coral: the green Banker and the
-    // black Ace on dark basalt read apart), and a dark rim plus a team ring around every shell
+    // Small screens: team rings keep the green Banker and black Ace distinct from Hazel.
     if (touch || this.proj(W / 2, H / 2, 0).s < 30) {
       for (const tk of this.tanks) {
         if (!tk.alive || tk.under || (tk.def?.ghost && !this.ghostVisible(tk))) continue;
         this.ring(g, tk.x, tk.y, tk.r * 1.2, tk.team === 0 ? (this.tournamentRingColor || '#55b582') : 'rgba(248,113,113,.8)');
       }
-      for (const s of this.shells) {
-        const q = this.proj(s.x, s.y, 0.42), r = Math.max(3.5, q.s * 0.14);
-        g.lineWidth = 2; g.strokeStyle = 'rgba(0,0,0,.55)'; g.beginPath(); g.arc(q.x, q.y, r + 1.5, 0, TAU); g.stroke();
-        g.lineWidth = 1.5; g.strokeStyle = s.team === 0 ? 'rgba(190,242,100,.95)' : 'rgba(248,113,113,.95)'; g.beginPath(); g.arc(q.x, q.y, r + 3, 0, TAU); g.stroke();
-      }
+    }
+    // Snow and sand also need contrast on desktop: a projectile always has a dark rim and its team colour.
+    for (const s of this.shells) {
+      const q = this.proj(s.x, s.y, 0.42), r = Math.max(3.5, q.s * 0.14);
+      g.lineWidth = 2; g.strokeStyle = 'rgba(0,0,0,.65)'; g.beginPath(); g.arc(q.x, q.y, r + 1.5, 0, TAU); g.stroke();
+      g.lineWidth = 1.5; g.strokeStyle = s.team === 0 ? 'rgba(190,242,100,.95)' : 'rgba(248,113,113,.95)'; g.beginPath(); g.arc(q.x, q.y, r + 3, 0, TAU); g.stroke();
     }
     // floating score pops
     for (const f of this.fx) if (f.kind === 'pop') { const q = this.proj(f.x, f.y, 1 + f.t * 1.2); label(g, f.text, q.x, q.y, 15, '#fde047'); }
@@ -954,11 +960,25 @@ export class TankSession {
       }
       g.globalAlpha = 1;
     }
-    if (this.boss && this.boss.alive) {
-      const bw = Math.min(360, w - 120), bx = (w - bw) / 2, by = 54;
+    if (this.boss && this.boss.alive && this.t >= READY) {
+      const compact = Math.min(w, h) < 560, rows = this.pad.rows;
+      let bw = Math.min(360, w - 120), bx = (w - bw) / 2, by = 54, title = this.boss.def.name, textSize = 13, hpText = '';
+      if (compact) {
+        title = {klonk:'Ganter',drill:'Quota',walker:'Brigadier',mothership:'Equality'}[this.boss.boss];
+        hpText = `${Math.max(0,this.boss.hp)}/${this.boss.maxHp}`;
+        if (this.pad.portrait) {
+          title += ` ${hpText}`; hpText = '';
+          bx = rows.left; by = rows.y + 20;
+          bw = Math.max(90, Math.min(w - 120, this.pad.btn.x - this.pad.btn.r - bx - 14));
+        } else {
+          bx = rows.left; by = rows.y + 34;
+          bw = Math.max(38, Math.min(110, this.pad.rect.x0 - bx - 12)); textSize = 10;
+        }
+      }
       g.fillStyle = 'rgba(15,23,42,.6)'; roundRect(g, bx - 4, by - 4, bw + 8, 16, 8); g.fill();
       g.fillStyle = '#ef4444'; roundRect(g, bx, by, bw * (this.boss.hp / this.boss.maxHp), 8, 4); g.fill();
-      label(g, this.boss.def.name, w / 2, by + 24, 13);
+      label(g, title, bx + bw / 2, by + 24, textSize);
+      if (hpText) label(g, hpText, bx + bw / 2, by + 38, textSize);
     }
   }
   ring(g, x, y, r, color, fill = 0) {

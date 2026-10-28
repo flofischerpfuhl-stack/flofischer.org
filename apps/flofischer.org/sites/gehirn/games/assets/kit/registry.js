@@ -194,7 +194,7 @@ export const LEAVES = [
   // ── Games ──────────────────────────────────────────────────────────────────
   T('games', 'fern-rangers', 'Fern Rangers', 'Fern Rangers', '#fern-rangers', { sub: 'fern-rangers', icon: 'crosshair', desc: 'Steer your squad through number gates and outgun the horde.', syn: ['game', 'games', 'play', 'shooter', 'arcade', 'machines', 'gates', 'squad', 'runner'] }),
   T('games', 'pips-tower', 'Pip’s Tower', 'Pip’s Tower', '#pips-tower', { sub: 'pips-tower', icon: 'pin', desc: 'Pull the pins in the right order to save the hero.', syn: ['game', 'games', 'play', 'puzzle', 'pull the pin', 'pin', 'rescue', 'pips tower', 'tower'] }),
-  T('games', 'momo', 'Hexennacht', 'Hexennacht', '#momo', { sub: 'momo', icon: 'wrench', desc: 'Choose a Fernling, develop its moves and free the abbey from the hex.', syn: ['game', 'games', 'play', 'arena', 'survivor', 'horde', 'roguelite', 'upgrade', 'cards', 'momo', 'fernling'] }),
+  T('games', 'momo', 'Fernling-Arena', 'Fernling-Arena', '#momo', { sub: 'momo', icon: 'wrench', desc: 'Choose a Fernling, evolve its abilities and break the hex in four regions.', syn: ['game', 'games', 'play', 'arena', 'survivor', 'horde', 'roguelite', 'upgrade', 'cards', 'momo', 'fernling'] }),
   T('games', 'tanks', 'Bounce Brigade', 'Bounce Brigade', '#tanks', { sub: 'tanks', icon: 'crosshair', desc: 'Toy tank tournament: bank rubber shells off the walls and outplay rival clubs.', syn: ['game', 'games', 'play', 'tank', 'tanks', 'ricochet', 'bounce', 'mines', 'arena', 'tournament', 'hazel'] }),
 ];
 

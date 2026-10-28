@@ -151,7 +151,7 @@ export class PipsTower3D {
       ],
       gem: [
         new THREE.OctahedronGeometry(PR * 1.35, 0),
-        mat(0x66ba8e, { emissive: 0x164b27, emissiveIntensity: 0.3 }),
+        mat(0xe8b84a, { emissive: 0x6b3906, emissiveIntensity: 0.2 }),
         false,
       ],
       sand: [
@@ -301,9 +301,9 @@ export class PipsTower3D {
     }));
     this.reactionSlot = 0;
   }
-  prepare(sess) {
+  prepare(sess, options = {}) {
     this.preparing = this.preparing
-      .then(() => this._prepare(sess))
+      .then(() => this._prepare(sess, options))
       .catch((error) => {
         this.releaseLevel();
         throw error;
@@ -313,7 +313,10 @@ export class PipsTower3D {
     this.preparing = job.catch(() => undefined);
     return job;
   }
-  async _prepare(sess) {
+  async _prepare(sess, { onProgress, signal } = {}) {
+    signal?.throwIfAborted();
+    this.library.setProgressListener(onProgress, signal);
+    this.channels.setProgressListener(onProgress, signal);
     if (this.disposed) throw new Error("Pip renderer disposed");
     if (this.level === sess && this.ready) return;
     const ids = new Set([
@@ -321,7 +324,7 @@ export class PipsTower3D {
       "BISCUIT_GLEAMPUP",
       "PULL_PIN",
       "PIN_SOCKET",
-      "FERNSTONE_GREEN",
+      "GROSCHEN_COIN",
       "FERNSTONE_CACHE",
     ]);
     for (const en of sess.enemies)
@@ -361,6 +364,8 @@ export class PipsTower3D {
     ]);
     if (this.disposed)
       throw new Error("Pip renderer disposed during preparation");
+    signal?.throwIfAborted();
+    onProgress?.({phase: "prepare", stage: "Schatzkammer vorbereiten …", done: false});
     this.releaseLevel();
     this.ready = false;
     this.prepared = prepared;
@@ -525,6 +530,18 @@ export class PipsTower3D {
       -10,
       0,
     );
+    // The chest keeps its authored shape; only its green stone inlays become gold.
+    this.goldChestGeometry ||= new Map();
+    cache.handle.scene.traverse(o => {
+      if (!o.isMesh || !o.geometry.attributes.color) return;
+      if (this.goldChestGeometry.has(o.geometry)) { o.geometry = this.goldChestGeometry.get(o.geometry); return; }
+      const source = o.geometry, g = source.clone(), colors = g.attributes.color;
+      for (let i = 0; i < colors.count; i++) {
+        const r = colors.getX(i), green = colors.getY(i), b = colors.getZ(i);
+        if (green > r * 1.4 && green > b * 1.2) colors.setXYZ(i, Math.min(1, green * 1.65), green, 0.035);
+      }
+      this.goldChestGeometry.set(source, g); o.geometry = g; this.geometry.add(g);
+    });
     this.cache = cache;
     this.granny = null;
     this.glider = null;
@@ -540,24 +557,25 @@ export class PipsTower3D {
       this.escape.visible = false;
     }
     if (!this.nativeGem) {
-      const template = await this.library.template("FERNSTONE_GREEN", "lo");
+      const template = await this.library.template("GROSCHEN_COIN", "lo");
       template.scene.updateMatrixWorld(true);
       const pieces = [];
       template.scene.traverse((o) => {
         if (o.isMesh) pieces.push(o);
       });
       if (pieces.length !== 1)
-        throw new Error("Fernstone particle expects one authored primitive");
+        throw new Error("Groschen particle expects one authored primitive");
       const src = pieces[0],
         g = src.geometry.clone().applyMatrix4(src.matrixWorld);
-      g.translate(0, -0.1855, 0);
-      g.scale(34, 34, 34);
+      // Keep the authored mesh-to-asset rotation: its detailed face already faces +Z.
+      g.translate(0, 0, -0.00675);
+      g.scale(47, 47, 47);
       this.geometry.add(g);
       this.parts.gem.geometry = g;
       this.parts.gem.material = src.material.clone();
-      this.parts.gem.material.color.set(0x8cc9a4);
-      this.parts.gem.material.emissive.set(0x123d22);
-      this.parts.gem.material.emissiveIntensity = 0.18;
+      this.parts.gem.material.color.set(0xffffff);
+      this.parts.gem.material.emissive.set(0x5a3305);
+      this.parts.gem.material.emissiveIntensity = 0.12;
       this.materials.add(this.parts.gem.material);
       this.nativeGem = true;
     }
@@ -566,7 +584,9 @@ export class PipsTower3D {
     this.effects.clear();
     this.bakeDirty = true;
     this.sceneryFor = null;
+    signal?.throwIfAborted();
     this.ready = true;
+    onProgress?.({phase: "prepare", stage: "Schatzkammer bereit", done: true});
   }
   releaseLevel() {
     this.scenery?.dispose();
@@ -988,9 +1008,9 @@ export class PipsTower3D {
       if (p.t === "gem")
         q.setFromEuler(
           e.set(
-            ((i * 37) % 10) * 0.2,
-            sess.t * 0.8 + (i % 7) * 0.9,
-            ((i * 13) % 9) * 0.15,
+            Math.sin(sess.t * 1.2 + i) * 0.16,
+            Math.sin(sess.t * 1.6 + i * 0.9) * 0.3,
+            sess.t * 0.45 + i * 0.9,
           ),
         );
       else if (p.t === "stone" || p.t === "sand")
@@ -1015,6 +1035,17 @@ export class PipsTower3D {
         sc.set(k, k, k),
       );
       mesh.setMatrixAt(n, m4);
+    }
+    // Reuse the same native coin batch for collection; coins visibly enter the chest.
+    for (const c of sess.coins) {
+      const n = counts.gem++;
+      if (n >= meshes.gem.instanceMatrix.count) break;
+      const f = 1 - c.life / c.max, target = this.cache.root.position;
+      q.setFromEuler(e.set(0, Math.sin(f * Math.PI) * 0.35, f * 4));
+      m4.compose(v.set(BX(c.x) + (target.x - BX(c.x)) * f,
+        BY(c.y) + (target.y + 12 - BY(c.y)) * f + Math.sin(f * Math.PI) * 30, 24),
+        q, sc.setScalar(1 - f * 0.45));
+      meshes.gem.setMatrixAt(n, m4);
     }
     for (const [t, mesh] of Object.entries(meshes)) {
       mesh.count = Math.min(counts[t], mesh.instanceMatrix.count);
@@ -1061,12 +1092,19 @@ export class PipsTower3D {
           f.life * 8,
         );
     }
-    // Fernstones flying to Pip
+    // Golden collection glint follows the native coin into the chest
     for (const c of sess.coins) {
       const q = 1 - c.life / c.max;
-      const x = c.x + (sess.hero.x - c.x) * q,
-        y = c.y + (sess.hero.y - 40 - c.y) * q - Math.sin(q * Math.PI) * 30;
-      gl.add(BX(x), BY(y), 24, PR * (1.3 - q * 0.6), 0x5ff0c8);
+      const target = this.cache.root.position;
+      const x = BX(c.x) + (target.x - BX(c.x)) * q,
+        y = BY(c.y) + (target.y + 12 - BY(c.y)) * q + Math.sin(q * Math.PI) * 30;
+      gl.add(x, y, 25, PR * (0.8 - q * 0.4), 0xffce62);
+    }
+    for (let i = 0, n = 0; i < sess.parts.length && n < 16; i++) {
+      const p = sess.parts[i];
+      if (p.dead || p.t !== "gem") continue;
+      const pulse = Math.sin(sess.t * 2.1 + i * 2.4);
+      if (pulse > 0.96) { fx.add(BX(p.x) + 3, BY(p.y) + 3, 18, 0.6 + (pulse - 0.96) * 25, 0xfff5c4, sess.t); n++; }
     }
     // lava glow
     for (let i = 0; i < sess.parts.length; i += 3) {
