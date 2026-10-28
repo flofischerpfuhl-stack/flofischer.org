@@ -1,4 +1,5 @@
 import { mockupName } from "./mockups.js";
+import { fetchGameModel } from "./game-models.js";
 
 /**
  * Host-based static routing for flofischer.org
@@ -47,7 +48,7 @@ function candidatePaths(site, pathname) {
   return out;
 }
 
-function withSiteHeaders(response, pathname) {
+function withSiteHeaders(response, pathname, encodeBody = "automatic") {
   const headers = new Headers(response.headers);
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -72,10 +73,16 @@ function withSiteHeaders(response, pathname) {
     headers.set("Cache-Control", "public, max-age=3600");
   }
 
+  if (mockup === "games") {
+    headers.set("Cache-Control", `no-cache, must-revalidate${encodeBody === "manual" ? ", no-transform" : ""}`);
+    headers.set("Referrer-Policy", "no-referrer");
+  }
+
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
     headers,
+    encodeBody,
   });
 }
 
@@ -117,6 +124,11 @@ export default {
       ].filter(Boolean));
       if (res) return withSiteHeaders(res, pathname);
       return withSiteHeaders(new Response("Not found", { status: 404 }), pathname);
+    }
+
+    if (site === "gehirn") {
+      const model = await fetchGameModel(request, env, pathname);
+      if (model) return withSiteHeaders(model, pathname, "manual");
     }
 
     // A directory index is only served under its trailing-slash URL, otherwise
