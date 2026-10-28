@@ -1,0 +1,168 @@
+{
+  "local_forward_axis": "+Z glTF",
+  "runtime_sockets": {
+    "Muzzle_L": {
+      "world_position_gltf_m": [
+        -3.499999761581421,
+        1.130000114440918,
+        0.20000000298023224
+      ],
+      "world_forward_gltf": [
+        -1.0,
+        0.0,
+        2.0281595425331034e-07
+      ],
+      "node_local_translation": [
+        -0.34999990463256836,
+        0,
+        0
+      ],
+      "node_local_rotation_xyzw": [
+        0,
+        -0.7071067094802856,
+        0,
+        0.7071068286895752
+      ],
+      "extras": {
+        "socket": true
+      }
+    },
+    "Muzzle_R": {
+      "world_position_gltf_m": [
+        3.499999761581421,
+        1.130000114440918,
+        0.20000000298023224
+      ],
+      "world_forward_gltf": [
+        1.0,
+        0.0,
+        2.0281595425331034e-07
+      ],
+      "node_local_translation": [
+        0.34999990463256836,
+        0,
+        0
+      ],
+      "node_local_rotation_xyzw": [
+        0,
+        0.7071067094802856,
+        0,
+        0.7071068286895752
+      ],
+      "extras": {
+        "socket": true
+      }
+    },
+    "CentralAttack": {
+      "world_position_gltf_m": [
+        0.0,
+        0.9800000190734863,
+        1.600000023841858
+      ],
+      "world_forward_gltf": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "node_local_translation": [
+        0,
+        0.9800000190734863,
+        1.600000023841858
+      ],
+      "node_local_rotation_xyzw": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "extras": {
+        "socket": true
+      }
+    },
+    "WeakpointSocket": {
+      "world_position_gltf_m": [
+        0.0,
+        0.9800000190734863,
+        1.3300000429153442
+      ],
+      "world_forward_gltf": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "node_local_translation": [
+        0,
+        0.9800000190734863,
+        1.3300000429153442
+      ],
+      "node_local_rotation_xyzw": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "extras": {
+        "socket": true,
+        "radius_m": 0.36
+      }
+    },
+    "EscapePodDock": {
+      "world_position_gltf_m": [
+        0.7200000286102295,
+        2.0899999141693115,
+        -0.7200000286102295
+      ],
+      "world_forward_gltf": [
+        0.0,
+        1.0,
+        -1.3435884227419592e-07
+      ],
+      "node_local_translation": [
+        0.7200000286102295,
+        2.0899999141693115,
+        -0.7200000286102295
+      ],
+      "node_local_rotation_xyzw": [
+        -0.7071068286895752,
+        0,
+        0,
+        0.7071068286895752
+      ],
+      "extras": {
+        "socket": true,
+        "launch_axis": "glTF +Y",
+        "clear_radius_m": 0.37,
+        "external_generic_pod": true
+      }
+    }
+  },
+  "live_all_clips_all_keytimes": "qa/GLB_REIMPORT_QA.json",
+  "weakpoint_radius_m": 0.36,
+  "pod_launch_radius_m": 0.37,
+  "pod_corridor_checks": {
+    "Hero": {
+      "radius_m": 0.37,
+      "triangle_clipped_clearance_m": 0.43346016015349903,
+      "pose": "EscapeHatch 1.2s",
+      "passed": true
+    },
+    "Lo": {
+      "radius_m": 0.37,
+      "triangle_clipped_clearance_m": 0.43345463275909424,
+      "pose": "EscapeHatch 1.2s",
+      "passed": true
+    },
+    "Far": {
+      "radius_m": 0.37,
+      "triangle_clipped_clearance_m": 0.43345463275909424,
+      "pose": "EscapeHatch 1.2s",
+      "passed": true
+    },
+    "Shadow": {
+      "radius_m": 0.37,
+      "triangle_clipped_clearance_m": 0.44073917154763953,
+      "pose": "EscapeHatch 1.2s",
+      "passed": true
+    }
+  }
+}

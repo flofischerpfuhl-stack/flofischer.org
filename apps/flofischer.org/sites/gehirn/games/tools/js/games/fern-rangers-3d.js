@@ -1,56 +1,36 @@
-/**
- * Fern Rangers in 3D (Three.js). Draws a FernRangersSession; the 2D overlay (squad count, popups, health numbers, boss
- * bar, grenade button, screen flashes) stays on the session's canvas pass, projected through this camera.
- * World mapping: session x → three x, distance ahead z → three −z, the squad stands at the origin.
- *
- * Scenery is procedural per world (no photo backdrops, nothing to blur): a baked panorama (world/panorama.js: painted
- * sky with clouds and sun, terrain with trees, houses and the landmark) on one plane at the back, the sculpted props of
- * the world along the road (scripts/games-sculpt), a looping strip of roadside dressing (world/roadside.js: fences,
- * lamps, flowers, stones, ruins, snow banks or crystals, gravel shoulders) and, on the meadows and dunes, wind-blown
- * grass at the roadside.
- */
-import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, MergedCrowd, Particles, TextPlane, projector, LOW_GPU } from './three-kit.js';
-import { loadModel } from './models.js';
+/** Fern Rangers: authored campaign and Sturmbastion assets, bounded motion
+ * batches, native sockets and shared WebGL context. Gameplay stays in sessions. */
+import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, TextPlane, projector, LOW_GPU } from './three-kit.js';
+import { RangersArt, ENEMY_ASSET, BOSS_ASSET } from './fern-rangers-art.js';
+import { RangerSettlements } from './fern-rangers-scenery.js';
+import { RangerProps } from './fern-rangers-props.js';
+import { Sturmbastion3D } from './fern-rangers-sturmbastion-3d.js';
 import { tuft, windy } from './world/island.js';
-import { Panorama } from './world/panorama.js';
-import { RoadLoop } from './world/roadside.js';
-import { ROAD, WEAPONS, BOSSES, PICKUPS, gateText, gateGood, laserOn, laserWarn, geyserState } from './fern-rangers.js';
 
-// The sculpted cast: the squad mixes the four Ranger species; aliens and robots come the other way.
-const SPECIES = ['RANGER_BUNNY', 'RANGER_FOX', 'RANGER_HEDGEHOG', 'RANGER_RACCOON'];
-const ENEMY_MODEL = { zorbling: 'ZORBLING', zipper: 'ZIPPER', klonk: 'KLONKBOT', shield: 'SHIELD_KLONK', spitter: 'SPITTER', blorb: 'BLORB', buzz: 'BUZZBOT' };
-const ENEMY_SCALE = { zorbling: 1.35, zipper: 1.0, klonk: 1.15, shield: 1.1, spitter: 1.3, blorb: 1.0, buzz: 1.25 };
-const ENEMY_MAX = { zorbling: 220, zipper: 120, klonk: 140, shield: 50, spitter: 40, blorb: 50, buzz: 80 };
-const BOSS_MODEL = { tank: 'KLONK_TANK', drill: 'DRILL_MECH', walker: 'FROST_WALKER', mothership: 'UFO' };
-const BOSS_SCALE = { tank: 2.3, drill: 2.4, walker: 2.6, mothership: 1.7 };
-const load = (name, lods = ['lo', 'sh']) => Promise.all(lods.map((l) => loadModel(name, l).catch(() => null)));
-const CAST = Object.fromEntries(await Promise.all([...SPECIES, ...Object.values(ENEMY_MODEL)].map(async (name) => {
-  const [model, shadowModel] = await load(name);
-  return [name, { model, shadowModel }];
-})));
-const BOSS_CAST = Object.fromEntries(await Promise.all(Object.entries(BOSS_MODEL).map(async ([k, name]) => [k, { model: (await load(name, ['lo']))[0] }])));
+import { RoadLoop } from './world/roadside.js';
+import { ROAD, WEAPONS, BOSSES, LANES_MAX } from './fern-rangers.js';
 
 const FAR = 92;
 const THEMES = {
   meadow: {
     ground: 't-grass', sky: { top: 0x4f9ef0, horizon: 0xe4f3ff }, fog: 0xd2e8fa,
     light: { sun: 0xfff1d6, sky: 0xd6ecff, ground: 0x4f6e2c, intensity: 2.6, ambient: 1.2 }, exposure: 1.05,
-    near: ['TREE_ROUND', 'BUSH', 'TREE_ROUND', 'ROCK', 'BUSH'], far: ['COTTAGE', 'TREE_ROUND', 'WINDMILL', 'TREE_ROUND', 'COTTAGE'], grass: { colour: [0.27, 0.55, 0.32], height: 0.24 },
+    near: ['woodland_birch_young','woodland_bush_flowering','meadow_fern_arching','fw_granite_moss'], far: ['woodland_oak_old','fw_wall_stone_arch','fw_bridge_wood'], grass: { colour: [0.27, 0.55, 0.32], height: 0.24 },
   },
   dunes: {
     ground: 't-sand', sky: { top: 0x5f93db, horizon: 0xffe2b0 }, fog: 0xf6dcb4,
     light: { sun: 0xffd29a, sky: 0xffe3c2, ground: 0x9a6b3a, intensity: 2.6, ambient: 1.1 }, exposure: 1.05,
-    near: ['CACTUS', 'DESERT_ROCK', 'CACTUS', 'PALM'], far: ['MESA', 'DESERT_ROCK', 'PALM'], grass: { colour: [0.11, 0.42, 0.5], height: 0.18 },
+    near: ['woodland_palm_sahrun','fw_sandstone_bedded','meadow_reed'], far: ['fw_wall_stone_arch','fw_pillar_carved','woodland_palm_sahrun'], grass: { colour: [0.11, 0.42, 0.5], height: 0.18 },
   },
   frost: {
     ground: 't-snow', sky: { top: 0x3f78c8, horizon: 0xeaf5ff }, fog: 0xdfecfa,
     light: { sun: 0xffffff, sky: 0xe0f0ff, ground: 0xb0c4d8, intensity: 2.3, ambient: 1.1 }, exposure: 0.95,
-    near: ['PINE_SNOW', 'SNOW_ROCK', 'PINE_SNOW', 'ICE_CRYSTAL'], far: ['PINE_SNOW', 'OBSERVATORY', 'PINE_SNOW'], grass: null,
+    near: ['woodland_spruce_tiered','fw_snow_wind_drift','fw_ice_crystal_cluster'], far: ['fw_cliff_straight','fw_wall_stone_arch','woodland_spruce_tiered'], grass: null,
   },
   ember: {
     ground: 't-lavarock', sky: { top: 0x2a1b40, horizon: 0xe0704a }, fog: 0x6a3446,
     light: { sun: 0xffb27a, sky: 0xff9a6a, ground: 0x3a1408, intensity: 2.2, ambient: 1.0 }, exposure: 1.05,
-    near: ['BASALT', 'FERNSTONE', 'BASALT', 'ROCK'], far: ['VOLCANO', 'BASALT'], grass: { colour: [0.06, 0.35, 0.22], height: 0.15 }, ufo: true,
+    near: ['fw_basalt_columns','fw_petra_raw_fossil','fw_lava_fissure'], far: ['fw_cliff_corner','fw_wall_stone_arch','fw_basalt_columns'], grass: { colour: [0.06, 0.35, 0.22], height: 0.15 }, ufo: true,
   },
 };
 
@@ -64,6 +44,11 @@ function canvasTex(w, h, draw, repeat) {
   return t;
 }
 const hash = (n) => { const s = Math.sin(n * 12.9898) * 43758.5453; return s - Math.floor(s); };
+// particle colours arrive as CSS strings; parse each one once
+const COLORS = new Map();
+const colorOf = (css) => { let c = COLORS.get(css); if (!c) { c = new THREE.Color(css); COLORS.set(css, c); } return c; };
+const WHITE = new THREE.Color(0xffffff);
+const SHOTS_MAX = 640;
 
 /** Instanced sculpted props that scroll past along the roadside; positions come from a hash of their slot. */
 class Roadside {
@@ -102,25 +87,7 @@ class Roadside {
     k.n++;
   }
   end() { for (const k of this.kinds) for (const { mesh } of k.meshes) { mesh.count = k.n || 0; mesh.instanceMatrix.needsUpdate = true; } }
-  dispose(scene) { for (const k of this.kinds) for (const { mesh } of k.meshes) { scene.remove(mesh); mesh.material.dispose(); } }
-}
-
-/** Little round icons for the pickups, drawn once. */
-function pickupIcon(type) {
-  return canvasTex(128, 128, (g) => {
-    const col = PICKUPS[type].color;
-    g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.arc(64, 68, 56, 0, 7); g.fill();
-    g.fillStyle = col; g.beginPath(); g.arc(64, 62, 54, 0, 7); g.fill();
-    g.lineWidth = 8; g.strokeStyle = '#fff'; g.stroke();
-    g.fillStyle = '#fff'; g.strokeStyle = '#fff'; g.lineCap = 'round'; g.lineJoin = 'round';
-    if (type === 'medkit') { g.fillRect(52, 34, 24, 56); g.fillRect(36, 50, 56, 24); }
-    else if (type === 'grenade') { g.beginPath(); g.arc(64, 70, 24, 0, 7); g.fill(); g.fillRect(56, 36, 16, 14); g.lineWidth = 6; g.beginPath(); g.arc(80, 38, 9, 3, 6); g.stroke(); }
-    else if (type === 'freeze') { g.lineWidth = 7; for (let i = 0; i < 3; i++) { const a = (i * Math.PI) / 3; g.beginPath(); g.moveTo(64 - Math.cos(a) * 30, 62 - Math.sin(a) * 30); g.lineTo(64 + Math.cos(a) * 30, 62 + Math.sin(a) * 30); g.stroke(); } }
-    else if (type === 'bubble') { g.lineWidth = 7; g.beginPath(); g.arc(64, 62, 26, 0, 7); g.stroke(); g.beginPath(); g.arc(56, 52, 7, 0, 7); g.fill(); }
-    else if (type === 'turret') { g.fillRect(44, 60, 40, 22); g.fillRect(58, 36, 12, 28); g.fillRect(40, 82, 48, 8); }
-    else if (type === 'double') { g.font = '900 52px Geist, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('2×', 64, 64); }
-    else if (type === 'revive') { g.beginPath(); g.moveTo(64, 92); g.bezierCurveTo(20, 60, 36, 26, 64, 46); g.bezierCurveTo(92, 26, 108, 60, 64, 92); g.fill(); }
-  });
+  dispose(scene) { for (const k of this.kinds) for (const { mesh } of k.meshes) { scene.remove(mesh); mesh.material.dispose();mesh.dispose(); } }
 }
 
 export class FernRangers3D {
@@ -129,23 +96,22 @@ export class FernRangers3D {
     // Shadows are rendered every second frame: figures move a few centimetres per frame, the lag is invisible.
     this.renderer.shadowMap.autoUpdate = false;
     this.frame = 0;
-    this.scene = new THREE.Scene();
+    this.campaignScene = new THREE.Scene();
     // Real reflections only where they show (figures, gates, barrels); ground, road and props get the same soft
     // environment light from a gradient (three-kit cheapIbl) instead of two cube-map lookups per pixel.
     this.env = studioEnvironment(this.renderer);
-    this.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 500);
+    this.campaignCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 500);
     this.themeName = null;
-    this.gates = new Map(); this.props = new Map(); this.pool = new Map();
     this.w = 1; this.h = 1;
     this.uniforms = { uTime: { value: 0 } };
     this.build();
   }
 
+  get scene(){return this.prepared?.mode==='sturmbastion'?this.bonus.scene:this.campaignScene;}
+  get camera(){return this.prepared?.mode==='sturmbastion'?this.bonus.camera:this.campaignCamera;}
+
   build() {
     const s = this.scene;
-    // the horizon: one baked panorama plane (rebaked per world and screen size)
-    this.pano = new Panorama();
-    s.add(this.pano.mesh);
     this.far = new THREE.Group(); s.add(this.far);
     // Opaque near ground and road (cheap: early depth rejects everything behind them) plus thin transparent strips at
     // the far end that fade into the fog. Texture offsets of strip and main plane are kept continuous.
@@ -164,6 +130,7 @@ export class FernRangers3D {
     this.roadFar = plane(ROAD * 2, STRIP, 20 - NEAR_LEN, cheap(mat(0xffffff, { roughness: 0.85, map: asphaltFar, transparent: true, depthWrite: false })));
     this.roadFar.material.alphaMap = fade;
     this.nearLen = NEAR_LEN; this.strip = STRIP;
+    this.emberBanks=[-1,1].map(side=>{const bank=new THREE.Mesh(new THREE.BoxGeometry(17,.24,NEAR_LEN+STRIP),cheap(mat(0x343942,{map:texture('t-lavarock',{repeat:[1.7,(NEAR_LEN+STRIP)/10]}),roughness:.95})));bank.position.set(side*(ROAD+8.5),-.13,20-(NEAR_LEN+STRIP)/2);bank.visible=false;s.add(bank);return bank;});
     const curbTex = canvasTex(64, 64, (g, w, h) => { g.fillStyle = '#f4f4f5'; g.fillRect(0, 0, w, h); g.fillStyle = '#4c8f3a'; g.fillRect(0, 0, w, h / 2); }, [1, (FAR + 40) / 2]);
     this.curbs = [-1, 1].map((side) => {
       const m = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, FAR + 40), cheap(mat(0xffffff, { map: curbTex, roughness: 0.6 })));
@@ -189,19 +156,14 @@ export class FernRangers3D {
     s.add(this.finish);
 
     this.lights = addLights(s, { shadowBox: 13, mapSize: 2048 });
-    // one crowd per species; soldier i is species i % 4, so each crowd holds a quarter of the 100-soldier cap; the
-    // depth pre-pass keeps the mixed squad as cheap as one sorted crowd
-    this.squads = SPECIES.map((n) => new MergedCrowd(s, null, 25, { ...CAST[n], prepass: true }));
-    this.enemies = Object.fromEntries(Object.entries(ENEMY_MODEL).map(([type, name]) => [type, new MergedCrowd(s, null, ENEMY_MAX[type], CAST[name])]));
-    this.bosses = Object.fromEntries(Object.entries(BOSS_CAST).map(([k, c]) => [k, c.model ? new MergedCrowd(s, null, 1, { model: c.model }) : null]));
-    this.caged = new MergedCrowd(s, null, 12, CAST.RANGER_FOX);
-    this.bullets = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.045, 0.8, 2, 6), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }), 600);
+    // all tracers in one instanced draw; matrices are written straight into the instance buffer (see drawShots)
+    this.bullets = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.045, 0.8, 2, 6), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }), SHOTS_MAX);
     this.bullets.frustumCulled = false; this.bullets.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     s.add(this.bullets);
     const additive = (color, opacity = 0.9) => new THREE.MeshBasicMaterial({ color, toneMapped: false, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false });
-    this.flashes = new Particles(s, 40, new THREE.SphereGeometry(1, 8, 6), additive(0xffffff));
+    this.flashes = new Particles(s, LANES_MAX + 4, new THREE.SphereGeometry(1, 8, 6), additive(0xffffff));
     this.sparks = new Particles(s, 800);
-    this.gooFx = new Particles(s, 40, new THREE.SphereGeometry(1, 12, 8), new THREE.MeshStandardMaterial({ color: 0x8dff4a, emissive: 0x3a8a10, emissiveIntensity: 0.8, roughness: 0.15 }));
+    this.gooFx = new Particles(s, 40, new THREE.SphereGeometry(1, 12, 8), new THREE.MeshStandardMaterial({ color: 0xd5f4ee, emissive: 0x416e6b, emissiveIntensity: 0.8, roughness: 0.15 }));
     this.grenadeFx = new Particles(s, 8, new THREE.SphereGeometry(1, 10, 8), new THREE.MeshStandardMaterial({ color: 0x3f6b2a, roughness: 0.4, metalness: 0.3 }));
     this.rings = Array.from({ length: 6 }, () => {
       const r = new THREE.Mesh(new THREE.TorusGeometry(1, 0.08, 6, 32), additive(0xffd36b, 1));
@@ -215,29 +177,7 @@ export class FernRangers3D {
     this.bubble = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 16), new THREE.MeshPhysicalMaterial({ color: 0xc4b5fd, transparent: true, opacity: 0.22, roughness: 0.05, metalness: 0, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide }));
     this.bubble.visible = false; s.add(this.bubble);
     this.turret = new THREE.Group();
-    { const steel = mat(0x8f959e, { metalness: 0.6, roughness: 0.3 }), orange = mat(0x5d7a35, { roughness: 0.5 });
-      const legs = [0, 1, 2].map((i) => { const l = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.6, 6), steel); const a = (i / 3) * Math.PI * 2; l.position.set(Math.cos(a) * 0.15, 0.25, Math.sin(a) * 0.15); l.rotation.set(Math.sin(a) * 0.4, 0, -Math.cos(a) * 0.4); return l; });
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 10), orange); head.position.y = 0.6;
-      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.6, 10), steel); barrel.rotation.x = Math.PI / 2; barrel.position.set(0, 0.62, -0.3);
-      this.turret.add(...legs, head, barrel); this.turret.traverse((o) => { o.castShadow = true; }); }
-    this.turret.visible = false; s.add(this.turret);
     applyIbl(s, this.env, 0.55);
-    this.barrelGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.9, 16);
-    this.ringGeo = new THREE.TorusGeometry(0.345, 0.035, 6, 18);
-    this.signGeo = new THREE.CircleGeometry(0.15, 3);
-    this.crateGeo = new THREE.BoxGeometry(0.9, 0.9, 0.9);
-    this.glowGeo = new THREE.BoxGeometry(1.02, 1.02, 1.02);
-    this.postGeo = new THREE.CylinderGeometry(0.08, 0.1, 1.3, 10);
-    this.barGeo = new THREE.CylinderGeometry(0.035, 0.035, 1.05, 6);
-    this.propMats = {
-      barrel: mat(0xd7261e, { metalness: 0.35, roughness: 0.35 }), ring: mat(0x3a3a3a, { metalness: 0.6, roughness: 0.3 }),
-      sign: new THREE.MeshBasicMaterial({ color: 0xfde047 }), crate: mat(0xffffff, { map: texture('t-wood', { repeat: [1, 1] }), roughness: 0.8 }),
-      steel: mat(0x8f959e, { metalness: 0.6, roughness: 0.3 }), tin: mat(0xe07a2c, { metalness: 0.3, roughness: 0.4 }), dark: mat(0x2a2c31, { metalness: 0.4, roughness: 0.5 }),
-      energy: additive(0x5ef0ff, 0.55), laser: additive(0xff3b5c, 0.8), ice: new THREE.MeshPhysicalMaterial({ color: 0xcdeeff, roughness: 0.06, metalness: 0, clearcoat: 1, transparent: true, opacity: 0.75 }),
-      crater: mat(0x2a2022, { roughness: 0.9 }), lava: new THREE.MeshBasicMaterial({ color: 0xff6a1f, toneMapped: false, transparent: true }),
-      plume: additive(0xff8a3a, 0.75), wall: mat(0x7d8da3, { roughness: 0.7 }),
-    };
-    this.pickupMats = Object.fromEntries(Object.keys(PICKUPS).map((k) => [k, new THREE.SpriteMaterial({ map: pickupIcon(k), depthWrite: false })]));
     this.grass = null;
   }
 
@@ -247,6 +187,7 @@ export class FernRangers3D {
     this.themeName = key;
     const th = THEMES[name] || THEMES.meadow;
     this.th = th;
+    for(const bank of this.emberBanks)bank.visible=name==='ember';
     this.tile = 10;
     for (const [m, len] of [[this.ground, this.nearLen], [this.groundFar, this.strip]]) {
       m.material.map = texture(th.ground, { repeat: [400 / this.tile, len / this.tile] });
@@ -262,20 +203,20 @@ export class FernRangers3D {
     if (this.roadside) this.roadside.dispose(this.scene);
     if (this.farProps) this.farProps.dispose(this.scene);
     this.roadside = null; this.farProps = null;
-    const near = await Promise.all(th.near.map((n) => loadModel(n, 'lo').catch(() => null)));
-    const far = await Promise.all(th.far.map((n) => loadModel(n, 'lo').catch(() => null)));
+    const near = await Promise.all(th.near.map(n => this.art.library.model(n,'lo')));
+    const far = await Promise.all(th.far.map(n => this.art.library.model(n,'lo')));
     if (this.themeName !== key) return;
     const world = ['meadow', 'dunes', 'frost', 'ember'].indexOf(name);
-    this.pano.build({ world: Math.max(0, world), dark, low: LOW_GPU, fog: th.fog, light: th.light });
-    this.panoDirty = true;
+    this.scene.background = new THREE.Color(th.fog);
     if (this.loop) { this.scene.remove(this.loop.group, this.loop.static); this.loop.dispose(); }
+    this.settlements?.dispose();this.settlements=await RangerSettlements.create(this.art.library,this.scene,Math.max(0,world),this.env);
     this.loop = new RoadLoop({ world: Math.max(0, world), road: ROAD, P: 128, low: LOW_GPU, dark });
     this.scene.add(this.loop.group, this.loop.static);
     this.roadside = new Roadside(this.scene, near, 40);
     this.farProps = new Roadside(this.scene, far, 12);
     // far props stand outside the shadow box: no shadow pass for them
     for (const k of this.farProps.kinds) for (const { mesh } of k.meshes) mesh.castShadow = false;
-    if (this.grass) { this.scene.remove(this.grass); this.grass = null; }
+    if (this.grass) { this.scene.remove(this.grass);this.grass.geometry.dispose();this.grass.material.dispose();this.grass.dispose(); this.grass = null;this.grassMats=false; }
     if (th.grass && !LOW_GPU) this.grass = this.makeGrass(th.grass);
     applyIbl(this.scene, this.env, 0.55);
     this.warmedFor = null;
@@ -288,7 +229,7 @@ export class FernRangers3D {
     const mesh = new THREE.InstancedMesh(geo, windy(new THREE.MeshLambertMaterial({ side: THREE.DoubleSide }), this.uniforms), N);
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); mesh.frustumCulled = false;
     const col = new THREE.Color();
-    this.grassBase = [];
+    this.grassBase = []; this.grassMats = false;
     for (let i = 0; i < N; i++) {
       const side = i % 2 ? 1 : -1, off = ROAD + 0.35 + Math.pow(hash(i * 3.1), 1.6) * 7;
       this.grassBase.push({ x: side * off, z: hash(i * 7.7) * (FAR + 30), s: spec.height * (0.6 + hash(i * 1.3) * 0.9), r: hash(i) * 6 });
@@ -308,65 +249,48 @@ export class FernRangers3D {
     const wantHalf = 3.7 / 8.4;
     this.camera.fov = Math.min(84, Math.max(46, (2 * Math.atan(wantHalf / aspect) * 180) / Math.PI));
     this.camera.updateProjectionMatrix();
-    this.panoDirty = true;
   }
 
   /**
    * Before a level runs: build the pooled gates and props it will need and draw everything once, so every shader
    * (including shadow variants and the enemy crowds) is compiled now and not when the first alien walks in.
    */
-  warm(s) {
-    this.warmedFor = s;
-    const counts = new Map();
-    for (const e of s.ents) {
-      const key = this.keyOf(e);
-      if (key && !counts.has(key)) counts.set(key, () => (e.kind === 'gate' ? this.makeGate(e.x1 - e.x0 - 0.16, 1.9) : this.makeProp(e, key)));
+  async prepare(s) {
+    if (this.prepared === s) return;
+    this.prepared=null;
+    if (s.mode === 'sturmbastion') {
+      this.bonus ||= new Sturmbastion3D(this.renderer, this.env);
+      await this.bonus.prepare(s); this.prepared=s; return;
     }
-    const shown = [];
-    for (const [key, make] of counts) {
-      const have = this.pool.get(key)?.length || 0;
-      for (let i = have; i < 3; i++) this.give(key, make());
-      for (const o of this.pool.get(key)) { (o.group || o).visible = true; (o.group || o).position.set(0, 0, -12); shown.push(o); }
-    }
-    for (const c of [...this.squads, ...Object.values(this.enemies), ...Object.values(this.bosses).filter(Boolean), this.caged]) { c.begin(); c.add(0, -20, -10, 0, 1); c.end(); }
-    const m = new THREE.Matrix4().makeTranslation(0, -20, -10);
-    this.bullets.setMatrixAt(0, m); this.bullets.count = 1;
-    for (const fx of [this.flashes, this.sparks, this.gooFx, this.grenadeFx]) { fx.begin(); fx.add(0, -20, -10, 0.1, 0xffffff); fx.end(); }
-    const extras = [this.rings[0], this.laneWarn[0], this.discWarn[0], this.beams[0], this.bubble, this.turret];
-    for (const o of extras) o.visible = true;
-    this.renderer.shadowMap.needsUpdate = true;
-    this.renderer.render(this.scene, this.camera);
-    for (const o of shown) (o.group || o).visible = false;
-    for (const o of extras) o.visible = false;
-    this.bullets.count = 0;
-  }
-  keyOf(e) {
-    if (e.kind === 'gate') return 'gate:' + (e.x1 - e.x0 - 0.16).toFixed(2);
-    if (e.kind === 'barrel' || e.kind === 'crate' || e.kind === 'cage' || e.kind === 'geyser') return e.kind;
-    if (e.kind === 'pickup') return 'pickup:' + e.type;
-    if (e.kind === 'block' || e.kind === 'laser') return `${e.kind}:${(e.x1 - e.x0).toFixed(2)}`;
-    if (e.kind === 'ice') return `ice:${(e.x1 - e.x0).toFixed(1)}:${e.len}`;
-    if (e.kind === 'fork') return `fork:${e.len}`;
-    return null;
+    this.native?.dispose(); this.art?.dispose();
+    this.art=new RangersArt(this.scene,this.env);
+    this.native=new RangerProps(this.scene,this.art,this.env);
+    this.themeName=null;
+    const types=new Set(s.ents.filter(e=>e.kind==='enemy'&&e.type!=='boss').map(e=>e.type));
+    if(s.boss) types.add(BOSSES[s.boss.boss].minion);
+    if(types.has('blorb')) types.add('zorbling');
+    await this.art.prepareTroops();
+    for(const type of types) { await this.art.batch(ENEMY_ASSET[type],320,'far'); await this.art.batch(ENEMY_ASSET[type],320,'lo'); }
+    if(types.has('blorb'))await this.art.prepareHulkSockets();
+    await this.native.prepare(s);
+    if(s.boss) this.bossActor=await this.art.actor(BOSS_ASSET[s.boss.boss],'lo'); else this.bossActor=null;
+    await this.setTheme(s.themeName,false);
+    this.prepared=s;
+    this.render(s,{dark:false,reduced:true});
+    await this.renderer.compileAsync(this.scene,this.camera);
   }
 
   render(s, view) {
-    this.setTheme(s.themeName, view.dark);
-    if (this.warmedFor !== s) this.warm(s);
+    if(s.mode==='sturmbastion'){this.bonus.resize(this.w,this.h);return this.bonus.render(s,view);}
+    if(this.prepared!==s) return;
+    this.art.begin(); this.native.begin();
     this.uniforms.uTime.value = s.t;
     const cam = this.camera;
     const camX = s.px * 0.35;
     const shake = s.shake > 0 && !view.reduced ? s.shake : 0;
-    if (this.panoDirty && this.pano.scene) {
-      // bake from the centred camera; the plane then follows the camera sideways
-      this.panoDirty = false;
-      cam.position.set(0, 4.1, 6.4); cam.lookAt(0, 0.8, -7); cam.updateMatrixWorld();
-      this.pano.bake(this.renderer, cam);
-    }
-    cam.position.set(camX + (Math.random() - 0.5) * shake * 0.25, 4.1 + (Math.random() - 0.5) * shake * 0.2, 6.4);
-    cam.lookAt(camX * 0.7, 0.8, -7);
-    if (this.pano.base) this.pano.mesh.position.set(this.pano.base.x + camX * 0.98, this.pano.base.y, this.pano.base.z);
-    this.loop?.update(s.pos);
+    cam.position.set(camX + (Math.random() - 0.5) * shake * 0.25, 5.6 + (Math.random() - 0.5) * shake * 0.2, 9.2);
+    cam.lookAt(camX * 0.7, 1.0, -8);
+    this.loop?.update(s.pos);this.settlements?.update(s.pos);
     const L = this.lights.light;
     L.position.set(-5 + s.px * 0.3, 12, 4); L.target.position.set(s.px * 0.3, 0, -6);
 
@@ -375,7 +299,7 @@ export class FernRangers3D {
     if (this.ground.material.map) { this.ground.material.map.offset.y = gOff; this.groundFar.material.map.offset.y = (gOff + this.nearLen / this.tile) % 1; }
     this.road.material.map.offset.y = rOff; this.roadFar.material.map.offset.y = (rOff + this.nearLen / 6) % 1;
     this.curbTex.offset.y = (pos / 2) % 1;
-    const m = new THREE.Matrix4();
+    const m = this._dash || (this._dash = new THREE.Matrix4());
     let n = 0;
     for (let i = 0; i < 40; i++) {
       const d = Math.floor(pos / 4) * 4 + i * 4 - 8;
@@ -385,15 +309,24 @@ export class FernRangers3D {
     }
     this.dashes.count = n; this.dashes.instanceMatrix.needsUpdate = true;
     this.drawRoadside(s);
-    const fz = s.L.length - pos;
-    this.finish.visible = fz < FAR && fz > -10;
+    const fz = s.goal - pos;
+    // boss levels: the finish arch rises out of the road where the boss went down (the level ends right there)
+    if (this.finishFor !== s) { this.finishFor = s; this.finishUp = null; }
+    let rise = 1;
+    if (s.boss) {
+      if (s.boss.alive) rise = 0;
+      else { if (this.finishUp == null) this.finishUp = s.t; const k = Math.min(1, (s.t - this.finishUp) / 0.5); rise = 1 - (1 - k) * (1 - k); }
+    }
+    this.finish.visible = rise > 0 && fz < FAR && fz > -10;
     this.finish.position.set(0, 0, -fz - 0.6);
+    this.finish.scale.set(1, Math.max(0.01, rise), 1);
 
     this.drawEntities(s);
     this.drawSquad(s);
     this.drawShots(s);
     this.drawWarnings(s);
     this.drawParticles(s);
+    this.native.events(s); this.native.end(); this.art.end();
     if ((this.frame++ & 1) === 0) this.renderer.shadowMap.needsUpdate = true;
     this.renderer.render(this.scene, cam);
   }
@@ -429,250 +362,115 @@ export class FernRangers3D {
       F.end();
     }
     if (this.grass) {
-      const M = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), e = new THREE.Euler();
-      const P = FAR + 30;
-      this.grassBase.forEach((g, i) => {
-        const z = ((g.z - pos) % P + P) % P - 10;
-        M.compose(v.set(g.x, -0.01, -z), q.setFromEuler(e.set(0, g.r, 0)), sc.set(1, g.s / 0.95, 1));
-        this.grass.setMatrixAt(i, M);
-      });
+      // a tuft's matrix only changes by its distance along the road: rotation and size are baked once
+      const P = FAR + 30, a = this.grass.instanceMatrix.array;
+      if (!this.grassMats) {
+        const M = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), e = new THREE.Euler();
+        this.grassBase.forEach((g, i) => { M.compose(v.set(g.x, -0.01, 0), q.setFromEuler(e.set(0, g.r, 0)), sc.set(1, g.s / 0.95, 1)); M.toArray(a, i * 16); });
+        this.grassMats = true;
+      }
+      const base = this.grassBase;
+      for (let i = 0; i < base.length; i++) { const z = ((base[i].z - pos) % P + P) % P - 10; a[i * 16 + 14] = -z; }
       this.grass.instanceMatrix.needsUpdate = true;
     }
   }
 
   drawSquad(s) {
-    const sq = this.squads; for (const c of sq) c.begin();
-    const lost = s.result && !s.result.won;
-    if (!lost) {
-      // Front to back (nearest the camera first) within each species crowd; the depth pre-pass does the rest.
-      const order = this.order || (this.order = []);
-      order.length = s.slots.length;
-      for (let i = 0; i < order.length; i++) order[i] = i;
-      order.sort((a, b) => s.slots[a].z - s.slots[b].z);
-      for (const i of order) {
-        const sl = s.slots[i];
-        sq[i & 3].add(s.px + sl.x, 0, -sl.z, Math.PI, 1.1, { phase: s.t * 11 + i * 1.7, swing: s.speed > 0.5 ? 1 : 0.15, recoil: s.muzzle, lean: s.onIce ? (s.tx - s.px) * 0.08 : 0 });
+    const lost=s.result&&!s.result.won;
+    if(!lost) {
+      const count=Math.min(28,s.n);
+      for(let i=0;i<count;i++) {
+        const row=Math.floor(i/5),col=i%5, x=(col-2)*.7;
+        // Full authored person scale. One giant stands behind the formation.
+        this.art.troop(i,s.px+(i===17?-1.7:x),i===17?1.8:row*.68-.8,s.t);
       }
     }
-    for (const c of sq) c.end();
-    // shield bubble around the squad, the turret beside it
-    this.bubble.visible = s.buffs.bubble > 0 && !lost;
-    if (this.bubble.visible) { const r = s.radius + 0.7; this.bubble.position.set(s.px, 0.5, -0.1); this.bubble.scale.set(r, r * 0.75, r); this.bubble.material.opacity = 0.16 + Math.sin(s.t * 6) * 0.05 + (s.buffs.bubble < 1.5 ? Math.sin(s.t * 30) * 0.08 : 0); }
-    this.turret.visible = s.buffs.turret > 0 && !lost;
-    if (this.turret.visible) { this.turret.position.set(s.turretX, 0, -1.2); this.turret.rotation.y = Math.sin(s.t * 3) * 0.1; }
+    this.bubble.visible=s.buffs.bubble>0&&!lost;
+    if(this.bubble.visible){this.bubble.position.set(s.px,1,-.1);this.bubble.scale.set(2.4,2.1,2.4);}
+    this.native.turret(s);
   }
-
   drawEntities(s) {
-    for (const c of Object.values(this.enemies)) c.begin();
-    for (const c of Object.values(this.bosses)) c?.begin();
-    this.caged.begin();
-    const seen = new Set();
-    // nearest first, for the same early-depth benefit as the squad
-    const ents = this.sorted || (this.sorted = []);
-    ents.length = 0;
-    for (const e of s.ents) ents.push(e);
-    ents.sort((a, b) => a.d - b.d);
-    const icy = new THREE.Color(0xbfe9ff);
-    for (const e of ents) {
-      const z = e.d - s.pos;
-      if (z > FAR || z < -8 - (e.len || 0)) continue;
-      const fade = e.alive ? 1 : Math.max(0, e.fade || 0);
-      if (e.kind === 'enemy') {
-        if (fade <= 0) continue;
-        const pose = { phase: e.phase * 1.6, swing: e.active && !(e.frozen > 0) ? 1 : 0.1, flash: e.flash > 0 ? 0.85 : 0, squash: e.alive ? 0 : 1 - fade, tint: e.frozen > 0 ? icy : null };
-        if (e.type === 'boss') {
-          const b = this.bosses[e.boss];
-          const k = e.boss === 'mothership';
-          pose.spin = s.t * 0.6; pose.recoil = Math.max(0, 1 - (BOSSES[e.boss].every - e.attackT) * 3);
-          b?.add(e.x, k ? 2.6 + Math.sin(s.t * 1.3) * 0.25 : 0, -z, 0, BOSS_SCALE[e.boss], { ...pose, swing: k ? 0 : 0.6, flash: e.coreOpen > 0 && k ? 0.25 + Math.sin(s.t * 12) * 0.2 : pose.flash });
-          continue;
-        }
-        const c = this.enemies[e.type];
-        if (e.type === 'shield' && !(e.shield > 0)) pose.hide = 'recoil';
-        if (e.type === 'spitter') pose.recoil = Math.max(0, 1 - (2.6 - e.fire) * 4);
-        if (e.type === 'buzz') pose.spin = s.t * 22;
-        c.add(e.x, e.type === 'buzz' ? 0.75 + Math.sin(s.t * 3 + e.phase) * 0.12 : 0, -z, 0, ENEMY_SCALE[e.type], pose);
-      } else {
-        const key = this.keyOf(e);
-        if (!key) continue;
-        seen.add(e); this.drawThing(e, key, z, fade, s);
-      }
+    const dead=new Set();
+    for(const v of s.visualEvents||[]) if(v.entity&&s.t-v.time<4) dead.add(v.entity);
+    const entities=[...s.ents,...[...dead].filter(e=>!s.ents.includes(e))];
+    for(const e of entities) {
+      const z=e.d-s.pos,age=e.disabledAt==null?0:s.t-e.disabledAt;
+      if(z>FAR||z< -10-(e.len||0))continue;
+      if(e.kind==='enemy') {
+        if(!e.alive&&((e.type==='blorb'&&e.split&&age>=1.2)||(age>2&&e.type!=='boss')))continue;
+        if(e.type==='boss'){this.drawBoss(e,s,z,age);continue;}
+        const birth=e.spawnHull,birthAge=birth?s.t-birth.time:99;if(birthAge<1.2)continue;const k=birth?Math.max(0,1-(birthAge-1.2)/.6):0,socket=birth?this.art.hulkSockets[birth.side<0?0:1]:null;
+        this.art.machine(e.type,e.x*(1-k)+(birth?birth.x+socket.x:0)*k,-z*(1-k)+(birth?-birth.d+s.pos+socket.z:0)*k,s.t,{active:e.active&&!e.frozen,speed:e.speed||1,phase:e.phase||0,disabled:!e.alive,age,near:z<15,split:e.split,hitAge:s.t-(e.hitAt??-99),fireAge:s.t-(e.fireAt??-99),wheelPhase:e.phase/(3*Math.max(.1,e.speed||1))});
+      } else this.native.entity(e,s,z,age);
     }
-    for (const c of Object.values(this.enemies)) c.end();
-    for (const c of Object.values(this.bosses)) c?.end();
-    this.caged.end();
-    for (const [e, obj] of this.gates) if (!seen.has(e)) { this.give(obj.key, obj); this.gates.delete(e); }
-    for (const [e, obj] of this.props) if (!seen.has(e)) { this.give(obj.userData.key, obj); this.props.delete(e); }
   }
-
-  /**
-   * Gates and props are pooled: a passed gate is hidden and reused for the next one of the same size, so no new
-   * meshes, materials or shaders are created while playing (that is what caused hitches).
-   */
-  take(key, make) {
-    const list = this.pool.get(key);
-    const o = (list && list.pop()) || make();
-    (o.group || o).visible = true;
-    return o;
-  }
-  give(key, o) {
-    (o.group || o).visible = false;
-    if (!this.pool.has(key)) this.pool.set(key, []);
-    this.pool.get(key).push(o);
-  }
-
-  drawThing(e, key, z, fade, s) {
-    if (e.kind === 'gate') {
-      let o = this.gates.get(e);
-      if (!o) { o = this.take(key, () => this.makeGate(e.x1 - e.x0 - 0.16, 1.9)); o.good = null; o.op = null; this.gates.set(e, o); }
-      this.updateGate(o, e, z, fade);
-      return;
-    }
-    let o = this.props.get(e);
-    if (!o) { o = this.take(key, () => this.makeProp(e, key)); this.props.set(e, o); }
-    this.updateProp(o, e, z, fade, s);
-  }
-
-  makeGate(wdt, H) {
-    const group = new THREE.Group();
-    const panel = new THREE.Mesh(new THREE.PlaneGeometry(wdt, H), new THREE.MeshStandardMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.5, emissive: 0x1d4ed8, emissiveIntensity: 0.6, side: THREE.DoubleSide, depthWrite: false, roughness: 0.2 }));
-    panel.position.y = H / 2;
-    const postMat = mat(0x1e3a8a, { metalness: 0.4, roughness: 0.35 });
-    const posts = [-1, 1].map((sd) => { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, H + 0.2, 10), postMat); p.position.set(sd * wdt / 2, (H + 0.2) / 2, 0); p.castShadow = true; return p; });
-    const top = new THREE.Mesh(new THREE.BoxGeometry(wdt + 0.2, 0.14, 0.18), postMat); top.position.y = H + 0.12; top.castShadow = true;
-    const label = new TextPlane(wdt * 0.9, H * 0.62, 320);
-    label.mesh.position.set(0, H * 0.52, 0.03);
-    group.add(panel, ...posts, top, label.mesh);
-    this.scene.add(group);
-    applyIbl(group, this.env, 0.55);
-    return { group, panel, postMat, label, good: null, key: 'gate:' + wdt.toFixed(2) };
-  }
-  updateGate(o, e, z, fade) {
-    const good = gateGood(e);
-    if (o.good !== good || o.op !== e.op) {
-      o.good = good; o.op = e.op;
-      const col = good ? (e.op === 'rate' ? 0x22d3ee : 0x3b82f6) : 0xef4444;
-      o.panel.material.color.set(col); o.panel.material.emissive.set(col).multiplyScalar(0.5);
-      o.postMat.color.set(good ? (e.op === 'rate' ? 0x0e7490 : 0x1e3a8a) : 0x991b1b);
-    }
-    o.label.set(gateText(e), { sub: e.op === 'rate' ? 'FIRE RATE' : '' });
-    const pulse = e.pulse > 0 ? e.pulse : 0;
-    o.panel.material.opacity = (0.42 + pulse * 0.25) * fade;
-    o.label.mesh.material.opacity = fade;
-    o.label.mesh.scale.setScalar(1 + pulse * 0.12);
-    o.group.position.set((e.x0 + e.x1) / 2, 0, -z);
-    o.group.scale.set(1, e.alive ? 1 : 1 + (1 - fade) * 0.3, 1);
-  }
-
-  makeProp(e, key) {
-    const o = new THREE.Group();
-    o.userData.key = key;
-    const M = this.propMats;
-    const add = (mesh, shadow = true) => { mesh.castShadow = shadow; mesh.receiveShadow = true; o.add(mesh); return mesh; };
-    if (e.kind === 'barrel') {
-      add(new THREE.Mesh(this.barrelGeo, M.barrel)).position.y = 0.45;
-      for (const y of [0.18, 0.72]) { const r = add(new THREE.Mesh(this.ringGeo, M.ring), false); r.rotation.x = Math.PI / 2; r.position.y = y; }
-      add(new THREE.Mesh(this.signGeo, M.sign), false).position.set(0, 0.45, 0.345);
-    } else if (e.kind === 'crate' || e.kind === 'cage') {
-      if (e.kind === 'crate') add(new THREE.Mesh(this.crateGeo, M.crate)).position.y = 0.45;
-      else {
-        // a cage: steel floor and roof, bars all round; a captured Ranger waits inside (drawn by the caged crowd)
-        add(new THREE.Mesh(new THREE.BoxGeometry(1, 0.08, 1), M.steel)).position.y = 0.04;
-        add(new THREE.Mesh(new THREE.BoxGeometry(1, 0.08, 1), M.tin)).position.y = 1.08;
-        for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; const b = add(new THREE.Mesh(this.barGeo, M.steel), false); b.position.set(Math.cos(a) * 0.46, 0.56, Math.sin(a) * 0.46); }
-      }
-      const glow = new THREE.Mesh(this.glowGeo, new THREE.MeshBasicMaterial({ color: e.kind === 'cage' ? 0x86efac : 0xfacc15, transparent: true, opacity: 0.25, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
-      glow.position.y = 0.5; glow.scale.y = e.kind === 'cage' ? 1.1 : 1; o.add(glow); o.userData.glow = glow;
-    } else if (e.kind === 'block') {
-      // an alien barricade: orange robot plates between posts, a humming energy band on top
-      const len = e.x1 - e.x0;
-      add(new THREE.Mesh(new THREE.BoxGeometry(len, 0.7, 0.35), M.tin)).position.set(0, 0.35, 0);
-      for (let x = -len / 2 + 0.3; x <= len / 2 - 0.3 + 1e-3; x += Math.max(0.6, (len - 0.6) / Math.max(1, Math.round((len - 0.6) / 0.9)))) add(new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.74, 0.4), M.dark)).position.set(x, 0.37, 0);
-      const band = new THREE.Mesh(new THREE.BoxGeometry(len, 0.18, 0.08), M.energy); band.position.set(0, 0.86, 0); o.add(band);
-    } else if (e.kind === 'laser') {
-      const len = e.x1 - e.x0;
-      for (const sd of [-1, 1]) add(new THREE.Mesh(this.postGeo, M.steel)).position.set(sd * len / 2, 0.65, 0);
-      const beams = [];
-      for (const y of [0.3, 0.65, 1.0]) { const b = new THREE.Mesh(new THREE.BoxGeometry(len, 0.05, 0.05), M.laser.clone()); b.position.set(0, y, 0); o.add(b); beams.push(b); }
-      o.userData.beams = beams;
-    } else if (e.kind === 'ice') {
-      const ice = new THREE.Mesh(new THREE.PlaneGeometry(e.x1 - e.x0 + 1, e.len), M.ice); ice.rotation.x = -Math.PI / 2; ice.position.set(0, 0.015, -e.len / 2); ice.receiveShadow = true; o.add(ice);
-    } else if (e.kind === 'fork') {
-      add(new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.9, e.len), M.wall)).position.set(0, 0.45, -e.len / 2);
-      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.12, e.len), M.energy); cap.position.set(0, 0.96, -e.len / 2); o.add(cap);
-    } else if (e.kind === 'geyser') {
-      const crater = add(new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.95, 0.18, 20), M.crater)); crater.position.y = 0.05;
-      const pool = new THREE.Mesh(new THREE.CircleGeometry(0.6, 20), M.lava.clone()); pool.rotation.x = -Math.PI / 2; pool.position.y = 0.15; o.add(pool);
-      const plume = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.6, 3, 16, 1, true), M.plume.clone()); plume.position.y = 1.5; o.add(plume);
-      o.userData.pool = pool; o.userData.plume = plume;
-    } else if (e.kind === 'pickup') {
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.05, 8, 32), new THREE.MeshBasicMaterial({ color: PICKUPS[e.type].color, toneMapped: false }));
-      ring.rotation.x = -Math.PI / 2; ring.position.y = 0.06; o.add(ring);
-      const icon = new THREE.Sprite(this.pickupMats[e.type]); icon.scale.setScalar(0.8); icon.position.y = 0.75; o.add(icon); o.userData.icon = icon;
-    }
-    applyIbl(o, this.env, 0.55);
-    this.scene.add(o);
-    return o;
-  }
-  updateProp(o, e, z, fade, s) {
-    const x = e.kind === 'block' || e.kind === 'laser' || e.kind === 'ice' ? (e.x0 + e.x1) / 2 : e.kind === 'fork' ? e.x : e.x;
-    o.position.set(x, 0, -z);
-    const shrink = e.kind === 'ice' || e.kind === 'fork' || e.kind === 'geyser' ? 1 : e.alive ? (e.flash > 0 ? 1.08 : 1) : Math.max(0.01, fade);
-    o.scale.setScalar(shrink);
-    if (o.userData.glow) o.userData.glow.material.opacity = 0.18 + Math.sin(s.t * 6) * 0.12;
-    if (e.kind === 'crate') o.rotation.y = Math.sin(s.t * 1.5) * 0.15;
-    if (e.kind === 'cage' && e.alive) this.caged.add(e.x, 0.08, -z, Math.sin(s.t * 2) * 0.3, 0.8, { phase: s.t * 3, swing: 0.2, armsUp: Math.sin(s.t * 4) > 0 });
-    if (e.kind === 'pickup') { o.userData.icon.position.y = 0.75 + Math.sin(s.t * 3 + e.x) * 0.1; }
-    if (e.kind === 'laser') {
-      const on = laserOn(e, s.t), warn = laserWarn(e, s.t);
-      for (const b of o.userData.beams) { b.visible = on || (warn && Math.sin(s.t * 40) > 0); b.material.opacity = on ? 0.85 : 0.35; }
-    }
-    if (e.kind === 'geyser') {
-      const st = geyserState(e, s.t);
-      o.userData.pool.material.color.setHex(st === 'idle' ? 0x7a2a10 : 0xff6a1f);
-      o.userData.pool.material.opacity = st === 'warn' ? 0.7 + Math.sin(s.t * 20) * 0.3 : 1;
-      o.userData.plume.visible = st === 'burst';
-      if (st === 'burst') o.userData.plume.scale.set(1, 0.6 + Math.random() * 0.5, 1);
-    }
+  drawBoss(e,s,z,age) {
+    const a=this.bossActor;if(!a)return;
+    a.scene.visible=true;a.scene.position.set(e.x,e.boss==='mothership'?.85:0,-z);
+    const hover=e.boss==='mothership',warning=s.warnings?.find(w=>w.boss===e);
+    let clip=hover?'Idle_Hover':e.active?'Travel':'Idle',time=s.t,loop=true;
+    const charge={tank:'Attack_FrontSweep',drill:'Drill_Charge',walker:'Frost_Charge',mothership:'Broadside_Charge'}[e.boss];
+    const fire={tank:'Fire_Recoil',drill:'Drill_Strike',walker:'Frost_Fire',mothership:'Broadside_Fire'}[e.boss];
+    const impact={tank:.08,drill:.384,walker:.10,mothership:.1667}[e.boss],shotAge=s.t-(e.fireAt??-99);
+    if(!e.alive){clip=age<.55?(hover?'Disabled_Hover':'Disabled'):'EscapeHatch';time=age<.55?age:age-.55;loop=false;}
+    else if(warning){clip=warning.t<=impact?fire:charge;time=warning.t<=impact?impact-warning.t:s.t-(e.attackAt||0);loop=false;}
+    else if(shotAge<1.2){clip=fire;time=shotAge+impact;loop=false;}
+    else if(e.coreOpen>0){clip='OpenWeakpoint';time=1;loop=false;}
+    else if(s.t-(e.hitAt??-99)<.12){clip='Hit';time=s.t-e.hitAt;loop=false;}
+    a.pose(clip,time,loop);
+    if(!e.alive&&age>=.55)this.native.escape(a,e,s,age-.55);
   }
 
   drawShots(s) {
     const w = WEAPONS[s.weapon];
-    this.bullets.material.color.set(w.color);
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0));
-    const v = new THREE.Vector3(), sc = new THREE.Vector3(1.6, 1, 1.6);
+    // heavier tracers (a big squad, or guns faster than the tracers can show) burn brighter, towards white
+    const heft = Math.max(1, s.heft || 1);
+    const glow = Math.min(0.55, Math.log2(heft) * 0.12);
+    this.bullets.material.color.copy(colorOf(w.color)).lerp(WHITE, glow);
+    // Matrices go straight into the instance buffer: a tracer is the capsule turned to lie along the road (rotation
+    // about x by 90°), scaled by its heft, at its spot; only the used part of the buffer is uploaded.
+    const S = s.shots, a = this.bullets.instanceMatrix.array;
     let n = 0;
-    for (const b of s.bullets) {
-      const z = b.d - s.pos;
-      if (z > FAR || n >= 600) continue;
-      m.compose(v.set(b.x, b.turret ? 0.62 : 0.5, -z - 0.4), q, sc);
-      this.bullets.setMatrixAt(n++, m);
+    for (let i = 0; i < S.n && n < SHOTS_MAX; i++) {
+      const z = S.d[i] - s.pos;
+      if (z > FAR) continue;
+      const h = S.heft[i], lg = h > 1 ? Math.log2(h) : 0;
+      // heavier tracers: a little thicker, clearly longer (streaks), see also the colour above
+      const wd = 1.6 * Math.min(1.7, 1 + lg * 0.18), len = Math.min(2.4, 1 + lg * 0.3);
+      const o = n * 16;
+      a[o] = wd; a[o + 1] = 0; a[o + 2] = 0; a[o + 3] = 0;
+      a[o + 4] = 0; a[o + 5] = 0; a[o + 6] = len; a[o + 7] = 0;
+      a[o + 8] = 0; a[o + 9] = -wd; a[o + 10] = 0; a[o + 11] = 0;
+      a[o + 12] = S.x[i]; a[o + 13] = S.turret[i] ? .78 : 1.12; a[o + 14] = -z - 0.4 * len; a[o + 15] = 1;
+      n++;
     }
-    this.bullets.count = n; this.bullets.instanceMatrix.needsUpdate = true;
+    const im = this.bullets.instanceMatrix;
+    this.bullets.count = n;
+    im.clearUpdateRanges(); im.addUpdateRange(0, Math.max(1, n) * 16); im.needsUpdate = true;
     const f = this.flashes; f.begin();
-    if (s.muzzle > 0.35 && !(s.result && !s.result.won)) {
-      const shooters = Math.min(s.n, 12), R = Math.min(s.radius * 0.85, ROAD);
-      for (let i = 0; i < shooters; i++) {
-        const off = shooters === 1 ? 0 : (i / (shooters - 1) - 0.5) * 2 * R;
-        f.add(s.px + off + 0.06, 0.52, -0.9, 0.12 * s.muzzle + 0.04, w.color);
+    if (!(s.result && !s.result.won)) {
+      // a flash on every lane that just fired; heavy fire makes them bigger
+      const lanes = Math.min(s.lanes || 1, LANES_MAX);
+      const big = 1 + Math.min(0.8, Math.log2(heft) * 0.2), col = colorOf(w.color);
+      for (let i = 0; i < lanes; i++) {
+        const k = s.laneFlash[i];
+        if (k > 0.3) f.add(s.px + s.laneX[i] + 0.06, 1.12, -0.9, (0.12 * k + 0.04) * big, col);
       }
     }
     f.end();
     // goo blobs and grenades in flight
     const g = this.gooFx; g.begin();
-    for (const b of s.goo) g.add(b.x, b.h, -(b.d - s.pos), 0.22, 0xffffff, s.t * 3, 0.19);
+    for (const b of s.goo) g.add(b.x, b.h, -(b.d - s.pos), 0.22, WHITE, s.t * 3, 0.19);
     g.end();
     const gr = this.grenadeFx; gr.begin();
-    for (const t of s.throws) {
-      const k = Math.min(1, t.t / t.dur);
-      gr.add(t.x0 + (t.tx - t.x0) * k, 0.6 + Math.sin(k * Math.PI) * 2.6, -((t.d0 + (t.td - t.d0) * k) - s.pos), 0.16, 0xffffff, s.t * 8);
-    }
     gr.end();
   }
 
   drawWarnings(s) {
     let lane = 0, disc = 0, beam = 0;
-    for (const o of [...this.laneWarn, ...this.discWarn, ...this.beams]) o.visible = false;
+    for (const o of this.laneWarn) o.visible = false;
+    for (const o of this.discWarn) o.visible = false;
+    for (const o of this.beams) o.visible = false;
     for (const w of s.warnings) {
       const k = Math.min(1, Math.max(0, 1 - w.t / w.dur));
       if (w.done) {
@@ -711,13 +509,14 @@ export class FernRangers3D {
         continue;
       }
       const life = Math.min(1, (p.life / p.max) * 2);
-      sp.add(p.x, p.h + 0.05, -z, Math.max(0.02, p.size * 1.4 * life), p.color, p.life * 7);
+      sp.add(p.x, p.h + 0.05, -z, Math.max(0.02, p.size * 1.4 * life), colorOf(p.color), p.life * 7);
     }
     sp.end();
   }
 
   /** Projection for the 2D overlay: distance ahead z and height h → CSS px plus the local scale (px per unit). */
   projectFn() {
+    if(this.prepared?.mode==='sturmbastion')return this.bonus.projectFn();
     const pr = projector(this.camera, this.w, this.h);
     return (x, z, h = 0) => {
       const a = pr(x, h, -z), b = pr(x + 1, h, -z);
@@ -726,12 +525,18 @@ export class FernRangers3D {
   }
   /** Screen x on the squad's row → road x (for mouse steering). */
   layoutFor() {
+    if(this.prepared?.mode==='sturmbastion')return this.bonus.layoutFor();
     const proj = this.projectFn();
     const o = proj(0, 0, 0), u = proj(1, 0, 0);
     const ppu = Math.max(1, u.x - o.x);
     return { ppu, toWorldX: (sx) => (sx - o.x) / ppu };
   }
-  dispose() { this.renderer.dispose(); }
+  dispose() {
+    this.native?.dispose();this.art?.dispose();this.bonus?.dispose();this.loop?.dispose();this.settlements?.dispose();
+    this.roadside?.dispose(this.campaignScene);this.farProps?.dispose(this.campaignScene);
+    const geo=new Set(),mats=new Set(),tex=new Set();this.campaignScene.traverse(o=>{if(o.geometry)geo.add(o.geometry);for(const m of o.material?(Array.isArray(o.material)?o.material:[o.material]):[]){mats.add(m);for(const v of Object.values(m))if(v?.isTexture)tex.add(v);}});
+    for(const x of geo)x.dispose();for(const x of mats)x.dispose();for(const x of tex)x.dispose();this.env.dispose();this.renderer.dispose();
+  }
 }
 
 export const create = (canvas) => new FernRangers3D(canvas);

@@ -1,0 +1,112 @@
+{
+  "category": "architecture",
+  "label": "Timber floor \u00b7 separate planks",
+  "games": [
+    "generic"
+  ],
+  "description": "Timber floor \u00b7 separate planks; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 798,
+      "triangles": 266,
+      "groups": 1,
+      "bytes": 15154,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 798,
+      "triangles": 266,
+      "groups": 1,
+      "bytes": 15154,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 135,
+      "triangles": 266,
+      "groups": 1,
+      "bytes": 4546,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "architecture/kaykit/floor_wood_large.glb",
+  "adaptation": {
+    "scale": 0.65,
+    "rotationY": 0,
+    "pivot": "bounds centre at ground",
+    "units": "metres"
+  },
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_floor_timber",
+  "bounds": [
+    [
+      -1.2999999523162842,
+      0.0,
+      -1.2999999523162842
+    ],
+    [
+      1.2999999523162842,
+      0.09749999642372131,
+      1.2999999523162842
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#7d3d2c",
+    "#894936",
+    "#8b4b38",
+    "#8d4c39",
+    "#8d4d39",
+    "#8e4d3a",
+    "#8f4e3b",
+    "#904f3b",
+    "#904f3c",
+    "#91503d",
+    "#92513d",
+    "#92513e",
+    "#92523e",
+    "#945440",
+    "#955540",
+    "#965541",
+    "#985742",
+    "#995843",
+    "#995944",
+    "#9a5944",
+    "#9b5a45",
+    "#9c5b45",
+    "#9d5c46",
+    "#9e5d47",
+    "#9f5e47",
+    "#a05f48",
+    "#a26149",
+    "#a36149",
+    "#a3624a",
+    "#a6654b",
+    "#a7664c",
+    "#a9674d",
+    "#aa684d",
+    "#ab694e",
+    "#ae6c50",
+    "#ae6d50"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

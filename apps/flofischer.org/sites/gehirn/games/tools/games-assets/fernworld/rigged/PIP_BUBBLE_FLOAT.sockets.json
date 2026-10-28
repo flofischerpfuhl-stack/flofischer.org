@@ -1,0 +1,47 @@
+{
+  "variant": "PIP_BUBBLE_FLOAT",
+  "sockets": [
+    {
+      "name": "SOCKET_BubbleCenter",
+      "bone": "root",
+      "rest_position_blender_zup": [
+        0.0,
+        0.0,
+        1.2400000095367432
+      ],
+      "bone_local_position_blender": [
+        -1.0223043081286545e-14,
+        1.2400000095367432,
+        4.2443378589496206e-08
+      ],
+      "recipe": "world = boneWorld * inverseBoneRest * restPosition; Blender Z-up -> glTF Y-up (x,z,-y)"
+    }
+  ],
+  "activation": "Glide external clip for balanced airborne pose; BubbleCenter follows root; shell 1 + glint arcs 2 unchanged. Entire shell world-up; controller altitude owns float.",
+  "coordinate_conversion": "Blender (x,y,z) -> glTF (x,z,-y); translation matrices use boneWorld * inverseBoneRest * restPosition.",
+  "bubble_runtime_flags": {
+    "castShadow": false,
+    "receiveShadow": false,
+    "frustumCulled": true,
+    "depthWrite": false,
+    "side": "FrontSide",
+    "renderOrder": 10
+  },
+  "shared_motion": {
+    "source": "../pip-shared-motion/pip-shared-motion.glb",
+    "sha256": "89217deecffe18268c9f89803645f479b3f948344e4c6f63d2d79f639877b064",
+    "clips": [
+      "FireCast_Left",
+      "Hook_Right",
+      "Jump_Start",
+      "Jump_Air",
+      "Jump_Land",
+      "Glide",
+      "Hit_Recover",
+      "Celebrate"
+    ],
+    "unchanged_external_library": true
+  },
+  "instance_scale": 0.4233654951651481,
+  "interrupt": "Hide optional FX immediately on interruption; cancel release event if not yet fired. Restore source pose with library fades. Root owns world physics."
+}

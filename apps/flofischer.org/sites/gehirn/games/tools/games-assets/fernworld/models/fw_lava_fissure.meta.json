@@ -1,0 +1,79 @@
+{
+  "category": "terrain",
+  "label": "Cold broken crust and recessed heat channel",
+  "games": [
+    "generic"
+  ],
+  "description": "Cold broken crust and recessed heat channel; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 2396,
+      "triangles": 2180,
+      "groups": 1,
+      "bytes": 56052,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 1654,
+      "triangles": 1282,
+      "groups": 1,
+      "bytes": 36996,
+      "vertexCap": 4000,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 646,
+      "triangles": 1256,
+      "groups": 1,
+      "bytes": 20659,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 4000,
+  "shadow_cap": 1200,
+  "ground": true,
+  "ao_dist": 0.15,
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_lava_fissure",
+  "bounds": [
+    [
+      -0.9817100763320923,
+      0.014758242294192314,
+      -1.2999999523162842
+    ],
+    [
+      0.9979921579360962,
+      0.35703685879707336,
+      1.3323291540145874
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#252f37",
+    "#343f47",
+    "#414f56",
+    "#536169",
+    "#6c777a",
+    "#b64d32",
+    "#ed8834",
+    "#ffcb67"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

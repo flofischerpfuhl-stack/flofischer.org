@@ -1,0 +1,117 @@
+{
+  "coordinates": "Y-up +Z-forward; socket local identity rotation; +Z forward",
+  "sockets": {
+    "MuzzleSocket": {
+      "parent": "BarrelRecoil",
+      "translation": [
+        0.0,
+        0.0,
+        0.2304999828338623
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "TurretPivot": {
+      "parent": "TurretYaw",
+      "translation": [
+        0.0,
+        0.0,
+        -0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "GroundShadow": {
+      "parent": "TOY_ACE",
+      "translation": [
+        0.0,
+        0.0010000000474974513,
+        -0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "FX_Exhaust": {
+      "parent": "Body",
+      "translation": [
+        0.0,
+        0.2199999988079071,
+        -0.41760000586509705
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "FX_Hit": {
+      "parent": "Body",
+      "translation": [
+        0.0,
+        0.2800000011920929,
+        -0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "TurretAxis": [
+    0,
+    1,
+    0
+  ],
+  "emissionDirections": {
+    "FX_Exhaust": [
+      0,
+      0,
+      -1
+    ],
+    "FX_Hit": [
+      0,
+      1,
+      0
+    ]
+  }
+}

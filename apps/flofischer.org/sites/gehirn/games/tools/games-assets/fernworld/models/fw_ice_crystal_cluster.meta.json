@@ -1,0 +1,75 @@
+{
+  "category": "terrain",
+  "label": "Opaque blue prismatic ice growth",
+  "games": [
+    "generic"
+  ],
+  "description": "Opaque blue prismatic ice growth; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 506,
+      "triangles": 376,
+      "groups": 1,
+      "bytes": 11385,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 506,
+      "triangles": 376,
+      "groups": 1,
+      "bytes": 11385,
+      "vertexCap": 2600,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 200,
+      "triangles": 376,
+      "groups": 1,
+      "bytes": 6489,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 2600,
+  "shadow_cap": 1200,
+  "ground": true,
+  "ao_dist": 0.15,
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_ice_crystal_cluster",
+  "bounds": [
+    [
+      -0.8379952907562256,
+      -0.013198461383581161,
+      -0.5440693497657776
+    ],
+    [
+      0.7904000282287598,
+      1.640113115310669,
+      0.6091858148574829
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#4785a8",
+    "#77b3cf",
+    "#a4d8e0",
+    "#d4ebea"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

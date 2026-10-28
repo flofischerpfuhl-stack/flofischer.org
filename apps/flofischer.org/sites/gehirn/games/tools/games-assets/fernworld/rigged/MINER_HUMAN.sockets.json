@@ -1,0 +1,83 @@
+{
+  "asset": "MINER_HUMAN",
+  "forward": "+Z",
+  "up": "+Y",
+  "groundY": 0,
+  "sockets": [
+    {
+      "name": "Headlamp",
+      "bone": "head",
+      "jointLocalTranslation_m": [
+        -8.034398697078943e-09,
+        0.33534748774804335,
+        0.23472801722325665
+      ],
+      "actorBindPositionYUp_m": [
+        0.0,
+        1.535344681155404,
+        0.234728
+      ],
+      "usage": "Multiply live glTF joint world matrix by jointLocalTranslation; meters. Bone local axes are the actual exported glTF bind axes."
+    },
+    {
+      "name": "Chest",
+      "bone": "chest",
+      "jointLocalTranslation_m": [
+        -7.098996797323773e-09,
+        0.06036861265391136,
+        0.2074000117298998
+      ],
+      "actorBindPositionYUp_m": [
+        0.0,
+        1.0757132366440243,
+        0.2074
+      ],
+      "usage": "Multiply live glTF joint world matrix by jointLocalTranslation; meters. Bone local axes are the actual exported glTF bind axes."
+    },
+    {
+      "name": "HandLeft",
+      "bone": "hand.l",
+      "jointLocalTranslation_m": [
+        -9.503652328243495e-08,
+        0.10009482364043731,
+        -3.7895763549400385e-07
+      ],
+      "actorBindPositionYUp_m": [
+        0.651,
+        1.12,
+        0.0
+      ],
+      "usage": "Multiply live glTF joint world matrix by jointLocalTranslation; meters. Bone local axes are the actual exported glTF bind axes."
+    },
+    {
+      "name": "HandRight",
+      "bone": "hand.r",
+      "jointLocalTranslation_m": [
+        2.3236436031278336e-08,
+        0.1000948490319683,
+        -3.7823446885631995e-07
+      ],
+      "actorBindPositionYUp_m": [
+        -0.651,
+        1.12,
+        0.0
+      ],
+      "usage": "Multiply live glTF joint world matrix by jointLocalTranslation; meters. Bone local axes are the actual exported glTF bind axes."
+    },
+    {
+      "name": "Ground",
+      "bone": "root",
+      "jointLocalTranslation_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "actorBindPositionYUp_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "usage": "Multiply live glTF joint world matrix by jointLocalTranslation; meters. Bone local axes are the actual exported glTF bind axes."
+    }
+  ]
+}

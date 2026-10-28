@@ -1,0 +1,96 @@
+{
+  "category": "vegetation/woodland",
+  "label": "Mossy fallen trunk",
+  "games": [
+    "generic"
+  ],
+  "description": "Crooked horizontal log with six bark ribs, two ringed cut ends, broken bough and moss cushions. Prepared library only; no game integration.",
+  "budgets": {
+    "lo": 1800,
+    "hi": 24000
+  },
+  "vertex_cap": 1200,
+  "lods": {
+    "lo": {
+      "vertices": 814,
+      "triangles": 1045,
+      "groups": 1,
+      "bytes": 21662,
+      "vertexCap": 1200,
+      "triangleTarget": 1800
+    },
+    "hi": {
+      "vertices": 814,
+      "triangles": 1045,
+      "groups": 1,
+      "bytes": 21662,
+      "vertexCap": 1000000,
+      "triangleTarget": 24000
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "cull": false,
+  "sockets": {},
+  "placement": {
+    "surface": "forest floor; rotate around Y; allow slight terrain intersection",
+    "origin": "ground centre, Y-up",
+    "rotationY": "free 0-360 degrees",
+    "uniformScale": [
+      0.7,
+      1.4
+    ]
+  },
+  "reuse": {
+    "family": "woodland",
+    "repeat": "rotate and vary uniform scale; keep species silhouette",
+    "combineWith": [
+      "meadow_fern_rosette",
+      "meadow_moss",
+      "meadow_leaf_litter"
+    ]
+  },
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0,
+    "note": "Suggested future shader response; authored mesh is static."
+  },
+  "source": "scripts/games-blender/fernworld/assets/woodland.py",
+  "id": "woodland_fallen_log",
+  "bounds": [
+    [
+      -0.9699673652648926,
+      -0.0124606192111969,
+      -0.29664453864097595
+    ],
+    [
+      1.0005091428756714,
+      0.690043032169342,
+      0.32248854637145996
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#493c30",
+    "#5d7d3e",
+    "#70513a",
+    "#789047",
+    "#806040",
+    "#8c9d51",
+    "#96704a",
+    "#9c7249",
+    "#a77a4d",
+    "#b58e65",
+    "#cba16b"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "8e02baf333670c9c35cbcef7b197dcda766bd5a8b980e39b6dad4f76c3439911"
+}

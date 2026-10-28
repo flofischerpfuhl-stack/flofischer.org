@@ -1,0 +1,44 @@
+{
+  "executable_blender": "../../scripts/rigid_motion.py",
+  "executable_threejs": "../rigid_motion.js",
+  "basis": "Blender Z up, -Y front; Three.js adapter converts all offsets and local rotation axes to glTF Y up",
+  "pose_mode": "reset bind, assign quaternion postmultiply local axis rotation, updateMatrixWorld",
+  "clips_embedded": false,
+  "tested_glb": "lo.glb",
+  "recipes": {
+    "Hover": {
+      "period_seconds": 1.8,
+      "DARTER_Root.translationZ": ".018*sin(2*pi*t/1.8)",
+      "Skate_L.rotationX": ".035*sin(2*pi*t/1.8) radians",
+      "Skate_R.rotationX": "-.035*sin(2*pi*t/1.8) radians"
+    },
+    "Bank": {
+      "period_seconds": 2.4,
+      "BodyBank.rotationY": "8deg*sin(2*pi*t/2.4)",
+      "Skate_L.rotationY": "6deg*sin(2*pi*t/2.4)",
+      "Skate_R.rotationY": "6deg*sin(2*pi*t/2.4)",
+      "ProjectionArm.rotationZ": "7deg*sin(2*pi*t/2.4)"
+    },
+    "Fire": {
+      "duration_seconds": 0.6,
+      "envelope": "a=sin(pi*clamp(t/.6,0,1))",
+      "ProjectionArm.rotationX": "-12deg*a",
+      "ProjectionArm.translationY": ".028*a",
+      "BodyBank.rotationX": "3deg*a"
+    },
+    "Disabled": {
+      "duration_seconds": 1.4,
+      "envelope": "u=smoothstep(clamp(t/1.4,0,1))",
+      "DARTER_Root.translationZ": "-.14*u",
+      "Suspension.translationZ": "-.11*u",
+      "ProjectionArm.rotationX": "-5deg*u"
+    }
+  },
+  "ground": {
+    "idle_lowest_surface_m": 0.13999995589256287,
+    "disabled_final_lowest_surface_m": -4.692040889153759e-08,
+    "minimum_sampled_clearance_m": -4.692040889153759e-08,
+    "skate_static_airgap_m": 0.14,
+    "closed_suspension_stroke_m": 0.11
+  }
+}

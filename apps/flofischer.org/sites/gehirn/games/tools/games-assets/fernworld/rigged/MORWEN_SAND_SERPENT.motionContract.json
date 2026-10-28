@@ -1,0 +1,397 @@
+{
+  "coordinates": {
+    "runtime": "glTF Y-up, +Z forward; meters, nominal floor Y=0",
+    "native": "Blender Z-up, -Y forward; meters",
+    "root_motion": "All clips in place. Controllers own world movement; never apply a second baked translation."
+  },
+  "clips": {
+    "MORWEN": {
+      "Idle_Riding": {
+        "duration_s": 2.4166667461395264,
+        "start_s": 0.0,
+        "loop": true
+      },
+      "Ride_Cast": {
+        "duration_s": 1.5833333730697632,
+        "start_s": 0.0,
+        "loop": false
+      },
+      "Ground_Idle": {
+        "duration_s": 2.4166667461395264,
+        "start_s": 0.0,
+        "loop": true
+      },
+      "Ground_Walk": {
+        "duration_s": 1.2083333730697632,
+        "start_s": 0.0,
+        "loop": true
+      },
+      "Hit_Recover": {
+        "duration_s": 1.0833333730697632,
+        "start_s": 0.0,
+        "loop": false
+      },
+      "Dismount": {
+        "duration_s": 2.0,
+        "start_s": 0.0,
+        "loop": false
+      },
+      "Surrender_Captured": {
+        "duration_s": 2.0,
+        "start_s": 0.0,
+        "loop": false
+      }
+    },
+    "MORWEN_SAND_SERPENT": {
+      "Idle_Coil": {
+        "duration_s": 2.4166667461395264,
+        "start_s": 0.0,
+        "loop": true
+      },
+      "Slither": {
+        "duration_s": 1.5833333730697632,
+        "start_s": 0.0,
+        "loop": true
+      },
+      "Bite_Tell": {
+        "duration_s": 0.9166666865348816,
+        "start_s": 0.0,
+        "loop": false
+      },
+      "Bite_Strike": {
+        "duration_s": 0.6666666865348816,
+        "start_s": 0.0,
+        "loop": false
+      },
+      "Hit_Recover": {
+        "duration_s": 1.0833333730697632,
+        "start_s": 0.0,
+        "loop": false
+      },
+      "Freed": {
+        "duration_s": 2.4166667461395264,
+        "start_s": 0.0,
+        "loop": false
+      }
+    }
+  },
+  "sockets": {
+    "MORWEN": {
+      "Palm.L": {
+        "node": "Palm.L",
+        "parent": "hand.L",
+        "translation": [
+          0.002470922190696001,
+          0.04799918830394745,
+          -0.013266200199723244
+        ],
+        "rotation": [
+          0.9908280372619629,
+          0.09551109373569489,
+          0.09551136195659637,
+          0.0038796227890998125
+        ],
+        "scale": [
+          0.9999994039535522,
+          0.9999992847442627,
+          0.9999995827674866
+        ],
+        "forward_axis": "+Z",
+        "radius_m": 0.03,
+        "live_bone_parent": true,
+        "terrain_projection": false,
+        "flat_ground_height_correction_m": 0
+      },
+      "Palm.R": {
+        "node": "Palm.R",
+        "parent": "hand.R",
+        "translation": [
+          -0.002470922190696001,
+          0.04799918830394745,
+          -0.013266200199723244
+        ],
+        "rotation": [
+          0.9908280372619629,
+          -0.09551109373569489,
+          -0.09551136195659637,
+          0.0038796227890998125
+        ],
+        "scale": [
+          0.9999994039535522,
+          0.9999992847442627,
+          0.9999995827674866
+        ],
+        "forward_axis": "+Z",
+        "radius_m": 0.03,
+        "live_bone_parent": true,
+        "terrain_projection": false,
+        "flat_ground_height_correction_m": 0
+      },
+      "ChestHex": {
+        "node": "ChestHex",
+        "parent": "chest",
+        "translation": [
+          0,
+          1.1920928955078125e-07,
+          0.1899999976158142
+        ],
+        "rotation": [
+          3.774895063202166e-08,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "forward_axis": "+Z",
+        "radius_m": 0.03,
+        "live_bone_parent": true,
+        "terrain_projection": false,
+        "flat_ground_height_correction_m": 0
+      },
+      "ReiterMount": {
+        "node": "ReiterMount",
+        "parent": "pelvis",
+        "translation": [
+          0,
+          -0.07999998331069946,
+          0.07500000298023224
+        ],
+        "rotation": [
+          3.774895063202166e-08,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "forward_axis": "+Z",
+        "radius_m": 0.03,
+        "live_bone_parent": true,
+        "terrain_projection": false,
+        "flat_ground_height_correction_m": 0
+      },
+      "GroundShadow": {
+        "node": "GroundShadow",
+        "parent": "Root",
+        "translation": [
+          0,
+          0.004999995231628418,
+          0
+        ],
+        "rotation": [
+          3.774895063202166e-08,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "forward_axis": "+Z",
+        "radius_m": 0.03,
+        "live_bone_parent": true,
+        "terrain_projection": true,
+        "flat_ground_height_correction_m": 0
+      }
+    },
+    "MORWEN_SAND_SERPENT": {
+      "MouthForward": {
+        "node": "MouthForward",
+        "parent": "head",
+        "translation": [
+          -3.396532832766752e-08,
+          0.7694572806358337,
+          0.041661858558654785
+        ],
+        "rotation": [
+          -0.7017301321029663,
+          -3.603407350283305e-08,
+          -2.8102665083906686e-08,
+          0.712442934513092
+        ],
+        "scale": [
+          0.9999998807907104,
+          0.9999998807907104,
+          1.0000001192092896
+        ],
+        "forward_axis": "+Z",
+        "radius_m": 0.03,
+        "live_bone_parent": true,
+        "terrain_projection": false,
+        "flat_ground_height_correction_m": 0
+      },
+      "MountSocket": {
+        "node": "MountSocket",
+        "parent": "saddle",
+        "translation": [
+          2.7538176183838914e-08,
+          0.07500000298023224,
+          0.315000057220459
+        ],
+        "rotation": [
+          0,
+          -0.7071067690849304,
+          -0.7071067690849304,
+          6.181723932741079e-08
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "forward_axis": "+Z",
+        "radius_m": 0.03,
+        "live_bone_parent": true,
+        "terrain_projection": false,
+        "flat_ground_height_correction_m": 0
+      },
+      "DismountAnchor": {
+        "node": "DismountAnchor",
+        "parent": "Root",
+        "translation": [
+          0.8799999952316284,
+          -0.2800000011920929,
+          0.05000000074505806
+        ],
+        "rotation": [
+          3.774895063202166e-08,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "forward_axis": "+Z",
+        "radius_m": 0.03,
+        "live_bone_parent": true,
+        "terrain_projection": true,
+        "flat_ground_height_correction_m": 0.04
+      },
+      "GroundShadow": {
+        "node": "GroundShadow.001",
+        "parent": "Root",
+        "translation": [
+          0,
+          -0.2750000059604645,
+          0
+        ],
+        "rotation": [
+          3.774895063202166e-08,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "forward_axis": "+Z",
+        "radius_m": 0.03,
+        "live_bone_parent": true,
+        "terrain_projection": true,
+        "flat_ground_height_correction_m": 0.04
+      }
+    }
+  },
+  "synchronization": {
+    "attack_cycle_s": 1.5833333730697632,
+    "human": "Ride_Cast starts at common clock0 and covers the entire attack cycle.",
+    "serpent": "Bite_Tell starts at common clock0; Bite_Strike follows immediately at Bite_Tell duration. Their summed duration equals Ride_Cast.",
+    "serpent_strike_start_s": 0.9166666865348816,
+    "serpent_bite_release_clock_s": 1.26333336353302,
+    "capture": "Hold serpent Idle_Coil during Dismount; after the2s landing, start Freed and Surrender_Captured together. Human holds final captured pose alive."
+  },
+  "riding": {
+    "actors": "Two separate actors. Align live ReiterMount and MountSocket with the same absolute scene clock. Do not parent Morwen under an animated spine segment. Saddle/root remains stable while the20 body bones wave.",
+    "contact_evidence": "seat-contact.json checks actual imported skin vertices and live sockets at4 slither phases.",
+    "seat_socket_gap_max_m": 4.519928581443598e-08
+  },
+  "locomotion": {
+    "Ground_Walk": {
+      "controller_forward_speed_mps": 0.3641379190596903,
+      "stride_m": 0.44,
+      "duration_s": 1.2083333730697632,
+      "stance": "L normalized phase0-.5; R .5-1. Ankle counters forward controller. Swing soles clear floor. No limb scaling."
+    },
+    "Slither": {
+      "controller_forward_speed_mps": 0.9,
+      "phase_clock": "absolute seconds; use exported clip duration",
+      "root_motion": "none"
+    },
+    "Freed": {
+      "controller_forward_speed_mps": 0.9,
+      "hex_release_s": 0,
+      "alive": true,
+      "exit": "Glide forward on world controller after release; do not play a death state."
+    }
+  },
+  "collision_radii_m": {
+    "Morwen_ground": 0.28,
+    "Morwen_head": 0.14,
+    "Serpent_head": 0.39,
+    "Serpent_body": 0.3,
+    "Serpent_tail": 0.12
+  },
+  "release_events": {
+    "Ride_Cast": {
+      "release_s": 0.7916666865348816,
+      "socket": "Palm.R",
+      "effect": "external single hex effect; no duplicate baked FX"
+    },
+    "Bite_Strike": {
+      "release_s": 0.3466666769981384,
+      "socket": "MouthForward",
+      "radius_m": 0.52,
+      "forward_axis": "+Z"
+    },
+    "Dismount": {
+      "duration_s": 2.0,
+      "detach_s": 0.7,
+      "controller_path": "Hold world root until normalized .35. Then smoothstep X0->.88m and forward Z0->.05m during .35-.75. Hold landing anchor thereafter. Feet are tucked clear before translation; extend .75-1.",
+      "native_anchor": [
+        0.88,
+        -0.05,
+        0
+      ],
+      "gltf_anchor": [
+        0.88,
+        0,
+        0.05
+      ],
+      "anchor_height_rule": "Use the live DismountAnchor horizontal coordinates and project onto terrain. Serpent authored rig lowers its raw anchor node by0.04m; raw Y must not be used as the landing floor. Nominal floor projection gives the stated glTF anchor.",
+      "landing_s": 2.0
+    },
+    "Surrender_Captured": {
+      "alive": true,
+      "hold_last_pose": true,
+      "damage_enabled": false,
+      "death_animation": false
+    }
+  },
+  "render": {
+    "opaque_materials": 1,
+    "skin_mesh_primitives_per_actor": 1,
+    "max_weights": 4,
+    "shadow_lod": "Use depth/shadow material at runtime; supplied skin uses same rig and clips.",
+    "runtime_transparency": false,
+    "ground_shadow_rule": "Use GroundShadow horizontal coordinates and terrain height+0.005m. The serpent raw socket is lowered with the0.04m authored rig shift; terrain projection is required."
+  },
+  "limitations": [
+    "No integrated-game performance promise; no game integration performed.",
+    "Jaw remains closed; there is no authored empty mouth cavity. Bite is a telegraphed head/neck strike.",
+    "Artist OUTPUT_READY is not final user approval."
+  ]
+}

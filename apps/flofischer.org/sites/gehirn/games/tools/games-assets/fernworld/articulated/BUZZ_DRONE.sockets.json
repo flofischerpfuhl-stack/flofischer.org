@@ -1,0 +1,60 @@
+{
+  "Socket_Projection": {
+    "parent": "ProjectionNozzle",
+    "local_translation": [
+      0.02000001072883606,
+      -0.33500000834465027,
+      -0.02499997615814209
+    ],
+    "local_rotation_quaternion_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "world_translation": [
+      0.23000000417232513,
+      -0.45500001311302185,
+      1.0750000476837158
+    ],
+    "forward_local": [
+      0,
+      -1,
+      0
+    ],
+    "forward_world": [
+      0.0,
+      -1.0,
+      0.0
+    ]
+  },
+  "Socket_Damage": {
+    "parent": "FlightTilt",
+    "local_translation": [
+      0.0,
+      0.33500000834465027,
+      0.1799999475479126
+    ],
+    "local_rotation_quaternion_wxyz": [
+      4.371138828673793e-08,
+      0.0,
+      0.0,
+      -1.0
+    ],
+    "world_translation": [
+      0.0,
+      0.33500000834465027,
+      1.399999976158142
+    ],
+    "forward_local": [
+      0,
+      -1,
+      0
+    ],
+    "forward_world": [
+      -8.742277657347586e-08,
+      1.0,
+      0.0
+    ]
+  }
+}

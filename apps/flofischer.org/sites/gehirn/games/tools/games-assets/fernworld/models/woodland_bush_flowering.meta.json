@@ -1,0 +1,94 @@
+{
+  "category": "vegetation/woodland",
+  "label": "Cream flowering shrub",
+  "games": [
+    "generic"
+  ],
+  "description": "Seven woody canes, leaf cushions, folded foliage and five-petalled ivory blossom clusters. Prepared library only; no game integration.",
+  "budgets": {
+    "lo": 1800,
+    "hi": 24000
+  },
+  "vertex_cap": 1200,
+  "lods": {
+    "lo": {
+      "vertices": 1117,
+      "triangles": 744,
+      "groups": 1,
+      "bytes": 24108,
+      "vertexCap": 1200,
+      "triangleTarget": 744
+    },
+    "hi": {
+      "vertices": 1990,
+      "triangles": 2376,
+      "groups": 1,
+      "bytes": 51131,
+      "vertexCap": 1000000,
+      "triangleTarget": 24000
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "cull": false,
+  "sockets": {},
+  "placement": {
+    "surface": "hedge, clearing, settlement garden",
+    "origin": "ground centre, Y-up",
+    "rotationY": "free 0-360 degrees",
+    "uniformScale": [
+      0.8,
+      1.2
+    ]
+  },
+  "reuse": {
+    "family": "woodland",
+    "repeat": "rotate and vary uniform scale; keep species silhouette",
+    "combineWith": [
+      "meadow_fern_rosette",
+      "meadow_moss",
+      "meadow_leaf_litter"
+    ]
+  },
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.16,
+    "note": "Suggested future shader response; authored mesh is static."
+  },
+  "source": "scripts/games-blender/fernworld/assets/woodland.py",
+  "id": "woodland_bush_flowering",
+  "bounds": [
+    [
+      -0.8184850215911865,
+      -0.00927273090928793,
+      -0.7233842611312866
+    ],
+    [
+      0.7343432307243347,
+      0.8670476675033569,
+      0.7496233582496643
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#493c30",
+    "#4e743e",
+    "#6b8b49",
+    "#70513a",
+    "#786042",
+    "#829b55",
+    "#d0a34c",
+    "#e7cfb7",
+    "#f0dfcc"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "855ea84a8ad39c4087fbf9b35076c6224768fc799b64d3b96067f85af181f5dc"
+}

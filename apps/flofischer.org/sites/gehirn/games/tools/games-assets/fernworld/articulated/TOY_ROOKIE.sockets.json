@@ -1,0 +1,106 @@
+{
+  "GroundShadow": {
+    "node": "GroundShadow",
+    "localTRS": {
+      "translation": [
+        0,
+        0.0020000000949949026,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "forward": [
+      0,
+      0,
+      1
+    ]
+  },
+  "FXEmitter": {
+    "node": "FXEmitter",
+    "localTRS": {
+      "translation": [
+        0,
+        0,
+        0.3190000057220459
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "forward": [
+      0,
+      0,
+      1
+    ]
+  },
+  "MuzzleSocket": {
+    "node": "MuzzleSocket",
+    "localTRS": {
+      "translation": [
+        0,
+        0,
+        0.3179999887943268
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "forward": [
+      0,
+      0,
+      1
+    ]
+  },
+  "TurretPivot": {
+    "node": "TurretYaw",
+    "localTRS": {
+      "translation": [
+        0,
+        0.3100000023841858,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "axis": [
+      0,
+      1,
+      0
+    ]
+  }
+}

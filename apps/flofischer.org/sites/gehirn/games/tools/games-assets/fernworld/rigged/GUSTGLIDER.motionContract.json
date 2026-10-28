@@ -1,0 +1,61 @@
+{
+  "asset": "Gustglider",
+  "units": "Lore meters; one Blender unit equals one meter",
+  "axes": {
+    "nativeUp": "+Z",
+    "nativeForward": "-Y",
+    "gltfUp": "+Y",
+    "gltfForward": "+Z"
+  },
+  "pivot": "Root at (0,0,0); root is neutral and never translated by a clip. Body bind height approximately0.32m. Controller owns world position and flight altitude. Pivot is not a foot contact point.",
+  "altitude": "For flight, add controller altitude to root. ShadowAnchor remains root local (0,0,0); consumer projects ground shadow independently. Do not add keyed vertical translation.",
+  "rootMotion": false,
+  "groundContact": "No standing/walking/landing-contact clip. Land_Ready is an approach/tuck pose, not grounded contact, and must transition under controller placement.",
+  "hex": "Base creature is friendly. Violet binding/hex shell is a separate consumer effect at BodyHex. Freed requests hex removal and escape rather than death. No binding meshes in any tier.",
+  "clips": {
+    "Idle_Glide": {
+      "duration": 2.4,
+      "loop": true,
+      "purpose": "Small living sail/body and tail corrections"
+    },
+    "Flap": {
+      "duration": 1,
+      "loop": true,
+      "purpose": "Synchronized shoulder/hip sail flex with wrist followthrough and tail rudder"
+    },
+    "Bank": {
+      "duration": 1.6,
+      "loop": true,
+      "purpose": "Visible in-place roll and yaw, asymmetric shoulders with counter rudder"
+    },
+    "Dive_Attack": {
+      "duration": 1.4,
+      "loop": false,
+      "purpose": "Pitch down, sweep forelimbs, release wind at0.70s from AttackRelease",
+      "releaseTime": 0.7
+    },
+    "Hit_Recover": {
+      "duration": 1,
+      "loop": false,
+      "purpose": "Short backward recoil, open sail, return to glide"
+    },
+    "Freed": {
+      "duration": 2,
+      "loop": false,
+      "purpose": "Relieved lift and two vigorous sail beats, consumer clears hex and moves creature away"
+    },
+    "Land_Ready": {
+      "duration": 1.6,
+      "loop": false,
+      "purpose": "Symmetric lowering/tucking approach posture; no floor contact claim"
+    }
+  },
+  "sockets": {
+    "AttackRelease": "Actual empty bone-parented to Head at mouth; consumer uses asset forward +Z",
+    "BodyHex": "Actual Body bone-parent node, removable external binding",
+    "Trail": "Actual Tail3 bone-parent node",
+    "TailAnchor": "Actual Tail1 bone-parent node",
+    "ShadowAnchor": "Actual Root bone-parent node; projected ground position"
+  },
+  "skin": "One skinned mesh and one opaque rough vertex-color material per tier, four normalized bone weights maximum; no alpha or morph dependence. All runtime tiers share skeleton and animations."
+}

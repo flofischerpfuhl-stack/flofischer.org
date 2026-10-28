@@ -1,0 +1,93 @@
+{
+  "category": "vegetation/woodland",
+  "label": "Tiered woodland spruce",
+  "games": [
+    "generic"
+  ],
+  "description": "Six staggered whorls of thirty serrated needle fans; reddish branch skeleton remains visible between tiers. Prepared library only; no game integration.",
+  "budgets": {
+    "lo": 1800,
+    "hi": 24000
+  },
+  "vertex_cap": 1200,
+  "lods": {
+    "lo": {
+      "vertices": 1200,
+      "triangles": 990,
+      "groups": 1,
+      "bytes": 27404,
+      "vertexCap": 1200,
+      "triangleTarget": 990
+    },
+    "hi": {
+      "vertices": 2292,
+      "triangles": 2844,
+      "groups": 1,
+      "bytes": 59707,
+      "vertexCap": 1000000,
+      "triangleTarget": 24000
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "cull": false,
+  "sockets": {},
+  "placement": {
+    "surface": "cool woodland, upland, northern settlement",
+    "origin": "ground centre, Y-up",
+    "rotationY": "free 0-360 degrees",
+    "uniformScale": [
+      0.8,
+      1.2
+    ]
+  },
+  "reuse": {
+    "family": "woodland",
+    "repeat": "rotate and vary uniform scale; keep species silhouette",
+    "combineWith": [
+      "meadow_fern_rosette",
+      "meadow_moss",
+      "meadow_leaf_litter"
+    ]
+  },
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.065,
+    "note": "Suggested future shader response; authored mesh is static."
+  },
+  "source": "scripts/games-blender/fernworld/assets/woodland.py",
+  "id": "woodland_spruce_tiered",
+  "bounds": [
+    [
+      -0.8122827410697937,
+      -0.0009545059874653816,
+      -0.9035037159919739
+    ],
+    [
+      0.949999988079071,
+      3.2200000286102295,
+      0.9035037159919739
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#365b45",
+    "#416c4d",
+    "#493c30",
+    "#527c51",
+    "#5b8052",
+    "#648450",
+    "#66513a",
+    "#78553b"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "8e02baf333670c9c35cbcef7b197dcda766bd5a8b980e39b6dad4f76c3439911"
+}

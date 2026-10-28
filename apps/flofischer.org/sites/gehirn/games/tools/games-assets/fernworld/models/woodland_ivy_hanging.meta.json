@@ -1,0 +1,96 @@
+{
+  "category": "vegetation/woodland",
+  "label": "Hanging five-lobed ivy",
+  "games": [
+    "generic"
+  ],
+  "description": "Three unequal descending stems with petioles and twenty-one folded five-lobed ivy leaves. Prepared library only; no game integration.",
+  "budgets": {
+    "lo": 420,
+    "hi": 24000
+  },
+  "vertex_cap": 350,
+  "lods": {
+    "lo": {
+      "vertices": 333,
+      "triangles": 339,
+      "groups": 1,
+      "bytes": 8326,
+      "vertexCap": 350,
+      "triangleTarget": 420
+    },
+    "hi": {
+      "vertices": 333,
+      "triangles": 339,
+      "groups": 1,
+      "bytes": 8326,
+      "vertexCap": 1000000,
+      "triangleTarget": 24000
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "cull": false,
+  "sockets": {
+    "hanging": [
+      -0.15,
+      1.27,
+      0.035
+    ]
+  },
+  "placement": {
+    "surface": "wall, ruin, tree limb; attach highest hanging socket",
+    "origin": "ground centre, Y-up",
+    "rotationY": "free 0-360 degrees",
+    "uniformScale": [
+      0.8,
+      1.2
+    ]
+  },
+  "reuse": {
+    "family": "woodland",
+    "repeat": "rotate and vary uniform scale; keep species silhouette",
+    "combineWith": [
+      "meadow_fern_rosette",
+      "meadow_moss",
+      "meadow_leaf_litter"
+    ]
+  },
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.22,
+    "note": "Suggested future shader response; authored mesh is static."
+  },
+  "source": "scripts/games-blender/fernworld/assets/woodland.py",
+  "id": "woodland_ivy_hanging",
+  "bounds": [
+    [
+      -0.33857622742652893,
+      -0.00022109606652520597,
+      -0.08055233955383301
+    ],
+    [
+      0.30996131896972656,
+      1.2713791131973267,
+      0.14257246255874634
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#3e6340",
+    "#60804a",
+    "#6c7240",
+    "#7c8346",
+    "#7d9457"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "8e02baf333670c9c35cbcef7b197dcda766bd5a8b980e39b6dad4f76c3439911"
+}

@@ -1,0 +1,9 @@
+{
+  "library": "three.js",
+  "version": "0.170.0",
+  "licence": "MIT",
+  "source": "https://github.com/mrdoob/three.js/blob/r170/examples/jsm/loaders/GLTFLoader.js",
+  "upstream": "https://github.com/mrdoob/three.js/blob/r170/examples/jsm/loaders/GLTFLoader.js",
+  "source_sha256": "45139faddd5aaf48ed2d62203d976e5cbd703db1a592de40527f9f6cf58abd44",
+  "changes": "Only BufferGeometryUtils import adapted to existing vendored file. Used by the asset workshop and separately staged browser runtime."
+}

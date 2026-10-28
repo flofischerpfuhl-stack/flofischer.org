@@ -1,0 +1,232 @@
+{
+  "schema": "fernworld.rigid-motion.v1",
+  "coordinates": "glTF meters, Y up, +Z forward; additive channels from neutral node transform; radians; all group names refer to GLB empty nodes",
+  "fps": 30,
+  "body_pivot": "axle",
+  "wheel_radius_m": 0.22883333367419742,
+  "groups": [
+    "body",
+    "wheel",
+    "armL",
+    "armR",
+    "shield"
+  ],
+  "recipes": {
+    "idle_balance": {
+      "duration_s": 2.4,
+      "loop": true,
+      "channels": [
+        {
+          "node": "body",
+          "path": "rotation_euler",
+          "axis": "X",
+          "function": "sin(2*pi*t/2.4)*0.025",
+          "amplitude_rad": 0.025
+        },
+        {
+          "node": "armL",
+          "path": "rotation_euler",
+          "axis": "X",
+          "function": "sin(2*pi*t/2.4+0.8)*0.015",
+          "amplitude_rad": 0.015
+        }
+      ]
+    },
+    "wheel_roll_travel": {
+      "duration_s": 1,
+      "loop": true,
+      "distance_m": 1,
+      "channels": [
+        {
+          "node": "SHIELD_KLONK",
+          "path": "translation",
+          "axis": "Z",
+          "function": "t",
+          "delta_m": 1
+        },
+        {
+          "node": "wheel",
+          "path": "rotation_euler",
+          "axis": "X",
+          "function": "t/0.228833334",
+          "delta_rad": 4.36999271016938,
+          "delta_rad_by_lod": {
+            "hi": 4.369992729579087,
+            "lo": 4.43786982874598,
+            "far": 4.43786982874598,
+            "shadow": 4.43786982874598
+          }
+        }
+      ],
+      "time_domain": "t is unbounded elapsed seconds; accumulate root displacement and wheel rotation across repeats. duration_s=1 is the authoring preview span, never wrap world position.",
+      "note": "Use delta_rad_by_lod for active LOD; hi default includes the physical tread protrusion. Root translation stays exactly one meter."
+    },
+    "weapon_recoil": {
+      "duration_s": 0.32,
+      "loop": false,
+      "interpolation": "LINEAR",
+      "channels": [
+        {
+          "node": "armR",
+          "path": "rotation_euler",
+          "axis": "X",
+          "times": [
+            0,
+            0.055,
+            0.14,
+            0.32
+          ],
+          "values": [
+            0,
+            0.15,
+            -0.025,
+            0
+          ]
+        },
+        {
+          "node": "body",
+          "path": "rotation_euler",
+          "axis": "X",
+          "times": [
+            0,
+            0.055,
+            0.14,
+            0.32
+          ],
+          "values": [
+            0,
+            0.035,
+            -0.008,
+            0
+          ]
+        }
+      ],
+      "note": "KLONK uses this rigid tool kick for claw impacts; projector variants use it for discharge"
+    },
+    "hit_twitch": {
+      "duration_s": 0.26,
+      "loop": false,
+      "channels": [
+        {
+          "node": "body",
+          "path": "rotation_euler",
+          "axis": "Z",
+          "times": [
+            0,
+            0.04,
+            0.12,
+            0.26
+          ],
+          "values": [
+            0,
+            0.075,
+            -0.035,
+            0
+          ]
+        }
+      ],
+      "interpolation": "LINEAR"
+    },
+    "deactivated": {
+      "duration_s": 0.9,
+      "loop": false,
+      "hold_last": true,
+      "channels": [
+        {
+          "node": "body",
+          "path": "rotation_euler",
+          "axis": "X",
+          "times": [
+            0,
+            0.45,
+            0.9
+          ],
+          "values": [
+            0,
+            -0.12,
+            -0.18
+          ]
+        },
+        {
+          "node": "armL",
+          "path": "rotation_euler",
+          "axis": "X",
+          "times": [
+            0,
+            0.45,
+            0.9
+          ],
+          "values": [
+            0,
+            -0.06,
+            -0.11
+          ]
+        },
+        {
+          "node": "armR",
+          "path": "rotation_euler",
+          "axis": "X",
+          "times": [
+            0,
+            0.45,
+            0.9
+          ],
+          "values": [
+            0,
+            -0.08,
+            -0.14
+          ]
+        },
+        {
+          "path": "emissiveStrength",
+          "times": [
+            0,
+            0.4,
+            0.9
+          ],
+          "values": [
+            2.6,
+            0.4,
+            0
+          ],
+          "material": "Warm_lens"
+        }
+      ],
+      "interpolation": "LINEAR",
+      "note": "Braked wheel, slumped service posture, no organic death or loose debris; lens material override can be omitted for shared instancing"
+    }
+  },
+  "wheel_radius_by_lod_m": {
+    "hi": 0.22883333265781403,
+    "lo": 0.2253333330154419,
+    "far": 0.2253333330154419,
+    "shadow": 0.2253333330154419
+  },
+  "pivots_gltf_m": {
+    "body": [
+      0,
+      0.22883333367419742,
+      0
+    ],
+    "wheel": [
+      0,
+      0.22883333367419742,
+      0
+    ],
+    "armL": [
+      -0.23454166948795319,
+      0.8896666921209544,
+      -0.0
+    ],
+    "armR": [
+      0.23454166948795319,
+      0.8896666921209544,
+      -0.0
+    ],
+    "shield": [
+      -0.28166666626930237,
+      0.6210000074934214,
+      0.20800000429153442
+    ]
+  }
+}

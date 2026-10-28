@@ -1,0 +1,84 @@
+{
+  "category": "vegetation",
+  "label": "Daisy",
+  "games": [
+    "generic"
+  ],
+  "description": "Original botanical sculpt: curved folded laminae, tapered stems and individually shaped flowers. Opaque double-sided vertex colours, library only.",
+  "budgets": {
+    "hi": 90000,
+    "lo": 1400,
+    "sh": 350
+  },
+  "vertex_cap": 2600,
+  "shadow_cap": 1800,
+  "lods": {
+    "hi": {
+      "vertices": 1928,
+      "triangles": 2686,
+      "groups": 1,
+      "bytes": 52596,
+      "vertexCap": 1000000,
+      "triangleTarget": 90000
+    },
+    "lo": {
+      "vertices": 1035,
+      "triangles": 1240,
+      "groups": 1,
+      "bytes": 26740,
+      "vertexCap": 2600,
+      "triangleTarget": 1400,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 406,
+      "triangles": 350,
+      "groups": 1,
+      "bytes": 9573,
+      "vertexCap": 1800,
+      "triangleTarget": 350,
+      "authoredLod": true
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.18
+  },
+  "sockets": {},
+  "source": "scripts/games-blender/fernworld/assets/meadow_botany.py",
+  "id": "meadow_daisy",
+  "bounds": [
+    [
+      -0.09197336435317993,
+      0.0,
+      -0.09553214907646179
+    ],
+    [
+      0.12999999523162842,
+      0.45548975467681885,
+      0.11145219206809998
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#2b5837",
+    "#497d38",
+    "#668e46",
+    "#c8992e",
+    "#d8d5c8",
+    "#e8be47",
+    "#eee8d5"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "84fe661dfd7863c79c5710f9b789571dcaf55903ffd333e88ea5cfe97924d01e"
+}

@@ -1,0 +1,325 @@
+{
+  "version": 1,
+  "status": "prepared-only; no Games imports or integrated performance claim",
+  "families": [
+    {
+      "id": "pip",
+      "game": "pips-tower",
+      "label": "Pip Fossil Guild excavations and vaults",
+      "directory": "scripts/games-blender/fernworld/environments/pip-overworld",
+      "staticPattern": "{region}.static.glb",
+      "browserAudit": "docs/games/fernworld-assets/pip-world-browser-audit-2026-10-27.json",
+      "sourceContract": "scripts/games-blender/fernworld/environments/pip-overworld/AUTHORING.md",
+      "review": "Coordinator shape, all four actual runtime worlds and 44 supported visible nodes checked. Fine bevel contact points remain documented. No final user approval claimed.",
+      "regions": [
+        {
+          "region": "viridis",
+          "file": "environments/pip/viridis.glb",
+          "layoutFile": "environments/pip/viridis.layout.json",
+          "bytes": 13471608,
+          "sha256": "2af42bc815eb4de150176b2abd4ee317db7480547b16f9292eef9f9079f42702",
+          "layoutSha256": "129d2fc738c4919139a151e39fde4512bf8bd173ce088f7645e71a18eb99327a",
+          "triangles": 180074,
+          "materialPrimitives": 4,
+          "sourceFile": "scripts/games-blender/fernworld/environments/pip-overworld/viridis/viridis.static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/pip-overworld/viridis/viridis.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/pip-overworld/viridis/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "sahrun",
+          "file": "environments/pip/sahrun.glb",
+          "layoutFile": "environments/pip/sahrun.layout.json",
+          "bytes": 10474920,
+          "sha256": "0b5a3351062f8a1541bdcb7fc12f4a0d0add37402b8e23f7d42868ad124a192e",
+          "layoutSha256": "7d33f49174d1de1759bb7deaf6d5bcc7b4c751e5d9a0ac8c1965d51edc5fd42f",
+          "triangles": 143248,
+          "materialPrimitives": 4,
+          "sourceFile": "scripts/games-blender/fernworld/environments/pip-overworld/sahrun/sahrun.static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/pip-overworld/sahrun/sahrun.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/pip-overworld/sahrun/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "hibern",
+          "file": "environments/pip/hibern.glb",
+          "layoutFile": "environments/pip/hibern.layout.json",
+          "bytes": 8226244,
+          "sha256": "1baf16b669711070f5d56d8b7fa73b04b07d6208d1a0feeee69c5490243900ad",
+          "layoutSha256": "8e2ed1f0fab3d31f8fda1e568146160fdb82d8932d3c6f8b3890075f3c59b4fe",
+          "triangles": 114345,
+          "materialPrimitives": 4,
+          "sourceFile": "scripts/games-blender/fernworld/environments/pip-overworld/hibern/hibern.static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/pip-overworld/hibern/hibern.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/pip-overworld/hibern/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "vulkara",
+          "file": "environments/pip/vulkara.glb",
+          "layoutFile": "environments/pip/vulkara.layout.json",
+          "bytes": 9903992,
+          "sha256": "2ad5b440cdce9c735ddc855dc024c0365ad75fddba1b438ae09ceec8c0b4a0e5",
+          "layoutSha256": "bc678503e0c85f271e2709505f6b0a1462b3ac7ba9ec144690fead8a589484da",
+          "triangles": 134850,
+          "materialPrimitives": 4,
+          "sourceFile": "scripts/games-blender/fernworld/environments/pip-overworld/vulkara/vulkara.static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/pip-overworld/vulkara/vulkara.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/pip-overworld/vulkara/layout.json",
+          "cameraProjection": "orthographic"
+        }
+      ],
+      "integration": "prepared-only",
+      "runtimeStrategy": "Load only the selected region. Static material batches; source assemblies and shared instance transforms remain in authoring files."
+    },
+    {
+      "id": "rangers",
+      "game": "fern-rangers",
+      "label": "Fern Rangers campaign landscapes",
+      "directory": "scripts/games-blender/fernworld/environments/rangers-overworld",
+      "staticPattern": "{region}-merged-static.glb",
+      "browserAudit": "docs/games/fernworld-assets/rangers-world-browser-audit-2026-10-27.json",
+      "sourceContract": "docs/games/fernworld-assets/rangers-overworld.md",
+      "review": "Coordinator reviewed final colored static batches, actual game-camera visibility and all four distinct regions. Four static batches plus two retained moving sensor meshes in Vulkara. No final user or fullgame performance approval.",
+      "regions": [
+        {
+          "region": "viridis",
+          "file": "environments/rangers/viridis.glb",
+          "layoutFile": "environments/rangers/viridis.layout.json",
+          "bytes": 12515940,
+          "sha256": "a3b9f230adb036e6fae4733640ec65e6f941c439484869ad3e2eaa982cdcfa09",
+          "layoutSha256": "b56906032e05587a1664bd99c226ba859132a72db823fb734a09d7d3a0e93860",
+          "triangles": 172025,
+          "materialPrimitives": 4,
+          "sourceFile": "scripts/games-blender/fernworld/environments/rangers-overworld/viridis/viridis-merged-static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/rangers-overworld/viridis/viridis.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/rangers-overworld/viridis/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "sahrun",
+          "file": "environments/rangers/sahrun.glb",
+          "layoutFile": "environments/rangers/sahrun.layout.json",
+          "bytes": 8830044,
+          "sha256": "eeb9963ed5b81a0fb1d9a1d6efb9d49bb91535f509a6e5b8518432dfe8b8fb1a",
+          "layoutSha256": "7f8becce08b07f9cc8c5eb82f18fc50cab5d1f640e611a2f36fb14d39fd39437",
+          "triangles": 108214,
+          "materialPrimitives": 3,
+          "sourceFile": "scripts/games-blender/fernworld/environments/rangers-overworld/sahrun/sahrun-merged-static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/rangers-overworld/sahrun/sahrun.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/rangers-overworld/sahrun/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "hibern",
+          "file": "environments/rangers/hibern.glb",
+          "layoutFile": "environments/rangers/hibern.layout.json",
+          "bytes": 7056260,
+          "sha256": "df3361584a86efe78054ac9da17965d7db889bc01b3d1cd3f2ce500a5bf4856e",
+          "layoutSha256": "6a66f7a88e12c927e5e8c80159ff1aa83c5a8fdcd63e8548fb03baadeba4d4ca",
+          "triangles": 80356,
+          "materialPrimitives": 3,
+          "sourceFile": "scripts/games-blender/fernworld/environments/rangers-overworld/hibern/hibern-merged-static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/rangers-overworld/hibern/hibern.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/rangers-overworld/hibern/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "vulkara",
+          "file": "environments/rangers/vulkara.glb",
+          "layoutFile": "environments/rangers/vulkara.layout.json",
+          "bytes": 9303272,
+          "sha256": "f16578700ee36dbfd99fe7a2437ec4f7556bbe022eea9558bf559ca90b135ef1",
+          "layoutSha256": "6827f888e492de67feef8acdd8677540740dab3b578a0b408b9d89f0ddde0657",
+          "triangles": 89462,
+          "materialPrimitives": 6,
+          "sourceFile": "scripts/games-blender/fernworld/environments/rangers-overworld/vulkara/vulkara-merged-static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/rangers-overworld/vulkara/vulkara.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/rangers-overworld/vulkara/layout.json",
+          "cameraProjection": "orthographic"
+        }
+      ],
+      "integration": "prepared-only",
+      "runtimeStrategy": "Load only the selected region. Static material batches; source assemblies and shared instance transforms remain in authoring files."
+    },
+    {
+      "id": "momo",
+      "game": "momo",
+      "label": "Momo grounded abbeys and study gardens",
+      "directory": "scripts/games-blender/fernworld/environments/momo-overworld",
+      "staticPattern": "{region}.full-assembly.glb",
+      "browserAudit": "docs/games/fernworld-assets/momo-world-browser-audit-2026-10-27.json",
+      "sourceContract": "docs/games/fernworld-assets/momo-overworld.md",
+      "review": "Coordinator all four forms, final closed roof shells, actual browser views and44visible/supported nodes reviewed. No integrated performance approval.",
+      "regions": [
+        {
+          "region": "viridis",
+          "file": "environments/momo/viridis.glb",
+          "layoutFile": "environments/momo/viridis.layout.json",
+          "bytes": 16477272,
+          "sha256": "8d81a6e19ebd58a6cd7bb16c7f16c26f8f3df00bd8d420a14ce7d120e385dbdd",
+          "layoutSha256": "9175e32ae30b7f47171bf0ddaeaf2247c03e112179bae8ce042f1df85e48f112",
+          "triangles": 177171,
+          "materialPrimitives": 4,
+          "sourceFile": "scripts/games-blender/fernworld/environments/momo-overworld/viridis/viridis.full-assembly.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/momo-overworld/viridis/viridis.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/momo-overworld/viridis/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "sahrun",
+          "file": "environments/momo/sahrun.glb",
+          "layoutFile": "environments/momo/sahrun.layout.json",
+          "bytes": 15886820,
+          "sha256": "1a3a4257c8ef3e7788b96f898ab48497400800bd27c0b7ac2318c617ff1bf52f",
+          "layoutSha256": "7e539282c6303b99c22d6d7fa708aa99a130b4aecfcbf08f7ea53829118a23de",
+          "triangles": 170796,
+          "materialPrimitives": 4,
+          "sourceFile": "scripts/games-blender/fernworld/environments/momo-overworld/sahrun/sahrun.full-assembly.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/momo-overworld/sahrun/sahrun.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/momo-overworld/sahrun/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "hibern",
+          "file": "environments/momo/hibern.glb",
+          "layoutFile": "environments/momo/hibern.layout.json",
+          "bytes": 11944384,
+          "sha256": "cd2e2cad0e17a925f33d6318f30e6867aa37b5fd5e963e80de06b73347b43ab1",
+          "layoutSha256": "0ec1b3f63ff875a0648dff1858ba9248f408056628423db9467d6ddd5e0aa6e8",
+          "triangles": 129454,
+          "materialPrimitives": 4,
+          "sourceFile": "scripts/games-blender/fernworld/environments/momo-overworld/hibern/hibern.full-assembly.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/momo-overworld/hibern/hibern.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/momo-overworld/hibern/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "vulkara",
+          "file": "environments/momo/vulkara.glb",
+          "layoutFile": "environments/momo/vulkara.layout.json",
+          "bytes": 17399420,
+          "sha256": "ef75b8354d03286dbea720369886d87edc5e297b3b6b64d42f0639801d5b4f4f",
+          "layoutSha256": "6ffd851d60d2e5c71fa45e0a33668553103d24ed7a52cefa12161d952c72b733",
+          "triangles": 187083,
+          "materialPrimitives": 4,
+          "sourceFile": "scripts/games-blender/fernworld/environments/momo-overworld/vulkara/vulkara.full-assembly.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/momo-overworld/vulkara/vulkara.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/momo-overworld/vulkara/layout.json",
+          "cameraProjection": "orthographic"
+        }
+      ],
+      "integration": "prepared-only",
+      "runtimeStrategy": "Load only the selected region. Static material batches; source assemblies and shared instance transforms remain in authoring files."
+    },
+    {
+      "id": "bounce",
+      "game": "bounce-brigade",
+      "label": "Peace tournament tables and club miniature venues",
+      "directory": "scripts/games-blender/fernworld/environments/bounce-overworld",
+      "staticPattern": "{region}-merged-static.glb",
+      "browserAudit": "docs/games/fernworld-assets/bounce-world-browser-audit-2026-10-27.json",
+      "sourceContract": "docs/games/fernworld-assets/bounce-overworld.md",
+      "review": "Coordinator all four final native overviews and actual GLB views, corrected structural details and 44 supported visible nodes checked. No integrated performance or final user approval.",
+      "regions": [
+        {
+          "region": "viridis",
+          "file": "environments/bounce/viridis.glb",
+          "layoutFile": "environments/bounce/viridis.layout.json",
+          "bytes": 13673884,
+          "sha256": "4c31df8a939b7136df4061d5629980c51d1d46940dc712e66318a25615211e3b",
+          "layoutSha256": "f1e7ac90dbea4198ef2deede6ff6bd86370364e46355cf417e42e9c84995f054",
+          "triangles": 158566,
+          "materialPrimitives": 3,
+          "sourceFile": "scripts/games-blender/fernworld/environments/bounce-overworld/viridis/viridis-merged-static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/bounce-overworld/viridis/viridis.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/bounce-overworld/viridis/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "sahrun",
+          "file": "environments/bounce/sahrun.glb",
+          "layoutFile": "environments/bounce/sahrun.layout.json",
+          "bytes": 10171244,
+          "sha256": "53deceb0f2f5d2b08888225ce87b2042195d124abfb6028b176828509e915bb3",
+          "layoutSha256": "521b571d1caf98419cceafd0574020bcbf1757771ffbab35905a172f00080d6f",
+          "triangles": 117613,
+          "materialPrimitives": 3,
+          "sourceFile": "scripts/games-blender/fernworld/environments/bounce-overworld/sahrun/sahrun-merged-static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/bounce-overworld/sahrun/sahrun.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/bounce-overworld/sahrun/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "hibern",
+          "file": "environments/bounce/hibern.glb",
+          "layoutFile": "environments/bounce/hibern.layout.json",
+          "bytes": 8784012,
+          "sha256": "6964c1e2c6f5e7bed48ac11896b28237cb6e19f3976443770cb3f18a82f02bd3",
+          "layoutSha256": "defa76b27fa681cb4765ea0bf12c862b923e710a88e66ef096b54d1ee225a9e6",
+          "triangles": 103205,
+          "materialPrimitives": 3,
+          "sourceFile": "scripts/games-blender/fernworld/environments/bounce-overworld/hibern/hibern-merged-static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/bounce-overworld/hibern/hibern.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/bounce-overworld/hibern/layout.json",
+          "cameraProjection": "orthographic"
+        },
+        {
+          "region": "vulkara",
+          "file": "environments/bounce/vulkara.glb",
+          "layoutFile": "environments/bounce/vulkara.layout.json",
+          "bytes": 10418896,
+          "sha256": "3273bfede5361e9ee31162c6d5e6e825ab3d74d7e4f98a2e458075b25c7d9380",
+          "layoutSha256": "c92f36d1937e1e25c01b7ab70e8a6ef15c77742b58186cb523239737b5da3bd5",
+          "triangles": 115392,
+          "materialPrimitives": 3,
+          "sourceFile": "scripts/games-blender/fernworld/environments/bounce-overworld/vulkara/vulkara-merged-static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/bounce-overworld/vulkara/vulkara.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/bounce-overworld/vulkara/layout.json",
+          "cameraProjection": "orthographic"
+        }
+      ],
+      "integration": "prepared-only",
+      "runtimeStrategy": "Load only the selected region. Static material batches; source assemblies and shared instance transforms remain in authoring files."
+    },
+    {
+      "id": "sturmbastion",
+      "game": "fern-rangers",
+      "role": "bonus",
+      "label": "Sturmbastion harbour and sluiceworks",
+      "directory": "scripts/games-blender/fernworld/environments/sturmbastion-overworld",
+      "regionKeys": [
+        "sturmbastion"
+      ],
+      "regionDirectories": {
+        "sturmbastion": "output"
+      },
+      "assetIds": {
+        "sturmbastion": "OW_RANGERS_STURMBASTION"
+      },
+      "staticPattern": "{region}.static.glb",
+      "browserAudit": "docs/games/fernworld-assets/sturmbastion-world-browser-audit-2026-10-27.json",
+      "sourceContract": "scripts/games-blender/fernworld/environments/sturmbastion-overworld/output/RUNTIME.md",
+      "review": "Coordinator final eight actual GLB views and 11 visible supported level nodes reviewed. No final user or integrated performance approval.",
+      "regions": [
+        {
+          "assetId": "OW_RANGERS_STURMBASTION",
+          "region": "sturmbastion",
+          "file": "environments/sturmbastion/sturmbastion.glb",
+          "layoutFile": "environments/sturmbastion/sturmbastion.layout.json",
+          "bytes": 14639796,
+          "sha256": "2f8df57cca7996ba72d38a1ec6993a4bf01b5773f3588af7332da90f917289f6",
+          "layoutSha256": "975cadd8a4e8cedce577f5b55975af6f5716202f22e5a8af9a4f120ad47bd635",
+          "triangles": 179144,
+          "materialPrimitives": 7,
+          "sourceFile": "scripts/games-blender/fernworld/environments/sturmbastion-overworld/output/sturmbastion.static.glb",
+          "nativeFile": "scripts/games-blender/fernworld/environments/sturmbastion-overworld/output/sturmbastion.blend",
+          "sourceLayout": "scripts/games-blender/fernworld/environments/sturmbastion-overworld/output/layout.json",
+          "cameraProjection": "orthographic"
+        }
+      ],
+      "integration": "prepared-only",
+      "runtimeStrategy": "Load only the selected region. Static material batches; source assemblies and shared instance transforms remain in authoring files."
+    }
+  ]
+}

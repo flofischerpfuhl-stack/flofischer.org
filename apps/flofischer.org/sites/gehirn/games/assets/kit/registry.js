@@ -192,10 +192,10 @@ export const LEAVES = [
   T('canvas', 'mermaid', 'Mermaid', 'Mermaid', '#mermaid', { sub: 'mermaid', icon: 'workflow', desc: 'Diagrams from text.', syn: ['diagram', 'flowchart', 'uml', 'sequence diagram', 'gantt'] }),
 
   // ── Games ──────────────────────────────────────────────────────────────────
-  T('games', 'fern-rangers', 'Fern Rangers', 'Fern Rangers', '#fern-rangers', { sub: 'fern-rangers', icon: 'crosshair', desc: 'Steer your squad through number gates and outgun the horde.', syn: ['game', 'games', 'play', 'shooter', 'arcade', 'zombie', 'gates', 'squad', 'runner'] }),
+  T('games', 'fern-rangers', 'Fern Rangers', 'Fern Rangers', '#fern-rangers', { sub: 'fern-rangers', icon: 'crosshair', desc: 'Steer your squad through number gates and outgun the horde.', syn: ['game', 'games', 'play', 'shooter', 'arcade', 'machines', 'gates', 'squad', 'runner'] }),
   T('games', 'pips-tower', 'Pip’s Tower', 'Pip’s Tower', '#pips-tower', { sub: 'pips-tower', icon: 'pin', desc: 'Pull the pins in the right order to save the hero.', syn: ['game', 'games', 'play', 'puzzle', 'pull the pin', 'pin', 'rescue', 'pips tower', 'tower'] }),
-  T('games', 'momo', 'Momo’s Last Stand', 'Momo’s Last Stand', '#momo', { sub: 'momo', icon: 'wrench', desc: 'Hold the arena against the alien horde and pick an upgrade card each level-up.', syn: ['game', 'games', 'play', 'arena', 'survivor', 'horde', 'roguelite', 'upgrade', 'cards', 'momo', 'red panda'] }),
-  T('games', 'tanks', 'Bounce Brigade', 'Bounce Brigade', '#tanks', { sub: 'tanks', icon: 'crosshair', desc: 'Toy tank duels: bank your shells off the walls, lay mines and beat the Klonkbot tank corps.', syn: ['game', 'games', 'play', 'tank', 'tanks', 'ricochet', 'bounce', 'mines', 'arena', 'hedgehog', 'hazel'] }),
+  T('games', 'momo', 'Hexennacht', 'Hexennacht', '#momo', { sub: 'momo', icon: 'wrench', desc: 'Choose a Fernling, develop its moves and free the abbey from the hex.', syn: ['game', 'games', 'play', 'arena', 'survivor', 'horde', 'roguelite', 'upgrade', 'cards', 'momo', 'fernling'] }),
+  T('games', 'tanks', 'Bounce Brigade', 'Bounce Brigade', '#tanks', { sub: 'tanks', icon: 'crosshair', desc: 'Toy tank tournament: bank rubber shells off the walls and outplay rival clubs.', syn: ['game', 'games', 'play', 'tank', 'tanks', 'ricochet', 'bounce', 'mines', 'arena', 'tournament', 'hazel'] }),
 ];
 
 /** Older (mockup round) ids → today's leaves, so stored Recent entries and links keep resolving. */

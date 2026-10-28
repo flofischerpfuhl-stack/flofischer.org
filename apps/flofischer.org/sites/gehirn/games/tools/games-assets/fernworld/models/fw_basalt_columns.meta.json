@@ -1,0 +1,76 @@
+{
+  "category": "terrain",
+  "label": "Jointed prismatic basalt cluster",
+  "games": [
+    "generic"
+  ],
+  "description": "Jointed prismatic basalt cluster; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 2036,
+      "triangles": 1176,
+      "groups": 1,
+      "bytes": 42243,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 2036,
+      "triangles": 1176,
+      "groups": 1,
+      "bytes": 42243,
+      "vertexCap": 4000,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 620,
+      "triangles": 1156,
+      "groups": 1,
+      "bytes": 19426,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 4000,
+  "shadow_cap": 1200,
+  "ground": true,
+  "ao_dist": 0.15,
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_basalt_columns",
+  "bounds": [
+    [
+      -1.1040960550308228,
+      0.0,
+      -0.681090235710144
+    ],
+    [
+      1.1794514656066895,
+      1.6727608442306519,
+      0.6755489110946655
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#252f37",
+    "#343f47",
+    "#414f56",
+    "#536169",
+    "#6c777a"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

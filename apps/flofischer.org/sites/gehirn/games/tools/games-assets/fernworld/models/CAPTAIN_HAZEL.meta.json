@@ -1,0 +1,120 @@
+{
+  "category": "characters",
+  "label": "Captain Hazel Federkiel",
+  "games": [
+    "fern-rangers",
+    "bounce-brigade"
+  ],
+  "description": "White Duck captain of the Fern Rangers; navy greatcoat, crimson cape, crowned Sevenstar cap.",
+  "budgets": {
+    "hi": 24000,
+    "lo": 12000,
+    "sh": 1200
+  },
+  "vertex_cap": 10000,
+  "shadow_cap": 1000,
+  "sockets": {
+    "mouth": [
+      0,
+      1.1,
+      0.46
+    ],
+    "head": [
+      0,
+      1.43,
+      0
+    ],
+    "handL": [
+      -0.391,
+      0.605,
+      0.18
+    ],
+    "handR": [
+      0.391,
+      0.605,
+      0.18
+    ],
+    "feet": [
+      0,
+      0,
+      0.07
+    ],
+    "attack": [
+      0.391,
+      0.605,
+      0.25
+    ]
+  },
+  "ground": true,
+  "source": "scripts/games-blender/fernworld/assets/captain_hazel.py",
+  "id": "CAPTAIN_HAZEL",
+  "bounds": [
+    [
+      -0.471993088722229,
+      0.0010000000474974513,
+      -0.37452876567840576
+    ],
+    [
+      0.471993088722229,
+      1.6997292041778564,
+      0.47999998927116394
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "lods": {
+    "hi": {
+      "vertices": 7707,
+      "triangles": 14471,
+      "groups": 5,
+      "bytes": 240371,
+      "vertexCap": 1000000,
+      "triangleTarget": 24000
+    },
+    "lo": {
+      "vertices": 4981,
+      "triangles": 9099,
+      "groups": 5,
+      "bytes": 153773,
+      "vertexCap": 10000,
+      "triangleTarget": 12000
+    },
+    "sh": {
+      "vertices": 637,
+      "triangles": 1178,
+      "groups": 5,
+      "bytes": 20897,
+      "vertexCap": 1000,
+      "triangleTarget": 1200
+    }
+  },
+  "channels": [
+    "armL",
+    "armR",
+    "body",
+    "legL",
+    "legR"
+  ],
+  "palette": [
+    "#121a26",
+    "#172336",
+    "#172a48",
+    "#192333",
+    "#23354a",
+    "#263f60",
+    "#48505a",
+    "#a9742d",
+    "#ad243b",
+    "#ad7728",
+    "#e7b650",
+    "#f7b83f",
+    "#f8f5e8",
+    "#fffefa",
+    "#ffffff"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "f08dc04bcb902772341562f799334a2e8f5a41cbc2c571fe7e29288506f45830"
+}

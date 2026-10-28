@@ -1,0 +1,92 @@
+{
+  "category": "vegetation/woodland",
+  "label": "Old twisted broadleaf tree",
+  "games": [
+    "generic"
+  ],
+  "description": "Root-flared spiral bole, exposed fork scaffolding, fifteen lobed leaf cushions and folded edge leaves. Prepared library only; no game integration.",
+  "budgets": {
+    "lo": 1800,
+    "hi": 24000
+  },
+  "vertex_cap": 1200,
+  "lods": {
+    "lo": {
+      "vertices": 1179,
+      "triangles": 730,
+      "groups": 1,
+      "bytes": 24981,
+      "vertexCap": 1200,
+      "triangleTarget": 731
+    },
+    "hi": {
+      "vertices": 2971,
+      "triangles": 3867,
+      "groups": 1,
+      "bytes": 78744,
+      "vertexCap": 1000000,
+      "triangleTarget": 24000
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "cull": false,
+  "sockets": {},
+  "placement": {
+    "surface": "forest floor, meadow edge, landmark",
+    "origin": "ground centre, Y-up",
+    "rotationY": "free 0-360 degrees",
+    "uniformScale": [
+      0.8,
+      1.2
+    ]
+  },
+  "reuse": {
+    "family": "woodland",
+    "repeat": "rotate and vary uniform scale; keep species silhouette",
+    "combineWith": [
+      "meadow_fern_rosette",
+      "meadow_moss",
+      "meadow_leaf_litter"
+    ]
+  },
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.045,
+    "note": "Suggested future shader response; authored mesh is static."
+  },
+  "source": "scripts/games-blender/fernworld/assets/woodland.py",
+  "id": "woodland_oak_old",
+  "bounds": [
+    [
+      -1.338841199874878,
+      -0.0523713193833828,
+      -1.2255828380584717
+    ],
+    [
+      1.240979790687561,
+      2.940000057220459,
+      1.0272104740142822
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#355a36",
+    "#493c30",
+    "#507b3d",
+    "#70513a",
+    "#75934b",
+    "#789047",
+    "#96704a"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "855ea84a8ad39c4087fbf9b35076c6224768fc799b64d3b96067f85af181f5dc"
+}

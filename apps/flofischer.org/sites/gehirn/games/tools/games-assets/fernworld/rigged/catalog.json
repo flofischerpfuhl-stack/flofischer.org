@@ -1,0 +1,2621 @@
+{
+  "version": 1,
+  "status": "prepared-only; no game integration",
+  "assets": [
+    {
+      "id": "PIP_KESSEL",
+      "reviewAsset": "ranger",
+      "label": "Pip Kessel",
+      "native": "scripts/games-blender/fernworld/variants/pip-kaykit2-ranger/pip-kaykit2-ranger.blend",
+      "glb": "scripts/games-blender/fernworld/variants/pip-kaykit2-ranger/pip-kaykit2-ranger.glb",
+      "license": "CC0-1.0; KayKit Adventurers 2.0 plus Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/variants/pip-kaykit2-ranger/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/rigged-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1,
+      "role": "solo-hero",
+      "review": "User-preferred Ranger body; focused V3 face reviewed by coordinator. No final user approval claimed.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "useItem": "Attack_Mining_UseItem"
+      },
+      "motionLibrary": "PIP_SHARED_MOTION",
+      "file": "rigged/PIP_KESSEL.glb",
+      "lods": {},
+      "sha256": "34367651b8c02dafc0336610e8e61f0f9e6ab7aafc540cdecbe72147220fef10",
+      "nativeSha256": "88d8bc35ddb911331c6099707016cbcb9edf31218d8d7c737a92313449a962f3",
+      "bytes": 829688,
+      "triangles": 13392,
+      "vertices": 11747,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "MOMO_NOVICE",
+      "reviewAsset": "momo",
+      "label": "Momo, novice of Hohenfarn",
+      "native": "scripts/games-blender/fernworld/characters/momo-refined/momo-refined-v2.blend",
+      "glb": "scripts/games-blender/fernworld/characters/momo-refined/momo-refined-v2.glb",
+      "license": "CC-BY-4.0 Ellie (Blender Studio/Blender Foundation) face/eyes/brows and CC0 KayKit Adventurers 2.0 body; Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/momo-refined/SOURCE-v2.json",
+      "browserAudit": "docs/games/fernworld-assets/momo-refined-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.45,
+      "role": "single-keeper-npc",
+      "review": "Coordinator personally reviewed actual final front/35/profile/back/face/braid/Lo256/Shadow256 and Keeper_Call/Joy renders. Independent four actual GLBs/all3clips/allkeytimes+25/fullskin vertex checks pass. New mapped bind is shared by all tiers, not claimed identical to old Momo. User approved design sheet, no final 3D model user approval claimed.",
+      "clips": {
+        "idle": "Idle",
+        "call": "Keeper_Call",
+        "joy": "Joy"
+      },
+      "attribution": {
+        "file": "rigged/MOMO_NOVICE.attribution.txt",
+        "sha256": "583b6054650491c59d92501e553df5ed1fff1616690302c66f90a26ed7548a92"
+      },
+      "licenseText": {
+        "file": "rigged/MOMO_NOVICE.licenseText.txt",
+        "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+      },
+      "motionContract": {
+        "file": "rigged/MOMO_NOVICE.motionContract.json",
+        "sha256": "ceb3d36db5aae2ebf138c0aedee500cf6c0585c5644c44647621e9d2d67c6787"
+      },
+      "instanceScale": 0.6388198713960991,
+      "defaultLod": "lo",
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/momo-refined/momo-refined-v2.lo.glb",
+          "reviewAsset": "momo-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/momo-refined/momo-refined-v2.far.glb",
+          "reviewAsset": "momo-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/momo-refined/momo-refined-v2.shadow.glb",
+          "reviewAsset": "momo-shadow"
+        }
+      },
+      "integrationNotes": [
+        "Shared uniform scale0.6388198713960991 for all LODs/sockets to nominal1.45m; no independent LOD normalization.",
+        "Raw Idle/Keeper_Call/Joy start1/24s; preserved source timings. No locomotion clip authored; Keeper stays at abbey steps.",
+        "Two GLTF material primitives on one shared23bone rig. Shadow closed1188triangle silhouette is shadow-only.",
+        "CC-BY4 Ellie attribution and modification notice must accompany distribution."
+      ],
+      "file": "rigged/MOMO_NOVICE.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/MOMO_NOVICE.lo.glb",
+          "sha256": "b205489d21113ab48c0f03e1329ee96a9d02b94f090fa8a5ff83cd0431258907",
+          "bytes": 1081316,
+          "triangles": 10997,
+          "materialPrimitives": 2
+        },
+        "far": {
+          "file": "rigged/MOMO_NOVICE.far.glb",
+          "sha256": "e85928ad5b93c89aec50d5cb5cb881f4b9876a81602a8e3a0c6cc31e2a2c4f7d",
+          "bytes": 468620,
+          "triangles": 2988,
+          "materialPrimitives": 2
+        },
+        "shadow": {
+          "file": "rigged/MOMO_NOVICE.shadow.glb",
+          "sha256": "5244c0cc8f2a6093ecc52a7b2021adb089f35c3670a28314f4aa9ae5590e41cf",
+          "bytes": 103332,
+          "triangles": 1188,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "c3b0843955e7ad25a432abec72881171d4ce48b989d6b8ddf4667b0720d8272a",
+      "nativeSha256": "29b79c666a3c3f3c7dc60cbd19892227252fe4b94222458f4df8c1c6dc4ac347",
+      "bytes": 4236872,
+      "triangles": 52004,
+      "vertices": 29294,
+      "materialPrimitives": 2,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "PIP_VINE_HOOK",
+      "reviewAsset": "vine",
+      "label": "Pip Rankenhaken",
+      "native": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_VINE_HOOK/PIP_VINE_HOOK.blend",
+      "glb": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_VINE_HOOK/PIP_VINE_HOOK.glb",
+      "license": "CC0-1.0; KayKit Adventurers 2.0, Blender Studio Human Base Meshes and Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_VINE_HOOK/provenance.json",
+      "browserAudit": "docs/games/fernworld-assets/pip-tools-elements-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1,
+      "instanceScale": 0.4233654951651481,
+      "role": "solo-hero-powerup",
+      "review": "Coordinator multi-view and actual browser GLB review complete. No final user approval claimed.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "useItem": "Attack_Mining_UseItem"
+      },
+      "sockets": {
+        "file": "rigged/PIP_VINE_HOOK.sockets.json",
+        "sha256": "fff6f4798fb1c9f7cba0886037ff80cc7c58ec093b240633760dcddace858060"
+      },
+      "motionLibrary": "PIP_SHARED_MOTION",
+      "integrationNotes": [
+        "Read actual SOCKET_* nodes and the authored socket contract. Original bind skeleton and source clips are byte-identical; eight shared clips independently checked on this final body.",
+        "Powerup tools replace the pickaxe. Preserve source character scale. Free-hand geometry uses licensed CC0 stylized hand topology."
+      ],
+      "file": "rigged/PIP_VINE_HOOK.glb",
+      "lods": {},
+      "sha256": "281ffefeee792f55976498b413651e59f47fb390b262a5419822430a51a5d8ba",
+      "nativeSha256": "cb9b5e2f8dee05e2a5eb4af2984482255c7beb063e69a13bab30acc2ac8887ba",
+      "bytes": 824828,
+      "triangles": 13216,
+      "vertices": 11655,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "PIP_FIRE_THROW",
+      "reviewAsset": "fire",
+      "label": "Pip Feuerwurf",
+      "native": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_FIRE_THROW/PIP_FIRE_THROW.blend",
+      "glb": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_FIRE_THROW/PIP_FIRE_THROW.glb",
+      "license": "CC0-1.0; KayKit Adventurers 2.0, Blender Studio Human Base Meshes and Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_FIRE_THROW/provenance.json",
+      "browserAudit": "docs/games/fernworld-assets/pip-tools-elements-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1,
+      "instanceScale": 0.4233654951651481,
+      "role": "solo-hero-powerup",
+      "review": "Coordinator multi-view and actual browser GLB review complete. No final user approval claimed.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "useItem": "Attack_Mining_UseItem"
+      },
+      "sockets": {
+        "file": "rigged/PIP_FIRE_THROW.sockets.json",
+        "sha256": "2bfe0bdcd6bafbee493d4968c9204682123e4a5895af3cecf3ffe77bbb8fb99e"
+      },
+      "attachments": [
+        {
+          "source": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_FIRE_THROW/PIP_FIRE_THROW_FX.glb",
+          "filename": "PIP_FIRE_THROW_FX.glb",
+          "browserAudit": "docs/games/fernworld-assets/pip-accessories-browser-audit-2026-10-27.json",
+          "runtimeFlags": {
+            "castShadow": false,
+            "receiveShadow": false,
+            "worldUp": true
+          },
+          "activation": {
+            "clip": "FireCast_Left",
+            "visibleSeconds": [
+              0.20833333333333334,
+              0.5833333333333334
+            ],
+            "releaseSeconds": 0.4166666666666667,
+            "hideOnInterrupt": true,
+            "socket": "SOCKET_FireCast",
+            "worldUp": true
+          }
+        }
+      ],
+      "motionLibrary": "PIP_SHARED_MOTION",
+      "integrationNotes": [
+        "Read actual SOCKET_* nodes and the authored socket contract. Original bind skeleton and source clips are byte-identical; eight shared clips independently checked on this final body.",
+        "Powerup tools replace the pickaxe. Preserve source character scale. Free-hand geometry uses licensed CC0 stylized hand topology."
+      ],
+      "file": "rigged/PIP_FIRE_THROW.glb",
+      "lods": {},
+      "sha256": "70260620a093d5e7c56661da077ccdc06bdcf8b30bf8509496361a13928b9c4e",
+      "nativeSha256": "ce6eec0c276cbf7f302cb216ee4f95cd1d81e362789bd07f9f60c88b68675daa",
+      "bytes": 972720,
+      "triangles": 16848,
+      "vertices": 14082,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "PIP_BUBBLE_FLOAT",
+      "reviewAsset": "bubble",
+      "label": "Pip Blasenschweben",
+      "native": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_BUBBLE_FLOAT/PIP_BUBBLE_FLOAT.blend",
+      "glb": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_BUBBLE_FLOAT/PIP_BUBBLE_FLOAT.glb",
+      "license": "CC0-1.0; KayKit Adventurers 2.0, Blender Studio Human Base Meshes and Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_BUBBLE_FLOAT/provenance.json",
+      "browserAudit": "docs/games/fernworld-assets/pip-tools-elements-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1,
+      "instanceScale": 0.4233654951651481,
+      "role": "solo-hero-powerup",
+      "review": "Coordinator multi-view and actual browser GLB review complete. No final user approval claimed.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "useItem": "Attack_Mining_UseItem"
+      },
+      "sockets": {
+        "file": "rigged/PIP_BUBBLE_FLOAT.sockets.json",
+        "sha256": "2f3e09052f5002f362c490bf5a703a2226d837abbecd83dbf69adc0f3933feae"
+      },
+      "attachments": [
+        {
+          "source": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_BUBBLE_FLOAT/PIP_BUBBLE_FLOAT_FX.glb",
+          "filename": "PIP_BUBBLE_FLOAT_FX.glb",
+          "browserAudit": "docs/games/fernworld-assets/pip-accessories-browser-audit-2026-10-27.json",
+          "runtimeFlags": {
+            "castShadow": false,
+            "receiveShadow": false,
+            "worldUp": true,
+            "depthWrite": false,
+            "side": "FrontSide",
+            "renderOrder": 10
+          },
+          "activation": "Visible only while the Bubble Float powerup is active; world-up root socket, FrontSide, depthWrite false."
+        }
+      ],
+      "motionLibrary": "PIP_SHARED_MOTION",
+      "integrationNotes": [
+        "Read actual SOCKET_* nodes and the authored socket contract. Original bind skeleton and source clips are byte-identical; eight shared clips independently checked on this final body.",
+        "Powerup tools replace the pickaxe. Preserve source character scale. Free-hand geometry uses licensed CC0 stylized hand topology."
+      ],
+      "file": "rigged/PIP_BUBBLE_FLOAT.glb",
+      "lods": {},
+      "sha256": "63476f6ebf6a78f24b6408de2426b88012d9b28d3f159787e633455343bbb70e",
+      "nativeSha256": "71cbdabe7502c5e104211954003150bf393b5d31eb0d424bd8906c461150573d",
+      "bytes": 852368,
+      "triangles": 15848,
+      "vertices": 11885,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "PIP_GALE_GLIDER",
+      "reviewAsset": "gale",
+      "label": "Pip Windgleiter",
+      "native": "scripts/games-blender/fernworld/characters/pip-tools-mobility/output/PIP_GALE_GLIDER/PIP_GALE_GLIDER.blend",
+      "glb": "scripts/games-blender/fernworld/characters/pip-tools-mobility/output/PIP_GALE_GLIDER/PIP_GALE_GLIDER.glb",
+      "license": "CC0-1.0; KayKit Adventurers 2.0, Blender Studio Human Base Meshes and Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/pip-tools-mobility/output/PIP_GALE_GLIDER/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/pip-tools-mobility-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1,
+      "instanceScale": 0.4233654951651481,
+      "role": "solo-hero-powerup",
+      "review": "Coordinator inspected actual multiview renders, ability and hand-contact details. Independent complete-vertex 11clip/keytime/25phase browser audit plus runtime-contract anchors/morph reset/FX; exact original rig, clip and cape-morph preservation. No final user approval claimed.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "useItem": "Attack_Mining_UseItem"
+      },
+      "activationRecipes": {
+        "file": "rigged/PIP_GALE_GLIDER.activationRecipes.json",
+        "sha256": "2f60943d51046520677e28536b0a5d31690308c6c1a77ea48ace87b86437fa08"
+      },
+      "motionLibrary": "PIP_SHARED_MOTION",
+      "motionContract": {
+        "file": "rigged/PIP_GALE_GLIDER.motionContract.json",
+        "sha256": "8854896974d3c9f9f0bda2112a75363d9b27683abac83392815d8f9bdb43f785"
+      },
+      "file": "rigged/PIP_GALE_GLIDER.glb",
+      "lods": {},
+      "sha256": "1a0a93c90c8a4e8e3525997302e8b2b517bd48356ad5ddf8485cb89ba1e7c5be",
+      "nativeSha256": "f58a75637eb47ba5fd8ac4839466f4c952bd61c43efdf40573771e7522b255d7",
+      "bytes": 967744,
+      "triangles": 17808,
+      "vertices": 13109,
+      "materialPrimitives": 2,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "PIP_SPARK_LEAP",
+      "reviewAsset": "spark",
+      "label": "Pip Funkensprung",
+      "native": "scripts/games-blender/fernworld/characters/pip-tools-mobility/output/PIP_SPARK_LEAP/PIP_SPARK_LEAP.blend",
+      "glb": "scripts/games-blender/fernworld/characters/pip-tools-mobility/output/PIP_SPARK_LEAP/PIP_SPARK_LEAP.glb",
+      "license": "CC0-1.0; KayKit Adventurers 2.0, Blender Studio Human Base Meshes and Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/pip-tools-mobility/output/PIP_SPARK_LEAP/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/pip-tools-mobility-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1,
+      "instanceScale": 0.4233654951651481,
+      "role": "solo-hero-powerup",
+      "review": "Coordinator inspected actual multiview renders, ability and hand-contact details. Independent complete-vertex 11clip/keytime/25phase browser audit plus runtime-contract anchors/morph reset/FX; exact original rig, clip and cape-morph preservation. No final user approval claimed.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "useItem": "Attack_Mining_UseItem"
+      },
+      "activationRecipes": {
+        "file": "rigged/PIP_SPARK_LEAP.activationRecipes.json",
+        "sha256": "2f60943d51046520677e28536b0a5d31690308c6c1a77ea48ace87b86437fa08"
+      },
+      "motionLibrary": "PIP_SHARED_MOTION",
+      "motionContract": {
+        "file": "rigged/PIP_SPARK_LEAP.motionContract.json",
+        "sha256": "d5d3f10b0ea7cbc53f39588c7b751f92cffa46705dafe9e983156e92a5f7dd25"
+      },
+      "attachments": [
+        {
+          "source": "scripts/games-blender/fernworld/characters/pip-tools-mobility/output/PIP_SPARK_LEAP/PIP_SPARK_LEAP_FX.glb",
+          "filename": "PIP_SPARK_LEAP_FX.glb",
+          "browserAudit": "docs/games/fernworld-assets/pip-tools-mobility-fx-browser-audit-2026-10-27.json",
+          "role": "optional on-demand hand discharge; local FX time 0..0.16s at accepted double-jump event, position only and world up; see motionContract"
+        }
+      ],
+      "file": "rigged/PIP_SPARK_LEAP.glb",
+      "lods": {},
+      "sha256": "98ca33e6fb3056a72d7677f32eaa19ae3937b44e9962755576a64676fe5c202b",
+      "nativeSha256": "86c6f85d296ca2125987c03616b03c7097da0d585898bac969a11ab50d033160",
+      "bytes": 892764,
+      "triangles": 16944,
+      "vertices": 12537,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "PIP_FROST_BRIDGE",
+      "reviewAsset": "frost",
+      "label": "Pip Frostbr\u00fccke",
+      "native": "scripts/games-blender/fernworld/characters/pip-tools-mobility/output/PIP_FROST_BRIDGE/PIP_FROST_BRIDGE.blend",
+      "glb": "scripts/games-blender/fernworld/characters/pip-tools-mobility/output/PIP_FROST_BRIDGE/PIP_FROST_BRIDGE.glb",
+      "license": "CC0-1.0; KayKit Adventurers 2.0, Blender Studio Human Base Meshes and Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/pip-tools-mobility/output/PIP_FROST_BRIDGE/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/pip-tools-mobility-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1,
+      "instanceScale": 0.4233654951651481,
+      "role": "solo-hero-powerup",
+      "review": "Coordinator inspected actual multiview renders, ability and hand-contact details. Independent complete-vertex 11clip/keytime/25phase browser audit plus runtime-contract anchors/morph reset/FX; exact original rig, clip and cape-morph preservation. No final user approval claimed.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "useItem": "Attack_Mining_UseItem"
+      },
+      "activationRecipes": {
+        "file": "rigged/PIP_FROST_BRIDGE.activationRecipes.json",
+        "sha256": "2f60943d51046520677e28536b0a5d31690308c6c1a77ea48ace87b86437fa08"
+      },
+      "motionLibrary": "PIP_SHARED_MOTION",
+      "motionContract": {
+        "file": "rigged/PIP_FROST_BRIDGE.motionContract.json",
+        "sha256": "51c5d01638b3b68d0b6ab8832f5d6da2ddcf2c31ece7cafb3a2b93015a3fe92e"
+      },
+      "file": "rigged/PIP_FROST_BRIDGE.glb",
+      "lods": {},
+      "sha256": "3a508114c7651cbf912c4c6747dc27ca420b271c2d93d71dbf7d2632b365e69b",
+      "nativeSha256": "979a0b003187e24830655aaf55d8623100e6b113bd2fae63794fb3f8ce15d5b7",
+      "bytes": 1093424,
+      "triangles": 18326,
+      "vertices": 16235,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "PIP_STONE_STOMPER",
+      "reviewAsset": "stone",
+      "label": "Pip Felsenstampfer",
+      "native": "scripts/games-blender/fernworld/characters/pip-tools-stone/output/stone-stomper-v1/pip-stone-stomper.blend",
+      "glb": "scripts/games-blender/fernworld/characters/pip-tools-stone/output/stone-stomper-v1/pip-stone-stomper.glb",
+      "license": "CC0-1.0; KayKit Adventurers 2.0, Blender Studio Human Base Meshes and Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/pip-tools-stone/output/stone-stomper-v1/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/pip-tools-stone-browser-audit-2026-10-27.json",
+      "groundContactAudit": "docs/games/fernworld-assets/pip-tools-stone-contact-audit-2026-10-27.json",
+      "nominalHeightMetres": 1,
+      "instanceScale": 0.4233654951651481,
+      "role": "solo-hero-powerup",
+      "review": "Coordinator multi-view and actual browser skinning/contact checks complete. User approval not claimed.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "useItem": "Attack_Mining_UseItem",
+        "stomp": "Stomp"
+      },
+      "sockets": {
+        "file": "rigged/PIP_STONE_STOMPER.sockets.json",
+        "sha256": "167dc87b97fce98c35929633e85b430e3ef34669811ae2392ab97afa6fc02667"
+      },
+      "attachments": [
+        {
+          "source": "scripts/games-blender/fernworld/characters/pip-tools-stone/output/stone-stomper-v1/stone-stomp-footfx.glb",
+          "filename": "PIP_STONE_STOMPER_FX.glb",
+          "browserAudit": "docs/games/fernworld-assets/stone-accessory-browser-audit-2026-10-27.json",
+          "runtimeFlags": {
+            "castShadow": false,
+            "receiveShadow": false,
+            "worldUp": true
+          },
+          "activation": {
+            "clip": "Stomp",
+            "timeSeconds": 0.625,
+            "socket": "FootFx",
+            "spawnAndExpire": true
+          }
+        }
+      ],
+      "motionLibrary": "PIP_SHARED_MOTION",
+      "motionContract": {
+        "file": "rigged/PIP_STONE_STOMPER.motionContract.json",
+        "sha256": "d39aacc1f5617e8c3bd67a5e086251c9b70b983dca35782a1a9c38e4a4a81297"
+      },
+      "file": "rigged/PIP_STONE_STOMPER.glb",
+      "lods": {},
+      "sha256": "2cbc01f91347d738278d4450693f67ec06066abe192db655d8a55a607c2b1632",
+      "nativeSha256": "5cdc46482c31c9bbcca5072fde4b85ad80eb082de0636006364a4c42d8edc490",
+      "bytes": 1074656,
+      "triangles": 20566,
+      "vertices": 15224,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "MAYOR_TORTELLINI",
+      "reviewAsset": "mayor",
+      "label": "Mayor Tortellini",
+      "native": "scripts/games-blender/fernworld/characters/mayor-tortellini/MAYOR_TORTELLINI.blend",
+      "glb": "scripts/games-blender/fernworld/characters/mayor-tortellini/MAYOR_TORTELLINI.hi.glb",
+      "license": "CC0-1.0 licensed donor plus original Fernworld adaptation; see provenance",
+      "provenance": "scripts/games-blender/fernworld/characters/mayor-tortellini/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/npc-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.3,
+      "role": "single-civilian-npc",
+      "review": "Coordinator visual review and actual browser motion checks complete. No final user approval claimed.",
+      "clips": {
+        "idle": "Idle",
+        "greet": "Greet",
+        "task": "Give_Task",
+        "walk": "Walk_Careful"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/mayor-tortellini/MAYOR_TORTELLINI.lo.glb",
+          "reviewAsset": "mayor_lo"
+        },
+        "sh": {
+          "glb": "scripts/games-blender/fernworld/characters/mayor-tortellini/MAYOR_TORTELLINI.sh.glb",
+          "reviewAsset": "mayor_sh"
+        }
+      },
+      "file": "rigged/MAYOR_TORTELLINI.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/MAYOR_TORTELLINI.lo.glb",
+          "sha256": "95fca44e6a2378a8c32368e30afc62235af68400f6af233a7722e1be6789c430",
+          "bytes": 326440,
+          "triangles": 6968,
+          "materialPrimitives": 2
+        },
+        "sh": {
+          "file": "rigged/MAYOR_TORTELLINI.sh.glb",
+          "sha256": "60042c777a969f75c5ebc41b7053ac71b617b326e4b590ced1a6d09eb0e39731",
+          "bytes": 84448,
+          "triangles": 1112,
+          "materialPrimitives": 2
+        }
+      },
+      "sha256": "542e2e8a375af5c1a27e4718458714409248945692e82fbac135b172e5d83804",
+      "nativeSha256": "2ffe723ce3ca30f9967099ec6557fba501a4b3ca548dfb0db66a86a7263124f9",
+      "bytes": 886772,
+      "triangles": 21432,
+      "vertices": 11314,
+      "materialPrimitives": 2,
+      "bones": 6,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "PROFESSOR_OWLBERT",
+      "reviewAsset": "owlbert",
+      "label": "Professor Owlbert",
+      "native": "scripts/games-blender/fernworld/characters/professor-owlbert/professor-owlbert.blend",
+      "glb": "scripts/games-blender/fernworld/characters/professor-owlbert/professor-owlbert.glb",
+      "license": "CC0-1.0 licensed donor plus original Fernworld adaptation; see provenance",
+      "provenance": "scripts/games-blender/fernworld/characters/professor-owlbert/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/npc-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.4,
+      "role": "single-scholar-npc",
+      "review": "Coordinator visual review and actual browser motion checks complete. No final user approval claimed.",
+      "clips": {
+        "idle": "Idle",
+        "greet": "Greeting_Explain",
+        "inspect": "Inspect_Notebook"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/professor-owlbert/professor-owlbert-lo.glb",
+          "reviewAsset": "owlbert_lo"
+        },
+        "sh": {
+          "glb": "scripts/games-blender/fernworld/characters/professor-owlbert/professor-owlbert-shadow.glb",
+          "reviewAsset": "owlbert_sh"
+        }
+      },
+      "file": "rigged/PROFESSOR_OWLBERT.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/PROFESSOR_OWLBERT.lo.glb",
+          "sha256": "323a9d5a10e24d2ff8708e800ed0fa6c8742eb14de893c787c3c1c5915ba3187",
+          "bytes": 326112,
+          "triangles": 6581,
+          "materialPrimitives": 3
+        },
+        "sh": {
+          "file": "rigged/PROFESSOR_OWLBERT.sh.glb",
+          "sha256": "acbc3140e3ae46a71e4036222e169fd77c1336fe25b626238f7e65d6e4adbcba",
+          "bytes": 107804,
+          "triangles": 1034,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "c9777dc9c6d52e81af32a65dede13991eb7e0eb5260e6f5b514666c7a64b154d",
+      "nativeSha256": "9cd0f027894308bc621b7341de9fd342ea0a9c521c9265602356bba3f7e4c68c",
+      "bytes": 934104,
+      "triangles": 23424,
+      "vertices": 12941,
+      "materialPrimitives": 3,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "BISCUIT_GLEAMPUP",
+      "reviewAsset": "biscuit",
+      "label": "Biscuit Gleampup",
+      "native": "scripts/games-blender/fernworld/characters/biscuit-gleampup/biscuit-gleampup.blend",
+      "glb": "scripts/games-blender/fernworld/characters/biscuit-gleampup/biscuit-gleampup.glb",
+      "license": "CC0-1.0 licensed donor plus original Fernworld adaptation; see provenance",
+      "provenance": "scripts/games-blender/fernworld/characters/biscuit-gleampup/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/biscuit-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 0.55,
+      "role": "single-companion",
+      "review": "Coordinator visual review and actual browser motion checks complete. No final user approval claimed.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "run": "Run",
+        "sniff": "Sniff",
+        "cheer": "Cheer"
+      },
+      "groundContactAudit": "docs/games/fernworld-assets/biscuit-browser-audit-2026-10-27.json",
+      "motionContract": {
+        "file": "rigged/BISCUIT_GLEAMPUP.motionContract.json",
+        "sha256": "9e316daa545a7a1d90cb350929b6f7806a82f28d0859a84ef58a57c6b0bcfb6d"
+      },
+      "motionSpeedSourceMetresPerSecond": {
+        "walk": 0.09375,
+        "run": 0.34921
+      },
+      "motionSpeedNote": "Scale source speed by instance scale and adapt clip playback to controller travel. No terrain IK supplied.",
+      "file": "rigged/BISCUIT_GLEAMPUP.glb",
+      "lods": {},
+      "sha256": "7e50847c6f9cc4299b0c8132b7a92fd5fafdfc4581dd32d76be094d87958ddd8",
+      "nativeSha256": "ee02543a682e8a0d47153ddf154e193155631c7ebf37c21d94bf9ee77a822427",
+      "bytes": 997588,
+      "triangles": 16732,
+      "vertices": 8953,
+      "materialPrimitives": 3,
+      "bones": 62,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "GRANNY_GRAUSEL",
+      "reviewAsset": "granny",
+      "label": "Granny Grausel",
+      "native": "scripts/games-blender/fernworld/characters/granny-gaze/output/GRANNY_GRAUSEL.blend",
+      "glb": "scripts/games-blender/fernworld/characters/granny-gaze/output/GRANNY_GRAUSEL.hi.glb",
+      "license": "KayKit Adventurers2 CC0-1.0 plus original Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/granny-gaze/output/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/granny-gaze-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.55,
+      "role": "single-witch-npc",
+      "review": "Targeted gaze correction: Root inspected front and \u00b135/profile face board, body and actual Spell/Mounted images. New Hi/Lo independently pass all3clips/keytimes/25phases. Non-eye attributes/rig/clips and glider/Shadow unchanged;68source+output hashes verified.",
+      "clips": {
+        "idle": "Idle",
+        "cast": "Spell_Cackle",
+        "escape": "Mounted_Escape"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/granny-gaze/output/GRANNY_GRAUSEL.lo.glb",
+          "reviewAsset": "granny_lo"
+        },
+        "sh": {
+          "glb": "scripts/games-blender/fernworld/characters/granny-gaze/output/GRANNY_GRAUSEL.sh.glb",
+          "reviewAsset": "granny_sh"
+        }
+      },
+      "sockets": {
+        "file": "rigged/GRANNY_GRAUSEL.sockets.json",
+        "sha256": "c42c800a4c608f807a9c5783f325fade55d28d00460f1e08be5ab42b96771703"
+      },
+      "motionContract": {
+        "file": "rigged/GRANNY_GRAUSEL.motionContract.json",
+        "sha256": "2f3eb0db56fd5699aa68cdbec357f14f8367f50faf0526cfcffb15705a506ee0"
+      },
+      "mountAsset": "GRAUSEL_BROOM_GLIDER",
+      "mountRule": "Same original origin and one common transformed parent; never normalize glider separately.",
+      "clipNormalization": {
+        "sourceStartSeconds": 0.041666666666666664,
+        "policy": "Clone all tracks, shift the common start to zero and resetDuration; events use normalized times. Matches authored Granny runtime-clips.gltfImport contract."
+      },
+      "file": "rigged/GRANNY_GRAUSEL.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/GRANNY_GRAUSEL.lo.glb",
+          "sha256": "000d7842fe494ba4b7fec0d38a5d736ca0ba762f9a07dbf3a2e99cdcac6cb95e",
+          "bytes": 608116,
+          "triangles": 8135,
+          "materialPrimitives": 1
+        },
+        "sh": {
+          "file": "rigged/GRANNY_GRAUSEL.sh.glb",
+          "sha256": "724676c079c70d34c30ac714401ced1100f359ebffe89cd894c26bf304ea90ec",
+          "bytes": 109204,
+          "triangles": 1047,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "cd59b97c577d04fdbed4868ac3580911bc720b4b74f6be0ef7dc7c9589aff4d9",
+      "nativeSha256": "ce7a721202439fdae2bd1451ac372d5055b60da9744fca1faa0da2f4cfc676be",
+      "bytes": 1781652,
+      "triangles": 25028,
+      "vertices": 13536,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "PLASHLING",
+      "reviewAsset": "plashling",
+      "label": "Plashling",
+      "native": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/PLASHLING/PLASHLING.blend",
+      "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/PLASHLING/PLASHLING_hero.glb",
+      "license": "Original Fernworld character; source-preserving animation and LOD derivative",
+      "provenance": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/tide-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 0.3055191798631112,
+      "instanceScale": 1,
+      "role": "crowd-capable-fernling",
+      "defaultLod": "hero",
+      "review": "Coordinator original-form, multi-view, actual motion and all five GLB LODs checked. No final user or integrated performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Locomotion",
+        "cast": "Attack_Cast",
+        "sweep": "Attack_Sweep",
+        "ground": "GroundPulse",
+        "hit": "Hit_Recover",
+        "freed": "Freed"
+      },
+      "motionContract": {
+        "file": "rigged/PLASHLING.motionContract.json",
+        "sha256": "97af611b050c5b0c48571841ab2522ab9a85a76b8c8501d7f63a8183ea401a15"
+      },
+      "lodSources": {
+        "crowd": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/PLASHLING/PLASHLING_crowd.glb",
+          "reviewAsset": "plashling-crowd"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/PLASHLING/PLASHLING_far.glb",
+          "reviewAsset": "plashling-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/PLASHLING/PLASHLING_shadow.glb",
+          "reviewAsset": "plashling-shadow"
+        },
+        "high": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/PLASHLING/PLASHLING_high.glb",
+          "reviewAsset": "plashling-high"
+        }
+      },
+      "file": "rigged/PLASHLING.glb",
+      "lods": {
+        "crowd": {
+          "file": "rigged/PLASHLING.crowd.glb",
+          "sha256": "d83d36b0ef9d22ad306fcb2b32e930a7c34976f0060c3002af6d6c8818ee1597",
+          "bytes": 492364,
+          "triangles": 2030,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/PLASHLING.far.glb",
+          "sha256": "cda3293246ad6d2d69158e9b8b879e37407bb999e6250cdf7bd709470985bf01",
+          "bytes": 274284,
+          "triangles": 766,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/PLASHLING.shadow.glb",
+          "sha256": "223564754ef96648b76d990b937dfc32725cf03c2c2b92458eca28bd10f0be94",
+          "bytes": 155040,
+          "triangles": 414,
+          "materialPrimitives": 1
+        },
+        "high": {
+          "file": "rigged/PLASHLING.high.glb",
+          "sha256": "f15e8056935529305d7d279a84b504beccd2032bae7d87b87103564a9b44149b",
+          "bytes": 1395580,
+          "triangles": 35838,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "c9bebee38b3dbffb781f3bab31fcbcb77119a0413c7a8db7564bf2278bf92022",
+      "nativeSha256": "96d7f74ac39387c0e5e74e3128b4af8369d7482eade6d23b0fe3522293caef47",
+      "bytes": 938856,
+      "triangles": 22410,
+      "vertices": 11814,
+      "materialPrimitives": 1,
+      "bones": 18,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "SPRAYCOUNT",
+      "reviewAsset": "spraycount",
+      "label": "Spraycount",
+      "native": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/SPRAYCOUNT/SPRAYCOUNT.blend",
+      "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/SPRAYCOUNT/SPRAYCOUNT_hero.glb",
+      "license": "Original Fernworld character; source-preserving animation and LOD derivative",
+      "provenance": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/tide-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.5082571319711247,
+      "instanceScale": 1,
+      "role": "crowd-capable-fernling",
+      "defaultLod": "hero",
+      "review": "Coordinator original-form, multi-view, actual motion and all five GLB LODs checked. No final user or integrated performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Locomotion",
+        "cast": "Attack_Cast",
+        "sweep": "Attack_Sweep",
+        "ground": "GroundPulse",
+        "hit": "Hit_Recover",
+        "freed": "Freed"
+      },
+      "motionContract": {
+        "file": "rigged/SPRAYCOUNT.motionContract.json",
+        "sha256": "add87310c1995b468ecc46acf2d224d9d4fb406075f26dd9636dc1c8ac155d8b"
+      },
+      "lodSources": {
+        "crowd": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/SPRAYCOUNT/SPRAYCOUNT_crowd.glb",
+          "reviewAsset": "spraycount-crowd"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/SPRAYCOUNT/SPRAYCOUNT_far.glb",
+          "reviewAsset": "spraycount-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/SPRAYCOUNT/SPRAYCOUNT_shadow.glb",
+          "reviewAsset": "spraycount-shadow"
+        },
+        "high": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/SPRAYCOUNT/SPRAYCOUNT_high.glb",
+          "reviewAsset": "spraycount-high"
+        }
+      },
+      "file": "rigged/SPRAYCOUNT.glb",
+      "lods": {
+        "crowd": {
+          "file": "rigged/SPRAYCOUNT.crowd.glb",
+          "sha256": "706add13120e42736e46c0f49c2a37e63b569718d64a48489ff9f92dac563c66",
+          "bytes": 505852,
+          "triangles": 2112,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/SPRAYCOUNT.far.glb",
+          "sha256": "00324bc515516e979699bab1e8c8f256b99ad0b2622f0811e51b4ad624e8c72b",
+          "bytes": 279212,
+          "triangles": 800,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/SPRAYCOUNT.shadow.glb",
+          "sha256": "d1af83fcafa5d1fc90d5276715d9d086b72f2d2ecf5fddde04a260f3d46b5144",
+          "bytes": 155952,
+          "triangles": 446,
+          "materialPrimitives": 1
+        },
+        "high": {
+          "file": "rigged/SPRAYCOUNT.high.glb",
+          "sha256": "a82146217d88a967768580c8b3869824758fe04cec0a602c664e57c6659fba13",
+          "bytes": 1503896,
+          "triangles": 38328,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "c3c71e380331243e8e29669ade135dd77957ad9feb453d33f3a7f5041cef451a",
+      "nativeSha256": "b3165a31a8320c63a80dfff2e0a68e9a168025bfbf373d75c3d490a4caaccf92",
+      "bytes": 1083944,
+      "triangles": 25980,
+      "vertices": 14042,
+      "materialPrimitives": 1,
+      "bones": 18,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "TIDEDUKE",
+      "reviewAsset": "tideduke",
+      "label": "Tideduke",
+      "native": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/TIDEDUKE/TIDEDUKE.blend",
+      "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/TIDEDUKE/TIDEDUKE_hero.glb",
+      "license": "Original Fernworld character; source-preserving animation and LOD derivative",
+      "provenance": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/tide-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.6903362695683586,
+      "instanceScale": 1,
+      "role": "crowd-capable-fernling",
+      "defaultLod": "hero",
+      "review": "Coordinator original-form, multi-view, actual motion and all five GLB LODs checked. No final user or integrated performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Locomotion",
+        "cast": "Attack_Cast",
+        "sweep": "Attack_Sweep",
+        "ground": "GroundPulse",
+        "hit": "Hit_Recover",
+        "freed": "Freed"
+      },
+      "motionContract": {
+        "file": "rigged/TIDEDUKE.motionContract.json",
+        "sha256": "3c581a8d2e610c1e74fc42a81623e798366763cc025aa2a82de8e3e5563fe0ad"
+      },
+      "lodSources": {
+        "crowd": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/TIDEDUKE/TIDEDUKE_crowd.glb",
+          "reviewAsset": "tideduke-crowd"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/TIDEDUKE/TIDEDUKE_far.glb",
+          "reviewAsset": "tideduke-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/TIDEDUKE/TIDEDUKE_shadow.glb",
+          "reviewAsset": "tideduke-shadow"
+        },
+        "high": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-tide-runtime/TIDEDUKE/TIDEDUKE_high.glb",
+          "reviewAsset": "tideduke-high"
+        }
+      },
+      "file": "rigged/TIDEDUKE.glb",
+      "lods": {
+        "crowd": {
+          "file": "rigged/TIDEDUKE.crowd.glb",
+          "sha256": "7e32eaf96a0ac39d6ff6d6c06a41f8b5a1befa2e11296114a73e2ca04a1beb74",
+          "bytes": 512684,
+          "triangles": 2094,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/TIDEDUKE.far.glb",
+          "sha256": "ea9329dbd213e532fc1a52ac02dc9bc879c1adeaced6d5cf12fe8421e876d274",
+          "bytes": 281260,
+          "triangles": 764,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/TIDEDUKE.shadow.glb",
+          "sha256": "3d8629f76a1f2f89a08b6864afae090513eb5ef5fc217a66cf5c0b5b8a96a90f",
+          "bytes": 159220,
+          "triangles": 436,
+          "materialPrimitives": 1
+        },
+        "high": {
+          "file": "rigged/TIDEDUKE.high.glb",
+          "sha256": "018630c40025c5875b5f0c4b2ec9cfaaee27322c57ee1a96ae549de4b00cb528",
+          "bytes": 1585244,
+          "triangles": 38916,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "adbb295a8a81a2d380dbfa0739b246315e21c2d2767798f54cd6ad92c87e357d",
+      "nativeSha256": "4b8c7cdcbd4e34ada790b55093db804d8d3a18ee25f23fbded23e562b89599dd",
+      "bytes": 1107528,
+      "triangles": 24868,
+      "vertices": 14492,
+      "materialPrimitives": 1,
+      "bones": 18,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "GLIMMO",
+      "reviewAsset": "glimmo",
+      "label": "Glimmo",
+      "native": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/GLIMMO/GLIMMO.blend",
+      "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/GLIMMO/GLIMMO.hero.glb",
+      "license": "Original Fernworld character; source-preserving animation and LOD derivative",
+      "provenance": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/ember-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 0.7222212239228815,
+      "instanceScale": 1,
+      "role": "crowd-capable-fernling",
+      "defaultLod": "hero",
+      "review": "Coordinator preserved form, actual three views, seven motions and all four GLB LODs reviewed. No final user or integrated performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Locomotion",
+        "cast": "Attack_Cast",
+        "sweep": "Attack_Sweep",
+        "ground": "GroundPulse",
+        "hit": "Hit_Recover",
+        "freed": "Freed"
+      },
+      "motionContract": {
+        "file": "rigged/GLIMMO.motionContract.json",
+        "sha256": "f5861edc97c0b8865870795370a666c8910e33bd174385389351de5e9c72c1c1"
+      },
+      "lodSources": {
+        "crowd": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/GLIMMO/GLIMMO.crowd.glb",
+          "reviewAsset": "glimmo-crowd"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/GLIMMO/GLIMMO.far.glb",
+          "reviewAsset": "glimmo-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/GLIMMO/GLIMMO.shadow.glb",
+          "reviewAsset": "glimmo-shadow"
+        }
+      },
+      "file": "rigged/GLIMMO.glb",
+      "lods": {
+        "crowd": {
+          "file": "rigged/GLIMMO.crowd.glb",
+          "sha256": "dc05caf2ceb7a8422440250493405a7d2ddb62149c6b843b711d35f0e251dac3",
+          "bytes": 444148,
+          "triangles": 2044,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/GLIMMO.far.glb",
+          "sha256": "ad29d0e3537141adcbb90476deb9ccf2c66dc2f7ba0f7d6e1c9e35350189a666",
+          "bytes": 286612,
+          "triangles": 694,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/GLIMMO.shadow.glb",
+          "sha256": "d43a290a0bac4ae48b1113467c24661ae7fe83484e79824ad8340a31f1fafff5",
+          "bytes": 146216,
+          "triangles": 310,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "c2def24e180b3df9d4f2d516e96ad2bf75b93425082f8d77566eaaa038ae4f02",
+      "nativeSha256": "5c7da0c44535ac51b091feaaf9e2a62a4a0940603039e3a906c5ec55a0344492",
+      "bytes": 1550380,
+      "triangles": 29986,
+      "vertices": 18752,
+      "materialPrimitives": 1,
+      "bones": 17,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "COALBEAR",
+      "reviewAsset": "coalbear",
+      "label": "Coalbear",
+      "native": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/COALBEAR/COALBEAR.blend",
+      "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/COALBEAR/COALBEAR.hero.glb",
+      "license": "Original Fernworld character; source-preserving animation and LOD derivative",
+      "provenance": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/ember-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.6491656969286508,
+      "instanceScale": 1,
+      "role": "crowd-capable-fernling",
+      "defaultLod": "hero",
+      "review": "Coordinator preserved form, actual three views, seven motions and all four GLB LODs reviewed. No final user or integrated performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Locomotion",
+        "cast": "Attack_Cast",
+        "sweep": "Attack_Sweep",
+        "ground": "GroundPulse",
+        "hit": "Hit_Recover",
+        "freed": "Freed"
+      },
+      "motionContract": {
+        "file": "rigged/COALBEAR.motionContract.json",
+        "sha256": "b039c56c76994260166bc86bcc54a133c2194e460b12147213a32b7d05baaef6"
+      },
+      "lodSources": {
+        "crowd": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/COALBEAR/COALBEAR.crowd.glb",
+          "reviewAsset": "coalbear-crowd"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/COALBEAR/COALBEAR.far.glb",
+          "reviewAsset": "coalbear-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/COALBEAR/COALBEAR.shadow.glb",
+          "reviewAsset": "coalbear-shadow"
+        }
+      },
+      "file": "rigged/COALBEAR.glb",
+      "lods": {
+        "crowd": {
+          "file": "rigged/COALBEAR.crowd.glb",
+          "sha256": "1d9878ef2970f6dbd72e5d29e2853fbad6a601d1e71391d0d80f93fcee038f91",
+          "bytes": 519956,
+          "triangles": 2146,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/COALBEAR.far.glb",
+          "sha256": "80f125ef292c96d06879aeef677d0041549ebb0ac5f0f4ed9a19deadfec0a288",
+          "bytes": 322032,
+          "triangles": 732,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/COALBEAR.shadow.glb",
+          "sha256": "3b77fbcf030cdb5af3c774c81cc58b7c2f1840f87ace2aa074e9497d32643c80",
+          "bytes": 148320,
+          "triangles": 346,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "edc4276ba8014f692ed44549eae18b33fdd753522b4d57f5602cbcae21014437",
+      "nativeSha256": "c0930fa4096b0ffd1e26e246a3fd499004d52856f0e178a7670ed153067592cd",
+      "bytes": 1632072,
+      "triangles": 29984,
+      "vertices": 19656,
+      "materialPrimitives": 1,
+      "bones": 17,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "EMBERWARD",
+      "reviewAsset": "emberward",
+      "label": "Emberward",
+      "native": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/EMBERWARD/EMBERWARD.blend",
+      "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/EMBERWARD/EMBERWARD.hero.glb",
+      "license": "Original Fernworld character; source-preserving animation and LOD derivative",
+      "provenance": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/ember-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 2.363189971316653,
+      "instanceScale": 1,
+      "role": "crowd-capable-fernling",
+      "defaultLod": "hero",
+      "review": "Coordinator preserved form, actual three views, seven motions and all four GLB LODs reviewed. No final user or integrated performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Locomotion",
+        "cast": "Attack_Cast",
+        "sweep": "Attack_Sweep",
+        "ground": "GroundPulse",
+        "hit": "Hit_Recover",
+        "freed": "Freed"
+      },
+      "motionContract": {
+        "file": "rigged/EMBERWARD.motionContract.json",
+        "sha256": "12a8c2b8be993eee9c0332fb01526bb9406db194deda36e6c294231829ff33b8"
+      },
+      "lodSources": {
+        "crowd": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/EMBERWARD/EMBERWARD.crowd.glb",
+          "reviewAsset": "emberward-crowd"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/EMBERWARD/EMBERWARD.far.glb",
+          "reviewAsset": "emberward-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-ember-runtime/EMBERWARD/EMBERWARD.shadow.glb",
+          "reviewAsset": "emberward-shadow"
+        }
+      },
+      "file": "rigged/EMBERWARD.glb",
+      "lods": {
+        "crowd": {
+          "file": "rigged/EMBERWARD.crowd.glb",
+          "sha256": "7e54bb469ef804342fd68f4a65192a48347c3a22c5ea0c8e42e2e5ee8e528347",
+          "bytes": 507492,
+          "triangles": 2124,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/EMBERWARD.far.glb",
+          "sha256": "bc4a37b2a047f884917762bbb668f01a424f51c9058d7437877facff1dd422c5",
+          "bytes": 323684,
+          "triangles": 752,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/EMBERWARD.shadow.glb",
+          "sha256": "cef3ba953890b00c5a0291e837d62cdc5e39d5fae2aa4f4dff95fb4d643616fe",
+          "bytes": 133264,
+          "triangles": 378,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "122dfd3945e505e7a82be8becd45291de3d806d37f2ce7b8898bc5bb2c06d5e5",
+      "nativeSha256": "693f4a32d629985e6a6109f1c6366e1a3b3def4ac831bdca7e1c9d223185d03d",
+      "bytes": 1675616,
+      "triangles": 29984,
+      "vertices": 19953,
+      "materialPrimitives": 1,
+      "bones": 17,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "GUSTGLIDER",
+      "reviewAsset": "gustglider-hero",
+      "label": "Gustglider / B\u00f6enh\u00f6rnchen",
+      "native": "scripts/games-blender/fernworld/characters/gustglider/gustglider.blend",
+      "glb": "scripts/games-blender/fernworld/characters/gustglider/gustglider-hero.glb",
+      "license": "CC0-1.0; Quaternius Animated Animals Fox plus Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/gustglider/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/gustglider-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.6911795946346047,
+      "instanceScale": 1,
+      "role": "crowd-capable-flying-fernling",
+      "defaultLod": "crowd",
+      "review": "Coordinator finalnative andactualGLBmultiviews,all4LOD/7clips passed. No finaluserapproval or integratedperformance claim.",
+      "clips": {
+        "idle": "Idle_Glide",
+        "travel": "Flap",
+        "bank": "Bank",
+        "attack": "Dive_Attack",
+        "hit": "Hit_Recover",
+        "freed": "Freed",
+        "landingApproach": "Land_Ready"
+      },
+      "motionContract": {
+        "file": "rigged/GUSTGLIDER.motionContract.json",
+        "sha256": "a7723e4e595377e553cb1dc585865fb8a8b590196eefaa3f48364876debddf12"
+      },
+      "lodSources": {
+        "crowd": {
+          "glb": "scripts/games-blender/fernworld/characters/gustglider/gustglider-crowd.glb",
+          "reviewAsset": "gustglider-crowd"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/gustglider/gustglider-far.glb",
+          "reviewAsset": "gustglider-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/gustglider/gustglider-shadow.glb",
+          "reviewAsset": "gustglider-shadow"
+        }
+      },
+      "integrationNotes": [
+        "Controller owns altitude and worldmovement; root hasno keyed translation; projectgroundshadow separately",
+        "Land_Ready is approachattitude not groundcontact; Dive needs clearance altitude from ActualGLBQA",
+        "Nominalheight includes curltail and is not anatomicalbodyheight; set crowdscale frombody/head anatomy and gameplayradius",
+        "Friendly living base; hexexternal atBodyHex; Freed clearshex andfliesaway"
+      ],
+      "file": "rigged/GUSTGLIDER.glb",
+      "lods": {
+        "crowd": {
+          "file": "rigged/GUSTGLIDER.crowd.glb",
+          "sha256": "29546a0c4fa88035c16562c34d7e5f93f776c65e0bad79c025b4ad9d82546240",
+          "bytes": 245900,
+          "triangles": 2166,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/GUSTGLIDER.far.glb",
+          "sha256": "75de649f0d84e49c031730018fefd2212b3f2ad7a5653fb9b4da19246a8df9b7",
+          "bytes": 200864,
+          "triangles": 868,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/GUSTGLIDER.shadow.glb",
+          "sha256": "6d231d9d9c952ba506e3fadb5f9a8b7d12d9d476337d37806ac32e240b849270",
+          "bytes": 186352,
+          "triangles": 458,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "583b4f1b2aa6c353d6961f4bbfc89e0cea39e48c56a2b48050e028a3135dfab7",
+      "nativeSha256": "829262b1751a64807f1b1eace5a22705da9021de5eaa77da14874c1b2bda73c8",
+      "bytes": 770412,
+      "triangles": 17512,
+      "vertices": 8912,
+      "materialPrimitives": 1,
+      "bones": 18,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "MOSSEL",
+      "reviewAsset": "mossel",
+      "label": "Mossel",
+      "native": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/MOSSEL/MOSSEL.blend",
+      "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/MOSSEL/MOSSEL.hero.glb",
+      "license": "Original Fernworld character; source-preserving animation and LOD derivative",
+      "provenance": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/green-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 0.40003489398019476,
+      "instanceScale": 1,
+      "role": "crowd-capable-fernling",
+      "defaultLod": "hero",
+      "review": "Coordinator preserved form, final six views, motion and LOD boards, actual browser 12 GLBs and seven clips reviewed. No final user or integrated performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Locomotion",
+        "cast": "Attack_Cast",
+        "sweep": "Attack_Sweep",
+        "ground": "GroundPulse",
+        "hit": "Hit_Recover",
+        "freed": "Freed"
+      },
+      "motionContract": {
+        "file": "rigged/MOSSEL.motionContract.json",
+        "sha256": "612299c4e4c23dd927990fab81f79390c438afcf1394d952eae01e2bcf9a9e1b"
+      },
+      "lodSources": {
+        "crowd": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/MOSSEL/MOSSEL.crowd.glb",
+          "reviewAsset": "mossel-crowd"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/MOSSEL/MOSSEL.far.glb",
+          "reviewAsset": "mossel-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/MOSSEL/MOSSEL.shadow.glb",
+          "reviewAsset": "mossel-shadow"
+        }
+      },
+      "file": "rigged/MOSSEL.glb",
+      "lods": {
+        "crowd": {
+          "file": "rigged/MOSSEL.crowd.glb",
+          "sha256": "a49e9642010db139ce849181f60957c32d63d887ffc88f52ada334691b275af5",
+          "bytes": 609352,
+          "triangles": 2167,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/MOSSEL.far.glb",
+          "sha256": "96609bf58bb540a90424b0d1632e3bca2c57e80fec9890deb1b2deb60f54bfdb",
+          "bytes": 300420,
+          "triangles": 674,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/MOSSEL.shadow.glb",
+          "sha256": "e3f80d902610d3bbbbac11eeef87b05fd6b0c90a1e9a95825a3c48b10813b93a",
+          "bytes": 154108,
+          "triangles": 332,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "2daebef65d393fbbae8ce0b99675274d3413f18dc1da0cd92740fe4e90aa923b",
+      "nativeSha256": "fcec9cd3915cce5dbdd21b3af13e37b236807ba2bb468eb7960e454bde031deb",
+      "bytes": 1578312,
+      "triangles": 18026,
+      "vertices": 23691,
+      "materialPrimitives": 1,
+      "bones": 18,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "MOORGRIM",
+      "reviewAsset": "moorgrim",
+      "label": "Moorgrim",
+      "native": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/MOORGRIM/MOORGRIM.blend",
+      "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/MOORGRIM/MOORGRIM.hero.glb",
+      "license": "Original Fernworld character; source-preserving animation and LOD derivative",
+      "provenance": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/green-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.3115302071183665,
+      "instanceScale": 1,
+      "role": "crowd-capable-fernling",
+      "defaultLod": "hero",
+      "review": "Coordinator preserved form, final six views, motion and LOD boards, actual browser 12 GLBs and seven clips reviewed. No final user or integrated performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Locomotion",
+        "cast": "Attack_Cast",
+        "sweep": "Attack_Sweep",
+        "ground": "GroundPulse",
+        "hit": "Hit_Recover",
+        "freed": "Freed"
+      },
+      "motionContract": {
+        "file": "rigged/MOORGRIM.motionContract.json",
+        "sha256": "09958cff62a6009b60ff17fd70ae54bb8dd748f0ba8c423b1c836b886d49b2ff"
+      },
+      "lodSources": {
+        "crowd": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/MOORGRIM/MOORGRIM.crowd.glb",
+          "reviewAsset": "moorgrim-crowd"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/MOORGRIM/MOORGRIM.far.glb",
+          "reviewAsset": "moorgrim-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/MOORGRIM/MOORGRIM.shadow.glb",
+          "reviewAsset": "moorgrim-shadow"
+        }
+      },
+      "file": "rigged/MOORGRIM.glb",
+      "lods": {
+        "crowd": {
+          "file": "rigged/MOORGRIM.crowd.glb",
+          "sha256": "b4493bff5d7ea74cabd31cafa7c980ba936b7f2da35f010a20650dc0dc2ef9a3",
+          "bytes": 496564,
+          "triangles": 1947,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/MOORGRIM.far.glb",
+          "sha256": "b4bd09085d7869f9d2c76cfff0e3dc013d2d573f08e1508d92b391455edb00ec",
+          "bytes": 284600,
+          "triangles": 672,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/MOORGRIM.shadow.glb",
+          "sha256": "7b397c3cb19b189ec1509d43de8d5db84bc06c8875838309b32220c0570d5ae2",
+          "bytes": 131920,
+          "triangles": 318,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "75612e063a3de03d85d87d4ae91f7bd5925106fe6e63cb8b2992fc6bd8cd7a4c",
+      "nativeSha256": "99b319decd55d150461acacb766719046d2af5212248c67fbc7032129a00ad7e",
+      "bytes": 2322200,
+      "triangles": 25594,
+      "vertices": 36555,
+      "materialPrimitives": 1,
+      "bones": 18,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "GROVEPRINCE",
+      "reviewAsset": "groveprince",
+      "label": "Groveprince",
+      "native": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/GROVEPRINCE/GROVEPRINCE.blend",
+      "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/GROVEPRINCE/GROVEPRINCE.hero.glb",
+      "license": "Original Fernworld character; source-preserving animation and LOD derivative",
+      "provenance": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/green-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 2.2026304849630223,
+      "instanceScale": 1,
+      "role": "crowd-capable-fernling",
+      "defaultLod": "hero",
+      "review": "Coordinator preserved form, final six views, motion and LOD boards, actual browser 12 GLBs and seven clips reviewed. No final user or integrated performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Locomotion",
+        "cast": "Attack_Cast",
+        "sweep": "Attack_Sweep",
+        "ground": "GroundPulse",
+        "hit": "Hit_Recover",
+        "freed": "Freed"
+      },
+      "motionContract": {
+        "file": "rigged/GROVEPRINCE.motionContract.json",
+        "sha256": "1a50ffe3960eaa6840923965705975cca8431773befdc7fda1505f1348d7cdb4"
+      },
+      "lodSources": {
+        "crowd": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/GROVEPRINCE/GROVEPRINCE.crowd.glb",
+          "reviewAsset": "groveprince-crowd"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/GROVEPRINCE/GROVEPRINCE.far.glb",
+          "reviewAsset": "groveprince-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/fernlings-green-runtime/GROVEPRINCE/GROVEPRINCE.shadow.glb",
+          "reviewAsset": "groveprince-shadow"
+        }
+      },
+      "file": "rigged/GROVEPRINCE.glb",
+      "lods": {
+        "crowd": {
+          "file": "rigged/GROVEPRINCE.crowd.glb",
+          "sha256": "05707c1261cbb3657dd1bb891d9bc0cad64263b4305502e7bf0843ddc7a21ec4",
+          "bytes": 566432,
+          "triangles": 2098,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/GROVEPRINCE.far.glb",
+          "sha256": "0af4a9456789a4d0c3a2eb928c30f11a6c1a15f7e819c0dab2b6f3b8b73707f6",
+          "bytes": 345856,
+          "triangles": 726,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/GROVEPRINCE.shadow.glb",
+          "sha256": "fdfd91383c49b5ddebabf68f4eace076095900f50c965a9a0967bd7050aea82d",
+          "bytes": 135784,
+          "triangles": 294,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "b1d317ce6927fbcc588e41026f8bc484c6112efe47c52f9ba851e40f6f0d60df",
+      "nativeSha256": "8703be05ca19b61393b7e18e9735c7d4be9fd596dc414cd1a98302b664b20968",
+      "bytes": 3163820,
+      "triangles": 33078,
+      "vertices": 50739,
+      "materialPrimitives": 1,
+      "bones": 18,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "THORN_GOLEM",
+      "reviewAsset": "thorn-hi",
+      "label": "Dornengolem",
+      "native": "scripts/games-blender/fernworld/characters/thorn-golem/THORN_GOLEM.blend",
+      "glb": "scripts/games-blender/fernworld/characters/thorn-golem/THORN_GOLEM_Hi.glb",
+      "license": "CC0-1.0 Quaternius Ultimate Monsters Yeti plus Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/thorn-golem/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/thorn-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 2.960403,
+      "role": "single-viridis-momo-boss",
+      "defaultLod": "lo",
+      "review": "Coordinator final multiview and actual4LOD7clip review complete; no finaluserapproval or fullgameperformance claim.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Travel",
+        "sweep": "Attack_Sweep",
+        "rootCast": "Attack_RootCast",
+        "groundPulse": "GroundPulse",
+        "hit": "Hit_Recover",
+        "disabled": "Disabled"
+      },
+      "motionContract": {
+        "file": "rigged/THORN_GOLEM.motionContract.json",
+        "sha256": "a0dc4e64511379aa169518565310b11193afd1af34435d9957401e14d13f3c12"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/thorn-golem/THORN_GOLEM_Lo.glb",
+          "reviewAsset": "thorn-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/thorn-golem/THORN_GOLEM_Far.glb",
+          "reviewAsset": "thorn-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/thorn-golem/THORN_GOLEM_Shadow.glb",
+          "reviewAsset": "thorn-shadow"
+        }
+      },
+      "integrationNotes": [
+        "Travel inplace with controller .145m/s nominal; cliptime and speed scale together.",
+        "RootCast hands hover13cm minimum at authoredscale; separate GroundImpact FX, do not force floorcontact.",
+        "Disabled at1.9s uses external hex material fade/off per MotionContract; clone only stateful material.",
+        "Two primitive skinned actor, one skin22bones; Shadow is depth-only silhouette, not visibleactor."
+      ],
+      "file": "rigged/THORN_GOLEM.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/THORN_GOLEM.lo.glb",
+          "sha256": "840499fc190a738b4ddac6fdd4fa711b95837aa1a4ef93cb08a50189399c21e1",
+          "bytes": 655404,
+          "triangles": 10494,
+          "materialPrimitives": 2
+        },
+        "far": {
+          "file": "rigged/THORN_GOLEM.far.glb",
+          "sha256": "04307244d35f163eac9bf12e974f846c9cac1af99a86eb48fa075980795d2a7c",
+          "bytes": 345812,
+          "triangles": 2694,
+          "materialPrimitives": 2
+        },
+        "shadow": {
+          "file": "rigged/THORN_GOLEM.shadow.glb",
+          "sha256": "a5d16598af15480a2f0de43643c274344c57c132f6c44b103c39cf8cd43fcdc4",
+          "bytes": 317904,
+          "triangles": 1350,
+          "materialPrimitives": 2
+        }
+      },
+      "sha256": "223d3454c19d9b53225844b106a067965eee33befcc0eb81392614721021839d",
+      "nativeSha256": "d4688002105a6d9cae4102a4d1618859ec2eed09dc7dcc7cf242cc60f9afbb2f",
+      "bytes": 1569376,
+      "triangles": 33950,
+      "vertices": 18262,
+      "materialPrimitives": 2,
+      "bones": 22,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "MOSS_HEX_GOLEM",
+      "reviewAsset": "moss-hi",
+      "label": "Moos-Hexgolem",
+      "native": "scripts/games-blender/fernworld/characters/hex-golems-earth/MOSS_HEX_GOLEM/MOSS_HEX_GOLEM.blend",
+      "glb": "scripts/games-blender/fernworld/characters/hex-golems-earth/MOSS_HEX_GOLEM/MOSS_HEX_GOLEM_Hi.glb",
+      "license": "CC0-1.0 Quaternius Ultimate Monsters Orc arms plus Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/hex-golems-earth/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/hex-earth-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 2.576,
+      "role": "single-tower-boss-construct",
+      "defaultLod": "lo",
+      "review": "Coordinator final multiview/hand/LOD/motion and actual eightGLB sixclip audit complete. No final user or game performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "slam": "Attack_Slam",
+        "hit": "Hit_Recover",
+        "stagger": "Stagger",
+        "disabled": "Disabled"
+      },
+      "motionContract": {
+        "file": "rigged/MOSS_HEX_GOLEM.motionContract.json",
+        "sha256": "70ea2b97cbbba39e6f438a3a27f5ed4ce3d9a567c649906424fbb1091aefa719"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-earth/MOSS_HEX_GOLEM/MOSS_HEX_GOLEM_Lo.glb",
+          "reviewAsset": "moss-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-earth/MOSS_HEX_GOLEM/MOSS_HEX_GOLEM_Far.glb",
+          "reviewAsset": "moss-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-earth/MOSS_HEX_GOLEM/MOSS_HEX_GOLEM_Shadow.glb",
+          "reviewAsset": "moss-shadow"
+        }
+      },
+      "attachments": [
+        {
+          "source": "scripts/games-blender/fernworld/characters/hex-golems-earth/MOSS_HEX_GOLEM/MOSS_HEX_GOLEM_Parts.glb",
+          "filename": "MOSS_HEX_GOLEM_Parts.glb",
+          "browserAudit": "docs/games/fernworld-assets/hex-earth-parts-browser-audit-2026-10-27.json",
+          "runtimeFlags": {
+            "rigidDebris": true,
+            "maxTemporaryClusters": 6
+          },
+          "activation": "Bind/Idle0 assembly only. Transition explicitly before replacing skin; pool six clusters. No exact matching to posed Slam/Disabled."
+        }
+      ],
+      "integrationNotes": [
+        "Walk in place at controller .18m/s; cliptime and movement scale together.",
+        "Slam impact phase .62-.73, use floor GroundImpact rather than moving fist corners.",
+        "Core bone may collapse and hex emission switches off externally; soulless construct.",
+        "Two skinned primitives sharing one18bone rig; authored source single mesh."
+      ],
+      "clipNormalization": {
+        "sourceStartSeconds": 0.041666666666666664,
+        "policy": "Clone all tracks, shift the common start to zero and resetDuration; events use normalized times."
+      },
+      "file": "rigged/MOSS_HEX_GOLEM.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/MOSS_HEX_GOLEM.lo.glb",
+          "sha256": "ca1fc492442875f170f231c11dc8f9941b99c60ecdb53bb03686468b22c76bca",
+          "bytes": 630224,
+          "triangles": 7970,
+          "materialPrimitives": 2
+        },
+        "far": {
+          "file": "rigged/MOSS_HEX_GOLEM.far.glb",
+          "sha256": "759b748fb2fec31b758923f309d6ac7a9e540f5de92e860bde3a4dff1217c91c",
+          "bytes": 255196,
+          "triangles": 2372,
+          "materialPrimitives": 2
+        },
+        "shadow": {
+          "file": "rigged/MOSS_HEX_GOLEM.shadow.glb",
+          "sha256": "cae860827d84188de37eb74d3fba31389fd64a3d77371d450e6415484507e3cf",
+          "bytes": 178764,
+          "triangles": 980,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "ac292e08fe5b4636b4303f86b890d92b70cfbea64c3f6818be07ee38a3b3f2d8",
+      "nativeSha256": "b045399b0be3dd2049e24e97e0b69fa50454ae729de99880fdad2522f8c2fcbd",
+      "bytes": 1075448,
+      "triangles": 19096,
+      "vertices": 15477,
+      "materialPrimitives": 2,
+      "bones": 18,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "SAND_HEX_GOLEM",
+      "reviewAsset": "sand-hi",
+      "label": "Sand-Hexgolem",
+      "native": "scripts/games-blender/fernworld/characters/hex-golems-earth/SAND_HEX_GOLEM/SAND_HEX_GOLEM.blend",
+      "glb": "scripts/games-blender/fernworld/characters/hex-golems-earth/SAND_HEX_GOLEM/SAND_HEX_GOLEM_Hi.glb",
+      "license": "CC0-1.0 Quaternius Ultimate Monsters Orc arms plus Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/hex-golems-earth/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/hex-earth-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 2.681,
+      "role": "single-tower-boss-construct",
+      "defaultLod": "lo",
+      "review": "Coordinator final multiview/hand/LOD/motion and actual eightGLB sixclip audit complete. No final user or game performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "slam": "Attack_Slam",
+        "hit": "Hit_Recover",
+        "stagger": "Stagger",
+        "disabled": "Disabled"
+      },
+      "motionContract": {
+        "file": "rigged/SAND_HEX_GOLEM.motionContract.json",
+        "sha256": "70ea2b97cbbba39e6f438a3a27f5ed4ce3d9a567c649906424fbb1091aefa719"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-earth/SAND_HEX_GOLEM/SAND_HEX_GOLEM_Lo.glb",
+          "reviewAsset": "sand-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-earth/SAND_HEX_GOLEM/SAND_HEX_GOLEM_Far.glb",
+          "reviewAsset": "sand-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-earth/SAND_HEX_GOLEM/SAND_HEX_GOLEM_Shadow.glb",
+          "reviewAsset": "sand-shadow"
+        }
+      },
+      "attachments": [
+        {
+          "source": "scripts/games-blender/fernworld/characters/hex-golems-earth/SAND_HEX_GOLEM/SAND_HEX_GOLEM_Parts.glb",
+          "filename": "SAND_HEX_GOLEM_Parts.glb",
+          "browserAudit": "docs/games/fernworld-assets/hex-earth-parts-browser-audit-2026-10-27.json",
+          "runtimeFlags": {
+            "rigidDebris": true,
+            "maxTemporaryClusters": 6
+          },
+          "activation": "Bind/Idle0 assembly only. Transition explicitly before replacing skin; pool six clusters. No exact matching to posed Slam/Disabled."
+        }
+      ],
+      "integrationNotes": [
+        "Walk in place at controller .18m/s; cliptime and movement scale together.",
+        "Slam impact phase .62-.73, use floor GroundImpact rather than moving fist corners.",
+        "Core bone may collapse and hex emission switches off externally; soulless construct.",
+        "Two skinned primitives sharing one18bone rig; authored source single mesh."
+      ],
+      "clipNormalization": {
+        "sourceStartSeconds": 0.041666666666666664,
+        "policy": "Clone all tracks, shift the common start to zero and resetDuration; events use normalized times."
+      },
+      "file": "rigged/SAND_HEX_GOLEM.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/SAND_HEX_GOLEM.lo.glb",
+          "sha256": "d444b6c1884610eb7daf5b4c1026232c9c3cf78b853b668c650f40db41fb6b26",
+          "bytes": 400276,
+          "triangles": 5336,
+          "materialPrimitives": 2
+        },
+        "far": {
+          "file": "rigged/SAND_HEX_GOLEM.far.glb",
+          "sha256": "746a9ac57a8830a6b667c5202399e9c867e815d331c3eb42259609dbc60b8590",
+          "bytes": 246876,
+          "triangles": 2264,
+          "materialPrimitives": 2
+        },
+        "shadow": {
+          "file": "rigged/SAND_HEX_GOLEM.shadow.glb",
+          "sha256": "44f770a709f218d04083de055ac6d6f7e0d1ff945443b90584ba3d38446571b1",
+          "bytes": 173520,
+          "triangles": 968,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "79676805d7f67581100c7c2d5613c41ac47450424fa83e8effda8e98720ffa71",
+      "nativeSha256": "dfc39fbf68f7ba296a28adb346a46acc0e7a869d294238003dbf1b81dceba94a",
+      "bytes": 811416,
+      "triangles": 15756,
+      "vertices": 11121,
+      "materialPrimitives": 2,
+      "bones": 18,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "FROST_HEX_GOLEM",
+      "reviewAsset": "frost-hi",
+      "label": "Frost-Hexgolem",
+      "native": "scripts/games-blender/fernworld/characters/hex-golems-extreme/FROST_HEX_GOLEM/FROST_HEX_GOLEM.blend",
+      "glb": "scripts/games-blender/fernworld/characters/hex-golems-extreme/FROST_HEX_GOLEM/FROST_HEX_GOLEM_Hi.glb",
+      "license": "CC0-1.0 Quaternius Ultimate Monsters Orc arms plus Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/hex-golems-extreme/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/hex-extreme-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 2.8168957709801896,
+      "role": "single-tower-boss-construct",
+      "defaultLod": "lo",
+      "review": "Coordinator final multiview/hand/LOD/motion and actual eightGLB sixclip audit complete. No final user or game performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "slam": "Attack_Slam",
+        "hit": "Hit_Recover",
+        "stagger": "Stagger",
+        "disabled": "Disabled"
+      },
+      "motionContract": {
+        "file": "rigged/FROST_HEX_GOLEM.motionContract.json",
+        "sha256": "f456257d57aa3d63477b9304cbbdfffa75f8aa6a20a3b78fa3eb4a7c74c51de6"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-extreme/FROST_HEX_GOLEM/FROST_HEX_GOLEM_Lo.glb",
+          "reviewAsset": "frost-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-extreme/FROST_HEX_GOLEM/FROST_HEX_GOLEM_Far.glb",
+          "reviewAsset": "frost-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-extreme/FROST_HEX_GOLEM/FROST_HEX_GOLEM_Shadow.glb",
+          "reviewAsset": "frost-shadow"
+        }
+      },
+      "attachments": [
+        {
+          "source": "scripts/games-blender/fernworld/characters/hex-golems-extreme/FROST_HEX_GOLEM/FROST_HEX_GOLEM_Parts.glb",
+          "filename": "FROST_HEX_GOLEM_Parts.glb",
+          "browserAudit": "docs/games/fernworld-assets/hex-extreme-parts-browser-audit-2026-10-27.json",
+          "runtimeFlags": {
+            "rigidDebris": true,
+            "maxTemporaryClusters": 6
+          },
+          "activation": "Bind/Idle0 assembly only. Transition explicitly before replacing skin; pool six clusters. No exact matching to posed Slam/Disabled."
+        }
+      ],
+      "integrationNotes": [
+        "Walk in place at controller .18m/s; cliptime and movement scale together.",
+        "Slam impact phase .62-.73, use floor GroundImpact rather than moving fist corners.",
+        "Core bone may collapse and hex emission switches off externally; soulless construct.",
+        "Two skinned primitives sharing one18bone rig; authored source single mesh.",
+        "Raw GLB timeline starts at1/24s. Clone+shift every track by\u22121/24s and reset duration before controller/atlas sampling."
+      ],
+      "clipNormalization": {
+        "sourceStartSeconds": 0.041666666666666664,
+        "policy": "Clone all tracks, shift the common start to zero and resetDuration; events use normalized times."
+      },
+      "file": "rigged/FROST_HEX_GOLEM.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/FROST_HEX_GOLEM.lo.glb",
+          "sha256": "0bd58bb94fe47dee8ef5e2b5be408f4de25e69087e0eee3cd230fb3640ac0cb2",
+          "bytes": 409932,
+          "triangles": 5750,
+          "materialPrimitives": 2
+        },
+        "far": {
+          "file": "rigged/FROST_HEX_GOLEM.far.glb",
+          "sha256": "7f70d8c24bfdeef825ffcb0ca2f0f9d086e11688b0c4b8f14f8c9bdafb08f329",
+          "bytes": 251860,
+          "triangles": 2262,
+          "materialPrimitives": 2
+        },
+        "shadow": {
+          "file": "rigged/FROST_HEX_GOLEM.shadow.glb",
+          "sha256": "8693372f0d3919ac89b4eb9f5a9ca5c2c339ee6f587dc42b0130f198164972ae",
+          "bytes": 172956,
+          "triangles": 836,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "e3c827b8f08739f3df17e7b3be12f8b636a73bc1dba5f0532099a475c34a6ddf",
+      "nativeSha256": "b8ccdd262349bd00a07f863a33a358503930d11bea1f73dd29083f7aabd2e673",
+      "bytes": 980240,
+      "triangles": 20232,
+      "vertices": 13656,
+      "materialPrimitives": 2,
+      "bones": 18,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "EMBER_HEX_GOLEM",
+      "reviewAsset": "ember-hi",
+      "label": "Glut-Hexgolem",
+      "native": "scripts/games-blender/fernworld/characters/hex-golems-extreme/EMBER_HEX_GOLEM/EMBER_HEX_GOLEM.blend",
+      "glb": "scripts/games-blender/fernworld/characters/hex-golems-extreme/EMBER_HEX_GOLEM/EMBER_HEX_GOLEM_Hi.glb",
+      "license": "CC0-1.0 Quaternius Ultimate Monsters Orc arms plus Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/hex-golems-extreme/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/hex-extreme-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 2.430788564823844,
+      "role": "single-tower-boss-construct",
+      "defaultLod": "lo",
+      "review": "Coordinator final multiview/hand/LOD/motion and actual eightGLB sixclip audit complete. No final user or game performance approval.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "slam": "Attack_Slam",
+        "hit": "Hit_Recover",
+        "stagger": "Stagger",
+        "disabled": "Disabled"
+      },
+      "motionContract": {
+        "file": "rigged/EMBER_HEX_GOLEM.motionContract.json",
+        "sha256": "f456257d57aa3d63477b9304cbbdfffa75f8aa6a20a3b78fa3eb4a7c74c51de6"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-extreme/EMBER_HEX_GOLEM/EMBER_HEX_GOLEM_Lo.glb",
+          "reviewAsset": "ember-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-extreme/EMBER_HEX_GOLEM/EMBER_HEX_GOLEM_Far.glb",
+          "reviewAsset": "ember-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/hex-golems-extreme/EMBER_HEX_GOLEM/EMBER_HEX_GOLEM_Shadow.glb",
+          "reviewAsset": "ember-shadow"
+        }
+      },
+      "attachments": [
+        {
+          "source": "scripts/games-blender/fernworld/characters/hex-golems-extreme/EMBER_HEX_GOLEM/EMBER_HEX_GOLEM_Parts.glb",
+          "filename": "EMBER_HEX_GOLEM_Parts.glb",
+          "browserAudit": "docs/games/fernworld-assets/hex-extreme-parts-browser-audit-2026-10-27.json",
+          "runtimeFlags": {
+            "rigidDebris": true,
+            "maxTemporaryClusters": 6
+          },
+          "activation": "Bind/Idle0 assembly only. Transition explicitly before replacing skin; pool six clusters. No exact matching to posed Slam/Disabled."
+        }
+      ],
+      "integrationNotes": [
+        "Walk in place at controller .18m/s; cliptime and movement scale together.",
+        "Slam impact phase .62-.73, use floor GroundImpact rather than moving fist corners.",
+        "Core bone may collapse and hex emission switches off externally; soulless construct.",
+        "Two skinned primitives sharing one18bone rig; authored source single mesh.",
+        "Raw GLB timeline starts at1/24s. Clone+shift every track by\u22121/24s and reset duration before controller/atlas sampling."
+      ],
+      "clipNormalization": {
+        "sourceStartSeconds": 0.041666666666666664,
+        "policy": "Clone all tracks, shift the common start to zero and resetDuration; events use normalized times."
+      },
+      "file": "rigged/EMBER_HEX_GOLEM.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/EMBER_HEX_GOLEM.lo.glb",
+          "sha256": "b63ae8d3345db4c0322b4d703718d1bd5deaed13d8271eccdd6425b55c1d9777",
+          "bytes": 424768,
+          "triangles": 6010,
+          "materialPrimitives": 2
+        },
+        "far": {
+          "file": "rigged/EMBER_HEX_GOLEM.far.glb",
+          "sha256": "2f211e41e46549a84de7b7a1cc83d8ef36ec85b0bbd2dd27dd8c31ddd92229bf",
+          "bytes": 257672,
+          "triangles": 2362,
+          "materialPrimitives": 2
+        },
+        "shadow": {
+          "file": "rigged/EMBER_HEX_GOLEM.shadow.glb",
+          "sha256": "f1677c8db4d88be6c2af7578b706556f70bbf3a0dc2ed33379afd66a9b413e98",
+          "bytes": 175468,
+          "triangles": 860,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "1a0f5c0e21ab5efec2fcd1712bc59bd937fbe862d58b9aed4de483f47aeb3e20",
+      "nativeSha256": "1c78821ef8c26483e0952d200c99585b07464a7bddefdee6e8e64c3be6e288f4",
+      "bytes": 1024644,
+      "triangles": 21164,
+      "vertices": 14349,
+      "materialPrimitives": 2,
+      "bones": 18,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "MORWEN",
+      "reviewAsset": "morwen-hi",
+      "label": "Morwen Dornweber",
+      "native": "scripts/games-blender/fernworld/characters/morwen-refined/MORWEN_V2.blend",
+      "glb": "scripts/games-blender/fernworld/characters/morwen-refined/MORWEN.hi.glb",
+      "license": "CC-BY-4.0 Rain Rig (Blender Foundation/Blender Studio) head anatomy and CC0 Blender Studio Human Base Meshes body; Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/morwen-refined/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/morwen-refined-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.3691486270767725,
+      "role": "single-boss-rider",
+      "defaultLod": "lo",
+      "review": "Coordinator final front/35/profile/back, face, bark details, four LODs and mounted/action views personally reviewed. Independent all4GLBs/all7clips/allkeytimes+25/fullskin and common-clock mount/cast/dismount/capture pass. No final user approval or game performance claimed.",
+      "clips": {
+        "idleRiding": "Idle_Riding",
+        "cast": "Ride_Cast",
+        "idle": "Ground_Idle",
+        "walk": "Ground_Walk",
+        "hit": "Hit_Recover",
+        "dismount": "Dismount",
+        "captured": "Surrender_Captured"
+      },
+      "motionContract": {
+        "file": "rigged/MORWEN.motionContract.json",
+        "sha256": "e56ea9f4a474c3f63fe84ad84cf95e8a5d7342f7810020f600cf6379243993bd"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/morwen-refined/MORWEN.lo.glb",
+          "reviewAsset": "morwen-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/morwen-refined/MORWEN.far.glb",
+          "reviewAsset": "morwen-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/morwen-refined/MORWEN.sh.glb",
+          "reviewAsset": "morwen-shadow"
+        }
+      },
+      "integrationNotes": [
+        "Two separate actors in common authored coordinates; use one absolute animation clock. Do not parent rider under an animated body bone.",
+        "Mounting and dismount controller evidence: docs/games/fernworld-assets/morwen-refined-mounted-browser-audit-2026-10-27.json",
+        "Dismount holds root until .7s, smoothstep to X.88 Z.05 by1.5s; landing at2s, then captured human alive and serpent Freed.",
+        "DismountAnchor and GroundShadow raw Y lowered .04m: project onto terrain. Physical contacts use capsule, never shadow geometry.",
+        "Human cast release .7916667s at Palm.R; serpent Bite_Tell then Bite_Strike, release common1.2633334s.",
+        "Closed-jaw head strike, no opening mouth cavity; external hex/effects only."
+      ],
+      "sockets": {
+        "file": "rigged/MORWEN.sockets.json",
+        "sha256": "b3d3e5202ec24f3382ce4f89d16dba998cc99af56da9960bb3cac11ba927b18c"
+      },
+      "attribution": {
+        "file": "rigged/MORWEN.attribution.md",
+        "sha256": "cba7ad04554420a902fa57ce8b56e9eba44771b1fc832280482bbc168000501a"
+      },
+      "licenseText": {
+        "file": "rigged/MORWEN.licenseText.txt",
+        "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+      },
+      "file": "rigged/MORWEN.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/MORWEN.lo.glb",
+          "sha256": "3a8e88afaff66b02750957658dfab3e6df40f3ea0c67eb771581a7fbba985a1e",
+          "bytes": 796640,
+          "triangles": 12953,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/MORWEN.far.glb",
+          "sha256": "90a12640b36c368f7a05e2aef44627f20ba57ca90cf2ba53e52d964ccaa637d0",
+          "bytes": 398120,
+          "triangles": 3004,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/MORWEN.shadow.glb",
+          "sha256": "dba45f6a1343e00d9f82061209d6f5123cf7e29e99f3c251d8046e6fcbb06dda",
+          "bytes": 190732,
+          "triangles": 1510,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "55a6f6c082ceaa2873e37bbc638f1282dcca6892c740a21b4f86710e40dd5cab",
+      "nativeSha256": "f1d7c5186f8080f77e1b59310a0b0157cb0d76d36ff116c60b16d501c06c9cf0",
+      "bytes": 2840340,
+      "triangles": 65655,
+      "vertices": 34097,
+      "materialPrimitives": 1,
+      "bones": 26,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "MORWEN_SAND_SERPENT",
+      "reviewAsset": "serpent-hi",
+      "label": "Morwens Sandschlange",
+      "native": "scripts/games-blender/fernworld/characters/morwen-serpent/MORWEN_SERPENT.blend",
+      "glb": "scripts/games-blender/fernworld/characters/morwen-serpent/MORWEN_SAND_SERPENT.hi.glb",
+      "license": "Original Fernworld adaptation; CC0 Blender Studio female anatomy and KayKit Mage donor topology for Morwen",
+      "provenance": "scripts/games-blender/fernworld/characters/morwen-serpent/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/morwen-serpent-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 0.5639830882307237,
+      "role": "single-boss-living-mount",
+      "defaultLod": "lo",
+      "review": "Coordinator final forms, actual eight GLBs/13 clips and common-clock mounted assembly checked. No integrated performance claim.",
+      "clips": {
+        "idle": "Idle_Coil",
+        "walk": "Slither",
+        "tell": "Bite_Tell",
+        "strike": "Bite_Strike",
+        "hit": "Hit_Recover",
+        "freed": "Freed"
+      },
+      "motionContract": {
+        "file": "rigged/MORWEN_SAND_SERPENT.motionContract.json",
+        "sha256": "e56ea9f4a474c3f63fe84ad84cf95e8a5d7342f7810020f600cf6379243993bd"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/morwen-serpent/MORWEN_SAND_SERPENT.lo.glb",
+          "reviewAsset": "serpent-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/morwen-serpent/MORWEN_SAND_SERPENT.far.glb",
+          "reviewAsset": "serpent-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/morwen-serpent/MORWEN_SAND_SERPENT.sh.glb",
+          "reviewAsset": "serpent-shadow"
+        }
+      },
+      "integrationNotes": [
+        "Two separate actors in common authored coordinates; use one absolute animation clock. Do not parent rider under an animated body bone.",
+        "Mounting and dismount controller evidence: docs/games/fernworld-assets/morwen-mounted-browser-audit-2026-10-27.json.",
+        "Dismount holds root until .7s, smoothstep to X.88 Z.05 by1.5s; landing at2s, then captured human alive and serpent Freed.",
+        "DismountAnchor and GroundShadow raw Y lowered .04m: project onto terrain. Physical contacts use capsule, never shadow geometry.",
+        "Human cast release .7916667s at Palm.R; serpent Bite_Tell then Bite_Strike, release common1.2633334s.",
+        "Closed-jaw head strike, no opening mouth cavity; external hex/effects only."
+      ],
+      "file": "rigged/MORWEN_SAND_SERPENT.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/MORWEN_SAND_SERPENT.lo.glb",
+          "sha256": "3ffc7e7b22ed07a396a582043b2d1416bc271d640fdd424cecb4918fd2a8a483",
+          "bytes": 489412,
+          "triangles": 6984,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/MORWEN_SAND_SERPENT.far.glb",
+          "sha256": "44d2b2858292956ea1537b9bd7b95203d5dcd2b2b0730100a16fb8c181956307",
+          "bytes": 244328,
+          "triangles": 1990,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/MORWEN_SAND_SERPENT.shadow.glb",
+          "sha256": "218e7e920d2630c7827d7bd7be067f98c3e4e29bdd0ffcb56e710d579f458673",
+          "bytes": 192520,
+          "triangles": 776,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "4ad689db7a203bee57b966a0b85ece04a371072f9f0a28d3bc32a66a69749da0",
+      "nativeSha256": "41f612fbd37e7f8192c74814df9427dcf4a42bc1a97ff272ecceac58ee3b6557",
+      "bytes": 1603212,
+      "triangles": 18870,
+      "vertices": 23927,
+      "materialPrimitives": 1,
+      "bones": 24,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "VEIT_SORN",
+      "reviewAsset": "veit-hi",
+      "label": "Veit Sorn",
+      "native": "scripts/games-blender/fernworld/characters/veit-sorn/VEIT_SORN.blend",
+      "glb": "scripts/games-blender/fernworld/characters/veit-sorn/VEIT_SORN.hi.glb",
+      "license": "CC0-1.0 KayKit Rogue donor with original Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/veit-sorn/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/veit-sorn-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.7941360298570135,
+      "role": "single-boss-human",
+      "defaultLod": "lo",
+      "review": "Coordinator actual four GLBs/seven clips and final form, hands, attack, capture and LOD views accepted. No integrated performance claim.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "cast": "FrostCast_Left",
+        "ground": "GroundFrost",
+        "hit": "Hit_Recover",
+        "stagger": "Stagger",
+        "captured": "Surrender_Captured"
+      },
+      "motionContract": {
+        "file": "rigged/VEIT_SORN.motionContract.json",
+        "sha256": "08eaf72fc493193fee2d7f6559bef941a1c1f71786683b96989b0719fd6bba91"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/veit-sorn/VEIT_SORN.lo.glb",
+          "reviewAsset": "veit-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/veit-sorn/VEIT_SORN.far.glb",
+          "reviewAsset": "veit-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/veit-sorn/VEIT_SORN.sh.glb",
+          "reviewAsset": "veit-shadow"
+        }
+      },
+      "integrationNotes": [
+        "23 exported joints, one skinned primitive/material, all seven clips start at0; identical LOD bind.",
+        "Walk in place: controller +Z .32m/s times playback rate, measured stance drift <.01mm.",
+        "Both frost attacks release at.8s, FrostCast from live frost_palm_l toward+Z, GroundFrost down toward ground socket.",
+        "Alive captured with open empty hands; clamp final Surrender_Captured. Use existing external frost VFX, no baked duplicate FX.",
+        "Far removes tiny individual scales; retains closed blue arm. Shadow only in depth pass."
+      ],
+      "file": "rigged/VEIT_SORN.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/VEIT_SORN.lo.glb",
+          "sha256": "1d226b089f968e76195789690fb82cdf66fe7552f1a281c7a0d321b5e05a974f",
+          "bytes": 689712,
+          "triangles": 8492,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/VEIT_SORN.far.glb",
+          "sha256": "4f645c6ab04e6b9a83031f6550e52e213900579c2b6ee9fa311bfc6580841cf5",
+          "bytes": 480380,
+          "triangles": 2530,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/VEIT_SORN.shadow.glb",
+          "sha256": "f0e76b15cf27f72322487d06bb7e135f62389b25604bc16c9695876de797fc94",
+          "bytes": 434356,
+          "triangles": 1218,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "f86eb6c9a17f2a4d62c5ca3f3dcb4a2a6fa72cb9201823806f3a6a16a6f823eb",
+      "nativeSha256": "86563d6c7836a1c91c0c00bb3037d7dd1625972aa6d368fc1d5f55c4705e75c6",
+      "bytes": 1694844,
+      "triangles": 38000,
+      "vertices": 19227,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "SYNTHET",
+      "reviewAsset": "synthet-hi",
+      "label": "Synthet",
+      "native": "scripts/games-blender/fernworld/characters/synthet/SYNTHET.blend",
+      "glb": "scripts/games-blender/fernworld/characters/synthet/SYNTHET_Hero.glb",
+      "license": "CC0 Quaternius animal topology plus original Fernworld sculpted adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/synthet/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/synthet-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 2.542445919980726,
+      "role": "single-boss-living-synthet",
+      "defaultLod": "lo",
+      "review": "Coordinator final6views,4SweepPhases,Stabilized,locomotion and256pxLOD personally accepted;96sealedfiles and actual4GLB7clip/keytime/vertices/sockets proof passed.",
+      "clips": {
+        "idle": "Idle_Unstable",
+        "walk": "Heavy_Locomotion",
+        "charge": "Spark_Charge",
+        "burst": "Spark_Burst",
+        "sweep": "Sweep",
+        "hit": "Hit_Recover",
+        "stabilized": "Stabilized"
+      },
+      "motionContract": {
+        "file": "rigged/SYNTHET.motionContract.json",
+        "sha256": "f749a469eead1c91183e6adacafd395fae419add50910abd708ea40af1cf3ba4"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/synthet/SYNTHET_Lo.glb",
+          "reviewAsset": "synthet-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/synthet/SYNTHET_Far.glb",
+          "reviewAsset": "synthet-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/synthet/SYNTHET_Shadow.glb",
+          "reviewAsset": "synthet-sh"
+        }
+      },
+      "integrationNotes": [
+        "One authored mesh/skin with2opaque material primitives ->2GLTFLoader SkinnedMeshes/2draws, same23bones allLODs.",
+        "Heavy_Locomotion in place;controller +Z .234375m/s at1x playback.",
+        "Five live sockets:ChestCore,BackEmit,Hand.L,Hand.R,Ground. Preserve named nodes and orientation.",
+        "Spark_Charge release.85s;Spark_Burst.36s;Sweep.7s. Existing externalVFX only.",
+        "Stabilized is alive and breathing, not killed; clamp/loop only according to MotionContract."
+      ],
+      "file": "rigged/SYNTHET.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/SYNTHET.lo.glb",
+          "sha256": "31bd23b00291ed222b6565d6b8a42bc57e87e8235479428563a1ffd7222d985a",
+          "bytes": 607968,
+          "triangles": 8704,
+          "materialPrimitives": 2
+        },
+        "far": {
+          "file": "rigged/SYNTHET.far.glb",
+          "sha256": "66cb7f3e417f0bdaeb9824da775b5db3ee8c122713eaf41e2497498dd72f2a76",
+          "bytes": 376944,
+          "triangles": 2756,
+          "materialPrimitives": 2
+        },
+        "shadow": {
+          "file": "rigged/SYNTHET.shadow.glb",
+          "sha256": "7ea5929974de8426649dc254b3c4bc58bc9728dde37aaf36d4000a02fddd3473",
+          "bytes": 326056,
+          "triangles": 1470,
+          "materialPrimitives": 2
+        }
+      },
+      "sha256": "0cb042bcb3b157cc0362454c8ff037ce0012957df1b8cbea8d2cdb232ed6217d",
+      "nativeSha256": "fb11021a131400e554446a7e0b7a4541ef9931d4d0d0acebcf5f2e5df7078adc",
+      "bytes": 1777460,
+      "triangles": 38798,
+      "vertices": 19991,
+      "materialPrimitives": 2,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "MINER_HUMAN",
+      "reviewAsset": "miner_human-hi",
+      "label": "Minenarbeiter \u2013 Mensch",
+      "native": "scripts/games-blender/fernworld/characters/miners/MINER_HUMAN/native.blend",
+      "glb": "scripts/games-blender/fernworld/characters/miners/MINER_HUMAN/MINER_HUMAN.hi.glb",
+      "license": "CC0 KayKit Adventurers2 source plus original Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/miners/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/miners-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.648,
+      "role": "rescued-miner-npc",
+      "defaultLod": "lo",
+      "review": "Coordinator inspected all nine final form/action/runtime boards. Twelve final GLBs independently passed all four clips, keytimes/25 phases, skin vertices and hand-slot checks. Source manifest verified.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "rescue": "Rescue_Cheer",
+        "crouch": "Duck_Crouch"
+      },
+      "sockets": {
+        "file": "rigged/MINER_HUMAN.sockets.json",
+        "sha256": "1459f0808b3dbbbfcd225d8eb81bac3098248848121b651169194a3a792320dc"
+      },
+      "motionContract": {
+        "file": "rigged/MINER_HUMAN.motionContract.json",
+        "sha256": "930b3644fa22bf00716e7df6cfdbb6bc44812a5df2a956a1602f688d9e665aff"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/miners/MINER_HUMAN/MINER_HUMAN.lo.glb",
+          "reviewAsset": "miner_human-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/miners/MINER_HUMAN/MINER_HUMAN.far.glb",
+          "reviewAsset": "miner_human-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/miners/MINER_HUMAN/MINER_HUMAN.shadow.glb",
+          "reviewAsset": "miner_human-shadow"
+        }
+      },
+      "integrationNotes": [
+        "Sockets are joint-local points in sockets.json; multiply by live bone matrix, not actor matrix.",
+        "Keep authored metre scale. Fernworld Dwarf is 30cm with adult proportions; do not rescale all species to equal height.",
+        "Preserve existing rescue pod/collision controller and use appropriate crouch clearance."
+      ],
+      "file": "rigged/MINER_HUMAN.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/MINER_HUMAN.lo.glb",
+          "sha256": "07bad876ce3fa2625833a86b8c1779f17f93437733e619621f5028cc9e0a9776",
+          "bytes": 221044,
+          "triangles": 2600,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/MINER_HUMAN.far.glb",
+          "sha256": "90f183b90c4accc3c63d42bfd899439801ef86e28337a361f78a08872b5fa1a5",
+          "bytes": 139216,
+          "triangles": 797,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/MINER_HUMAN.shadow.glb",
+          "sha256": "9320af9225ac070b0ee1e5fc1280b50b66adac8fc1c5e89266f6d6df62ed2cc6",
+          "bytes": 96176,
+          "triangles": 420,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "73c36c10ae1413604560736d0382dcfad456dbd413787261c2b59420a369ea16",
+      "nativeSha256": "c5d348bda72bfb016b31e7af3f41ebcb22018dce1e60ef6986348a431c81001f",
+      "bytes": 810728,
+      "triangles": 9620,
+      "vertices": 7950,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "MINER_HALFGROWN",
+      "reviewAsset": "miner_halfgrown-hi",
+      "label": "Minenarbeiter \u2013 Halfgrown",
+      "native": "scripts/games-blender/fernworld/characters/miners/MINER_HALFGROWN/native.blend",
+      "glb": "scripts/games-blender/fernworld/characters/miners/MINER_HALFGROWN/MINER_HALFGROWN.hi.glb",
+      "license": "CC0 KayKit Adventurers2 source plus original Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/miners/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/miners-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 1.049,
+      "role": "rescued-miner-npc",
+      "defaultLod": "lo",
+      "review": "Coordinator inspected all nine final form/action/runtime boards. Twelve final GLBs independently passed all four clips, keytimes/25 phases, skin vertices and hand-slot checks. Source manifest verified.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "rescue": "Rescue_Cheer",
+        "crouch": "Duck_Crouch"
+      },
+      "sockets": {
+        "file": "rigged/MINER_HALFGROWN.sockets.json",
+        "sha256": "600c897d9214488c48db831b06d2bdbfaeda098b5be5b509fa3ef847ba8368eb"
+      },
+      "motionContract": {
+        "file": "rigged/MINER_HALFGROWN.motionContract.json",
+        "sha256": "4beae694b69609e4ff7d73441e19309efb1db80821cae3b55ca61a91e9c948ce"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/miners/MINER_HALFGROWN/MINER_HALFGROWN.lo.glb",
+          "reviewAsset": "miner_halfgrown-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/miners/MINER_HALFGROWN/MINER_HALFGROWN.far.glb",
+          "reviewAsset": "miner_halfgrown-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/miners/MINER_HALFGROWN/MINER_HALFGROWN.shadow.glb",
+          "reviewAsset": "miner_halfgrown-shadow"
+        }
+      },
+      "integrationNotes": [
+        "Sockets are joint-local points in sockets.json; multiply by live bone matrix, not actor matrix.",
+        "Keep authored metre scale. Fernworld Dwarf is 30cm with adult proportions; do not rescale all species to equal height.",
+        "Preserve existing rescue pod/collision controller and use appropriate crouch clearance."
+      ],
+      "file": "rigged/MINER_HALFGROWN.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/MINER_HALFGROWN.lo.glb",
+          "sha256": "4270f21c0b94efb5166b847a4b167e5a8614b8cf1df2f416a0e4d04bd7333001",
+          "bytes": 223748,
+          "triangles": 2600,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/MINER_HALFGROWN.far.glb",
+          "sha256": "33fb73dffaf6aa344c9d03163a7aeb989dc3675ae4238574de688d198fc8baf5",
+          "bytes": 140840,
+          "triangles": 797,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/MINER_HALFGROWN.shadow.glb",
+          "sha256": "c66ac8e234b2e053f09addd464b48cda2fe7755916eeaff9573e72255551fb54",
+          "bytes": 97028,
+          "triangles": 420,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "e3449c897ec52a28bbc07160e8ea5e5b677b58f61b32f5ab28f9525a99ea822d",
+      "nativeSha256": "af4443e10b0393d7013663843d98767945dc76c2d949d9f14b05565f9e49bc66",
+      "bytes": 653144,
+      "triangles": 9688,
+      "vertices": 7957,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    },
+    {
+      "id": "MINER_DWARF",
+      "reviewAsset": "miner_dwarf-hi",
+      "label": "Minenarbeiter \u2013 Zwerg",
+      "native": "scripts/games-blender/fernworld/characters/miners/MINER_DWARF/native.blend",
+      "glb": "scripts/games-blender/fernworld/characters/miners/MINER_DWARF/MINER_DWARF.hi.glb",
+      "license": "CC0 KayKit Adventurers2 source plus original Fernworld adaptation",
+      "provenance": "scripts/games-blender/fernworld/characters/miners/SOURCE.json",
+      "browserAudit": "docs/games/fernworld-assets/miners-browser-audit-2026-10-27.json",
+      "nominalHeightMetres": 0.3,
+      "role": "rescued-miner-npc",
+      "defaultLod": "lo",
+      "review": "Coordinator inspected all nine final form/action/runtime boards. Twelve final GLBs independently passed all four clips, keytimes/25 phases, skin vertices and hand-slot checks. Source manifest verified.",
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "rescue": "Rescue_Cheer",
+        "crouch": "Duck_Crouch"
+      },
+      "sockets": {
+        "file": "rigged/MINER_DWARF.sockets.json",
+        "sha256": "bf47027f1b726067f0b749b77eab9cf47d75b21de06b82a5a619dfb6576d2327"
+      },
+      "motionContract": {
+        "file": "rigged/MINER_DWARF.motionContract.json",
+        "sha256": "dd9d3d032043effb46dd616c09a7024e7d6ecdce9552aee72143148b0a507fd5"
+      },
+      "lodSources": {
+        "lo": {
+          "glb": "scripts/games-blender/fernworld/characters/miners/MINER_DWARF/MINER_DWARF.lo.glb",
+          "reviewAsset": "miner_dwarf-lo"
+        },
+        "far": {
+          "glb": "scripts/games-blender/fernworld/characters/miners/MINER_DWARF/MINER_DWARF.far.glb",
+          "reviewAsset": "miner_dwarf-far"
+        },
+        "shadow": {
+          "glb": "scripts/games-blender/fernworld/characters/miners/MINER_DWARF/MINER_DWARF.shadow.glb",
+          "reviewAsset": "miner_dwarf-shadow"
+        }
+      },
+      "integrationNotes": [
+        "Sockets are joint-local points in sockets.json; multiply by live bone matrix, not actor matrix.",
+        "Keep authored metre scale. Fernworld Dwarf is 30cm with adult proportions; do not rescale all species to equal height.",
+        "Preserve existing rescue pod/collision controller and use appropriate crouch clearance."
+      ],
+      "file": "rigged/MINER_DWARF.glb",
+      "lods": {
+        "lo": {
+          "file": "rigged/MINER_DWARF.lo.glb",
+          "sha256": "aba27a853ed837b35863c8b2d9c8884b2ccdb1977efae3b8976eaccbc7b479b3",
+          "bytes": 218152,
+          "triangles": 2600,
+          "materialPrimitives": 1
+        },
+        "far": {
+          "file": "rigged/MINER_DWARF.far.glb",
+          "sha256": "d11f7eaa6ea191c8e84cc8e626234cd78c70baa704dea8e262786a20ec3fa054",
+          "bytes": 138368,
+          "triangles": 797,
+          "materialPrimitives": 1
+        },
+        "shadow": {
+          "file": "rigged/MINER_DWARF.shadow.glb",
+          "sha256": "0736bc8e97937dc4f956279dc3392a9314fe8de1d9868c4bdb9bfd99077ed09a",
+          "bytes": 95144,
+          "triangles": 420,
+          "materialPrimitives": 1
+        }
+      },
+      "sha256": "a10423ef9d9a313d82c9202216d8f524fad473a6ab5dfc77dda48eebb3a1fa8a",
+      "nativeSha256": "15f73b2a42a011eb543bb39762cdbb2002fc55da9e067a07908f7fabef4a559e",
+      "bytes": 660312,
+      "triangles": 9872,
+      "vertices": 8081,
+      "materialPrimitives": 1,
+      "bones": 23,
+      "integration": "prepared-only"
+    }
+  ],
+  "attachments": [
+    {
+      "source": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_FIRE_THROW/PIP_FIRE_THROW_FX.glb",
+      "filename": "PIP_FIRE_THROW_FX.glb",
+      "browserAudit": "docs/games/fernworld-assets/pip-accessories-browser-audit-2026-10-27.json",
+      "runtimeFlags": {
+        "castShadow": false,
+        "receiveShadow": false,
+        "worldUp": true
+      },
+      "activation": {
+        "clip": "FireCast_Left",
+        "visibleSeconds": [
+          0.20833333333333334,
+          0.5833333333333334
+        ],
+        "releaseSeconds": 0.4166666666666667,
+        "hideOnInterrupt": true,
+        "socket": "SOCKET_FireCast",
+        "worldUp": true
+      },
+      "sha256": "02b05090a67938b5a08f12b12ffc74cd2d79f8952e62ca494d8e444fa527b972",
+      "bytes": 16080
+    },
+    {
+      "source": "scripts/games-blender/fernworld/characters/pip-tools-elements/PIP_BUBBLE_FLOAT/PIP_BUBBLE_FLOAT_FX.glb",
+      "filename": "PIP_BUBBLE_FLOAT_FX.glb",
+      "browserAudit": "docs/games/fernworld-assets/pip-accessories-browser-audit-2026-10-27.json",
+      "runtimeFlags": {
+        "castShadow": false,
+        "receiveShadow": false,
+        "worldUp": true,
+        "depthWrite": false,
+        "side": "FrontSide",
+        "renderOrder": 10
+      },
+      "activation": "Visible only while the Bubble Float powerup is active; world-up root socket, FrontSide, depthWrite false.",
+      "sha256": "549663c7cf998d055b95dcca5ef53c80841a2559aebd7bfdb19d517f8184f0ab",
+      "bytes": 58072
+    },
+    {
+      "source": "scripts/games-blender/fernworld/characters/pip-tools-mobility/output/PIP_SPARK_LEAP/PIP_SPARK_LEAP_FX.glb",
+      "filename": "PIP_SPARK_LEAP_FX.glb",
+      "browserAudit": "docs/games/fernworld-assets/pip-tools-mobility-fx-browser-audit-2026-10-27.json",
+      "role": "optional on-demand hand discharge; local FX time 0..0.16s at accepted double-jump event, position only and world up; see motionContract",
+      "sha256": "3b39fc81e4f2e083db3d63baf669195206a0b8723203eff5caf99c0efcbb4b2b",
+      "bytes": 13820
+    },
+    {
+      "source": "scripts/games-blender/fernworld/characters/pip-tools-stone/output/stone-stomper-v1/stone-stomp-footfx.glb",
+      "filename": "PIP_STONE_STOMPER_FX.glb",
+      "browserAudit": "docs/games/fernworld-assets/stone-accessory-browser-audit-2026-10-27.json",
+      "runtimeFlags": {
+        "castShadow": false,
+        "receiveShadow": false,
+        "worldUp": true
+      },
+      "activation": {
+        "clip": "Stomp",
+        "timeSeconds": 0.625,
+        "socket": "FootFx",
+        "spawnAndExpire": true
+      },
+      "sha256": "61ca474f50e658f9b793aedd713677b60da1753563bd8ee10c932f39e4811778",
+      "bytes": 11700
+    },
+    {
+      "source": "scripts/games-blender/fernworld/characters/hex-golems-earth/MOSS_HEX_GOLEM/MOSS_HEX_GOLEM_Parts.glb",
+      "filename": "MOSS_HEX_GOLEM_Parts.glb",
+      "browserAudit": "docs/games/fernworld-assets/hex-earth-parts-browser-audit-2026-10-27.json",
+      "runtimeFlags": {
+        "rigidDebris": true,
+        "maxTemporaryClusters": 6
+      },
+      "activation": "Bind/Idle0 assembly only. Transition explicitly before replacing skin; pool six clusters. No exact matching to posed Slam/Disabled.",
+      "sha256": "79a6851d05b597da904a6b0e86682bd47ae35896bdb851b90dfd356370f320dd",
+      "bytes": 452352
+    },
+    {
+      "source": "scripts/games-blender/fernworld/characters/hex-golems-earth/SAND_HEX_GOLEM/SAND_HEX_GOLEM_Parts.glb",
+      "filename": "SAND_HEX_GOLEM_Parts.glb",
+      "browserAudit": "docs/games/fernworld-assets/hex-earth-parts-browser-audit-2026-10-27.json",
+      "runtimeFlags": {
+        "rigidDebris": true,
+        "maxTemporaryClusters": 6
+      },
+      "activation": "Bind/Idle0 assembly only. Transition explicitly before replacing skin; pool six clusters. No exact matching to posed Slam/Disabled.",
+      "sha256": "cc1fe8fb1b18d93eae6a3615a3c804b896ea92aff699ee019b74862ba877c65b",
+      "bytes": 250612
+    },
+    {
+      "source": "scripts/games-blender/fernworld/characters/hex-golems-extreme/FROST_HEX_GOLEM/FROST_HEX_GOLEM_Parts.glb",
+      "filename": "FROST_HEX_GOLEM_Parts.glb",
+      "browserAudit": "docs/games/fernworld-assets/hex-extreme-parts-browser-audit-2026-10-27.json",
+      "runtimeFlags": {
+        "rigidDebris": true,
+        "maxTemporaryClusters": 6
+      },
+      "activation": "Bind/Idle0 assembly only. Transition explicitly before replacing skin; pool six clusters. No exact matching to posed Slam/Disabled.",
+      "sha256": "e1375bd27e081aab9334512d84ef8436907d0cef0c1ac805187eb3f08a91d14b",
+      "bytes": 203552
+    },
+    {
+      "source": "scripts/games-blender/fernworld/characters/hex-golems-extreme/EMBER_HEX_GOLEM/EMBER_HEX_GOLEM_Parts.glb",
+      "filename": "EMBER_HEX_GOLEM_Parts.glb",
+      "browserAudit": "docs/games/fernworld-assets/hex-extreme-parts-browser-audit-2026-10-27.json",
+      "runtimeFlags": {
+        "rigidDebris": true,
+        "maxTemporaryClusters": 6
+      },
+      "activation": "Bind/Idle0 assembly only. Transition explicitly before replacing skin; pool six clusters. No exact matching to posed Slam/Disabled.",
+      "sha256": "0166a8b10a4b800b3c2c746588891ea97ef7f212c324b36309534219d9f0e720",
+      "bytes": 211108
+    }
+  ],
+  "motionLibraries": [
+    {
+      "id": "PIP_SHARED_MOTION",
+      "glb": "scripts/games-blender/fernworld/characters/pip-shared-motion/pip-shared-motion.glb",
+      "native": "scripts/games-blender/fernworld/characters/pip-shared-motion/pip-shared-motion.blend",
+      "contract": "scripts/games-blender/fernworld/characters/pip-shared-motion/motion-contract.json",
+      "browserAudit": "docs/games/fernworld-assets/pip-shared-motion-current-browser-audit-2026-10-27.json",
+      "compatibleIds": [
+        "PIP_KESSEL",
+        "PIP_VINE_HOOK",
+        "PIP_FIRE_THROW",
+        "PIP_BUBBLE_FLOAT",
+        "PIP_GALE_GLIDER",
+        "PIP_SPARK_LEAP",
+        "PIP_FROST_BRIDGE",
+        "PIP_STONE_STOMPER"
+      ],
+      "clips": [
+        "FireCast_Left",
+        "Hook_Right",
+        "Jump_Start",
+        "Jump_Air",
+        "Jump_Land",
+        "Glide",
+        "Hit_Recover",
+        "Celebrate"
+      ],
+      "role": "animation-only; zero meshes, shared original Ranger23bone bind skeleton",
+      "file": "rigged/PIP_SHARED_MOTION.glb",
+      "sha256": "89217deecffe18268c9f89803645f479b3f948344e4c6f63d2d79f639877b064",
+      "bytes": 167044,
+      "contractFile": "rigged/PIP_SHARED_MOTION.json"
+    }
+  ]
+}

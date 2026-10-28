@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "status": "runtime-ready; used by the Fernworld game integration",
+  "files": [
+    {
+      "file": "runtime/asset-library.js",
+      "source": "scripts/games-blender/fernworld/runtime/asset-library.js",
+      "bytes": 8561,
+      "sha256": "eb4e4836b09ebe1dc9042615d41f33e539b8ff3053bbbb5cf2f8f3490413ef84"
+    },
+    {
+      "file": "runtime/channel-library.js",
+      "source": "scripts/games-blender/fernworld/runtime/channel-library.js",
+      "bytes": 3800,
+      "sha256": "db5c9ddac31cec7d78b740b3c36960b189e08826c4b3f44db3f6ef16d36bc051"
+    },
+    {
+      "file": "runtime/world-library.js",
+      "source": "scripts/games-blender/fernworld/runtime/world-library.js",
+      "bytes": 7170,
+      "sha256": "ab31573a487d06fcca25181553df91fae7226e5968bebbdec6aedd91d6c94bc2"
+    },
+    {
+      "file": "runtime/rigid-clips.js",
+      "source": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "bytes": 4203,
+      "sha256": "a6d9ccc44646abc7ee9a23bda508688810f2cad5396d20069c3e1e51b0075c51"
+    },
+    {
+      "file": "runtime/articulated-clips.js",
+      "source": "scripts/games-blender/fernworld/runtime/articulated-clips.js",
+      "bytes": 16050,
+      "sha256": "1ca7a9721f59684baeec518dad2664fffce8f0bcec20836df3b0bb7f514a7b3f"
+    },
+    {
+      "file": "runtime/baked-crowd.js",
+      "source": "scripts/games-blender/fernworld/runtime/baked-crowd.js",
+      "bytes": 11046,
+      "sha256": "857721ce6150e2129d80b3bc626e7c0c10546c11dc190819cbae766400c0379e"
+    },
+    {
+      "file": "runtime/baked-rigid.js",
+      "source": "scripts/games-blender/fernworld/runtime/baked-rigid.js",
+      "bytes": 7874,
+      "sha256": "1c03a928a113f77e5eb9f1c526c23dca109177930b498939f216e30ddc609a93"
+    },
+    {
+      "file": "runtime/baked-morph.js",
+      "source": "scripts/games-blender/fernworld/runtime/baked-morph.js",
+      "bytes": 5385,
+      "sha256": "ba5abeffb10fb59d5e6af5d9056c491c119817a8baef83cb0b2fbee18a7e86c6"
+    },
+    {
+      "file": "vendor/GLTFLoader.js",
+      "source": "scripts/games-blender/fernworld/vendor/GLTFLoader.js",
+      "bytes": 110303,
+      "sha256": "f9c8d2de8a3ab74cbb9553f8143d4b804287829c9646c77ac66023483f884a65"
+    },
+    {
+      "file": "vendor/LICENSE-three.txt",
+      "source": "scripts/games-blender/fernworld/vendor/LICENSE-three.txt",
+      "bytes": 1081,
+      "sha256": "4c40a1ef62450b857c3b2aaf294936304cd552d965fbcd9d32d4c5bcf4ba4454"
+    },
+    {
+      "file": "vendor/SOURCE.json",
+      "source": "scripts/games-blender/fernworld/vendor/SOURCE.json",
+      "bytes": 531,
+      "sha256": "4b7fedca7d3925116add4b8517a6bc8f3f3ce38e88ebd8259d93c5ea64eb4c13"
+    }
+  ],
+  "sharedThreeVersion": "0.170.0",
+  "excludes": "Editable native files, renders and authoring scripts are not runtime dependencies."
+}

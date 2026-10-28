@@ -1,19 +1,28 @@
 /**
  * Pip’s Tower levels on a 360 × 640 board; the tower's inner walls are at x 46 / 314 and the floor at y 594.
  * Four worlds of ten levels and a boss each, in order (world 0–3, `boss: true` last); each world brings its elements in
- * one at a time (an intro level, then combinations).
+ * one at a time (a lesson level, then variations and combinations), and every world adds one deeper mechanic:
+ * flaps (Viridis), plates and doors (Sahrun), Pip's own weight and ice (Hibern), the pad delivering weight (Vulkara).
+ * Hints nudge, they do not spell out the order. test/unit/games/pips-tower-analysis.json holds each level's audit
+ * (npm run analyze:pips): how likely random pulling wins, the fewest pulls, the decisions on the way.
  *
  *   walls / wood / gates: [x1, y1, x2, y2] segments, 12 px thick. Wood is blown away by bombs; a gate opens when a key
  *          touches it.
  *   pins:  [x1, y1, x2, y2] — the second point is the handle end; a pulled pin slides out that way
  *   levers: [{ at: [x, y] handle, plat: [x1, y1, x2, y2] platform turning around its first point, turn: degrees }]
- *          — numbered after the pins (keys and solutions use the same numbers)
+ *          — numbered after the pins (keys and solutions use the same numbers); a lever tips once
+ *   flaps: like levers (numbered after them), but every tap swings the plank back and forth between its two positions;
+ *          `pivot: [x, y]` turns it around another point (a seesaw that sends things left or right)
+ *   plates: [{ at: [x0, x1, y] on the floor at y, need: weight (10), door / doors: [[x1, y1, x2, y2], …] that open while
+ *          the plate is pressed, shut: [[…]] doors that close while it is pressed }] — a door slides into the wall at its
+ *          first point. A particle weighs 1, a boulder 14, a bomb 8, Pip and the walking enemies 12–16, the boss 40.
  *   fill:  [material, x0, y0, x1, y1] rectangles packed with gem (Fernstones), water, lava, sand, goo or gas
  *   ice:   [x0, y0, x1, y1] blocks (lava melts them into water, bombs shatter them)
  *   boulders / bombs / keys: [x, y]   enemies: [x, y, 'zorbling' | 'klonkbot' | 'buzzbot']
  *   portals: [{ from: [x0, y0, x1, y1] pad, to: [x, y] exit }]   chief: { at: [x, y], weak: ['lava', 'crush', …] }
  *   hero: Pip's start; walk: Pip walks to Fernstones on his floor; zone: Pip's room — Fernstones landing there are his
  *   need:  share of the Fernstones Pip needs; stars: [share for ★★, share for ★★★]
+ *   lesson: the level teaches one new element (it may be solved by the first sensible pull; all others may not)
  *   solution: [[control, seconds to wait after pulling it], …] — test/unit/games/levels.test.mjs replays it and checks
  *   that the listed traps (`fails`, wrong orders or wrong pins) really fail.
  */
@@ -21,10 +30,10 @@ const OUTER = [[40, 40, 40, 600], [320, 40, 320, 600], [40, 600, 320, 600]];
 const level = (o) => ({ need: 0.5, stars: [0.6, 0.85], ...o, walls: [...OUTER, ...(o.walls || [])] });
 const world = (w, list) => list.map((o, i) => level({ ...o, world: w, boss: i === list.length - 1 }));
 
-// ─────────────── World 1 · Fernhaven Meadows: Fernstones, water, lava → stone, Zorblings ───────────────
+// ─────────────── World 1 · Viridis: Fernstones, water, lava → stone, wax Klonks ───────────────
 const MEADOWS = [
   {
-    name: 'First Pull', hint: 'Tap the pin under the Fernstones',
+    name: 'First Pull', lesson: true, hint: 'Tap the pin under the Fernstones',
     walls: [[200, 330, 200, 600], [182, 262, 286, 300]],
     pins: [[176, 250, 8, 250], [176, 250, 176, 132]],
     fill: [['gem', 52, 160, 170, 244]],
@@ -32,7 +41,7 @@ const MEADOWS = [
     solution: [[0, 4]], fails: [[1, 3, 0]],
   },
   {
-    name: 'Choose Wisely', hint: 'Lava melts Fernstones. Pull only the pin under them',
+    name: 'Choose Wisely', lesson: true, hint: 'Lava melts Fernstones',
     walls: [[180, 60, 180, 262]],
     pins: [[180, 268, 10, 268], [180, 268, 350, 268]],
     fill: [['gem', 56, 160, 172, 260], ['lava', 188, 180, 306, 260]],
@@ -40,7 +49,7 @@ const MEADOWS = [
     solution: [[0, 4]], fails: [[1]],
   },
   {
-    name: 'Cool Down', hint: 'Water turns lava into stone',
+    name: 'Cool Down', lesson: true, hint: 'Water turns lava into stone',
     walls: [[180, 60, 180, 214]],
     pins: [[180, 220, 10, 220], [180, 220, 350, 220], [40, 400, 340, 400]],
     fill: [['water', 52, 130, 172, 212], ['gem', 188, 130, 306, 212], ['lava', 52, 370, 308, 394]],
@@ -48,15 +57,7 @@ const MEADOWS = [
     solution: [[0, 3.5], [2, 2.5], [1, 4]], fails: [[2], [1], [1, 0, 2]],
   },
   {
-    name: 'Flood First', hint: 'Give the lava something to land on',
-    walls: [[180, 60, 180, 230], [250, 150, 250, 230]],
-    pins: [[180, 236, 10, 236], [180, 236, 350, 236]],
-    fill: [['water', 52, 130, 172, 228], ['gem', 188, 150, 244, 228], ['lava', 258, 140, 308, 228]],
-    hero: [150, 575], zone: [46, 280, 314, 594],
-    solution: [[0, 3], [1, 5]], fails: [[1]],
-  },
-  {
-    name: 'Zorb Next Door', hint: 'Zorblings burn in lava. Keep Pip safe',
+    name: 'Wax Next Door', lesson: true, hint: 'Wax Klonks burn in lava. Pip does too',
     walls: [[180, 60, 180, 200], [186, 330, 186, 394]],
     pins: [[180, 206, 10, 206], [186, 394, 10, 394], [180, 206, 350, 206]],
     fill: [['lava', 56, 140, 172, 198], ['gem', 188, 120, 306, 198]],
@@ -65,7 +66,7 @@ const MEADOWS = [
     solution: [[0, 3], [2, 4]], fails: [[1], [2, 1], [1, 0, 2]],
   },
   {
-    name: 'Double Dip', hint: 'One bucket is not enough for that much lava',
+    name: 'Double Dip', hint: 'That is a lot of lava',
     walls: [[124, 60, 124, 212], [236, 60, 236, 212]],
     pins: [[124, 218, 10, 218], [124, 130, 350, 130], [236, 218, 350, 218], [40, 380, 340, 380]],
     fill: [['water', 52, 110, 118, 212], ['gem', 130, 66, 230, 124], ['water', 244, 140, 308, 212], ['lava', 52, 338, 308, 374]],
@@ -73,25 +74,17 @@ const MEADOWS = [
     solution: [[0, 3], [2, 3.5], [3, 2.5], [1, 4]], fails: [[0, 3], [2, 3], [1], [3, 0, 2, 1]],
   },
   {
-    name: 'Burn, Then Cool', hint: 'First the Zorbling, then the lava, then the Fernstones',
-    walls: [[130, 60, 130, 170], [230, 60, 230, 170], [130, 170, 150, 170], [210, 170, 230, 170]],
-    pins: [[124, 176, 8, 176], [150, 176, 210, 176], [236, 176, 352, 176], [40, 344, 352, 344]],
-    fill: [['gem', 52, 90, 124, 170], ['lava', 136, 96, 224, 164], ['water', 236, 70, 308, 170]],
-    enemies: [[180, 310]],
-    hero: [180, 575], zone: [46, 356, 314, 594],
-    solution: [[1, 3], [2, 3.5], [0, 3], [3, 4]], fails: [[0, 1], [3], [1, 3], [1, 0, 2, 3]],
+    name: 'Switch Track', lesson: true, hint: 'Tap the lever to swing the platform',
+    walls: [[150, 60, 150, 200], [210, 60, 210, 200], [180, 380, 180, 600]],
+    pins: [[144, 206, 352, 206]],
+    flaps: [{ at: [180, 285], pivot: [180, 285], plat: [138, 312, 222, 258], turn: 66 }],
+    fill: [['gem', 156, 110, 204, 200], ['lava', 52, 540, 174, 594]],
+    hero: [250, 575], zone: [186, 300, 314, 594],
+    stars: [0.6, 0.8],
+    solution: [[1, 1], [0, 5]], fails: [[0]],
   },
   {
-    name: 'The Vault', hint: 'Burn the guard, cool the lava, then open the vault',
-    walls: [[120, 60, 120, 190], [240, 60, 240, 190], [40, 240, 140, 285], [320, 240, 220, 285], [120, 300, 120, 426], [240, 300, 240, 426]],
-    pins: [[120, 196, 10, 196], [120, 110, 350, 110], [240, 196, 350, 196], [114, 426, 350, 426]],
-    fill: [['water', 52, 96, 114, 190], ['lava', 126, 66, 234, 104], ['gem', 246, 118, 308, 190]],
-    enemies: [[180, 400]],
-    hero: [180, 575], zone: [46, 440, 314, 594], need: 0.4, stars: [0.6, 0.85],
-    solution: [[1, 3], [0, 4], [3, 3], [2, 5]], fails: [[3], [2, 1], [1, 3]],
-  },
-  {
-    name: 'Lure', hint: 'Zorblings run at Pip as soon as they see him',
+    name: 'Lure', hint: 'Wax Klonks run at Pip as soon as they see him',
     walls: [[40, 520, 140, 520], [140, 520, 140, 600], [240, 520, 240, 600], [240, 520, 320, 520], [156, 60, 156, 196], [204, 60, 204, 196], [40, 250, 170, 300], [320, 250, 210, 300]],
     pins: [[115, 514, 115, 400], [156, 196, 8, 196], [204, 196, 352, 196]],
     fill: [['lava', 146, 548, 234, 594], ['water', 52, 100, 150, 190], ['gem', 210, 100, 308, 190]],
@@ -100,30 +93,49 @@ const MEADOWS = [
     solution: [[0, 4], [1, 4], [2, 5]], fails: [[2], [0, 2, 1]], stars: [0.55, 0.72],
   },
   {
-    name: 'Twin Zorbs', hint: 'Two Zorblings, two pits',
-    walls: [[40, 520, 96, 520], [96, 520, 96, 600], [150, 520, 150, 600], [150, 520, 210, 520], [210, 520, 210, 600], [264, 520, 264, 600], [264, 520, 320, 520],
-      [126, 60, 126, 186], [234, 60, 234, 186], [126, 180, 162, 204], [234, 180, 198, 204], [40, 250, 112, 300], [320, 250, 248, 300], [180, 318, 136, 366], [180, 318, 224, 366]],
-    pins: [[84, 514, 84, 420], [276, 514, 276, 420], [126, 186, 8, 186], [234, 186, 352, 186], [180, 212, 180, 64]],
-    fill: [['lava', 102, 545, 144, 594], ['lava', 216, 545, 258, 594], ['water', 52, 120, 120, 180], ['water', 240, 120, 308, 180], ['gem', 132, 90, 228, 178]],
-    enemies: [[64, 495], [296, 495]],
-    hero: [180, 495], zone: [96, 400, 264, 552],
-    solution: [[0, 3.5], [1, 3.5], [2, 3.5], [3, 3.5], [4, 6]], fails: [[4], [0, 2, 3, 4], [2, 3, 0, 1, 4], [0, 1, 4]], stars: [0.5, 0.68],
+    name: 'Burn, Then Cool', hint: 'A wax Klonk stands between the lava and Pip',
+    walls: [[130, 60, 130, 170], [230, 60, 230, 170], [130, 170, 150, 170], [210, 170, 230, 170]],
+    pins: [[124, 176, 8, 176], [150, 176, 210, 176], [236, 176, 352, 176], [40, 344, 352, 344]],
+    fill: [['gem', 52, 90, 124, 170], ['lava', 136, 96, 224, 164], ['water', 236, 70, 308, 170]],
+    enemies: [[180, 310]],
+    hero: [180, 575], zone: [46, 356, 314, 594],
+    solution: [[1, 3], [2, 3.5], [0, 3], [3, 4]], fails: [[0, 1], [3], [1, 3], [1, 0, 2, 3]],
   },
   {
-    name: 'The Big Blorb', hint: 'Drop the Blorb into the lava, then soak it',
-    walls: [[136, 60, 136, 200], [230, 60, 230, 600], [136, 200, 163, 222], [230, 200, 197, 222], [136, 190, 100, 226], [96, 226, 96, 470]],
-    pins: [[230, 176, 352, 176], [124, 400, 200, 400], [136, 176, 8, 176], [180, 230, 180, 64]],
-    fill: [['gem', 242, 86, 308, 170], ['water', 52, 76, 130, 170], ['water', 142, 80, 224, 196], ['lava', 52, 552, 224, 594]],
-    chief: { at: [165, 360], weak: ['lava', 'water'] },
-    hero: [275, 575], zone: [236, 410, 314, 594],
-    solution: [[1, 3], [3, 4], [0, 4]], fails: [[3, 1, 0], [0, 3, 1]],
+    name: 'The Vault', hint: 'The vault opens last',
+    walls: [[120, 60, 120, 190], [240, 60, 240, 190], [40, 240, 140, 285], [320, 240, 220, 285], [120, 300, 120, 426], [240, 300, 240, 426]],
+    pins: [[120, 196, 10, 196], [120, 110, 350, 110], [240, 196, 350, 196], [114, 426, 350, 426]],
+    fill: [['water', 52, 96, 114, 190], ['lava', 126, 66, 234, 104], ['gem', 246, 118, 308, 190]],
+    enemies: [[180, 400]],
+    hero: [180, 575], zone: [46, 440, 314, 594], need: 0.4, stars: [0.55, 0.72],
+    solution: [[1, 3], [0, 4], [3, 3], [2, 5]], fails: [[3], [2, 1], [1, 3]],
+  },
+  {
+    name: 'Sorting', hint: 'Every load has its own room',
+    walls: [[136, 60, 136, 220], [180, 60, 180, 220], [224, 60, 224, 220], [180, 372, 180, 600]],
+    pins: [[136, 226, 8, 226], [180, 226, 352, 226]],
+    flaps: [{ at: [180, 300], pivot: [180, 300], plat: [214, 266, 146, 334], turn: 90 }],
+    fill: [['lava', 142, 110, 174, 220], ['gem', 186, 100, 218, 220]],
+    enemies: [[100, 560]],
+    hero: [260, 575], zone: [186, 380, 314, 594],
+    solution: [[0, 3], [2, 1], [1, 5]], fails: [[1], [2, 0], [2, 1, 2, 0]],
+  },
+  {
+    name: 'Moss Hex Golem', hint: 'The golem is sealed. Watch which element breaks its next ward',
+    walls: [[120, 50, 120, 208], [150, 50, 150, 226], [210, 50, 210, 226], [240, 50, 240, 208], [180, 372, 180, 600]],
+    pins: [[150, 214, 8, 214], [210, 232, 150, 232], [210, 214, 352, 214]],
+    flaps: [{ at: [180, 300], pivot: [180, 300], plat: [146, 266, 214, 334], turn: -90 }],
+    fill: [['water', 126, 50, 144, 208], ['lava', 156, 166, 204, 226], ['gem', 216, 50, 234, 208]],
+    chief: { at: [100, 500], weak: ['lava', 'water'] },
+    hero: [260, 575], zone: [186, 380, 314, 594], need: 0.6,
+    solution: [[3, 1], [1, 3], [0, 3], [3, 1], [2, 4]], fails: [[1], [3, 0, 1, 3, 2], [2], [3, 2, 3, 1, 0]],
   },
 ];
 
-// ─────────────── World 2 · Sunbake Dunes: sand, boulders, bombs, wooden walls, Klonkbots ───────────────
+// ─────────────── World 2 · Sahrun: sand, boulders, bombs, wooden walls, Klonkbots ───────────────
 const DUNES = [
   {
-    name: 'Sandfall', hint: 'Sand smothers lava',
+    name: 'Sandfall', lesson: true, hint: 'Sand smothers lava',
     walls: [[180, 60, 180, 214]],
     pins: [[180, 220, 10, 220], [180, 220, 350, 220], [40, 400, 340, 400]],
     fill: [['sand', 52, 120, 172, 212], ['gem', 188, 130, 306, 212], ['lava', 52, 370, 308, 394]],
@@ -131,17 +143,18 @@ const DUNES = [
     solution: [[0, 3.5], [2, 2.5], [1, 4]], fails: [[2], [1], [1, 0, 2]],
   },
   {
-    name: 'Rock Bottom', hint: 'A falling boulder flattens whatever is below',
+    name: 'Rock Bottom', lesson: true, hint: 'A falling boulder flattens whatever is below',
     walls: [[130, 60, 130, 246], [230, 60, 230, 246], [180, 420, 180, 600], [140, 300, 214, 330]],
     pins: [[130, 252, 10, 252], [130, 252, 350, 252], [230, 200, 350, 200]],
     fill: [['gem', 140, 140, 222, 244]],
     boulders: [[88, 210], [272, 160]],
     enemies: [[110, 575]],
     hero: [255, 575], zone: [186, 270, 314, 594],
+    stars: [0.6, 0.75],
     solution: [[0, 3], [1, 4]], fails: [[1, 2], [2, 1]],
   },
   {
-    name: 'Short Circuit', hint: 'Klonkbots walk through lava, but water shorts them out',
+    name: 'Short Circuit', lesson: true, hint: 'Klonkbots walk through lava. Water shorts them out',
     walls: [[110, 60, 110, 180], [210, 60, 210, 180], [110, 180, 140, 180], [210, 180, 180, 180]],
     pins: [[104, 186, 8, 186], [140, 186, 180, 186], [216, 186, 352, 186], [40, 340, 352, 340]],
     fill: [['lava', 52, 110, 104, 180], ['gem', 116, 90, 204, 176], ['water', 216, 96, 308, 180]],
@@ -150,7 +163,7 @@ const DUNES = [
     solution: [[2, 3], [1, 3], [3, 4]], fails: [[3], [0, 1, 3], [1, 3]],
   },
   {
-    name: 'Kaboom', hint: 'Bombs explode in lava and blow wood away',
+    name: 'Kaboom', lesson: true, hint: 'Bombs explode in lava and blow wood away',
     walls: [[180, 60, 180, 206], [200, 366, 200, 330], [224, 250, 224, 340], [224, 250, 320, 250]],
     wood: [[224, 340, 320, 340]],
     pins: [[180, 212, 10, 212], [206, 372, 10, 372]],
@@ -160,17 +173,36 @@ const DUNES = [
     solution: [[0, 5]], fails: [[1], [1, 0]],
   },
   {
-    name: 'Two Guards', hint: 'Lava for one, a boulder for the other',
-    walls: [[130, 60, 130, 214], [230, 60, 230, 214], [40, 330, 130, 330], [130, 330, 130, 296], [215, 430, 215, 600]],
-    pins: [[130, 220, 10, 220], [130, 220, 350, 220], [230, 180, 350, 180]],
-    fill: [['lava', 52, 140, 124, 212], ['gem', 238, 100, 308, 176]],
-    boulders: [[180, 190]],
-    enemies: [[88, 300], [170, 575, 'klonkbot']],
-    hero: [270, 575], zone: [221, 240, 314, 594],
-    solution: [[0, 3], [1, 3], [2, 4]], fails: [[[1, 3], [0, 3], [2, 4]], [[2, 3], [0, 3], [1, 4]]],
+    name: 'Heavy Step', lesson: true, hint: 'Weight on a plate opens the door of its colour',
+    walls: [[136, 70, 136, 190], [40, 290, 150, 290], [190, 60, 190, 250]],
+    pins: [[136, 196, 8, 196], [184, 130, 352, 130]],
+    plates: [{ at: [56, 140, 290], door: [314, 256, 196, 256] }],
+    fill: [['sand', 52, 100, 130, 190], ['gem', 200, 170, 308, 250], ['lava', 200, 80, 308, 124]],
+    hero: [180, 575], zone: [46, 300, 314, 594],
+    solution: [[0, 5]], fails: [[1]],
   },
   {
-    name: 'Dry Run', hint: 'A little water for the robot, sand for the lava',
+    name: 'Counterweight', hint: 'The plate does not care what presses it',
+    walls: [[90, 300, 180, 300], [46, 268, 90, 300], [130, 60, 130, 170], [180, 60, 180, 200], [250, 60, 250, 200], [180, 300, 180, 600], [250, 520, 250, 600]],
+    pins: [[130, 176, 8, 176], [174, 206, 352, 206], [96, 296, 96, 230]],
+    plates: [{ at: [104, 174, 300], door: [314, 300, 178, 300] }],
+    fill: [['water', 52, 80, 124, 170], ['gem', 186, 70, 244, 200], ['lava', 186, 560, 244, 594]],
+    boulders: [[70, 262]],
+    hero: [285, 575], zone: [186, 310, 314, 594], need: 0.65, stars: [0.8, 0.95],
+    solution: [[0, 4], [2, 3], [1, 5]], fails: [[1], [2, 1], [0, 1]],
+  },
+  {
+    name: 'Sentry', hint: 'The Klonkbot guards a plate',
+    walls: [[40, 520, 148, 520], [148, 520, 166, 536], [166, 536, 194, 536], [194, 536, 212, 520], [212, 520, 320, 520], [150, 60, 150, 200], [180, 60, 180, 200], [210, 60, 210, 200], [216, 300, 216, 386]],
+    pins: [[180, 206, 8, 206], [180, 206, 352, 206], [240, 514, 240, 400]],
+    plates: [{ at: [56, 130, 520], shut: [[314, 386, 216, 386]] }],
+    fill: [['water', 156, 150, 174, 200], ['lava', 186, 110, 204, 200], ['gem', 222, 300, 308, 380]],
+    enemies: [[90, 495, 'klonkbot']],
+    hero: [280, 495], zone: [216, 392, 314, 520],
+    solution: [[0, 4], [2, 6]], fails: [[2], [1, 0, 2], [0, 1, 2]],
+  },
+  {
+    name: 'Dry Run', hint: 'A little water for the robot',
     walls: [[110, 60, 110, 180], [210, 60, 210, 180], [110, 180, 140, 180], [210, 180, 180, 180], [40, 250, 80, 250], [80, 250, 80, 210]],
     pins: [[104, 186, 8, 186], [140, 186, 180, 186], [216, 186, 352, 186], [40, 360, 352, 360]],
     fill: [['sand', 52, 100, 104, 180], ['gem', 116, 90, 204, 176], ['water', 250, 150, 308, 180], ['lava', 52, 324, 308, 354]],
@@ -179,34 +211,14 @@ const DUNES = [
     solution: [[2, 3], [0, 3.5], [1, 3], [3, 4]], fails: [[3], [1, 0], [0, 1, 3], [0, 1, 2, 3]],
   },
   {
-    name: 'In Order', hint: 'Four pins, one safe order',
-    walls: [[180, 60, 180, 426], [40, 520, 180, 570]],
-    pins: [[186, 176, 10, 176], [186, 296, 10, 296], [186, 426, 10, 426], [186, 600, 186, 432]],
-    fill: [['gem', 52, 96, 172, 170], ['water', 52, 196, 172, 290], ['lava', 52, 380, 172, 420]],
-    enemies: [[110, 520]],
-    hero: [265, 575], zone: [192, 300, 314, 594], need: 0.3, stars: [0.45, 0.65],
-    solution: [[2, 2.5], [1, 3], [3, 2.5], [0, 7]], fails: [[3], [2, 3], [1, 2, 3, 0]],
-  },
-  {
-    name: 'Leave It Hot', hint: 'This time the lava has a job to do',
-    walls: [[224, 60, 224, 180], [300, 210, 150, 262], [110, 336, 220, 336], [104, 336, 104, 300], [220, 336, 220, 300], [40, 240, 104, 240], [104, 240, 104, 300]],
-    wood: [[40, 336, 104, 336]],
-    pins: [[224, 186, 350, 186], [224, 176, 10, 176]],
-    fill: [['water', 116, 96, 216, 168], ['lava', 116, 304, 214, 330], ['gem', 50, 250, 98, 330]],
-    bombs: [[270, 150]],
-    hero: [250, 575], zone: [46, 350, 314, 594], need: 0.4, stars: [0.6, 0.85],
-    solution: [[0, 5]], fails: [[1, 0], [1]],
-  },
-  {
-    name: 'Demolition', hint: 'Short the robot before the wall comes down',
-    walls: [[124, 60, 124, 206], [230, 60, 230, 380], [130, 450, 230, 450], [130, 450, 130, 420], [230, 450, 230, 420]],
-    wood: [[176, 470, 176, 600], [236, 380, 320, 380]],
-    pins: [[124, 206, 8, 206], [130, 206, 224, 206]],
-    fill: [['water', 52, 110, 118, 200], ['gem', 236, 300, 314, 374], ['lava', 136, 424, 224, 444]],
-    bombs: [[177, 180]],
-    enemies: [[80, 575, 'klonkbot']],
-    hero: [270, 575], zone: [182, 390, 314, 594],
-    solution: [[0, 3], [1, 5]], fails: [[1]],
+    name: 'Twin Automatons', hint: 'Two wax Klonks, two pits',
+    walls: [[40, 520, 96, 520], [96, 520, 96, 600], [150, 520, 150, 600], [150, 520, 210, 520], [210, 520, 210, 600], [264, 520, 264, 600], [264, 520, 320, 520],
+      [126, 60, 126, 186], [234, 60, 234, 186], [126, 180, 162, 204], [234, 180, 198, 204], [40, 250, 112, 300], [320, 250, 248, 300], [180, 318, 136, 366], [180, 318, 224, 366]],
+    pins: [[84, 514, 84, 420], [276, 514, 276, 420], [126, 186, 8, 186], [234, 186, 352, 186], [180, 212, 180, 64]],
+    fill: [['lava', 102, 545, 144, 594], ['lava', 216, 545, 258, 594], ['water', 52, 120, 120, 180], ['water', 240, 120, 308, 180], ['gem', 132, 90, 228, 178]],
+    enemies: [[64, 495], [296, 495]],
+    hero: [180, 495], zone: [96, 400, 264, 552],
+    solution: [[0, 3.5], [1, 3.5], [2, 3.5], [3, 3.5], [4, 6]], fails: [[4], [0, 2, 3, 4], [2, 3, 0, 1, 4], [0, 1, 4]], stars: [0.5, 0.65],
   },
   {
     name: 'Sandstorm', hint: 'Every guard needs its own trick',
@@ -219,21 +231,22 @@ const DUNES = [
     solution: [[0, 3], [3, 3], [2, 3.5], [1, 3], [4, 4]], fails: [[4], [1, 0], [0, 1, 2, 3, 4], [2, 3, 1, 4]],
   },
   {
-    name: 'Klonk Tank', hint: 'Boulder, then lava, then water',
-    walls: [[136, 60, 136, 200], [230, 60, 230, 600], [136, 200, 163, 222], [230, 200, 197, 222], [40, 228, 126, 268]],
-    pins: [[230, 176, 352, 176], [124, 400, 200, 400], [136, 176, 8, 176], [180, 230, 180, 64]],
-    fill: [['gem', 242, 86, 308, 170], ['water', 142, 80, 224, 196], ['lava', 52, 552, 224, 594]],
-    boulders: [[88, 150]],
-    chief: { at: [165, 360], weak: ['crush', 'lava', 'water'] },
-    hero: [275, 575], zone: [236, 410, 314, 594],
-    solution: [[2, 3], [1, 3], [3, 4], [0, 4]], fails: [[3, 2, 1, 0], [0, 3, 2, 1]],
+    name: 'Sand Hex Golem', hint: 'Water can wait on a plate',
+    walls: [[130, 60, 130, 140], [88, 60, 88, 140], [130, 250, 130, 200], [136, 60, 136, 190], [230, 60, 230, 556], [40, 380, 120, 430], [236, 100, 236, 176]],
+    pins: [[88, 146, 8, 146], [130, 146, 88, 146], [136, 256, 8, 256]],
+    plates: [{ at: [52, 124, 256], door: [230, 196, 136, 196] }, { at: [140, 226, 600], need: 30, shut: [[314, 182, 236, 182]] }],
+    fill: [['gem', 242, 100, 308, 176], ['water', 52, 66, 82, 140], ['lava', 94, 66, 124, 140]],
+    boulders: [[183, 170]],
+    chief: { at: [183, 566], weak: ['crush', 'water'] },
+    hero: [275, 575], zone: [236, 190, 314, 594], settle: 3,
+    solution: [[0, 4], [2, 6]], fails: [[2, 0], [1, 0, 2], [0, 1, 2]],
   },
 ];
 
-// ─────────────── World 3 · Frostpeak: ice, keys and gates, levers, Pip walks ───────────────
+// ─────────────── World 3 · Hibern: ice, keys and gates, levers, Pip walks ───────────────
 const FROST = [
   {
-    name: 'Thaw', hint: 'Lava melts ice into water',
+    name: 'Thaw', lesson: true, hint: 'Lava melts ice into water',
     walls: [[116, 60, 116, 136], [40, 256, 150, 300], [230, 60, 230, 206]],
     ice: [[46, 170, 140, 240]],
     pins: [[116, 136, 8, 136], [230, 206, 352, 206], [40, 400, 340, 400]],
@@ -242,16 +255,7 @@ const FROST = [
     solution: [[0, 5], [2, 3], [1, 4]], fails: [[1], [2], [1, 0, 2]],
   },
   {
-    name: 'Tip It', hint: 'Levers tip platforms. Tap the red knob',
-    walls: [[136, 60, 136, 176], [226, 236, 226, 306]],
-    levers: [{ at: [64, 336], plat: [46, 300, 222, 300], turn: 34 }],
-    pins: [[136, 176, 8, 176]],
-    fill: [['lava', 52, 110, 130, 170], ['gem', 56, 236, 216, 294]],
-    hero: [180, 575], zone: [46, 420, 314, 594],
-    solution: [[1, 5]], fails: [[0], [0, 1]],
-  },
-  {
-    name: 'Locked', hint: 'A key opens the gate it lands on',
+    name: 'Locked', lesson: true, hint: 'A key opens the gate it lands on',
     walls: [[200, 200, 200, 314], [206, 60, 206, 176], [262, 60, 262, 176]],
     gates: [[40, 320, 320, 320]],
     pins: [[262, 182, 352, 182], [206, 182, 262, 182]],
@@ -261,7 +265,7 @@ const FROST = [
     solution: [[0, 5]], fails: [[1, 0]],
   },
   {
-    name: 'Stroll', walk: true, hint: 'Pip walks to the Fernstones when the way is clear',
+    name: 'Stroll', lesson: true, walk: true, hint: 'Pip walks to the Fernstones when the way is clear',
     walls: [[150, 60, 150, 200], [230, 60, 230, 200]],
     pins: [[128, 600, 128, 440], [150, 206, 230, 206]],
     fill: [['gem', 52, 520, 122, 594], ['lava', 156, 120, 224, 200]],
@@ -279,7 +283,32 @@ const FROST = [
     solution: [[0, 5], [2, 4]], fails: [[1], [2, 1]],
   },
   {
-    name: 'Open Door', walk: true, hint: 'Crush the guard, then unlock the door',
+    name: 'Heavy Feet', lesson: true, walk: true, hint: 'Pip is heavier than he looks',
+    walls: [[94, 60, 94, 200], [144, 360, 144, 446], [246, 360, 246, 446], [180, 260, 180, 354], [240, 260, 240, 354]],
+    gates: [[124, 476, 124, 600]],
+    pins: [[180, 354, 240, 354], [94, 206, 8, 206], [146, 316, 100, 316]],
+    plates: [{ at: [258, 312, 600], shut: [[246, 446, 144, 446]] }],
+    fill: [['water', 186, 270, 234, 350], ['gem', 46, 70, 88, 200], ['lava', 150, 400, 240, 440]],
+    keys: [[120, 300]],
+    hero: [284, 575], zone: [250, 450, 314, 594],
+    solution: [[0, 4], [1, 4], [2, 6]], fails: [[1, 2], [2, 1], [1, 2, 0]],
+  },
+  {
+    name: 'Frost Gauntlet', walk: true, hint: 'Pip only walks when the way is clear',
+    walls: [[40, 470, 90, 470], [154, 60, 154, 300], [214, 60, 214, 300]],
+    gates: [[146, 476, 146, 600]],
+    ice: [[166, 476, 202, 594]],
+    flaps: [{ at: [62, 332], plat: [46, 300, 124, 300], turn: 40 }, { at: [92, 212], plat: [46, 180, 128, 180], turn: 25 }],
+    pins: [[148, 306, 352, 306]],
+    fill: [['gem', 52, 520, 104, 594], ['lava', 160, 272, 208, 300]],
+    keys: [[120, 166]], boulders: [[80, 280]],
+    enemies: [[128, 575]],
+    hero: [285, 575], zone: [250, 450, 314, 594],
+    stars: [0.5, 0.68],
+    solution: [[1, 3], [0, 5], [2, 7]], fails: [[2, 1, 0], [0, 2, 1]],
+  },
+  {
+    name: 'Open Door', walk: true, hint: 'The guard first, then the door',
     walls: [[102, 60, 102, 206], [150, 60, 150, 206], [182, 60, 182, 206]],
     gates: [[160, 476, 160, 600]],
     pins: [[150, 206, 196, 206], [102, 206, 8, 206], [150, 212, 102, 212]],
@@ -287,32 +316,14 @@ const FROST = [
     keys: [[164, 180]], boulders: [[72, 170]],
     enemies: [[100, 560]],
     hero: [270, 575], zone: [240, 450, 314, 594],
+    stars: [0.5, 0.65],
     solution: [[1, 3], [0, 7]], fails: [[0], [2, 1, 0]],
   },
   {
-    name: 'Cold Feet', walk: true, hint: 'Melt the ice first, then cool what is left',
-    walls: [[40, 470, 140, 470], [128, 60, 128, 300], [178, 60, 178, 300]],
-    ice: [[140, 470, 166, 594]],
-    pins: [[178, 306, 8, 306], [178, 232, 8, 232]],
-    fill: [['gem', 52, 520, 134, 594], ['lava', 134, 260, 172, 300], ['water', 134, 120, 172, 226]],
-    hero: [280, 575], zone: [240, 450, 314, 594],
-    solution: [[0, 4], [1, 6]], fails: [[1, 0]],
-  },
-  {
-    name: 'Lever Pour', hint: 'Tip the lava onto the Zorbling, then the water',
-    walls: [[220, 60, 220, 186], [140, 386, 140, 322], [166, 110, 166, 176], [166, 200, 166, 256], [314, 214, 128, 314]],
-    levers: [{ at: [194, 252], plat: [160, 250, 46, 250], turn: -45 }, { at: [194, 172], plat: [160, 170, 46, 170], turn: -45 }],
-    pins: [[220, 186, 352, 186], [146, 386, 8, 386]],
-    fill: [['lava', 52, 222, 154, 244], ['water', 52, 120, 154, 164], ['gem', 226, 80, 314, 180]],
-    enemies: [[90, 350]],
-    hero: [180, 575], zone: [46, 400, 314, 594],
-    solution: [[2, 4], [3, 4], [1, 3], [0, 6]], fails: [[1], [3, 2, 1, 0], [2, 1, 3, 0]], stars: [0.5, 0.6],
-  },
-  {
-    name: 'Key Ramp', hint: 'Burn, cool, add the Fernstones, then send the key down',
+    name: 'Key Ramp', hint: 'Send the key down when it is safe',
     walls: [[94, 60, 94, 186], [152, 60, 152, 186], [210, 60, 210, 186], [268, 60, 268, 186], [94, 330, 94, 406], [266, 330, 266, 406], [300, 262, 236, 300]],
     gates: [[94, 406, 266, 406]],
-    levers: [{ at: [296, 232], plat: [314, 210, 272, 210], turn: -40 }],
+    flaps: [{ at: [296, 232], plat: [314, 210, 272, 210], turn: -40 }],
     pins: [[100, 192, 152, 192], [158, 192, 210, 192], [216, 192, 268, 192]],
     fill: [['lava', 100, 130, 146, 186], ['water', 158, 110, 204, 186], ['gem', 216, 90, 262, 186]],
     keys: [[294, 196]],
@@ -321,35 +332,47 @@ const FROST = [
     solution: [[0, 3], [1, 4], [2, 3], [3, 5]], fails: [[3], [0, 2, 1, 3], [1, 0, 2, 3]],
   },
   {
-    name: 'Frost Gauntlet', walk: true, hint: 'Crush, melt, unlock',
-    walls: [[40, 470, 90, 470], [154, 60, 154, 300], [214, 60, 214, 300]],
-    gates: [[146, 476, 146, 600]],
-    ice: [[166, 476, 202, 594]],
-    levers: [{ at: [62, 332], plat: [46, 300, 124, 300], turn: 40 }, { at: [92, 212], plat: [46, 180, 128, 180], turn: 25 }],
-    pins: [[148, 306, 352, 306]],
-    fill: [['gem', 52, 520, 104, 594], ['lava', 160, 272, 208, 300]],
-    keys: [[120, 166]], boulders: [[70, 280]],
-    enemies: [[118, 575]],
-    hero: [285, 575], zone: [250, 450, 314, 594],
-    solution: [[1, 3], [0, 5], [2, 7]], fails: [[2, 1, 0], [0, 2, 1]],
+    name: 'Lever Pour', hint: 'Two flaps, two tanks, one wax Klonk',
+    walls: [[220, 60, 220, 186], [140, 386, 140, 322], [166, 110, 166, 176], [166, 200, 166, 256], [314, 214, 128, 314]],
+    flaps: [{ at: [194, 252], plat: [160, 250, 46, 250], turn: -45 }, { at: [194, 172], plat: [160, 170, 46, 170], turn: -45 }],
+    pins: [[220, 186, 352, 186], [146, 386, 8, 386]],
+    fill: [['lava', 52, 222, 154, 244], ['water', 52, 120, 154, 164], ['gem', 226, 80, 314, 180]],
+    enemies: [[90, 350]],
+    hero: [180, 575], zone: [46, 400, 314, 594],
+    solution: [[2, 4], [3, 4], [1, 3], [0, 6]], fails: [[1], [3, 2, 1, 0], [2, 1, 3, 0]], stars: [0.5, 0.6],
   },
   {
-    name: 'Frost Walker', hint: 'Lava, then water, then a boulder',
-    walls: [[136, 60, 136, 200], [230, 60, 230, 600], [136, 200, 163, 222], [230, 200, 197, 222], [40, 228, 126, 268]],
-    ice: [[146, 238, 214, 290]],
-    pins: [[230, 176, 352, 176], [124, 400, 200, 400], [136, 176, 8, 176], [180, 230, 180, 64]],
-    fill: [['gem', 242, 86, 308, 170], ['lava', 142, 150, 224, 196], ['lava', 52, 556, 224, 594]],
-    boulders: [[88, 150]],
-    chief: { at: [165, 360], weak: ['lava', 'water', 'crush'] },
-    hero: [275, 575], zone: [236, 410, 314, 594],
-    solution: [[1, 3], [3, 5], [2, 4], [0, 4]], fails: [[3, 1, 2, 0], [2, 3, 1, 0]],
+    name: 'Frozen Key', hint: 'The key is stuck on the ice',
+    walls: [[150, 60, 150, 220], [210, 60, 210, 220], [180, 336, 180, 420], [186, 380, 314, 380], [190, 380, 190, 350], [46, 540, 174, 590]],
+    gates: [[180, 420, 180, 600]],
+    pins: [[144, 226, 352, 226], [144, 140, 352, 140]],
+    flaps: [{ at: [180, 290], pivot: [180, 290], plat: [149, 259, 211, 321], turn: -90 }],
+    ice: [[100, 346, 172, 378]],
+    fill: [['lava', 156, 198, 204, 220], ['lava', 156, 66, 204, 134], ['gem', 52, 440, 170, 540]],
+    keys: [[164, 332]],
+    enemies: [[262, 355]],
+    hero: [280, 575], zone: [186, 390, 314, 594],
+    stars: [0.6, 0.8],
+    solution: [[2, 1], [0, 5], [2, 1], [1, 5]], fails: [[1, 0], [0, 1, 2], [1, 0, 2]],
+  },
+  {
+    name: 'Frost Hex Golem', hint: 'Lava first, then something cold',
+    walls: [[150, 60, 150, 220], [210, 60, 210, 220], [314, 380, 168, 440], [250, 450, 250, 530], [250, 450, 314, 450], [190, 446, 190, 600]],
+    pins: [[216, 226, 8, 226], [216, 140, 8, 140]],
+    flaps: [{ at: [180, 290], pivot: [180, 290], plat: [211, 259, 149, 321], turn: 90 }],
+    ice: [[196, 330, 256, 362]],
+    plates: [{ at: [70, 170, 600], shut: [[314, 536, 244, 536]] }],
+    fill: [['lava', 156, 170, 204, 220], ['lava', 156, 66, 204, 134], ['gem', 256, 456, 308, 530]],
+    chief: { at: [118, 566], weak: ['lava', 'water'] },
+    hero: [222, 575], zone: [196, 480, 314, 594],
+    solution: [[0, 4], [2, 1], [1, 6]], fails: [[1, 0], [2, 0, 2, 1]],
   },
 ];
 
-// ─────────────── World 4 · Ember Isles: alien goo, teleport pads, rising gas, Buzzbots ───────────────
+// ─────────────── World 4 · Vulkara: hex slime, teleport pads, rising gas, Buzzbots ───────────────
 const EMBER = [
   {
-    name: 'Goo!', hint: 'Goo eats Fernstones. Water dissolves it',
+    name: 'Hex Slime', lesson: true, hint: 'Hex slime consumes Fernstones. Water dissolves it',
     walls: [[180, 60, 180, 214]],
     pins: [[180, 220, 10, 220], [180, 220, 350, 220], [40, 400, 340, 400]],
     fill: [['water', 52, 120, 172, 212], ['gem', 188, 130, 306, 212], ['goo', 52, 370, 308, 394]],
@@ -357,7 +380,7 @@ const EMBER = [
     solution: [[0, 4], [2, 2.5], [1, 4]], fails: [[2], [1], [1, 0, 2]],
   },
   {
-    name: 'Warp', hint: 'What falls on the pad comes out above Pip',
+    name: 'Warp', lesson: true, hint: 'What falls on the pad comes out above Pip',
     walls: [[156, 60, 156, 186], [194, 60, 194, 186], [194, 250, 320, 250], [194, 250, 194, 380], [194, 380, 320, 380]],
     pins: [[156, 186, 8, 186], [194, 186, 156, 186]],
     fill: [['gem', 52, 90, 150, 180], ['lava', 162, 110, 188, 180]],
@@ -366,7 +389,7 @@ const EMBER = [
     solution: [[0, 6]], fails: [[1]],
   },
   {
-    name: 'Gas Leak', hint: 'Gas rises. Keep a lid on it',
+    name: 'Gas Leak', lesson: true, hint: 'Gas rises. Keep a lid on it',
     walls: [[40, 250, 156, 250], [40, 360, 110, 360], [156, 250, 156, 600]],
     pins: [[162, 524, 8, 524], [162, 424, 8, 424]],
     fill: [['gem', 52, 470, 150, 518], ['gas', 52, 430, 150, 466]],
@@ -375,7 +398,7 @@ const EMBER = [
     solution: [[0, 6]], fails: [[1], [1, 0]],
   },
   {
-    name: 'Buzz Off', hint: 'Buzzbots fly straight at Pip. Water shorts them out',
+    name: 'Buzz Off', lesson: true, hint: 'Buzzbots fly straight at Pip. Water shorts them out',
     walls: [[40, 310, 182, 372], [182, 378, 320, 378], [40, 160, 176, 160], [176, 160, 176, 250]],
     pins: [[182, 256, 8, 256], [176, 366, 176, 252]],
     fill: [['water', 52, 170, 170, 248], ['gem', 96, 286, 170, 362]],
@@ -384,25 +407,18 @@ const EMBER = [
     solution: [[0, 3], [1, 5]], fails: [[1]], stars: [0.55, 0.7],
   },
   {
-    name: 'Slime Time', hint: 'Lava burns goo and Zorblings. Then cool it down',
-    walls: [[130, 60, 130, 170], [230, 60, 230, 170], [130, 170, 150, 170], [210, 170, 230, 170]],
-    pins: [[124, 176, 8, 176], [150, 176, 210, 176], [236, 176, 352, 176], [40, 344, 352, 344]],
-    fill: [['gem', 52, 90, 124, 170], ['lava', 136, 96, 224, 164], ['water', 236, 70, 308, 170], ['goo', 52, 318, 308, 338]],
-    enemies: [[180, 310]],
-    hero: [180, 575], zone: [46, 356, 314, 594],
-    solution: [[1, 4], [2, 4], [0, 3], [3, 4]], fails: [[0], [3], [2, 1, 0, 3], [1, 0, 2, 3]],
+    name: 'Special Delivery', lesson: true, hint: 'The pad can reach places nothing else can',
+    walls: [[110, 60, 110, 150], [124, 230, 124, 600], [224, 60, 224, 212], [224, 166, 250, 166], [280, 166, 314, 166], [130, 60, 130, 206], [130, 330, 200, 360]],
+    pins: [[110, 156, 8, 156], [124, 262, 74, 262]],
+    plates: [{ at: [228, 310, 166], door: [218, 212, 136, 212] }],
+    fill: [['goo', 52, 70, 104, 150], ['gem', 136, 70, 218, 206]],
+    boulders: [[104, 240]],
+    portals: [{ from: [46, 540, 118, 594], to: [262, 110] }],
+    hero: [265, 575], zone: [130, 300, 314, 594],
+    solution: [[1, 4], [0, 1]], fails: [[0, 1]],
   },
   {
-    name: 'Warp Zone', hint: 'Cool the lava before it reaches the pad',
-    walls: [[120, 60, 120, 176], [194, 60, 194, 176], [194, 250, 320, 250], [194, 250, 194, 380], [194, 380, 320, 380]],
-    pins: [[120, 182, 8, 182], [194, 182, 120, 182], [200, 430, 8, 430]],
-    fill: [['water', 52, 90, 114, 176], ['gem', 126, 96, 188, 176], ['lava', 52, 404, 188, 424]],
-    portals: [{ from: [46, 540, 188, 594], to: [257, 290] }],
-    hero: [257, 355], zone: [200, 256, 314, 374],
-    solution: [[0, 4], [2, 3], [1, 6]], fails: [[2], [1], [1, 0, 2]],
-  },
-  {
-    name: 'Burner', hint: 'Burn the Zorbling first. Never lift the lid',
+    name: 'Burner', hint: 'Never lift the lid on the gas',
     walls: [[40, 250, 156, 250], [40, 360, 110, 360], [156, 250, 156, 286], [156, 366, 156, 600], [156, 366, 236, 366], [236, 140, 236, 372], [156, 140, 156, 250]],
     pins: [[162, 524, 8, 524], [162, 424, 8, 424], [156, 246, 242, 246], [156, 366, 156, 290]],
     fill: [['gem', 52, 470, 150, 518], ['gas', 52, 430, 150, 466], ['lava', 162, 170, 230, 240]],
@@ -412,17 +428,16 @@ const EMBER = [
     solution: [[2, 4], [0, 6]], fails: [[3], [1], [0, 3]],
   },
   {
-    name: 'Hive', hint: 'Water for one Buzzbot, a boulder for the other',
-    walls: [[40, 310, 140, 342], [320, 310, 220, 342], [40, 160, 146, 160], [146, 160, 146, 250], [320, 160, 214, 160], [214, 160, 214, 250]],
-    pins: [[152, 256, 8, 256], [208, 256, 352, 256], [146, 348, 146, 252], [214, 348, 214, 252]],
-    fill: [['water', 52, 170, 140, 248], ['gem', 80, 280, 140, 336], ['gem', 220, 280, 280, 336]],
-    boulders: [[262, 230]],
-    enemies: [[70, 280, 'buzzbot'], [280, 280, 'buzzbot']],
-    hero: [180, 575], zone: [46, 380, 314, 594],
-    solution: [[0, 3], [1, 3], [2, 3], [3, 5]], fails: [[2], [3], [0, 3]],
+    name: 'Slime Time', hint: 'Lava burns hex slime and wax Klonks',
+    walls: [[130, 60, 130, 170], [230, 60, 230, 170], [130, 170, 150, 170], [210, 170, 230, 170]],
+    pins: [[124, 176, 8, 176], [150, 176, 210, 176], [236, 176, 352, 176], [40, 344, 352, 344]],
+    fill: [['gem', 52, 90, 124, 170], ['lava', 136, 96, 224, 164], ['water', 236, 70, 308, 170], ['goo', 52, 318, 308, 338]],
+    enemies: [[180, 310]],
+    hero: [180, 575], zone: [46, 356, 314, 594],
+    solution: [[1, 4], [2, 4], [0, 3], [3, 4]], fails: [[0], [3], [2, 1, 0, 3], [1, 0, 2, 3]],
   },
   {
-    name: 'Goo Factory', hint: 'The Zorbling swims in goo. Burn both, then cool the lava',
+    name: 'Hex Reservoir', hint: 'The wax Klonk swims in hex slime',
     walls: [[120, 60, 120, 176], [194, 60, 194, 176], [194, 250, 320, 250], [194, 250, 194, 380], [194, 380, 320, 380], [230, 60, 230, 176], [320, 184, 206, 236]],
     pins: [[120, 182, 8, 182], [194, 182, 120, 182], [326, 430, 8, 430], [230, 176, 352, 176]],
     fill: [['water', 52, 80, 114, 176], ['gem', 126, 96, 188, 176], ['goo', 52, 398, 188, 424], ['lava', 236, 110, 314, 170]],
@@ -432,7 +447,7 @@ const EMBER = [
     solution: [[3, 4], [0, 4], [2, 3], [1, 6]], fails: [[2], [3, 2], [0, 3, 2, 1]],
   },
   {
-    name: 'Ember Gauntlet', hint: 'Burn, soak, then let the Fernstones through',
+    name: 'Ember Gauntlet', hint: 'Every guard needs its own trick',
     walls: [[130, 60, 130, 170], [230, 60, 230, 170], [130, 170, 150, 170], [210, 170, 230, 170]],
     pins: [[124, 176, 8, 176], [150, 176, 210, 176], [236, 176, 352, 176], [40, 344, 352, 344]],
     fill: [['gem', 52, 90, 124, 170], ['lava', 136, 96, 224, 164], ['water', 236, 60, 308, 170], ['goo', 52, 322, 308, 338]],
@@ -441,7 +456,17 @@ const EMBER = [
     solution: [[1, 4], [2, 4], [0, 3], [3, 4]], fails: [[2, 1, 0, 3], [0], [1, 0, 2, 3], [3]],
   },
   {
-    name: 'Zorb Queen', hint: 'Boulder, lava, bomb, water: in that order',
+    name: 'Half and Half', hint: 'One tank of water, two pools of lava',
+    walls: [[150, 60, 150, 190], [210, 60, 210, 190], [120, 244, 120, 180], [240, 244, 240, 180],
+      [130, 470, 130, 600], [230, 470, 230, 600], [130, 470, 145, 470], [230, 470, 215, 470]],
+    pins: [[144, 196, 352, 196], [144, 125, 352, 125], [126, 250, 8, 250], [234, 250, 352, 250]],
+    flaps: [{ at: [180, 330], pivot: [180, 330], plat: [135, 354, 225, 306], turn: 56 }],
+    fill: [['water', 156, 131, 204, 190], ['water', 156, 66, 204, 119], ['gem', 52, 200, 114, 244], ['gem', 246, 200, 308, 244], ['lava', 46, 562, 124, 594], ['lava', 236, 562, 314, 594]],
+    hero: [180, 575], zone: [46, 300, 314, 594], need: 0.75, stars: [0.85, 0.97],
+    solution: [[0, 3], [4, 1], [1, 3], [2, 3], [3, 4]], fails: [[2], [1, 0, 2, 3], [0, 1, 2, 3]],
+  },
+  {
+    name: 'Ember Hex Golem', hint: 'The golem shows which element breaks its next ward',
     walls: [[90, 60, 90, 470], [136, 60, 136, 200], [230, 60, 230, 600], [136, 200, 163, 222], [230, 200, 197, 222]],
     pins: [[230, 176, 352, 176], [112, 400, 188, 400], [136, 176, 90, 176], [180, 230, 180, 64], [90, 150, 8, 150]],
     fill: [['gem', 242, 86, 308, 170], ['water', 142, 80, 224, 196], ['lava', 52, 552, 224, 594]],

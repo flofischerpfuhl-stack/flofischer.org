@@ -1,0 +1,214 @@
+{
+  "id": "KLONK",
+  "nominal_height_m": 0.8,
+  "wheel_radius_m": 0.14216666700753075,
+  "rigid_groups": [
+    "body",
+    "wheel",
+    "armL",
+    "armR"
+  ],
+  "source_parts": [
+    {
+      "output_part": "Leela_original_optical_bezel",
+      "source_pack": "quaternius-animated-mechs",
+      "source_model": "leela",
+      "source_part": "leela_part_27",
+      "operation": "weld coincident split normals; retain faces, original UVMap and exact material colors; affine fit; add PaletteUV"
+    },
+    {
+      "output_part": "Mike_retained_shoulder_casing_armL",
+      "source_pack": "quaternius-animated-mechs",
+      "source_model": "mike",
+      "source_part": "mike_part_34",
+      "operation": "weld coincident split normals; retain faces, original UVMap and exact material colors; affine fit; add PaletteUV"
+    },
+    {
+      "output_part": "Mike_retained_elbow_armL",
+      "source_pack": "quaternius-animated-mechs",
+      "source_model": "mike",
+      "source_part": "mike_part_24",
+      "operation": "weld coincident split normals; retain faces, original UVMap and exact material colors; affine fit; add PaletteUV"
+    },
+    {
+      "output_part": "Leela_retained_forearm_armL",
+      "source_pack": "quaternius-animated-mechs",
+      "source_model": "leela",
+      "source_part": "leela_part_00",
+      "operation": "weld coincident split normals; retain faces, original UVMap and exact material colors; affine fit; add PaletteUV"
+    },
+    {
+      "output_part": "Mike_retained_shoulder_casing_armR",
+      "source_pack": "quaternius-animated-mechs",
+      "source_model": "mike",
+      "source_part": "mike_part_34",
+      "operation": "weld coincident split normals; retain faces, original UVMap and exact material colors; affine fit; add PaletteUV"
+    },
+    {
+      "output_part": "Mike_retained_elbow_armR",
+      "source_pack": "quaternius-animated-mechs",
+      "source_model": "mike",
+      "source_part": "mike_part_24",
+      "operation": "weld coincident split normals; retain faces, original UVMap and exact material colors; affine fit; add PaletteUV"
+    },
+    {
+      "output_part": "Leela_retained_forearm_armR",
+      "source_pack": "quaternius-animated-mechs",
+      "source_model": "leela",
+      "source_part": "leela_part_00",
+      "operation": "weld coincident split normals; retain faces, original UVMap and exact material colors; affine fit; add PaletteUV"
+    }
+  ],
+  "sockets_blender_m": {
+    "eye": [
+      -0.025333333333333336,
+      -0.19333333333333336,
+      0.5535000003408641
+    ],
+    "weakspot_cell": [
+      0.05,
+      0.18333333333333335,
+      0.3401666670075308
+    ],
+    "muzzle": [
+      0.2433333396911621,
+      -0.06133333221077919,
+      0.25949999690055847
+    ],
+    "grip": [
+      -0.2433333396911621,
+      -0.06133333221077919,
+      0.34616665611974895
+    ],
+    "wheel": [
+      0,
+      0,
+      0.14216666700753075
+    ],
+    "pivot": [
+      0,
+      0,
+      0.14216666700753075
+    ]
+  },
+  "pivots_blender_m": {
+    "body": [
+      0,
+      0,
+      0.14216666700753075
+    ],
+    "wheel": [
+      0,
+      0,
+      0.14216666700753075
+    ],
+    "armL": [
+      -0.17266666889190674,
+      0.0,
+      0.5488333262037486
+    ],
+    "armR": [
+      0.17266666889190674,
+      0.0,
+      0.5488333262037486
+    ]
+  },
+  "costs": {
+    "triangles": 10319,
+    "vertices": 5627,
+    "triangles_by_group": {
+      "armL": 1826,
+      "armR": 1728,
+      "body": 3833,
+      "wheel": 2932
+    },
+    "bounds_blender_m": [
+      [
+        -0.29517439007759094,
+        -0.21533332765102386,
+        2.988055580743776e-09
+      ],
+      [
+        0.29233333468437195,
+        0.18533332645893097,
+        0.803978443145752
+      ]
+    ],
+    "dimensions_m": [
+      0.5875077247619629,
+      0.40066665410995483,
+      0.8039784401576964
+    ],
+    "materials": 2,
+    "rigid_groups": 4,
+    "skeleton_bones": 0,
+    "native_evaluated_triangles": 10361
+  },
+  "coordinate_contract": "Blender Z up, -Y forward; glTF Y up, +Z forward. Model-space meters. Socket nodes inherit their assembly transforms.",
+  "bounds_gltf_m": [
+    [
+      -0.29517441987991333,
+      0.0,
+      -0.18533332645893097
+    ],
+    [
+      0.29233333468437195,
+      0.803978443145752,
+      0.21533332765102386
+    ]
+  ],
+  "sockets_gltf_m": {
+    "eye": [
+      -0.025333333333333336,
+      0.5535000003408641,
+      0.19333333333333336
+    ],
+    "weakspot_cell": [
+      0.05,
+      0.3401666670075308,
+      -0.18333333333333335
+    ],
+    "muzzle": [
+      0.2433333396911621,
+      0.25949999690055847,
+      0.06133333221077919
+    ],
+    "grip": [
+      -0.2433333396911621,
+      0.34616665611974895,
+      0.06133333221077919
+    ],
+    "wheel": [
+      0,
+      0.14216666700753075,
+      0
+    ],
+    "pivot": [
+      0,
+      0.14216666700753075,
+      0
+    ]
+  },
+  "pivots_gltf_m": {
+    "body": [
+      0,
+      0.14216666700753075,
+      0
+    ],
+    "wheel": [
+      0,
+      0.14216666700753075,
+      0
+    ],
+    "armL": [
+      -0.17266666889190674,
+      0.5488333262037486,
+      -0.0
+    ],
+    "armR": [
+      0.17266666889190674,
+      0.5488333262037486,
+      -0.0
+    ]
+  }
+}

@@ -29,9 +29,8 @@ export const LOW_GPU = (() => {
   } catch { return false; }
 })();
 
-export function createRenderer(canvas, { shadows = true } = {}) {
+export function createRenderer(canvas, { shadows = true, antialias = window.__noAA ? false : (window.devicePixelRatio || 1) < 1.5 } = {}) {
   // High-density phone screens hide jaggies by themselves; MSAA there mostly costs fill rate.
-  const antialias = window.__noAA ? false : (window.devicePixelRatio || 1) < 1.5;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias, alpha: false, powerPreference: 'high-performance' });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -63,7 +62,12 @@ export function studioEnvironment(renderer, size = window.__envSize || 64) {
   const pm = new THREE.PMREMGenerator(renderer);
   const rt = pm.fromCubemap(cubeRT.texture);
   pm.dispose(); cubeRT.dispose();
-  return rt.texture;
+  // The capture scene is temporary. Keep only the prefiltered result.
+  env.traverse(node => { node.geometry?.dispose(); if (node.material) node.material.dispose(); });
+  const texture = rt.texture, disposeTexture = texture.dispose.bind(texture);
+  let disposed = false;
+  texture.dispose = () => { if (disposed) return; disposed = true; rt.dispose(); disposeTexture(); };
+  return texture;
 }
 
 /**

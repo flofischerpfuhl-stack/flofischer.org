@@ -1,0 +1,48 @@
+{
+  "schema": "fernworld.rigid-motion-layering/1",
+  "base_contract": "motion.json",
+  "initialization": "Initialize all nodes from motion.json nodes once. For a standalone diagnostic clip, full absolute keys may reset all channels to rest. For simultaneous gameplay layers, only apply the channels explicitly listed here.",
+  "clip_channel_masks": {
+    "Idle": {
+      "TurretYaw": [
+        "translation"
+      ]
+    },
+    "Travel": {
+      "WheelLeft": [
+        "rotation"
+      ],
+      "WheelRight": [
+        "rotation"
+      ]
+    },
+    "AimYaw": {
+      "TurretYaw": [
+        "rotation"
+      ]
+    },
+    "Fire_Recoil": {
+      "BarrelRecoil": [
+        "translation"
+      ]
+    },
+    "Hit": {
+      "Body": [
+        "translation",
+        "rotation"
+      ]
+    },
+    "Toy_Disabled": {
+      "TurretYaw": [
+        "translation",
+        "rotation"
+      ]
+    }
+  },
+  "priority": [
+    "Toy_Disabled cancels Travel/Idle/AimYaw/Fire_Recoil/Rocket_Charge; motor_stop stops Travel and can hold the current wheel rotation.",
+    "Idle translation and AimYaw rotation can coexist on TurretYaw.",
+    "Fire_Recoil modifies only BarrelRecoil.translation; never overwrite TurretYaw with its diagnostic rest channels.",
+    "Blend into absolute recipes from current pose when switching states; JSON keys define canonical poses, no controller or gameplay implementation is included."
+  ]
+}

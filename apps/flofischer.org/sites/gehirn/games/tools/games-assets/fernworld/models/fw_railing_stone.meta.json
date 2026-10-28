@@ -1,0 +1,87 @@
+{
+  "category": "architecture",
+  "label": "Stone parapet \u00b7 coping blocks",
+  "games": [
+    "generic"
+  ],
+  "description": "Stone parapet \u00b7 coping blocks; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 270,
+      "triangles": 90,
+      "groups": 1,
+      "bytes": 5300,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 270,
+      "triangles": 90,
+      "groups": 1,
+      "bytes": 5300,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 68,
+      "triangles": 90,
+      "groups": 1,
+      "bytes": 2067,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "architecture/kaykit/barrier.glb",
+  "adaptation": {
+    "scale": 0.65,
+    "rotationY": 0,
+    "pivot": "bounds centre at ground",
+    "units": "metres"
+  },
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_railing_stone",
+  "bounds": [
+    [
+      -1.2999999523162842,
+      0.0,
+      -0.16249999403953552
+    ],
+    [
+      1.2999999523162842,
+      0.7150000333786011,
+      0.16249999403953552
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#687175",
+    "#6a7377",
+    "#6c757a",
+    "#6e767b",
+    "#6f787c",
+    "#717a7e",
+    "#737c81",
+    "#757e83",
+    "#7c868b",
+    "#8a969b",
+    "#929ea3"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

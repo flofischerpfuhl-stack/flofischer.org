@@ -1,0 +1,1165 @@
+{
+  "schemaVersion": 1,
+  "asset": "LANDING_POD",
+  "units": "metres",
+  "axes": "Y-up,+Z-forward",
+  "podSha256": "d7207450fb77337edd2e8be7c03c638cacada57acbc22a953b61646bb8c290d7",
+  "independentFromBossDocks": true,
+  "certifiedBinaryRayRectangle": {
+    "x": [
+      -0.112,
+      0.112
+    ],
+    "y": [
+      0.215,
+      0.775
+    ],
+    "width": 0.224,
+    "height": 0.56,
+    "rays": 153,
+    "allClear": true,
+    "openQuaternionXYZW": [
+      0,
+      -0.8191520442889918,
+      0,
+      0.5735764363510462
+    ],
+    "raySamples": [
+      {
+        "x": -0.112,
+        "y": 0.215,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.25,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.28500000000000003,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.32,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.355,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.39,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.42500000000000004,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.46,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.495,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.53,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.5650000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.6,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.635,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.67,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.7050000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.74,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.112,
+        "y": 0.775,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.215,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.25,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.28500000000000003,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.32,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.355,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.39,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.42500000000000004,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.46,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.495,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.53,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.5650000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.6,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.635,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.67,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.7050000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.74,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.084,
+        "y": 0.775,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.215,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.25,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.28500000000000003,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.32,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.355,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.39,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.42500000000000004,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.46,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.495,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.53,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.5650000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.6,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.635,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.67,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.7050000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.74,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.056,
+        "y": 0.775,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.215,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.25,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.28500000000000003,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.32,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.355,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.39,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.42500000000000004,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.46,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.495,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.53,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.5650000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.6,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.635,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.67,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.7050000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.74,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": -0.027999999999999997,
+        "y": 0.775,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.215,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.25,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.28500000000000003,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.32,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.355,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.39,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.42500000000000004,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.46,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.495,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.53,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.5650000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.6,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.635,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.67,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.7050000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.74,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.0,
+        "y": 0.775,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.215,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.25,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.28500000000000003,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.32,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.355,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.39,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.42500000000000004,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.46,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.495,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.53,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.5650000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.6,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.635,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.67,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.7050000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.74,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.02800000000000001,
+        "y": 0.775,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.215,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.25,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.28500000000000003,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.32,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.355,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.39,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.42500000000000004,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.46,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.495,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.53,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.5650000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.6,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.635,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.67,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.7050000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.74,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.05600000000000001,
+        "y": 0.775,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.215,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.25,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.28500000000000003,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.32,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.355,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.39,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.42500000000000004,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.46,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.495,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.53,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.5650000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.6,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.635,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.67,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.7050000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.74,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.084,
+        "y": 0.775,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.215,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.25,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.28500000000000003,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.32,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.355,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.39,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.42500000000000004,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.46,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.495,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.53,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.5650000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.6,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.635,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.67,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.7050000000000001,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.74,
+        "clear": true,
+        "hitDistance": null
+      },
+      {
+        "x": 0.112,
+        "y": 0.775,
+        "clear": true,
+        "hitDistance": null
+      }
+    ]
+  },
+  "measuredInterior": {
+    "floorY": 0.12999999523162842,
+    "ceilingY": 0.990000009536743,
+    "height": 0.8600000143051146,
+    "widthAtHeight": {
+      "0.25": 0.5039047460639846,
+      "0.4": 0.5110476391926404,
+      "0.55": 0.48985185863059155,
+      "0.7": 0.4609411667292506,
+      "0.85": 0.38505882523463975
+    },
+    "depthAtHeight": {
+      "0.25": 0.4764523735088295,
+      "0.4": 0.48002382007315736,
+      "0.55": 0.46942592979213293,
+      "0.7": 0.4549705838414625
+    }
+  },
+  "marginMetres": {
+    "head": 0.1,
+    "eachSide": 0.05,
+    "totalForeAft": 0.1
+  },
+  "nominalHeights": {
+    "Human": {
+      "actorWorldHeight": 1.65,
+      "actorWorldWidth": null,
+      "actorWorldDepth": null,
+      "minimumHeightScale": 3.1249999999999996,
+      "requiredConservativeUniformPodScale": 3.1249999999999996,
+      "scaledPodHeight": 3.156249970197677,
+      "scaledCertifiedDoorWidth": 0.7,
+      "scaledCertifiedDoorHeight": 1.75,
+      "scaledInteriorHeight": 2.6875000447034827,
+      "maximumActorWidthAtThisScale": 0.6,
+      "scaledSillStepFromInteriorFloor": 0.26562501490116114,
+      "actorScalePolicy": "Actor world dimensions remain unchanged. Apply this scale to LANDING_POD only; it is independent of boss docking scales.",
+      "fitMeaning": "Full unposed bbox through certified opening rectangle; weapon/helmet included where present. Nominal height rows require actor width/depth as inputs before final fit claim."
+    },
+    "Halfgrown": {
+      "actorWorldHeight": 1.05,
+      "actorWorldWidth": null,
+      "actorWorldDepth": null,
+      "minimumHeightScale": 2.053571428571429,
+      "requiredConservativeUniformPodScale": 2.053571428571429,
+      "scaledPodHeight": 2.0741071232727597,
+      "scaledCertifiedDoorWidth": 0.4600000000000001,
+      "scaledCertifiedDoorHeight": 1.1500000000000004,
+      "scaledInteriorHeight": 1.7660714579480035,
+      "maximumActorWidthAtThisScale": 0.3600000000000001,
+      "scaledSillStepFromInteriorFloor": 0.1745535812207631,
+      "actorScalePolicy": "Actor world dimensions remain unchanged. Apply this scale to LANDING_POD only; it is independent of boss docking scales.",
+      "fitMeaning": "Full unposed bbox through certified opening rectangle; weapon/helmet included where present. Nominal height rows require actor width/depth as inputs before final fit claim."
+    },
+    "Dwarf": {
+      "actorWorldHeight": 0.3,
+      "actorWorldWidth": null,
+      "actorWorldDepth": null,
+      "minimumHeightScale": 0.7142857142857143,
+      "requiredConservativeUniformPodScale": 0.7142857142857143,
+      "scaledPodHeight": 0.7214285646166121,
+      "scaledCertifiedDoorWidth": 0.16,
+      "scaledCertifiedDoorHeight": 0.4,
+      "scaledInteriorHeight": 0.6142857245036534,
+      "maximumActorWidthAtThisScale": 0.06,
+      "scaledSillStepFromInteriorFloor": 0.06071428912026541,
+      "actorScalePolicy": "Actor world dimensions remain unchanged. Apply this scale to LANDING_POD only; it is independent of boss docking scales.",
+      "fitMeaning": "Full unposed bbox through certified opening rectangle; weapon/helmet included where present. Nominal height rows require actor width/depth as inputs before final fit claim."
+    }
+  },
+  "actualCurrentTroops": {
+    "HUMAN_LEGIONARY": {
+      "actorWorldHeight": 1.6999999284744263,
+      "actorWorldWidth": 0.7896166145801544,
+      "actorWorldDepth": 0.6729373633861542,
+      "minimumHeightScale": 3.2142855865614752,
+      "requiredConservativeUniformPodScale": 3.9715027436614037,
+      "scaledPodHeight": 4.011217733222816,
+      "scaledCertifiedDoorWidth": 0.8896166145801544,
+      "scaledCertifiedDoorHeight": 2.224041536450386,
+      "scaledInteriorHeight": 3.415492416361609,
+      "maximumActorWidthAtThisScale": 0.7896166145801544,
+      "scaledSillStepFromInteriorFloor": 0.33757775214882013,
+      "actorScalePolicy": "Actor world dimensions remain unchanged. Apply this scale to LANDING_POD only; it is independent of boss docking scales.",
+      "fitMeaning": "Full unposed bbox through certified opening rectangle; weapon/helmet included where present. Nominal height rows require actor width/depth as inputs before final fit claim.",
+      "source": "tools/games-assets/fernworld/models/HUMAN_LEGIONARY.hi.glb",
+      "sha256": "341048172fa99ff23db1bb0226b025b7358abe31939a55bc947e381f8c6de301",
+      "measuredWorldBounds": [
+        [
+          -0.48867928981781006,
+          0.0,
+          -0.27326491475105286
+        ],
+        [
+          0.30093732476234436,
+          1.6999999284744263,
+          0.3996724486351013
+        ]
+      ],
+      "meshRestPoseOnly": true,
+      "hasSkin": false,
+      "centerActorHorizontallyByBBox": 0.09387098252773285,
+      "limits": "Measure the actual runtime idle/walk/tool-stowed pose before reducing this conservative full-bbox pod scale. No source model changed."
+    },
+    "HALFGROWN_LEGIONARY": {
+      "actorWorldHeight": 1.0,
+      "actorWorldWidth": 0.6317781209945679,
+      "actorWorldDepth": 0.6552263796329498,
+      "minimumHeightScale": 1.9642857142857142,
+      "requiredConservativeUniformPodScale": 3.266866611582892,
+      "scaledPodHeight": 3.2995352465434533,
+      "scaledCertifiedDoorWidth": 0.7317781209945678,
+      "scaledCertifiedDoorHeight": 1.8294453024864197,
+      "scaledInteriorHeight": 2.809505332694189,
+      "maximumActorWidthAtThisScale": 0.6317781209945679,
+      "scaledSillStepFromInteriorFloor": 0.2776836775621797,
+      "actorScalePolicy": "Actor world dimensions remain unchanged. Apply this scale to LANDING_POD only; it is independent of boss docking scales.",
+      "fitMeaning": "Full unposed bbox through certified opening rectangle; weapon/helmet included where present. Nominal height rows require actor width/depth as inputs before final fit claim.",
+      "source": "tools/games-assets/fernworld/models/HALFGROWN_LEGIONARY.hi.glb",
+      "sha256": "5b4625423a3f7f9d6af2ac1e51fee5b60d83c8c41679666360801e16dba4ba29",
+      "measuredWorldBounds": [
+        [
+          -0.27209389209747314,
+          0.0,
+          -0.17396512627601624
+        ],
+        [
+          0.3596842288970947,
+          1.0,
+          0.4812612533569336
+        ]
+      ],
+      "meshRestPoseOnly": true,
+      "hasSkin": false,
+      "centerActorHorizontallyByBBox": -0.04379516839981079,
+      "limits": "Measure the actual runtime idle/walk/tool-stowed pose before reducing this conservative full-bbox pod scale. No source model changed."
+    },
+    "GIANT_LEGIONARY": {
+      "actorWorldHeight": 3.3999998569488525,
+      "actorWorldWidth": 1.934293270111084,
+      "actorWorldDepth": 1.5036312937736511,
+      "minimumHeightScale": 6.249999744551522,
+      "requiredConservativeUniformPodScale": 9.081666384424482,
+      "scaledPodHeight": 9.172482961659206,
+      "scaledCertifiedDoorWidth": 2.034293270111084,
+      "scaledCertifiedDoorHeight": 5.08573317527771,
+      "scaledInteriorHeight": 7.810233220519333,
+      "maximumActorWidthAtThisScale": 1.934293270111084,
+      "scaledSillStepFromInteriorFloor": 0.7719416859808408,
+      "actorScalePolicy": "Actor world dimensions remain unchanged. Apply this scale to LANDING_POD only; it is independent of boss docking scales.",
+      "fitMeaning": "Full unposed bbox through certified opening rectangle; weapon/helmet included where present. Nominal height rows require actor width/depth as inputs before final fit claim.",
+      "source": "tools/games-assets/fernworld/models/GIANT_LEGIONARY.hi.glb",
+      "sha256": "e977595933d3003c60d614a9407b96b80e0df39a924c00c59ca85cc54d24a82a",
+      "measuredWorldBounds": [
+        [
+          -1.2250646352767944,
+          0.0,
+          -0.5303674936294556
+        ],
+        [
+          0.7092286348342896,
+          3.3999998569488525,
+          0.9732638001441956
+        ]
+      ],
+      "meshRestPoseOnly": true,
+      "hasSkin": false,
+      "centerActorHorizontallyByBBox": 0.25791800022125244,
+      "limits": "Measure the actual runtime idle/walk/tool-stowed pose before reducing this conservative full-bbox pod scale. No source model changed."
+    },
+    "DUCK_LEGIONARY": {
+      "actorWorldHeight": 1.3000000715255737,
+      "actorWorldWidth": 0.782201424241066,
+      "actorWorldDepth": 0.8174320310354233,
+      "minimumHeightScale": 2.5000001277242387,
+      "requiredConservativeUniformPodScale": 3.9383992153619016,
+      "scaledPodHeight": 3.9777831699560187,
+      "scaledCertifiedDoorWidth": 0.882201424241066,
+      "scaledCertifiedDoorHeight": 2.205503560602665,
+      "scaledInteriorHeight": 3.3870233815504878,
+      "maximumActorWidthAtThisScale": 0.782201424241066,
+      "scaledSillStepFromInteriorFloor": 0.3347639520855125,
+      "actorScalePolicy": "Actor world dimensions remain unchanged. Apply this scale to LANDING_POD only; it is independent of boss docking scales.",
+      "fitMeaning": "Full unposed bbox through certified opening rectangle; weapon/helmet included where present. Nominal height rows require actor width/depth as inputs before final fit claim.",
+      "source": "scripts/games-blender/fernworld/characters/duck-legionary/DUCK_LEGIONARY.hi.glb",
+      "sha256": "51c2989e970d701b1dd65cb0212c42b1c2e186ed042a57c3227fc16d689f7290",
+      "measuredWorldBounds": [
+        [
+          -0.33687811344861984,
+          0.0,
+          -0.22158485651016235
+        ],
+        [
+          0.44532331079244614,
+          1.3000000715255737,
+          0.5958471745252609
+        ]
+      ],
+      "meshRestPoseOnly": true,
+      "hasSkin": false,
+      "centerActorHorizontallyByBBox": -0.05422259867191315,
+      "limits": "Measure the actual runtime idle/walk/tool-stowed pose before reducing this conservative full-bbox pod scale. No source model changed."
+    }
+  },
+  "deploymentRecipe": {
+    "restFeet": "At actual inner floor Y=floorY * podScale; no standing actor floating at SeatSocket.",
+    "sillMotion": "When clear of carrier/dock and with hatch fully open, step/jump feet to Y=certified rectangle bottom * podScale. Traverse +Z while preserving actor world size.",
+    "interiorStart": "Derive feet from real StartDock: local (0,floorY,0), without adding a fake socket node. SeatSocket remains a separate seated-placement anchor.",
+    "exit": "Traverse to +Z .75*podScale, then land actor feet on actual terrain with jump/fall animation or physics. ExitSocket is real (0,.20,.51) and remains the route landmark.",
+    "timing": "Undock before opening; open .65s, exit no earlier than .72s. Do not close until full actor bbox is outside door sweep.",
+    "escapePolicy": "ESCAPE_POD inherits the boss world scale from its live StartDock. Boss docking table is a relative attachment contract, not a reason to shrink a pilot. Opening only after free undock; Equality +Y 1.2m before turn."
+  },
+  "limits": [
+    "Conservative full-bbox rest-pose contract, no integrated gameplay/locomotion proof.",
+    "Nominal Dwarf has no separate delivered troop GLB in the current selected mapping; its width/depth must be supplied before a fit claim.",
+    "A compact tool-stowed walking pose may permit a smaller pod; Root must verify the actual moving vertices."
+  ]
+}

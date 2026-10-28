@@ -1,0 +1,106 @@
+{
+  "category": "architecture",
+  "label": "Terracotta roof \u00b7 individually rolled tiles",
+  "games": [
+    "generic"
+  ],
+  "description": "Terracotta roof \u00b7 individually rolled tiles; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 1701,
+      "triangles": 2919,
+      "groups": 1,
+      "bytes": 50824,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 1701,
+      "triangles": 2919,
+      "groups": 1,
+      "bytes": 50824,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 412,
+      "triangles": 651,
+      "groups": 1,
+      "bytes": 12055,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "architecture/kenney/roof.glb + authored overlapping terracotta courses",
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_roof_gentle",
+  "bounds": [
+    [
+      -1.3872066736221313,
+      0.0,
+      -1.2999999523162842
+    ],
+    [
+      1.4348732233047485,
+      1.829573631286621,
+      1.2999999523162842
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#3b9d74",
+    "#45a087",
+    "#45a187",
+    "#46a188",
+    "#46a288",
+    "#47a38a",
+    "#4dab92",
+    "#4eab93",
+    "#4fad95",
+    "#51af97",
+    "#53b29a",
+    "#55b49c",
+    "#55b59d",
+    "#5bbba5",
+    "#5dbea8",
+    "#5dbfa8",
+    "#5ebfa9",
+    "#5ec0aa",
+    "#60c1ab",
+    "#60c2ad",
+    "#7d829c",
+    "#7e849f",
+    "#8c93b0",
+    "#8e95b2",
+    "#a4abcd",
+    "#a85d43",
+    "#b36347",
+    "#b87859",
+    "#b96c49",
+    "#b97859",
+    "#b9c2e8",
+    "#be7c5c",
+    "#c17a51",
+    "#c48160",
+    "#efbd8d",
+    "#f0c59d"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

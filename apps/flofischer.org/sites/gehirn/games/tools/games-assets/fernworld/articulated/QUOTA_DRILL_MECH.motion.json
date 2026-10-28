@@ -1,0 +1,47 @@
+{
+  "fps": 24,
+  "clip_seconds": {
+    "Idle": 2.0,
+    "Travel": 2.0,
+    "Drill_Charge": 0.7916666666666666,
+    "Drill_Strike": 1.2083333333333333,
+    "OpenWeakpoint": 1.0,
+    "Hit": 0.5,
+    "Disabled": 1.5,
+    "EscapeHatch": 1.2083333333333333
+  },
+  "rotation": "QUATERNION",
+  "scale": "unit rigid, never animated",
+  "runtime": "Three.js AnimationMixer: play matching named clip on one instance; no geometry rebuilds. Travel in place; root translation is game-owned. Clamp charge/open/disabled/escape at end; Idle/Travel loop. Drill_Strike follows Drill_Charge; Hit returns to idle. EscapeHatch starts from fully disabled arm/lid pose.",
+  "event_times_seconds": {
+    "Drill_Charge": {
+      "spin_start": 0.0,
+      "anticipation_ready": 0.7916666666666666
+    },
+    "Drill_Strike": {
+      "attackDrill_enable": 0.24,
+      "impact": 0.384,
+      "attackDrill_disable": 0.7
+    },
+    "OpenWeakpoint": {
+      "weakpoint_exposed": 0.72
+    },
+    "Disabled": {
+      "disable_attacks": 0.0,
+      "safe_pose": 1.5
+    },
+    "EscapeHatch": {
+      "hatch_clear": 1.0,
+      "spawn_generic_pod_at_escapePodDock": 1.05
+    }
+  },
+  "track_recipe": "Travel GLB animates left/right driven sprockets. Belts are stationary sealed rubber cassettes; optional material UV scrolling is game-owned, no geometry rebuilding. Use grounded in-place Travel and root translation, no suspension bob.",
+  "escape_dock_contract": {
+    "origin": "pod base center",
+    "axis": "+Y in exported glTF",
+    "max_pod_radius_m": 0.34,
+    "clearance_corridor_height_m": 1.5,
+    "spawn_after_seconds": 1.05
+  },
+  "weakpoint_radius_m": 0.27
+}

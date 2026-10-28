@@ -1,0 +1,73 @@
+{
+  "category": "architecture",
+  "label": "Terracotta ridge \u00b7 overlapping rounded caps",
+  "games": [
+    "generic"
+  ],
+  "description": "Terracotta ridge \u00b7 overlapping rounded caps; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 1152,
+      "triangles": 1056,
+      "groups": 1,
+      "bytes": 27139,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 1152,
+      "triangles": 1056,
+      "groups": 1,
+      "bytes": 27139,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 464,
+      "triangles": 896,
+      "groups": 1,
+      "bytes": 14849,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "Original Fernworld authored geometry",
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_roof_ridge",
+  "bounds": [
+    [
+      -0.21012499928474426,
+      0.0,
+      -1.2899999618530273
+    ],
+    [
+      0.21012499928474426,
+      0.21012499928474426,
+      1.2899999618530273
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#a95e44",
+    "#b66b49",
+    "#c37d53"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

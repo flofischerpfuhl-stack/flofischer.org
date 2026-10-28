@@ -1,0 +1,9 @@
+{
+  "matte": {"roughness": 0.78, "metalness": 0, "opacity": 1, "doubleSided": true},
+  "gloss": {"roughness": 0.25, "metalness": 0.1, "opacity": 1, "doubleSided": true},
+  "glow": {"unlit": true, "opacity": 1, "doubleSided": true},
+  "water": {"roughness": 0.25, "metalness": 0, "opacity": 0.78, "doubleSided": false, "depthWrite": false},
+  "waterSolid": {"roughness": 0.25, "metalness": 0, "opacity": 1, "doubleSided": false},
+  "pearl": {"roughness": 0.35, "metalness": 0, "opacity": 1, "doubleSided": true},
+  "bubble": {"roughness": 0.12, "metalness": 0, "opacity": 0.16, "doubleSided": false, "depthWrite": false}
+}

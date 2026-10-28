@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "atlasPixels": [1024, 1024],
+  "atlasColorSpace": "sRGB",
+  "runtime": "One atlas material and one static mesh primitive; full rectangular UV regions identify replaceable faces after joining.",
+  "artPreparation": "Compose source artwork at the physicalAspectRatio, then resample into the stated atlas pixel rectangle. The reserved atlas slots use different texel densities; this compensates the affine packing so final text and figures keep their intended physical proportions.",
+  "surfaces": {
+    "ARCADE_CABINET.ScreenSurface": {
+      "nativeNamedMesh": "ScreenSurface",
+      "gltfUVRect": [0.02, 0.38, 0.62, 0.80],
+      "blenderUVRect": [0.02, 0.20, 0.62, 0.62],
+      "pixelRectFromTopLeft": [20.48, 389.12, 634.88, 819.20],
+      "physicalWidth": 0.59,
+      "physicalHeightAlongPanel": 0.3710795063,
+      "physicalAspectRatio": 1.5899543389,
+      "cornerPositionsGltf": [[-0.295, 1.21, 0.270], [0.295, 1.21, 0.270], [0.295, 1.57, 0.180], [-0.295, 1.57, 0.180]],
+      "frontDirectionApproxGltf": [0, 0.242535625, 0.9701425],
+      "rootExtras": "screenAtlasRectUV"
+    },
+    "ARCADE_CABINET.CoverSurface": {
+      "nativeNamedMesh": "CoverSurface",
+      "gltfUVRect": [0.02, 0.04, 0.98, 0.28],
+      "blenderUVRect": [0.02, 0.72, 0.98, 0.96],
+      "pixelRectFromTopLeft": [20.48, 40.96, 1003.52, 286.72],
+      "physicalWidth": 0.652,
+      "physicalHeightAlongPanel": 0.095,
+      "physicalAspectRatio": 6.8631578947,
+      "cornerPositionsGltf": [[-0.326, 1.676, 0.371], [0.326, 1.676, 0.371], [0.326, 1.771, 0.371], [-0.326, 1.771, 0.371]],
+      "frontDirectionApproxGltf": [0, 0, 1],
+      "rootExtras": "coverAtlasRectUV",
+      "coverStatus": "Four final game covers/marquees are assigned to Root; no placeholder text geometry."
+    },
+    "JOB_BOARD.JobTextSurface": {
+      "nativeNamedMesh": "JobTextSurface",
+      "gltfUVRect": [0.68, 0.36, 0.98, 0.82],
+      "blenderUVRect": [0.68, 0.18, 0.98, 0.64],
+      "pixelRectFromTopLeft": [696.32, 368.64, 1003.52, 839.68],
+      "physicalWidth": 1.06,
+      "physicalHeightAlongPanel": 1.20,
+      "physicalAspectRatio": 0.8833333333,
+      "frontDirectionApproxGltf": [0, 0, 1],
+      "rootExtras": "textAtlasRectUV"
+    }
+  },
+  "teamColor": {
+    "assets": ["TOURNAMENT_MINE", "RUBBER_SHELL"],
+    "swatchIndex": 18,
+    "gltfUV": [0.3125, 0.9609375],
+    "nativeUV": [0.3125, 0.0390625],
+    "policy": "Use a team material/atlas instance. Do not recolor the global family atlas: index18 is also used by blue glass/buttons on other prefabs."
+  }
+}

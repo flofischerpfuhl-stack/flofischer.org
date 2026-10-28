@@ -13,12 +13,18 @@
  *   session.pointer(type, x, y)           'down' | 'move' | 'up' in CSS px relative to the canvas
  *   session.key(code, down)               return true when handled
  *   session.hud()                         { progress: 0..1 | null, score, label }
- *   env = { sound, preview }              preview: built only to draw the menu backdrop (no input, no updates)
+ *   env = { sound, preview, hint }        preview: built only to draw the menu backdrop (no input, no updates);
+ *                                         hint(id) asks for a one-time mechanic tip (games-help.js TIPS)
+ *
+ * Help: a "How to play" card per game (games-help.js HELP) opens from the "?" buttons (menu corner, HUD, pause card,
+ * H key), by itself on a game's very first level, and pauses the level while it is open. Mechanic tips show once each
+ * as a small banner when their mechanic first turns up.
  *
  * Tests reach the running game through window.__fwGames[game.id] (state, fast-forward, finish).
  */
 import { icon } from '../../../assets/kit/icons.js';
 import * as Profile from './profile.js';
+import { HELP, TIPS, glyph, introSeen, markIntro, tipSeen, markTip, tipsOn, setTipsOn, tipText } from './games-help.js';
 
 const KEY = 'fw:games:';
 export function readJSON(key, fallback) {
@@ -33,10 +39,11 @@ export function writeJSON(key, value) {
  * a world count as world 1 in order.
  */
 export function levelKeys(levels) {
-  const seen = [0, 0, 0, 0, 0];
+  const seen = new Map();
   return levels.map((lv) => {
     const w = (lv.world ?? 0) + 1;
-    const n = lv.boss ? 'boss' : ++seen[w];
+    const n = lv.boss ? 'boss' : (seen.get(w) ?? 0) + 1;
+    if (!lv.boss) seen.set(w, n);
     return { world: w, n, id: Profile.levelId(w, n) };
   });
 }
@@ -159,7 +166,11 @@ const isDark = () => {
 
 export function mountGame(root, game) {
   const sound = new Sound();
-  const progress = gameProgress(game.id, game.levels);
+  const progress = game.createProgress?.(Profile, game.levels) ?? gameProgress(game.id, game.levels);
+  const starters = game.starters ?? [];
+  let selectedStarter = readJSON(`starter:${game.id}`, starters[0]?.id);
+  if (!starters.some(s => s.id === selectedStarter)) selectedStarter = starters[0]?.id;
+  let runStarter = selectedStarter;
   const worlds = game.levels.some((lv) => lv.world != null);
   root.classList.add('gm-game');
   root.dataset.game = game.id;
@@ -169,6 +180,8 @@ export function mountGame(root, game) {
       <canvas class="gm-canvas" aria-label="${game.title} playfield" role="img"></canvas>
       <div class="gm-hud" hidden>
         <button type="button" class="fw-iconbtn gm-hud__btn" data-act="pause" aria-label="Pause" data-tip="Pause (Esc)">${icon('pause', { size: 20 })}</button>
+        <button type="button" class="fw-iconbtn gm-hud__btn" data-act="help" aria-label="How to play" data-tip="How to play (H)">${icon('circle-help', { size: 20 })}</button>
+        <button type="button" class="fw-iconbtn gm-hud__btn" data-act="puzzle-hint" aria-label="Owlberts Rätselhinweis" title="Owlberts Rätselhinweis" hidden>?</button>
         <div class="gm-hud__mid">
           <div class="gm-hud__level" data-ref="level"></div>
           <div class="gm-hud__bar"><span data-ref="bar"></span></div>
@@ -177,9 +190,17 @@ export function mountGame(root, game) {
         <button type="button" class="fw-iconbtn gm-hud__btn" data-act="fullscreen" aria-label="Full screen" data-tip="Full screen (F)">${icon('maximize', { size: 20 })}</button>
       </div>
       <button type="button" class="fw-iconbtn gm-hud__btn gm-fs" data-act="fullscreen" aria-label="Full screen" data-tip="Full screen (F)">${icon('maximize', { size: 20 })}</button>
+      <button type="button" class="fw-iconbtn gm-hud__btn gm-helpbtn" data-act="help" aria-label="How to play" data-tip="How to play (H)">${icon('circle-help', { size: 20 })}</button>
       <div class="gm-hint" data-ref="hint" hidden></div>
+      <div class="gm-tip" role="status" aria-live="polite" hidden>
+        <span class="gm-tip__icon" data-ref="tipicon"></span><span class="gm-tip__text" data-ref="tiptext"></span>
+        <button type="button" class="gm-tip__close" data-act="tip-close" aria-label="Dismiss tip">${icon('x', { size: 18 })}</button>
+      </div>
       <section class="gm-screen gm-menu" aria-label="${game.title} menu">
         <div class="gm-owhost" hidden></div>
+        ${starters.length ? `<label class="gm-starter-picker">Your Fernling
+          <select data-ref="starter" aria-label="Choose your Fernling">${starters.map(s => `<option value="${s.id}">${s.label}</option>`).join('')}</select>
+          <span data-ref="starter-description"></span></label>` : ''}
         <div class="gm-card">
           ${game.art ? `<img class="gm-art" src="${game.art}" alt="" decoding="async">` : ''}
           <header class="gm-menu__head">
@@ -196,11 +217,20 @@ export function mountGame(root, game) {
           </div>
         </div>
       </section>
+      <section class="gm-screen gm-loading" aria-live="polite" hidden>
+        <div class="gm-card gm-card--small">
+          <h2 class="gm-title" data-ref="loading-title">Preparing your adventure</h2>
+          <p data-ref="loading-message">Loading this region and its characters…</p>
+          <button type="button" class="fw-btn fw-btn--primary" data-act="load-retry" hidden>Try again</button>
+          <button type="button" class="fw-btn fw-btn--ghost" data-act="menu">Back to the map</button>
+        </div>
+      </section>
       <section class="gm-screen gm-pause" aria-label="Paused" hidden>
         <div class="gm-card gm-card--small">
           <h2 class="gm-title">Paused</h2>
           <button type="button" class="fw-btn fw-btn--primary fw-btn--lg" data-act="resume">${icon('play', { size: 18 })}Resume</button>
           <button type="button" class="fw-btn" data-act="restart">${icon('rotate-ccw', { size: 16 })}Restart level</button>
+          <button type="button" class="fw-btn fw-btn--ghost" data-act="help">${icon('circle-help', { size: 16 })}How to play</button>
           <button type="button" class="fw-btn fw-btn--ghost" data-act="menu">${icon('layout-grid', { size: 16 })}All levels</button>
         </div>
       </section>
@@ -216,13 +246,33 @@ export function mountGame(root, game) {
           <button type="button" class="fw-btn fw-btn--ghost" data-act="menu">${icon('layout-grid', { size: 16 })}All levels</button>
         </div>
       </section>
+      <section class="gm-help" role="dialog" aria-modal="true" aria-labelledby="gm-help-${game.id}-title" hidden>
+        <div class="gm-help__card">
+          <header class="gm-help__head">
+            <div><p class="gm-help__kicker">How to play</p><h2 class="gm-help__title" id="gm-help-${game.id}-title">${game.title}</h2></div>
+            <button type="button" class="fw-iconbtn gm-help__close" data-act="help-close" aria-label="Close">${icon('x', { size: 20 })}</button>
+          </header>
+          <p class="gm-help__goal"><span class="gm-help__icon">${glyph('goal')}</span><span data-ref="helpgoal"></span></p>
+          <div class="fw-seg gm-help__tabs" role="tablist" aria-label="Controls">
+            <button type="button" role="tab" class="fw-seg__opt" id="gm-help-${game.id}-touch" data-act="help-tab" data-mode="touch" aria-controls="gm-help-${game.id}-panel">${icon('hand', { size: 18 })}Touch</button>
+            <button type="button" role="tab" class="fw-seg__opt" id="gm-help-${game.id}-keys" data-act="help-tab" data-mode="keys" aria-controls="gm-help-${game.id}-panel">${icon('keyboard', { size: 18 })}Mouse &amp; keys</button>
+          </div>
+          <ul class="gm-help__list" role="tabpanel" id="gm-help-${game.id}-panel" data-ref="helpcontrols"></ul>
+          <ul class="gm-help__list gm-help__rules" aria-label="Rules" data-ref="helprules"></ul>
+          <div class="gm-help__foot">
+            <label class="fw-check gm-help__opt"><input type="checkbox" data-ref="helptips">Tips while playing</label>
+            <button type="button" class="fw-btn fw-btn--primary gm-help__done" data-act="help-close">Got it</button>
+          </div>
+        </div>
+      </section>
     </div>`;
   const stage = root.querySelector('.gm-stage');
   const canvas = root.querySelector('canvas:not(.gm-canvas--gl)');
   const glCanvas = root.querySelector('.gm-canvas--gl');
   const g = canvas.getContext('2d');
   // The 3D view (Three.js) loads on first activation; until then, or without WebGL, the 2D renderer draws everything.
-  let gl = null, glLoading = false, glScale = 1, slowFrames = 0;
+  let gl = null, glLoading = null, glScale = 1, slowFrames = 0;
+  let levelRequest = 0, preparedSession = null, prepareQueue = Promise.resolve();
   // 3D renders at up to 1.5× (the crisp 2D overlay keeps the full ratio). Only a device that keeps missing frames
   // steps its 3D resolution down (85 %, then 70 %); everything else, shadows included, stays as it is.
   const glDpr = () => Math.min(view.dpr, 1.5) * glScale;
@@ -239,25 +289,41 @@ export function mountGame(root, game) {
   const perf = { update: 0, gl: 0, overlay: 0, frame: 0 };
   const avg = (k, v) => { perf[k] = perf[k] * 0.9 + v * 0.1; };
   function loadGl() {
-    if (glLoading || !game.view3d || !hasWebGL()) return;
-    glLoading = true;
-    game.view3d().then((mod) => {
+    if (!game.view3d || !hasWebGL()) return Promise.resolve(null);
+    if (gl) return Promise.resolve(gl);
+    if (glLoading) return glLoading;
+    glLoading = game.view3d().then((mod) => {
       gl = mod.create(glCanvas);
       window.__glView = gl;
       gl.resize(view.w, view.h, glDpr());
       stage.classList.add('is-3d');
-      draw();
-    }).catch((err) => { console.warn('[games] 3D view unavailable, using 2D', err); gl = null; });
+      return gl;
+    }).catch((err) => { gl = null; glLoading = null; throw err; });
+    return glLoading;
   }
   const ref = (name) => root.querySelector(`[data-ref="${name}"]`);
-  const screens = { menu: root.querySelector('.gm-menu'), pause: root.querySelector('.gm-pause'), result: root.querySelector('.gm-result') };
+  const screens = { menu: root.querySelector('.gm-menu'), pause: root.querySelector('.gm-pause'), result: root.querySelector('.gm-result'), loading: root.querySelector('.gm-loading') };
   const hud = root.querySelector('.gm-hud');
   // keyboard: a mouse-and-keyboard device, or someone who pressed a key; games show key hints only then
   const view = { w: 1, h: 1, dpr: 1, dark: isDark(), reduced: reducedMotion(), time: 0, keyboard: !!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches };
 
   let startedAt = 0;
-  let session = null, level = 0, screen = 'menu', active = false, raf = 0, lastT = 0, acc = 0, endTimer = 0, hintTimer = 0, resultAt = 0;
+  let session = null, level = 0, screen = 'menu', active = false, raf = 0, lastT = 0, acc = 0, settlementTime = 0, hintTimer = 0, hintAt = 0, resultAt = 0;
   let preview = null;
+  const starterSelect = ref('starter');
+  function syncStarter() {
+    if (!starterSelect) return;
+    starterSelect.value = selectedStarter;
+    ref('starter-description').textContent = starters.find(s => s.id === selectedStarter)?.description ?? '';
+  }
+  starterSelect?.addEventListener('change', () => {
+    if (screen !== 'menu' || !starters.some(s => s.id === starterSelect.value)) return;
+    selectedStarter = starterSelect.value;
+    writeJSON(`starter:${game.id}`, selectedStarter);
+    preview = null;
+    syncStarter();
+  });
+  syncStarter();
 
   function setScreen(name) {
     screen = name;
@@ -265,11 +331,12 @@ export function mountGame(root, game) {
     for (const [key, el] of Object.entries(screens)) el.hidden = key !== name;
     if (ow) { if (name === 'menu' && active) { ow.refresh(); ow.activate(); } else ow.deactivate(); }
     hud.hidden = !(name === 'play' || name === 'pause');
-    document.body.classList.toggle('gm-playing', name === 'play' || name === 'pause');
-    const focusEl = name === 'menu' ? root.querySelector('[data-act="play"]') : name === 'pause' ? root.querySelector('[data-act="resume"]')
+    if (active) document.body.classList.toggle('gm-playing', name === 'play' || name === 'pause');
+    const focusEl = helpOpen ? null : name === 'menu' ? root.querySelector('[data-act="play"]') : name === 'pause' ? root.querySelector('[data-act="resume"]')
       : name === 'result' ? root.querySelector('.gm-result [data-act]:not([hidden])') : null;
     if (focusEl && active) focusEl.focus({ preventScroll: true });
-    if (name === 'play') canvas.focus?.({ preventScroll: true });
+    if (name === 'play' && !helpOpen) canvas.focus?.({ preventScroll: true });
+    if (name !== 'play') clearTips();
   }
 
   function nextOpenLevel() {
@@ -290,10 +357,12 @@ export function mountGame(root, game) {
     const host = root.querySelector('.gm-owhost');
     owLoading = import('./overworld.js').then((m) => {
       ow = m.mountOverworld(host, {
-        levels: game.levels, hero: game.hero, companion: game.companion, title: game.title,
+        gameId: game.id, levels: game.levels, hero: game.hero, companion: game.companion, title: game.title,
         state: {
           stars: progress.star, best: progress.bestOf, open: progress.open, worldOpen: progress.worldOpen,
-          need: (w) => `Beat the World ${w} boss and collect ${Profile.STAR_GATES[w]} stars`,
+          need: (w) => game.worldRequirement?.(w) ?? (w === 4
+            ? 'Complete the Vulkara campaign to unlock Sturmbastion.'
+            : `Beat the World ${w} boss and collect ${Profile.STAR_GATES[w]} stars`),
           current: () => lastPicked ?? nextOpenLevel(),
         },
         onPlay: (i) => { lastPicked = i; sound.unlock(); sound.play('click'); startLevel(i); },
@@ -341,16 +410,17 @@ export function mountGame(root, game) {
     draw();
   }
   function draw() {
+    if (screen === 'loading') return;
     if (ow && screen === 'menu') { g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, canvas.width, canvas.height); return; }
-    const s = session || preview || (preview = game.create(screen === 'menu' ? nextOpenLevel() : level, { sound, preview: true }));
+    const s = session || preview || (preview = game.create(screen === 'menu' ? nextOpenLevel() : level, { sound, preview: true, starter: selectedStarter, hint: () => false }));
     g.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
     g.clearRect(0, 0, view.w, view.h);
     let t0 = performance.now();
-    if (gl) {
-      try { gl.render(s, view); } catch (err) { console.error('[games] 3D render failed, using 2D', err); gl = null; stage.classList.remove('is-3d'); }
+    if (gl && preparedSession === s) {
+      try { gl.render(s, view); } catch (err) { showLoadError(err); return; }
     }
     const t1 = performance.now(); avg('gl', t1 - t0); t0 = t1;
-    view.gl = gl;
+    view.gl = preparedSession === s ? gl : null;
     s.render(g, view);
     view.gl = null;
     avg('overlay', performance.now() - t0);
@@ -368,7 +438,7 @@ export function mountGame(root, game) {
   // ── loop ──
   function frame(t) {
     raf = 0;
-    if (!active) return;
+    if (!active || helpOpen) return; // the help card pauses everything; closing it restarts the loop
     const dt = Math.min(0.1, (t - (lastT || t)) / 1000); lastT = t;
     if (screen === 'play') { adapt(dt * 1000); avg('frame', dt * 1000); }
     // The level keeps animating behind the result card for a few seconds (confetti, the squad walking on).
@@ -388,27 +458,69 @@ export function mountGame(root, game) {
   }
   function step() {
     session.update(STEP);
-    if (session.result && !endTimer) endTimer = performance.now();
-    if (session.result && performance.now() - endTimer > (session.result.won ? 900 : 1100)) finish(session.result);
+    tipTick();
+    if (session.result) settlementTime += STEP;
+    const resultReady = !session.result || (typeof session.resultReady === 'function' ? session.resultReady() : session.resultReady !== false);
+    const settlement = Math.max(session.result?.won ? .9 : 1.1, Number(session.settlementSeconds) || 0);
+    if (session.result && resultReady && settlementTime >= settlement) finish(session.result);
   }
   function startLoop() { if (!raf && active) { lastT = 0; raf = requestAnimationFrame(frame); } }
 
-  function startLevel(i) {
+  function showLoadError(error) {
+    console.error('[games] region could not be prepared', error);
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+    setScreen('loading');
+    ref('loading-title').textContent = 'This adventure could not load';
+    ref('loading-message').textContent = 'Please try again. Your saved progress is unchanged.';
+    root.querySelector('[data-act="load-retry"]').hidden = false;
+  }
+
+  async function startLevel(i, { retry = false } = {}) {
+    if (!Number.isInteger(i) || i < 0 || i >= game.levels.length) return;
+    const request = ++levelRequest;
     sound.unlock();
-    level = i; endTimer = 0; acc = 0; startedAt = performance.now();
-    session = game.create(i, { sound, preview: false });
+    level = i; settlementTime = 0; acc = 0;
+    if (!retry) runStarter = selectedStarter;
+    session = game.create(i, { sound, preview: false, starter: runStarter, hint: requestTip });
+    const preparing = session;
+    preparedSession = null;
     preview = null;
+    playT = 0; tickN = 0; clearTips();
+    ref('loading-title').textContent = 'Preparing your adventure';
+    ref('loading-message').textContent = 'Loading this region and its characters…';
+    root.querySelector('[data-act="load-retry"]').hidden = true;
+    setScreen('loading');
+    // A cancelled load cannot overwrite a newer renderer preparation.
+    const work = prepareQueue.catch(() => {}).then(async () => {
+      if (request !== levelRequest) return;
+      const renderer = await loadGl();
+      if (request !== levelRequest) return;
+      await renderer?.prepare?.(preparing);
+      if (request === levelRequest) preparedSession = preparing;
+    });
+    prepareQueue = work;
+    try { await work; } catch (error) { if (request === levelRequest) showLoadError(error); return; }
+    if (request !== levelRequest) return;
+    startedAt = performance.now();
     const k = progress.keys[i];
     ref('level').textContent = worlds ? `${k.n === 'boss' ? `World ${k.world} boss` : `${k.world}-${k.n}`} · ${game.levels[i].name}` : `${i + 1} · ${game.levels[i].name}`;
-    setScreen('play');
-    const hint = ref('hint');
+    setScreen(active ? 'play' : 'pause');
     const text = session.hint || game.levels[i].hint;
-    clearTimeout(hintTimer);
-    hint.hidden = !text; hint.textContent = text || '';
-    if (text) hintTimer = setTimeout(() => { hint.hidden = true; }, 3200);
+    // a game's very first level opens the help card first; the level's own hint follows when it closes
+    root.querySelector('[data-act="puzzle-hint"]').hidden = !session?.puzzleHintAvailable;
+    if (active && HELP[game.id] && !introSeen(game.id)) { markIntro(game.id); showLevelHint(''); hintAfterHelp = text; openHelp(); }
+    else showLevelHint(text);
     syncHud();
     if (active) draw(); // lay the board out now, so input in the very first frame lands where it is drawn
     startLoop();
+  }
+  function showLevelHint(text) {
+    const hint = ref('hint');
+    clearTimeout(hintTimer);
+    hint.hidden = !text; hint.textContent = text || '';
+    hintAt = text ? performance.now() : 0;
+    if (text) hintTimer = setTimeout(() => { hint.hidden = true; hintAt = 0; }, 3200);
   }
   function finish(result) {
     if (screen !== 'play') return;
@@ -425,7 +537,7 @@ export function mountGame(root, game) {
     ref('rtitle').textContent = result.won ? (stars === 3 ? 'Perfect!' : 'Level complete') : 'Failed';
     ref('rstars').innerHTML = starsHtml(stars, ' gm-star--pop');
     ref('rstars').setAttribute('aria-label', `${stars} of 3 stars`);
-    ref('reason').textContent = result.reason || '';
+    ref('reason').textContent = (result.reason || '') + (out.bonusUnlocked ? ' Sturmbastion freigeschaltet! In der neuen Sonderwelt warten elf weitere Einsätze.' : '');
     ref('rscore').textContent = String(result.score | 0);
     ref('rbest').textContent = String(Math.max(before, result.won ? result.score | 0 : 0));
     root.querySelector('.gm-result').dataset.won = String(!!result.won);
@@ -438,7 +550,134 @@ export function mountGame(root, game) {
   }
   function pause() { if (screen === 'play') { setScreen('pause'); draw(); } }
   function resume() { if (screen === 'pause') { setScreen('play'); startLoop(); } }
-  function toMenu() { session = null; preview = null; renderMenu(); setScreen('menu'); draw(); }
+  function toMenu() { levelRequest++; session = null; preparedSession = null; preview = null; renderMenu(); setScreen('menu'); draw(); }
+
+  // ── help: the How to play card ──
+  const helpData = HELP[game.id] || null;
+  const tips = TIPS[game.id] || [];
+  const helpEl = root.querySelector('.gm-help'), tipEl = root.querySelector('.gm-tip');
+  let helpOpen = false, helpReturn = null, helpMode = 'keys', hintAfterHelp = null;
+  // which controls to explain first: the last input used, else the device (a coarse pointer without hover is touch)
+  let inputMode = view.keyboard || !window.matchMedia?.('(pointer: coarse)').matches ? 'keys' : 'touch';
+  // view.touch: on-screen buttons (Bounce Brigade's MINE button) show from the start on touch screens, not only
+  // while a finger is down
+  view.touch = inputMode === 'touch';
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const keyCaps = (k) => (k.join('') === 'WASD'
+    ? `<span class="gm-help__wasd"><kbd class="fw-kbd">W</kbd><kbd class="fw-kbd">A</kbd><kbd class="fw-kbd">S</kbd><kbd class="fw-kbd">D</kbd></span>`
+    : k.map((c) => (c === '…' ? '<span class="gm-help__dots">…</span>' : `<kbd class="fw-kbd">${esc(c)}</kbd>`)).join(''));
+  const row = (r) => `<li class="gm-help__row"><span class="gm-help__icon">${r.g ? glyph(r.g, r.k ? 28 : 32) : ''}${r.k ? keyCaps(r.k) : ''}</span>`
+    + `<span class="gm-help__text">${r.b ? `<b>${esc(r.b)}:</b> ` : ''}${esc(r.t)}</span></li>`;
+  function renderHelp(mode) {
+    helpMode = mode;
+    ref('helpgoal').textContent = helpData.goal;
+    ref('helpcontrols').innerHTML = (helpData[mode] || []).map(row).join('');
+    ref('helpcontrols').setAttribute('aria-labelledby', `gm-help-${game.id}-${mode}`);
+    ref('helprules').innerHTML = (helpData.rules || []).map(row).join('');
+    for (const b of helpEl.querySelectorAll('[role="tab"]')) {
+      const on = b.dataset.mode === mode;
+      b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
+    }
+    ref('helptips').checked = tipsOn();
+  }
+  function openHelp() {
+    if (!helpData || helpOpen) return;
+    helpReturn = document.activeElement;
+    helpOpen = true;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    renderHelp(inputMode);
+    helpEl.hidden = false;
+    stage.classList.add('has-help');
+    root.querySelector('.gm-help__done').focus({ preventScroll: true });
+  }
+  function closeHelp() {
+    if (!helpOpen) return;
+    helpOpen = false;
+    helpEl.hidden = true;
+    stage.classList.remove('has-help');
+    if (hintAfterHelp != null && screen === 'play') showLevelHint(hintAfterHelp);
+    hintAfterHelp = null;
+    const back = helpReturn && root.contains(helpReturn) && helpReturn.offsetParent ? helpReturn : screen === 'play' ? canvas : null;
+    back?.focus?.({ preventScroll: true });
+    helpReturn = null;
+    if (screen === 'play' || screen === 'result') startLoop();
+    pumpTips();
+  }
+  /** Keys while the card is open: Esc closes, Tab stays inside, arrows switch the controls tab. Nothing reaches the game. */
+  function helpKey(e) {
+    if (e.key === 'Escape' || ((e.code === 'KeyH') && !e.target.closest?.('input'))) { closeHelp(); e.preventDefault(); return; }
+    if (e.key === 'Tab') {
+      const items = [...helpEl.querySelectorAll('button, input')].filter((el) => el.offsetParent && el.tabIndex >= 0);
+      if (!items.length) return;
+      const i = items.indexOf(document.activeElement);
+      const next = e.shiftKey ? (i <= 0 ? items.length - 1 : i - 1) : (i < 0 || i === items.length - 1 ? 0 : i + 1);
+      items[next].focus(); e.preventDefault(); return;
+    }
+    const tab = e.target.closest?.('[role="tab"]');
+    if (tab && (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End')) {
+      renderHelp(helpMode === 'touch' ? 'keys' : 'touch');
+      helpEl.querySelector(`[role="tab"][data-mode="${helpMode}"]`).focus();
+      e.preventDefault();
+    }
+  }
+  ref('helptips').addEventListener('change', (e) => { setTipsOn(e.target.checked); if (!e.target.checked) clearTips(); });
+  helpEl.addEventListener('pointerdown', (e) => { if (e.target === helpEl) e.preventDefault(); }); // a tap beside the card does nothing
+
+  // ── mechanic tips: once each, a small banner while playing (games-help.js TIPS) ──
+  let tipQueue = [], tipShown = null, tipTimer = 0, playT = 0, tickN = 0;
+  /** Called after every simulation step: play time, and a look at the tips four times a second. */
+  function tipTick() {
+    playT += STEP;
+    if (++tickN >= 15) { tickN = 0; checkTips(); }
+  }
+  function checkTips() {
+    if (!session || session.result || !tips.length || !tipsOn()) return;
+    const ctx = { t: playT, mode: inputMode, level };
+    for (const tip of tips) {
+      if (tip === tipShown || tipQueue.includes(tip) || tipSeen(game.id, tip.id)) continue;
+      try {
+        if (tip.done?.(session, ctx)) { markTip(game.id, tip.id); continue; }
+        if (tip.when(session, ctx)) tipQueue.push(tip);
+      } catch { /* a field the tip reads is gone: it stays quiet */ }
+    }
+    tipQueue.sort((a, b) => tips.indexOf(a) - tips.indexOf(b)); // the list order is the priority
+    pumpTips();
+  }
+  /** env.hint(id): a game asks for one of its tips now. */
+  function requestTip(id) {
+    const tip = tips.find((t) => t.id === id);
+    if (!tip || !tipsOn() || tip === tipShown || tipQueue.includes(tip) || tipSeen(game.id, id)) return false;
+    tipQueue.push(tip); pumpTips();
+    return true;
+  }
+  function pumpTips() {
+    if (tipShown || !tipQueue.length || helpOpen || screen !== 'play') return;
+    // the level's own hint gets a moment first, then a tip takes its place
+    const wait = hintAt ? 1600 - (performance.now() - hintAt) : 0;
+    clearTimeout(tipTimer);
+    if (wait > 0) { tipTimer = setTimeout(pumpTips, wait + 20); return; }
+    const tip = tipQueue.shift();
+    tipShown = tip;
+    markTip(game.id, tip.id);
+    clearTimeout(hintTimer); ref('hint').hidden = true; hintAt = 0;
+    const text = tipText(tip, inputMode);
+    ref('tipicon').innerHTML = glyph(tip.g, 32);
+    ref('tiptext').textContent = text;
+    tipEl.dataset.tip = tip.id;
+    tipEl.hidden = false;
+    tipTimer = setTimeout(hideTip, clamp(2000 + text.length * 55, 4500, 9000));
+  }
+  function hideTip() {
+    clearTimeout(tipTimer);
+    tipEl.hidden = true; tipShown = null;
+    if (tipQueue.length) tipTimer = setTimeout(pumpTips, 600);
+  }
+  /** Leaving a level: the banner goes; tips still waiting come back when their mechanic does. */
+  function clearTips() {
+    clearTimeout(tipTimer); tipQueue = [];
+    if (tipEl) { tipEl.hidden = true; }
+    tipShown = null;
+  }
 
   // ── input ──
   const pos = (e) => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
@@ -454,6 +693,7 @@ export function mountGame(root, game) {
   canvas.addEventListener('pointerup', up);
   canvas.addEventListener('pointercancel', up);
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  stage.addEventListener('pointerdown', (e) => { if (e.pointerType) { inputMode = e.pointerType === 'mouse' ? 'keys' : 'touch'; view.touch = inputMode === 'touch'; } }, true);
   // iOS: no page scroll or double-tap zoom while playing.
   stage.addEventListener('touchmove', (e) => { if (screen === 'play') e.preventDefault(); }, { passive: false });
 
@@ -467,11 +707,16 @@ export function mountGame(root, game) {
     if (act === 'play') startLevel(nextOpenLevel());
     else if (act === 'pause') pause();
     else if (act === 'resume') resume();
-    else if (act === 'restart' || act === 'retry') startLevel(level);
+    else if (act === 'restart' || act === 'retry' || act === 'load-retry') startLevel(level, { retry: true });
     else if (act === 'next') startLevel(Math.min(level + 1, game.levels.length - 1));
     else if (act === 'menu') toMenu();
     else if (act === 'sound') { sound.toggle(); syncSoundButton(); }
     else if (act === 'fullscreen') toggleFullscreen();
+    else if (act === 'puzzle-hint' && screen === 'play') { const hint = session?.takePuzzleHint?.(); if (hint) showLevelHint(hint); root.querySelector('[data-act="puzzle-hint"]').hidden = !session?.puzzleHintAvailable; }
+    else if (act === 'help') openHelp();
+    else if (act === 'help-close') closeHelp();
+    else if (act === 'help-tab') renderHelp(e.target.closest('[data-mode]').dataset.mode);
+    else if (act === 'tip-close') hideTip();
   });
 
   // Full screen: the real Fullscreen API where there is one; iPhone Safari has none for elements, so there the
@@ -498,14 +743,17 @@ export function mountGame(root, game) {
   document.addEventListener('webkitfullscreenchange', syncFullscreen);
   window.addEventListener('keydown', (e) => {
     if (!active || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (helpOpen) { helpKey(e); return; }
     if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
     if (/^(Digit|Numpad)[0-9]$/.test(e.code) || e.key.startsWith('Arrow')) view.keyboard = true;
+    if (!/^(Shift|Control|Alt|Meta)/.test(e.key)) { inputMode = 'keys'; view.touch = false; }
+    if (e.code === 'KeyH' && screen !== 'result') { openHelp(); e.preventDefault(); return; }
     if (e.code === 'KeyF') { toggleFullscreen(); e.preventDefault(); return; }
     if (e.key === 'Escape' && stage.classList.contains('is-max') && screen !== 'play') { toggleFullscreen(); e.preventDefault(); return; }
     if (screen === 'menu' && ow && ow.key(e)) { e.preventDefault(); return; }
     if (screen === 'play' && session) {
       if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') { pause(); e.preventDefault(); return; }
-      if (e.key === 'r' || e.key === 'R') { startLevel(level); e.preventDefault(); return; }
+      if (e.key === 'r' || e.key === 'R') { startLevel(level, { retry: true }); e.preventDefault(); return; }
       if (session.key(e.code, true, e)) e.preventDefault();
     } else if (screen === 'pause' && (e.key === 'Escape' || e.key === 'p' || e.key === 'P')) { resume(); e.preventDefault(); }
   });
@@ -527,7 +775,7 @@ export function mountGame(root, game) {
   if (worlds && hasWebGL()) { root.querySelector('.gm-owhost').hidden = false; screens.menu.classList.add('has-ow'); }
 
   const controller = {
-    activate() { if (active) return; active = true; resize(); loadGl(); loadOverworld(); if (ow && screen === 'menu') { ow.refresh(); ow.activate(); } if (screen === 'play' || screen === 'result') startLoop(); },
+    activate() { if (active) return; active = true; resize(); loadGl().catch(err => console.warn('[games] renderer load deferred to retry', err)); loadOverworld(); if (ow && screen === 'menu') { ow.refresh(); ow.activate(); } if (screen === 'play' || screen === 'result') startLoop(); },
     deactivate() { pause(); active = false; if (raf) cancelAnimationFrame(raf); raf = 0; ow?.deactivate(); },
   };
   // Test hooks (also handy from the console): state, deterministic fast-forward, jump to a result.
@@ -545,12 +793,18 @@ export function mountGame(root, game) {
     fastForward(seconds) {
       if (!session) return null;
       const n = Math.round(seconds / STEP);
-      for (let i = 0; i < n && screen === 'play'; i++) { session.update(STEP); if (session.result) break; }
+      for (let i = 0; i < n && screen === 'play'; i++) { session.update(STEP); tipTick(); if (session.result) break; }
       if (session.result) finish(session.result);
       syncHud(); draw();
       return session.result || null;
     },
     finish: (result) => finish(result),
+    get helpOpen() { return helpOpen; },
+    get tip() { return tipShown?.id || null; },
+    get playTime() { return playT; },
+    openHelp: () => openHelp(),
+    closeHelp: () => closeHelp(),
+    hint: (id) => requestTip(id),
     reset() { delete Profile.profile().games[game.id]; Profile.save(); toMenu(); },
   };
   return controller;

@@ -1,0 +1,94 @@
+{
+  "category": "vegetation/woodland",
+  "label": "Young white-barked birch",
+  "games": [
+    "generic"
+  ],
+  "description": "Narrow bending white bole, dark lenticels, eight drooping twig forks and airy layered green crown. Prepared library only; no game integration.",
+  "budgets": {
+    "lo": 1800,
+    "hi": 24000
+  },
+  "vertex_cap": 1200,
+  "lods": {
+    "lo": {
+      "vertices": 1121,
+      "triangles": 795,
+      "groups": 1,
+      "bytes": 24576,
+      "vertexCap": 1200,
+      "triangleTarget": 795
+    },
+    "hi": {
+      "vertices": 2580,
+      "triangles": 3356,
+      "groups": 1,
+      "bytes": 68408,
+      "vertexCap": 1000000,
+      "triangleTarget": 24000
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "cull": false,
+  "sockets": {},
+  "placement": {
+    "surface": "forest edge, stream margin, young woodland",
+    "origin": "ground centre, Y-up",
+    "rotationY": "free 0-360 degrees",
+    "uniformScale": [
+      0.8,
+      1.2
+    ]
+  },
+  "reuse": {
+    "family": "woodland",
+    "repeat": "rotate and vary uniform scale; keep species silhouette",
+    "combineWith": [
+      "meadow_fern_rosette",
+      "meadow_moss",
+      "meadow_leaf_litter"
+    ]
+  },
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.13,
+    "note": "Suggested future shader response; authored mesh is static."
+  },
+  "source": "scripts/games-blender/fernworld/assets/woodland.py",
+  "id": "woodland_birch_young",
+  "bounds": [
+    [
+      -1.0214548110961914,
+      -0.006995845586061478,
+      -0.833986222743988
+    ],
+    [
+      0.9648008942604065,
+      3.1000001430511475,
+      1.0513375997543335
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#493c30",
+    "#4c5145",
+    "#648b46",
+    "#85a451",
+    "#8b876b",
+    "#8da952",
+    "#90aa55",
+    "#9caf5b",
+    "#d9d8c3"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "855ea84a8ad39c4087fbf9b35076c6224768fc799b64d3b96067f85af181f5dc"
+}

@@ -1,0 +1,11 @@
+Ellie — Blender Studio / Blender Foundation — CC BY 4.0
+Source: https://studio.blender.org/characters/ellie/v1/
+License: https://creativecommons.org/licenses/by/4.0/
+
+Used visible source meshes: Ellie head/ears/lid topology, both eye cages and eyebrows.
+Modifications for Momo: youthful face/proportions and expression, new materials and UV atlases, integration into the existing mapped23-bone Momo rig; new approved-sheet chestnut hairstyle, side braid and loose tied hair; technical Lo/Far/Shadow derivatives.
+The original production rig and executable film UI were not copied into the asset scene.
+
+Body/costume/equipment base: Kay Lousberg, KayKit Adventurers Character Pack FREE2.0 / Rogue — CC0-1.0.
+https://kaylousberg.itch.io/kaykit-adventurers
+The existing original Momo adaptation and licensed upstream originals remain preserved.

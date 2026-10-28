@@ -1,0 +1,2910 @@
+{
+  "version": 1,
+  "status": "prepared-only; no game integration",
+  "assets": [
+    {
+      "id": "ALPINE_BLOOM",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_BLOOM/ALPINE_BLOOM.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_BLOOM/ALPINE_BLOOM.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_BLOOM/ALPINE_BLOOM.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_BLOOM/ALPINE_BLOOM.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 1824,
+        "lo": 648,
+        "sh": 276
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "d000c6e68dbbdaad273fe3b7129e2b587877b3dfe4e711ba4c0f63631f0d61f1",
+        "exports": {
+          "hi": "5996dc26e2ac7c9a543963151c0febdde5d201750b030db70821242f2bb2dfb1",
+          "lo": "ef5f6f4deba999c26e3f6df892287183cf52d298874ac8fa9c68b20e154b31bd",
+          "sh": "d037058b80c97fff380aed996b2bd832dd5584eaa44af521c13b70e0b0f3bc24"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-ALPINE_BLOOM-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/ALPINE_BLOOM.hi.glb",
+          "sha256": "5996dc26e2ac7c9a543963151c0febdde5d201750b030db70821242f2bb2dfb1",
+          "bytes": 155996,
+          "triangles": 1824,
+          "vertices": 3558,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.15202070772647858,
+              0,
+              -0.18140284717082977
+            ],
+            "max": [
+              0.18201495707035065,
+              0.2773365378379822,
+              0.14761245250701904
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/ALPINE_BLOOM.lo.glb",
+          "sha256": "ef5f6f4deba999c26e3f6df892287183cf52d298874ac8fa9c68b20e154b31bd",
+          "bytes": 58456,
+          "triangles": 648,
+          "vertices": 1296,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.15202070772647858,
+              0,
+              -0.18140284717082977
+            ],
+            "max": [
+              0.18201495707035065,
+              0.27757376432418823,
+              0.14761245250701904
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/ALPINE_BLOOM.shadow.glb",
+          "sha256": "d037058b80c97fff380aed996b2bd832dd5584eaa44af521c13b70e0b0f3bc24",
+          "bytes": 26932,
+          "triangles": 276,
+          "vertices": 564,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.15202070772647858,
+              0,
+              -0.18140284717082977
+            ],
+            "max": [
+              0.18201495707035065,
+              0.2698962092399597,
+              0.14761245250701904
+            ]
+          }
+        }
+      },
+      "nativeSha256": "d000c6e68dbbdaad273fe3b7129e2b587877b3dfe4e711ba4c0f63631f0d61f1",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "ALPINE_DWARF_PINE",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_DWARF_PINE/ALPINE_DWARF_PINE.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_DWARF_PINE/ALPINE_DWARF_PINE.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_DWARF_PINE/ALPINE_DWARF_PINE.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_DWARF_PINE/ALPINE_DWARF_PINE.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 2580,
+        "lo": 908,
+        "sh": 570
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "7e2c44cfa3e89c9f71e89c8b1972cbb355f54093ae700be4355c610095227e48",
+        "exports": {
+          "hi": "e7cd2b5d3393e8b2a7782db1103111f247d992cba8cbc12bf913b914f9de8c74",
+          "lo": "85cf50adcf4f3cb264551ea7be85125e78de4232236d331efd03a3a678968f08",
+          "sh": "70928e475fd6b82a4bbe4221c8e07bb6ff9ad1fa0f63a1d48d96585371fd92b7"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-ALPINE_DWARF_PINE-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/ALPINE_DWARF_PINE.hi.glb",
+          "sha256": "e7cd2b5d3393e8b2a7782db1103111f247d992cba8cbc12bf913b914f9de8c74",
+          "bytes": 236288,
+          "triangles": 2580,
+          "vertices": 5452,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.3078429400920868,
+              0,
+              -0.35664620995521545
+            ],
+            "max": [
+              0.375,
+              0.9121502637863159,
+              0.35664620995521545
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/ALPINE_DWARF_PINE.lo.glb",
+          "sha256": "85cf50adcf4f3cb264551ea7be85125e78de4232236d331efd03a3a678968f08",
+          "bytes": 92812,
+          "triangles": 908,
+          "vertices": 2116,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.3078429400920868,
+              0,
+              -0.35664620995521545
+            ],
+            "max": [
+              0.375,
+              0.9121502637863159,
+              0.35664620995521545
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/ALPINE_DWARF_PINE.shadow.glb",
+          "sha256": "70928e475fd6b82a4bbe4221c8e07bb6ff9ad1fa0f63a1d48d96585371fd92b7",
+          "bytes": 65024,
+          "triangles": 570,
+          "vertices": 1472,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.3078429400920868,
+              0,
+              -0.35664620995521545
+            ],
+            "max": [
+              0.375,
+              0.9121502637863159,
+              0.35664620995521545
+            ]
+          }
+        }
+      },
+      "nativeSha256": "7e2c44cfa3e89c9f71e89c8b1972cbb355f54093ae700be4355c610095227e48",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "ALPINE_FERN",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_FERN/ALPINE_FERN.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_FERN/ALPINE_FERN.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_FERN/ALPINE_FERN.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/ALPINE_FERN/ALPINE_FERN.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 4788,
+        "lo": 660,
+        "sh": 360
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "7d9c3896bbf952adbc3d704775de438090d50a089de82763f060b8ded2ea7424",
+        "exports": {
+          "hi": "8c20f71d6c498db178aaa751d2214120388a6375936494558b4664ea362213fc",
+          "lo": "41ae5a409e420262c7574283351821569fc18bc86eff48b2f607377081fa2100",
+          "sh": "d9ed1ab34af5137fca0730617f314bb232e940330b18f85978eaa8e657ede652"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-ALPINE_FERN-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/ALPINE_FERN.hi.glb",
+          "sha256": "8c20f71d6c498db178aaa751d2214120388a6375936494558b4664ea362213fc",
+          "bytes": 414024,
+          "triangles": 4788,
+          "vertices": 9564,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.24674741923809052,
+              0,
+              -0.2552689015865326
+            ],
+            "max": [
+              0.2619006931781769,
+              0.2423507422208786,
+              0.24828295409679413
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/ALPINE_FERN.lo.glb",
+          "sha256": "41ae5a409e420262c7574283351821569fc18bc86eff48b2f607377081fa2100",
+          "bytes": 59480,
+          "triangles": 660,
+          "vertices": 1320,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2479601353406906,
+              0,
+              -0.256519079208374
+            ],
+            "max": [
+              0.2630380690097809,
+              0.24149726331233978,
+              0.2495591640472412
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/ALPINE_FERN.shadow.glb",
+          "sha256": "d9ed1ab34af5137fca0730617f314bb232e940330b18f85978eaa8e657ede652",
+          "bytes": 33996,
+          "triangles": 360,
+          "vertices": 728,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.23926782608032227,
+              0,
+              -0.2561761140823364
+            ],
+            "max": [
+              0.262552946805954,
+              0.23962832987308502,
+              0.24922284483909607
+            ]
+          }
+        }
+      },
+      "nativeSha256": "7d9c3896bbf952adbc3d704775de438090d50a089de82763f060b8ded2ea7424",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "ASH_GRASS_CLUMP",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/ASH_GRASS_CLUMP/ASH_GRASS_CLUMP.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/ASH_GRASS_CLUMP/ASH_GRASS_CLUMP.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/ASH_GRASS_CLUMP/ASH_GRASS_CLUMP.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/ASH_GRASS_CLUMP/ASH_GRASS_CLUMP.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 1040,
+        "lo": 204,
+        "sh": 80
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "f109b4ca4234f823f396c9b42a14bc72f7ea67901fc4d19e567a18f7cae3ecd2",
+        "exports": {
+          "hi": "a7f0b93f58bf04c1b5946739312aeba6e772575fc7924c9bd36a4a72cf0f9fdd",
+          "lo": "c84aa960a57e96b51bb523010b0097ea3df8a35e6a7cd4cfb00f7344fdc44d6f",
+          "sh": "97308715023b2e99091e9c0d5a337aa18a3c7a109306b95bc9cb56180d0b6400"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-ASH_GRASS_CLUMP-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/ASH_GRASS_CLUMP.hi.glb",
+          "sha256": "a7f0b93f58bf04c1b5946739312aeba6e772575fc7924c9bd36a4a72cf0f9fdd",
+          "bytes": 92172,
+          "triangles": 1040,
+          "vertices": 2080,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2347051054239273,
+              0,
+              -0.3272571265697479
+            ],
+            "max": [
+              0.26432475447654724,
+              0.3639410138130188,
+              0.26945731043815613
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/ASH_GRASS_CLUMP.lo.glb",
+          "sha256": "c84aa960a57e96b51bb523010b0097ea3df8a35e6a7cd4cfb00f7344fdc44d6f",
+          "bytes": 20264,
+          "triangles": 204,
+          "vertices": 408,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2347051054239273,
+              0,
+              -0.3272571265697479
+            ],
+            "max": [
+              0.25821012258529663,
+              0.35986533761024475,
+              0.26945731043815613
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/ASH_GRASS_CLUMP.shadow.glb",
+          "sha256": "97308715023b2e99091e9c0d5a337aa18a3c7a109306b95bc9cb56180d0b6400",
+          "bytes": 9596,
+          "triangles": 80,
+          "vertices": 160,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2347051054239273,
+              0,
+              -0.3272571265697479
+            ],
+            "max": [
+              0.25821012258529663,
+              0.31278011202812195,
+              0.26945731043815613
+            ]
+          }
+        }
+      },
+      "nativeSha256": "f109b4ca4234f823f396c9b42a14bc72f7ea67901fc4d19e567a18f7cae3ecd2",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "BASALT_ROOT_SHRUB",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/BASALT_ROOT_SHRUB/BASALT_ROOT_SHRUB.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/BASALT_ROOT_SHRUB/BASALT_ROOT_SHRUB.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/BASALT_ROOT_SHRUB/BASALT_ROOT_SHRUB.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/BASALT_ROOT_SHRUB/BASALT_ROOT_SHRUB.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "basalt and lower wood rigid through local runtime Y=0.38 m; interpolate above to highest tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": true
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": false,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 2420,
+        "lo": 586,
+        "sh": 360
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "ca78253a101e78f1a237ed7c659d19170188e98c9f98b6cd31c3e96b9d14e8a8",
+        "exports": {
+          "hi": "5f1de0dd2e2ba379876d1e4e76d03ae61f516bf95960c1308708434255f0e968",
+          "lo": "c5b679274bc2c1202a45a024d751175f7588130e5ca341e3460c56a308b15433",
+          "sh": "f150895f9940aa616bebe792d61eef2540a64c6adeb0b484da868eb09d32b74e"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-BASALT_ROOT_SHRUB-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/BASALT_ROOT_SHRUB.hi.glb",
+          "sha256": "5f1de0dd2e2ba379876d1e4e76d03ae61f516bf95960c1308708434255f0e968",
+          "bytes": 291240,
+          "triangles": 2420,
+          "vertices": 6848,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.4589311182498932,
+              0,
+              -0.4255593419075012
+            ],
+            "max": [
+              0.42663130164146423,
+              0.7584484815597534,
+              0.45088785886764526
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/BASALT_ROOT_SHRUB.lo.glb",
+          "sha256": "c5b679274bc2c1202a45a024d751175f7588130e5ca341e3460c56a308b15433",
+          "bytes": 69748,
+          "triangles": 586,
+          "vertices": 1586,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.4395950436592102,
+              0,
+              -0.4215700328350067
+            ],
+            "max": [
+              0.42294347286224365,
+              0.7530540227890015,
+              0.4310964345932007
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/BASALT_ROOT_SHRUB.shadow.glb",
+          "sha256": "f150895f9940aa616bebe792d61eef2540a64c6adeb0b484da868eb09d32b74e",
+          "bytes": 41344,
+          "triangles": 360,
+          "vertices": 910,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.39460617303848267,
+              0,
+              -0.3981844186782837
+            ],
+            "max": [
+              0.387440025806427,
+              0.6974555253982544,
+              0.3879462778568268
+            ]
+          }
+        }
+      },
+      "nativeSha256": "ca78253a101e78f1a237ed7c659d19170188e98c9f98b6cd31c3e96b9d14e8a8",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "CHAR_FERN",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/CHAR_FERN/CHAR_FERN.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/CHAR_FERN/CHAR_FERN.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/CHAR_FERN/CHAR_FERN.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/CHAR_FERN/CHAR_FERN.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 4788,
+        "lo": 660,
+        "sh": 360
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "0e4fb4f067357cb699b8ea72cacc7a79507482e188baa0be667c5fbf070b4c80",
+        "exports": {
+          "hi": "7192939aff5f0d2b1b4ccd720305d8588aaa2a5518230f48e3f2515603efdf5b",
+          "lo": "a8e658eb708a0658f434496f02cf4b7ef1f8dabe0b4f615d1ab3591e15483b15",
+          "sh": "8c0ddb045bde5245d2d260060a689849386d508f06ce7eda83ccc7fc17dc7546"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-CHAR_FERN-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/CHAR_FERN.hi.glb",
+          "sha256": "7192939aff5f0d2b1b4ccd720305d8588aaa2a5518230f48e3f2515603efdf5b",
+          "bytes": 414016,
+          "triangles": 4788,
+          "vertices": 9564,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.3289194703102112,
+              0,
+              -0.34027615189552307
+            ],
+            "max": [
+              0.3491358160972595,
+              0.4289911389350891,
+              0.3309464752674103
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/CHAR_FERN.lo.glb",
+          "sha256": "a8e658eb708a0658f434496f02cf4b7ef1f8dabe0b4f615d1ab3591e15483b15",
+          "bytes": 59480,
+          "triangles": 660,
+          "vertices": 1320,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.3303150534629822,
+              0,
+              -0.34165921807289124
+            ],
+            "max": [
+              0.35055577754974365,
+              0.42876699566841125,
+              0.3322876989841461
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/CHAR_FERN.shadow.glb",
+          "sha256": "8c0ddb045bde5245d2d260060a689849386d508f06ce7eda83ccc7fc17dc7546",
+          "bytes": 33992,
+          "triangles": 360,
+          "vertices": 728,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.3187028765678406,
+              0,
+              -0.34130099415779114
+            ],
+            "max": [
+              0.34983211755752563,
+              0.4248645007610321,
+              0.3319399058818817
+            ]
+          }
+        }
+      },
+      "nativeSha256": "0e4fb4f067357cb699b8ea72cacc7a79507482e188baa0be667c5fbf070b4c80",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "CUSHION_MOSS",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/CUSHION_MOSS/CUSHION_MOSS.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/CUSHION_MOSS/CUSHION_MOSS.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/CUSHION_MOSS/CUSHION_MOSS.lo.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          0
+        ],
+        "groundWeight": 0,
+        "tipWeight": 0,
+        "binding": "local runtime Y height",
+        "anchor": "whole groundcover rigid",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 1802,
+        "lo": 600
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "shadowOmission": "Small rigid groundcover: no individual blade/moss/lichen shadow caster; avoid redundant near-identical geometry for dense instancing.",
+      "sha256": {
+        "native": "8bba35e969e555fa3c3b08dd07f17ce6dbf99ba26a2ad360f4bba248219083ce",
+        "exports": {
+          "hi": "cef513f8ffb292fba7c8a1dda4f0ae9ef8bd79d48010ed0f77eb0ac2242e5109",
+          "lo": "480e558930b5bad3a48b790ed6b18e95bdcaab175146265c90e44e8fb9538377"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-CUSHION_MOSS-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/CUSHION_MOSS.hi.glb",
+          "sha256": "cef513f8ffb292fba7c8a1dda4f0ae9ef8bd79d48010ed0f77eb0ac2242e5109",
+          "bytes": 158504,
+          "triangles": 1802,
+          "vertices": 3624,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.24945791065692902,
+              0,
+              -0.2399698793888092
+            ],
+            "max": [
+              0.20890121161937714,
+              0.0923011302947998,
+              0.22409752011299133
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/CUSHION_MOSS.lo.glb",
+          "sha256": "480e558930b5bad3a48b790ed6b18e95bdcaab175146265c90e44e8fb9538377",
+          "bytes": 54964,
+          "triangles": 600,
+          "vertices": 1216,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2138555347919464,
+              0,
+              -0.23321984708309174
+            ],
+            "max": [
+              0.1987340748310089,
+              0.091923788189888,
+              0.22533130645751953
+            ]
+          }
+        }
+      },
+      "nativeSha256": "8bba35e969e555fa3c3b08dd07f17ce6dbf99ba26a2ad360f4bba248219083ce",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "DESERT_BLOOM",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/DESERT_BLOOM/DESERT_BLOOM.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/DESERT_BLOOM/DESERT_BLOOM.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/DESERT_BLOOM/DESERT_BLOOM.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/DESERT_BLOOM/DESERT_BLOOM.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 3024,
+        "lo": 912,
+        "sh": 612
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "780a682416a0cb522b94a7ace1c5bdbd50bb11891ac664e9d79670add3707e23",
+        "exports": {
+          "hi": "b0617a9fbef0ba9347124a4d971b79b81b000a581c7a191f553d5b285bf3f094",
+          "lo": "28794fa1da2e2a818dacf26280ba6363ee2a9eb3a77bb8a3a20298cae8a84798",
+          "sh": "45d7242ca6180b7e1acce531a643bc4bd7dcdfb05c5c9c5412e53f67b37595b9"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-DESERT_BLOOM-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/DESERT_BLOOM.hi.glb",
+          "sha256": "b0617a9fbef0ba9347124a4d971b79b81b000a581c7a191f553d5b285bf3f094",
+          "bytes": 259200,
+          "triangles": 3024,
+          "vertices": 5958,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.15892645716667175,
+              0,
+              -0.18447081744670868
+            ],
+            "max": [
+              0.19001717865467072,
+              0.36259591579437256,
+              0.15763017535209656
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/DESERT_BLOOM.lo.glb",
+          "sha256": "28794fa1da2e2a818dacf26280ba6363ee2a9eb3a77bb8a3a20298cae8a84798",
+          "bytes": 81160,
+          "triangles": 912,
+          "vertices": 1824,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.15892645716667175,
+              0,
+              -0.18447081744670868
+            ],
+            "max": [
+              0.19001717865467072,
+              0.3574312925338745,
+              0.15763017535209656
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/DESERT_BLOOM.shadow.glb",
+          "sha256": "45d7242ca6180b7e1acce531a643bc4bd7dcdfb05c5c9c5412e53f67b37595b9",
+          "bytes": 55836,
+          "triangles": 612,
+          "vertices": 1236,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.15892645716667175,
+              0,
+              -0.18447081744670868
+            ],
+            "max": [
+              0.19001717865467072,
+              0.3555164933204651,
+              0.15763017535209656
+            ]
+          }
+        }
+      },
+      "nativeSha256": "780a682416a0cb522b94a7ace1c5bdbd50bb11891ac664e9d79670add3707e23",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "DESERT_FERN",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/DESERT_FERN/DESERT_FERN.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/DESERT_FERN/DESERT_FERN.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/DESERT_FERN/DESERT_FERN.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/DESERT_FERN/DESERT_FERN.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 5748,
+        "lo": 980,
+        "sh": 360
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "c8eda3e7d82566a1984da1c9a2734319e2292e5844d08c1cde00f8d727549d52",
+        "exports": {
+          "hi": "c00849b93d682d5ddf9a37434d01edf7b7a4f142019f4b1919e832db42ce23b9",
+          "lo": "79c586419dccd8bb33cd0af731605a1736aa0a5070cc8c21333206724fb24fe6",
+          "sh": "dbb1f2ce0bde953a544ac4169cc03ce03c74d88a665f48814257a5550aad6b0a"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-DESERT_FERN-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/DESERT_FERN.hi.glb",
+          "sha256": "c00849b93d682d5ddf9a37434d01edf7b7a4f142019f4b1919e832db42ce23b9",
+          "bytes": 496588,
+          "triangles": 5748,
+          "vertices": 11484,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.29407456517219543,
+              0,
+              -0.3045075535774231
+            ],
+            "max": [
+              0.31252631545066833,
+              0.3580069839954376,
+              0.2962154448032379
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/DESERT_FERN.lo.glb",
+          "sha256": "79c586419dccd8bb33cd0af731605a1736aa0a5070cc8c21333206724fb24fe6",
+          "bytes": 87000,
+          "triangles": 980,
+          "vertices": 1960,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2899516820907593,
+              0,
+              -0.299892395734787
+            ],
+            "max": [
+              0.3076586425304413,
+              0.3562845289707184,
+              0.2917531728744507
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/DESERT_FERN.shadow.glb",
+          "sha256": "dbb1f2ce0bde953a544ac4169cc03ce03c74d88a665f48814257a5550aad6b0a",
+          "bytes": 33996,
+          "triangles": 360,
+          "vertices": 728,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.25711724162101746,
+              0,
+              -0.27516964077949524
+            ],
+            "max": [
+              0.2819990813732147,
+              0.32284045219421387,
+              0.26772838830947876
+            ]
+          }
+        }
+      },
+      "nativeSha256": "c8eda3e7d82566a1984da1c9a2734319e2292e5844d08c1cde00f8d727549d52",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "DRY_BRANCH_SHRUB",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/DRY_BRANCH_SHRUB/DRY_BRANCH_SHRUB.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/DRY_BRANCH_SHRUB/DRY_BRANCH_SHRUB.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/DRY_BRANCH_SHRUB/DRY_BRANCH_SHRUB.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/DRY_BRANCH_SHRUB/DRY_BRANCH_SHRUB.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": false,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 2214,
+        "lo": 448,
+        "sh": 230
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "47d32985c537d530e90b6dda2beab8b72b0998fdfed7bfa52c9d694fe42884d6",
+        "exports": {
+          "hi": "ec849cf4f9c23316c5b8cae919fff9dee3aacf09b01ffe3068ce6403d57f8f0f",
+          "lo": "c09702efd457d81be556354e6b4cb0cc3efa2b070118c9b5d88fa80c02474c8b",
+          "sh": "e10d631e269bbb642988683976a6064ca531021267cbb7d7ff7f2f23c3729cc2"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-DRY_BRANCH_SHRUB-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/DRY_BRANCH_SHRUB.hi.glb",
+          "sha256": "ec849cf4f9c23316c5b8cae919fff9dee3aacf09b01ffe3068ce6403d57f8f0f",
+          "bytes": 246804,
+          "triangles": 2214,
+          "vertices": 5768,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.20846644043922424,
+              0,
+              -0.19896045327186584
+            ],
+            "max": [
+              0.19998054206371307,
+              0.49696439504623413,
+              0.1455138474702835
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/DRY_BRANCH_SHRUB.lo.glb",
+          "sha256": "c09702efd457d81be556354e6b4cb0cc3efa2b070118c9b5d88fa80c02474c8b",
+          "bytes": 58040,
+          "triangles": 448,
+          "vertices": 1314,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2063043713569641,
+              0,
+              -0.17921783030033112
+            ],
+            "max": [
+              0.18926022946834564,
+              0.4967806041240692,
+              0.14291998744010925
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/DRY_BRANCH_SHRUB.shadow.glb",
+          "sha256": "e10d631e269bbb642988683976a6064ca531021267cbb7d7ff7f2f23c3729cc2",
+          "bytes": 31200,
+          "triangles": 230,
+          "vertices": 676,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.1819344013929367,
+              0,
+              -0.12016049772500992
+            ],
+            "max": [
+              0.12327864021062851,
+              0.4511256814002991,
+              0.10970468074083328
+            ]
+          }
+        }
+      },
+      "nativeSha256": "47d32985c537d530e90b6dda2beab8b72b0998fdfed7bfa52c9d694fe42884d6",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "EMBER_BLOOM",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/EMBER_BLOOM/EMBER_BLOOM.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/EMBER_BLOOM/EMBER_BLOOM.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/EMBER_BLOOM/EMBER_BLOOM.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/EMBER_BLOOM/EMBER_BLOOM.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 1704,
+        "lo": 612,
+        "sh": 252
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "49366beea479886dbd1fbb2dab9e920a9aa6981b328cc9b5059ac6fcf3213584",
+        "exports": {
+          "hi": "37c4a9ba28a57a2338de36c4494206c8eea4258caba0013d2aa1891a283508b4",
+          "lo": "5ed49d93fa17e20683232da154832d044a3717176768c83447bed369480976e0",
+          "sh": "a75770bf3429b5dec349a2dc1149fa0aec983316664ebb514fdff142da36079a"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-EMBER_BLOOM-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/EMBER_BLOOM.hi.glb",
+          "sha256": "37c4a9ba28a57a2338de36c4494206c8eea4258caba0013d2aa1891a283508b4",
+          "bytes": 145676,
+          "triangles": 1704,
+          "vertices": 3318,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.14850649237632751,
+              0,
+              -0.1741018444299698
+            ],
+            "max": [
+              0.17901591956615448,
+              0.3821241855621338,
+              0.14662976562976837
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/EMBER_BLOOM.lo.glb",
+          "sha256": "5ed49d93fa17e20683232da154832d044a3717176768c83447bed369480976e0",
+          "bytes": 55356,
+          "triangles": 612,
+          "vertices": 1224,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.14850649237632751,
+              0,
+              -0.1741018444299698
+            ],
+            "max": [
+              0.17901591956615448,
+              0.38086122274398804,
+              0.14662976562976837
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/EMBER_BLOOM.shadow.glb",
+          "sha256": "a75770bf3429b5dec349a2dc1149fa0aec983316664ebb514fdff142da36079a",
+          "bytes": 24868,
+          "triangles": 252,
+          "vertices": 516,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.14850649237632751,
+              0,
+              -0.1741018444299698
+            ],
+            "max": [
+              0.17901591956615448,
+              0.3754841685295105,
+              0.14662976562976837
+            ]
+          }
+        }
+      },
+      "nativeSha256": "49366beea479886dbd1fbb2dab9e920a9aa6981b328cc9b5059ac6fcf3213584",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "FROST_GRASS",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/FROST_GRASS/FROST_GRASS.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/FROST_GRASS/FROST_GRASS.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/FROST_GRASS/FROST_GRASS.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/FROST_GRASS/FROST_GRASS.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 1456,
+        "lo": 340,
+        "sh": 160
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "72a77659925fac78de24bbbee69f6a559b836a5b04e458c5599f8f29b4417656",
+        "exports": {
+          "hi": "45337e52534076a114a66051c2fbe2dcb8eb3dca7fb259341300ddb167ad2e52",
+          "lo": "406ceb47464f46cd3172417a6c39cc966e5a25a1ca3c43ce075002e02b60d36b",
+          "sh": "b2310d9006d17807c074003233a075e6659cfa1e1539b52916786c414b269d16"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-FROST_GRASS-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/FROST_GRASS.hi.glb",
+          "sha256": "45337e52534076a114a66051c2fbe2dcb8eb3dca7fb259341300ddb167ad2e52",
+          "bytes": 127944,
+          "triangles": 1456,
+          "vertices": 2912,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2251477688550949,
+              0,
+              -0.3188416659832001
+            ],
+            "max": [
+              0.29021790623664856,
+              0.33325907588005066,
+              0.28958553075790405
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/FROST_GRASS.lo.glb",
+          "sha256": "406ceb47464f46cd3172417a6c39cc966e5a25a1ca3c43ce075002e02b60d36b",
+          "bytes": 31956,
+          "triangles": 340,
+          "vertices": 680,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.20138245820999146,
+              0,
+              -0.3188416659832001
+            ],
+            "max": [
+              0.23066863417625427,
+              0.3175870180130005,
+              0.28958553075790405
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/FROST_GRASS.shadow.glb",
+          "sha256": "b2310d9006d17807c074003233a075e6659cfa1e1539b52916786c414b269d16",
+          "bytes": 16472,
+          "triangles": 160,
+          "vertices": 320,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.17444132268428802,
+              0,
+              -0.3188416659832001
+            ],
+            "max": [
+              0.23066863417625427,
+              0.3175870180130005,
+              0.28958553075790405
+            ]
+          }
+        }
+      },
+      "nativeSha256": "72a77659925fac78de24bbbee69f6a559b836a5b04e458c5599f8f29b4417656",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "GLOW_MOSS_PATCH",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/GLOW_MOSS_PATCH/GLOW_MOSS_PATCH.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/GLOW_MOSS_PATCH/GLOW_MOSS_PATCH.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/GLOW_MOSS_PATCH/GLOW_MOSS_PATCH.lo.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          0
+        ],
+        "groundWeight": 0,
+        "tipWeight": 0,
+        "binding": "local runtime Y height",
+        "anchor": "whole groundcover rigid",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 2120,
+        "lo": 756
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "shadowOmission": "Small rigid groundcover: no individual blade/moss/lichen shadow caster; avoid redundant near-identical geometry for dense instancing.",
+      "sha256": {
+        "native": "fe05d32c57075437d31ff37541460186d90b788946f045ad62b5d932a1863701",
+        "exports": {
+          "hi": "7f367cdd6a5568a582550f1087375289f482e8c14ff832f44fa36b7d2cc6b2c1",
+          "lo": "5a52e10e67aa624bc11db108fb895c0f81f41a35bf188a538b49d2179e736c1c"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-GLOW_MOSS_PATCH-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/GLOW_MOSS_PATCH.hi.glb",
+          "sha256": "7f367cdd6a5568a582550f1087375289f482e8c14ff832f44fa36b7d2cc6b2c1",
+          "bytes": 185620,
+          "triangles": 2120,
+          "vertices": 4254,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2663770020008087,
+              0,
+              -0.20970572531223297
+            ],
+            "max": [
+              0.20890121161937714,
+              0.10240550339221954,
+              0.20478130877017975
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/GLOW_MOSS_PATCH.lo.glb",
+          "sha256": "5a52e10e67aa624bc11db108fb895c0f81f41a35bf188a538b49d2179e736c1c",
+          "bytes": 68388,
+          "triangles": 756,
+          "vertices": 1528,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.19261959195137024,
+              0,
+              -0.2044113576412201
+            ],
+            "max": [
+              0.19611914455890656,
+              0.10240451991558075,
+              0.20585063099861145
+            ]
+          }
+        }
+      },
+      "nativeSha256": "fe05d32c57075437d31ff37541460186d90b788946f045ad62b5d932a1863701",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "LAVA_EDGE_LICHEN",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/LAVA_EDGE_LICHEN/LAVA_EDGE_LICHEN.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/LAVA_EDGE_LICHEN/LAVA_EDGE_LICHEN.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/LAVA_EDGE_LICHEN/LAVA_EDGE_LICHEN.lo.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          0
+        ],
+        "groundWeight": 0,
+        "tipWeight": 0,
+        "binding": "local runtime Y height",
+        "anchor": "whole groundcover rigid",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 1068,
+        "lo": 490
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "shadowOmission": "Small rigid groundcover: no individual blade/moss/lichen shadow caster; avoid redundant near-identical geometry for dense instancing.",
+      "sha256": {
+        "native": "ae2515541c8c86bbecabd25356926fb36d87275615af56ad227dbfeadd7cd797",
+        "exports": {
+          "hi": "8b3693e39d0667c84a9814985cefc9cd9e66e002f0464ea363a21e74e7097f3e",
+          "lo": "02d06cd5bc2f7d18acc55f972ef939be31fd6702b6c07c2679b2284350def937"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-LAVA_EDGE_LICHEN-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/vulkara-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/LAVA_EDGE_LICHEN.hi.glb",
+          "sha256": "8b3693e39d0667c84a9814985cefc9cd9e66e002f0464ea363a21e74e7097f3e",
+          "bytes": 95544,
+          "triangles": 1068,
+          "vertices": 2160,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.25574976205825806,
+              0,
+              -0.24236734211444855
+            ],
+            "max": [
+              0.2224918156862259,
+              0.08482304215431213,
+              0.18272988498210907
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/LAVA_EDGE_LICHEN.lo.glb",
+          "sha256": "02d06cd5bc2f7d18acc55f972ef939be31fd6702b6c07c2679b2284350def937",
+          "bytes": 45672,
+          "triangles": 490,
+          "vertices": 1000,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.24150380492210388,
+              0,
+              -0.2355019897222519
+            ],
+            "max": [
+              0.22012674808502197,
+              0.0816432386636734,
+              0.18796291947364807
+            ]
+          }
+        }
+      },
+      "nativeSha256": "ae2515541c8c86bbecabd25356926fb36d87275615af56ad227dbfeadd7cd797",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "OASIS_REED",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/OASIS_REED/OASIS_REED.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/OASIS_REED/OASIS_REED.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/OASIS_REED/OASIS_REED.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/OASIS_REED/OASIS_REED.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 1764,
+        "lo": 288,
+        "sh": 156
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "d7770f980b35a4c0baefbd43ec6cdfcdcb530acd4cd02bcd196baa39ce6b3107",
+        "exports": {
+          "hi": "c49d7459444e70db0e795b1cad880e566fbf024b4fe1b15006d41471afed821d",
+          "lo": "1cdcfa0a30d08ed8a389ed38de8369f2c70c0193b2bf984abd51f5dd0afa0f28",
+          "sh": "0a5b7b14346cfa04dfa7d8b884735ad4cd549c64d05bf63a90cdf3629e3dd5ed"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-OASIS_REED-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/OASIS_REED.hi.glb",
+          "sha256": "c49d7459444e70db0e795b1cad880e566fbf024b4fe1b15006d41471afed821d",
+          "bytes": 152592,
+          "triangles": 1764,
+          "vertices": 3482,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.24138665199279785,
+              0,
+              -0.25274693965911865
+            ],
+            "max": [
+              0.28767433762550354,
+              0.8653285503387451,
+              0.28719910979270935
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/OASIS_REED.lo.glb",
+          "sha256": "1cdcfa0a30d08ed8a389ed38de8369f2c70c0193b2bf984abd51f5dd0afa0f28",
+          "bytes": 27480,
+          "triangles": 288,
+          "vertices": 576,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.24138665199279785,
+              0,
+              -0.25274693965911865
+            ],
+            "max": [
+              0.28767433762550354,
+              0.8653026223182678,
+              0.28719910979270935
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/OASIS_REED.shadow.glb",
+          "sha256": "0a5b7b14346cfa04dfa7d8b884735ad4cd549c64d05bf63a90cdf3629e3dd5ed",
+          "bytes": 16448,
+          "triangles": 156,
+          "vertices": 320,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.24138665199279785,
+              0,
+              -0.25274693965911865
+            ],
+            "max": [
+              0.28767433762550354,
+              0.8652697205543518,
+              0.28719910979270935
+            ]
+          }
+        }
+      },
+      "nativeSha256": "d7770f980b35a4c0baefbd43ec6cdfcdcb530acd4cd02bcd196baa39ce6b3107",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "SAND_GRASS_CLUMP",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/SAND_GRASS_CLUMP/SAND_GRASS_CLUMP.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/SAND_GRASS_CLUMP/SAND_GRASS_CLUMP.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/SAND_GRASS_CLUMP/SAND_GRASS_CLUMP.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/SAND_GRASS_CLUMP/SAND_GRASS_CLUMP.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": true,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 1760,
+        "lo": 528,
+        "sh": 284
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "bf76029b48fe02fc4e13e45e1e06f780eb72a33e9b645328d5561fdf7ace71ff",
+        "exports": {
+          "hi": "5b31f6589c0165bd0da6ef702e19ee814e2fa18b17d3b5bed84a00a0f155fd76",
+          "lo": "b98cdfa8e6604c2d7deda6a25c93b0a584250cc391da4aea9c8d27893d4f748c",
+          "sh": "cbcb1e61c20c11dd3a6b15d833991ac7f9c3d5c727408b91af29364540784700"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-SAND_GRASS_CLUMP-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/SAND_GRASS_CLUMP.hi.glb",
+          "sha256": "5b31f6589c0165bd0da6ef702e19ee814e2fa18b17d3b5bed84a00a0f155fd76",
+          "bytes": 153856,
+          "triangles": 1760,
+          "vertices": 3514,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2391384392976761,
+              0,
+              -0.3468840420246124
+            ],
+            "max": [
+              0.33655181527137756,
+              0.674066424369812,
+              0.2799726128578186
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/SAND_GRASS_CLUMP.lo.glb",
+          "sha256": "b98cdfa8e6604c2d7deda6a25c93b0a584250cc391da4aea9c8d27893d4f748c",
+          "bytes": 48136,
+          "triangles": 528,
+          "vertices": 1056,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2391384392976761,
+              0,
+              -0.3468840420246124
+            ],
+            "max": [
+              0.3044205904006958,
+              0.6503251194953918,
+              0.2799726128578186
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/SAND_GRASS_CLUMP.shadow.glb",
+          "sha256": "cbcb1e61c20c11dd3a6b15d833991ac7f9c3d5c727408b91af29364540784700",
+          "bytes": 27388,
+          "triangles": 284,
+          "vertices": 574,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.21236035227775574,
+              0,
+              -0.3468840420246124
+            ],
+            "max": [
+              0.24355918169021606,
+              0.6503008008003235,
+              0.23772847652435303
+            ]
+          }
+        }
+      },
+      "nativeSha256": "bf76029b48fe02fc4e13e45e1e06f780eb72a33e9b645328d5561fdf7ace71ff",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "SNOWCAP_SHRUB",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/SNOWCAP_SHRUB/SNOWCAP_SHRUB.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/SNOWCAP_SHRUB/SNOWCAP_SHRUB.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/SNOWCAP_SHRUB/SNOWCAP_SHRUB.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/SNOWCAP_SHRUB/SNOWCAP_SHRUB.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": false,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 2646,
+        "lo": 568,
+        "sh": 321
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "b7ea14bda5076038e39c78419e2da03d30a904e1ea77639b7ba1a287c6859cef",
+        "exports": {
+          "hi": "a498d6d48ca7a24a9c0c712bd6a6ee75557372a9b7173643d878e433550e195c",
+          "lo": "e0aad0107c4db3973e4016ffcec30853c4e51327c8858bb6f05ea279d9e98302",
+          "sh": "c99206fc982da4068ec86888dd07dd19a5801182badb872ad467806219d292c2"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-SNOWCAP_SHRUB-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/hibern-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/SNOWCAP_SHRUB.hi.glb",
+          "sha256": "a498d6d48ca7a24a9c0c712bd6a6ee75557372a9b7173643d878e433550e195c",
+          "bytes": 284272,
+          "triangles": 2646,
+          "vertices": 6640,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.21513675153255463,
+              0,
+              -0.19896045327186584
+            ],
+            "max": [
+              0.22573724389076233,
+              0.49696439504623413,
+              0.18481197953224182
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/SNOWCAP_SHRUB.lo.glb",
+          "sha256": "e0aad0107c4db3973e4016ffcec30853c4e51327c8858bb6f05ea279d9e98302",
+          "bytes": 68512,
+          "triangles": 568,
+          "vertices": 1558,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2139349728822708,
+              0,
+              -0.18491850793361664
+            ],
+            "max": [
+              0.22573724389076233,
+              0.4967806041240692,
+              0.18481197953224182
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/SNOWCAP_SHRUB.shadow.glb",
+          "sha256": "c99206fc982da4068ec86888dd07dd19a5801182badb872ad467806219d292c2",
+          "bytes": 38828,
+          "triangles": 321,
+          "vertices": 853,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.2139349728822708,
+              0,
+              -0.18491850793361664
+            ],
+            "max": [
+              0.22573724389076233,
+              0.46922218799591064,
+              0.18481197953224182
+            ]
+          }
+        }
+      },
+      "nativeSha256": "b7ea14bda5076038e39c78419e2da03d30a904e1ea77639b7ba1a287c6859cef",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    },
+    {
+      "id": "SUCCULENT_ROSETTE",
+      "native": "scripts/games-blender/fernworld/generic/biome-plants/SUCCULENT_ROSETTE/SUCCULENT_ROSETTE.blend",
+      "exports": {
+        "hi": "scripts/games-blender/fernworld/generic/biome-plants/SUCCULENT_ROSETTE/SUCCULENT_ROSETTE.hi.glb",
+        "lo": "scripts/games-blender/fernworld/generic/biome-plants/SUCCULENT_ROSETTE/SUCCULENT_ROSETTE.lo.glb",
+        "sh": "scripts/games-blender/fernworld/generic/biome-plants/SUCCULENT_ROSETTE/SUCCULENT_ROSETTE.sh.glb"
+      },
+      "windAttribute": {
+        "attribute": "TEXCOORD_1",
+        "component": "x",
+        "componentIndex": 0,
+        "otherComponent": {
+          "y": 1,
+          "used": false,
+          "nativeUV1v": 0,
+          "reason": "Blender glTF exporter flips UV V; wind reads U/x only"
+        },
+        "range": [
+          0,
+          1
+        ],
+        "groundWeight": 0,
+        "tipWeight": 1,
+        "binding": "local runtime Y height",
+        "anchor": "local runtime Y=0 rigid, linear normalized height toward tips",
+        "deformation": "future vertex shader only, no per-frame mesh rebuild",
+        "implementedAnimation": false
+      },
+      "origin": {
+        "runtime": [
+          0,
+          0,
+          0
+        ],
+        "placement": "foot at local runtime Y=0",
+        "includesTerrain": false
+      },
+      "units": "metres",
+      "axes": {
+        "runtime": {
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "native": {
+          "up": "+Z",
+          "forward": "-Y"
+        }
+      },
+      "source": {
+        "metadata": "scripts/games-blender/fernworld/generic/biome-plants/SOURCE.json",
+        "builder": "scripts/games-blender/fernworld/generic/biome-plants/build.py",
+        "internalSnapshots": "scripts/games-blender/fernworld/generic/biome-plants/source",
+        "license": "scripts/games-blender/fernworld/generic/biome-plants/LICENSE.md"
+      },
+      "material": {
+        "count": 1,
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "alphaMode": "OPAQUE",
+        "doubleSided": true,
+        "thinLeafSurfacesIntentionallyOpen": false,
+        "atlas": [
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-atlas.png",
+          "scripts/games-blender/fernworld/generic/biome-plants/flora-emission.png"
+        ],
+        "externalURIs": false
+      },
+      "triangleCounts": {
+        "hi": 2688,
+        "lo": 924,
+        "sh": 672
+      },
+      "category": "instantiable vegetation",
+      "status": "OUTPUT_READY",
+      "sha256": {
+        "native": "143991293a129e9d3ef7568f5882c953202618674d644fe6eb014fab7fb572de",
+        "exports": {
+          "hi": "2f92bbfec59a7826806296f44815c69b0d6f538b2eba7f7ce680b275bd225d2d",
+          "lo": "345aa30fc5750b847dfb12884582905fa6c6dcf875d2ea5da3a5bf874b1923a3",
+          "sh": "1337b661c3aa72d37f71cf01faefb9b2462941be48af538c65815da4f9768dc9"
+        }
+      },
+      "previews": {
+        "front": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-0.png",
+        "threeQuarter": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-35.png",
+        "profile": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-90.png",
+        "back": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-180.png",
+        "hiLoActualGLB": "scripts/games-blender/fernworld/generic/biome-plants/renders/compare-SUCCULENT_ROSETTE-35-hi.png",
+        "hiLoPixelBoards": {
+          "72": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-72.png",
+          "128": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-128.png",
+          "256": "scripts/games-blender/fernworld/generic/biome-plants/review/sahrun-hi-lo-256.png"
+        }
+      },
+      "role": "instanced-vegetation",
+      "defaultLod": "lo",
+      "lods": {
+        "hi": {
+          "file": "decoratives/SUCCULENT_ROSETTE.hi.glb",
+          "sha256": "2f92bbfec59a7826806296f44815c69b0d6f538b2eba7f7ce680b275bd225d2d",
+          "bytes": 233912,
+          "triangles": 2688,
+          "vertices": 5376,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.23501795530319214,
+              0,
+              -0.24628905951976776
+            ],
+            "max": [
+              0.2500884532928467,
+              0.2357959747314453,
+              0.24628905951976776
+            ]
+          }
+        },
+        "lo": {
+          "file": "decoratives/SUCCULENT_ROSETTE.lo.glb",
+          "sha256": "345aa30fc5750b847dfb12884582905fa6c6dcf875d2ea5da3a5bf874b1923a3",
+          "bytes": 82200,
+          "triangles": 924,
+          "vertices": 1848,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.23501795530319214,
+              0,
+              -0.24628905951976776
+            ],
+            "max": [
+              0.2500884532928467,
+              0.2246270328760147,
+              0.24628905951976776
+            ]
+          }
+        },
+        "shadow": {
+          "file": "decoratives/SUCCULENT_ROSETTE.shadow.glb",
+          "sha256": "1337b661c3aa72d37f71cf01faefb9b2462941be48af538c65815da4f9768dc9",
+          "bytes": 60528,
+          "triangles": 672,
+          "vertices": 1344,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.23501795530319214,
+              0,
+              -0.24628905951976776
+            ],
+            "max": [
+              0.2500884532928467,
+              0.2070307582616806,
+              0.24628905951976776
+            ]
+          }
+        }
+      },
+      "nativeSha256": "143991293a129e9d3ef7568f5882c953202618674d644fe6eb014fab7fb572de",
+      "manifest": "scripts/games-blender/fernworld/generic/biome-plants/manifest.json",
+      "manifestSha256": "02c0837bdbfab3b8d90ebc375fb8393eefd3c810f66b94f889bb83d54a4fad13",
+      "browserAudit": "docs/games/fernworld-assets/biome-plants-browser-audit-2026-10-27.json",
+      "review": "Coordinator personally reviewed three biome multiview and 128px Hi/Lo boards; 184 sealed source files and 51 actual GLBs independently verified. No integrated-game performance claim."
+    }
+  ]
+}

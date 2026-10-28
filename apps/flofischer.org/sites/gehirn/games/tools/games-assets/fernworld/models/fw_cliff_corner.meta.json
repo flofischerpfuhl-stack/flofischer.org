@@ -1,0 +1,79 @@
+{
+  "category": "terrain",
+  "label": "Interlocking fractured returning cliff beds",
+  "games": [
+    "generic"
+  ],
+  "description": "Interlocking fractured returning cliff beds; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 5698,
+      "triangles": 5602,
+      "groups": 1,
+      "bytes": 136239,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 4738,
+      "triangles": 4102,
+      "groups": 1,
+      "bytes": 108881,
+      "vertexCap": 8500,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 837,
+      "triangles": 1594,
+      "groups": 1,
+      "bytes": 26417,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 8500,
+  "shadow_cap": 1200,
+  "ground": true,
+  "ao_dist": 0.15,
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_cliff_corner",
+  "bounds": [
+    [
+      -1.7833445072174072,
+      0.0,
+      -0.704199492931366
+    ],
+    [
+      1.6525756120681763,
+      2.078000068664551,
+      2.675957202911377
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#425e3c",
+    "#505f5d",
+    "#63726a",
+    "#637f43",
+    "#727b77",
+    "#78914a",
+    "#939b91",
+    "#afb1a0"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

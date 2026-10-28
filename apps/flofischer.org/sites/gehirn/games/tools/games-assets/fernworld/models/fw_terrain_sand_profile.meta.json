@@ -1,0 +1,80 @@
+{
+  "category": "terrain",
+  "label": "Wind crust over dry sediment shelf",
+  "games": [
+    "generic"
+  ],
+  "description": "Wind crust over dry sediment shelf; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 1122,
+      "triangles": 1278,
+      "groups": 1,
+      "bytes": 28442,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 616,
+      "triangles": 614,
+      "groups": 1,
+      "bytes": 15033,
+      "vertexCap": 3000,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 285,
+      "triangles": 554,
+      "groups": 1,
+      "bytes": 9257,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 3000,
+  "shadow_cap": 1200,
+  "ground": true,
+  "ao_dist": 0.15,
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_terrain_sand_profile",
+  "bounds": [
+    [
+      -2.1391751766204834,
+      0.0,
+      -1.3947579860687256
+    ],
+    [
+      2.1268346309661865,
+      0.6499999761581421,
+      1.2099114656448364
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#715640",
+    "#9d7855",
+    "#aa875d",
+    "#b69461",
+    "#b99565",
+    "#c9aa7b",
+    "#cdae79",
+    "#e5c997",
+    "#ead6ad"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

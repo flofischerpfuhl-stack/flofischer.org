@@ -1,0 +1,154 @@
+{
+  "units": "metres",
+  "axes": "Y-up,+Z-forward",
+  "method": "Measured closed entire GLB mesh radius, including feet and hatch; 0.01m radial margin per boss. Uniform scale also shrinks hatch and pilot free space. No FitsAll claim.",
+  "bossDocks": {
+    "BRIGADIER": 0.24,
+    "COMBINE_CRAWLER": 0.29,
+    "QUOTA": 0.34,
+    "EQUALITY": 0.37
+  },
+  "escapeWorldScalePolicy": "Inherit the live boss StartDock world matrix, including boss world scale. Table uniformScale is a local prefab factor; never shrink pilot geometry to fit. World radius equals boss world scale times scaledClosedRadius. Open only after free undock.",
+  "assets": {
+    "LANDING_POD": {
+      "measuredClosedEnvelopeRadius": 0.3275461751376919,
+      "measuredOpenEnvelopeRadius": 0.6011318928943176,
+      "nativeHeight": 1.0099999904632568,
+      "authoringDockRadiusContract": 0.33,
+      "motionPivotNode": "HatchPivot",
+      "startDockNode": "StartDock",
+      "socketsScaleWithRoot": true,
+      "centerOfGeometryNote": "Pivot and whole pressure skin are preserved. Moving hatch shifts geometry centroid; root placement must use StartDock, not recenter on posed bounds.",
+      "placements": {
+        "BRIGADIER": {
+          "uniformScale": 0.7021910724596737,
+          "scaledClosedRadius": 0.22999999999999998,
+          "dockRadius": 0.24,
+          "radialMargin": 0.010000000000000009,
+          "scaledOpenEnvelopeRadius": 0.42210944856117455,
+          "scaledHeight": 0.7092129764876546,
+          "scaledDoorwayWidth": 0.1994222645785473,
+          "scaledDoorwayHeight": 0.4213146434758042,
+          "scaledSafePilotRadius": 0.08075197333286248,
+          "alignment": "T(asset) * scale * StartDock.localPosition = boss live StartDock world position. Preserve live dock quaternion; no boss changes.",
+          "openingPolicy": "Undock and clear support hull before opening; scale sweep and exit corridor with entire asset."
+        },
+        "COMBINE_CRAWLER": {
+          "uniformScale": 0.854841305603081,
+          "scaledClosedRadius": 0.27999999999999997,
+          "dockRadius": 0.29,
+          "radialMargin": 0.010000000000000009,
+          "scaledOpenEnvelopeRadius": 0.5138723721614299,
+          "scaledHeight": 0.8633897105067099,
+          "scaledDoorwayWidth": 0.242774930791275,
+          "scaledDoorwayHeight": 0.5129047833618486,
+          "scaledSafePilotRadius": 0.09830675014435432,
+          "alignment": "T(asset) * scale * StartDock.localPosition = boss live StartDock world position. Preserve live dock quaternion; no boss changes.",
+          "openingPolicy": "Undock and clear support hull before opening; scale sweep and exit corridor with entire asset."
+        },
+        "QUOTA": {
+          "uniformScale": 1.0,
+          "scaledClosedRadius": 0.3275461751376919,
+          "dockRadius": 0.34,
+          "radialMargin": 0.012453824862308116,
+          "scaledOpenEnvelopeRadius": 0.6011318928943176,
+          "scaledHeight": 1.0099999904632568,
+          "scaledDoorwayWidth": 0.284,
+          "scaledDoorwayHeight": 0.6,
+          "scaledSafePilotRadius": 0.115,
+          "alignment": "T(asset) * scale * StartDock.localPosition = boss live StartDock world position. Preserve live dock quaternion; no boss changes.",
+          "openingPolicy": "Undock and clear support hull before opening; scale sweep and exit corridor with entire asset."
+        },
+        "EQUALITY": {
+          "uniformScale": 1.0,
+          "scaledClosedRadius": 0.3275461751376919,
+          "dockRadius": 0.37,
+          "radialMargin": 0.04245382486230809,
+          "scaledOpenEnvelopeRadius": 0.6011318928943176,
+          "scaledHeight": 1.0099999904632568,
+          "scaledDoorwayWidth": 0.284,
+          "scaledDoorwayHeight": 0.6,
+          "scaledSafePilotRadius": 0.115,
+          "alignment": "T(asset) * scale * StartDock.localPosition = boss live StartDock world position. Preserve live dock quaternion; no boss changes.",
+          "openingPolicy": "Undock and clear support hull before opening; scale sweep and exit corridor with entire asset.",
+          "flightRecipe": {
+            "phase1": "Translate world +Y 1.2m from live StartDock before any heading change; keep capsule upright.",
+            "phase2": "After full lift, turn toward runtime escape route; no fixed world pilot heading assumed.",
+            "diameterLimit": 0.7,
+            "measuredScaledClosedDiameter": 0.6550923502753838
+          }
+        }
+      }
+    },
+    "ESCAPE_POD": {
+      "measuredClosedEnvelopeRadius": 0.3275461751376919,
+      "measuredOpenEnvelopeRadius": 0.6011318928943176,
+      "nativeHeight": 1.0099999904632568,
+      "authoringDockRadiusContract": 0.33,
+      "motionPivotNode": "HatchPivot",
+      "startDockNode": "StartDock",
+      "socketsScaleWithRoot": true,
+      "centerOfGeometryNote": "Pivot and whole pressure skin are preserved. Moving hatch shifts geometry centroid; root placement must use StartDock, not recenter on posed bounds.",
+      "placements": {
+        "BRIGADIER": {
+          "uniformScale": 0.7021910724596737,
+          "scaledClosedRadius": 0.22999999999999998,
+          "dockRadius": 0.24,
+          "radialMargin": 0.010000000000000009,
+          "scaledOpenEnvelopeRadius": 0.42210944856117455,
+          "scaledHeight": 0.7092129764876546,
+          "scaledDoorwayWidth": 0.1994222645785473,
+          "scaledDoorwayHeight": 0.4213146434758042,
+          "scaledSafePilotRadius": 0.08075197333286248,
+          "alignment": "T(asset) * scale * StartDock.localPosition = boss live StartDock world position. Preserve live dock quaternion; no boss changes.",
+          "openingPolicy": "Undock and clear support hull before opening; scale sweep and exit corridor with entire asset."
+        },
+        "COMBINE_CRAWLER": {
+          "uniformScale": 0.854841305603081,
+          "scaledClosedRadius": 0.27999999999999997,
+          "dockRadius": 0.29,
+          "radialMargin": 0.010000000000000009,
+          "scaledOpenEnvelopeRadius": 0.5138723721614299,
+          "scaledHeight": 0.8633897105067099,
+          "scaledDoorwayWidth": 0.242774930791275,
+          "scaledDoorwayHeight": 0.5129047833618486,
+          "scaledSafePilotRadius": 0.09830675014435432,
+          "alignment": "T(asset) * scale * StartDock.localPosition = boss live StartDock world position. Preserve live dock quaternion; no boss changes.",
+          "openingPolicy": "Undock and clear support hull before opening; scale sweep and exit corridor with entire asset."
+        },
+        "QUOTA": {
+          "uniformScale": 1.0,
+          "scaledClosedRadius": 0.3275461751376919,
+          "dockRadius": 0.34,
+          "radialMargin": 0.012453824862308116,
+          "scaledOpenEnvelopeRadius": 0.6011318928943176,
+          "scaledHeight": 1.0099999904632568,
+          "scaledDoorwayWidth": 0.284,
+          "scaledDoorwayHeight": 0.6,
+          "scaledSafePilotRadius": 0.115,
+          "alignment": "T(asset) * scale * StartDock.localPosition = boss live StartDock world position. Preserve live dock quaternion; no boss changes.",
+          "openingPolicy": "Undock and clear support hull before opening; scale sweep and exit corridor with entire asset."
+        },
+        "EQUALITY": {
+          "uniformScale": 1.0,
+          "scaledClosedRadius": 0.3275461751376919,
+          "dockRadius": 0.37,
+          "radialMargin": 0.04245382486230809,
+          "scaledOpenEnvelopeRadius": 0.6011318928943176,
+          "scaledHeight": 1.0099999904632568,
+          "scaledDoorwayWidth": 0.284,
+          "scaledDoorwayHeight": 0.6,
+          "scaledSafePilotRadius": 0.115,
+          "alignment": "T(asset) * scale * StartDock.localPosition = boss live StartDock world position. Preserve live dock quaternion; no boss changes.",
+          "openingPolicy": "Undock and clear support hull before opening; scale sweep and exit corridor with entire asset.",
+          "flightRecipe": {
+            "phase1": "Translate world +Y 1.2m from live StartDock before any heading change; keep capsule upright.",
+            "phase2": "After full lift, turn toward runtime escape route; no fixed world pilot heading assumed.",
+            "diameterLimit": 0.7,
+            "measuredScaledClosedDiameter": 0.6550923502753838
+          }
+        }
+      }
+    }
+  }
+}

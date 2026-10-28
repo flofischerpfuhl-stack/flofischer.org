@@ -1,0 +1,59 @@
+{
+  "localTRS": {
+    "ChargeCore": {
+      "translation": [
+        0,
+        0,
+        0.6000000238418579
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "SpawnSocket": {
+      "translation": [
+        0,
+        0,
+        0.82
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "HeadPivot": {
+      "translation": [
+        0,
+        1,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "reference": "Names identify actual nodes in every Hi/Lo/Shadow GLB; hierarchy retained."
+}

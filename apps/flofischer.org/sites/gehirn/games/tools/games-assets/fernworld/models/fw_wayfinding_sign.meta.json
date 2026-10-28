@@ -1,0 +1,75 @@
+{
+  "category": "props",
+  "label": "Oak wayfinding sign \u00b7 carved route boards",
+  "games": [
+    "generic"
+  ],
+  "description": "Oak wayfinding sign \u00b7 carved route boards; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 1204,
+      "triangles": 2288,
+      "groups": 1,
+      "bytes": 37830,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 1630,
+      "triangles": 1272,
+      "groups": 1,
+      "bytes": 36518,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 208,
+      "triangles": 360,
+      "groups": 1,
+      "bytes": 6470,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "Original Fernworld authored geometry",
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_wayfinding_sign",
+  "bounds": [
+    [
+      -0.7699999809265137,
+      0.0,
+      -0.11500000208616257
+    ],
+    [
+      0.7699999809265137,
+      1.899999976158142,
+      0.15600000321865082
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#49545b",
+    "#624735",
+    "#986c43",
+    "#c09a64",
+    "#e4d2a3"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

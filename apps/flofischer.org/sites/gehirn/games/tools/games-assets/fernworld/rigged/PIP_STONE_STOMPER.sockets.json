@@ -1,0 +1,170 @@
+{
+  "asset_id": "PIP_STONE_STOMPER",
+  "character_glb": "pip-stone-stomper.glb",
+  "character_sha256": "2cbc01f91347d738278d4450693f67ec06066abe192db655d8a55a607c2b1632",
+  "coordinates": "glTF Y-up, front +Z; source dimensions and bind matrices unchanged",
+  "instance_scale_to_1m": 0.4233654951651481,
+  "runtime_contract": "runtime-contract.json",
+  "event_visibility_interrupt_contract": "motion-contract.json",
+  "primary_sockets": {
+    "StonePalm_L": {
+      "parent_bone": "hand.l",
+      "rest_translation_gltf": [
+        0.968,
+        1.10676,
+        0.044
+      ],
+      "rest_frame": "identity: +Y up/thumb, +Z outward palm or foot forward",
+      "all_743_times_skin_space_vs_live_node_matrix_max_error": 1.2467546034802823e-07,
+      "actual_world_translation_range_from_first_sample": 1.215114387613978
+    },
+    "StonePalm_R": {
+      "parent_bone": "hand.r",
+      "rest_translation_gltf": [
+        -0.968,
+        1.10676,
+        0.044
+      ],
+      "rest_frame": "identity: +Y up/thumb, +Z outward palm or foot forward",
+      "all_743_times_skin_space_vs_live_node_matrix_max_error": 2.0275324941892992e-07,
+      "actual_world_translation_range_from_first_sample": 0.9657069716814217
+    },
+    "StoneImpact": {
+      "parent_bone": "foot.r",
+      "rest_translation_gltf": [
+        -0.171,
+        0.007,
+        0.13
+      ],
+      "rest_frame": "identity: +Y up/thumb, +Z outward palm or foot forward",
+      "all_743_times_skin_space_vs_live_node_matrix_max_error": 1.2503521906737092e-07,
+      "actual_world_translation_range_from_first_sample": 0.36468121807871995,
+      "landing_live_world_matrix_model_scale_1": [
+        [
+          0.9999999947340831,
+          -2.0631952924809425e-09,
+          2.155234399534837e-09,
+          -0.17100003526202176
+        ],
+        [
+          3.722847336882275e-09,
+          1.000000152752381,
+          -1.4705452544561126e-07,
+          0.007000004172838081
+        ],
+        [
+          -2.491350627707561e-09,
+          2.3094990203587074e-07,
+          0.9999998812494482,
+          0.16499986432497132
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "effect_orientation": "World Y-up after ground projection; do not inherit foot tilt."
+    }
+  },
+  "semantics": {
+    "StonePalm_L/R": "+Z outward palm, +Y thumb/up in bind glTF frame, +X character-left. These axes animate with original hand bones. For right-hand distal is -X. Empty anchors, no native cast/FX in Stone mode.",
+    "StoneImpact": "Child of foot.r at right sole. Live bone orientation available for foot attachments, while impact FX is explicitly world-up.",
+    "FootFx": "Original rig-local legacy marker retained unchanged for source compatibility; use live StoneImpact for new impact event.",
+    "LeftFootSocket/RightFootSocket": "Original ankle anchors retained bone-parented and live."
+  },
+  "legacy_original_sockets": {
+    "FootFx": {
+      "parent": "Pip_Ranger_Rig_Medium",
+      "rest_world_model_matrix_gltf": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.17100000381469727
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.007000000216066837
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.12999999523162842
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "use": "Compatibility marker only, use live StoneImpact"
+    },
+    "LeftFootSocket": {
+      "parent": "foot.l",
+      "rest_world_model_matrix_gltf": [
+        [
+          1.0,
+          5.924848655117039e-13,
+          2.3845626214840385e-14,
+          0.17094499254332385
+        ],
+        [
+          -6.175936106038355e-13,
+          0.9999999385114611,
+          1.6539475722332497e-07,
+          0.14523728340377068
+        ],
+        [
+          2.7494091647902285e-14,
+          -2.970830720316897e-08,
+          0.9999988097905513,
+          -0.018585844792750824
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "use": "Original live ankle anchor"
+    },
+    "RightFootSocket": {
+      "parent": "foot.r",
+      "rest_world_model_matrix_gltf": [
+        [
+          1.0,
+          -3.8585002961115955e-13,
+          3.1708998664797914e-15,
+          -0.1709449916320613
+        ],
+        [
+          3.5516045176110845e-13,
+          0.9999999385114609,
+          1.6539475256038827e-07,
+          0.14523728211091474
+        ],
+        [
+          -1.12380053316512e-13,
+          -2.9708302429209965e-08,
+          0.9999988097905511,
+          -0.018585850158795002
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "use": "Original live ankle anchor"
+    }
+  },
+  "world_up": "Impact FX reads live StoneImpact position once at release 0.625 s, projects onto ground, uses identity world quaternion (Y-up), and hides immediately on interrupt."
+}

@@ -8,21 +8,25 @@
  *   B  the world's boss (its 2 × 2 tiles, top-left corner)
  *
  * Each world brings new enemy types and a new floor: Meadows (rookies, scouts, crates), Dunes (zippers, miners,
- * canyons), Frostpeak (bankers, swarmers, ice), Ember Isles (ghosts, aces, lava vents). test/unit/games/tanks.test.mjs
+ * canyons), Hibern · Firnwatch Cup (bankers, swarmers, ice), Vulkara · Concordia Final (ghosts, aces, lava vents). test/unit/games/tanks.test.mjs
  * plays every level with a bot (it must win) and checks the maps.
  */
 export const W = 20, H = 12;
 export const T = { FLOOR: 0, WALL: 1, CRATE: 2, PIT: 3, ICE: 4, VENT: 5 };
 
 export const WORLDS = [
-  { key: 'meadow', name: 'Fernhaven Meadows', boss: 'klonk' },
-  { key: 'dunes', name: 'Sunbake Dunes', boss: 'drill' },
-  { key: 'frost', name: 'Frostpeak', boss: 'walker' },
-  { key: 'ember', name: 'Ember Isles', boss: 'mothership' },
+  { key: 'meadow', name: 'Viridis · Fernhaven Cup', boss: 'klonk' },
+  { key: 'dunes', name: 'Sahrun · Fossil Club', boss: 'drill' },
+  { key: 'frost', name: 'Hibern · Firnwatch Cup', boss: 'walker' },
+  { key: 'ember', name: 'Vulkara · Concordia Final', boss: 'mothership' },
 ];
 
 const ENEMY = { r: 'rookie', s: 'scout', z: 'zip', m: 'miner', b: 'banker', w: 'swarm', g: 'ghost', a: 'ace' };
 const TILE = { '.': T.FLOOR, '#': T.WALL, x: T.CRATE, o: T.PIT, '~': T.ICE, '^': T.VENT };
+
+// Presentation names must never reseed the original 44 tournament arenas.
+const LEVEL_SEEDS = [5831, 5717, 6486, 5848, 5717, 5603, 5341, 5358, 6258, 5506, 5569, 6563, 6825, 7087, 6318, 6318, 6466, 5925, 6580, 7252, 6614, 7201, 7278, 7933, 7933, 8064, 7688, 7688, 7426, 7426, 7705, 7853, 7785, 8500, 8386, 8517, 8648, 8796, 8010, 8944, 9468, 8551, 8716, 9155];
+let levelOrdinal = 0;
 
 function level(world, name, rows, o = {}) {
   if (rows.length !== H) throw new Error(`${name}: ${rows.length} rows, not ${H}`);
@@ -40,11 +44,11 @@ function level(world, name, rows, o = {}) {
   });
   if (!player) throw new Error(`${name}: no player`);
   const n = enemies.length + (boss ? 1 : 0);
-  return { name, world, grid, enemies, player, boss, vents, hint: o.hint, par: o.par ?? Math.round(12 + n * 7 + (boss ? 28 : 0)), seed: 4242 + world * 977 + name.length * 131 + n * 17 };
+  return { name, world, grid, enemies, player, boss, vents, hint: o.hint, par: o.par ?? Math.round(12 + n * 7 + (boss ? 28 : 0)), seed: LEVEL_SEEDS[levelOrdinal++] };
 }
 
 export const LEVELS = [
-  // ── World 1 · Fernhaven Meadows: rookies (sit and wait), scouts (prowl), crates ──
+  // ── World 1 · Viridis · Fernhaven Cup: rookies (sit and wait), scouts (prowl), crates ──
   level(0, 'First Rounds', [
     '....................',
     '........#..#........',
@@ -87,7 +91,7 @@ export const LEVELS = [
     '...P................',
     '....................',
   ], { hint: 'Bounce a shell off the top wall to reach the hidden tank' }),
-  level(0, 'Scout Patrol', [
+  level(0, 'Scout Circuit', [
     '....................',
     '...s................',
     '....................',
@@ -185,7 +189,7 @@ export const LEVELS = [
     '.........P..........',
     '....................',
   ]),
-  level(0, 'Klonk Tank', [
+  level(0, 'Ganter’s Parade Toy', [
     '....................',
     '.........B..........',
     '....................',
@@ -198,9 +202,9 @@ export const LEVELS = [
     '....................',
     '.........P..........',
     '....................',
-  ], { hint: 'The Klonk Tank takes twelve hits; its armour shrugs off shells for a moment after each one' }),
+  ], { hint: 'The Ganter’s Parade Toy takes twelve hits; its armour shrugs off shells for a moment after each one' }),
 
-  // ── World 2 · Sunbake Dunes: zippers (rockets), miners, canyons ──
+  // ── World 2 · Sahrun · Fossil Club: zippers (rockets), miners, canyons ──
   level(1, 'Canyon Gap', [
     '....................',
     '....z..........r....',
@@ -327,7 +331,7 @@ export const LEVELS = [
     '.........P..........',
     '....................',
   ]),
-  level(1, 'Drill Site', [
+  level(1, 'Drill Club', [
     'z........s.........z',
     '....................',
     '...oooo......oooo...',
@@ -341,7 +345,7 @@ export const LEVELS = [
     '.........P..........',
     '....................',
   ]),
-  level(1, 'Dune Drill Mech', [
+  level(1, 'Quota’s Toy Drill', [
     '....................',
     '....................',
     '.........B..........',
@@ -356,7 +360,7 @@ export const LEVELS = [
     '....................',
   ], { hint: 'The Drill Mech burrows. A dust ring shows where it comes up: get away from it' }),
 
-  // ── World 3 · Frostpeak: bankers (two bounces), swarmers (volleys), ice ──
+  // ── World 3 · Hibern · Firnwatch Cup: bankers (two bounces), swarmers (volleys), ice ──
   level(2, 'Thin Ice', [
     '....................',
     '....b..........r....',
@@ -497,7 +501,7 @@ export const LEVELS = [
     '.........P..........',
     '....................',
   ]),
-  level(2, 'Frost Walker', [
+  level(2, 'Brigadier’s Frost Toy', [
     '....................',
     '.........B..........',
     '....................',
@@ -510,9 +514,9 @@ export const LEVELS = [
     '....................',
     '.........P..........',
     '....................',
-  ], { hint: 'The Frost Walker lobs mortar shells. Leave the red circle before they land' }),
+  ], { hint: 'The Brigadier’s Frost Toy lobs mortar shells. Leave the red circle before they land' }),
 
-  // ── World 4 · Ember Isles: ghosts (invisible), aces (fast rockets), lava vents ──
+  // ── World 4 · Vulkara · Concordia Final: ghosts (invisible), aces (fast rockets), lava vents ──
   level(3, 'Hot Ground', [
     '....................',
     '.........g..........',
@@ -527,7 +531,7 @@ export const LEVELS = [
     '.........P..........',
     '....................',
   ], { hint: 'Glowing vents erupt: keep off them. White Ghosts are invisible, watch their tracks' }),
-  level(3, 'Black Ace', [
+  level(3, 'Ace Club', [
     '....................',
     '...a...........r....',
     '....................',
@@ -540,7 +544,7 @@ export const LEVELS = [
     '....................',
     '.........P..........',
     '....................',
-  ], { hint: 'Black Aces are fast and fire rockets. Fight them from cover' }),
+  ], { hint: 'Ace Clubs are fast and fire rockets. Fight them from cover' }),
   level(3, 'Ash Fields', [
     '....................',
     '..g..............g..',
@@ -611,7 +615,7 @@ export const LEVELS = [
     '.........P..........',
     '....................',
   ]),
-  level(3, 'Mothership Shadow', [
+  level(3, 'Module Ship Showcase', [
     'a..................a',
     '....................',
     '...g....####....g...',
@@ -639,7 +643,7 @@ export const LEVELS = [
     '.........P..........',
     '....................',
   ]),
-  level(3, 'Final Stand', [
+  level(3, 'Peace Tournament Final', [
     'a........w.........a',
     '....................',
     '..##....b.......##..',
@@ -653,7 +657,7 @@ export const LEVELS = [
     '.........P..........',
     '....................',
   ]),
-  level(3, 'Zorb Mothership', [
+  level(3, 'Equality’s Module Toy', [
     '....................',
     '.........B..........',
     '....................',
@@ -666,5 +670,5 @@ export const LEVELS = [
     '....................',
     '.........P..........',
     '....................',
-  ], { hint: 'The Mothership sweeps a beam along a row or column. Leave the red stripe' }),
+  ], { hint: 'The module toy sweeps a beam along a row or column. Leave the red stripe' }),
 ];

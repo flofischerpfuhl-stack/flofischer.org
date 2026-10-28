@@ -1,0 +1,93 @@
+{
+  "category": "vegetation/woodland",
+  "label": "Open hazel shrub",
+  "games": [
+    "generic"
+  ],
+  "description": "Tall open multi-stem hazel habit, broad folded leaves and small warm nut pairs with green bracts. Prepared library only; no game integration.",
+  "budgets": {
+    "lo": 1800,
+    "hi": 24000
+  },
+  "vertex_cap": 1200,
+  "lods": {
+    "lo": {
+      "vertices": 1120,
+      "triangles": 1024,
+      "groups": 1,
+      "bytes": 26389,
+      "vertexCap": 1200,
+      "triangleTarget": 1024
+    },
+    "hi": {
+      "vertices": 1596,
+      "triangles": 1976,
+      "groups": 1,
+      "bytes": 41623,
+      "vertexCap": 1000000,
+      "triangleTarget": 24000
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "cull": false,
+  "sockets": {},
+  "placement": {
+    "surface": "woodland understorey, path edge",
+    "origin": "ground centre, Y-up",
+    "rotationY": "free 0-360 degrees",
+    "uniformScale": [
+      0.8,
+      1.2
+    ]
+  },
+  "reuse": {
+    "family": "woodland",
+    "repeat": "rotate and vary uniform scale; keep species silhouette",
+    "combineWith": [
+      "meadow_fern_rosette",
+      "meadow_moss",
+      "meadow_leaf_litter"
+    ]
+  },
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.17,
+    "note": "Suggested future shader response; authored mesh is static."
+  },
+  "source": "scripts/games-blender/fernworld/assets/woodland.py",
+  "id": "woodland_bush_hazel",
+  "bounds": [
+    [
+      -0.7757185101509094,
+      -0.010961118154227734,
+      -0.7843466997146606
+    ],
+    [
+      0.8100000023841858,
+      1.046594500541687,
+      0.7614082098007202
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#493c30",
+    "#5c773b",
+    "#70513a",
+    "#786042",
+    "#819349",
+    "#8b9752",
+    "#9caa5a",
+    "#ac8c50"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "855ea84a8ad39c4087fbf9b35076c6224768fc799b64d3b96067f85af181f5dc"
+}

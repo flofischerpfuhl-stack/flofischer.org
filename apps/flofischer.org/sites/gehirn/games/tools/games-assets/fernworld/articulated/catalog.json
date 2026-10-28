@@ -1,0 +1,3256 @@
+{
+  "version": 1,
+  "status": "prepared-only; no game integration",
+  "assets": [
+    {
+      "id": "KLONK",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/klonk-family/KLONK",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "hi.glb",
+        "lo": "lo.glb",
+        "far": "far.glb",
+        "shadow": "shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/KLONK.motion.json",
+        "sha256": "185af9292362f3a821ddc9e41e00558116bf71a2eecc15dabd09887f407d10b9"
+      },
+      "sockets": {
+        "file": "articulated/KLONK.sockets.json",
+        "sha256": "c10b475f83d3824a1c0e3c0159f1c1e5021d1ebc04468bfbb186d2d84a9150f9"
+      },
+      "browserAudit": "docs/games/fernworld-assets/rigid-browser-audit-2026-10-27.json",
+      "role": "crowd-automaton",
+      "license": "CC0-1.0 Quaternius Animated Mechs plus Fernworld adaptation",
+      "provenance": "provenance.json",
+      "defaultLod": "lo",
+      "review": "Coordinator six views and final runtime exports checked. User final approval not claimed.",
+      "nativeSha256": "e017889021c6afd1d0b4be445369b0df02d16d0fc40dc3b435d9d42871ff2077",
+      "lods": {
+        "hi": {
+          "file": "articulated/KLONK.hi.glb",
+          "sha256": "978481a3fcd06925648da838e281fb26d73e5f62500585bd23e51a618e5bd3ef",
+          "bytes": 512044,
+          "triangles": 10319,
+          "vertices": 13855,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.29517440497875214,
+              0,
+              -0.18533332645893097
+            ],
+            "max": [
+              0.29233333468437195,
+              0.803978443145752,
+              0.21533332765102386
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/KLONK.lo.glb",
+          "sha256": "7c9febfa7b8dbd59b2cf0aefb629dfef09088c3d81ca64b14188726c4538b5d7",
+          "bytes": 123592,
+          "triangles": 2584,
+          "vertices": 3167,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.2972332537174225,
+              0,
+              -0.18533332645893097
+            ],
+            "max": [
+              0.29233333468437195,
+              0.8004783689975739,
+              0.21533332765102386
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/KLONK.far.glb",
+          "sha256": "44413ee7495013e8e6e9cdd487c8bd451982bcf68853e883abbb4435d88df7dc",
+          "bytes": 46100,
+          "triangles": 868,
+          "vertices": 1068,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.2972332537174225,
+              0,
+              -0.17866666615009308
+            ],
+            "max": [
+              0.290971040725708,
+              0.8004783689975739,
+              0.19200000166893005
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/KLONK.shadow.glb",
+          "sha256": "e28288d751302ed38f11ce6b89d70ad0577e9a7d6c32f2ad290ba58bdafb3642",
+          "bytes": 30672,
+          "triangles": 536,
+          "vertices": 684,
+          "primitives": 4,
+          "bounds": {
+            "min": [
+              -0.2972332537174225,
+              0,
+              -0.13187983632087708
+            ],
+            "max": [
+              0.290971040725708,
+              0.8004783689975739,
+              0.13187983632087708
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "KLONKBOT",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/klonk-family/KLONKBOT",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "hi.glb",
+        "lo": "lo.glb",
+        "far": "far.glb",
+        "shadow": "shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/KLONKBOT.motion.json",
+        "sha256": "c2ad40da31a5193d2d01d33fa3361dc9ae94af95e7d60049cdcd56fec7c9f2e2"
+      },
+      "sockets": {
+        "file": "articulated/KLONKBOT.sockets.json",
+        "sha256": "0729fab35e1151de72378cf84283f17b115ac9b20ca259f6eedcb84144061cbc"
+      },
+      "browserAudit": "docs/games/fernworld-assets/rigid-browser-audit-2026-10-27.json",
+      "role": "crowd-automaton",
+      "license": "CC0-1.0 Quaternius Animated Mechs plus Fernworld adaptation",
+      "provenance": "provenance.json",
+      "defaultLod": "lo",
+      "review": "Coordinator six views and final runtime exports checked. User final approval not claimed.",
+      "nativeSha256": "51d5141cacfe6aa35a2dd019703787d5cefc14f02f6fb8e155cb5f433eab7449",
+      "lods": {
+        "hi": {
+          "file": "articulated/KLONKBOT.hi.glb",
+          "sha256": "f7393b2dc9dcd6359b695a4001f103a974165461c6a1e82f22ddc9f01107e281",
+          "bytes": 517620,
+          "triangles": 10486,
+          "vertices": 13998,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.401166170835495,
+              0,
+              -0.24799999594688416
+            ],
+            "max": [
+              0.4024999737739563,
+              1.2042178064584732,
+              0.2930000126361847
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/KLONKBOT.lo.glb",
+          "sha256": "ccd9351240b7f7c4314c42beb8629468944c30b92ad00790a2c1ec9cbef444ea",
+          "bytes": 130160,
+          "triangles": 2744,
+          "vertices": 3343,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.4033499211072922,
+              0,
+              -0.24799999594688416
+            ],
+            "max": [
+              0.4024999737739563,
+              1.200717806816101,
+              0.2930000126361847
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/KLONKBOT.far.glb",
+          "sha256": "f08dc2817db5cb89d468c692f4fdc573abc0720c52a64c4fa9c818b286e37fe1",
+          "bytes": 45568,
+          "triangles": 868,
+          "vertices": 1052,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.4033499211072922,
+              0,
+              -0.23800000548362732
+            ],
+            "max": [
+              0.3945750743150711,
+              1.200717806816101,
+              0.28850001096725464
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/KLONKBOT.shadow.glb",
+          "sha256": "7e58c439e498d6e04c8f798703d4d3651e159a0920fdc0bbfca01c145d167c7e",
+          "bytes": 28944,
+          "triangles": 508,
+          "vertices": 636,
+          "primitives": 4,
+          "bounds": {
+            "min": [
+              -0.4033499211072922,
+              0,
+              -0.1978197544813156
+            ],
+            "max": [
+              0.3945750743150711,
+              1.200717806816101,
+              0.281499981880188
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "SHIELD_KLONK",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/klonk-family/SHIELD_KLONK",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "hi.glb",
+        "lo": "lo.glb",
+        "far": "far.glb",
+        "shadow": "shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/SHIELD_KLONK.motion.json",
+        "sha256": "ff2448373ac6d54cdc12909bee2e11fbe48f343c2af05191e872ec94c578a021"
+      },
+      "sockets": {
+        "file": "articulated/SHIELD_KLONK.sockets.json",
+        "sha256": "9556fa62df1e30c947991081248856780eb53c016db4dc55c00304ad3b26b10a"
+      },
+      "browserAudit": "docs/games/fernworld-assets/rigid-browser-audit-2026-10-27.json",
+      "role": "crowd-automaton",
+      "license": "CC0-1.0 Quaternius Animated Mechs plus Fernworld adaptation",
+      "provenance": "provenance.json",
+      "defaultLod": "lo",
+      "review": "Coordinator six views and final runtime exports checked. User final approval not claimed.",
+      "nativeSha256": "999df753843a25fbd67312635335a77c9ef5bf3ebd7fb3a3bb05c37aeb51455a",
+      "lods": {
+        "hi": {
+          "file": "articulated/SHIELD_KLONK.hi.glb",
+          "sha256": "69b865111bc79b056a49e2972096946b14629a03c3b64fdf01bb35eeba66a639",
+          "bytes": 566364,
+          "triangles": 11202,
+          "vertices": 15351,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.5849999785423279,
+              0,
+              -0.26866665482521057
+            ],
+            "max": [
+              0.4360416531562805,
+              1.3042774349451065,
+              0.3174166679382324
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/SHIELD_KLONK.lo.glb",
+          "sha256": "24a4f7fde4c787d12fd26aca21f5680b6fed78474b88519d0c2cd8cd39df3f9c",
+          "bytes": 144336,
+          "triangles": 2996,
+          "vertices": 3703,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.5849999785423279,
+              0,
+              -0.26866665482521057
+            ],
+            "max": [
+              0.4360416531562805,
+              1.3007774353027344,
+              0.3174166679382324
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/SHIELD_KLONK.far.glb",
+          "sha256": "9714f4994f9e7c7d8cf87b3ccd609fdd22ed66d87aa904ff93cff8a67369b7c0",
+          "bytes": 53364,
+          "triangles": 996,
+          "vertices": 1236,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.5849999785423279,
+              0,
+              -0.257833331823349
+            ],
+            "max": [
+              0.4276050180196762,
+              1.3007774353027344,
+              0.31470832228660583
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/SHIELD_KLONK.shadow.glb",
+          "sha256": "d973edf5d81058b6765b5548d50c2fc2654971598b7ccdc5239bd39b42f2176e",
+          "bytes": 32648,
+          "triangles": 552,
+          "vertices": 708,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.5849999785423279,
+              0,
+              -0.21430473029613495
+            ],
+            "max": [
+              0.4276050180196762,
+              1.3007774353027344,
+              0.3049583435058594
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "DUCK_LEGIONARY",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/duck-legionary",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "DUCK_LEGIONARY.hi.glb",
+        "lo": "DUCK_LEGIONARY.lo.glb",
+        "far": "DUCK_LEGIONARY.far.glb",
+        "sh": "DUCK_LEGIONARY.sh.glb"
+      },
+      "motion": {
+        "file": "articulated/DUCK_LEGIONARY.motion.json",
+        "sha256": "342184409d5009c705b7c4cf97123d03650f25c9e1a5bcc828f230d716452f82"
+      },
+      "sockets": {
+        "file": "articulated/DUCK_LEGIONARY.sockets.json",
+        "sha256": "e56ef343a75be5782c41070fd8d34f1e3420b584302d2600c3123648ffab3da7"
+      },
+      "browserAudit": "docs/games/fernworld-assets/rigid-browser-audit-2026-10-27.json",
+      "role": "crowd-legionary",
+      "license": "CC0-1.0 KayKit plus Fernworld Duck adaptation",
+      "provenance": "DELIVERY.json",
+      "defaultLod": "lo",
+      "review": "Coordinator source, native/GLB Lo/Hi and true motion reviewed. Closed arms/boots. User approval not claimed.",
+      "nativeSha256": "03bd7c572349a09b1856bf3d3b6117c3c0e2ea46810271202bd760a7d82ebd80",
+      "lods": {
+        "hi": {
+          "file": "articulated/DUCK_LEGIONARY.hi.glb",
+          "sha256": "51c2989e970d701b1dd65cb0212c42b1c2e186ed042a57c3227fc16d689f7290",
+          "bytes": 286608,
+          "triangles": 10836,
+          "vertices": 6007,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.33687811344861984,
+              0,
+              -0.22158485651016235
+            ],
+            "max": [
+              0.44532331079244614,
+              1.3000000715255737,
+              0.5958471745252609
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/DUCK_LEGIONARY.lo.glb",
+          "sha256": "1cf2d63fc8a01cf524d8ba2a2011f9c4798c77adfd6c371ab1a349dccca4d94b",
+          "bytes": 89928,
+          "triangles": 2992,
+          "vertices": 1851,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3317970260977745,
+              0,
+              -0.22158485651016235
+            ],
+            "max": [
+              0.4462594911456108,
+              1.2989016771316528,
+              0.5958471745252609
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/DUCK_LEGIONARY.far.glb",
+          "sha256": "9ffbe27d1b403e2b8d29ce8b05c0388a8663023c7608df0fb277596bd769211d",
+          "bytes": 45032,
+          "triangles": 1324,
+          "vertices": 883,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3151557371020317,
+              0,
+              -0.22210079431533813
+            ],
+            "max": [
+              0.43273841589689255,
+              1.2895368337631226,
+              0.5958471745252609
+            ]
+          }
+        },
+        "sh": {
+          "file": "articulated/DUCK_LEGIONARY.sh.glb",
+          "sha256": "f285b62592519216b4fd4b6ad9634294cd3c41049abeaefc0f1bc574e5103c15",
+          "bytes": 24544,
+          "triangles": 658,
+          "vertices": 425,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3151557371020317,
+              0,
+              -0.22210079431533813
+            ],
+            "max": [
+              0.43060698360204697,
+              1.2895368337631226,
+              0.5815486162900925
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "DARTER",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/mobile-machines/DARTER",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "hi.glb",
+        "lo": "lo.glb",
+        "far": "far.glb",
+        "shadow": "shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/DARTER.motion.json",
+        "sha256": "b2e66125026f46017d986e2c9a5819ea0f3c69578a2a2f3c3a3208aba2eadae4"
+      },
+      "sockets": {
+        "file": "articulated/DARTER.sockets.json",
+        "sha256": "89fe0c06af4b65b73a54ddaf5d4bc6a156f63e2ea7afbb02d872007a5590b406"
+      },
+      "browserAudit": "docs/games/fernworld-assets/mobile-glider-browser-audit-2026-10-27.json",
+      "motionAudit": "docs/games/fernworld-assets/mount-machines-browser-audit-2026-10-27.json",
+      "motionScript": {
+        "file": "articulated/COMMUNE_MOBILE_MOTION.js",
+        "sha256": "501cf76a590af81c1186ec3162acdae5a0640ece6b11bb6284331bdbc8f46896"
+      },
+      "motionScriptFilename": "COMMUNE_MOBILE_MOTION.js",
+      "role": "crowd-automaton",
+      "license": "Quaternius CC0-1.0 plus original Fernworld adaptation",
+      "provenance": "../SOURCE.json",
+      "defaultLod": "lo",
+      "review": "Coordinator allLOD/pivot checks and actual procedural motion recipes verified in browser; no final user approval claimed.",
+      "nativeSha256": "ccece7c5deae9d4ba0f6ec5ae2a1642fa15b5b46bd8644fa26acf90211cb1212",
+      "lods": {
+        "hi": {
+          "file": "articulated/DARTER.hi.glb",
+          "sha256": "44692d41cba0c30b19cfc44e6ff588b71a8f7969f5411dc3bad574837e3b820c",
+          "bytes": 620980,
+          "triangles": 9576,
+          "vertices": 15411,
+          "primitives": 8,
+          "bounds": {
+            "min": [
+              -0.5350000151249443,
+              0.1399999531128536,
+              -0.5599999837577343
+            ],
+            "max": [
+              0.5350000266544652,
+              1.1975706815719604,
+              0.7300000376999378
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/DARTER.lo.glb",
+          "sha256": "eba243fcbdca4ddc569ec903aacd3b1a2dea9247f13a77b4ffdfb8d0baa72701",
+          "bytes": 249256,
+          "triangles": 4172,
+          "vertices": 5998,
+          "primitives": 8,
+          "bounds": {
+            "min": [
+              -0.5350000151249443,
+              0.1399999531128536,
+              -0.5599999837577343
+            ],
+            "max": [
+              0.5350000266544652,
+              1.1961627006530762,
+              0.7300000376999378
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/DARTER.far.glb",
+          "sha256": "f8bad24aaa2e813d5ea413b7178636c5a22561e96734ae6461fbc958624aae8f",
+          "bytes": 58864,
+          "triangles": 908,
+          "vertices": 1272,
+          "primitives": 8,
+          "bounds": {
+            "min": [
+              -0.5350000151249443,
+              0.1399999531128536,
+              -0.5599999837577343
+            ],
+            "max": [
+              0.5350000266544652,
+              1.2000000476837158,
+              0.7300000376999378
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/DARTER.shadow.glb",
+          "sha256": "5ba0b4bb7f1ce7dc2a405e58f3ea11de3729d1cef9c0e94b1a83d8b0b4cee3bf",
+          "bytes": 37020,
+          "triangles": 480,
+          "vertices": 800,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.5350000151249443,
+              0.14399993039640238,
+              -0.5599999837577343
+            ],
+            "max": [
+              0.5350000266544652,
+              1.1699999570846558,
+              0.7300000376999378
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "BUZZ_DRONE",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/mobile-machines/BUZZ_DRONE",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "hi.glb",
+        "lo": "lo.glb",
+        "far": "far.glb",
+        "shadow": "shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/BUZZ_DRONE.motion.json",
+        "sha256": "746b7064427b95e3376bacde64c14aefbc32b24212d17117b410cd4b49fea0f5"
+      },
+      "sockets": {
+        "file": "articulated/BUZZ_DRONE.sockets.json",
+        "sha256": "5e72d85ae6ebc78ea132efe5dbc47e4434eed8a0bf38da9a031ab94cb904e1d3"
+      },
+      "browserAudit": "docs/games/fernworld-assets/mobile-glider-browser-audit-2026-10-27.json",
+      "motionAudit": "docs/games/fernworld-assets/mount-machines-browser-audit-2026-10-27.json",
+      "motionScript": {
+        "file": "articulated/COMMUNE_MOBILE_MOTION.js",
+        "sha256": "501cf76a590af81c1186ec3162acdae5a0640ece6b11bb6284331bdbc8f46896"
+      },
+      "motionScriptFilename": "COMMUNE_MOBILE_MOTION.js",
+      "role": "crowd-automaton",
+      "license": "Quaternius CC0-1.0 plus original Fernworld adaptation",
+      "provenance": "../SOURCE.json",
+      "defaultLod": "lo",
+      "review": "Coordinator allLOD/pivot checks and actual procedural motion recipes verified in browser; no final user approval claimed.",
+      "nativeSha256": "d9a564031453b1b4419e4c0aac01736c5bfd2eb108388934d0f40e181b9ff953",
+      "lods": {
+        "hi": {
+          "file": "articulated/BUZZ_DRONE.hi.glb",
+          "sha256": "4439868d15ae833b145465f6bd4c11078045dfbff3cbfa54d9dc265171bbee63",
+          "bytes": 740076,
+          "triangles": 14004,
+          "vertices": 18025,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -1.1440000534057617,
+              0.8709999918937683,
+              -0.45399999618530273
+            ],
+            "max": [
+              1.1440000534057617,
+              1.5199999809265137,
+              0.47699999809265137
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/BUZZ_DRONE.lo.glb",
+          "sha256": "a58799d039e743af7d713231a2d462b73cf7e55e4115680182dc1fd68fc3fcee",
+          "bytes": 209652,
+          "triangles": 3804,
+          "vertices": 5051,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -1.1440000534057617,
+              0.8709999918937683,
+              -0.45399999618530273
+            ],
+            "max": [
+              1.1440000534057617,
+              1.5199999809265137,
+              0.47699999809265137
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/BUZZ_DRONE.far.glb",
+          "sha256": "5a8a1e2aef2d53e90ffbe171486f5568715eeddc8d2e81ad6e96fad82ee2da61",
+          "bytes": 59976,
+          "triangles": 980,
+          "vertices": 1329,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -1.1440000534057617,
+              0.8709999918937683,
+              -0.4317796528339386
+            ],
+            "max": [
+              1.1440000534057617,
+              1.5199999809265137,
+              0.47699999809265137
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/BUZZ_DRONE.shadow.glb",
+          "sha256": "5e2e9556241df212d9b9fc44977efac21d090bc9d48490ce08713547c40fcfdf",
+          "bytes": 34768,
+          "triangles": 496,
+          "vertices": 732,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -1.1440000534057617,
+              0.8709999918937683,
+              -0.45399999618530273
+            ],
+            "max": [
+              1.1440000534057617,
+              1.4800000190734863,
+              0.45399999618530273
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "GRAUSEL_BROOM_GLIDER",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/granny-grausel",
+      "native": "GRANNY_GRAUSEL.blend",
+      "lodFiles": {
+        "hi": "GRAUSEL_BROOM_GLIDER.hi.glb",
+        "lo": "GRAUSEL_BROOM_GLIDER.lo.glb",
+        "sh": "GRAUSEL_BROOM_GLIDER.sh.glb"
+      },
+      "motion": {
+        "file": "articulated/GRAUSEL_BROOM_GLIDER.motion.json",
+        "sha256": "ae6c737146719b5c4a89b1a2765158c2132a5ec899373a7fdd640af1dc9e7436"
+      },
+      "sockets": {
+        "file": "articulated/GRAUSEL_BROOM_GLIDER.sockets.json",
+        "sha256": "c42c800a4c608f807a9c5783f325fade55d28d00460f1e08be5ab42b96771703"
+      },
+      "browserAudit": "docs/games/fernworld-assets/mobile-glider-browser-audit-2026-10-27.json",
+      "role": "single-character-mount",
+      "license": "Original Fernworld glider",
+      "provenance": "SOURCE.json",
+      "defaultLod": "lo",
+      "review": "ThreeLOD exports and shared-origin mount inspected independently in actual browser; no final user approval claimed.",
+      "nativeSha256": "add5b1802ebcba4693b568daec9c59ade73358cd654ad3739e70ad2993fd49c6",
+      "lods": {
+        "hi": {
+          "file": "articulated/GRAUSEL_BROOM_GLIDER.hi.glb",
+          "sha256": "c5835790761e1ac108b6164d1d27e22932207a59b56bb398db635f260849eb2c",
+          "bytes": 143700,
+          "triangles": 5800,
+          "vertices": 2990,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.6125313639640808,
+              0.36643022298812866,
+              -1.3225497007369995
+            ],
+            "max": [
+              0.6125308871269226,
+              1.0060075521469116,
+              0.5606852173805237
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/GRAUSEL_BROOM_GLIDER.lo.glb",
+          "sha256": "bf4c463f7b1c0ec21103f3ffed4043310beecaf85e0fd984ecf8e200e7b80ad8",
+          "bytes": 45292,
+          "triangles": 1700,
+          "vertices": 940,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.6133081912994385,
+              0.36389896273612976,
+              -1.3224341869354248
+            ],
+            "max": [
+              0.6133133172988892,
+              1.0060456991195679,
+              0.561643123626709
+            ]
+          }
+        },
+        "sh": {
+          "file": "articulated/GRAUSEL_BROOM_GLIDER.sh.glb",
+          "sha256": "8861475d505b0797f6af64a2533cf1f8e830820d4898335f6283ff7c49a1fdf7",
+          "bytes": 20088,
+          "triangles": 650,
+          "vertices": 415,
+          "primitives": 1,
+          "bounds": {
+            "min": [
+              -0.611472487449646,
+              0.36375993490219116,
+              -1.3272143602371216
+            ],
+            "max": [
+              0.6114802360534668,
+              1.0084047317504883,
+              0.5595606565475464
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "HULK",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/heavy-machines/HULK",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "hi.glb",
+        "lo": "lo.glb",
+        "far": "far.glb",
+        "shadow": "shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/HULK.motion.json",
+        "sha256": "162169db76b237cb83ff86c639f6d0011f1cb8b2277c98aa3f745c5cbebb38c1"
+      },
+      "sockets": {
+        "file": "articulated/HULK.sockets.json",
+        "sha256": "162169db76b237cb83ff86c639f6d0011f1cb8b2277c98aa3f745c5cbebb38c1"
+      },
+      "socketSection": "pivots_world_gltf_m; full shared motion contract intentionally retained",
+      "browserAudit": "docs/games/fernworld-assets/heavy-machines-browser-audit-2026-10-27.json",
+      "role": "crowd-automaton",
+      "license": "Quaternius CC0-1.0 plus Fernworld adaptation",
+      "provenance": "provenance.json",
+      "defaultLod": "lo",
+      "review": "Coordinator six views, actual8LOD exports and5/6 motion clips at keytimes checked. HULK exact ground-level split sockets checked. No fullgame performance approval.",
+      "locomotionContract": "WalkRoll contains local root Z translation0.45m per1s; runtime must clone and remove that root translation channel when controller provides movement. Keep wheel and HullTilt channels.",
+      "nativeSha256": "2fa9a6fec9731428feb7e1de3bfd1501fb37f20cf49b6dc0f6e3c6ecc286ef7c",
+      "lods": {
+        "hi": {
+          "file": "articulated/HULK.hi.glb",
+          "sha256": "927eb937dbf85934123f6f14a611e17503ac78c502ea25feabb6bef8bb3f4fee",
+          "bytes": 1501932,
+          "triangles": 17068,
+          "vertices": 30924,
+          "primitives": 7,
+          "bounds": {
+            "min": [
+              -0.8399999737739563,
+              -3.725290298461914e-09,
+              -0.3489999994635582
+            ],
+            "max": [
+              0.8399999737739563,
+              1.0562165919691324,
+              0.47600001841783524
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/HULK.lo.glb",
+          "sha256": "f2cbd43edb3cc8267cb81d28b1d715e9a578276df0aa2bccac98dd798b2e8a5e",
+          "bytes": 587320,
+          "triangles": 5522,
+          "vertices": 11659,
+          "primitives": 7,
+          "bounds": {
+            "min": [
+              -0.8400000333786011,
+              -3.725290298461914e-09,
+              -0.34882139414548874
+            ],
+            "max": [
+              0.8400000333786011,
+              1.055524343624711,
+              0.47600001841783524
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/HULK.far.glb",
+          "sha256": "efffd3b4e2fd1f023fbdc1ceaf0cb96592036f532d59a994e60f754dc972af83",
+          "bytes": 181964,
+          "triangles": 1258,
+          "vertices": 2962,
+          "primitives": 7,
+          "bounds": {
+            "min": [
+              -0.8400000333786011,
+              5.587935447692871e-09,
+              -0.34857674688100815
+            ],
+            "max": [
+              0.8400000333786011,
+              1.046814976260066,
+              0.47460050135850906
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/HULK.shadow.glb",
+          "sha256": "7b167970342e31c48cbf5acfb2313cc12d4acb203cf4d3d11cf914d727aef5a5",
+          "bytes": 129252,
+          "triangles": 740,
+          "vertices": 1861,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.8400000333786011,
+              3.4924596548080444e-09,
+              -0.3544992730021477
+            ],
+            "max": [
+              0.8400000333786011,
+              1.0453602014458738,
+              0.47460073977708817
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "SQUIRTER",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/heavy-machines/SQUIRTER",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "hi.glb",
+        "lo": "lo.glb",
+        "far": "far.glb",
+        "shadow": "shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/SQUIRTER.motion.json",
+        "sha256": "eea1f4f31928388b39c1742e42db243ca540f165fe1e2e3806ae1de27682d1e7"
+      },
+      "sockets": {
+        "file": "articulated/SQUIRTER.sockets.json",
+        "sha256": "eea1f4f31928388b39c1742e42db243ca540f165fe1e2e3806ae1de27682d1e7"
+      },
+      "socketSection": "pivots_world_gltf_m; full shared motion contract intentionally retained",
+      "browserAudit": "docs/games/fernworld-assets/heavy-machines-browser-audit-2026-10-27.json",
+      "role": "crowd-automaton",
+      "license": "Quaternius CC0-1.0 plus Fernworld adaptation",
+      "provenance": "provenance.json",
+      "defaultLod": "lo",
+      "review": "Coordinator six views, actual8LOD exports and5/6 motion clips at keytimes checked. HULK exact ground-level split sockets checked. No fullgame performance approval.",
+      "locomotionContract": "WalkRoll contains local root Z translation0.45m per1s; runtime must clone and remove that root translation channel when controller provides movement. Keep wheel and HullTilt channels.",
+      "nativeSha256": "d9e6e85d49200e0fa47966e2a7f0ef33e40b8f8568a0a8013670c14fc753e770",
+      "lods": {
+        "hi": {
+          "file": "articulated/SQUIRTER.hi.glb",
+          "sha256": "e44d37c95f9b97e29a597621e3c9ab8ec1faee16b3bbce1a07a1afcefa55d51d",
+          "bytes": 1142464,
+          "triangles": 17516,
+          "vertices": 22755,
+          "primitives": 9,
+          "bounds": {
+            "min": [
+              -0.4760238826274872,
+              -3.725290298461914e-09,
+              -0.502507233992219
+            ],
+            "max": [
+              0.4760238826274872,
+              1.0402928683906794,
+              0.6240000072866678
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/SQUIRTER.lo.glb",
+          "sha256": "e56dac268b0a75393d05f9bbc7bba8e61e042614e742782942b6d3533ed83d5f",
+          "bytes": 451000,
+          "triangles": 5614,
+          "vertices": 8528,
+          "primitives": 9,
+          "bounds": {
+            "min": [
+              -0.47551777958869934,
+              -3.725290298461914e-09,
+              -0.5019594077020884
+            ],
+            "max": [
+              0.4756261706352234,
+              1.0394656751304865,
+              0.6240682546049356
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/SQUIRTER.far.glb",
+          "sha256": "1f661e25bf800dfc064e56d37d8401df9bbf3c27d87c1c4114d0c64cd36d3509",
+          "bytes": 151632,
+          "triangles": 1290,
+          "vertices": 2227,
+          "primitives": 9,
+          "bounds": {
+            "min": [
+              -0.47562938928604126,
+              6.984919309616089e-09,
+              -0.5021453741937876
+            ],
+            "max": [
+              0.4762166142463684,
+              1.0196967283263803,
+              0.6241757813841105
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/SQUIRTER.shadow.glb",
+          "sha256": "5e0558537952c892c6189b509b949b19a43c75e8ae6b9e9098bf1ac01cc37c4d",
+          "bytes": 110060,
+          "triangles": 724,
+          "vertices": 1381,
+          "primitives": 8,
+          "bounds": {
+            "min": [
+              -0.47562938928604126,
+              3.725290298461914e-09,
+              -0.5040459278970957
+            ],
+            "max": [
+              0.4754237234592438,
+              1.022026950493455,
+              0.6234033647924662
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "COMBINE_CRAWLER",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/combine-crawler",
+      "native": "COMBINE_CRAWLER.blend",
+      "lodFiles": {
+        "hi": "COMBINE_CRAWLER_Hi.glb",
+        "lo": "COMBINE_CRAWLER_Lo.glb",
+        "far": "COMBINE_CRAWLER_Far.glb",
+        "shadow": "COMBINE_CRAWLER_Shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/COMBINE_CRAWLER.motion.json",
+        "sha256": "5e7ab11b2a4c3f4a0677cd8f264435141ce113fa6bfbd8aae8c95eb79bea7c01"
+      },
+      "sockets": {
+        "file": "articulated/COMBINE_CRAWLER.sockets.json",
+        "sha256": "bcbce1c917b4761a2354d81194cdf8ba7885e693569a7058c351a7610352b3cb"
+      },
+      "browserAudit": "docs/games/fernworld-assets/crawler-browser-audit-2026-10-27.json",
+      "role": "single-viridis-rangers-boss",
+      "license": "CC0-1.0 Quaternius Animated Tanks plus Fernworld adaptation",
+      "provenance": "SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "embeddedGLBClips",
+      "review": "Coordinator finalmultiview and independent actualbrowser all4LODs8clips accepted. No finaluserapproval or integratedperformance claim.",
+      "integrationNotes": [
+        "GLB clip times start0; Travelinplace, wheelrolling3.33m/s nominal; speedscalecontroller mustmatchdistance",
+        "EightactualGLB clips; optional author runtime_pose.mjs is reference-only and not copied to game package",
+        "MOTION_YUP clips include events; socketJSON is reference rest, query live namednodes afterposes",
+        "EscapeHatch hood slides forward toclear PodDock; release at0.85sec; podradius0.29m",
+        "Native/Lo originalsource colors preserved; atlas contains validated olive69/79/48 andochre133/110/56"
+      ],
+      "nativeSha256": "761fb010e2f6b6bb1455f586533ed0dc4a7d7dd67a07a7fb338002f4354968cc",
+      "lods": {
+        "hi": {
+          "file": "articulated/COMBINE_CRAWLER.hi.glb",
+          "sha256": "263b724d7c7a89a8413bdf228360956494a0fdac13d97af067fd27ea40e4e31e",
+          "bytes": 1729796,
+          "triangles": 35678,
+          "vertices": 48728,
+          "primitives": 11,
+          "bounds": {
+            "min": [
+              -1.8600419759750366,
+              0.0027880072593688965,
+              -1.671736717224121
+            ],
+            "max": [
+              1.8595502376556396,
+              2.1494242548942566,
+              2.559999942779541
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/COMBINE_CRAWLER.lo.glb",
+          "sha256": "580631c2849392dd5cdc6975ef921a30fc31e063de93982637539c17e0632d04",
+          "bytes": 528928,
+          "triangles": 11486,
+          "vertices": 14025,
+          "primitives": 11,
+          "bounds": {
+            "min": [
+              -1.8589885234832764,
+              0.005933046340942383,
+              -1.670194149017334
+            ],
+            "max": [
+              1.8591526746749878,
+              2.14384526014328,
+              2.559999942779541
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/COMBINE_CRAWLER.far.glb",
+          "sha256": "87d97c5fdc5d7b1d57766aeee520bebe1fc30b099c7624903b57ece9e3758a91",
+          "bytes": 191000,
+          "triangles": 3032,
+          "vertices": 4448,
+          "primitives": 11,
+          "bounds": {
+            "min": [
+              -1.8558162450790405,
+              0.017897069454193115,
+              -1.6615312099456787
+            ],
+            "max": [
+              1.8572241067886353,
+              2.1408888697624207,
+              2.5431411266326904
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/COMBINE_CRAWLER.shadow.glb",
+          "sha256": "cf7bf4e6c14772882f76a801f5de48e0d2fbea9a0cb3b05cc1153d80055dd805",
+          "bytes": 110184,
+          "triangles": 1286,
+          "vertices": 2147,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.7503383159637451,
+              0.017897069454193115,
+              -1.6615312099456787
+            ],
+            "max": [
+              1.750801682472229,
+              2.1408888697624207,
+              2.5431411266326904
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "BRIGADIER_FROST_STRIDER",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/brigadier-frost-strider",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "brigadier_hi.glb",
+        "lo": "brigadier_lo.glb",
+        "far": "brigadier_far.glb",
+        "shadow": "brigadier_shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/BRIGADIER_FROST_STRIDER.motion.json",
+        "sha256": "2d19d069cc3b0bdd9fd72d1137f9b79da57cde55701620c21b1914b67a748a56"
+      },
+      "sockets": {
+        "file": "articulated/BRIGADIER_FROST_STRIDER.sockets.json",
+        "sha256": "4f8d15fac1328373a64c7e36606be2da199d78b77870eb09e6e726a3c4729418"
+      },
+      "browserAudit": "docs/games/fernworld-assets/quota-brigadier-browser-audit-2026-10-27.json",
+      "role": "single-hibern-rangers-boss",
+      "license": "CC0-1.0 Quaternius Leela plus Fernworld adaptation",
+      "provenance": "SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "embeddedGLBClips",
+      "review": "Coordinator final views/motion/LOD and independent fourGLB eightclip/keytime review complete. No finaluserapproval or integratedperformance claim.",
+      "integrationNotes": [
+        "Travel in-place, nominal controller speed .28125m/s matches stance; scale cliptime and travel together.",
+        "16rigid pivots, one opaque embedded palette; no per-frame geometry rebuild.",
+        "Frost_Fire at.10s uses live MainMuzzle; weakpoint enables.90s; EscapeHatch pilot release1.10s through live PodDock radius.24m.",
+        "EscapeHatch starts from Disabled kneel; query current animated socket nodes, not saved rest coordinates."
+      ],
+      "nativeSha256": "40205baac2927700699f797c6e8c73ef9a9e6a8fbcc8f448fcb0cca6b2e6889f",
+      "lods": {
+        "hi": {
+          "file": "articulated/BRIGADIER_FROST_STRIDER.hi.glb",
+          "sha256": "bf86fce00e4e81d579e9c866c15fbc13b5c021841388110f9884b71ec30d146d",
+          "bytes": 4485088,
+          "triangles": 40704,
+          "vertices": 99921,
+          "primitives": 16,
+          "bounds": {
+            "min": [
+              -2.140841962720077,
+              -2.6676772282852035e-07,
+              -2.268941980426616
+            ],
+            "max": [
+              2.140842862554159,
+              3.1912199705839157,
+              2.3999237418174744
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/BRIGADIER_FROST_STRIDER.lo.glb",
+          "sha256": "eeafcba186243f4261fd2312b6efbd226fa82f9474ea11007fe0c54ddd9adf6c",
+          "bytes": 1670456,
+          "triangles": 13484,
+          "vertices": 32724,
+          "primitives": 16,
+          "bounds": {
+            "min": [
+              -2.1398295381260604,
+              -2.664872997826251e-07,
+              -2.2674044850277753
+            ],
+            "max": [
+              2.1380903120082726,
+              3.189746744930744,
+              2.4000231623649597
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/BRIGADIER_FROST_STRIDER.far.glb",
+          "sha256": "5612e94d3c21da78f7f83fb28a8fdc6722e06a36959bf3ba65aedae0ede7d903",
+          "bytes": 685468,
+          "triangles": 3640,
+          "vertices": 9260,
+          "primitives": 16,
+          "bounds": {
+            "min": [
+              -2.138586244188857,
+              -2.674941797509156e-07,
+              -2.26142789360651
+            ],
+            "max": [
+              2.1381920019883847,
+              3.180903859436512,
+              2.4049379229545593
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/BRIGADIER_FROST_STRIDER.shadow.glb",
+          "sha256": "395e21430ea1e0e4a8be9d87b2be5e9e9524209bd9d54d39cd8168fb4cc5d887",
+          "bytes": 450100,
+          "triangles": 1224,
+          "vertices": 3664,
+          "primitives": 16,
+          "bounds": {
+            "min": [
+              -2.148352879117418,
+              -2.674469565255855e-07,
+              -2.2746211797245253
+            ],
+            "max": [
+              2.1479279468311185,
+              3.191260978579521,
+              2.40038400888443
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "QUOTA_DRILL_MECH",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/quota-drill",
+      "native": "QUOTA_native.blend",
+      "lodFiles": {
+        "hi": "quota_hi.glb",
+        "lo": "quota_lo.glb",
+        "far": "quota_far.glb",
+        "shadow": "quota_shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/QUOTA_DRILL_MECH.motion.json",
+        "sha256": "9d230213e19b4d8e55ad5016c408095650c63b7e115caa75145f1242b1674c8b"
+      },
+      "sockets": {
+        "file": "articulated/QUOTA_DRILL_MECH.sockets.json",
+        "sha256": "aa3b39e8f27f7dcee40fc0021ec6561924f282c2c26b47fb1ba967e081d7f663"
+      },
+      "browserAudit": "docs/games/fernworld-assets/quota-brigadier-browser-audit-2026-10-27.json",
+      "role": "single-sahrun-rangers-boss",
+      "license": "CC0-1.0 Quaternius Mike plus Fernworld adaptation",
+      "provenance": "SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "embeddedGLBClips",
+      "review": "Coordinator final multiview/LOD/attack and exact4GLB8clip/keytime audit passed; no finaluserapproval or integratedperformance claim.",
+      "integrationNotes": [
+        "Travel inplace; controller owns translation. Eight rigid primitives, one opaque embedded atlas.",
+        "DrillCharge precedes DrillStrike; active .24-.70s, impact .384s; query animated attackDrill socket.",
+        "Weakpoint exposed .72s, radius.27m. Escape starts from Disabled; spawn pod1.05s at current escapePodDock radius.34m, +Y launch axis."
+      ],
+      "nativeSha256": "2e1a705d9b1481b98d6287a644acc3c675748430a5b1f9d8bc898892b6b750d5",
+      "lods": {
+        "hi": {
+          "file": "articulated/QUOTA_DRILL_MECH.hi.glb",
+          "sha256": "a1e54d740c9839ba948772ba8693d49c0cc5268658445d300a38d07f2086402e",
+          "bytes": 2311344,
+          "triangles": 35828,
+          "vertices": 50407,
+          "primitives": 8,
+          "bounds": {
+            "min": [
+              -1.769499983638525,
+              0,
+              -1.3046965599060059
+            ],
+            "max": [
+              1.769499983638525,
+              2.8920000419020653,
+              2.6443404030937003
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/QUOTA_DRILL_MECH.lo.glb",
+          "sha256": "b48805a33bf92cbfd589dd2eaf326074fa800b0676eb07d00f2c5f8cd3cca437",
+          "bytes": 1149204,
+          "triangles": 11990,
+          "vertices": 24812,
+          "primitives": 8,
+          "bounds": {
+            "min": [
+              -1.765653831884265,
+              0,
+              -1.3015692234039307
+            ],
+            "max": [
+              1.769499983638525,
+              2.8920000419020653,
+              2.644142152851189
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/QUOTA_DRILL_MECH.far.glb",
+          "sha256": "bd67db32dc4c93243f80f816954bec7fcbaa68cd04a464508daf7e7969f0d901",
+          "bytes": 425916,
+          "triangles": 3184,
+          "vertices": 7129,
+          "primitives": 8,
+          "bounds": {
+            "min": [
+              -1.7718437388539314,
+              0,
+              -1.2888901233673096
+            ],
+            "max": [
+              1.7718437388539314,
+              2.882000043988228,
+              2.6441044475235564
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/QUOTA_DRILL_MECH.shadow.glb",
+          "sha256": "ae4a72cb0f4f4f35498b1e33b8c164a7763c7e27d1bc7c40e71638b51d3f7048",
+          "bytes": 198260,
+          "triangles": 1012,
+          "vertices": 2360,
+          "primitives": 8,
+          "bounds": {
+            "min": [
+              -1.7596514709293842,
+              0,
+              -1.3105555772781372
+            ],
+            "max": [
+              1.7485132599249482,
+              2.882000043988228,
+              2.6366612221390935
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_HAZEL",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-clubs-1/TOY_HAZEL",
+      "native": "TOY_HAZEL.blend",
+      "lodFiles": {
+        "hi": "TOY_HAZEL_Hi.glb",
+        "lo": "TOY_HAZEL_Lo.glb",
+        "far": "TOY_HAZEL_Far.glb",
+        "shadow": "TOY_HAZEL_Shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_HAZEL.motion.json",
+        "sha256": "4b7934add7e74cd2869bb8c391151a71c20ec809e43e08e930b24c95d5a3ee64"
+      },
+      "sockets": {
+        "file": "articulated/TOY_HAZEL.sockets.json",
+        "sha256": "e63ca1dbd152db29f6d3fec6cd6780c6b4408d371f0a14017ae8cd87aea7783d"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-clubs-1-browser-audit-2026-10-27.json",
+      "role": "bounce-club-toy-tank",
+      "license": "CC0-1.0 Quaternius Rover_Round wheel topology plus Fernworld adaptation",
+      "provenance": "SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "review": "Coordinator personally reviewed six form views, motion/LOD boards and independent actual12GLB6recipe samples with HIT floor correction; reset error0. No fullgame performance claim.",
+      "integrationNotes": [
+        "GLB stores rigid hierarchy and rest pose; six actual animation recipes are in motion.json.",
+        "Use cached recipeClips conversion; gameplay turret yaw/recoil must be layered by controller, not two full-rest clips overriding each other.",
+        "Travel is inplace; controller speed and radius contract retained in motion.json.",
+        "HIT recipe compensates pivot tilt to preserve wheel ground contact and GroundShadowY.002.",
+        "Five rigid primitives, one material; one material is not one draw until the separate rigid batch adapter is used."
+      ],
+      "nativeSha256": "1b5fa7e4ebe216882cb4d948551b1a2055abc7af2300492fbe2076d2a0affcc1",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_HAZEL.hi.glb",
+          "sha256": "7df28e973cc97d0ce3eab3a2ea3d4834ff954b9aa2521c77feffdb963585c8b2",
+          "bytes": 239468,
+          "triangles": 8696,
+          "vertices": 4973,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3774999976158142,
+              0,
+              -0.40000002086162567
+            ],
+            "max": [
+              0.3774999976158142,
+              0.6000000238418579,
+              0.48500001430511475
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_HAZEL.lo.glb",
+          "sha256": "4c68ffac6178bdbe8eb89f1ac6c3b1baeb015279e4547208fa972e52b51e8fdd",
+          "bytes": 114640,
+          "triangles": 3796,
+          "vertices": 2199,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3775421679019928,
+              0,
+              -0.40000002086162567
+            ],
+            "max": [
+              0.3775421679019928,
+              0.6000208854675293,
+              0.48502156138420105
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_HAZEL.far.glb",
+          "sha256": "e96488ae924b087af17aae354e11d5d2c2b56d77b97e1ff5f7ab531a041b7929",
+          "bytes": 39628,
+          "triangles": 1094,
+          "vertices": 686,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3721469044685364,
+              0,
+              -0.3984299302101135
+            ],
+            "max": [
+              0.3721469044685364,
+              0.6001813411712646,
+              0.48509836196899414
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_HAZEL.shadow.glb",
+          "sha256": "dd5818a9e575003d94c30cf405fad18d1efd4a7802f0124db5dc406674daad62",
+          "bytes": 22364,
+          "triangles": 534,
+          "vertices": 346,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3721469044685364,
+              0,
+              -0.3945814222097397
+            ],
+            "max": [
+              0.3721469044685364,
+              0.595144733786583,
+              0.4850154221057892
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_ROOKIE",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-clubs-1/TOY_ROOKIE",
+      "native": "TOY_ROOKIE.blend",
+      "lodFiles": {
+        "hi": "TOY_ROOKIE_Hi.glb",
+        "lo": "TOY_ROOKIE_Lo.glb",
+        "far": "TOY_ROOKIE_Far.glb",
+        "shadow": "TOY_ROOKIE_Shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_ROOKIE.motion.json",
+        "sha256": "3b1da0cb8e1a3dea80a60311d0a7635ca7261826612ac31745d187a7b4c2c519"
+      },
+      "sockets": {
+        "file": "articulated/TOY_ROOKIE.sockets.json",
+        "sha256": "e1287ce0c8b8ff52999700229652c49f5b32edd5cfa91d9895f43e2d91bc908b"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-clubs-1-browser-audit-2026-10-27.json",
+      "role": "bounce-club-toy-tank",
+      "license": "CC0-1.0 Quaternius Rover_Round wheel topology plus Fernworld adaptation",
+      "provenance": "SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "review": "Coordinator personally reviewed six form views, motion/LOD boards and independent actual12GLB6recipe samples with HIT floor correction; reset error0. No fullgame performance claim.",
+      "integrationNotes": [
+        "GLB stores rigid hierarchy and rest pose; six actual animation recipes are in motion.json.",
+        "Use cached recipeClips conversion; gameplay turret yaw/recoil must be layered by controller, not two full-rest clips overriding each other.",
+        "Travel is inplace; controller speed and radius contract retained in motion.json.",
+        "HIT recipe compensates pivot tilt to preserve wheel ground contact and GroundShadowY.002.",
+        "Five rigid primitives, one material; one material is not one draw until the separate rigid batch adapter is used."
+      ],
+      "nativeSha256": "815aa4baff5f6a26c88eb4d21a7588899abd98e2f3ecb8d8d623eecc41d711ab",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_ROOKIE.hi.glb",
+          "sha256": "c16a0e7710b674c27f4513135e536618348391e6b96de4555fcb6e41a3f9217d",
+          "bytes": 265016,
+          "triangles": 9348,
+          "vertices": 5351,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3774999976158142,
+              0,
+              -0.35100002586841583
+            ],
+            "max": [
+              0.3774999976158142,
+              0.4162999987602234,
+              0.4349999949336052
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_ROOKIE.lo.glb",
+          "sha256": "fe2bab760e66cceb134833d5a562d2f52a6e68a27a423a7346133bde8fef4dd2",
+          "bytes": 118840,
+          "triangles": 3794,
+          "vertices": 2229,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3775411546230316,
+              0,
+              -0.35100002586841583
+            ],
+            "max": [
+              0.3775411546230316,
+              0.4168209806084633,
+              0.43503307551145554
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_ROOKIE.far.glb",
+          "sha256": "80047b7af082d1c9ed5dab61d14c88349a0625488e3b4b9fec3251f031a65438",
+          "bytes": 41112,
+          "triangles": 1094,
+          "vertices": 698,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3721387982368469,
+              0,
+              -0.34660762548446655
+            ],
+            "max": [
+              0.3721387982368469,
+              0.41841697692871094,
+              0.4351246878504753
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_ROOKIE.shadow.glb",
+          "sha256": "11ac94a66bdc9b4026863571125913e7fef0d407c7b2bc968ce311547e41a5c4",
+          "bytes": 23628,
+          "triangles": 536,
+          "vertices": 358,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.370576947927475,
+              0,
+              -0.341482013463974
+            ],
+            "max": [
+              0.3721387982368469,
+              0.41841697692871094,
+              0.43580543249845505
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_SCOUT",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-clubs-1/TOY_SCOUT",
+      "native": "TOY_SCOUT.blend",
+      "lodFiles": {
+        "hi": "TOY_SCOUT_Hi.glb",
+        "lo": "TOY_SCOUT_Lo.glb",
+        "far": "TOY_SCOUT_Far.glb",
+        "shadow": "TOY_SCOUT_Shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_SCOUT.motion.json",
+        "sha256": "997bd5412220e972f8975015615f54871ad589a34ea4ccc377fcdaae1ceb890b"
+      },
+      "sockets": {
+        "file": "articulated/TOY_SCOUT.sockets.json",
+        "sha256": "b6a2b64d1fa4c2a4c37663804ec2d04e0079a8c6887f9aa28d4f6c09a364d16c"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-clubs-1-browser-audit-2026-10-27.json",
+      "role": "bounce-club-toy-tank",
+      "license": "CC0-1.0 Quaternius Rover_Round wheel topology plus Fernworld adaptation",
+      "provenance": "SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "review": "Coordinator personally reviewed six form views, motion/LOD boards and independent actual12GLB6recipe samples with HIT floor correction; reset error0. No fullgame performance claim.",
+      "integrationNotes": [
+        "GLB stores rigid hierarchy and rest pose; six actual animation recipes are in motion.json.",
+        "Use cached recipeClips conversion; gameplay turret yaw/recoil must be layered by controller, not two full-rest clips overriding each other.",
+        "Travel is inplace; controller speed and radius contract retained in motion.json.",
+        "HIT recipe compensates pivot tilt to preserve wheel ground contact and GroundShadowY.002.",
+        "Five rigid primitives, one material; one material is not one draw until the separate rigid batch adapter is used."
+      ],
+      "nativeSha256": "950fa1adf51d158974ca8f09984c1280ace377e0f5d746fa9fe475fd18e2ce26",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_SCOUT.hi.glb",
+          "sha256": "749fa400156a5f78ea37fb15ef130b2cad26af98a8e33bb72ce98e690aad5845",
+          "bytes": 233012,
+          "triangles": 8472,
+          "vertices": 4861,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.33249998092651367,
+              0,
+              -0.49000000953674316
+            ],
+            "max": [
+              0.33250001072883606,
+              0.42500001192092896,
+              0.5149999856948853
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_SCOUT.lo.glb",
+          "sha256": "2a996fc35fee257b6a13ba9a7d610db697f9252654546e97fc7384e3d354700f",
+          "bytes": 115912,
+          "triangles": 3794,
+          "vertices": 2242,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.33253929018974304,
+              0,
+              -0.49000000953674316
+            ],
+            "max": [
+              0.3325393497943878,
+              0.4250040799379349,
+              0.5149999856948853
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_SCOUT.far.glb",
+          "sha256": "5de34ab04c534710795acac1072d474c1dee3e98256dba44a5cc9d0d0ccdccdf",
+          "bytes": 39880,
+          "triangles": 1098,
+          "vertices": 693,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3262808322906494,
+              0,
+              -0.4877731204032898
+            ],
+            "max": [
+              0.3262808620929718,
+              0.4251596927642822,
+              0.5137960314750671
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_SCOUT.shadow.glb",
+          "sha256": "872fb226dd8cd5d051f23b4b66160f00e73610e205afbf8f3718870d10d0d727",
+          "bytes": 22324,
+          "triangles": 534,
+          "vertices": 346,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3262808322906494,
+              0,
+              -0.4810614287853241
+            ],
+            "max": [
+              0.3252096474170685,
+              0.4251596927642822,
+              0.5072983503341675
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "EQUALITY_MODULE_SHIP",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/equality-module-ship",
+      "native": "EQUALITY.blend",
+      "lodFiles": {
+        "hi": "EQUALITY_Hero.glb",
+        "lo": "EQUALITY_Lo.glb",
+        "far": "EQUALITY_Far.glb",
+        "shadow": "EQUALITY_Shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/EQUALITY_MODULE_SHIP.motion.json",
+        "sha256": "db63c81f4ecb18528b578e464ae82f4f475eb2fa4269792b2ed9ac291f673035"
+      },
+      "sockets": {
+        "file": "articulated/EQUALITY_MODULE_SHIP.sockets.json",
+        "sha256": "5abe3698e3337ee33e8864e48394fd38013613f72644c32cdebd982f4e599f5e"
+      },
+      "browserAudit": "docs/games/fernworld-assets/equality-browser-audit-2026-10-27.json",
+      "role": "single-vulkara-rangers-boss",
+      "license": "CC0-1.0 Quaternius Space Kit plus Fernworld adaptation",
+      "provenance": "SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "embeddedGLBClips",
+      "review": "Coordinator final sixviews/motion/LOD and actual4GLB8clip/keytime proof accepted after fixing overlapping exterior panels. No fullgame performance claim.",
+      "integrationNotes": [
+        "One hover boss, eight rigid groups, sixteen material primitives, three opaque material classes.",
+        "Controller root hover height at least.70m; animated source bottom reaches\u2212.122m.",
+        "Broadside fire L/R at.1666667/.3666667s using current oriented Muzzle_L/Muzzle_R.",
+        "OpenWeakpoint vulnerability at1.0s, radius.36m, live WeakpointSocket.",
+        "EscapeHatch starts from Disabled_Hover. PodRelease at.8s, EscapePodDock radius.37m; poddiameter\u2264.70m, rise1.2m before turning.",
+        "Full TRS state clips: crossfade or explicit masks; scene root translation belongs to controller."
+      ],
+      "nativeSha256": "bf9573369328c74effabd85368228b8a639480d0e1c7b140efa5c1160d178536",
+      "lods": {
+        "hi": {
+          "file": "articulated/EQUALITY_MODULE_SHIP.hi.glb",
+          "sha256": "b623984298ffae60ea85f5a83b3f04ef97ced6a5479b7a510f41b392f459e28a",
+          "bytes": 2809284,
+          "triangles": 36396,
+          "vertices": 50032,
+          "primitives": 16,
+          "bounds": {
+            "min": [
+              -3.490013360977173,
+              -3.0994415283203125e-06,
+              -2.2900006771087646
+            ],
+            "max": [
+              3.4900107383728027,
+              2.374000072479248,
+              2.2940001487731934
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/EQUALITY_MODULE_SHIP.lo.glb",
+          "sha256": "ebf28f5ca398b9ec7657a5ff02ead673a054deab9ad03d269b0d43d7bd023b12",
+          "bytes": 1860120,
+          "triangles": 12000,
+          "vertices": 34333,
+          "primitives": 16,
+          "bounds": {
+            "min": [
+              -3.490147590637207,
+              -0.00010514259338378906,
+              -2.2900540828704834
+            ],
+            "max": [
+              3.4901092052459717,
+              2.374000072479248,
+              2.2940001487731934
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/EQUALITY_MODULE_SHIP.far.glb",
+          "sha256": "a46a772bba92ba55cdbfbc5fefc95701f69b4eae960d60b5d72bd80099511780",
+          "bytes": 545120,
+          "triangles": 3068,
+          "vertices": 8796,
+          "primitives": 16,
+          "bounds": {
+            "min": [
+              -3.489557981491089,
+              -0.005257248878479004,
+              -2.292656183242798
+            ],
+            "max": [
+              3.5031487941741943,
+              2.340057373046875,
+              2.2939999103546143
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/EQUALITY_MODULE_SHIP.shadow.glb",
+          "sha256": "f1f2fef113719242a872127862d4e427d7d09f6b6d94d3b7425e64c4dfb34df0",
+          "bytes": 287064,
+          "triangles": 1294,
+          "vertices": 3810,
+          "primitives": 16,
+          "bounds": {
+            "min": [
+              -3.500190019607544,
+              0.006362438201904297,
+              -2.3001561164855957
+            ],
+            "max": [
+              3.4980950355529785,
+              2.283217430114746,
+              2.2939999103546143
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_ZIPPER",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-clubs-2/TOY_ZIPPER",
+      "native": "../source/TOY_ZIPPER.blend",
+      "lodFiles": {
+        "hi": "TOY_ZIPPER.hi.glb",
+        "lo": "TOY_ZIPPER.lo.glb",
+        "far": "TOY_ZIPPER.far.glb",
+        "shadow": "TOY_ZIPPER.shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_ZIPPER.motion.json",
+        "sha256": "0f1ef1b4fcc8760c1551c15dba5dc6d7777367a7173362187d000b33f4d0d93d"
+      },
+      "sockets": {
+        "file": "articulated/TOY_ZIPPER.sockets.json",
+        "sha256": "ca3d9f228570be9c7ddaee6f3b195d316f74adb75bfa482adda331941fcfc954"
+      },
+      "motionLayering": {
+        "file": "articulated/TOY_ZIPPER.motionLayering.json",
+        "sha256": "849189c3bf7be2922b8f999604e880205de124d15e4902984b72b759f02af9c6"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-clubs-2-browser-audit-2026-10-27.json",
+      "role": "bounce-club-toy-tank",
+      "license": "CC0-1.0 Quaternius Tank base plus Fernworld adaptation",
+      "provenance": "../SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "review": "Coordinator personally accepted sixforms/action/LOD boards,123source hashes and actual12GLB wholeTRS/keytime/interruption checks. No fullgame performance claim.",
+      "integrationNotes": [
+        "Full absolute-TRS diagnostic recipes need motionLayering masks for simultaneous gameplay aim/recoil/travel.",
+        "Inplace Travel controller speed1unit/s and central wheel angular speed match documented radius; outer tread is a static molded toy shell.",
+        "Zipper Rocket_Charge lasts.45s; actual gameplay warning must remain visible before fire.",
+        "Miner DropMine uses oriented RearMineSocket with world clearance; spawn object separately.",
+        "Banker retains one live MuzzleSocket; double ricochet belongs to game rules, not duplicated shots."
+      ],
+      "nativeSha256": "cb9bf586ed6b3e1031c46f7c35cfebef1eb39994f557ce254430f59ac534339f",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_ZIPPER.hi.glb",
+          "sha256": "f81e9d827bef3c4dd6503e1050d809bcb2fb40420991a5c67d6dc45fdc681e0f",
+          "bytes": 438340,
+          "triangles": 11584,
+          "vertices": 8267,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.36552000045776367,
+              0,
+              -0.48500001430511475
+            ],
+            "max": [
+              0.36552000045776367,
+              0.48649999499320984,
+              0.4880000054836273
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_ZIPPER.lo.glb",
+          "sha256": "1f47ef1ef922a917761f06f87f43bed61514ee3d10ec094e5793dad1a29d2d81",
+          "bytes": 190988,
+          "triangles": 4594,
+          "vertices": 3512,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.36552000045776367,
+              0,
+              -0.48500001430511475
+            ],
+            "max": [
+              0.36552000045776367,
+              0.48649999499320984,
+              0.4880000054836273
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_ZIPPER.far.glb",
+          "sha256": "0532fd9faf2114b291ada52def05b45003fe33e1550fc26b32c2626215a0811d",
+          "bytes": 56024,
+          "triangles": 1136,
+          "vertices": 917,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.36552000045776367,
+              0,
+              -0.48500001430511475
+            ],
+            "max": [
+              0.36552000045776367,
+              0.48649999499320984,
+              0.4880000054836273
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_ZIPPER.shadow.glb",
+          "sha256": "83f6f96b251cc8f97f3b029d350899534b96461df91af02b321a2afd902765cf",
+          "bytes": 22316,
+          "triangles": 376,
+          "vertices": 276,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.34501999616622925,
+              0,
+              -0.48500001430511475
+            ],
+            "max": [
+              0.34501999616622925,
+              0.48249998688697815,
+              0.4880000054836273
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_MINER",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-clubs-2/TOY_MINER",
+      "native": "../source/TOY_MINER.blend",
+      "lodFiles": {
+        "hi": "TOY_MINER.hi.glb",
+        "lo": "TOY_MINER.lo.glb",
+        "far": "TOY_MINER.far.glb",
+        "shadow": "TOY_MINER.shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_MINER.motion.json",
+        "sha256": "a1fb7d1942e9333d632f641ed4d503e478337d682731e9ebd26cac5852885fe9"
+      },
+      "sockets": {
+        "file": "articulated/TOY_MINER.sockets.json",
+        "sha256": "09e763ff279c3a85f8ea45eb8204ec823056bf63c9bd39dfc94fc3063a1fee32"
+      },
+      "motionLayering": {
+        "file": "articulated/TOY_MINER.motionLayering.json",
+        "sha256": "61ecc5229d4f2af08e6e806e58be1842f16118448b692a217d25a949dcb75371"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-clubs-2-browser-audit-2026-10-27.json",
+      "role": "bounce-club-toy-tank",
+      "license": "CC0-1.0 Quaternius Tank base plus Fernworld adaptation",
+      "provenance": "../SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "review": "Coordinator personally accepted sixforms/action/LOD boards,123source hashes and actual12GLB wholeTRS/keytime/interruption checks. No fullgame performance claim.",
+      "integrationNotes": [
+        "Full absolute-TRS diagnostic recipes need motionLayering masks for simultaneous gameplay aim/recoil/travel.",
+        "Inplace Travel controller speed1unit/s and central wheel angular speed match documented radius; outer tread is a static molded toy shell.",
+        "Zipper Rocket_Charge lasts.45s; actual gameplay warning must remain visible before fire.",
+        "Miner DropMine uses oriented RearMineSocket with world clearance; spawn object separately.",
+        "Banker retains one live MuzzleSocket; double ricochet belongs to game rules, not duplicated shots."
+      ],
+      "nativeSha256": "4ed7c28434d289a705b783a8a0e36c335b3fa74dda28c036510c88450ddbd2a5",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_MINER.hi.glb",
+          "sha256": "cedf730cf63d108e42a5238a711c5f4e0b6ab931d7418e217a79174b041ad53a",
+          "bytes": 492080,
+          "triangles": 14240,
+          "vertices": 9128,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.40240001678466797,
+              0,
+              -0.5160000324249268
+            ],
+            "max": [
+              0.40240001678466797,
+              0.5256574153900146,
+              0.49399998784065247
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_MINER.lo.glb",
+          "sha256": "222b73d0dea1d2c5c6dc06150de5cfd04f5771e8790ba802bbc62fb65c7bf85a",
+          "bytes": 184220,
+          "triangles": 4594,
+          "vertices": 3360,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.40240001678466797,
+              0,
+              -0.5160000324249268
+            ],
+            "max": [
+              0.40240001678466797,
+              0.5262260735034943,
+              0.49399998784065247
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_MINER.far.glb",
+          "sha256": "0264f0a28f38a28f156969ab5667d4f61b47daedda5ed746d07e097b271114bf",
+          "bytes": 56028,
+          "triangles": 1136,
+          "vertices": 919,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.40240001678466797,
+              0,
+              -0.5160000324249268
+            ],
+            "max": [
+              0.40240001678466797,
+              0.5226709246635437,
+              0.49399998784065247
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_MINER.shadow.glb",
+          "sha256": "d901c070554b1fc3fe261ae93e0efa3c48f3973a4d698509d777900fd42b815f",
+          "bytes": 22832,
+          "triangles": 360,
+          "vertices": 294,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.38190001249313354,
+              0,
+              -0.5160000324249268
+            ],
+            "max": [
+              0.38190001249313354,
+              0.5149999856948853,
+              0.4869999885559082
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_BANKER",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-clubs-2/TOY_BANKER",
+      "native": "../source/TOY_BANKER.blend",
+      "lodFiles": {
+        "hi": "TOY_BANKER.hi.glb",
+        "lo": "TOY_BANKER.lo.glb",
+        "far": "TOY_BANKER.far.glb",
+        "shadow": "TOY_BANKER.shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_BANKER.motion.json",
+        "sha256": "65e4f0e989a422894b29228fc154172a9f2d0a056b2d46a37bf3ada4164e6cea"
+      },
+      "sockets": {
+        "file": "articulated/TOY_BANKER.sockets.json",
+        "sha256": "f4ac533741ec70c085aa10170b3a8e964a3a8732c2733248b24f3eee89a39238"
+      },
+      "motionLayering": {
+        "file": "articulated/TOY_BANKER.motionLayering.json",
+        "sha256": "94f15da4c240578fab9e74d3bb6086c9fc98950a697d28be589cc44d04fabda0"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-clubs-2-browser-audit-2026-10-27.json",
+      "role": "bounce-club-toy-tank",
+      "license": "CC0-1.0 Quaternius Tank base plus Fernworld adaptation",
+      "provenance": "../SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "review": "Coordinator personally accepted sixforms/action/LOD boards,123source hashes and actual12GLB wholeTRS/keytime/interruption checks. No fullgame performance claim.",
+      "integrationNotes": [
+        "Full absolute-TRS diagnostic recipes need motionLayering masks for simultaneous gameplay aim/recoil/travel.",
+        "Inplace Travel controller speed1unit/s and central wheel angular speed match documented radius; outer tread is a static molded toy shell.",
+        "Zipper Rocket_Charge lasts.45s; actual gameplay warning must remain visible before fire.",
+        "Miner DropMine uses oriented RearMineSocket with world clearance; spawn object separately.",
+        "Banker retains one live MuzzleSocket; double ricochet belongs to game rules, not duplicated shots."
+      ],
+      "nativeSha256": "b945b2e81d397db13a1a2f8ee11b9cfd70a60d283fb395f756e0b6d02a1d12a8",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_BANKER.hi.glb",
+          "sha256": "13835c020d9c261d19fdc85e6a10567bece898618cddb402f26d59c1ebc29e15",
+          "bytes": 428376,
+          "triangles": 11784,
+          "vertices": 8046,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3644000291824341,
+              0,
+              -0.4233599901199341
+            ],
+            "max": [
+              0.3644000291824341,
+              0.5250000357627869,
+              0.4939199984073639
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_BANKER.lo.glb",
+          "sha256": "d098738364f60de7e3fbc21e358eaa137f195f604adab88a926cb43e97fb6ac3",
+          "bytes": 187136,
+          "triangles": 4594,
+          "vertices": 3457,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3644000291824341,
+              0,
+              -0.4233599901199341
+            ],
+            "max": [
+              0.3644000291824341,
+              0.5250000357627869,
+              0.4939199984073639
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_BANKER.far.glb",
+          "sha256": "c7f34703bbe4cc870c8f61013d06a635532f1276a5a813141d927388abb9dff5",
+          "bytes": 54172,
+          "triangles": 1134,
+          "vertices": 934,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3644000291824341,
+              0,
+              -0.4225873649120331
+            ],
+            "max": [
+              0.3644000291824341,
+              0.5250000357627869,
+              0.49343404173851013
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_BANKER.shadow.glb",
+          "sha256": "69e8953c31e9bea30c8f5c2670ed7c35652f42827138b0cb85331369b16d139d",
+          "bytes": 17964,
+          "triangles": 312,
+          "vertices": 230,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.34389999508857727,
+              0,
+              -0.41999998688697815
+            ],
+            "max": [
+              0.34389999508857727,
+              0.5250000357627869,
+              0.49000000953674316
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_GANTER_PARADE_TANK",
+      "label": "Ganter Paradepanzer",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-ganter/output",
+      "native": "../source/TOY_GANTER_Hero.blend",
+      "lodFiles": {
+        "hi": "TOY_GANTER_PARADE_TANK_Hero.glb",
+        "lo": "TOY_GANTER_PARADE_TANK_Lo.glb",
+        "far": "TOY_GANTER_PARADE_TANK_Far.glb",
+        "shadow": "TOY_GANTER_PARADE_TANK_Shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_GANTER_PARADE_TANK.motion.json",
+        "sha256": "1a7fd02be5ce205086b8af4996665f56d8df612aecd60383213e8d47876a9ac5"
+      },
+      "sockets": {
+        "file": "articulated/TOY_GANTER_PARADE_TANK.sockets.json",
+        "sha256": "95ae42496843c6009b78f8694e85bf9f98816fab593c87b0301aad3fcd769490"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-ganter-browser-audit-2026-10-27.json",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "role": "single-toy-boss",
+      "defaultLod": "lo",
+      "license": "CC0 source plus original Fernworld toy adaptation",
+      "provenance": "SOURCE.json",
+      "integrationNotes": [
+        "Five moving mesh nodes, two material classes; ten primitives Hi/Lo/Far.",
+        "Relative toy unit u, boss width3.685/length3.003/height2.270. No living crew or pilot escape.",
+        "FanSalvo release .45s, three live muzzles -0.28/0/+0.28rad; synchronize to gameplay fire callback.",
+        "Full-pose recipes must not overlap; controller may replace TurretYaw rotation over Travel.",
+        "Harmless Disabled pitches turret backward -.08rad and sinks .13u without mouth/deck overlap.",
+        "Reinforcement threshold50% summons Rookie and Scout from arena corners, not from rear decorative marker.",
+        "Original semantic contract MOTION.json retains event/cooldown/context; normalized portable file preserves exact TRS."
+      ],
+      "motionContract": {
+        "file": "articulated/TOY_GANTER_PARADE_TANK.motionContract.json",
+        "sha256": "d63881aaf8ddb593ada10cb305f68b61a90fb02d4b1a82e8d3aa11ef6682104f"
+      },
+      "nativeSha256": "41fb50e682f7897fffda9a5a778edfebaba0daa4c842c63923616d9d6d6636f9",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_GANTER_PARADE_TANK.hi.glb",
+          "sha256": "45abeba951de5498a17bba3c2c6a25b46d8ab4837bcdd3620c45da1ed09fa67d",
+          "bytes": 883512,
+          "triangles": 30992,
+          "vertices": 15970,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.8424999713897705,
+              0,
+              -1.4950000047683716
+            ],
+            "max": [
+              1.8424999713897705,
+              2.2699999809265137,
+              1.5080000162124634
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_GANTER_PARADE_TANK.lo.glb",
+          "sha256": "25e84236850c3f513e81404635b0a5e0e3a4c67f937b43ce8da231bcf2b53c27",
+          "bytes": 273776,
+          "triangles": 9198,
+          "vertices": 4912,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.8424999713897705,
+              0,
+              -1.4950000047683716
+            ],
+            "max": [
+              1.8424999713897705,
+              2.2699999809265137,
+              1.5080000162124634
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_GANTER_PARADE_TANK.far.glb",
+          "sha256": "94e3d22b0241ce0ec32b7714f19866f63921512059c32ec65893532a7d39d2a7",
+          "bytes": 77264,
+          "triangles": 2328,
+          "vertices": 1316,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.8424999713897705,
+              0,
+              -1.4950000047683716
+            ],
+            "max": [
+              1.8424999713897705,
+              2.2699999809265137,
+              1.508000135421753
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_GANTER_PARADE_TANK.shadow.glb",
+          "sha256": "6ae99315bc8bb6c795a848dd01d2cae4c142e566f9507d0fbb2f08c89e9a89af",
+          "bytes": 34156,
+          "triangles": 1084,
+          "vertices": 570,
+          "primitives": 7,
+          "bounds": {
+            "min": [
+              -1.75,
+              0,
+              -1.4800000190734863
+            ],
+            "max": [
+              1.75,
+              2.2699999809265137,
+              1.4800000190734863
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_SWARMER",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-clubs-3/output/TOY_SWARMER",
+      "native": "../../source/TOY_SWARMER.blend",
+      "lodFiles": {
+        "hi": "TOY_SWARMER.hi.glb",
+        "lo": "TOY_SWARMER.lo.glb",
+        "far": "TOY_SWARMER.far.glb",
+        "shadow": "TOY_SWARMER.shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_SWARMER.motion.json",
+        "sha256": "16ac69cee9010b7e728b4dae2b02c3ce216b6e1c99e11e8857cf42675c380645"
+      },
+      "sockets": {
+        "file": "articulated/TOY_SWARMER.sockets.json",
+        "sha256": "74a35f943bfef43b9a032caf060349b8d221575ee80a17048e6135f1fd9d511b"
+      },
+      "motionLayering": {
+        "file": "articulated/TOY_SWARMER.motionLayering.json",
+        "sha256": "3f62c41df708dd7ebe1f18c1e82cb8dadb7a7bccc2c765f1497bfe95976d302b"
+      },
+      "motionContract": {
+        "file": "articulated/TOY_SWARMER.motionContract.json",
+        "sha256": "6eedad493cc7dc731176546b3ebbefefb3db08ed8494ff0e7bb4aaa55949d32c"
+      },
+      "teamSurface": {
+        "file": "articulated/TOY_SWARMER.teamSurface.json",
+        "sha256": "4ea4e1f445be8c96009a4b88f7d0c0a0f23dbb68a7d0bcd7bdcb04c9dbee47b6"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-clubs-3-browser-audit-2026-10-27.json",
+      "role": "bounce-club-toy-tank",
+      "license": "CC0 Quaternius Tank source plus original Fernworld adaptation",
+      "provenance": "../SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "review": "Coordinator personally accepted three multiview/action/LoFar review sheets;122 sealed source files and final12GLB complete-TRS/keytime/interruption proof passed.",
+      "integrationNotes": [
+        "Whole-pose recipes are diagnostic; use motionLayering masks for simultaneous aim/recoil/travel.",
+        "Idle is intentionally stationary rest. Wheels rotate at controller speed/radius; outer toy surface is opaque.",
+        "Swarmer uses three live muzzle sockets; Ghost stealth belongs to controller, not hidden geometry.",
+        "Ace Rocket_Charge must telegraph before firing; Disabled is a small harmless turret settle."
+      ],
+      "nativeSha256": "17c9c76d31154e68478dc7c52b61b8748d5eb4d52ad9d9aa2471e97c47d3f5ec",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_SWARMER.hi.glb",
+          "sha256": "8433bb1bfff275145a3ea9e6ffe8b634da1c8290c2f995f8f3b836757b4f3f57",
+          "bytes": 291684,
+          "triangles": 9148,
+          "vertices": 5449,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3739999830722809,
+              0,
+              -0.41689997911453247
+            ],
+            "max": [
+              0.3739999830722809,
+              0.5809999704360962,
+              0.3907800018787384
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_SWARMER.lo.glb",
+          "sha256": "c05a4a36d1d6f23d37d5c5f7e1dcc95e0160ced3b5e43cfc73c406ace5ee65a7",
+          "bytes": 125868,
+          "triangles": 3676,
+          "vertices": 2301,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3739999830722809,
+              0,
+              -0.41689997911453247
+            ],
+            "max": [
+              0.3739999830722809,
+              0.5809999704360962,
+              0.3907800018787384
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_SWARMER.far.glb",
+          "sha256": "9582c0aec13d8eec2b36ce8a0c05f9994ef02b6085dd4e8f38db287d221de931",
+          "bytes": 41484,
+          "triangles": 1062,
+          "vertices": 720,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.36399999260902405,
+              0,
+              -0.41689997911453247
+            ],
+            "max": [
+              0.36399999260902405,
+              0.5809999704360962,
+              0.38999998569488525
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_SWARMER.shadow.glb",
+          "sha256": "4b01df561f1296b8d8fa283d1599737100f78c8c4f88fb84ecaab62a450de465",
+          "bytes": 19996,
+          "triangles": 456,
+          "vertices": 321,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.36399999260902405,
+              0,
+              -0.38999998569488525
+            ],
+            "max": [
+              0.36399999260902405,
+              0.5809999704360962,
+              0.38999998569488525
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_GHOST",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-clubs-3/output/TOY_GHOST",
+      "native": "../../source/TOY_GHOST.blend",
+      "lodFiles": {
+        "hi": "TOY_GHOST.hi.glb",
+        "lo": "TOY_GHOST.lo.glb",
+        "far": "TOY_GHOST.far.glb",
+        "shadow": "TOY_GHOST.shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_GHOST.motion.json",
+        "sha256": "b318c6f0dbaf5f97af6a4c8d7b303c30daa488920293c6df514466e16add8e58"
+      },
+      "sockets": {
+        "file": "articulated/TOY_GHOST.sockets.json",
+        "sha256": "a1f67bfd162ac70a8329a6161fa458562e4b5459259e9bbaecb32224ce3719a2"
+      },
+      "motionLayering": {
+        "file": "articulated/TOY_GHOST.motionLayering.json",
+        "sha256": "3f62c41df708dd7ebe1f18c1e82cb8dadb7a7bccc2c765f1497bfe95976d302b"
+      },
+      "motionContract": {
+        "file": "articulated/TOY_GHOST.motionContract.json",
+        "sha256": "11d8793b723eb7dfef67091509be530c34fb33dca6f8eb54d6d8fe45e9df4c29"
+      },
+      "teamSurface": {
+        "file": "articulated/TOY_GHOST.teamSurface.json",
+        "sha256": "4ea4e1f445be8c96009a4b88f7d0c0a0f23dbb68a7d0bcd7bdcb04c9dbee47b6"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-clubs-3-browser-audit-2026-10-27.json",
+      "role": "bounce-club-toy-tank",
+      "license": "CC0 Quaternius Tank source plus original Fernworld adaptation",
+      "provenance": "../SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "review": "Coordinator personally accepted three multiview/action/LoFar review sheets;122 sealed source files and final12GLB complete-TRS/keytime/interruption proof passed.",
+      "integrationNotes": [
+        "Whole-pose recipes are diagnostic; use motionLayering masks for simultaneous aim/recoil/travel.",
+        "Idle is intentionally stationary rest. Wheels rotate at controller speed/radius; outer toy surface is opaque.",
+        "Swarmer uses three live muzzle sockets; Ghost stealth belongs to controller, not hidden geometry.",
+        "Ace Rocket_Charge must telegraph before firing; Disabled is a small harmless turret settle."
+      ],
+      "nativeSha256": "73c306abcb89c76a904567d4b0b2c2343d2dd70f6d93afc7f3b23a6c799d5a77",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_GHOST.hi.glb",
+          "sha256": "2454d28304028b9d816a760c2d1713208f8951da21c427dce6cd22a2f7882a93",
+          "bytes": 253496,
+          "triangles": 8140,
+          "vertices": 4771,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.343999981880188,
+              0,
+              -0.4250999987125397
+            ],
+            "max": [
+              0.343999981880188,
+              0.5568503737449646,
+              0.41582998633384705
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_GHOST.lo.glb",
+          "sha256": "20ca022b46b08e7027abef381eade550f0591cd6d3b2cc47c98bcf85079b3aa9",
+          "bytes": 109296,
+          "triangles": 3276,
+          "vertices": 2011,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.343999981880188,
+              0,
+              -0.4250999987125397
+            ],
+            "max": [
+              0.343999981880188,
+              0.5566359162330627,
+              0.41582998633384705
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_GHOST.far.glb",
+          "sha256": "8d7af7c086b5fc293fc67cf248a838ebb042713b3129ad8b9ea7716cd6244e5c",
+          "bytes": 31240,
+          "triangles": 822,
+          "vertices": 542,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.33399999141693115,
+              0,
+              -0.4250999987125397
+            ],
+            "max": [
+              0.33399999141693115,
+              0.5550482869148254,
+              0.41499999165534973
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_GHOST.shadow.glb",
+          "sha256": "7f76b760b2256a067f5545ca058008a1c54b8ff38a8e2e4c8894e2896916884b",
+          "bytes": 15916,
+          "triangles": 356,
+          "vertices": 256,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.33399999141693115,
+              0,
+              -0.41499999165534973
+            ],
+            "max": [
+              0.33399999141693115,
+              0.5515999794006348,
+              0.41499999165534973
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_ACE",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-clubs-3/output/TOY_ACE",
+      "native": "../../source/TOY_ACE.blend",
+      "lodFiles": {
+        "hi": "TOY_ACE.hi.glb",
+        "lo": "TOY_ACE.lo.glb",
+        "far": "TOY_ACE.far.glb",
+        "shadow": "TOY_ACE.shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_ACE.motion.json",
+        "sha256": "1f4910a97da510c400d77a40cbcabffd91a9aba3c86dc27999c973363f07983a"
+      },
+      "sockets": {
+        "file": "articulated/TOY_ACE.sockets.json",
+        "sha256": "153f02d7b71f1edfcdbc6b3df9c02cec8c6bc9f3990a6db34fcc5a66e593a454"
+      },
+      "motionLayering": {
+        "file": "articulated/TOY_ACE.motionLayering.json",
+        "sha256": "b45078c733057539fedca1d0a1d284265c38f4c747e90ca6a803e04db81448c7"
+      },
+      "motionContract": {
+        "file": "articulated/TOY_ACE.motionContract.json",
+        "sha256": "dd987d4b092a683cd5f29cc59e8122fec8c7fab7d35e5ee300a67e2c233ef9eb"
+      },
+      "teamSurface": {
+        "file": "articulated/TOY_ACE.teamSurface.json",
+        "sha256": "a5712214e153b1a3144df6c90ea7ab4db99c21d58ef8cc7f81546318d8fff5ee"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-clubs-3-browser-audit-2026-10-27.json",
+      "role": "bounce-club-toy-tank",
+      "license": "CC0 Quaternius Tank source plus original Fernworld adaptation",
+      "provenance": "../SOURCE.json",
+      "defaultLod": "lo",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "review": "Coordinator personally accepted three multiview/action/LoFar review sheets;122 sealed source files and final12GLB complete-TRS/keytime/interruption proof passed.",
+      "integrationNotes": [
+        "Whole-pose recipes are diagnostic; use motionLayering masks for simultaneous aim/recoil/travel.",
+        "Idle is intentionally stationary rest. Wheels rotate at controller speed/radius; outer toy surface is opaque.",
+        "Swarmer uses three live muzzle sockets; Ghost stealth belongs to controller, not hidden geometry.",
+        "Ace Rocket_Charge must telegraph before firing; Disabled is a small harmless turret settle."
+      ],
+      "nativeSha256": "acf2642680bf8abb147c7520fe0c7afc86548ac1ad5c270cbb42adfe1eec6016",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_ACE.hi.glb",
+          "sha256": "d5c3cedb3ea27a2448ddc17c43a2b3057e31bf918ba0146469805f89dc0b15ea",
+          "bytes": 331328,
+          "triangles": 10300,
+          "vertices": 6199,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3190000057220459,
+              0,
+              -0.4787999987602234
+            ],
+            "max": [
+              0.3190000057220459,
+              0.5517999976873398,
+              0.4358699917793274
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_ACE.lo.glb",
+          "sha256": "71b1c88be1d1a77bf7d327391438803d36b4e5b74f1cb8a77e657260f523a551",
+          "bytes": 137440,
+          "triangles": 3954,
+          "vertices": 2532,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3190000057220459,
+              0,
+              -0.4787999987602234
+            ],
+            "max": [
+              0.3190000057220459,
+              0.5517999976873398,
+              0.4358699917793274
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_ACE.far.glb",
+          "sha256": "9b08bd68fdaac99de6b6e0ef483dc5247b586f67de0d15851de5f2c9e0c1e34c",
+          "bytes": 42780,
+          "triangles": 1058,
+          "vertices": 756,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3089999854564667,
+              0,
+              -0.4787999987602234
+            ],
+            "max": [
+              0.3089999854564667,
+              0.5517999976873398,
+              0.4350000023841858
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_ACE.shadow.glb",
+          "sha256": "c67d4cf4bb330d4659b38c76f362564bf50e13a56387ebd5d19cdcbd6ee7fc74",
+          "bytes": 17976,
+          "triangles": 400,
+          "vertices": 289,
+          "primitives": 5,
+          "bounds": {
+            "min": [
+              -0.3089999854564667,
+              0,
+              -0.4350000023841858
+            ],
+            "max": [
+              0.3089999854564667,
+              0.5517999976873398,
+              0.4350000023841858
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_QUOTA",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-quota/output",
+      "native": "TOY_QUOTA_native.blend",
+      "lodFiles": {
+        "hi": "toy_quota_hero.glb",
+        "lo": "toy_quota_lo.glb",
+        "far": "toy_quota_far.glb",
+        "shadow": "toy_quota_shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_QUOTA.motion.json",
+        "sha256": "39233549d1ea5bbb0e7ea3398b5495bcf3f3549112d256b6294a0a9421419fe4"
+      },
+      "motionContract": {
+        "file": "articulated/TOY_QUOTA.motionContract.json",
+        "sha256": "fd9978d4c9b9cd644efbd773977a51355cfa062341762d3c9ebcaa4bde4bca70"
+      },
+      "sockets": {
+        "file": "articulated/TOY_QUOTA.sockets.json",
+        "sha256": "7e48c2b7b21b6e575586d9d5fae674de972e744f1f368cb07c5a7bb84d403ff6"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-quota-browser-audit-2026-10-27.json",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "role": "single-toy-boss",
+      "defaultLod": "lo",
+      "license": "CC0 source plus original Fernworld toy adaptation",
+      "provenance": "SOURCE.json",
+      "review": "Coordinator accepted final six views, four attack poses, mechanism and256pxLOD boards; actual4GLB10clip/8live-socket/keytime/reset audit passes and fullSHA manifests verified.",
+      "integrationNotes": [
+        "Toy units;3.00width/2.75height/3.07length; nine rigid primitives, one material.",
+        "WorldController owns burrow/surface worldY and dust; preserve named actual child hierarchy, arm-bearing blocks rotate with TurretYaw.",
+        "Burrow warning1.6s, simultaneous eight RingShot sockets at speed3.2/bounce0; use live node orientation.",
+        "AbsoluteTRS recipes are full diagnostic states; original MOTION mixing contract governs simultaneous travel/yaw/recoil.",
+        "Battery_Service opens actual battery hatch; harmless Toy_Disabled, no living crew or escape."
+      ],
+      "nativeSha256": "f9ff9c673a97675be24a847658da2afcecc5efd374b9d05edb72571095eaeabe",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_QUOTA.hi.glb",
+          "sha256": "3a1754d171fbcd578b83a88caddf79c2fe6c82de3a162a1e3d985d76a9d8e734",
+          "bytes": 2476824,
+          "triangles": 29190,
+          "vertices": 63586,
+          "primitives": 9,
+          "bounds": {
+            "min": [
+              -1.4978368617594242,
+              0,
+              -1.159999966621399
+            ],
+            "max": [
+              1.4978368617594242,
+              2.7507054060697556,
+              1.9113829221017875
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_QUOTA.lo.glb",
+          "sha256": "37dadf843cf09964657c0dafc44ccc6482a11b09456fd770eabaa1923211d5ab",
+          "bytes": 767544,
+          "triangles": 8492,
+          "vertices": 19557,
+          "primitives": 9,
+          "bounds": {
+            "min": [
+              -1.4959174916148186,
+              0.001510400790721178,
+              -1.154608964920044
+            ],
+            "max": [
+              1.4959174916148186,
+              2.7486262917518616,
+              1.912925283341822
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_QUOTA.far.glb",
+          "sha256": "8441158bfba269c27e3aef64526c0a2e95c9e970eddea9c8bfeef4917fc29281",
+          "bytes": 201172,
+          "triangles": 2086,
+          "vertices": 4894,
+          "primitives": 9,
+          "bounds": {
+            "min": [
+              -1.4914981946349144,
+              0,
+              -1.1520308256149292
+            ],
+            "max": [
+              1.4914981946349144,
+              2.7372869104146957,
+              1.901846678080947
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_QUOTA.shadow.glb",
+          "sha256": "5e9f296fc57cfe6908c354ebefa3b76c005fb9bdc70c601a324ff04138bf6f58",
+          "bytes": 101168,
+          "triangles": 992,
+          "vertices": 2305,
+          "primitives": 9,
+          "bounds": {
+            "min": [
+              -1.4790327083319426,
+              0,
+              -1.119789719581604
+            ],
+            "max": [
+              1.4824120569974184,
+              2.708926737308502,
+              1.8999272330335324
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "WAX_KLONK",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/wax-machines/output/WAX_KLONK",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "hi.glb",
+        "lo": "lo.glb",
+        "far": "far.glb",
+        "shadow": "shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/WAX_KLONK.motion.json",
+        "sha256": "b3035ce493a257f9574adb05553d93e5f01ff372cf95d43321fe43ca0b030b30"
+      },
+      "sockets": {
+        "file": "articulated/WAX_KLONK.sockets.json",
+        "sha256": "6b37b9575e2dabea91247ec736349da0c77bce0d429e40213ec3b64d71033062"
+      },
+      "browserAudit": "docs/games/fernworld-assets/wax-machines-browser-audit-2026-10-27.json",
+      "motionMode": "embeddedGLTF",
+      "role": "meltable-wax-machine",
+      "defaultLod": "lo",
+      "nominalHeightMetres": 0.85,
+      "license": "CC0 Quaternius machinery plus original Fernworld closed wax adaptation",
+      "provenance": "provenance.json",
+      "review": "Coordinator personally accepted final six-view boards, actual Melt progression and256pxLo/Far;8GLB full-keytime/25phase/morph/socket proof and138sealedsource/outputfiles verified.",
+      "integrationNotes": [
+        "Five rigid groups with actual closed relative Melt morph on every mesh; six primitives/two opaque materials.",
+        "One active complete-pose action; reset every morph weight and group TRS before changing clips.",
+        "Melt1.1seconds, hold last, actual surface deforms; do not scale whole character to imitate melting.",
+        "Attack_Shove live left/right sockets at.32s; Walk_InPlace controller speed.222222222m/s forKlonk,.319444444m/s forHulk (see contract).",
+        "Mechanical constructs, retained metal tips into harmless wax pool."
+      ],
+      "nativeSha256": "dbe7ce2b833db92c6de736334842ab2e8b4752b2e43b844ece57694b17441ec9",
+      "lods": {
+        "hi": {
+          "file": "articulated/WAX_KLONK.hi.glb",
+          "sha256": "f94e89bb2549562345fd87c55d89fbf8b2a4395ffb4295f505d3a20678aacf8f",
+          "bytes": 1105084,
+          "triangles": 19448,
+          "vertices": 16259,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.375,
+              0.003000006079673767,
+              -0.19762501120567322
+            ],
+            "max": [
+              0.375,
+              0.8500000238418579,
+              0.22609999775886536
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/WAX_KLONK.lo.glb",
+          "sha256": "24d9efff53db6e5732ec71f519050277061bcdcbc3e1c1fa502b7b0e3806e5a0",
+          "bytes": 426784,
+          "triangles": 4844,
+          "vertices": 6233,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.375,
+              0.003000006079673767,
+              -0.19762501120567322
+            ],
+            "max": [
+              0.375,
+              0.8500000238418579,
+              0.22609999775886536
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/WAX_KLONK.far.glb",
+          "sha256": "64e577faa8d7061fd357743ab16e72c4f3e87ce08903ff3e89154855661e23de",
+          "bytes": 124292,
+          "triangles": 1084,
+          "vertices": 1558,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.375,
+              0.003000006079673767,
+              -0.1908571422100067
+            ],
+            "max": [
+              0.375,
+              0.8500000238418579,
+              0.22609999775886536
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/WAX_KLONK.shadow.glb",
+          "sha256": "d7d1a89b6e186c2dbc820fa6750706b584d7755ad9a15e7750901de72bed5ad8",
+          "bytes": 71428,
+          "triangles": 568,
+          "vertices": 710,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.375,
+              0.003000006079673767,
+              -0.18687699735164642
+            ],
+            "max": [
+              0.375,
+              0.8500000238418579,
+              0.22609999775886536
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "WAX_HULK",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/wax-machines/output/WAX_HULK",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "hi.glb",
+        "lo": "lo.glb",
+        "far": "far.glb",
+        "shadow": "shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/WAX_HULK.motion.json",
+        "sha256": "d83ed2ae51ea3275177df908a8479c77bd763eab5973deb62bc880785d70d102"
+      },
+      "sockets": {
+        "file": "articulated/WAX_HULK.sockets.json",
+        "sha256": "f7be8423c9df9f8664c4cee424f44474d35b749fa3743e75f2f7429d71585600"
+      },
+      "browserAudit": "docs/games/fernworld-assets/wax-machines-browser-audit-2026-10-27.json",
+      "motionMode": "embeddedGLTF",
+      "role": "meltable-wax-machine",
+      "defaultLod": "lo",
+      "nominalHeightMetres": 1.4,
+      "license": "CC0 Quaternius machinery plus original Fernworld closed wax adaptation",
+      "provenance": "provenance.json",
+      "review": "Coordinator personally accepted final six-view boards, actual Melt progression and256pxLo/Far;8GLB full-keytime/25phase/morph/socket proof and138sealedsource/outputfiles verified.",
+      "integrationNotes": [
+        "Five rigid groups with actual closed relative Melt morph on every mesh; six primitives/two opaque materials.",
+        "One active complete-pose action; reset every morph weight and group TRS before changing clips.",
+        "Melt1.1seconds, hold last, actual surface deforms; do not scale whole character to imitate melting.",
+        "Attack_Shove live left/right sockets at.32s; Walk_InPlace controller speed.222222222m/s forKlonk,.319444444m/s forHulk (see contract).",
+        "Mechanical constructs, retained metal tips into harmless wax pool."
+      ],
+      "nativeSha256": "4b3102e958cec36a657559b843de5f488185f58b4c8728698036208cb0c16ada",
+      "lods": {
+        "hi": {
+          "file": "articulated/WAX_HULK.hi.glb",
+          "sha256": "d968acf9013675c80db743abb017a4343d0e53c64465e5b144d79622310abefe",
+          "bytes": 1275076,
+          "triangles": 19224,
+          "vertices": 15565,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.8180000185966492,
+              0.0029999911785125732,
+              -0.3241000175476074
+            ],
+            "max": [
+              0.8180000185966492,
+              1.399999976158142,
+              0.38999998569488525
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/WAX_HULK.lo.glb",
+          "sha256": "e4247fc2f195317abbc5772111bb1d89f76ee851b11e0a40cf7a33a7d2c3fe55",
+          "bytes": 488352,
+          "triangles": 4712,
+          "vertices": 5832,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.8151428699493408,
+              0.0029999911785125732,
+              -0.3241000175476074
+            ],
+            "max": [
+              0.8151428699493408,
+              1.399999976158142,
+              0.38958409428596497
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/WAX_HULK.far.glb",
+          "sha256": "e116581bfa9c67761d32151b35ef2e9071ff93aa828120ebdc349907d70fb483",
+          "bytes": 199604,
+          "triangles": 1084,
+          "vertices": 2220,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.8180000185966492,
+              0.0029999911785125732,
+              -0.3050000071525574
+            ],
+            "max": [
+              0.8180000185966492,
+              1.399999976158142,
+              0.3918428421020508
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/WAX_HULK.shadow.glb",
+          "sha256": "093c908a4bbddd56884ee3325796be23af4b706c772b8c8737e4d9faa8b88f50",
+          "bytes": 84704,
+          "triangles": 584,
+          "vertices": 734,
+          "primitives": 6,
+          "bounds": {
+            "min": [
+              -0.8130000233650208,
+              0.0029999911785125732,
+              -0.29429492354393005
+            ],
+            "max": [
+              0.8130000233650208,
+              1.399999976158142,
+              0.3861662745475769
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_EQUALITY",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-equality/output",
+      "native": "TOY_EQUALITY.blend",
+      "lodFiles": {
+        "hi": "TOY_EQUALITY_Hero.glb",
+        "lo": "TOY_EQUALITY_Lo.glb",
+        "far": "TOY_EQUALITY_Far.glb",
+        "shadow": "TOY_EQUALITY_Shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_EQUALITY.motion.json",
+        "sha256": "e9acc6bb86dd2afab3a9bd505aff5686c1aa4ac7121ce1ce1e25f2882d3a8703"
+      },
+      "motionContract": {
+        "file": "articulated/TOY_EQUALITY.motionContract.json",
+        "sha256": "46b053c379897424cd67f5ffc0a0640dcab09157952abcce0ee249fdbcb1bedd"
+      },
+      "sockets": {
+        "file": "articulated/TOY_EQUALITY.sockets.json",
+        "sha256": "4b4d3581d5d15b95187101c9a0e81bb0465bc18c302bab2a4b69d300eafeefd3"
+      },
+      "teamSurface": {
+        "file": "articulated/TOY_EQUALITY.teamSurface.json",
+        "sha256": "44178efc504613635761c399895304fc636f5a1b35be2071f49468bceb75c90d"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-equality-browser-audit-2026-10-27.json",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "role": "single-toy-boss",
+      "defaultLod": "lo",
+      "license": "CC0 Quaternius source plus original Fernworld toy adaptation",
+      "provenance": "SOURCE.json",
+      "review": "Coordinator inspected six-view, attack, mechanics and256pxLOD final boards; all four GLBs/seven clips/keytimes/reset and live muzzles independently passed after quaternion/state isolation correction.107fileSHA manifest verified.",
+      "integrationNotes": [
+        "Two opaque material classes, ten source primitives. Controller hover origin offset +0.14 units; imported bounds are not auto-grounded.",
+        "Seven complete absolute TRS recipes; stop/reset previous action before starting another. Beam_Fire begins fully charged.",
+        "Charge warning1.5s, three main BeamSockets plus two MuzzleSockets preserved with actual orientation.",
+        "Four underside bell thrusters, harmless Toy_Disabled, no living crew."
+      ],
+      "nativeSha256": "54eb0d97a773d38213cccc355f8ebd69c9d276eaafffdae1cdee1fd71b7fe06f",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_EQUALITY.hi.glb",
+          "sha256": "2fc708555667726cc78d5deea1175fcbfcc773e720922dccd9ffdcbc9571add6",
+          "bytes": 1503152,
+          "triangles": 23000,
+          "vertices": 25408,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.7800003290176392,
+              -8.344650268554688e-07,
+              -1.000002957880497
+            ],
+            "max": [
+              1.7800003290176392,
+              1.0817623138427734,
+              1.0600001811981201
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_EQUALITY.lo.glb",
+          "sha256": "cd29ea7f911500870396f8bfc084df3dfcf9d7c4f8f8cbf332d61573d4fb78f4",
+          "bytes": 532412,
+          "triangles": 7500,
+          "vertices": 6994,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.7800439596176147,
+              -1.3828277587890625e-05,
+              -1.0000669732689857
+            ],
+            "max": [
+              1.7800744771957397,
+              1.0815470218658447,
+              1.0600618124008179
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_EQUALITY.far.glb",
+          "sha256": "a482be9a681af33166958dadd0b117f5849119ad32eae2725a7e4315800fe3bd",
+          "bytes": 248948,
+          "triangles": 1868,
+          "vertices": 1790,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.7799999713897705,
+              -0.000622868537902832,
+              -1.0013018622994423
+            ],
+            "max": [
+              1.7799999713897705,
+              1.0808923244476318,
+              1.059999942779541
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_EQUALITY.shadow.glb",
+          "sha256": "6c1b92f1b04870cda3933fc852ddbb94224f80eb9ce39cafd16762a81363168b",
+          "bytes": 191440,
+          "triangles": 860,
+          "vertices": 722,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.7799999713897705,
+              0.0012180209159851074,
+              -0.9964373484253883
+            ],
+            "max": [
+              1.7799999713897705,
+              1.0724999904632568,
+              1.059999942779541
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TOY_BRIGADIER",
+      "sourceFolder": "scripts/games-blender/fernworld/characters/toy-brigadier/output",
+      "native": "native.blend",
+      "lodFiles": {
+        "hi": "TOY_BRIGADIER_hi.glb",
+        "lo": "TOY_BRIGADIER_lo.glb",
+        "far": "TOY_BRIGADIER_far.glb",
+        "shadow": "TOY_BRIGADIER_shadow.glb"
+      },
+      "motion": {
+        "file": "articulated/TOY_BRIGADIER.motion.json",
+        "sha256": "50ef24f4615ca3fc526cc62fc55e45ebe60e53006205f9c8134e6cfe7cee72fc"
+      },
+      "motionContract": {
+        "file": "articulated/TOY_BRIGADIER.motionContract.json",
+        "sha256": "eb352f82363443137cdac27e8d99b02c899937eea65489f67ac85a4b3e6d1194"
+      },
+      "sockets": {
+        "file": "articulated/TOY_BRIGADIER.sockets.json",
+        "sha256": "3a1e6f0116187c95b400777f47820ec7fead115f91232c0326f8ed664c3af733"
+      },
+      "browserAudit": "docs/games/fernworld-assets/toy-brigadier-browser-audit-2026-10-27.json",
+      "motionMode": "absoluteTRSRecipe",
+      "recipeAdapter": "scripts/games-blender/fernworld/runtime/rigid-clips.js",
+      "role": "single-toy-boss",
+      "defaultLod": "lo",
+      "license": "CC0 source plus original Fernworld toy adaptation",
+      "provenance": "SOURCE.json",
+      "review": "Root inspected final form/mechanics/LOD/Hit floor-contact images. All4GLBs/8clips/keytimes/reset/live muzzle independently pass;93fileSHA verified. Hit affects upper mortar without burying feet.",
+      "integrationNotes": [
+        "Ten articulated source nodes, one opaque material; preserve actual hierarchy and TurretPivot.",
+        "Source base soleY=-0.000104; do not add compensating large world offset.",
+        "High/Lo/Far/Shadow 29992/7992/2040/982 triangles. Far intended for small distant on-screen units, not close inspection.",
+        "Upper mortar charge/recoil and gait; all whole-TRS recipes must reset on interrupted state.",
+        "Live MuzzleSocket for lobbed shell; harmless Toy_Disabled, no living crew."
+      ],
+      "nativeSha256": "ff4c5682727a44059f1e19896bad8852bfe0a00ffb7fb1324a3ad5138e90d719",
+      "lods": {
+        "hi": {
+          "file": "articulated/TOY_BRIGADIER.hi.glb",
+          "sha256": "83bf14ef94700614d19ff4830db390641c35af527de811b585a80985add7344b",
+          "bytes": 958880,
+          "triangles": 29992,
+          "vertices": 17440,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.5652631223201752,
+              -0.0001036524772644043,
+              -1.3603139519691467
+            ],
+            "max": [
+              1.5652631223201752,
+              2.5793331265449524,
+              1.4302632212638855
+            ]
+          }
+        },
+        "lo": {
+          "file": "articulated/TOY_BRIGADIER.lo.glb",
+          "sha256": "e8827883236b1213c06470398eb127f6bf7e5f34d0e692c15963ad8aac03f811",
+          "bytes": 293688,
+          "triangles": 7992,
+          "vertices": 5324,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.5641268193721771,
+              -0.0001036524772644043,
+              -1.3593859672546387
+            ],
+            "max": [
+              1.5641268193721771,
+              2.580005943775177,
+              1.4291268587112427
+            ]
+          }
+        },
+        "far": {
+          "file": "articulated/TOY_BRIGADIER.far.glb",
+          "sha256": "beed821a94a751abaef79133e0eae63c48c4e7ee908dd2338e84f4c61f273b75",
+          "bytes": 98712,
+          "triangles": 2040,
+          "vertices": 1706,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.5657900869846344,
+              -0.0001036524772644043,
+              -1.353701800107956
+            ],
+            "max": [
+              1.5686379075050354,
+              2.5825775265693665,
+              1.422779381275177
+            ]
+          }
+        },
+        "shadow": {
+          "file": "articulated/TOY_BRIGADIER.shadow.glb",
+          "sha256": "599a62e88aa0c615d5bc57220e3eed3de0342dc722cd98527bf04910a1cdc928",
+          "bytes": 80748,
+          "triangles": 982,
+          "vertices": 2904,
+          "primitives": 10,
+          "bounds": {
+            "min": [
+              -1.564064085483551,
+              -0.0001036524772644043,
+              -1.3588864207267761
+            ],
+            "max": [
+              1.5627439320087433,
+              2.581484079360962,
+              1.4276618957519531
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

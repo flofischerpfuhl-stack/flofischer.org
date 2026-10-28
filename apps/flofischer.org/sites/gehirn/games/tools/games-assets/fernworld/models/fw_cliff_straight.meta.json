@@ -1,0 +1,79 @@
+{
+  "category": "terrain",
+  "label": "Interlocking fractured straight cliff beds",
+  "games": [
+    "generic"
+  ],
+  "description": "Interlocking fractured straight cliff beds; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 3542,
+      "triangles": 3478,
+      "groups": 1,
+      "bytes": 84754,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 2966,
+      "triangles": 2578,
+      "groups": 1,
+      "bytes": 68339,
+      "vertexCap": 6500,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 791,
+      "triangles": 1534,
+      "groups": 1,
+      "bytes": 25202,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 6500,
+  "shadow_cap": 1200,
+  "ground": true,
+  "ao_dist": 0.15,
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_cliff_straight",
+  "bounds": [
+    [
+      -1.7038174867630005,
+      0.0,
+      -0.704199492931366
+    ],
+    [
+      1.6525756120681763,
+      2.078000068664551,
+      0.8928519487380981
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#425e3c",
+    "#505f5d",
+    "#63726a",
+    "#637f43",
+    "#727b77",
+    "#78914a",
+    "#939b91",
+    "#afb1a0"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

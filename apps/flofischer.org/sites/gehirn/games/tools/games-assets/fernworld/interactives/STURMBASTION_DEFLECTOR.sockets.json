@@ -1,0 +1,41 @@
+{
+  "localTRS": {
+    "EndSocket": {
+      "translation": [
+        3.9000000953674316,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "DeflectorPivot": {
+      "translation": [
+        0,
+        0.3199999928474426,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "reference": "Names identify actual nodes in every Hi/Lo/Shadow GLB; hierarchy retained."
+}

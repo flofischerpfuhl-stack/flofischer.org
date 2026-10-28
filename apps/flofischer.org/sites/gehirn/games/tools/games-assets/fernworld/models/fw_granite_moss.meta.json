@@ -1,0 +1,79 @@
+{
+  "category": "terrain",
+  "label": "Moss seated in massive cleft granite",
+  "games": [
+    "generic"
+  ],
+  "description": "Moss seated in massive cleft granite; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 2154,
+      "triangles": 2494,
+      "groups": 1,
+      "bytes": 54690,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 1133,
+      "triangles": 1144,
+      "groups": 1,
+      "bytes": 27554,
+      "vertexCap": 3000,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 294,
+      "triangles": 568,
+      "groups": 1,
+      "bytes": 9522,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 3000,
+  "shadow_cap": 1200,
+  "ground": true,
+  "ao_dist": 0.15,
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_granite_moss",
+  "bounds": [
+    [
+      -1.3261582851409912,
+      0.014999999664723873,
+      -0.6438580751419067
+    ],
+    [
+      1.1938512325286865,
+      1.292557954788208,
+      0.8506162762641907
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#425e3c",
+    "#505f5d",
+    "#63726a",
+    "#637f43",
+    "#727b77",
+    "#78914a",
+    "#939b91",
+    "#afb1a0"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

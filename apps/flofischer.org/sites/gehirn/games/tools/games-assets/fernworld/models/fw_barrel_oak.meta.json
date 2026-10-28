@@ -1,0 +1,123 @@
+{
+  "category": "props",
+  "label": "Oak barrel \u00b7 iron hoops",
+  "games": [
+    "generic"
+  ],
+  "description": "Oak barrel \u00b7 iron hoops; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 1683,
+      "triangles": 561,
+      "groups": 1,
+      "bytes": 31671,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 1683,
+      "triangles": 561,
+      "groups": 1,
+      "bytes": 31671,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 310,
+      "triangles": 561,
+      "groups": 1,
+      "bytes": 9702,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "architecture/kaykit/barrel_large.glb",
+  "adaptation": {
+    "scale": 0.55,
+    "rotationY": 0,
+    "pivot": "bounds centre at ground",
+    "units": "metres"
+  },
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_barrel_oak",
+  "bounds": [
+    [
+      -0.4950000047683716,
+      0.0,
+      -0.4949999749660492
+    ],
+    [
+      0.4950000047683716,
+      1.100000023841858,
+      0.4949999749660492
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#626a6e",
+    "#778085",
+    "#788287",
+    "#798287",
+    "#798388",
+    "#81402f",
+    "#81412f",
+    "#854432",
+    "#864634",
+    "#894836",
+    "#8d989e",
+    "#8d999e",
+    "#8e4d3a",
+    "#8e999f",
+    "#8f9ba0",
+    "#904f3c",
+    "#90503c",
+    "#92513e",
+    "#965541",
+    "#975642",
+    "#995843",
+    "#9a5944",
+    "#9b5a45",
+    "#9d5b46",
+    "#9d5c46",
+    "#9e5d47",
+    "#9f5e47",
+    "#a15f48",
+    "#a16049",
+    "#a36149",
+    "#a3624a",
+    "#a4634a",
+    "#a4b1b7",
+    "#a4b2b8",
+    "#a5644b",
+    "#a6644b",
+    "#a6654c",
+    "#a7664c",
+    "#a8664c",
+    "#a8674d",
+    "#ab694e",
+    "#ab6a4e",
+    "#ae6d50",
+    "#af6d50",
+    "#b47253",
+    "#b67455",
+    "#c4825d"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

@@ -1,0 +1,132 @@
+{
+  "id": "MOMO_REFINED",
+  "variant_id": "MOMO_REFINED_V2",
+  "canonical_character": "MOMO_NOVICE",
+  "label": "Momo – zwölfjährige Novizin von Hohenfarn",
+  "identity": {
+    "species": "human",
+    "age": 12,
+    "nominal_height_m": 1.45
+  },
+  "native": "momo-refined-v2.blend",
+  "glb": "momo-refined-v2.glb",
+  "lods": [
+    "hi",
+    "lo",
+    "far",
+    "shadow"
+  ],
+  "lod_paths": {
+    "hi": "momo-refined-v2.glb",
+    "lo": "momo-refined-v2.lo.glb",
+    "far": "momo-refined-v2.far.glb",
+    "shadow": "momo-refined-v2.shadow.glb"
+  },
+  "runtime": {
+    "hi": {
+      "triangles": 52004,
+      "vertices": 29294,
+      "materials": 2,
+      "drawcalls": 2,
+      "bones": 23,
+      "sha256": "c3b0843955e7ad25a432abec72881171d4ce48b989d6b8ddf4667b0720d8272a"
+    },
+    "lo": {
+      "triangles": 10997,
+      "vertices": 7007,
+      "materials": 2,
+      "drawcalls": 2,
+      "bones": 23,
+      "sha256": "b205489d21113ab48c0f03e1329ee96a9d02b94f090fa8a5ff83cd0431258907"
+    },
+    "far": {
+      "triangles": 2988,
+      "vertices": 2303,
+      "materials": 2,
+      "drawcalls": 2,
+      "bones": 23,
+      "sha256": "e85928ad5b93c89aec50d5cb5cb881f4b9876a81602a8e3a0c6cc31e2a2c4f7d"
+    },
+    "shadow": {
+      "triangles": 1188,
+      "vertices": 588,
+      "materials": 1,
+      "drawcalls": 1,
+      "bones": 23,
+      "sha256": "5244c0cc8f2a6093ecc52a7b2021adb089f35c3670a28314f4aa9ae5590e41cf"
+    }
+  },
+  "coordinates": {
+    "native_up": "Z",
+    "native_forward": "-Y",
+    "glb_up": "Y",
+    "glb_forward": "+Z",
+    "hi_bind_bounds_min": [
+      -1.0919204950332642,
+      -0.002025346737354994,
+      -0.5405896306037903
+    ],
+    "hi_bind_bounds_max": [
+      0.9723502993583679,
+      2.26778507232666,
+      0.4567350149154663
+    ],
+    "hi_bind_height_author_units": 2.269810419064015,
+    "shared_scale_to_nominal_1_45m": 0.6388198713960991,
+    "rule": "Use one Hi-derived world scale for every LOD; do not normalize each LOD independently."
+  },
+  "clips": [
+    {
+      "name": "Idle",
+      "raw_start_exact": "1/24",
+      "raw_start_seconds": 0.0416666679084301,
+      "raw_end_seconds": 1.0833333730697632,
+      "motion_span_seconds": 1.041666705161333,
+      "normalization_applied": false
+    },
+    {
+      "name": "Keeper_Call",
+      "raw_start_exact": "1/24",
+      "raw_start_seconds": 0.0416666679084301,
+      "raw_end_seconds": 2.1666667461395264,
+      "motion_span_seconds": 2.1250000782310963,
+      "normalization_applied": false
+    },
+    {
+      "name": "Joy",
+      "raw_start_exact": "1/24",
+      "raw_start_seconds": 0.0416666679084301,
+      "raw_end_seconds": 2.5,
+      "motion_span_seconds": 2.45833333209157,
+      "normalization_applied": false
+    }
+  ],
+  "clip_time_contract": "All raw starts remain1/24 s. No GLB/clip normalization.",
+  "sockets": [
+    "socket_keepstone",
+    "socket_hand_right",
+    "socket_hand_left"
+  ],
+  "source": "SOURCE-v2.json",
+  "attribution": "ATTRIBUTION.txt",
+  "qa": "QA.json",
+  "preview": [
+    "final-front.png",
+    "final-three-quarter.png",
+    "final-side.png",
+    "final-back.png",
+    "final-face.png",
+    "final-braid.png",
+    "final-hand-keepstone.png",
+    "final-gameplay-256.png",
+    "final-lo-256.png",
+    "final-lo-face.png",
+    "final-far-256.png",
+    "final-far-face.png",
+    "final-pose-idle.png",
+    "final-pose-keeper_call.png",
+    "final-pose-joy.png",
+    "final-shadow-256.png"
+  ],
+  "review_status": "Root form and independent browser QA passed; artist technical/personal review complete. User final3D approval is not claimed."
+}

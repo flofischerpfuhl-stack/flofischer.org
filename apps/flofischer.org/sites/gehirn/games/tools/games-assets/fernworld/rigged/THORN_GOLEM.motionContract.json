@@ -1,0 +1,122 @@
+{
+  "axes": "GLB Y up, +Z forward; metres, floor Y=0",
+  "bones": 22,
+  "clips": {
+    "Idle": {
+      "duration": 3.0,
+      "loop": true,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": []
+    },
+    "Travel": {
+      "duration": 2.0,
+      "loop": true,
+      "rootMotion": false,
+      "runtimeSpeed": 0.145,
+      "events": []
+    },
+    "Attack_Sweep": {
+      "duration": 1.8,
+      "loop": false,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 0.9,
+          "socket": "Hand_L",
+          "event": "sweep_hit"
+        }
+      ]
+    },
+    "Attack_RootCast": {
+      "duration": 2.2,
+      "loop": false,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 1.1,
+          "socket": "GroundImpact",
+          "event": "root_cast_external_vfx"
+        }
+      ]
+    },
+    "GroundPulse": {
+      "duration": 1.6,
+      "loop": false,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 0.8,
+          "socket": "GroundImpact",
+          "event": "ground_pulse"
+        }
+      ]
+    },
+    "Hit_Recover": {
+      "duration": 1.0,
+      "loop": false,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": []
+    },
+    "Disabled": {
+      "duration": 2.4,
+      "loop": false,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 1.9,
+          "socket": "BodyHex",
+          "event": "runtime_hex_light_off"
+        }
+      ]
+    }
+  },
+  "sockets": [
+    {
+      "name": "Hand_L",
+      "bone": "hand_L"
+    },
+    {
+      "name": "Hand_R",
+      "bone": "hand_R"
+    },
+    {
+      "name": "GroundImpact",
+      "bone": "root"
+    },
+    {
+      "name": "BodyHex",
+      "bone": "chest"
+    },
+    {
+      "name": "WeakpointChest",
+      "bone": "chest"
+    },
+    {
+      "name": "FootShadow",
+      "bone": "root"
+    }
+  ],
+  "weakpointRadius": 0.3,
+  "light": "Subtle material emission; real runtime lights/VFX external. Disabled runtime fade from 1.9s; final pose is controlled kneeling.",
+  "travelContact": "Leg L phase u, R phase u+.5; stance phase [0,.62), swing .62..1; in place, floor Z0 internally.",
+  "rootCastPose": "Light 0.28 m knee bend; preserve abdomen/pelvis volume. Arms lower through shoulder girdle; fingers may hover above ground. GroundImpact is a separate VFX socket, not forced palm contact.",
+  "disabledHexEvent": {
+    "time": 1.9,
+    "external": true,
+    "runtimeLight": false,
+    "materialEmissionStrength": 0,
+    "baseColor": [
+      0.018,
+      0.007,
+      0.025,
+      1
+    ],
+    "preview": "renders/disabled-hex-off.png; applies this external event after actual GLB pose sampling"
+  }
+}

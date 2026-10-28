@@ -1,39 +1,25 @@
-/**
- * Bounce Brigade in 3D (Three.js): a walled toy arena seen from a fixed, tilted camera that frames the whole map
- * (turned a quarter on portrait phones, so the long side runs up the screen). Mapping: session (x, y) → three
- * (x − W/2, 0, y − H/2).
- *
- * Tanks are built from rounded parts (tracks, hull, a turret that turns on its own, a barrel that kicks back); Hazel
- * peeks out of her hatch, every Klonkbot tank has one glowing eye and an antenna. Walls and crates are instanced
- * rounded blocks in the world's material, pits/lava, ice and vents are flat tiles, tread marks and scorch marks are
- * decals; shells, mines, smoke and sparks are instanced. Walls cast static shadows; the shadow map is refreshed every
- * other frame for the tanks.
- */
-import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, MergedCrowd, Particles, LOW_GPU, furPatch } from './three-kit.js';
+/** Bounce Brigade: authored remote-controlled toys on a Concordia tournament tabletop. */
+import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, LOW_GPU } from './three-kit.js';
 import { RoundedBoxGeometry } from '../../vendor/three-0.170.0/RoundedBoxGeometry.js';
-import { loadModel } from './models.js';
+import { BounceArt, ToyInstances } from './tanks-art.js';
+import { TabletopWorld } from './tanks-tabletop.js';
+import { SMAAPass } from '../../vendor/three-0.170.0/postprocessing/SMAAPass.js';
+import * as Profile from './profile.js';
 import { W, H, T } from './tanks-levels.js';
-import { TYPES } from './tanks.js';
-
-const BOSS_MODEL = { klonk: 'KLONK_TANK', drill: 'DRILL_MECH', walker: 'FROST_WALKER', mothership: 'UFO' };
-const LO = Object.fromEntries(await Promise.all(['RANGER_HEDGEHOG', ...Object.values(BOSS_MODEL)].map(async (n) => [n, await loadModel(n, 'lo').catch(() => null)])));
+import { safeArea, SIDE_MARGIN } from './tanks-touch.js';
 
 const THEMES = [
   { // Fernhaven Meadows: oak blocks on a mown lawn
     ground: 't-grass', floor: 0x9ccf6a, floorAlt: 0x8cc25c, wall: 0xc9925a, wallMap: 't-wood', crate: 0xb07a45, fog: 0xcfe7f5, sky: 0xd6ecff, sun: 0xfff1d6, hemiG: 0x4f6e2c, exposure: 1.05,
-    props: [['TREE_ROUND', 22, 1.5, true], ['BUSH', 30, 1.15], ['ROCK', 10, 1.2], ['COTTAGE', 3, 2.6, true], ['WINDMILL', 1, 2.8, true]],
   },
   { // Sunbake Dunes: sandstone blocks, canyon cracks
     ground: 't-sand', floor: 0xecc98c, floorAlt: 0xe2bb7a, wall: 0xd9a45f, wallMap: 't-stone', crate: 0xa86e3a, fog: 0xf3d6a8, sky: 0xffe3c2, sun: 0xffd29a, hemiG: 0x9a6b3a, exposure: 1.05,
-    props: [['CACTUS', 22, 1.6, true], ['DESERT_ROCK', 20, 1.7], ['PALM', 8, 1.8, true], ['MESA', 2, 2.6, true]],
   },
   { // Frostpeak: ice blocks on packed snow
     ground: 't-snow', floor: 0xe6eef8, floorAlt: 0xdbe6f3, wall: 0x6fb2e8, wallMap: null, crate: 0x8a6a4a, fog: 0xd8e8f8, sky: 0xe0f0ff, sun: 0xffffff, hemiG: 0xb0c4d8, exposure: 0.96, glossyWall: true,
-    props: [['PINE_SNOW', 30, 1.7, true], ['SNOW_ROCK', 14, 1.3], ['ICE_CRYSTAL', 10, 1.5], ['OBSERVATORY', 1, 2.4, true]],
   },
   { // Ember Isles: basalt blocks, lava pools, vents
     ground: 't-lavarock', floor: 0x5d4f4f, floorAlt: 0x524444, wall: 0x3b3236, wallMap: 't-stone', crate: 0x5a3a2a, fog: 0x4a2a36, sky: 0xff9a6a, sun: 0xffb27a, hemiG: 0x3a1408, exposure: 1.1, lava: true,
-    props: [['BASALT', 26, 1.8, true], ['FERNSTONE', 10, 1.5], ['VOLCANO', 1, 2.6, true]],
   },
 ];
 
@@ -47,20 +33,6 @@ function canvasTex(w, h, draw, repeat = null) {
   if (repeat) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(...repeat); }
   return t;
 }
-/** Track tread: dark rubber with cleats (scrolled per tank as it drives). */
-const treadTex = () => canvasTex(64, 64, (g, w, h) => {
-  g.fillStyle = '#2b2a2e'; g.fillRect(0, 0, w, h);
-  for (let i = 0; i < 4; i++) { g.fillStyle = '#4a4850'; g.fillRect(i * 16 + 2, 4, 10, h - 8); g.fillStyle = '#1b1a1e'; g.fillRect(i * 16 + 12, 0, 3, h); }
-}, [3, 1]);
-/** Crate: planks with a frame and a cross brace. */
-const crateTex = (base) => canvasTex(128, 128, (g, w) => {
-  const c = new THREE.Color(base), css = (k) => `rgb(${Math.min(255, c.r * 255 * k) | 0},${Math.min(255, c.g * 255 * k) | 0},${Math.min(255, c.b * 255 * k) | 0})`;
-  g.fillStyle = css(1); g.fillRect(0, 0, w, w);
-  for (let i = 0; i < 5; i++) { g.fillStyle = css(0.92 + (i % 2) * 0.1); g.fillRect(0, i * 25.6, w, 24); }
-  g.strokeStyle = css(0.62); g.lineWidth = 14; g.strokeRect(7, 7, w - 14, w - 14);
-  g.lineWidth = 12; g.beginPath(); g.moveTo(12, 12); g.lineTo(w - 12, w - 12); g.stroke();
-  g.fillStyle = css(0.45); for (const [x, y] of [[12, 12], [w - 12, 12], [12, w - 12], [w - 12, w - 12]]) { g.beginPath(); g.arc(x, y, 4, 0, TAU); g.fill(); }
-});
 /** Ice tile: pale blue with frosty streaks. */
 const iceTex = () => canvasTex(128, 128, (g, w) => {
   g.fillStyle = '#cfeaf9'; g.fillRect(0, 0, w, w);
@@ -68,73 +40,6 @@ const iceTex = () => canvasTex(128, 128, (g, w) => {
   for (let i = 0; i < 9; i++) { g.beginPath(); const y = Math.random() * w; g.moveTo(0, y); g.lineTo(w, y + (Math.random() - 0.5) * 60); g.stroke(); }
   g.strokeStyle = 'rgba(120,170,210,.35)'; g.lineWidth = 3; g.strokeRect(1, 1, w - 2, w - 2);
 });
-
-/** A toy tank as a group; its turret group turns on its own. */
-function buildTank(geo, { color, player = false, ghost = false, eye = 0xffd34d }) {
-  const root = new THREE.Group(), body = new THREE.Group(), turret = new THREE.Group(), barrel = new THREE.Group();
-  root.add(body); body.add(turret); turret.add(barrel);
-  const tint = new THREE.Color(color);
-  const hullM = mat(tint, { roughness: 0.42, metalness: 0.08 });
-  const darkM = mat(tint.clone().multiplyScalar(0.62), { roughness: 0.5 });
-  const treadM = mat(0xffffff, { map: geo.tread.clone(), roughness: 0.85 });
-  treadM.map.needsUpdate = true;
-  const metalM = mat(0x8d939c, { roughness: 0.32, metalness: 0.7 });
-  const parts = [];
-  const add = (parent, g, m, x, y, z, sx = 1, sy = 1, sz = 1, ry = 0) => { const mesh = new THREE.Mesh(g, m); mesh.position.set(x, y, z); mesh.scale.set(sx, sy, sz); mesh.rotation.y = ry; mesh.castShadow = true; parent.add(mesh); parts.push(mesh); return mesh; };
-  // tracks with wheels peeking out, the hull, a sloped glacis
-  for (const z of [-0.25, 0.25]) {
-    add(body, geo.rbox, treadM, 0, 0.13, z, 0.8, 0.24, 0.17);
-    for (const x of [-0.27, -0.09, 0.09, 0.27]) add(body, geo.wheel, metalM, x, 0.12, z * 1.42, 0.075, 0.03, 0.075).rotation.x = Math.PI / 2;
-  }
-  add(body, geo.rbox, hullM, 0, 0.27, 0, 0.7, 0.17, 0.46);
-  add(body, geo.rbox, darkM, 0.27, 0.3, 0, 0.18, 0.1, 0.4);
-  // turret, barrel with a muzzle ring
-  turret.position.set(-0.03, 0.36, 0);
-  add(turret, geo.dome, hullM, 0, 0, 0, 0.21, 0.15, 0.2);
-  add(turret, geo.rbox, darkM, 0, 0.04, 0, 0.3, 0.06, 0.26);
-  barrel.position.set(0.12, 0.06, 0);
-  add(barrel, geo.tube, metalM, 0.25, 0, 0, 0.05, 0.42, 0.05).rotation.z = -Math.PI / 2;
-  add(barrel, geo.tube, darkM, 0.47, 0, 0, 0.072, 0.07, 0.072).rotation.z = -Math.PI / 2;
-  let driver = null, eyeMesh = null;
-  if (player) {
-    // a leaf emblem on the hull sides and Hazel in the hatch
-    const leafM = new THREE.MeshBasicMaterial({ map: geo.leaf, transparent: true, depthWrite: false });
-    for (const z of [-0.232, 0.232]) { const m = new THREE.Mesh(geo.plane, leafM); m.position.set(-0.05, 0.28, z); m.scale.setScalar(0.17); if (z < 0) m.rotation.y = Math.PI; turret.parent.add(m); }
-    if (LO.RANGER_HEDGEHOG) {
-      driver = new THREE.Group();
-      for (const part of LO.RANGER_HEDGEHOG) {
-        if (part.ch === 'legL' || part.ch === 'legR') continue;
-        const m = part.mat === 'glow' ? new THREE.MeshBasicMaterial({ vertexColors: true }) : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: part.mat === 'gloss' ? 0.25 : 0.65 });
-        if (part.geometry.attributes.aFur && part.mat !== 'glow') furPatch(m);
-        const mesh = new THREE.Mesh(part.geometry, m); mesh.castShadow = part.mat !== 'glow'; driver.add(mesh);
-      }
-      driver.scale.setScalar(0.4); driver.position.set(-0.06, -0.1, 0); driver.rotation.y = Math.PI / 2;
-      turret.add(driver);
-    }
-  } else {
-    // a Klonkbot tank: one glowing eye on the turret front, an antenna with a bobble
-    eyeMesh = new THREE.Mesh(geo.ball, new THREE.MeshBasicMaterial({ color: eye, toneMapped: false }));
-    eyeMesh.position.set(0.12, 0.1, 0); eyeMesh.scale.set(0.05, 0.075, 0.075); turret.add(eyeMesh);
-    const rim = add(turret, geo.ring, metalM, 0.13, 0.1, 0, 0.085, 0.085, 0.085); rim.rotation.y = Math.PI / 2;
-    add(turret, geo.tube, metalM, -0.09, 0.2, -0.07, 0.012, 0.24, 0.012);
-    add(turret, geo.ball, mat(0xff5a4d, { emissive: 0xff2a1a, emissiveIntensity: 0.6 }), -0.09, 0.33, -0.07, 0.035, 0.035, 0.035);
-  }
-  root.scale.setScalar(1.22);
-  const mats = [hullM, darkM, treadM, metalM];
-  if (ghost) for (const m of mats) { m.transparent = true; m.depthWrite = false; }
-  return { root, body, turret, barrel, driver, eye: eyeMesh, treadM, mats, parts };
-}
-
-/** A boss from the baked cast (vertex-coloured, one group). */
-function bossFigure(model) {
-  const g = new THREE.Group(), mats = [];
-  for (const part of model) {
-    const m = part.mat === 'glow' ? new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }) : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: part.mat === 'gloss' ? 0.25 : 0.62, metalness: 0.05 });
-    const mesh = new THREE.Mesh(part.geometry, m); mesh.castShadow = part.mat !== 'glow'; g.add(mesh);
-    if (part.mat !== 'glow') mats.push(m);
-  }
-  return { group: g, mats };
-}
 
 /** Instanced flat quads on the ground with colour and alpha per instance (tread marks, scorch, rings). */
 class Decals {
@@ -163,9 +68,46 @@ class Decals {
   end() { const m = this.mesh; m.count = this.n; m.instanceMatrix.needsUpdate = true; m.instanceColor.needsUpdate = true; this.alpha.needsUpdate = true; }
 }
 
+/** Full-resolution SMAA replaces the old low-DPR hardware MSAA path.
+ * This display-colour target uses r170's XR-target output contract: the scene
+ * receives the same per-material ACES/sRGB output as the default framebuffer.
+ * In particular, toneMapped:false toy effects and custom shaders stay intact.
+ * r170 stores this XR-style target in RGBA8: display-encoded samples go
+ * straight through SMAA, with no second tone map or sRGB encoding.
+ * No XR session, renderer size, pixel ratio, geometry or shadow policy changes.
+ */
+class BouncePostAA {
+  constructor(){
+    this.mode='SMAA 1x Medium / Three 0.170.0 / display-colour';
+    this.meta={passes:['per-material ACES + sRGB scene','SMAA edges','SMAA weights','SMAA display-colour blend'],toneMapping:'per-material ACESFilmicToneMapping',colorSpace:'SRGBColorSpace',exposure:'renderer.toneMappingExposure',fullResolution:true};
+    this.mainColorTarget=new THREE.WebGLRenderTarget(1,1,{type:THREE.UnsignedByteType,depthBuffer:true,samples:0,colorSpace:THREE.SRGBColorSpace});
+    this.mainColorTarget.isXRRenderTarget=true;
+    this.smaaPass=new SMAAPass(1,1);this.smaaPass.renderToScreen=true;
+    const blend=this.smaaPass.materialBlend;
+    blend.toneMapped=false;blend.depthTest=false;blend.depthWrite=false;
+    this.lookupReady=Promise.all([this.smaaPass.areaTexture,this.smaaPass.searchTexture].map(texture=>new Promise((resolve,reject)=>{
+      const image=texture.image,done=()=>{texture.needsUpdate=true;resolve();};
+      if(image.complete&&image.naturalWidth)done();else{image.addEventListener('load',done,{once:true});image.addEventListener('error',()=>reject(Error('Bounce SMAA lookup image failed')),{once:true});}
+    })));
+    this.size=new THREE.Vector2();
+  }
+  resize(renderer){
+    renderer.getDrawingBufferSize(this.size);const {x:w,y:h}=this.size;
+    this.mainColorTarget.setSize(w,h);this.smaaPass.setSize(w,h);
+  }
+  render(renderer,scene,camera){
+    renderer.setRenderTarget(this.mainColorTarget);renderer.render(scene,camera);
+    this.smaaPass.render(renderer,null,this.mainColorTarget);
+    renderer.setRenderTarget(null);
+  }
+  dispose(){this.mainColorTarget.dispose();this.smaaPass.dispose();}
+}
+
 export class Tanks3D {
   constructor(canvas) {
-    this.renderer = createRenderer(canvas);
+    this.renderer = createRenderer(canvas,{antialias:false});
+    this.postAA=!window.__noAA&&(window.devicePixelRatio||1)<1.5?new BouncePostAA():null;
+    this.renderer.info.autoReset=false;
     this.renderer.shadowMap.autoUpdate = false;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.scene = new THREE.Scene();
@@ -174,6 +116,7 @@ export class Tanks3D {
     this.w = 1; this.h = 1; this.frame = 0; this.session = null; this.themeKey = null; this.rev = -1; this.portrait = false;
     this.time = 0;
     this.build();
+    this.prepared=null;this.disposed=false;this.prepareEpoch=0;
     const v = new THREE.Vector3(), out = { x: 0, y: 0, s: 1 };
     this._proj = (x, y, h = 0) => {
       v.set(x - W / 2, h, y - H / 2).project(this.camera);
@@ -212,28 +155,18 @@ export class Tanks3D {
       ball: new THREE.SphereGeometry(1, 14, 10),
       ring: new THREE.TorusGeometry(1, 0.22, 8, 18),
       plane: new THREE.PlaneGeometry(1, 1),
-      tread: treadTex(),
-      leaf: canvasTex(128, 128, (g) => {
-        g.translate(64, 64); g.rotate(-0.5);
-        g.fillStyle = '#e9f7d8'; g.beginPath(); g.ellipse(0, 0, 50, 26, 0, 0, TAU); g.fill();
-        g.fillStyle = '#2f7a2a'; g.beginPath(); g.ellipse(0, 0, 42, 19, 0, 0, TAU); g.fill();
-        g.strokeStyle = '#e9f7d8'; g.lineWidth = 5; g.beginPath(); g.moveTo(-42, 0); g.lineTo(40, 0); g.stroke();
-        for (let i = -3; i <= 3; i++) { g.beginPath(); g.moveTo(i * 10, 0); g.lineTo(i * 10 + 10, -13); g.moveTo(i * 10, 0); g.lineTo(i * 10 + 10, 13); g.stroke(); }
-      }),
     };
     // the world around the arena and the arena floor
     this.ground = new THREE.Mesh(new THREE.PlaneGeometry(140, 140), mat(0xffffff, { roughness: 0.95 }));
-    this.ground.rotation.x = -Math.PI / 2; this.ground.position.y = -0.02; this.ground.receiveShadow = true; s.add(this.ground);
+    this.ground.rotation.x = -Math.PI / 2; this.ground.position.y = -2.65; this.ground.receiveShadow = true; this.ground.renderOrder=1; s.add(this.ground);
     this.floor = new THREE.Mesh(new THREE.PlaneGeometry(W, H), mat(0xffffff, { roughness: 0.9 }));
-    this.floor.rotation.x = -Math.PI / 2; this.floor.receiveShadow = true; s.add(this.floor);
+    this.floor.rotation.x = -Math.PI / 2; this.floor.receiveShadow = true; this.floor.renderOrder=1; s.add(this.floor);
     // blocks (walls and the border ring) and crates: one instanced mesh each
     const maxBlocks = W * H + 2 * (W + H) + 8;
     this.walls = new THREE.InstancedMesh(this.geo.block, mat(0xffffff, { roughness: 0.6 }), maxBlocks);
     this.walls.castShadow = this.walls.receiveShadow = true; s.add(this.walls);
     this.wallCaps = new THREE.InstancedMesh(this.geo.block, mat(0xffffff, { roughness: 0.75 }), maxBlocks);
     this.wallCaps.receiveShadow = true; s.add(this.wallCaps);
-    this.crates = new THREE.InstancedMesh(this.geo.block, mat(0xffffff, { roughness: 0.7 }), W * H);
-    this.crates.castShadow = this.crates.receiveShadow = true; s.add(this.crates);
     // ice, pits / lava, vents
     const flat = new THREE.PlaneGeometry(1, 1); flat.rotateX(-Math.PI / 2);
     this.ice = new THREE.InstancedMesh(flat, mat(0xffffff, { map: iceTex(), roughness: 0.12, metalness: 0.05 }), W * H);
@@ -280,23 +213,52 @@ export class Tanks3D {
     // decals: tread marks, scorch marks under wrecks and blasts
     this.treads = new Decals(s, 420, 'float e = smoothstep(0.0, 0.25, min(vUv.y, 1.0 - vUv.y)) * step(0.5, fract(vUv.x * 3.0)); gl_FragColor = vec4(vC, vA * e);');
     this.scorch = new Decals(s, 48, 'float r = length(vUv - 0.5) * 2.0; float n = 0.75 + 0.25 * sin(atan(vUv.y - 0.5, vUv.x - 0.5) * 7.0 + r * 5.0); gl_FragColor = vec4(vC, vA * (1.0 - smoothstep(0.35, 1.0, r)) * n);');
-    // shells, mines, wrecks, smoke and sparks
-    this.shellM = new THREE.InstancedMesh(this.geo.ball, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.4, emissive: 0x332a1a }), 64);
-    this.shellM.castShadow = true; this.shellM.frustumCulled = false; this.shellM.instanceMatrix.setUsage(THREE.DynamicDrawUsage); s.add(this.shellM);
-    for (let i = 0; i < 64; i++) this.shellM.setColorAt(i, new THREE.Color(1, 1, 1));
+    // Pooled toy flashes, confetti and soft puffs; imported projectiles are prepared below.
     this.flames = new Particles(s, 160, this.geo.ball, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
     this.smoke = new Particles(s, 320, new THREE.IcosahedronGeometry(1, 1), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, transparent: true, opacity: 0.75, depthWrite: false }));
     this.sparks = new Particles(s, 200, new THREE.OctahedronGeometry(1, 0), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }));
-    this.mineBody = new THREE.InstancedMesh(this.geo.dome, mat(0xffffff, { roughness: 0.35, metalness: 0.3 }), 16);
-    this.mineBody.castShadow = true; this.mineBody.frustumCulled = false; s.add(this.mineBody);
-    for (let i = 0; i < 16; i++) this.mineBody.setColorAt(i, new THREE.Color(1, 1, 1));
-    this.mineLight = new Particles(s, 16, this.geo.ball, new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }));
-    this.wrecks = new THREE.InstancedMesh(this.geo.rbox, mat(0x2a2624, { roughness: 0.9 }), 48);
-    this.wrecks.castShadow = true; this.wrecks.frustumCulled = false; s.add(this.wrecks);
-    // props around the arena (per world)
-    this.props = new Map();
-    this.tankViews = new Map();
-    this.bossView = null;
+    this.mineLight = new Particles(s, 32, this.geo.ball, new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }));
+    this.shadows = new Decals(s, 40, 'float r = length(vUv - .5) * 2.0; gl_FragColor = vec4(vC, vA * (1.0 - smoothstep(.2, 1.0, r)));');
+    this.teamMarks = new Decals(s, 1, 'float r = length(vUv - .5) * 2.0; gl_FragColor = vec4(vC, vA * smoothstep(.72,.78,r) * (1.0-smoothstep(.9,.97,r)));');
+  }
+
+  async prepare(session) {
+    await this.postAA?.lookupReady;
+    const epoch=++this.prepareEpoch;
+    const art=new BounceArt();let tabletop;
+    try {
+      await art.prepare(session);
+      const [shell,mine,crate]=await Promise.all(['RUBBER_SHELL','TOURNAMENT_MINE','FERNSTONE_CACHE'].map(id=>art.library.template(id,'lo')));
+      tabletop=await TabletopWorld.create(art.library,session.L.world,this.env);
+      if(this.disposed||epoch!==this.prepareEpoch)throw new Error('Bounce preparation superseded');
+      this.clearAssets();this.art=art;this.tabletop=tabletop;this.scene.add(tabletop.root);
+      this.shellBatch=new ToyInstances(shell,this.scene,96);this.mineBatch=new ToyInstances(mine,this.scene,32);this.crateBatch=new ToyInstances(crate,this.scene,W*H);
+      this.session=this.prepared=session;this.rev=-1;this.themeKey=null;
+      const ringKey=Profile.profile().cosmetics?.equipped?.['tournament-ring']||'fern';
+      this.ringColor=({fern:0x55b582,gold:0xe5bc55,sky:0x6ab9dc,violet:0xae89ce})[ringKey]??0x55b582;
+      session.tournamentRingColor='#'+this.ringColor.toString(16).padStart(6,'0');
+      session.visualMuzzle=(tk,angle)=>{
+        const actor=this.art.actor(tk,this.scene),v=actor.muzzle(tk,angle,session);
+        const x=v.x+W/2,y=v.z+H/2;
+        // Never cosmetically launch through a wall or across another tank. The
+        // unchanged simulation still decides the launch collision and every hit.
+        const d=Math.hypot(x-tk.x,y-tk.y),steps=Math.max(1,Math.ceil(d/.06));
+        for(let i=1;i<=steps;i++){const xx=tk.x+(x-tk.x)*i/steps,yy=tk.y+(y-tk.y)*i/steps,t=session.tile(xx,yy);if(t===T.WALL||t===T.CRATE)return null;}
+        return {x:v.x,y:v.y,z:v.z};
+      };
+      session.visualMine=tk=>{const actor=this.art.actor(tk,this.scene);actor.pose(tk,session);const node=actor.nodes.get('RearMineSocket');if(!node)return null;const v=node.getWorldPosition(new THREE.Vector3());const t=session.tile(v.x+W/2,v.z+H/2);return t===T.WALL||t===T.CRATE?null:{x:v.x,y:v.y,z:v.z};};
+      for(const tk of session.tanks){const actor=art.actor(tk,this.scene);applyIbl(actor.root,this.env,.7);actor.pose(tk,session);}
+      applyIbl(this.scene,this.env,.65);
+      this.setTheme(session,false);this.layout(session);this.rev=session.rev;
+    } catch(error) {if(this.art!==art){tabletop?.dispose();art.dispose();}else this.clearAssets();throw error;}
+  }
+
+  clearAssets(){
+    if(this.session){delete this.session.visualMuzzle;delete this.session.visualMine;}
+    this.tabletop?.dispose();this.tabletop=null;
+    this.shellBatch?.dispose();this.mineBatch?.dispose();this.crateBatch?.dispose();
+    this.shellBatch=this.mineBatch=this.crateBatch=null;
+    this.art?.dispose();this.art=null;this.prepared=null;
   }
 
   setTheme(sess, dark) {
@@ -315,43 +277,16 @@ export class Tanks3D {
     this.walls.material.roughness = th.glossyWall ? 0.18 : 0.62; this.walls.material.metalness = th.glossyWall ? 0.1 : 0.02;
     this.walls.material.needsUpdate = true;
     this.wallCaps.material.color.set(th.wall).offsetHSL(0, -0.05, 0.08);
-    this.crates.material.map = crateTex(th.crate); this.crates.material.needsUpdate = true;
     this.lavaU.uLava.value = th.lava ? 1 : 0;
     this.rev = -1; // repaint the floor in this world's look
-    // props: scattered around the arena (outside the border ring), static
-    for (const c of this.props.values()) for (const ch of c.channels) { ch.mesh.count = 0; if (ch.shadow) ch.shadow.count = 0; }
-    let seed = 11 + sess.L.world * 97;
-    const r = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
-    const missing = th.props.filter(([n]) => !LO[n]);
-    if (missing.length) Promise.all(missing.map(async ([n]) => { LO[n] = await loadModel(n, 'lo').catch(() => null); })).then(() => { if (this.themeKey === key) this.themeKey = null; });
-    for (const [name, count, scale, tall] of th.props) {
-      if (!LO[name]) continue;
-      let c = this.props.get(name);
-      if (!c) {
-        c = new MergedCrowd(this.scene, null, 48, { model: LO[name], shadowModel: tall ? LO[name] : null });
-        for (const ch of c.channels) ch.mesh.material.userData.cheapIbl = true;
-        this.props.set(name, c);
-        applyIbl(this.scene, this.env, 0.55);
-      }
-      c.begin();
-      let placed = 0, guard = 0;
-      while (placed < count && guard++ < count * 30) {
-        const x = (r() * 2 - 1) * 26, z = (r() * 2 - 1) * 17;
-        const big = count <= 3;
-        if (Math.abs(x) < W / 2 + (big ? 5 : 2.2) && Math.abs(z) < H / 2 + (big ? 4 : 1.8)) continue;
-        // keep the band in front of the camera low (it would cover the arena)
-        if (z > H / 2 && tall && Math.abs(x) < W / 2 + 4) continue;
-        c.add(x, 0, z, r() * TAU, scale * (0.8 + r() * 0.4), { swing: 0 }); placed++;
-      }
-      c.end();
-    }
     this.renderer.shadowMap.needsUpdate = true;
   }
 
   /** The static map: blocks, crates, ice, pits, vents (again whenever a crate breaks). */
   layout(sess) {
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), sc = new THREE.Vector3(), c = new THREE.Color();
-    let nw = 0, nc = 0, ni = 0, np = 0;
+    let nw = 0, ni = 0, np = 0;
+    this.crateBatch.begin();
     const th = THEMES[sess.L.world];
     const rand = ((seed) => () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; })(sess.L.seed % 2147483646 + 1);
     const wall = (x, y, h = 0.82) => {
@@ -368,8 +303,8 @@ export class Tanks3D {
       const t = sess.grid[y * W + x], cx = x - W / 2 + 0.5, cz = y - H / 2 + 0.5;
       if (t === T.WALL) wall(x, y);
       else if (t === T.CRATE) {
-        m.compose(p.set(cx, 0.34, cz), q.setFromAxisAngle(v3.set(0, 1, 0), (rand() - 0.5) * 0.12), sc.set(0.84, 0.68, 0.84));
-        this.crates.setMatrixAt(nc, m); this.crates.setColorAt(nc++, c.set(0xffffff).multiplyScalar(0.88 + rand() * 0.2));
+        m.compose(p.set(cx, 0, cz), q.setFromAxisAngle(v3.set(0, 1, 0), (rand() - 0.5) * 0.12), sc.setScalar(.56));
+        this.crateBatch.add(m); rand();
       } else if (t === T.ICE) { m.compose(p.set(cx, 0.004, cz), q.identity(), sc.set(1, 1, 1)); this.ice.setMatrixAt(ni++, m); }
       else if (t === T.PIT) {
         m.compose(p.set(cx, 0, cz), q.identity(), sc.set(1, 1, 1));
@@ -378,8 +313,9 @@ export class Tanks3D {
         this.pits.setMatrixAt(np++, m);
       }
     }
-    this.walls.count = nw; this.wallCaps.count = nw; this.crates.count = nc; this.ice.count = ni; this.pits.count = np;
-    for (const im of [this.walls, this.wallCaps, this.crates, this.ice, this.pits]) { im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; }
+    this.walls.count = nw; this.wallCaps.count = nw; this.ice.count = ni; this.pits.count = np;
+    for (const im of [this.walls, this.wallCaps, this.ice, this.pits]) { im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; }
+    this.crateBatch.end();
     this.pitEdge.needsUpdate = true;
     this.vents.count = sess.vents.length;
     sess.vents.forEach((v, i) => { m.compose(p.set(v.x - W / 2 + 0.5, 0, v.y - H / 2 + 0.5), q.identity(), sc.set(0.96, 1, 0.96)); this.vents.setMatrixAt(i, m); });
@@ -430,53 +366,52 @@ export class Tanks3D {
     this.renderer.shadowMap.needsUpdate = true;
   }
 
-  setup(sess) {
-    this.session = sess; this.rev = -1;
-    for (const tv of this.tankViews.values()) this.scene.remove(tv.root);
-    this.tankViews.clear();
-    if (this.bossView) { this.scene.remove(this.bossView.group); this.bossView = null; }
-    for (const tk of sess.tanks) this.viewFor(tk);
-    this.renderer.shadowMap.needsUpdate = true;
-  }
-  viewFor(tk) {
-    let tv = this.tankViews.get(tk.id);
-    if (tv) return tv;
-    if (tk.boss) {
-      const model = LO[BOSS_MODEL[tk.boss]];
-      const f = model ? bossFigure(model) : { group: new THREE.Group(), mats: [] };
-      tv = { root: f.group, boss: true, mats: f.mats, scale: tk.def.fly ? 2.0 : 1.75 };
-    } else {
-      const D = tk.def;
-      tv = buildTank(this.geo, { color: tk.team === 0 ? 0x4f9a3a : D.color, player: tk.team === 0, ghost: !!D?.ghost, eye: tk.type === 'ace' ? 0xff3b30 : tk.type === 'ghost' ? 0x9be7ff : 0xffd34d });
-    }
-    applyIbl(tv.root, this.env, 0.7);
-    this.scene.add(tv.root);
-    this.tankViews.set(tk.id, tv);
-    return tv;
-  }
-
   resize(w, h, dpr) {
     this.w = w; this.h = h;
     this.renderer.setPixelRatio(LOW_GPU ? Math.min(1, dpr) : dpr); this.renderer.setSize(w, h, false);
+    this.postAA?.resize(this.renderer);
     this.camera.aspect = w / h;
     this.portrait = h > w * 1.08;
-    // frame the arena (with its border ring): find the closest distance where every corner is on screen
-    const tilt = 1.02, yaw = this.portrait ? -Math.PI / 2 : 0;
+    // Phones (a short side under 560 px) get a longer lens, so the far side of the arena is nearly as big as the near
+    // side (bigger tiles, tanks and shells), and a steeper camera when upright, where height is plentiful.
+    const compact = Math.min(w, h) < 560;
+    this.compact = compact;
+    this.camera.fov = compact ? 21 : 30;
+    const tilt = compact && this.portrait ? 1.13 : 1.02, yaw = this.portrait ? -Math.PI / 2 : 0;
+    // the free box the arena (with its border ring) must fit in, in px: under the HUD; upright phones keep a band for
+    // the thumbs below the arena; sideways phones have the HUD in the margins, the thumbs beside the arena
+    const sa = compact ? safeArea() : { t: 0, r: 0, b: 0, l: 0 };
+    const ins = !compact ? { t: h * 0.07, b: h * 0.03, l: w * 0.015, r: w * 0.015 }
+      : this.portrait ? { t: 62 + sa.t, b: Math.max(116, h * 0.16) + sa.b, l: 6 + sa.l, r: 6 + sa.r }
+        : { t: 8 + sa.t, b: 6 + sa.b, l: SIDE_MARGIN + sa.l, r: SIDE_MARGIN + sa.r };
     const corners = [];
     for (const x of [-W / 2 - 1, W / 2 + 1]) for (const z of [-H / 2 - 1, H / 2 + 1]) for (const y of [0, 1]) corners.push(new THREE.Vector3(x, y, z));
+    this.camera.clearViewOffset();
+    const box = { x0: 0, y0: 0, x1: 0, y1: 0 };
     const place = (d) => {
-      const cx = 0, cz = 0.35;
-      this.camera.position.set(cx + Math.sin(yaw) * Math.cos(tilt) * d, Math.sin(tilt) * d, cz + Math.cos(yaw) * Math.cos(tilt) * d);
-      this.camera.lookAt(cx, 0, cz);
+      this.camera.position.set(Math.sin(yaw) * Math.cos(tilt) * d, Math.sin(tilt) * d, Math.cos(yaw) * Math.cos(tilt) * d);
+      this.camera.lookAt(0, 0, 0);
       this.camera.updateProjectionMatrix(); this.camera.updateMatrixWorld();
+      box.x0 = box.y0 = Infinity; box.x1 = box.y1 = -Infinity;
+      for (const c of corners) {
+        v3.copy(c).project(this.camera);
+        const sx = (v3.x + 1) / 2 * w, sy = (1 - v3.y) / 2 * h;
+        box.x0 = Math.min(box.x0, sx); box.x1 = Math.max(box.x1, sx); box.y0 = Math.min(box.y0, sy); box.y1 = Math.max(box.y1, sy);
+      }
     };
-    let lo = 8, hi = 90;
-    for (let i = 0; i < 24; i++) {
+    const aw = Math.max(40, w - ins.l - ins.r), ah = Math.max(40, h - ins.t - ins.b);
+    let lo = 8, hi = 160;
+    for (let i = 0; i < 28; i++) {
       const d = (lo + hi) / 2; place(d);
-      const fits = corners.every((c) => { v3.copy(c).project(this.camera); return Math.abs(v3.x) < 0.97 && v3.y < 0.86 && v3.y > -0.94; });
-      if (fits) hi = d; else lo = d;
+      if (box.x1 - box.x0 <= aw && box.y1 - box.y0 <= ah) hi = d; else lo = d;
     }
     place(hi);
+    // slide the picture (not the camera) so the arena sits in its box: centred, or at the top of it on upright phones
+    const tx = ins.l + aw / 2, ty = compact && this.portrait ? ins.t + (box.y1 - box.y0) / 2 : ins.t + ah / 2;
+    this.camera.setViewOffset(w, h, (box.x0 + box.x1) / 2 - tx, (box.y0 + box.y1) / 2 - ty, w, h);
+    this.camera.updateProjectionMatrix();
+    // shells are a few pixels on a phone: bigger there (the overlay adds a rim)
+    this.shellK = compact ? 1.5 : 1;
     this.camDist = hi;
     if (this.scene.fog) { this.scene.fog.near = hi * 1.05; this.scene.fog.far = hi * 2.6; }
     this.lights.light.position.set(-7, 15, 9); this.lights.light.target.position.set(0, 0, 0);
@@ -484,7 +419,7 @@ export class Tanks3D {
   }
 
   render(s, view) {
-    if (this.session !== s) this.setup(s);
+    if (this.prepared !== s) throw new Error('Bounce assets not prepared');
     this.setTheme(s, view.dark);
     if (this.rev !== s.rev) { this.rev = s.rev; this.layout(s); }
     this.time = view.time || this.time + 1 / 60;
@@ -495,96 +430,61 @@ export class Tanks3D {
     this.drawShells(s);
     this.drawGround(s);
     this.drawFx(s);
-    if ((this.frame++ & 1) === 0) this.renderer.shadowMap.needsUpdate = true;
-    this.renderer.render(this.scene, this.camera);
+    this.frame++; // Only static board pieces cast shadows; layout/resize/theme invalidate the map.
+    this.renderer.info.reset();
+    if(this.postAA)this.postAA.render(this.renderer,this.scene,this.camera);else this.renderer.render(this.scene,this.camera);
   }
 
   drawTanks(s) {
+    this.shadows.begin();this.teamMarks.begin();
     for (const tk of s.tanks) {
-      const tv = this.viewFor(tk);
-      const show = tk.alive && !tk.under;
-      tv.root.visible = show;
-      if (!show) continue;
-      const x = tk.x - W / 2, z = tk.y - H / 2;
-      if (tv.boss) {
-        const fly = tk.def.fly ? 1.4 + Math.sin(this.time * 1.6) * 0.15 : 0;
-        tv.root.position.set(x, fly, z);
-        tv.root.rotation.y = -tk.aim + Math.PI / 2;
-        tv.root.scale.setScalar(tv.scale * (1 + (tk.flash > 0 ? 0.05 : 0)));
-        const f = tk.flash > 0 ? 2.2 : tk.armour > 0 ? 1.25 : 1;
-        for (const m of tv.mats) m.color.setRGB(f, f, f);
-        continue;
-      }
-      tv.root.position.set(x, 0, z);
-      tv.root.rotation.y = -tk.ang;
-      tv.turret.rotation.y = -(tk.aim - tk.ang);
-      tv.barrel.position.x = 0.12 - tk.recoil * 0.08;
-      tv.body.position.y = tk.moving > 0.2 ? Math.abs(Math.sin(tk.tread * 9)) * 0.012 : 0;
-      tv.body.rotation.z = -tk.recoil * 0.05;
-      tv.treadM.map.offset.x = -tk.tread * 0.9;
-      // a hit tank flashes white; a ghost is a shimmer unless it fires, gets hit or comes close
-      const ghost = tk.def?.ghost;
-      let op = 1;
-      if (ghost) op = s.ghostVisible(tk) ? 0.75 : 0.07 + 0.04 * Math.sin(this.time * 6 + tk.id);
-      for (const m of tv.mats) { m.opacity = op; m.emissive.setRGB(tk.flash > 0 ? 0.8 : 0, tk.flash > 0 ? 0.8 : 0, tk.flash > 0 ? 0.8 : 0); }
-      if (tv.eye) {
-        tv.eye.material.color.set(tk.type === 'ace' ? 0xff3b30 : tk.type === 'ghost' ? 0x9be7ff : 0xffd34d).multiplyScalar(tk.charge > 0 ? 3 : tk.want != null ? 1.6 : 0.9);
-        tv.eye.scale.set(0.05, 0.075, 0.075).multiplyScalar(tk.charge > 0 ? 1.5 + Math.sin(this.time * 40) * 0.2 : 1);
-      }
-      if (tv.driver) tv.driver.position.y = -0.1 + (tk.moving > 0.2 ? 0 : Math.sin(this.time * 2.4) * 0.008);
+      const actor=this.art.actor(tk,this.scene);if(!actor.lit){applyIbl(actor.root,this.env,.7);actor.lit=true;}actor.pose(tk,s);
+      if(!actor.root.visible)continue;
+      const anchor=actor.shadow?.getWorldPosition(v3)||v3.set(tk.x-W/2,0,tk.y-H/2);
+      const opacity=tk.def?.ghost&&!s.ghostVisible(tk)?.035:.22;
+      this.shadows.add(anchor.x,anchor.z,tk.r*3,tk.r*2.6,0,0x203f49,opacity,.012);
+      if(tk.team===0&&tk.alive)this.teamMarks.add(tk.x-W/2,tk.y-H/2,1.12,1.12,0,this.ringColor,.8,.025);
     }
+    this.shadows.end();this.teamMarks.end();
+    this.tabletop.update(s.t,!!s.result?.won);
   }
 
   drawShells(s) {
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), sc = new THREE.Vector3(), c = new THREE.Color(), e = new THREE.Euler();
-    let n = 0;
-    this.flames.begin();
-    for (const sh of s.shells) {
-      if (n >= 64) break;
-      const a = Math.atan2(sh.vy, sh.vx), x = sh.x - W / 2, z = sh.y - H / 2, rocket = sh.kind === 1;
-      m.compose(p.set(x, 0.42, z), q.setFromEuler(e.set(0, -a, 0)), sc.set(rocket ? 0.16 : 0.12, 0.07, 0.07));
-      this.shellM.setMatrixAt(n, m); this.shellM.setColorAt(n, c.set(sh.team === 0 ? 0xe8f5d0 : rocket ? 0xff8a3d : 0xf4f1ea)); n++;
-      // a smoke trail behind, a flame for rockets
-      const dx = Math.cos(a), dz = Math.sin(a);
-      for (let k = 1; k <= (rocket ? 5 : 3); k++) {
-        const b = k * (rocket ? 0.09 : 0.11);
-        if (rocket) this.flames.add(x - dx * b, 0.42, z - dz * b, 0.07 * (1 - k / 6), k < 2 ? 0xffe08a : 0xff6a1a);
-        else this.flames.add(x - dx * b, 0.42, z - dz * b, 0.045 * (1 - k / 4), 0x998f80);
+    const m=new THREE.Matrix4(),q=new THREE.Quaternion(),p=new THREE.Vector3(),sc=new THREE.Vector3(),up=new THREE.Vector3(0,1,0);
+    this.flames.begin();this.mineLight.begin();this.shellBatch.begin();this.mineBatch.begin();
+    for(const sh of s.shells){
+      if(!sh.alive)continue;
+      const a=Math.atan2(sh.vy,sh.vx),k=this.shellK||1;
+      p.set(sh.x-W/2,.42,sh.y-H/2);
+      if(sh.renderFrom&&sh.age<.055){
+        const join=1-sh.age/.055,from=sh.renderFrom;
+        // A cosmetic join is valid only while the whole short segment is clear.
+        const steps=Math.max(1,Math.ceil(Math.hypot(from.x-p.x,from.z-p.z)/.06));let clear=true;
+        for(let i=0;i<=steps;i++){const t=s.tile(W/2+from.x+(p.x-from.x)*i/steps,H/2+from.z+(p.z-from.z)*i/steps);if(t===T.WALL||t===T.CRATE){clear=false;break;}}
+        if(clear)p.lerp(v3.set(from.x,from.y,from.z),join);
       }
+      this.shellBatch.add(m.compose(p,q.setFromAxisAngle(up,Math.PI/2-a),sc.setScalar(1.6*k)));
+      this.flames.add(p.x,p.y+.03,p.z,.06*k,sh.team===0?0xb8f1bd:0xffb486);
     }
-    this.shellM.count = n; this.shellM.instanceMatrix.needsUpdate = true; if (this.shellM.instanceColor) this.shellM.instanceColor.needsUpdate = true;
-    // mines: a little dome that blinks faster as the fuse runs out
-    let k = 0;
-    this.mineLight.begin();
-    for (const mi of s.mines) {
-      if (k >= 16) break;
-      const x = mi.x - W / 2, z = mi.y - H / 2;
-      m.compose(p.set(x, 0, z), q.identity(), sc.set(0.22, 0.12, 0.22));
-      this.mineBody.setMatrixAt(k, m); this.mineBody.setColorAt(k, c.set(mi.team === 0 ? 0x4f9a3a : 0xeab308)); k++;
-      const rate = mi.trig >= 0 ? 24 : mi.fuse < 2 ? 12 : 3;
-      if (Math.sin(this.time * rate) > 0) this.mineLight.add(x, 0.13, z, 0.04, mi.trig >= 0 || mi.fuse < 2 ? 0xff3b30 : 0xfff3a0);
+    // The existing mortar warning owns the falling projectile; no second shot is spawned.
+    for(const w of s.warn)if(w.kind==='shell'&&!w.done){const k=1-w.t/w.max;p.set(w.x-W/2,.18+(1-k)*6,w.y-H/2);this.shellBatch.add(m.compose(p,q.setFromAxisAngle(v3.set(1,0,0),Math.PI/2),sc.setScalar(2)));}
+    this.shellBatch.end();
+    for(const mi of s.mines){
+      if(!mi.alive)continue;p.set(mi.x-W/2,.02,mi.y-H/2);
+      if(mi.renderFrom&&mi.age<.15)p.lerp(v3.set(mi.renderFrom.x,mi.renderFrom.y,mi.renderFrom.z),1-mi.age/.15);
+      this.mineBatch.add(m.compose(p,q.identity(),sc.setScalar(1.8)));
+      const rate=mi.trig>=0?24:mi.fuse<2?12:3;
+      if(Math.sin(this.time*rate)>0)this.mineLight.add(p.x,.3,p.z,.045,mi.trig>=0||mi.fuse<2?0xff8563:0xffedab);
     }
-    this.mineBody.count = k; this.mineBody.instanceMatrix.needsUpdate = true; if (this.mineBody.instanceColor) this.mineBody.instanceColor.needsUpdate = true;
-    this.mineLight.end();
-    // wrecks
-    let wn = 0;
-    for (const wr of s.wrecks || []) {
-      if (wn >= 48) break;
-      const x = wr.x - W / 2, z = wr.y - H / 2, big = wr.boss ? 1.9 : 1;
-      m.compose(p.set(x, 0.1 * big, z), q.setFromEuler(e.set(0.05, -wr.ang, 0.08)), sc.set(0.66 * big, 0.2 * big, 0.48 * big));
-      this.wrecks.setMatrixAt(wn++, m);
-    }
-    this.wrecks.count = wn; this.wrecks.instanceMatrix.needsUpdate = true;
+    this.mineBatch.end();this.mineLight.end();
+    // Flash is sampled at the live authored muzzle, separate from physics.
+    for(const tk of s.tanks)if(tk.alive&&s.t-tk.shotAt<.08){const actor=this.art.actor(tk,this.scene);const names=tk.boss==='klonk'?['MuzzleSocket_Left','MuzzleSocket_Center','MuzzleSocket_Right']:tk.boss==='mothership'?['MuzzleSocket_L','MuzzleSocket_R']:tk.type==='swarm'?[`MuzzleSocket_${(tk.shotSerial+2)%3+1}`]:['MuzzleSocket'];for(const name of names){const point=actor.socket(name,v3);this.flames.add(point.x,point.y,point.z,.1,0xffe5a4);}}
   }
 
   drawGround(s) {
     this.treads.begin();
-    for (const mk of s.marks) this.treads.add(mk.x - W / 2, mk.y - H / 2, 0.34, 0.5, -mk.ang, 0x2b2118, Math.min(0.28, mk.life * 0.05));
-    this.treads.end();
-    this.scorch.begin();
-    for (const wr of s.wrecks || []) this.scorch.add(wr.x - W / 2, wr.y - H / 2, wr.boss ? 3.4 : 1.7, wr.boss ? 3.4 : 1.7, wr.x * 3.1, 0x120c0a, 0.7, 0.014);
-    for (const f of s.fx) if (f.kind === 'blast') this.scorch.add(f.x - W / 2, f.y - H / 2, f.r * 1.8, f.r * 1.8, f.x * 5, 0x1a100a, 0.55 * Math.min(1, f.t * 6), 0.016);
-    this.scorch.end();
+    for(const mk of s.marks)this.treads.add(mk.x-W/2,mk.y-H/2,.56,.52,mk.ang,0x425c48,Math.min(.13,mk.life*.025));
+    this.treads.end();this.scorch.begin();this.scorch.end();
   }
 
   drawFx(s) {
@@ -594,13 +494,13 @@ export class Tanks3D {
       const k = f.t / f.max, x = f.x - W / 2, z = f.y - H / 2;
       if (f.kind === 'boom' || f.kind === 'blast') {
         const R = (f.r || 1) * (f.kind === 'blast' ? 1 : 0.8);
-        // fireball, then a column of smoke
-        if (k < 0.45) this.flames.add(x, 0.3 + k, z, R * (0.35 + k * 1.1), k < 0.2 ? 0xffe6a0 : 0xff7a1a);
+        // Harmless toy pop: coloured confetti and a short pale puff.
+        if (k < 0.45) this.flames.add(x, 0.3 + k, z, R * (0.35 + k * 1.1), k < 0.2 ? 0xfff0bc : 0xa6e3cd);
         for (let i = 0; i < 8; i++) {
           const a = i * 0.785 + f.x, rr = R * (0.2 + k * 0.7);
-          this.smoke.add(x + Math.cos(a) * rr, 0.25 + k * 1.6 + (i % 3) * 0.15, z + Math.sin(a) * rr, R * 0.22 * (0.6 + k), k < 0.25 ? 0x5a4a40 : 0x6d6a66, a);
+          this.smoke.add(x + Math.cos(a) * rr, 0.25 + k * 1.6 + (i % 3) * 0.15, z + Math.sin(a) * rr, R * 0.22 * (0.6 + k), k < 0.25 ? 0xe6f4e6 : 0xdbe9e8, a);
         }
-        if (k < 0.5) for (let i = 0; i < 10; i++) { const a = i * 0.63 + f.y, rr = R * k * 2.2; this.sparks.add(x + Math.cos(a) * rr, 0.3 + Math.sin(k * 3.1) * 0.6 * (i % 2 + 0.5), z + Math.sin(a) * rr, 0.05 * (1 - k), 0xffc04d, a); }
+        if (k < 0.5) for (let i = 0; i < 10; i++) { const a = i * 0.63 + f.y, rr = R * k * 2.2; this.sparks.add(x + Math.cos(a) * rr, 0.3 + Math.sin(k * 3.1) * 0.6 * (i % 2 + 0.5), z + Math.sin(a) * rr, 0.05 * (1 - k), [0xe5bc55,0x6ab9dc,0xae89ce,0x55b582][i%4], a); }
       } else if (f.kind === 'puff') {
         for (let i = 0; i < 3; i++) this.smoke.add(x + (i - 1) * 0.08, 0.42 + k * 0.4, z, 0.08 + k * 0.1, 0xd8d2c8, i);
       } else if (f.kind === 'spark') {
@@ -609,17 +509,19 @@ export class Tanks3D {
         for (let i = 0; i < 8; i++) { const a = i * 0.79 + f.x, rr = 0.2 + k * 1.1; this.smoke.add(x + Math.cos(a) * rr, Math.max(0.05, 0.6 * Math.sin(k * 3.1)) , z + Math.sin(a) * rr, 0.09, THEMES[s.L.world].crate, a * 3 + k * 9); }
       }
     }
-    // burning wrecks keep smoking
-    for (const wr of s.wrecks || []) {
-      for (let i = 0; i < 2; i++) {
-        const ph = (t * 0.6 + i * 0.5 + wr.x) % 1;
-        this.smoke.add(wr.x - W / 2 + Math.sin(ph * 5 + i) * 0.1, 0.3 + ph * 1.4, wr.y - H / 2, 0.08 + ph * 0.16, 0x4a4542, ph * 6);
-      }
-    }
-    // vents spit embers while they erupt
+    // Toy lava bumpers send up bright game particles
     for (const v of s.vents) if (v.state === 2) for (let i = 0; i < 6; i++) { const ph = (t * 1.8 + i / 6) % 1; this.sparks.add(v.x - W / 2 + 0.5 + Math.sin(i * 2.1 + t) * 0.25, ph * 1.8, v.y - H / 2 + 0.5 + Math.cos(i * 1.7) * 0.25, 0.05 * (1 - ph), 0xffa13d, i + t); }
     this.smoke.end(); this.sparks.end(); this.flames.end();
   }
+  dispose(){
+    if(this.disposed)return;this.disposed=true;this.prepareEpoch++;this.clearAssets();
+    const geos=new Set(),mats=new Set(),textures=new Set();
+    this.scene.traverse(o=>{if(o.geometry)geos.add(o.geometry);if(o.isInstancedMesh)o.dispose();for(const m of o.material?(Array.isArray(o.material)?o.material:[o.material]):[]){mats.add(m);if(m.map&&m.map!==this.ground.material.map&&m.map!==this.walls.material.map)textures.add(m.map);}});
+    for(const g of Object.values(this.geo))if(g?.isBufferGeometry)geos.add(g);
+    for(const g of geos)g.dispose();for(const m of mats)m.dispose();for(const t of textures)t.dispose();
+    this.lights.light.shadow.map?.dispose();this.env.dispose();this.postAA?.dispose();this.renderer.dispose();this.scene.clear();
+  }
+
 }
 
 export const create = (canvas) => new Tanks3D(canvas);

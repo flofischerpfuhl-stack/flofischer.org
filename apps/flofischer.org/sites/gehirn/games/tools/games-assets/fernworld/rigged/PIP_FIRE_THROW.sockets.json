@@ -1,0 +1,40 @@
+{
+  "variant": "PIP_FIRE_THROW",
+  "sockets": [
+    {
+      "name": "SOCKET_FireCast",
+      "bone": "hand.l",
+      "rest_position_blender_zup": [
+        1.065000057220459,
+        -0.014999999664723873,
+        1.1399999856948853
+      ],
+      "bone_local_position_blender": [
+        0.014999962411820889,
+        0.2779926061630249,
+        0.033239368349313736
+      ],
+      "recipe": "world = boneWorld * inverseBoneRest * restPosition; Blender Z-up -> glTF Y-up (x,z,-y)"
+    }
+  ],
+  "activation": "FireCast_Left; release 0.4166666666666667 s; FX visible only [0.20833333333333334,0.5833333333333334]. Inherit socket position only; flame world-up.",
+  "coordinate_conversion": "Blender (x,y,z) -> glTF (x,z,-y); translation matrices use boneWorld * inverseBoneRest * restPosition.",
+  "bubble_runtime_flags": null,
+  "shared_motion": {
+    "source": "../pip-shared-motion/pip-shared-motion.glb",
+    "sha256": "89217deecffe18268c9f89803645f479b3f948344e4c6f63d2d79f639877b064",
+    "clips": [
+      "FireCast_Left",
+      "Hook_Right",
+      "Jump_Start",
+      "Jump_Air",
+      "Jump_Land",
+      "Glide",
+      "Hit_Recover",
+      "Celebrate"
+    ],
+    "unchanged_external_library": true
+  },
+  "instance_scale": 0.4233654951651481,
+  "interrupt": "Hide optional FX immediately on interruption; cancel release event if not yet fired. Restore source pose with library fades. Root owns world physics."
+}

@@ -1,0 +1,60 @@
+{
+  "Socket_Projection": {
+    "parent": "ProjectionArm",
+    "local_translation": [
+      0.0350000262260437,
+      -0.4150000214576721,
+      0.0
+    ],
+    "local_rotation_quaternion_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "world_translation": [
+      0.30000001192092896,
+      -0.6150000095367432,
+      0.7900000214576721
+    ],
+    "forward_local": [
+      0,
+      -1,
+      0
+    ],
+    "forward_world": [
+      0.0,
+      -1.0,
+      0.0
+    ]
+  },
+  "Socket_Damage": {
+    "parent": "BodyBank",
+    "local_translation": [
+      0.0,
+      0.4050000011920929,
+      0.24000000953674316
+    ],
+    "local_rotation_quaternion_wxyz": [
+      4.371138828673793e-08,
+      0.0,
+      0.0,
+      -1.0
+    ],
+    "world_translation": [
+      0.0,
+      0.4050000011920929,
+      0.8799999952316284
+    ],
+    "forward_local": [
+      0,
+      -1,
+      0
+    ],
+    "forward_world": [
+      -8.742277657347586e-08,
+      1.0,
+      0.0
+    ]
+  }
+}

@@ -6,7 +6,12 @@
  */
 import { THREE } from '../three-kit.js';
 import { Batch, mtx, rock, tuft, flower, fern, blob, rng } from './decor.js';
-import { WORLD } from './tower-scenery.js';
+const WORLD = [
+ {tuft:[[.08,.2,.05],[.34,.6,.18]],flowers:[0xffffff,0xfff2a8,0xf2a6c4],ferns:true,moss:.8,rock:[.6,.57,.52],wood:0x8a5a33,metal:0x3a3a40,torch:0xffb050},
+ {tuft:[[.32,.36,.12],[.62,.62,.3]],flowers:[0xff7a4a,0xffd23f],moss:0,rock:[.78,.5,.34],wood:0x9a6a3a,metal:0x5a4030,torch:0xffa040},
+ {tuft:[[.16,.3,.3],[.5,.66,.62]],flowers:[],moss:0,rock:[.52,.58,.68],wood:0x7a5a40,metal:0x4a5568,torch:0xffc070},
+ {tuft:[[.08,.16,.12],[.2,.4,.3]],flowers:[],moss:0,rock:[.3,.26,.26],wood:0x4a3030,metal:0x2a2a34,torch:0xff8030},
+];
 
 export class RoadLoop {
   /** world 0–3; road: half width of the asphalt; P: repeat length (longer than the visible road). */
@@ -92,7 +97,7 @@ export class RoadLoop {
           } else if (world === 2) { // snow banks and a snowman now and then
             B(z + o).add(ball, mtx([side * (edge + 0.3), 0.05, z + o], [0, 0, 0], [0.5, 0.25, 3]), 0xf4f8ff);
             if (k % 3 === 0) { B(z + o).add(ball, mtx([x, 0.35, z + o], [0, 0, 0], 0.38), 0xffffff); B(z + o).add(ball, mtx([x, 0.85, z + o], [0, 0, 0], 0.26), 0xffffff); B(z + o).add(new THREE.ConeGeometry(0.05, 0.25, 6), mtx([x, 0.88, z + o + 0.25], [Math.PI / 2, 0, 0], 1), 0xff8a3d); }
-          } else { // alien crystals and glowing cracks
+          } else { // Fernstone crystals and glowing cracks
             for (let c = 0; c < 3; c++) G(z + o).add(new THREE.OctahedronGeometry(1, 0), mtx([x + (R() - 0.5) * 0.8, 0.3, z + o + (R() - 0.5) * 0.8], [0, R(), (R() - 0.5) * 0.6], [0.12, 0.35 + R() * 0.4, 0.12]), new THREE.Color(R() < 0.5 ? 0x9a4af0 : 0x2ad8c0).multiplyScalar(1.3));
             G(z + o).add(box, mtx([x * 0.8, 0.012, z + o], [0, R() * 3, 0], [0.06, 0.01, 1.4 + R()]), new THREE.Color(0xff6a20).multiplyScalar(1.2));
           }

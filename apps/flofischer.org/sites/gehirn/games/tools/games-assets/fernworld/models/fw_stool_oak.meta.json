@@ -1,0 +1,103 @@
+{
+  "category": "props",
+  "label": "Oak stool \u00b7 braced legs",
+  "games": [
+    "generic"
+  ],
+  "description": "Oak stool \u00b7 braced legs; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 516,
+      "triangles": 172,
+      "groups": 1,
+      "bytes": 9886,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 516,
+      "triangles": 172,
+      "groups": 1,
+      "bytes": 9886,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 112,
+      "triangles": 172,
+      "groups": 1,
+      "bytes": 3422,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "architecture/kaykit/stool.glb",
+  "adaptation": {
+    "scale": 0.75,
+    "rotationY": 0,
+    "pivot": "bounds centre at ground",
+    "units": "metres"
+  },
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_stool_oak",
+  "bounds": [
+    [
+      -0.2812500298023224,
+      0.0,
+      -0.2812543213367462
+    ],
+    [
+      0.2812500298023224,
+      0.3749999701976776,
+      0.2812543213367462
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#81402f",
+    "#864634",
+    "#904f3c",
+    "#90503c",
+    "#92513d",
+    "#92513e",
+    "#92523e",
+    "#93523e",
+    "#975642",
+    "#985743",
+    "#9c5b46",
+    "#9d5b46",
+    "#9d5c46",
+    "#9e5d46",
+    "#9f5e47",
+    "#a26149",
+    "#a36149",
+    "#a4634a",
+    "#a6644b",
+    "#a6654b",
+    "#a7654c",
+    "#a8674d",
+    "#ab694e",
+    "#b06e51",
+    "#b16f51",
+    "#b16f52",
+    "#b27052"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

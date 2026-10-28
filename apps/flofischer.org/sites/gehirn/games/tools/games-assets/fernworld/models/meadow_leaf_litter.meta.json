@@ -1,0 +1,73 @@
+{
+  "category": "vegetation",
+  "label": "Curled autumn leaves",
+  "games": [
+    "generic"
+  ],
+  "description": "Original botanical sculpt: curved folded laminae, tapered stems and individually shaped flowers. Opaque double-sided vertex colours, library only. No separate shadow: sub-decimetre ground cover is intended for instancing without per-blade shadow casting.",
+  "budgets": {
+    "hi": 90000,
+    "lo": 1400,
+    "sh": 350
+  },
+  "vertex_cap": 2600,
+  "shadow_cap": 1800,
+  "lods": {
+    "hi": {
+      "vertices": 910,
+      "triangles": 1344,
+      "groups": 1,
+      "bytes": 25577,
+      "vertexCap": 1000000,
+      "triangleTarget": 90000
+    },
+    "lo": {
+      "vertices": 260,
+      "triangles": 320,
+      "groups": 1,
+      "bytes": 6985,
+      "vertexCap": 2600,
+      "triangleTarget": 1400,
+      "authoredLod": true
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.18
+  },
+  "sockets": {},
+  "source": "scripts/games-blender/fernworld/assets/meadow_botany.py",
+  "id": "meadow_leaf_litter",
+  "bounds": [
+    [
+      -0.2060718834400177,
+      0.0,
+      -0.20053640007972717
+    ],
+    [
+      0.21120943129062653,
+      0.026494305580854416,
+      0.24692431092262268
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#705b37",
+    "#79613d",
+    "#9b7847",
+    "#a17a43",
+    "#c39b56"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "84fe661dfd7863c79c5710f9b789571dcaf55903ffd333e88ea5cfe97924d01e"
+}

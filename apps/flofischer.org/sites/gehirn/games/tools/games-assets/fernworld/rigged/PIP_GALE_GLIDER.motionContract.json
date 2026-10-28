@@ -1,0 +1,63 @@
+{
+  "schema": "fernworld.runtime-equipment/1",
+  "asset": "PIP_GALE_GLIDER",
+  "glb_axes": "glTF Y-up, front +Z",
+  "instance_uniform_scale": 0.4233654951651481,
+  "material_class": "one opaque atlas PBR; all embedded, no external resources",
+  "draws": 2,
+  "original_clips": [
+    "Idle",
+    "Walk",
+    "Attack_Mining_UseItem"
+  ],
+  "shared_motion_uri": "characters/pip-shared-motion/pip-shared-motion.glb (existing package; resolve with game asset base at later integration)",
+  "clip_contract": "characters/pip-shared-motion/motion-contract.json",
+  "source_reference_for_clip_contract": "reference/characters/pip-shared-motion/motion-contract.json",
+  "transform_recipe": "worldPosition = bone.matrixWorld * skeleton.boneInverses[boneIndex] * restPositionGltf. Bone.matrixWorld already contains instance/world transforms; do not multiply the instance transform a second time. These rest anchors use the source skin bind coordinates (mesh bindMatrix is identity in this GLB). Directions use the upper3x3 of the same deformation matrix and normalize; effects/bridge keep world +Y up.",
+  "up": [
+    0,
+    1,
+    0
+  ],
+  "interrupt": "Stop optional FX immediately; stop emissions, clear pooled particles/projectiles owned by the interrupted cast as game policy requires; fade back using shared-motion fade times. Equipment remains visible and bound.",
+  "root_motion": "No new root movement; controller owns world jump translation, gravity, double impulse and landing. Air/Glide renders use a documented .18 source-unit presentation lift on the instance, never baked into clips.",
+  "legacy_tool_action": "Attack_Mining_UseItem is preserved for compatibility; it now is an empty equipment gesture and should not be selected as this form ability.",
+  "equipment": "Open, rounded CC0 balance hands; no extra cuffs/tethers without a real harness connection. Shoulder harness and cape are original.",
+  "ability_clips": [
+    "Jump_Start",
+    "Jump_Air",
+    "Glide",
+    "Jump_Land"
+  ],
+  "release_seconds": 0.3333333333333333,
+  "release_semantics": "Jump_Start takeoff; no projectile/cast release. Glide is entered by controller while airborne.",
+  "morph": {
+    "mesh_node": "Runtime_Pip_Gale_KiteCape",
+    "lookup": "node.morphTargetDictionary.Glide",
+    "target": "Glide",
+    "values": [
+      0,
+      0.5,
+      1
+    ],
+    "deploy_seconds": 0.35,
+    "retract_seconds": 0.2,
+    "animation_contains_morph_track": false
+  },
+  "visibility": "Cape always visible; 0 folded on ground, 1 in glide, ease between. Hands always visible.",
+  "interrupt_override": "Exit Glide: retract morph over .20 s and fade clip .18 s; on forced state reset set morph 0. No wrist ropes.",
+  "sockets": {
+    "cape": {
+      "bone": "chest",
+      "rest_position_gltf": [
+        0,
+        1.235,
+        -0.34
+      ],
+      "orientation": "inherits chest; cloth remains skinned, not spawned world-up",
+      "bone_blender_and_raw_gltf": "chest",
+      "bone_gltfloader": "chest"
+    }
+  },
+  "fx": "No additional FX geometry required."
+}

@@ -1,0 +1,269 @@
+{
+  "character": "TIDEDUKE",
+  "coordinates": "glTF Y-up, +Z forward, metres; Blender Z-up, -Y forward",
+  "rootMotion": false,
+  "clips": {
+    "Idle": {
+      "duration": 2.0,
+      "loop": true,
+      "frames": 61,
+      "fps": 30,
+      "fadeIn": 0.12,
+      "fadeOut": 0.16,
+      "inPlace": true
+    },
+    "Locomotion": {
+      "duration": 1.6,
+      "loop": true,
+      "frames": 49,
+      "fps": 30,
+      "fadeIn": 0.12,
+      "fadeOut": 0.16,
+      "inPlace": true,
+      "runtimeSpeed": 0.13979414642004578,
+      "dutyFactor": 0.65,
+      "contacts": {
+        "fore_L": {
+          "phaseOffset": 0.25,
+          "stance": [
+            0,
+            0.65
+          ],
+          "socket": "fore_L_foot"
+        },
+        "fore_R": {
+          "phaseOffset": 0.75,
+          "stance": [
+            0,
+            0.65
+          ],
+          "socket": "fore_R_foot"
+        },
+        "hind_L": {
+          "phaseOffset": 0,
+          "stance": [
+            0,
+            0.65
+          ],
+          "socket": "hind_L_foot"
+        },
+        "hind_R": {
+          "phaseOffset": 0.5,
+          "stance": [
+            0,
+            0.65
+          ],
+          "socket": "hind_R_foot"
+        }
+      }
+    },
+    "Attack_Cast": {
+      "duration": 1.0,
+      "loop": false,
+      "frames": 31,
+      "fps": 30,
+      "fadeIn": 0.12,
+      "fadeOut": 0.16,
+      "inPlace": true,
+      "events": [
+        {
+          "time": 0.46,
+          "event": "release",
+          "socket": "socket_mouth",
+          "direction": [
+            0,
+            0,
+            1
+          ],
+          "moveSlots": [
+            "Bubble Shot",
+            "Ripple Chain"
+          ]
+        }
+      ]
+    },
+    "Attack_Sweep": {
+      "duration": 1.2,
+      "loop": false,
+      "frames": 37,
+      "fps": 30,
+      "fadeIn": 0.12,
+      "fadeOut": 0.16,
+      "inPlace": true,
+      "events": [
+        {
+          "time": 0.62,
+          "event": "release",
+          "socket": "socket_tail",
+          "moveSlots": [
+            "Return Wave"
+          ]
+        }
+      ]
+    },
+    "GroundPulse": {
+      "duration": 1.1,
+      "loop": false,
+      "frames": 34,
+      "fps": 30,
+      "fadeIn": 0.12,
+      "fadeOut": 0.16,
+      "inPlace": true,
+      "events": [
+        {
+          "time": 0.52,
+          "event": "release",
+          "socket": "socket_ground",
+          "moveSlots": [
+            "Geyser Pools"
+          ]
+        }
+      ]
+    },
+    "Hit_Recover": {
+      "duration": 0.8,
+      "loop": false,
+      "frames": 25,
+      "fps": 30,
+      "fadeIn": 0.12,
+      "fadeOut": 0.16,
+      "inPlace": true
+    },
+    "Freed": {
+      "duration": 1.5,
+      "loop": false,
+      "frames": 46,
+      "fps": 30,
+      "fadeIn": 0.12,
+      "fadeOut": 0.16,
+      "inPlace": true,
+      "events": [
+        {
+          "time": 0.18,
+          "event": "hex_break",
+          "socket": "socket_hex"
+        },
+        {
+          "time": 1.2,
+          "event": "escape_ready"
+        }
+      ]
+    }
+  },
+  "sockets": {
+    "socket_mouth": {
+      "parentBone": "head",
+      "bindPositionBlender": [
+        -0.0017871374730020761,
+        -0.9920266270637512,
+        0.8865141272544861
+      ],
+      "bindPositionGLTF": [
+        -0.0017871374730020761,
+        0.8865141272544861,
+        0.9920266270637512
+      ]
+    },
+    "socket_emitter": {
+      "parentBone": "head",
+      "bindPositionBlender": [
+        -0.0017871374730020761,
+        -0.9920266270637512,
+        0.8865141272544861
+      ],
+      "bindPositionGLTF": [
+        -0.0017871374730020761,
+        0.8865141272544861,
+        0.9920266270637512
+      ]
+    },
+    "socket_tail": {
+      "parentBone": "tail_tip",
+      "bindPositionBlender": [
+        0.0069229137152433395,
+        1.3933041095733643,
+        0.23164619505405426
+      ],
+      "bindPositionGLTF": [
+        0.0069229137152433395,
+        0.23164619505405426,
+        -1.3933041095733643
+      ]
+    },
+    "socket_hand_L": {
+      "parentBone": "fore_L_foot",
+      "bindPositionBlender": [
+        0.45767226815223694,
+        -0.2739011347293854,
+        0.16155275702476501
+      ],
+      "bindPositionGLTF": [
+        0.45767226815223694,
+        0.16155275702476501,
+        0.2739011347293854
+      ]
+    },
+    "socket_hand_R": {
+      "parentBone": "fore_R_foot",
+      "bindPositionBlender": [
+        -0.4572897255420685,
+        -0.2739011347293854,
+        0.16155275702476501
+      ],
+      "bindPositionGLTF": [
+        -0.4572897255420685,
+        0.16155275702476501,
+        0.2739011347293854
+      ]
+    },
+    "socket_ground": {
+      "parentBone": "root",
+      "bindPositionBlender": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bindPositionGLTF": [
+        0.0,
+        0.0,
+        -0.0
+      ]
+    },
+    "socket_hex": {
+      "parentBone": "spine",
+      "bindPositionBlender": [
+        0.00019127130508422852,
+        -0.007360279560089111,
+        0.8787899613380432
+      ],
+      "bindPositionGLTF": [
+        0.00019127130508422852,
+        0.8787899613380432,
+        0.007360279560089111
+      ]
+    },
+    "socket_fountain": {
+      "parentBone": "head",
+      "bindPositionBlender": [
+        0.0006514782435260713,
+        -0.6819939613342285,
+        1.6859307289123535
+      ],
+      "bindPositionGLTF": [
+        0.0006514782435260713,
+        1.6859307289123535,
+        0.6819939613342285
+      ]
+    }
+  },
+  "slotMapping": {
+    "shot": "Attack_Cast/socket_mouth",
+    "orbit": "Idle or Locomotion/socket_fountain",
+    "returningArc": "Attack_Sweep/socket_tail",
+    "chain": "Attack_Cast/socket_emitter",
+    "traps": "GroundPulse/socket_ground"
+  },
+  "hex": "Runtime FX at socket_hex, no permanent violet material",
+  "socketAxes": "Local +Z emits forward from mouth/emitter, outward from tail, upward from fountain. Mouth bind local +Y is glTF up.",
+  "rendering": "One skinned mesh, one opaque material. Vertex colours high/hero; one embedded atlas crowd/far. No transparency sort."
+}

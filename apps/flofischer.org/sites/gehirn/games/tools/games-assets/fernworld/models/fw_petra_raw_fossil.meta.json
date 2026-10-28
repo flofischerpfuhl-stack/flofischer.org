@@ -1,0 +1,78 @@
+{
+  "category": "terrain",
+  "label": "Ammonite whorl and chamber septa in split matrix",
+  "games": [
+    "generic"
+  ],
+  "description": "Ammonite whorl and chamber septa in split matrix; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 4312,
+      "triangles": 7690,
+      "groups": 1,
+      "bytes": 130789,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 1758,
+      "triangles": 2808,
+      "groups": 1,
+      "bytes": 50872,
+      "vertexCap": 5500,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 295,
+      "triangles": 578,
+      "groups": 1,
+      "bytes": 9622,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 5500,
+  "shadow_cap": 1200,
+  "ground": true,
+  "ao_dist": 0.15,
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_petra_raw_fossil",
+  "bounds": [
+    [
+      -1.1414637565612793,
+      0.014999999664723873,
+      -0.7010939717292786
+    ],
+    [
+      1.0922549962997437,
+      0.45416459441185,
+      0.6957463026046753
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#865b44",
+    "#b37d56",
+    "#be9061",
+    "#d4a574",
+    "#dcc99a",
+    "#e2be8b",
+    "#f0dfb2"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

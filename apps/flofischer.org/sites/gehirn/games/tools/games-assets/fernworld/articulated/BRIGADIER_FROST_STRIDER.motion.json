@@ -1,0 +1,17 @@
+{
+  "asset":"BRIGADIER_FROST_STRIDER",
+  "coordinate_system":"glTF +Y up, +Z forward, meters; quaternion xyzw",
+  "rigid_mesh_pivots":16,
+  "runtime_recipe":"../source/motion.py",
+  "clips":{
+    "Idle":{"seconds":2.0,"loop":true},
+    "Travel":{"seconds":2.0,"loop":true,"root_translation":[0,0,0],"diagonal_pairs":[["FL","BR"],["FR","BL"]],"stance_fraction":0.64,"swing_fraction":0.36,"maximum_foot_lift_m":0.24,"stride_m":0.36,"matched_world_speed_mps":0.28125},
+    "Frost_Charge":{"seconds":1.5,"events":[{"seconds":0,"name":"show_warn_zones","sockets":["WarnZone_A","WarnZone_B"]},{"seconds":1.15,"name":"charge_ready"}]},
+    "Frost_Fire":{"seconds":1.0,"events":[{"seconds":0.10,"name":"frost_emit","socket":"MainMuzzle"}],"recoil_m":0.22},
+    "OpenWeakpoint":{"seconds":1.25,"events":[{"seconds":0.90,"name":"weakpoint_enable","socket":"WeakpointSocket","radius_m":0.24}]},
+    "Hit":{"seconds":0.75},
+    "Disabled":{"seconds":2.0,"events":[{"seconds":1.70,"name":"disabled_stable"}],"body_lowering_m":0.50},
+    "EscapeHatch":{"seconds":1.5,"starts_from":"Disabled final pose","events":[{"seconds":1.10,"name":"pilot_escape","socket":"PodDock"}],"pilot_mesh_included":false,"pod_mesh_included":false}
+  },
+  "mixing":"Absolute clips including static rest TRS; crossfade, no additive full-body layering. Aim quaternion can be applied on top of Turret local rotation. No per-frame mesh rebuilds."
+}

@@ -1,0 +1,41 @@
+{
+  "localTRS": {
+    "PassageCenter": {
+      "translation": [
+        0,
+        1.25,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "TextAnchor": {
+      "translation": [
+        0,
+        2.930000066757202,
+        0.257999986410141
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "reference": "Names identify actual nodes in every Hi/Lo/Shadow GLB; hierarchy retained."
+}

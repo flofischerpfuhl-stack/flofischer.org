@@ -1,0 +1,74 @@
+{
+  "category": "terrain",
+  "label": "Water worn sorted river pebbles",
+  "games": [
+    "generic"
+  ],
+  "description": "Water worn sorted river pebbles; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 2640,
+      "triangles": 4288,
+      "groups": 1,
+      "bytes": 76826,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 896,
+      "triangles": 1312,
+      "groups": 1,
+      "bytes": 25112,
+      "vertexCap": 2200,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 336,
+      "triangles": 656,
+      "groups": 1,
+      "bytes": 10906,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 2200,
+  "shadow_cap": 1200,
+  "ground": true,
+  "ao_dist": 0.15,
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_river_pebble_strip",
+  "bounds": [
+    [
+      -1.203240990638733,
+      0.004671995062381029,
+      -0.2743161618709564
+    ],
+    [
+      1.2172048091888428,
+      0.18000000715255737,
+      0.34642890095710754
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#64766f",
+    "#8f9a92",
+    "#b9bdaa"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

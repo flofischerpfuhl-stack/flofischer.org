@@ -1,0 +1,169 @@
+{
+  "schema": "fernworld.wax-motion.v1",
+  "asset": "WAX_HULK",
+  "coordinates": "glTF meters; Y up; +Z forward. Blender native Z up, -Y forward.",
+  "nominal_height_m": 1.4,
+  "mechanism": "5 real moving rigid node groups, each with one closed relative Melt morph; no bones, no skin, no runtime mesh generation.",
+  "node_scope": "Resolve names within this asset root; glTF clip bindings use node indices, never scene-global shared names.",
+  "nodes": [
+    "Body",
+    "ArmL",
+    "ArmR",
+    "LegL",
+    "LegR"
+  ],
+  "mesh_nodes": [
+    "ArmL_Surface",
+    "ArmR_Surface",
+    "Body_Surface",
+    "LegL_Surface",
+    "LegR_Surface"
+  ],
+  "rest": "Complete explicit translation/rotation/scale on every GLB node. Animation channels are absolute local transforms, not additive recipes. Reset all five groups + all five shape weights before changing clips; one active action at a time.",
+  "materials": {
+    "classes": 2,
+    "alphaMode": "OPAQUE",
+    "vertex_colors": "WaxColor is scene-linear converted from authored sRGB palette. glTF COLOR_0 is linear, no extra sRGB conversion by runtime.",
+    "lamp": "Dark_warm_lamp_controller_dim"
+  },
+  "clips": {
+    "Idle": {
+      "duration_s": 2,
+      "loop": true,
+      "behavior": "Low-amplitude service balance; no breathing or organic acting"
+    },
+    "Walk_InPlace": {
+      "duration_s": 1.2,
+      "loop": true,
+      "stride_m": 0.23,
+      "stance_fraction": 0.6,
+      "controller_speed_m_s": 0.3194444444444445,
+      "controller_direction": "+Z glTF",
+      "behavior": "Short plump drive legs translate: planted soles retreat at controller speed, swing soles clear the floor; arms counterbalance. Root stays fixed. Apply world controller separately."
+    },
+    "Attack_Shove": {
+      "duration_s": 0.8,
+      "loop": false,
+      "impact_time_s": 0.32,
+      "behavior": "Two tool arms shove forward, chassis anticipates and recovers",
+      "sockets": [
+        "Socket_ShoveL",
+        "Socket_ShoveR"
+      ]
+    },
+    "Hit": {
+      "duration_s": 0.4,
+      "loop": false,
+      "behavior": "Damped chassis kick, mechanical service reaction"
+    },
+    "Melt": {
+      "duration_s": 1.1,
+      "loop": false,
+      "hold_last": true,
+      "weights": "All five GLB mesh morph target 0 / targetNames Melt: 0 -> 1 over 1.1 s. These are morph weights, NOT joints or bones.",
+      "behavior": "Continuous closed wax housing flows wider and lower with unchanged topology; retained metal components tip into the pool. Feet stay above ground. No whole-object scale collapse.",
+      "controller_material_dim": {
+        "material": "Dark_warm_lamp_controller_dim",
+        "emissiveIntensityMultiplier": {
+          "times_s": [
+            0,
+            0.45,
+            1.1
+          ],
+          "values": [
+            1,
+            0,
+            0
+          ]
+        },
+        "native_Blender_emission_strength_equivalent": [
+          0.45,
+          0,
+          0
+        ],
+        "baseColor_sRGB": {
+          "times_s": [
+            0,
+            0.45,
+            1.1
+          ],
+          "values": [
+            [
+              0.56,
+              0.28,
+              0.065
+            ],
+            [
+              0.04,
+              0.035,
+              0.025
+            ],
+            [
+              0.04,
+              0.035,
+              0.025
+            ]
+          ]
+        },
+        "note": "Multiply the imported glTF emissiveFactor by the relative intensity multiplier; do not multiply by the native 0.45 twice. Convert sRGB baseColor to linear before shader assignment. Keep alpha=1 and opaque. This material operation is intentionally explicit controller work, not a claimed glTF material animation extension."
+      },
+      "lod_contract": "hi, lo, far and shadow each carry the actual same-named closed Melt target and complete 1.1 s clip. No mesh swap, no high-only promise."
+    }
+  },
+  "socket_semantics": "Shove sockets mark the tool contact envelope, slightly ahead/below the rigid palm; they are not vertices. Shove/Lamp anchors follow rigid nodes but not Melt vertex morphs: disable functional socket use immediately on Melt, keep Ground as controller anchor.",
+  "ground": "Neutral lowest sole vertex Z=.003 in Blender / Y=.003 glTF; ground plane at 0. No renderer stage is exported.",
+  "crush": "No optional Crush fragments supplied; these two assets are the entire catalog.",
+  "catalog_count": 1,
+  "technical_cost": "5 mesh nodes, normally 6 draw primitives (Body work+lamp), 2 material classes. No full-game performance assertion.",
+  "bounds_note": "Melt bounds must be measured from posed vertices (base + weight * relative delta), not a conservative static Three.js Box3 union of neutral/morph ranges.",
+  "melt_end_bounds_gltf_m": {
+    "hi": [
+      [
+        -1.1308772563934326,
+        0.012000083923339844,
+        -0.512078046798706
+      ],
+      [
+        1.1230229139328003,
+        0.3293539881706238,
+        0.5684839487075806
+      ]
+    ],
+    "lo": [
+      [
+        -1.1246668100357056,
+        0.011999964714050293,
+        -0.512078046798706
+      ],
+      [
+        1.1192517280578613,
+        0.3285834789276123,
+        0.5684839487075806
+      ]
+    ],
+    "far": [
+      [
+        -1.124986171722412,
+        0.011999964714050293,
+        -0.48190000653266907
+      ],
+      [
+        1.1163338422775269,
+        0.31393957138061523,
+        0.5684839487075806
+      ]
+    ],
+    "shadow": [
+      [
+        -1.1162595748901367,
+        0.011999964714050293,
+        -0.4649859666824341
+      ],
+      [
+        1.1113604307174683,
+        0.29255878925323486,
+        0.5684839487075806
+      ]
+    ]
+  }
+}

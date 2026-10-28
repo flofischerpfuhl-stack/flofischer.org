@@ -1,22 +1,27 @@
 /**
- * Pip’s Tower — a pull-the-pin physics puzzle game in four worlds. Golden pins (and, from Frostpeak on, levers) hold back
- * Fernstones, water, lava, sand, goo, gas, boulders and bombs; pull them in the right order so the Fernstones reach Pip
- * and nothing deadly does.
+ * Pip’s Tower — a pull-the-pin physics puzzle game in four worlds. Golden pins hold back Fernstones, water, lava, sand,
+ * goo, gas, boulders and bombs; blue flaps swing back and forth on every tap; pressure plates open (or shut) the doors of
+ * their colour while enough weight rests on them. Pull, flip and weigh in the right order so the Fernstones reach Pip and
+ * nothing deadly does.
  *
- *   World 1 Fernhaven Meadows  Fernstones, water, lava (water turns it into stone), Zorblings (burn in lava)
- *   World 2 Sunbake Dunes      sand (granular; it smothers a whole lava pool), boulders, bombs, wooden walls, Klonkbots (lava-proof,
- *                              short out in water)
- *   World 3 Frostpeak          ice (lava melts it to water, bombs shatter it), keys that open the gate they fall on,
- *                              levers that tip platforms, Pip walks to Fernstones on his floor when the way is clear
- *   World 4 Ember Isles        alien goo (eats Fernstones, water dissolves it, lava burns it), teleport pads,
+ *   World 1 Viridis  Fernstones, water, lava (water turns it into stone), wax Klonks (burn in lava),
+ *                              flaps (route what falls on them; reusable, so the order and the timing matter)
+ *   World 2 Sahrun      sand (granular; it smothers a whole lava pool), boulders, bombs, wooden walls, Klonkbots (lava-proof,
+ *                              short out in water), pressure plates and doors (anything heavy presses: water, sand, a
+ *                              boulder, an enemy standing guard; lift the weight and the door switches back)
+ *   World 3 Hibern          ice (lava melts it to water, bombs shatter it), keys that open the gate they fall on,
+ *                              Pip walks to Fernstones on his floor when the way is clear (and weighs on plates)
+ *   World 4 Vulkara        hex slime (eats Fernstones, water dissolves it, lava burns it), teleport pads,
  *                              rising gas (deadly to Pip, escapes upwards, burns off on lava), Buzzbots (fly, short out)
- *   Bosses                     a big Zorb boss that must take hazards in a fixed order (lava, crush, water, bomb)
+ *   Bosses                     one per world, each must take hazards in a fixed order (lava, crush, water, bomb) and
+ *                              tests that world's mechanic
  *
  * A small position-based particle simulation on a fixed 360 × 640 board (deterministic, no DOM), so tests can solve
  * levels headless. Bodies (Pip, enemies) are feet circles for the floor plus a box for contacts.
  */
 import { clamp, label, roundRect } from './core.js';
 import { LEVELS } from './pips-tower-levels.js';
+import { upgradeLevel } from './profile.js';
 
 export const BOARD_W = 360, BOARD_H = 640;
 const PR = 5;            // particle radius
@@ -27,7 +32,10 @@ const CELL = 16;          // spatial grid cell = fluid interaction radius
 const GRID_PAD = 64;      // the grid reaches a little past the board on every side
 const GW = Math.ceil((BOARD_W + GRID_PAD * 2) / CELL), GH = Math.ceil((BOARD_H + GRID_PAD * 2) / CELL);
 const cellX = (x) => clamp(((x + GRID_PAD) / CELL) | 0, 0, GW - 1), cellY = (y) => clamp(((y + GRID_PAD) / CELL) | 0, 0, GH - 1);
-const PULL_TIME = 0.32, LEVER_TIME = 0.5;
+const PULL_TIME = 0.32, LEVER_TIME = 0.5, FLAP_TIME = 0.45, DOOR_TIME = 0.3;
+// what presses a plate: a particle weighs 1, Pip and the walkers about a dozen (a Buzzbot flies over it)
+const WEIGHT = { boulder: 14, bomb: 8, key: 2, hero: 12, zorbling: 12, klonkbot: 16, buzzbot: 0, chief: 40 };
+export const PLATE_COLORS = ['#e879f9', '#a3e635', '#fb923c'];
 export const BODY = {
   hero: { r: 13, h: 52, w: 28 },
   zorbling: { r: 12, h: 42, w: 28, speed: 70 },
@@ -42,8 +50,17 @@ export const FLUID = { h: 16, rho0: 0.9, k: 40, kNear: 80 };
 const FLUIDS = new Set(['water', 'lava', 'goo', 'gas']);
 const DEADLY = { lava: 'lava', goo: 'goo', gas: 'gas' };
 const NEIGHBOURS = new Array(48).fill(null), NEIGHBOUR_Q = new Float64Array(48), NEIGHBOUR_X = new Float64Array(48), NEIGHBOUR_Y = new Float64Array(48);
+// material pairs that react (looked up without building strings in the hot loop)
+const PAIRS = {};
+for (const a of ['water', 'lava', 'stone', 'sand', 'goo', 'gas', 'gem']) {
+  PAIRS[a] = {};
+  for (const b of ['water', 'lava', 'stone', 'sand', 'goo', 'gas', 'gem']) {
+    const k = a < b ? a + b : b + a;
+    if (['lavawater', 'stonewater', 'lavastone', 'lavasand', 'gemlava', 'gemgoo', 'goowater', 'goolava', 'gaslava', 'stonestone'].includes(k)) PAIRS[a][b] = k;
+  }
+}
 const WEAK_LABEL = { lava: 'LAVA', crush: 'BOULDER', water: 'WATER', bomb: 'BOMB' };
-const ENEMY_NAME = { zorbling: 'A Zorbling', klonkbot: 'A Klonkbot', buzzbot: 'A Buzzbot', chief: 'The Zorb boss' };
+const ENEMY_NAME = { zorbling: 'A wax Klonk', klonkbot: 'A Klonkbot', buzzbot: 'A Buzzbot', chief: 'The boss' };
 
 const segDist = (px, py, ax, ay, bx, by) => {
   const dx = bx - ax, dy = by - ay;
@@ -73,6 +90,7 @@ export class PipsTowerSession {
     this.index = levelIndex;
     const L = (this.L = LEVELS[levelIndex]);
     this.world = L.world ?? 0;
+    this.settlementSeconds = L.boss ? 3.2 : 1.2;
     this.sound = env.sound || { play() {} };
     this.preview = !!env.preview;
     this.t = 0; this.result = null; this.pending = null; this.calm = 0; this.idle = 0;
@@ -85,11 +103,26 @@ export class PipsTowerSession {
       const len = Math.hypot(bx - ax, by - ay);
       return { i, kind: 'pin', ax, ay, bx, by, len, dx: (bx - ax) / len, dy: (by - ay) / len, off: 0, state: 'in', r: 5, pullT: 0 };
     });
-    this.levers = (L.levers || []).map(({ at, plat, turn }, k) => ({
-      i: this.pins.length + k, kind: 'lever', at, base: plat, ang: 0, turn: (turn * Math.PI) / 180, state: 'in', pullT: 0,
+    // levers tip their platform once; flaps swing between two positions on every tap (numbered after the levers)
+    const arm = (kind) => ({ at, plat, turn, pivot }) => ({
+      i: 0, kind, at, base: plat, pv: pivot || [plat[0], plat[1]], ang: 0, from: 0, to: 0, turn: (turn * Math.PI) / 180, state: 'in', pullT: 0, pos: 0,
       plat: { ax: plat[0], ay: plat[1], bx: plat[2], by: plat[3], r: WALL_T / 2, kind: 'plat' },
-    }));
+    });
+    this.levers = [...(L.levers || []).map(arm('lever')), ...(L.flaps || []).map(arm('flap'))];
+    this.levers.forEach((lv, k) => { lv.i = this.pins.length + k; });
+    this.flaps = this.levers.filter((lv) => lv.kind === 'flap');
     this.controls = [...this.pins, ...this.levers];
+    // pressure plates: while enough weight rests on one, its doors slide open (and close again when it is lifted)
+    this.plates = (L.plates || []).map(({ at: [x0, x1, y], need = 10, doors, door }, k) => ({
+      k, x0, x1, y, need, rect: [x0, y - 26, x1, y - 4], load: 0, hold: 0, down: false, color: PLATE_COLORS[k % PLATE_COLORS.length],
+    }));
+    // `doors` start shut and open under weight, `shut` doors start open and close under weight
+    this.doors = (L.plates || []).flatMap((pl, k) => [
+      ...(pl.doors || (pl.door ? [pl.door] : [])).map((d) => [d, false]), ...(pl.shut || []).map((d) => [d, true]),
+    ].map(([[ax, ay, bx, by], inv]) => ({
+      plate: k, inv, ax, ay, bx: inv ? ax : bx, by: inv ? ay : by, x2: bx, y2: by, r: WALL_T / 2, kind: 'door', open: inv ? 1 : 0,
+      color: PLATE_COLORS[k % PLATE_COLORS.length],
+    })));
     this.portals = (L.portals || []).map(({ from, to }) => ({ from, to, cx: (from[0] + from[2]) / 2, cy: (from[1] + from[3]) / 2, pulse: 0 }));
     this.parts = [];
     const solid = this.segments();
@@ -115,6 +148,15 @@ export class PipsTowerSession {
     this.fx = []; this.coins = []; this.popups = []; this.shake = 0; this.flash = 0;
     this.hover = -1; this.layout = null; this.pulled = 0;
     this.hint = L.hint;
+    this.puzzleHintUsed = false;
+    this.hintControl = -1;
+    // plates start in the state of what already rests on them (an enemy standing guard keeps its doors switched)
+    if (this.plates.length) {
+      this.weighPlates(0);
+      for (const pl of this.plates) pl.down = pl.load >= pl.need;
+      for (const d of this.doors) { d.open = this.plates[d.plate].down !== d.inv ? 1 : 0; d.set = false; }
+      this.weighPlates(0);
+    }
     this.segs = this.segments();
   }
 
@@ -137,6 +179,22 @@ export class PipsTowerSession {
   get score() { return this.collected * 10 + this.enemies.reduce((n, e) => n + (e.dead ? (e.type === 'chief' ? 500 : 100) : 0), 0); }
   hud() { return { progress: Math.min(1, this.collected / this.need), score: this.score, label: 'Score' }; }
 
+  get puzzleHintAvailable() {
+    return !this.preview && !this.result && !this.hero.dead && !this.puzzleHintUsed && upgradeLevel('pip-hint') > 0;
+  }
+
+  /** The workshop buys one optional hint per attempt, never an automatic move or a score change. */
+  takePuzzleHint() {
+    if (!this.puzzleHintAvailable) return null;
+    this.puzzleHintUsed = true;
+    if (this.pulled) return 'This vault has already changed. Restart this attempt to use a reliable opening hint; there is no guaranteed next move for the current layout.';
+    const first = this.L.solution[0], index = Array.isArray(first) ? first[0] : first;
+    const control = this.controls[index];
+    if (!control) return 'Watch which chamber receives each load before opening the vault.';
+    this.hintControl = index;
+    return `${control.kind === 'pin' ? 'Pull the highlighted pin' : 'Use the highlighted lever'} (${index + 1}) first. Then let the contents settle before your next move.`;
+  }
+
   // ── input ──
   toBoard(x, y) { const L = this.layout; return L ? [(x - L.ox) / L.s, (y - L.oy) / L.s] : [x, y]; }
   pinAt(bx, by, reach = 26) {
@@ -150,7 +208,9 @@ export class PipsTowerSession {
     }
     for (const lv of this.levers) {
       if (lv.state !== 'in') continue;
-      const d = Math.hypot(bx - lv.at[0], by - lv.at[1] + 10);
+      let d = Math.hypot(bx - lv.at[0], by - lv.at[1] + (lv.kind === 'flap' ? 0 : 10));
+      // a flap also answers a tap on its plank
+      if (lv.kind === 'flap') d = Math.min(d, Math.hypot(...segDist(bx, by, lv.plat.ax, lv.plat.ay, lv.plat.bx, lv.plat.by)) + 6);
       if (d < bestD + 4) { bestD = d; best = lv.i; }
     }
     return best;
@@ -173,19 +233,23 @@ export class PipsTowerSession {
     }
     return true;
   }
-  /** Pull pin i, or throw lever i (controls are numbered pins first, then levers). */
+  /** Pull pin i, throw lever i or flip flap i (controls are numbered pins first, then levers, then flaps). */
   pull(i) {
     const c = this.controls[i];
     if (!c || c.state !== 'in' || this.result) return false;
+    this.hintControl = -1;
     c.state = 'pulling'; c.pullT = 0; this.pulled++;
-    this.sound.play(c.kind === 'lever' ? 'click' : 'pin');
+    if (c.kind === 'flap') { c.pos = 1 - c.pos; c.from = c.ang; c.to = c.pos * c.turn; }
+    else if (c.kind === 'lever') { c.from = 0; c.to = c.turn; }
+    this.sound.play(c.kind === 'pin' ? 'pin' : 'click');
     return true;
   }
   pinSeg(pin) { return [pin.ax + pin.dx * pin.off, pin.ay + pin.dy * pin.off, pin.bx + pin.dx * pin.off, pin.by + pin.dy * pin.off]; }
-  leverSeg(lv) {
-    const [ax, ay, bx, by] = lv.base, c = Math.cos(lv.ang), s = Math.sin(lv.ang);
-    const ex = bx - ax, ey = by - ay;
-    return [ax, ay, ax + ex * c - ey * s, ay + ex * s + ey * c];
+  /** The platform turned by its angle around its pivot (its first point unless the level gives one). */
+  leverSeg(lv, ang = lv.ang) {
+    const [ax, ay, bx, by] = lv.base, [px, py] = lv.pv, c = Math.cos(ang), s = Math.sin(ang);
+    const rot = (x, y) => [px + (x - px) * c - (y - py) * s, py + (x - px) * s + (y - py) * c];
+    return [...rot(ax, ay), ...rot(bx, by)];
   }
 
   // ── simulation ──
@@ -202,13 +266,14 @@ export class PipsTowerSession {
     for (const lv of this.levers) {
       if (lv.state !== 'pulling') continue;
       lv.pullT += dt;
-      const q = Math.min(1, lv.pullT / LEVER_TIME);
-      lv.ang = lv.turn * ease(q);
+      const q = Math.min(1, lv.pullT / (lv.kind === 'flap' ? FLAP_TIME : LEVER_TIME));
+      lv.ang = lv.from + (lv.to - lv.from) * ease(q);
       const [ax, ay, bx, by] = this.leverSeg(lv);
       Object.assign(lv.plat, { ax, ay, bx, by });
-      if (q >= 1) { lv.state = 'out'; this.calm = 0; }
+      if (q >= 1) { lv.state = lv.kind === 'flap' ? 'in' : 'out'; this.calm = 0; }
     }
     for (const g of this.gates) if (!g.alive) g.openT += dt;
+    if (this.plates.length) this.weighPlates(dt);
     if (this.walking) this.planWalk();
     const h = dt / SUB;
     for (let s = 0; s < SUB; s++) this.substep(h);
@@ -222,6 +287,7 @@ export class PipsTowerSession {
     const segs = this.walls.slice();
     for (const b of this.breakables) if (b.alive) segs.push(b);
     for (const g of this.gates) if (g.alive) segs.push(g);
+    for (const d of this.doors) if (d.open < 0.97) segs.push(d);
     for (const ic of this.ice) if (ic.alive) segs.push(ic);
     for (const lv of this.levers) segs.push(lv.plat);
     for (const pin of this.pins) {
@@ -296,7 +362,7 @@ export class PipsTowerSession {
     const hero = this.hero;
     if (!hero.dead || hero.cause !== 'lava') {
       hero.vy += G * h;
-      if (hero.walk && !hero.dead && !this.pending) hero.vx = hero.walk * 64;
+      if (hero.walk && !hero.dead && !this.pending?.lose) hero.vx = hero.walk * 64;
       hero.x += hero.vx * h; hero.y += hero.vy * h;
       this.collideSegs(hero, hero.r, segs, hero.walk ? 0 : 0.6);
       if (!hero.walk) hero.vx *= 0.9;
@@ -462,7 +528,8 @@ export class PipsTowerSession {
 
   /** Material reactions; returns true when the pair no longer needs separating. */
   react(a, b) {
-    const pair = a.t < b.t ? a.t + b.t : b.t + a.t;
+    const pair = PAIRS[a.t][b.t];
+    if (!pair) return false;
     const of = (t) => (a.t === t ? a : b);
     switch (pair) {
       case 'lavawater': {
@@ -548,6 +615,33 @@ export class PipsTowerSession {
       if ((p.x * 7 + p.y) % 6 < 1) this.smoke(p.x, p.y, '#a8a29e');
     }
     this.smothering = active;
+  }
+
+  /** Weighs what rests on each plate and slides its doors open or shut. */
+  weighPlates(dt) {
+    for (const pl of this.plates) {
+      const [x0, y0, x1, y1] = pl.rect;
+      let load = 0;
+      const count = (p) => { if (!p.dead && p.t !== 'gas' && p.x > x0 && p.x < x1 && p.y > y0 && p.y < y1) load++; };
+      if (this.grid) this.near(x0, y0, x1, y1, count); else this.parts.forEach(count);
+      for (const r of this.rocks) if (r.alive && r.x > x0 && r.x < x1 && r.y + r.r > y0 && r.y - r.r < y1 + 4) load += WEIGHT[r.kind] || 0;
+      for (const b of [this.hero, ...this.enemies]) {
+        if (b.dead && !(b.kind === 'hero')) continue;
+        const feet = b.y + b.r;
+        if (b.x > x0 - 4 && b.x < x1 + 4 && feet > y0 && feet < y1 + 8) load += WEIGHT[b.type] || 0;
+      }
+      pl.load = load;
+      // it has to stay pressed (or lifted) for a moment: a splash passing over does not count
+      pl.hold = (load >= pl.need) !== pl.down ? (pl.hold || 0) + dt : 0;
+      if (pl.hold > 0.25) { pl.down = !pl.down; pl.hold = 0; this.sound.play('click'); this.calm = 0; }
+    }
+    for (const d of this.doors) {
+      const target = this.plates[d.plate].down !== d.inv ? 1 : 0;
+      if (d.open === target && d.set) continue;
+      d.open = clamp(d.open + (target ? dt : -dt) / DOOR_TIME, 0, 1); d.set = true;
+      // the door slides into the wall at its first end
+      d.bx = d.ax + (d.x2 - d.ax) * (1 - d.open); d.by = d.ay + (d.y2 - d.ay) * (1 - d.open);
+    }
   }
 
   meltIce(ic) {
@@ -667,7 +761,8 @@ export class PipsTowerSession {
         const dx = r.x - cx, dy = r.y - cy, d = Math.hypot(dx, dy);
         if (d >= r.r) continue;
         const speed = Math.hypot(r.vx, r.vy);
-        if (r.kind === 'boulder' && speed > 70) {
+        // a boulder crushes what it lands on (a rolling or nudged one does not)
+        if (r.kind === 'boulder' && speed > 70 && (b.type === 'chief' || (r.vy > 40 && r.y < b.y + b.r - b.h * 0.45))) {
           if (b.type === 'chief') this.hurtChief(b, 'crush');
           else { this.kill(b, 'boulder'); continue; }
         }
@@ -734,14 +829,14 @@ export class PipsTowerSession {
 
   kill(b, cause) {
     if (b.dead) return;
-    b.dead = true; b.cause = cause; b.deathT = 0;
+    b.dead = true; b.cause = cause; b.deathT = 0; b.diedAt = this.t;
     if (b.kind === 'hero') {
       b.mood = 'dead';
       this.shake = Math.max(this.shake, 0.7);
       this.burst(b.x, b.y - 20, cause === 'lava' ? ['#f97316', '#1c1917'] : cause === 'goo' ? ['#a855f7', '#2dd4bf'] : ['#fca5a5', '#ef4444'], 24, 200);
       const reasons = {
         lava: 'The lava reached Pip.', boulder: 'The boulder fell on Pip.', bomb: 'Pip was too close to the bomb.',
-        goo: 'The alien goo got Pip.', gas: 'Pip breathed the gas.',
+        goo: 'The hex slime got Pip.', gas: 'Pip breathed the gas.',
       };
       this.failNow(reasons[cause] || `${ENEMY_NAME[cause] || 'An enemy'} got to Pip.`);
     } else {
@@ -790,10 +885,12 @@ export class PipsTowerSession {
   planWalk() {
     const h = this.hero;
     h.walk = 0;
-    if (h.dead || this.pending || this.result || Math.abs(h.vy) > 60) return;
+    if (h.dead || this.pending?.lose || this.result || Math.abs(h.vy) > 60) return;
     let best = null, bestD = Infinity;
+    // a Fernstone with a boulder resting on it stays where it is: Pip does not dig under a boulder
+    const under = (p) => this.rocks.some((r) => r.alive && r.kind === 'boulder' && Math.abs(r.x - p.x) < r.r + 10 && r.y < p.y && r.y > p.y - 90);
     for (const p of this.parts) {
-      if (p.dead || p.t !== 'gem' || p.y < h.y - 34 || p.y > h.y + 16) continue;
+      if (p.dead || p.t !== 'gem' || p.y < h.y - 34 || p.y > h.y + 16 || under(p)) continue;
       const d = Math.abs(p.x - h.x);
       if (d < bestD) { bestD = d; best = p; }
     }
@@ -802,6 +899,8 @@ export class PipsTowerSession {
     if (!this.clearLine(h.x, h.y - 14, best.x, h.y - 14)) return;
     for (const p of this.parts) if (!p.dead && DEADLY[p.t] && p.x > x0 - 24 && p.x < x1 + 24 && p.y > h.y - 60 && p.y < h.y + 20) return;
     for (const e of this.enemies) if (!e.dead && e.x > x0 - 30 && e.x < x1 + 30 && Math.abs(e.y - h.y) < 70) return;
+    // nor does he push a boulder out of the way
+    for (const r of this.rocks) if (r.alive && r.kind === 'boulder' && r.x > x0 - 30 && r.x < x1 + 30 && Math.abs(r.y - h.y) < 60) return;
     h.walk = Math.sign(best.x - h.x);
   }
 
@@ -834,7 +933,8 @@ export class PipsTowerSession {
     }
     for (const pt of this.portals) pt.pulse = Math.max(0, pt.pulse - dt * 2);
     if (this.pending) {
-      this.pending.t -= dt;
+      // a won level waits while Pip still walks to the Fernstones left on his floor
+      if (this.pending.lose || !hero.walk) this.pending.t -= dt;
       if (this.pending.t <= 0) {
         if (this.pending.lose) this.result = { won: false, stars: 0, score: this.score, reason: this.pending.reason };
         else this.win();
@@ -844,7 +944,7 @@ export class PipsTowerSession {
     const enemiesLeft = this.enemies.filter((e) => !e.dead).length;
     const gemsLeft = this.parts.reduce((n, p) => n + (!p.dead && p.t === 'gem' ? 1 : 0), 0);
     if (this.collected + gemsLeft < this.need) {
-      this.failNow(this.eaten > this.melted ? 'The goo ate the Fernstones.' : this.melted ? 'The lava melted the Fernstones.' : 'Too many Fernstones were lost.');
+      this.failNow(this.eaten > this.melted ? 'The hex slime consumed the Fernstones.' : this.melted ? 'The lava melted the Fernstones.' : 'Too many Fernstones were lost.');
       return;
     }
     if (this.collected >= this.need && enemiesLeft === 0) {
@@ -852,15 +952,27 @@ export class PipsTowerSession {
       return;
     }
     // Stuck: every control is used and nothing moves any more.
-    const moving = hero.walk !== 0 || this.parts.some((p) => !p.dead && p.t !== 'gas' && Math.abs(p.vx) + Math.abs(p.vy) > 25)
-      || this.rocks.some((r) => r.alive && Math.abs(r.vx) + Math.abs(r.vy) > 25)
-      || this.enemies.some((e) => !e.dead && e.charging);
-    this.calm = moving ? 0 : this.calm + dt;
-    const allOut = this.controls.every((c) => c.state === 'out');
+    this.calm = this.isCalm() ? this.calm + dt : 0;
+    // flaps can always be flipped again, but only matter while something rests on them
+    const allOut = this.controls.every((c) => c.state === 'out' || (c.kind === 'flap' && c.state === 'in' && !this.loaded(c.plat)));
     this.idle = allOut ? this.idle + dt : 0;
     if (allOut && (this.calm > 1.2 || this.idle > 10)) {
-      this.failNow(enemiesLeft ? (this.chief && !this.chief.dead ? 'The Zorb boss is still standing.' : 'An invader is still standing.') : `Only ${this.collected} of ${this.need} Fernstones reached Pip.`);
+      this.failNow(enemiesLeft ? (this.chief && !this.chief.dead ? 'The hex golem is still active.' : 'An automaton is still active.') : `Only ${this.collected} of ${this.need} Fernstones reached Pip.`);
     }
+  }
+
+  /** Something rests on (or right above) a platform segment. */
+  loaded(sg) {
+    const near = (x, y, r) => Math.hypot(...segDist(x, y, sg.ax, sg.ay, sg.bx, sg.by)) < sg.r + r + 4;
+    return this.parts.some((p) => !p.dead && p.t !== 'gas' && near(p.x, p.y, PR)) || this.rocks.some((r) => r.alive && near(r.x, r.y, r.r));
+  }
+
+  /** Nothing moves: no particle, rock, walking Pip or charging enemy, and no control halfway through its motion. */
+  isCalm() {
+    return this.hero.walk === 0 && !this.controls.some((c) => c.state === 'pulling') && !this.doors.some((d) => d.open > 0 && d.open < 1)
+      && !this.parts.some((p) => !p.dead && p.t !== 'gas' && Math.abs(p.vx) + Math.abs(p.vy) > 25)
+      && !this.rocks.some((r) => r.alive && Math.abs(r.vx) + Math.abs(r.vy) > 25)
+      && !this.enemies.some((e) => !e.dead && e.charging);
   }
 
   win() {
@@ -903,18 +1015,24 @@ export class PipsTowerSession {
   // ── drawing ──
   /** Labels drawn on top of either view in board space: control numbers, the boss's next weakness, popups. */
   drawOverlay(g, view, labels) {
-    if (view.keyboard && labels) {
+    if ((view.keyboard || this.hintControl >= 0) && labels) {
       for (const pin of this.pins) {
         if (pin.state !== 'in') continue;
         const [, , bx, by] = this.pinSeg(pin);
         label(g, String(pin.i + 1), bx + pin.dx * 12, by + pin.dy * 12 + 0.5, 10, '#422006', 'rgba(255,255,255,.75)', 800);
       }
-      for (const lv of this.levers) if (lv.state === 'in') label(g, String(lv.i + 1), lv.at[0], lv.at[1] - 22, 10, '#422006', 'rgba(255,255,255,.75)', 800);
+      for (const lv of this.levers) if (lv.state === 'in') label(g, String(lv.i + 1), lv.at[0], lv.at[1] - (lv.kind === 'flap' ? 16 : 22), 10, '#422006', 'rgba(255,255,255,.75)', 800);
+    }
+    // plates: how much of the weight they need already rests on them
+    for (const pl of this.plates) {
+      const w = pl.x1 - pl.x0, q = Math.min(1, pl.load / pl.need), y = pl.y - 2.5; // a gauge in the floor under the plate
+      g.fillStyle = 'rgba(15,23,42,.55)'; roundRect(g, pl.x0, y, w, 5, 2.5); g.fill();
+      if (q > 0) { g.fillStyle = pl.color; roundRect(g, pl.x0, y, Math.max(5, w * q), 5, 2.5); g.fill(); }
     }
     const c = this.chief;
     if (c && !c.dead) {
       const left = c.weak.length - c.phase;
-      label(g, `${'♥'.repeat(left)}  next: ${WEAK_LABEL[c.weak[c.phase]]}`, clamp(c.x, 110, 250), c.y + c.r - c.h - 16, 12, '#f5d0fe', 'rgba(30,10,50,.75)', 900);
+      label(g, `${'◇'.repeat(left)}  next: ${WEAK_LABEL[c.weak[c.phase]]}`, clamp(c.x, 110, 250), c.y + c.r - c.h - 16, 12, '#f5d0fe', 'rgba(30,10,50,.75)', 900);
     }
     for (const p of this.popups) {
       g.globalAlpha = Math.min(1, p.life * 2);
@@ -966,6 +1084,7 @@ export class PipsTowerSession {
     for (const pin of this.pins) if (pin.state !== 'out') this.drawPin(g, pin);
     for (const e of this.enemies) this.drawEnemy(g, e);
     this.drawHero(g, this.hero);
+    this.drawBiscuit(g, this.hero);
     for (const c of this.coins) {
       const q = 1 - c.life / c.max;
       const x = c.x + (this.hero.x - c.x) * q, y = c.y + (this.hero.y - 40 - c.y) * q - Math.sin(q * Math.PI) * 30;
@@ -983,7 +1102,7 @@ export class PipsTowerSession {
       g.beginPath(); g.arc(f.x, f.y, f.size, 0, 6.283); g.fill();
     }
     g.globalAlpha = 1;
-    this.drawOverlay(g, view, false);
+    this.drawOverlay(g, view, true);
     g.restore();
     this.drawFlash(g, view);
   }
@@ -1007,21 +1126,35 @@ export class PipsTowerSession {
     for (const wl of this.breakables) if (wl.alive) { line(wl, WALL_T + 2, '#78350f'); line(wl, WALL_T - 4, '#b45309', [10, 4]); }
     for (const gt of this.gates) if (gt.alive) { line(gt, WALL_T + 2, '#854d0e'); line(gt, WALL_T - 4, '#facc15', [4, 6]); }
     for (const ic of this.ice) if (ic.alive) { const [x0, y0, x1, y1] = ic.rect; g.fillStyle = 'rgba(186,230,253,.9)'; roundRect(g, x0, y0, x1 - x0, y1 - y0, 5); g.fill(); g.strokeStyle = '#e0f2fe'; g.lineWidth = 2; g.stroke(); }
+    for (const pl of this.plates) {
+      g.fillStyle = pl.color; g.globalAlpha = pl.down ? 1 : 0.7;
+      roundRect(g, pl.x0, pl.y - 6 - (pl.down ? 3 : 6), pl.x1 - pl.x0, pl.down ? 3 : 6, 2); g.fill(); g.globalAlpha = 1;
+    }
+    for (const d of this.doors) if (d.open < 0.97) { line(d, WALL_T + 2, '#334155'); line(d, WALL_T - 4, d.color, [8, 4]); }
     for (const lv of this.levers) {
+      if (lv.kind === 'flap') {
+        // the flap, a faint ghost where the next tap swings it, and its blue hub
+        const [ax, ay, bx, by] = this.leverSeg(lv, (1 - lv.pos) * lv.turn);
+        if (lv.state === 'in') { g.globalAlpha = 0.25; line({ ax, ay, bx, by }, WALL_T - 4, '#0ea5e9', [6, 5]); g.globalAlpha = 1; }
+        line(lv.plat, WALL_T, '#075985'); line(lv.plat, WALL_T - 5, '#38bdf8');
+        g.fillStyle = lv.i === this.hover || lv.i === this.hintControl ? '#fde047' : '#2563eb'; g.beginPath(); g.arc(lv.at[0], lv.at[1], 8, 0, 6.283); g.fill();
+        g.strokeStyle = '#dbeafe'; g.lineWidth = 2; g.beginPath(); g.arc(lv.at[0], lv.at[1], 4.5, 0.4, 5.4); g.stroke();
+        continue;
+      }
       line(lv.plat, WALL_T, '#7c2d12'); line(lv.plat, WALL_T - 5, '#c2410c');
       const [x, y] = lv.at, a = -0.6 + (lv.ang / (lv.turn || 1)) * 1.2;
       g.strokeStyle = '#475569'; g.lineWidth = 4; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.sin(a) * 18, y - Math.cos(a) * 18); g.stroke();
-      g.fillStyle = lv.i === this.hover ? '#fde047' : '#ef4444'; g.beginPath(); g.arc(x + Math.sin(a) * 18, y - Math.cos(a) * 18, 6, 0, 6.283); g.fill();
+      g.fillStyle = lv.i === this.hover || lv.i === this.hintControl ? '#fde047' : '#ef4444'; g.beginPath(); g.arc(x + Math.sin(a) * 18, y - Math.cos(a) * 18, 6, 0, 6.283); g.fill();
       g.fillStyle = '#334155'; g.fillRect(x - 9, y - 3, 18, 7);
     }
     g.lineCap = 'butt';
-    g.fillStyle = view.dark ? '#44403c' : pal.roof;
-    g.beginPath(); g.moveTo(b[0] - 18, b[1] + 2); g.lineTo((b[0] + b[2]) / 2, b[1] - 34); g.lineTo(b[2] + 18, b[1] + 2); g.closePath(); g.fill();
+    g.fillStyle = view.dark ? '#44403c' : pal.wall[0];
+    roundRect(g, b[0] - 8, b[1] - 10, b[2] - b[0] + 16, 13, 4); g.fill();
   }
 
   drawPin(g, pin) {
     const [ax, ay, bx, by] = this.pinSeg(pin);
-    const hot = pin.i === this.hover;
+    const hot = pin.i === this.hover || pin.i === this.hintControl;
     g.lineCap = 'round';
     if (hot) { g.strokeStyle = 'rgba(253, 224, 71, .55)'; g.lineWidth = 18; g.beginPath(); g.moveTo(ax, ay); g.lineTo(bx, by); g.stroke(); }
     g.strokeStyle = '#a16207'; g.lineWidth = 11; g.beginPath(); g.moveTo(ax, ay); g.lineTo(bx, by); g.stroke();
@@ -1037,19 +1170,32 @@ export class PipsTowerSession {
     const bob = b.mood === 'happy' ? -Math.abs(Math.sin(this.t * 10)) * 6 : b.walk ? -Math.abs(Math.sin(this.t * 12)) * 2 : 0;
     const y = feet + bob, burnt = b.dead && b.cause === 'lava';
     g.fillStyle = 'rgba(0,0,0,.2)'; g.beginPath(); g.ellipse(x, feet, 14, 4, 0, 0, 6.283); g.fill();
-    g.fillStyle = burnt ? '#1c1917' : '#3f6212'; g.fillRect(x - 9, y - 16, 7, 16); g.fillRect(x + 2, y - 16, 7, 16);
-    g.fillStyle = burnt ? '#292524' : '#65a30d'; roundRect(g, x - 12, y - 36, 24, 22, 6); g.fill();
+    g.fillStyle = burnt ? '#1c1917' : '#315c84'; g.fillRect(x - 9, y - 16, 7, 16); g.fillRect(x + 2, y - 16, 7, 16);
+    g.fillStyle = burnt ? '#292524' : '#e8792c'; roundRect(g, x - 12, y - 36, 24, 22, 6); g.fill();
     g.fillStyle = burnt ? '#292524' : '#f97316'; g.fillRect(x - 12, y - 36, 24, 5);
     g.fillStyle = burnt ? '#292524' : '#fcd9b6'; g.beginPath(); g.arc(x, y - 46, 11, 0, 6.283); g.fill();
     g.fillStyle = burnt ? '#0c0a09' : '#78350f'; g.beginPath(); g.arc(x, y - 50, 11, Math.PI * 1.05, Math.PI * 1.95); g.fill();
     g.fillStyle = '#1f2937';
     if (!b.dead) { g.beginPath(); g.arc(x - 4, y - 47, 1.6, 0, 6.283); g.arc(x + 4, y - 47, 1.6, 0, 6.283); g.fill(); }
+    g.fillStyle = '#e8792c'; g.beginPath(); g.ellipse(x, y - 54, 12, 6, 0, Math.PI, Math.PI * 2); g.fill();
+    g.fillStyle = '#fff1b8'; g.beginPath(); g.arc(x + 4, y - 57, 3, 0, 6.283); g.fill();
+    g.strokeStyle = '#785334'; g.lineWidth = 3; g.beginPath(); g.moveTo(x - 17, y - 8); g.lineTo(x - 17, y - 34); g.stroke();
+    g.strokeStyle = '#8a9295'; g.lineWidth = 4; g.beginPath(); g.moveTo(x - 26, y - 32); g.quadraticCurveTo(x - 18, y - 40, x - 8, y - 32); g.stroke();
+  }
+
+  drawBiscuit(g, hero) {
+    const x = hero.x + (hero.x > 180 ? -29 : 29), y = hero.y + hero.r;
+    g.fillStyle = '#e0bd78'; roundRect(g, x - 10, y - 15, 20, 12, 6); g.fill();
+    g.fillStyle = '#fff0cc'; g.beginPath(); g.ellipse(x + 7, y - 20, 8, 9, 0, 0, 6.283); g.fill();
+    g.fillStyle = '#b68b4c'; g.beginPath(); g.ellipse(x + 2, y - 24, 3, 8, -.3, 0, 6.283); g.fill();
+    g.fillStyle = '#302d28'; g.beginPath(); g.arc(x + 10, y - 21, 1.5, 0, 6.283); g.fill();
+    g.fillStyle = '#fff0cc'; g.fillRect(x - 7, y - 5, 4, 5); g.fillRect(x + 4, y - 5, 4, 5);
   }
 
   drawEnemy(g, e) {
-    if (e.dead && e.deathT > 0.6) return;
+    if (e.dead && e.deathT > (e.type === 'zorbling' && e.cause === 'lava' ? 1.8 : 1.1)) return;
     const x = e.x, feet = e.y + e.r;
-    g.globalAlpha = e.dead ? Math.max(0, 1 - e.deathT / 0.6) : 1;
+    g.globalAlpha = 1;
     const burnt = e.dead && e.cause === 'lava';
     g.save(); g.translate(x, feet); g.scale(e.type === 'chief' ? 2.2 : 1, (e.dead && e.cause === 'boulder' ? 0.35 : 1) * (e.type === 'chief' ? 2.2 : 1));
     g.fillStyle = 'rgba(0,0,0,.2)'; g.beginPath(); g.ellipse(0, 0, 14, 4, 0, 0, 6.283); g.fill();
@@ -1060,11 +1206,16 @@ export class PipsTowerSession {
       if (e.type === 'buzzbot') { g.fillStyle = '#475569'; g.fillRect(-16, hover - 46, 32, 3); }
       else { g.fillStyle = '#475569'; g.fillRect(-9, -10, 7, 10); g.fillRect(2, -10, 7, 10); }
     } else {
-      g.fillStyle = burnt ? '#292524' : e.type === 'chief' ? '#7e22ce' : '#a855f7';
-      g.beginPath(); g.ellipse(0, -18, 14, 18, 0, 0, 6.283); g.fill();
-      g.fillStyle = '#ecfeff'; g.beginPath(); g.arc(0, -22, 6, 0, 6.283); g.fill();
-      g.fillStyle = '#134e4a'; g.beginPath(); g.arc(0, -22, 3, 0, 6.283); g.fill();
-      g.strokeStyle = '#2dd4bf'; g.lineWidth = 2; g.beginPath(); g.moveTo(0, -36); g.lineTo(0, -44); g.stroke();
+      // A soulless assembled golem or a wax machine, including the Canvas fallback.
+      const wax = e.type !== 'chief', melt = wax && burnt ? Math.min(1, e.deathT / 1.1) : 0;
+      g.fillStyle = wax ? '#cfad61' : ['#8f9d76', '#bca078', '#98bcc9', '#756c75'][this.world];
+      roundRect(g, -13 - melt * 5, -35 * (1 - melt), 26 + melt * 10, Math.max(6, 31 * (1 - melt)), 5); g.fill();
+      if (!melt) {
+        g.fillRect(-12, -8, 8, 8); g.fillRect(4, -8, 8, 8);
+        g.fillStyle = wax ? '#665b47' : '#55535b'; roundRect(g, -9, -42, 18, 11, 3); g.fill();
+        g.fillStyle = wax ? '#ffd575' : '#b98fd5'; g.fillRect(-6, -38, 12, 3);
+        g.beginPath(); g.moveTo(0,-26); g.lineTo(5,-21); g.lineTo(0,-15); g.lineTo(-5,-21); g.closePath(); g.fill();
+      }
     }
     g.restore();
     g.globalAlpha = 1;
@@ -1097,12 +1248,12 @@ const PALETTE2D = [
 export const pipsTower = {
   id: 'pips-tower',
   title: 'Pip’s Tower',
-  tagline: 'Pull the pins in the right order: Fernstones to Pip, lava and Zorb invaders anywhere else.',
-  howTo: 'Tap or click a pin or lever to pull it (with a keyboard, keys 1–9 use the numbered ones). Water turns lava into stone, lava melts Fernstones and burns Zorblings, Klonkbots short out in water. Esc pauses, R restarts.',
-  hero: 'PIP',
-  companion: 'BISCUIT',
+  tagline: 'Explore the fossil vaults with Pip and Biscuit. Recover Fernstones for the museum and outwit Granny Grausel’s automatons.',
+  howTo: 'Tap or click a pin to pull it; a hinged platform swings back and forth on every tap (with a keyboard, keys 1–9 use the numbered ones). Water turns lava into stone, lava melts Fernstones and burns wax Klonks, Klonkbots short out in water, weight on a coloured plate switches the doors of its colour. Esc pauses, R restarts.',
+  hero: 'PIP_KESSEL',
+  companion: 'BISCUIT_GLEAMPUP',
   levels: LEVELS,
-  art: new URL('../../games-assets/k-pips-tower.webp', import.meta.url).href,
+  art: new URL('../../games-assets/covers/cover-pips-tower.webp', import.meta.url).href,
   create: (i, env) => new PipsTowerSession(i, env),
   view3d: () => import('./pips-tower-3d.js'),
 };

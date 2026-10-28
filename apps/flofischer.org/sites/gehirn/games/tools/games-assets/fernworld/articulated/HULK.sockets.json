@@ -1,0 +1,537 @@
+{
+  "schema": "fernworld.heavy-rigid.v1",
+  "coordinates": "glTF meters, +Y up, +Z forward, +X right; quaternion rotations, additive local channels",
+  "fps": 120,
+  "pivots_world_gltf_m": {
+    "HULK": [
+      0.0,
+      0.002716507762670517,
+      -0.0
+    ],
+    "HullTilt": [
+      0.0,
+      0.30271652340888977,
+      -0.0
+    ],
+    "CentralLatch": [
+      0.0,
+      0.6227165460586548,
+      -0.0
+    ],
+    "CentralLid": [
+      0.0,
+      0.862716555595398,
+      -0.30000001192092896
+    ],
+    "ModuleL": [
+      -0.47999998927116394,
+      0.2477165162563324,
+      -0.0
+    ],
+    "spawnKlonkSocketL": [
+      -0.5399999618530273,
+      0.0,
+      -0.0
+    ],
+    "WheelL": [
+      -0.5400000214576721,
+      0.2477165162563324,
+      -0.0
+    ],
+    "ModuleR": [
+      0.47999998927116394,
+      0.2477165162563324,
+      -0.0
+    ],
+    "spawnKlonkSocketR": [
+      0.5399999618530273,
+      0.0,
+      -0.0
+    ],
+    "WheelR": [
+      0.5400000214576721,
+      0.2477165162563324,
+      -0.0
+    ]
+  },
+  "recipes": {
+    "WalkRoll": {
+      "loop": true,
+      "channels": [
+        {
+          "node": "HULK",
+          "path": "translation",
+          "axis": "Z",
+          "times": [
+            0,
+            1
+          ],
+          "values": [
+            0,
+            0.45
+          ],
+          "units": "meters",
+          "pivot": [
+            0.0,
+            0.002716507762670517,
+            -0.0
+          ],
+          "socket": null,
+          "application": "Add to neutral local translation"
+        },
+        {
+          "node": "WheelL",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.25,
+            0.5,
+            0.75,
+            1
+          ],
+          "values": [
+            0,
+            0.4525669557782303,
+            0.9051339115564606,
+            1.3577008673346909,
+            1.8102678231129212
+          ],
+          "units": "radians",
+          "pivot": [
+            -0.5400000214576721,
+            0.2477165162563324,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        },
+        {
+          "node": "WheelR",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.25,
+            0.5,
+            0.75,
+            1
+          ],
+          "values": [
+            0,
+            0.4525669557782303,
+            0.9051339115564606,
+            1.3577008673346909,
+            1.8102678231129212
+          ],
+          "units": "radians",
+          "pivot": [
+            0.5400000214576721,
+            0.2477165162563324,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        },
+        {
+          "node": "HullTilt",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.25,
+            0.5,
+            0.75,
+            1
+          ],
+          "values": [
+            0,
+            0.025,
+            0,
+            -0.025,
+            0
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.30271652340888977,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        }
+      ],
+      "time_domain": "Unbounded distance: accumulate root travel and each wheel angle across repeats. The embedded one-second clip is an authoring preview; never wrap the world translation at clip end. Runtime root velocity is 0.45 m/s, wheel angle = cumulative distance / measured active-LOD radius.",
+      "duration_s": 1.0,
+      "contact": "Apply root-Y contact correction from active wheel mesh support after rotation; exported clips include baked correction."
+    },
+    "HullLean": {
+      "loop": true,
+      "channels": [
+        {
+          "node": "HullTilt",
+          "path": "rotation",
+          "axis": "Z",
+          "times": [
+            0,
+            0.4,
+            0.8,
+            1.2,
+            1.6
+          ],
+          "values": [
+            0,
+            -0.045,
+            0,
+            0.045,
+            0
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.30271652340888977,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        }
+      ],
+      "duration_s": 1.6,
+      "contact": "Apply root-Y contact correction from active wheel mesh support after rotation; exported clips include baked correction."
+    },
+    "Hit": {
+      "loop": false,
+      "channels": [
+        {
+          "node": "HullTilt",
+          "path": "rotation",
+          "axis": "Y",
+          "times": [
+            0,
+            0.05,
+            0.13,
+            0.24,
+            0.36
+          ],
+          "values": [
+            0,
+            0.075,
+            -0.035,
+            0.012,
+            0
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.30271652340888977,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        },
+        {
+          "node": "HullTilt",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.05,
+            0.13,
+            0.36
+          ],
+          "values": [
+            0,
+            -0.045,
+            0.02,
+            0
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.30271652340888977,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        }
+      ],
+      "duration_s": 0.36,
+      "contact": "Apply root-Y contact correction from active wheel mesh support after rotation; exported clips include baked correction."
+    },
+    "Disabled": {
+      "loop": false,
+      "hold_last": true,
+      "channels": [
+        {
+          "node": "HullTilt",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.4,
+            1
+          ],
+          "values": [
+            0,
+            -0.045,
+            -0.075
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.30271652340888977,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        },
+        {
+          "node": "CentralLatch",
+          "path": "translation",
+          "axis": "Y",
+          "times": [
+            0,
+            0.4,
+            1
+          ],
+          "values": [
+            0,
+            -0.018,
+            -0.032
+          ],
+          "units": "meters",
+          "pivot": [
+            0.0,
+            0.6227165460586548,
+            -0.0
+          ],
+          "socket": null,
+          "application": "Add to neutral local translation"
+        },
+        {
+          "node": "CentralLid",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.4,
+            1
+          ],
+          "values": [
+            0,
+            -0.06,
+            -0.09
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.862716555595398,
+            -0.30000001192092896
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        }
+      ],
+      "duration_s": 1.0,
+      "contact": "Apply root-Y contact correction from active wheel mesh support after rotation; exported clips include baked correction."
+    },
+    "Disassembly": {
+      "loop": false,
+      "hold_last": true,
+      "channels": [
+        {
+          "node": "ModuleL",
+          "path": "translation",
+          "axis": "X",
+          "times": [
+            0,
+            0.3,
+            0.8,
+            1.2
+          ],
+          "values": [
+            0,
+            0,
+            -0.16,
+            -0.24
+          ],
+          "units": "meters",
+          "pivot": [
+            -0.47999998927116394,
+            0.2477165162563324,
+            -0.0
+          ],
+          "socket": "spawnKlonkSocketL",
+          "application": "Add to neutral local translation"
+        },
+        {
+          "node": "ModuleR",
+          "path": "translation",
+          "axis": "X",
+          "times": [
+            0,
+            0.3,
+            0.8,
+            1.2
+          ],
+          "values": [
+            0,
+            0,
+            0.16,
+            0.24
+          ],
+          "units": "meters",
+          "pivot": [
+            0.47999998927116394,
+            0.2477165162563324,
+            -0.0
+          ],
+          "socket": "spawnKlonkSocketR",
+          "application": "Add to neutral local translation"
+        },
+        {
+          "node": "CentralLid",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.2,
+            0.6,
+            1.2
+          ],
+          "values": [
+            0,
+            -0.08,
+            -0.3,
+            -0.48
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.862716555595398,
+            -0.30000001192092896
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        },
+        {
+          "node": "CentralLatch",
+          "path": "translation",
+          "axis": "Y",
+          "times": [
+            0,
+            0.4,
+            1.2
+          ],
+          "values": [
+            0,
+            -0.02,
+            -0.09
+          ],
+          "units": "meters",
+          "pivot": [
+            0.0,
+            0.6227165460586548,
+            -0.0
+          ],
+          "socket": null,
+          "application": "Add to neutral local translation"
+        }
+      ],
+      "duration_s": 1.2,
+      "contact": "Apply root-Y contact correction from active wheel mesh support after rotation; exported clips include baked correction."
+    }
+  },
+  "materials": [
+    "Commune_work_enamel",
+    "Single_warm_optic"
+  ],
+  "disable_optic": "At Disabled t=1, runtime may override optic emission to zero; no material animation in glTF.",
+  "wheel_roll_units": "For each active LOD, angle_radians = forward_distance_m / rolling_radius_by_lod_m[LOD][WheelL or WheelR]. JSON channel values refer to Hi; exported LOD clips already use their measured radii.",
+  "rolling_radius_by_lod_m": {
+    "hi": {
+      "WheelL": 0.24858200220682475,
+      "WheelR": 0.24858200220682475
+    },
+    "lo": {
+      "WheelL": 0.24858200220682475,
+      "WheelR": 0.24858200220682475
+    },
+    "far": {
+      "WheelL": 0.24907499577586142,
+      "WheelR": 0.24907500132964341
+    },
+    "shadow": {
+      "WheelL": 0.24902831898874794,
+      "WheelR": 0.2529854398116371
+    }
+  },
+  "split_support_mechanics": {
+    "central_node": "CentralLatch",
+    "rail_part": "Captive_split_crossrail",
+    "guide_parts": [
+      "Closed_split_guide_L",
+      "Closed_split_guide_R"
+    ],
+    "rail_span_x_m": [
+      -0.84,
+      0.84
+    ],
+    "rail_radius_m": 0.027,
+    "guide_slot_half_height_m": 0.079,
+    "latch_vertical_travel_m": 0.09,
+    "end_rail_guide_overlap_m": 0.1,
+    "min_vertical_clearance_m": 0.007,
+    "note": "Rail stays captive in the module guide slots through all six sampled phases; central core is supported rather than loose or hovering."
+  },
+  "two_klonk_handoff": {
+    "at_seconds": 1.2,
+    "exact_count": 2,
+    "existing_asset": "KLONK.lo.glb",
+    "existing_root": "KLONK",
+    "existing_asset_sha256": "7c9febfa7b8dbd59b2cf0aefb629dfef09088c3d81ca64b14188726c4538b5d7",
+    "existing_native_height_m": 0.80397844,
+    "existing_lo_height_m": 0.8004784,
+    "spawn_unit_scale": 1.0,
+    "sockets": {
+      "spawnKlonkSocketL": {
+        "position_world_gltf_m": [
+          -0.7799999713897705,
+          0.0,
+          -0.0
+        ],
+        "quaternion_world_gltf_xyzw": [
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "spawnKlonkSocketR": {
+        "position_world_gltf_m": [
+          0.7799999713897705,
+          0.0,
+          -0.0
+        ],
+        "quaternion_world_gltf_xyzw": [
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    "steps": [
+      "Play Disassembly once; no explosion or ballistic debris.",
+      "At 1.2 s sample both socket world transforms before hiding HULK.",
+      "Spawn exactly two existing KLONK assets at scale 1, origin at each wheel-ground socket.",
+      "Hide HULK as a whole in the same frame; shell end states remain capped, no source body exposure.",
+      "The linked Klonks are supplied by the separate family delivery; no duplicate full Klonks in this GLB."
+    ],
+    "sealed_end_states": [
+      "ModuleL: sealed inner casting + retained overlapping source armor",
+      "ModuleR: sealed inner casting + retained overlapping source armor",
+      "CentralLid captive on back hinge, -0.48 rad; latch retracts 0.09 m"
+    ]
+  }
+}

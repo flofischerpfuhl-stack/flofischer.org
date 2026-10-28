@@ -1,0 +1,59 @@
+{
+  "localTRS": {
+    "SeamMinusZ": {
+      "translation": [
+        0,
+        0,
+        -4
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "SeamPlusZ": {
+      "translation": [
+        0,
+        0,
+        4
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "WalkSurface": {
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "reference": "Names identify actual nodes in every Hi/Lo/Shadow GLB; hierarchy retained."
+}

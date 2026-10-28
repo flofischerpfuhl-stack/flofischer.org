@@ -1,0 +1,202 @@
+{
+  "asset": "DUCK_LEGIONARY",
+  "schema": "fernworld-rigid-motion-1",
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "implementation": "Five rigid mesh channels, no armature and no embedded skeletal animation. Interpolate these recipes in a shared crowd shader or ordinary scene nodes.",
+  "hierarchy": "Create one common root for all five channels. Each channel rotates about its own GLB node origin / packed JSON pivot. Apply root angles about [0,0.45,0]. Do not rotate body alone to turn the whole figure.",
+  "channels": [
+    "body",
+    "armL",
+    "armR",
+    "legL",
+    "legR"
+  ],
+  "rotation_units": "degrees, intrinsic XYZ in author Y-up coordinates",
+  "native_conversion": "Conjugate rotations by Rx(+90deg) when applying them to Blender Z-up objects. glTF and packed JSON are already Y-up.",
+  "socket_owners": {
+    "head": "body",
+    "eyeL": "body",
+    "eyeR": "body",
+    "mouth": "body",
+    "handL": "armL",
+    "handR": "armR",
+    "muzzle": "armR",
+    "attack": "armR",
+    "footL": "legL",
+    "footR": "legR",
+    "feet": "root"
+  },
+  "clips": {
+    "Idle": {
+      "duration": 2.4,
+      "loop": true,
+      "root_y_bob": 0.003,
+      "root_y_bob_curve": "0.5 - 0.5*cos(2*pi*t/duration)",
+      "armL_x_degrees_amplitude": 1.5,
+      "armR_x_degrees_amplitude": 0.6
+    },
+    "Walk": {
+      "duration": 0.8,
+      "loop": true,
+      "phase": "sin(2*pi*t/duration)",
+      "legL": [
+        20,
+        0,
+        0
+      ],
+      "legR": [
+        -20,
+        0,
+        0
+      ],
+      "armL": [
+        -12,
+        0,
+        -4
+      ],
+      "armR": [
+        4,
+        0,
+        0
+      ],
+      "root_y_lift": 0.012,
+      "note": "Channel angle amplitudes multiply phase; foot contact is stylized rigid gait, not IK."
+    },
+    "Fire": {
+      "duration": 0.18,
+      "loop": false,
+      "keyframes": [
+        {
+          "t": 0,
+          "armR": [
+            0,
+            0,
+            0
+          ],
+          "root": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "t": 0.045,
+          "armR": [
+            -6,
+            0,
+            0
+          ],
+          "root": [
+            0,
+            -3,
+            0
+          ]
+        },
+        {
+          "t": 0.18,
+          "armR": [
+            0,
+            0,
+            0
+          ],
+          "root": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "muzzle_flash": "attach to muzzle; external effect, not baked geometry"
+    },
+    "Hit": {
+      "duration": 0.28,
+      "loop": false,
+      "keyframes": [
+        {
+          "t": 0,
+          "root": [
+            0,
+            0,
+            0
+          ],
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "armR": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "t": 0.075,
+          "root": [
+            -8,
+            0,
+            5
+          ],
+          "armL": [
+            -10,
+            0,
+            -12
+          ],
+          "armR": [
+            -10,
+            0,
+            8
+          ]
+        },
+        {
+          "t": 0.28,
+          "root": [
+            0,
+            0,
+            0
+          ],
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "armR": [
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "Retreat": {
+      "duration": 0.65,
+      "loop": true,
+      "phase": "sin(2*pi*t/duration)",
+      "root": [
+        -5,
+        0,
+        0
+      ],
+      "legL": [
+        -17,
+        0,
+        0
+      ],
+      "legR": [
+        17,
+        0,
+        0
+      ],
+      "armL": [
+        14,
+        0,
+        0
+      ],
+      "note": "Locomotion translation belongs to gameplay. Emergency jump is an external effect."
+    }
+  },
+  "limits": "Rigid shoulder/hip motion cannot bend elbows or knees. Native aiming pose retains the imported source knuckles, thumb and grip. The 76 unmodified original KayKit glTF clips remain only in the original Knight.glb. No claim of retargeted clips or game performance is made.",
+  "socket_space": "Rest-pose model coordinates in sockets.json. Convert attachments through the inverse GLB node bind matrix before animation. For packed JSON translation-only pivots: localSocket = socket - pivot."
+}

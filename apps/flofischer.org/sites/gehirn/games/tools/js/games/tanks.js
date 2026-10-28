@@ -1,5 +1,5 @@
 /**
- * Bounce Brigade — toy tank duels. Captain Hazel's little fern-green tank against the Klonkbot tank corps in walled
+ * Bounce Brigade — toy tank duels. Captain Hazel's little fern-green tank at the Peace Tournament of Concordia in walled
  * arenas: shells ricochet off walls, shells cancel each other, mines blast crates and tanks. Every enemy colour has
  * its own habit (sits and waits, prowls, fires rockets, lays mines, banks shots off two walls, turns invisible …),
  * each world adds a floor (pits, ice, lava vents) and ends with a boss.
@@ -11,6 +11,7 @@
  */
 import { clamp, rng, label, roundRect } from './core.js';
 import { LEVELS, WORLDS, W, H, T } from './tanks-levels.js';
+import { TouchPad, MOVE_R, MOVE_DEAD } from './tanks-touch.js';
 
 const TAU = Math.PI * 2;
 export const TANK_R = 0.36;
@@ -35,14 +36,15 @@ export const TYPES = {
   ace: { name: 'Ace', color: 0x1e293b, css: '#1e293b', move: 3, keep: 6, shell: 8.2, bounces: 0, shells: 2, cd: 1.3, err: 0.04, react: 0.9, turret: 3.6, dodge: 1, score: 500 },
 };
 export const TYPE_KEYS = Object.keys(TYPES);
+export const CLUBS = { rookie: 'Fernhaven Juniors', scout: 'Scout Club', zip: 'Orvan Youth', miner: 'Fossil Mine Dwarfs', banker: 'Firnwatch Observatory', swarm: 'Violet Club', ghost: 'Granny Grausel', ace: 'Teshka Vonn' };
 const MOVE_SPEED = [0, 1.35, 2.1, 2.9];
 
 /** Bosses: big tanks (2 × 2 tiles) with several hit points and one signature attack each, always telegraphed. */
 export const BOSSES = {
-  klonk: { name: 'KLONK TANK', hp: 12, r: 0.85, move: 1.0, shell: 4.6, bounces: 1, cd: 2.6, score: 3000, model: 'KLONK_TANK' },
-  drill: { name: 'DUNE DRILL MECH', hp: 14, r: 0.85, move: 1.2, shell: 9, bounces: 0, cd: 2.4, score: 3500, model: 'DRILL_MECH' },
-  walker: { name: 'FROST WALKER', hp: 16, r: 0.85, move: 0.9, shell: 5.6, bounces: 2, cd: 2.4, score: 4000, model: 'FROST_WALKER' },
-  mothership: { name: 'ZORB QUEEN’S MOTHERSHIP', hp: 18, r: 0.95, move: 1.4, shell: 5.4, bounces: 1, cd: 2.2, score: 5000, model: 'UFO', fly: true },
+  klonk: { name: 'GANTER’S PARADE TOY', hp: 12, r: 0.85, move: 1.0, shell: 4.6, bounces: 1, cd: 2.6, score: 3000, model: 'TOY_GANTER_PARADE_TANK' },
+  drill: { name: 'QUOTA’S TOY DRILL', hp: 14, r: 0.85, move: 1.2, shell: 9, bounces: 0, cd: 2.4, score: 3500, model: 'TOY_QUOTA' },
+  walker: { name: 'BRIGADIER’S FROST TOY', hp: 16, r: 0.85, move: 0.9, shell: 5.6, bounces: 2, cd: 2.4, score: 4000, model: 'TOY_BRIGADIER' },
+  mothership: { name: 'EQUALITY’S MODULE TOY', hp: 18, r: 0.95, move: 1.4, shell: 5.4, bounces: 1, cd: 2.2, score: 5000, model: 'TOY_EQUALITY', fly: true },
 };
 
 const solidT = (t) => t === T.WALL || t === T.CRATE || t === T.PIT; // blocks tanks
@@ -75,8 +77,13 @@ export class TankSession {
     this.total = this.tanks.length - 1;
     // input
     this.keys = { u: false, d: false, l: false, r: false };
-    this.stick = null; this.mouse = null; this.aimAt = null; this.fireQueued = false; this.mineQueued = false;
-    this.botMove = null; this.botAim = null; this.touchAim = null;
+    this.mouse = null; this.aimAt = null; this.fireQueued = false; this.mineQueued = false;
+    this.botMove = null; this.botAim = null;
+    // touch: twin sticks and the mine button (tanks-touch.js); aimAng is an arena angle the turret holds (touch aims
+    // by direction, the mouse by a point)
+    this.pad = new TouchPad(this); this.aimAng = null; this.mineDenied = 0; this.fireDenied = 0;
+    this.touchMode = !this.preview && !!globalThis.matchMedia?.('(hover: none) and (pointer: coarse)').matches;
+    this.gridW = W; this.gridH = H; this.readyT = READY; this.maxShells = PLAYER.maxShells; this.maxMines = PLAYER.maxMines;
     // path distances to the player (enemy steering) and to mines (danger)
     this.dist = new Int16Array(W * H); this.distT = 0;
     this.queue = new Int32Array(W * H);
@@ -88,7 +95,8 @@ export class TankSession {
       id: this.ids++, team, type, boss: boss || null, def, x, y, vx: 0, vy: 0,
       ang: team ? Math.PI / 2 : -Math.PI / 2, aim: team ? Math.PI / 2 : -Math.PI / 2, r: boss ? def.r : TANK_R,
       alive: true, cd: 0.6 + (this.rand ? this.rand() : 0) * 0.8, live: 0, minesLive: 0, hp: boss ? def.hp : 1, maxHp: boss ? def.hp : 1,
-      tread: 0, recoil: 0, flash: 0, moving: 0,
+      tread: 0, visualTravel: 0, recoil: 0, flash: 0, moving: 0,
+      shotAt: -Infinity, hitAt: -Infinity, mineAt: -Infinity, disabledAt: Infinity, underAt: -Infinity, surfaceAt: -Infinity, shotSerial: 0,
       // AI
       wx: x, wy: y, think: 0, aimT: 0, want: null, seen: 0, mineCd: 3, dodgeT: 0, scan: (this.rand ? this.rand() : 0) * TAU,
       special: 4, phase: 0, under: false, spawned: 0, hidden: false, charge: 0,
@@ -107,30 +115,80 @@ export class TankSession {
 
   // ── input ──
   pointer(type, x, y, e = {}) {
-    if (this.result) { this.stick = null; return; }
-    const w = this.unproj ? this.unproj(x, y) : this.screenToWorld(x, y);
+    if (this.result) { this.pad.reset(); return; }
     if (e.pointerType === 'mouse' || e.pointerType === 'pen' || !e.pointerType) {
-      if (w) this.aimAt = { x: w.x, y: w.y };
+      this.touchMode = false; this.aimAng = null; this.pad.reset();
+      const w = this.screenPoint(x, y);
+      if (w) this.aimAt = w;
       if (type === 'down') { if (e.button === 2) this.mineQueued = true; else this.fireQueued = true; }
       return;
     }
-    // touch: the mine button, a floating stick on the left half, aim-and-fire taps on the right half
-    if (type === 'down' && this.mineBtn && Math.hypot(x - this.mineBtn.x, y - this.mineBtn.y) < this.mineBtn.r + 8) { this.mineQueued = true; return; }
-    const left = x < (this.layoutW || 800) * 0.45;
-    if (type === 'down') {
-      if (left && !this.stick) { this.stick = { id: e.pointerId, x0: x, y0: y, x, y }; return; }
-      if (w) { this.aimAt = { x: w.x, y: w.y }; this.touchAim = { id: e.pointerId }; }
-    } else if (type === 'move') {
-      if (this.stick && e.pointerId === this.stick.id) {
-        const s = this.stick; s.x = x; s.y = y;
-        const dx = x - s.x0, dy = y - s.y0, d = Math.hypot(dx, dy), max = 56;
-        if (d > max) { s.x0 = x - (dx / d) * max; s.y0 = y - (dy / d) * max; }
-      } else if (this.touchAim && e.pointerId === this.touchAim.id && w) this.aimAt = { x: w.x, y: w.y };
-    } else if (type === 'up') {
-      if (this.stick && e.pointerId === this.stick.id) this.stick = null;
-      else if (this.touchAim && e.pointerId === this.touchAim.id) { this.touchAim = null; if (w) this.aimAt = { x: w.x, y: w.y }; this.fireQueued = true; }
-    }
+    // touch: tanks-touch.js sorts thumbs into the move stick, the aim stick, the mine button and taps
+    this.touchMode = true; this.aimAt = null;
+    const id = e.pointerId ?? 1, now = e.timeStamp || performance.now();
+    if (type === 'down') this.pad.down(x, y, id, now);
+    else if (type === 'move') this.pad.moveTo(x, y, id);
+    else this.pad.up(x, y, id, e.type === 'pointercancel', now);
   }
+  /** Screen point (CSS px on the canvas) → arena point at turret height, or null above the horizon. */
+  screenPoint(x, y) {
+    const w = this.unproj ? this.unproj(x, y) : this.screenToWorld(x, y);
+    return w ? { x: w.x, y: w.y } : null;
+  }
+  /** A direction on screen (from the tank) → the arena angle it points along (the camera is tilted, maybe turned). */
+  screenAngle(dx, dy) {
+    const d = Math.hypot(dx, dy); if (d < 1e-6) return null;
+    const p = this.player, q = this.proj(p.x, p.y, 0.3), sx = q.x + (dx / d) * 80, sy = q.y + (dy / d) * 80;
+    const w = this.screenPoint(sx, sy);
+    return w ? Math.atan2(w.y - p.y, w.x - p.x) : null;
+  }
+  /** Where to aim at an enemy tank: ahead of it by the shell's travel time (as the enemies aim at you). */
+  leadAt(e) {
+    const p = this.player, t = Math.hypot(e.x - p.x, e.y - p.y) / PLAYER.shell;
+    return Math.atan2(e.y + e.vy * t * 0.8 - p.y, e.x + e.vx * t * 0.8 - p.x);
+  }
+  /** Visible enemies the turret could hit straight on: [{ e, ang }]. */
+  cleanShots() {
+    const p = this.player, out = [];
+    for (const e of this.tanks) {
+      if (e.team !== 1 || !e.alive || e.under || (e.def?.ghost && !this.ghostVisible(e))) continue;
+      const ang = this.leadAt(e);
+      if (this.traceShot(p, ang, 0, PLAYER.shell, 24).hit === e) out.push({ e, ang });
+    }
+    return out;
+  }
+  /** Aim help for a thumb: within ~3° of a clean straight shot at an enemy, the stick settles on it. */
+  magnet(ang) {
+    let best = ang, bd = 0.055;
+    for (const c of this.cleanShots()) { const d = Math.abs(angDiff(c.ang, ang)); if (d < bd) { bd = d; best = c.ang; } }
+    return best;
+  }
+  fireStick(dx, dy) { const a = this.screenAngle(dx, dy); if (a != null) { this.aimAng = this.magnet(a); this.fireQueued = true; } }
+  /** A tap on the arena fires at that spot; a tap close to an enemy tank fires at the tank. */
+  tapFire(x, y) {
+    const w = this.screenPoint(x, y), p = this.player; if (!w) return;
+    let ang = Math.atan2(w.y - p.y, w.x - p.x), bd = 1.15;
+    for (const e of this.tanks) {
+      if (e.team !== 1 || !e.alive || e.under || (e.def?.ghost && !this.ghostVisible(e))) continue;
+      const d = Math.hypot(e.x - w.x, e.y - w.y) - e.r;
+      if (d < bd) { bd = d; ang = this.leadAt(e); }
+    }
+    this.aimAng = ang; this.fireQueued = true;
+  }
+  /** A tap beside the arena: the nearest enemy in a clear straight line, else along the turret. */
+  quickFire() {
+    const p = this.player;
+    const c = this.cleanShots().sort((a, b) => Math.hypot(a.e.x - p.x, a.e.y - p.y) - Math.hypot(b.e.x - p.x, b.e.y - p.y))[0];
+    this.aimAng = c ? c.ang : p.aim; this.fireQueued = true;
+  }
+  /** A short buzz on phones that have one (Android; iOS Safari has no vibration API). Touch play only. */
+  buzz(pattern) {
+    if (!this.touchMode || this.preview) return;
+    try { globalThis.navigator?.vibrate?.(pattern); } catch { /* not allowed before the first tap */ }
+  }
+  shellsReady() { return PLAYER.maxShells - this.player.live; }
+  /** The player's live mines, fuse left as 0..1, soonest first (the mine button's cooldown pips). */
+  ownMineFuses() { return this.mines.filter((m) => m.alive && m.owner === this.player.id).map((m) => clamp(m.fuse / MINE_FUSE, 0, 1)).sort((a, b) => a - b); }
   key(code, down) {
     const k = this.keys;
     switch (code) {
@@ -152,10 +210,11 @@ export class TankSession {
   readMove() {
     if (this.botMove) return this.botMove;
     let mx = 0, my = 0;
-    if (this.stick) {
-      const dx = this.stick.x - this.stick.x0, dy = this.stick.y - this.stick.y0, d = Math.hypot(dx, dy);
-      if (d > 6) { const m = Math.min(1, (d - 6) / 38); mx = (dx / d) * m; my = (dy / d) * m; }
-      // the screen is tilted towards the camera: up on screen is −y in the arena
+    const st = this.pad.move;
+    if (st) {
+      // radial dead zone, then full speed at 4/5 of the knob's travel; screen directions map onto the arena below
+      const dx = st.x - st.x0, dy = st.y - st.y0, d = Math.hypot(dx, dy);
+      if (d > MOVE_DEAD) { const m = Math.min(1, (d - MOVE_DEAD) / (MOVE_R * 0.8 - MOVE_DEAD)); mx = (dx / d) * m; my = (dy / d) * m; }
     } else {
       const k = this.keys;
       mx = (k.r ? 1 : 0) - (k.l ? 1 : 0); my = (k.d ? 1 : 0) - (k.u ? 1 : 0);
@@ -209,21 +268,30 @@ export class TankSession {
   updatePlayer(tk, dt) {
     const m = this.readMove();
     this.drive(tk, m.x, m.y, PLAYER.speed, PLAYER.turn, dt);
-    // turret follows the cursor (or the last tap), keys alone aim along the hull
+    this.mineDenied = Math.max(0, this.mineDenied - dt); this.fireDenied = Math.max(0, this.fireDenied - dt);
+    // turret: the aim stick while it is pulled (and the angle it last fired along, held), else the cursor or the last
+    // click, else the keys alone aim along the hull
+    const pull = this.pad.aimVector();
+    if (pull) { const a = this.screenAngle(pull[0], pull[1]); if (a != null) this.aimAng = this.magnet(a); }
     let want = tk.aim;
-    if (this.aimAt) want = Math.atan2(this.aimAt.y - tk.y, this.aimAt.x - tk.x);
+    if (this.aimAng != null) want = this.aimAng;
+    else if (this.aimAt) want = Math.atan2(this.aimAt.y - tk.y, this.aimAt.x - tk.x);
     else if (m.x || m.y) want = Math.atan2(m.y, m.x);
     tk.aim = turnTo(tk.aim, want, PLAYER.turret * dt);
     if (this.fireQueued) {
       // a click during the short reload is kept for a moment, not lost
       this.fireAge = (this.fireAge || 0) + dt;
-      if (this.aimAt) tk.aim = want; // a click fires where it points, even before the turret caught up
+      if (this.aimAt || this.aimAng != null) tk.aim = want; // a click fires where it points, even before the turret caught up
       if (tk.live < PLAYER.maxShells && tk.cd <= 0) { this.fireShell(tk, tk.aim, PLAYER.shell, PLAYER.bounces); tk.cd = PLAYER.cd; this.fireQueued = false; this.fireAge = 0; }
-      else if (this.fireAge > 0.25 || tk.live >= PLAYER.maxShells) { this.fireQueued = false; this.fireAge = 0; }
+      else if (this.fireAge > 0.25 || tk.live >= PLAYER.maxShells) {
+        if (tk.live >= PLAYER.maxShells) { this.fireDenied = 0.4; this.buzz([8, 50, 8]); }
+        this.fireQueued = false; this.fireAge = 0;
+      }
     }
     if (this.mineQueued) {
       this.mineQueued = false;
-      if (tk.minesLive < PLAYER.maxMines && !this.mines.some((mi) => Math.hypot(mi.x - tk.x, mi.y - tk.y) < 0.9)) this.layMineAt(tk);
+      if (tk.minesLive < PLAYER.maxMines && !this.mines.some((mi) => Math.hypot(mi.x - tk.x, mi.y - tk.y) < 0.9)) { this.layMineAt(tk); this.buzz(25); }
+      else { this.mineDenied = 0.45; this.buzz([8, 50, 8]); }
     }
   }
 
@@ -245,10 +313,12 @@ export class TankSession {
     // ice: the hull keeps sliding and only slowly takes the new direction
     const k = ice ? 1 - Math.exp(-dt * 1.6) : 1 - Math.exp(-dt * 18);
     tk.vx += (tvx - tk.vx) * k; tk.vy += (tvy - tk.vy) * k;
+    const beforeX=tk.x,beforeY=tk.y;
     tk.x += tk.vx * dt; tk.y += tk.vy * dt;
     const sp = Math.hypot(tk.vx, tk.vy);
     tk.moving = sp; tk.tread += sp * dt;
     this.collideGrid(tk);
+    tk.visualTravel += (tk.x-beforeX)*Math.cos(tk.ang)+(tk.y-beforeY)*Math.sin(tk.ang);
     if (sp > 0.4 && (this.marks.length === 0 || Math.hypot(this.marks[this.marks.length - 1].x - tk.x, this.marks[this.marks.length - 1].y - tk.y) > 0.32 || this.marks[this.marks.length - 1].id !== tk.id)) {
       // tread marks (the only thing a ghost tank leaves visible)
       const last = this.lastMark?.[tk.id];
@@ -298,13 +368,15 @@ export class TankSession {
   }
 
   fireShell(tk, ang, speed, bounces, { x = tk.x, y = tk.y, kind = speed >= 8 ? 1 : 0 } = {}) {
-    const s = { x, y, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, speed, bounces, owner: tk.id, team: tk.team, age: 0, alive: true, kind, trail: 0 };
+    const renderFrom = this.visualMuzzle?.(tk, ang) ?? null;
+    const s = { renderFrom, x, y, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, speed, bounces, owner: tk.id, team: tk.team, age: 0, alive: true, kind, trail: 0 };
     // the shell leaves from the muzzle; a muzzle inside a wall bounces it straight away
     this.moveShell(s, (tk.boss ? tk.r + 0.2 : BARREL) / speed, true);
     if (!s.alive) { this.puff(s.x, s.y, 0.6); return null; }
     this.shells.push(s);
-    tk.live++; tk.recoil = 1; this.shots += tk.team === 0 ? 1 : 0;
+    tk.live++; tk.recoil = 1; tk.shotAt = this.t; tk.shotSerial++; this.shots += tk.team === 0 ? 1 : 0;
     this.events.push({ e: 'shot', x: s.x, y: s.y, ang, team: tk.team });
+    if (tk.team === 0) this.buzz(8);
     this.sound.play('shot', 40);
     return s;
   }
@@ -321,7 +393,7 @@ export class TankSession {
         let hx = solidS(this.tile(nx, s.y)), hy = solidS(this.tile(s.x, ny));
         if (!hx && !hy) hx = hy = true;
         if (hx) s.vx = -s.vx; if (hy) s.vy = -s.vy;
-        s.bounces--;
+        s.bounces--; s.renderFrom = null; // A ricochet immediately ends the cosmetic muzzle-to-path join.
         if (s.bounces < 0) { this.killShell(s, true); return; }
         this.events.push({ e: 'bounce', x: s.x, y: s.y });
         if (!launch) this.sound.play('hit', 30);
@@ -368,26 +440,29 @@ export class TankSession {
     if (!tk.alive || tk.under) return;
     // a boss's armour rings after every hit: for a moment more shells just clank off
     if (tk.boss && tk.armour > 0) { this.spark(tk.x, tk.y); this.sound.play('hit', 50); return; }
-    tk.hp -= src?.blast ? 3 : 1; tk.flash = 0.25;
+    tk.hp -= src?.blast ? 3 : 1; tk.flash = 0.25; tk.hitAt = this.t;
     if (tk.boss) tk.armour = 1.1;
     if (tk.hp > 0) { this.spark(tk.x, tk.y); this.sound.play('hit'); return; }
-    tk.alive = false;
+    tk.alive = false; tk.disabledAt = this.t;
     this.events.push({ e: 'kill', x: tk.x, y: tk.y, id: tk.id, boss: !!tk.boss });
     this.fx.push({ kind: 'boom', x: tk.x, y: tk.y, t: 0, max: tk.boss ? 1.4 : 0.9, r: tk.boss ? 2.2 : 1.2 });
     this.wrecks = this.wrecks || []; this.wrecks.push({ x: tk.x, y: tk.y, ang: tk.ang, type: tk.type, boss: tk.boss, team: tk.team });
     this.sound.play(tk.boss ? 'boom' : 'kill');
+    this.buzz(tk.team === 0 ? [70, 40, 140] : 30);
     if (tk.team === 1) {
       this.kills++; this.score += tk.def.score;
       this.fx.push({ kind: 'pop', x: tk.x, y: tk.y, t: 0, max: 1, text: `+${tk.def.score}` });
     } else {
       const o = src && src.owner ? this.tanks.find((t) => t.id === src.owner) : null;
       this.killer = { by: o ? (o.boss || o.type || 'self') : src?.blast ? 'blast' : src?.lava ? 'lava' : src?.beam ? 'beam' : '?', kind: src?.kind, age: src?.age, bounces: src?.bounces, dist: o ? Math.hypot(o.x - tk.x, o.y - tk.y) : 0, t: this.t };
-      this.loseReason = src?.blast ? (src.own ? 'Caught in your own mine blast' : 'Caught in a mine blast') : src?.lava ? 'The lava vent erupted under you' : src?.owner === tk.id ? 'Your own shell bounced back' : 'Your tank was hit';
+      this.loseReason = src?.blast ? (src.own ? 'Caught in your own mine blast' : 'Caught in a mine blast') : src?.lava ? 'The toy lava bumper caught you' : src?.owner === tk.id ? 'Your own shell bounced back' : 'Your tank was hit';
     }
   }
 
   layMineAt(tk) {
-    const m = { x: tk.x, y: tk.y, owner: tk.id, team: tk.team, fuse: MINE_FUSE, age: 0, trig: -1, alive: true };
+    tk.mineAt = this.t;
+    const renderFrom = this.visualMine?.(tk) ?? null;
+    const m = { renderFrom, x: tk.x, y: tk.y, owner: tk.id, team: tk.team, fuse: MINE_FUSE, age: 0, trig: -1, alive: true };
     this.mines.push(m); tk.minesLive++;
     this.events.push({ e: 'mine', x: m.x, y: m.y });
     this.sound.play('click');
@@ -655,7 +730,7 @@ export class TankSession {
     } else if (tk.boss === 'drill') {
       // burrows (can't be hit), a dust ring marks where it comes up 1.3 s later, then a ring of slow shells
       if (!tk.under && tk.special <= 0) {
-        tk.under = true; tk.special = 1.6;
+        tk.under = true; tk.special = 1.6; tk.underAt = this.t;
         const spot = this.openSpotNear(p.x, p.y, 4.5, 7);
         tk.wx = spot[0]; tk.wy = spot[1];
         this.warn.push({ kind: 'surface', x: spot[0], y: spot[1], r: 1.2, t: 1.6, max: 1.6 });
@@ -663,7 +738,7 @@ export class TankSession {
       } else if (tk.under) {
         tk.x += (tk.wx - tk.x) * Math.min(1, dt * 3); tk.y += (tk.wy - tk.y) * Math.min(1, dt * 3);
         if (tk.special <= 0) {
-          tk.under = false; tk.x = tk.wx; tk.y = tk.wy; tk.special = 5.5 + this.rand() * 1.5; tk.cd = 1.0;
+          tk.under = false; tk.surfaceAt = this.t; tk.x = tk.wx; tk.y = tk.wy; tk.special = 5.5 + this.rand() * 1.5; tk.cd = 1.0;
           this.events.push({ e: 'surface', x: tk.x, y: tk.y });
           for (let i = 0; i < 8; i++) this.fireShell(tk, (i / 8) * TAU + 0.2, 3.2, 0);
         }
@@ -756,7 +831,6 @@ export class TankSession {
   }
   render(g, view) {
     const { w, h } = view;
-    this.layoutW = w;
     if (view.gl) {
       this.projFn = view.gl.projectFn();
       this.unproj = view.gl.groundAt;
@@ -817,52 +891,67 @@ export class TankSession {
     // mines about to blow: their blast radius
     for (const m of this.mines) if (m.trig >= 0 || m.fuse < 2) this.ring(g, m.x, m.y, BLAST_R, 'rgba(250,204,21,.7)', 0.3);
     if (this.preview) return;
-    // aim line: dotted from the muzzle to the first wall, then the first bounce
-    const p = this.player;
-    if (p.alive && !this.result && this.t > READY && this.aimAt && !this.botMove) {
-      const pts = this.aimPath(p, p.aim, 1);
-      g.fillStyle = 'rgba(255,255,255,.85)';
-      for (let i = 0; i < pts.length; i++) { const q = this.proj(pts[i][0], pts[i][1], 0.35); g.beginPath(); g.arc(q.x, q.y, i < pts.length / 2 ? 2.4 : 1.6, 0, TAU); g.fill(); }
-      const q = this.proj(this.aimAt.x, this.aimAt.y, 0);
-      g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 2; g.beginPath(); g.arc(q.x, q.y, 9, 0, TAU); g.moveTo(q.x - 14, q.y); g.lineTo(q.x - 5, q.y); g.moveTo(q.x + 5, q.y); g.lineTo(q.x + 14, q.y); g.stroke();
+    const p = this.player, touch = this.touchMode;
+    const dt = Math.min(0.1, Math.max(0, (view.time || 0) - (this.lastDraw ?? view.time ?? 0))); this.lastDraw = view.time || 0;
+    this.pad.layout(w, h); // also before the first touch: a thumb may land on the mine button straight away
+    // aim line: from the muzzle to the first wall, the bounce, and what the shell would hit first. Mouse: always;
+    // touch: bright while the aim stick is pulled, faint along the held aim otherwise.
+    if (p.alive && !this.result && this.t > READY && !this.botMove) {
+      const pulled = touch && !!this.pad.aimVector();
+      const show = touch ? this.aimAng != null : !!this.aimAt;
+      if (show) this.drawAimLine(g, p, touch && !pulled ? 0.4 : 1, touch);
+      if (!touch && this.aimAt) {
+        const q = this.proj(this.aimAt.x, this.aimAt.y, 0);
+        g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 2; g.beginPath(); g.arc(q.x, q.y, 9, 0, TAU); g.moveTo(q.x - 14, q.y); g.lineTo(q.x - 5, q.y); g.moveTo(q.x + 5, q.y); g.lineTo(q.x + 14, q.y); g.stroke();
+      }
+    }
+    // small screens: a team ring on the ground under every tank (Hazel mint, rival clubs coral: the green Banker and the
+    // black Ace on dark basalt read apart), and a dark rim plus a team ring around every shell
+    if (touch || this.proj(W / 2, H / 2, 0).s < 30) {
+      for (const tk of this.tanks) {
+        if (!tk.alive || tk.under || (tk.def?.ghost && !this.ghostVisible(tk))) continue;
+        this.ring(g, tk.x, tk.y, tk.r * 1.2, tk.team === 0 ? (this.tournamentRingColor || '#55b582') : 'rgba(248,113,113,.8)');
+      }
+      for (const s of this.shells) {
+        const q = this.proj(s.x, s.y, 0.42), r = Math.max(3.5, q.s * 0.14);
+        g.lineWidth = 2; g.strokeStyle = 'rgba(0,0,0,.55)'; g.beginPath(); g.arc(q.x, q.y, r + 1.5, 0, TAU); g.stroke();
+        g.lineWidth = 1.5; g.strokeStyle = s.team === 0 ? 'rgba(190,242,100,.95)' : 'rgba(248,113,113,.95)'; g.beginPath(); g.arc(q.x, q.y, r + 3, 0, TAU); g.stroke();
+      }
     }
     // floating score pops
     for (const f of this.fx) if (f.kind === 'pop') { const q = this.proj(f.x, f.y, 1 + f.t * 1.2); label(g, f.text, q.x, q.y, 15, '#fde047'); }
-    // bottom bar: enemies left, shells ready, mines
+    // status: enemies left, shells ready, mines (touch: out from under the thumbs; the mine button shows the mines)
     const left = this.tanks.filter((t) => t.team === 1 && t.alive);
-    const y = h - 22;
-    g.save();
-    let x = 14;
-    for (const tk of left.slice(0, 14)) {
-      g.fillStyle = tk.boss ? '#b91c1c' : tk.def.css; roundRect(g, x, y - 8, 20, 14, 4); g.fill();
-      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(x + 9, y - 5, 12, 3); x += 25;
-    }
     const ready = PLAYER.maxShells - p.live;
-    let rx = w - 14;
-    const touch = !!this.stick || !!this.touchAim || view.touch;
+    g.save();
     if (touch) {
-      // the mine button for thumbs
-      const r = 26; this.mineBtn = { x: w - 18 - r, y: h - 90 - r, r };
-      g.fillStyle = 'rgba(15,23,42,.55)'; g.beginPath(); g.arc(this.mineBtn.x, this.mineBtn.y, r, 0, TAU); g.fill();
-      g.fillStyle = p.minesLive < PLAYER.maxMines ? '#facc15' : '#64748b'; g.beginPath(); g.arc(this.mineBtn.x, this.mineBtn.y, 11, 0, TAU); g.fill();
-      label(g, 'MINE', this.mineBtn.x, this.mineBtn.y + r + 10, 11);
-    } else this.mineBtn = null;
-    for (let i = 0; i < PLAYER.maxMines; i++) { rx -= 18; g.fillStyle = i < PLAYER.maxMines - p.minesLive ? '#facc15' : 'rgba(255,255,255,.25)'; g.beginPath(); g.arc(rx + 7, y - 1, 6, 0, TAU); g.fill(); }
-    rx -= 10;
-    for (let i = 0; i < PLAYER.maxShells; i++) { rx -= 11; g.fillStyle = i < ready ? '#fff' : 'rgba(255,255,255,.25)'; roundRect(g, rx, y - 7, 7, 12, 3); g.fill(); }
-    g.restore();
-    // stick
-    if (this.stick) {
-      const s = this.stick;
-      g.fillStyle = 'rgba(255,255,255,.18)'; g.beginPath(); g.arc(s.x0, s.y0, 46, 0, TAU); g.fill();
-      g.fillStyle = 'rgba(255,255,255,.5)'; g.beginPath(); g.arc(s.x, s.y, 20, 0, TAU); g.fill();
+      if (this.fireDenied > 0) g.globalAlpha = 0.5 + 0.5 * Math.sin(this.fireDenied * 40);
+      this.pad.drawRows(g, left, ready, PLAYER.maxShells);
+      g.globalAlpha = 1;
+      this.pad.draw(g, dt);
+    } else {
+      const y = h - 22;
+      let x = 14;
+      for (const tk of left.slice(0, 14)) {
+        g.fillStyle = tk.boss ? '#b91c1c' : tk.def.css; roundRect(g, x, y - 8, 20, 14, 4); g.fill();
+        g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(x + 9, y - 5, 12, 3); x += 25;
+      }
+      let rx = w - 14;
+      for (let i = 0; i < PLAYER.maxMines; i++) { rx -= 18; g.fillStyle = i < PLAYER.maxMines - p.minesLive ? '#facc15' : 'rgba(255,255,255,.25)'; g.beginPath(); g.arc(rx + 7, y - 1, 6, 0, TAU); g.fill(); }
+      rx -= 10;
+      for (let i = 0; i < PLAYER.maxShells; i++) { rx -= 11; g.fillStyle = i < ready ? '#fff' : 'rgba(255,255,255,.25)'; roundRect(g, rx, y - 7, 7, 12, 3); g.fill(); }
     }
+    g.restore();
     // start banner and boss bar
     if (this.t < READY + 0.5) {
       const a = this.t < READY ? 1 : 1 - (this.t - READY) / 0.5;
       g.globalAlpha = Math.max(0, a);
       label(g, this.t < READY ? `${this.L.name}` : 'GO!', w / 2, h * 0.42, Math.min(46, w / 12), '#fff');
-      if (this.t < READY) label(g, `${this.total} enemy tank${this.total === 1 ? '' : 's'}`, w / 2, h * 0.42 + 38, 17, '#fde68a');
+      if (this.t < READY) {
+        const clubs=[...new Set(this.tanks.filter(t=>t.type).map(t=>CLUBS[t.type]))];
+        const caption=this.boss?'Concordia · An evening of peace':`${clubs.length===1?clubs[0]:clubs.length+' rival clubs'} · ${this.total} toy${this.total===1?'':'s'}`;
+        label(g, caption, w / 2, h * 0.42 + 38, Math.min(17,w/24), '#fde68a');
+      }
       g.globalAlpha = 1;
     }
     if (this.boss && this.boss.alive) {
@@ -879,23 +968,52 @@ export class TankSession {
     g.strokeStyle = color; g.lineWidth = 2.5; g.stroke();
     if (fill) { g.fillStyle = color.replace(/[\d.]+\)$/, `${0.12 + 0.18 * fill})`); g.fill(); }
   }
-  /** Points along a shell's path (for the aim line): up to the first wall and `bounces` reflections. */
-  aimPath(tk, ang, bounces) {
+  /**
+   * A shell's path for the aim line: points up to `bounces` reflections, and the first tank it would hit (`self` when
+   * it would come back into the shooter).
+   */
+  aimTrace(tk, ang, bounces) {
     const pts = [];
-    let x = tk.x + Math.cos(ang) * BARREL, y = tk.y + Math.sin(ang) * BARREL, vx = Math.cos(ang), vy = Math.sin(ang), b = bounces, len = 0;
-    while (len < 16 && pts.length < 60) {
+    let x = tk.x + Math.cos(ang) * BARREL, y = tk.y + Math.sin(ang) * BARREL, vx = Math.cos(ang), vy = Math.sin(ang), b = bounces, len = 0, bounceAt = -1, hit = null;
+    walk: while (len < 18 && pts.length < 70) {
       const st = 0.1, nx = x + vx * st, ny = y + vy * st;
       if (solidS(this.tile(nx, ny))) {
         let hx = solidS(this.tile(nx, y)), hy = solidS(this.tile(x, ny));
         if (!hx && !hy) hx = hy = true;
         if (hx) vx = -vx; if (hy) vy = -vy;
         if (--b < 0) break;
+        if (bounceAt < 0) bounceAt = pts.length;
         continue;
       }
       x = nx; y = ny; len += st;
+      for (const o of this.tanks) {
+        if (!o.alive || o.under || (o === tk && len < 0.9) || (o.def?.ghost && !this.ghostVisible(o))) continue;
+        if ((o.x - x) ** 2 + (o.y - y) ** 2 < (o.r + SHELL_R) ** 2) { hit = o; pts.push([x, y]); break walk; }
+      }
       if (Math.round(len * 10) % 4 === 0) pts.push([x, y]);
     }
-    return pts;
+    return { pts, hit, self: hit === tk, bounceAt };
+  }
+  aimPath(tk, ang, bounces) { return this.aimTrace(tk, ang, bounces).pts; }
+  drawAimLine(g, p, alpha, big) {
+    const tr = this.aimTrace(p, p.aim, PLAYER.bounces);
+    const r1 = big ? 3.2 : 2.4, r2 = big ? 2.3 : 1.6;
+    g.save(); g.globalAlpha = alpha;
+    for (let i = 0; i < tr.pts.length; i++) {
+      const q = this.proj(tr.pts[i][0], tr.pts[i][1], 0.35), after = tr.bounceAt >= 0 && i >= tr.bounceAt;
+      g.beginPath(); g.arc(q.x, q.y, after ? r2 : r1, 0, TAU);
+      g.fillStyle = tr.self && after ? 'rgba(248,113,113,.95)' : 'rgba(255,255,255,.92)'; g.fill();
+      g.lineWidth = 1; g.strokeStyle = 'rgba(0,0,0,.4)'; g.stroke();
+    }
+    // what it hits: a target ring on an enemy, a warning on Hazel's own tank
+    if (tr.hit) {
+      const o = tr.hit, q = this.proj(o.x, o.y, 0.3), r = Math.max(12, o.r * q.s * 1.35);
+      g.lineWidth = 2.5; g.strokeStyle = tr.self ? 'rgba(248,113,113,.95)' : 'rgba(253,224,71,.95)';
+      g.beginPath(); g.arc(q.x, q.y, r, 0, TAU); g.stroke();
+      if (!tr.self) for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2; g.beginPath(); g.moveTo(q.x + Math.cos(a) * (r - 4), q.y + Math.sin(a) * (r - 4)); g.lineTo(q.x + Math.cos(a) * (r + 5), q.y + Math.sin(a) * (r + 5)); g.stroke(); }
+      else label(g, '!', q.x, q.y - r - 8, 14, '#fecaca');
+    }
+    g.restore();
   }
 }
 
@@ -912,10 +1030,11 @@ function segDist(px, py, x1, y1, x2, y2) {
 export const tanks = {
   id: 'tanks',
   title: 'Bounce Brigade',
-  tagline: 'Toy tank duels with Captain Hazel: bank your shells off the walls, lay mines, outsmart the Klonkbot tank corps.',
-  howTo: 'Move with WASD / arrow keys (touch: drag on the left). Aim with the mouse and click (or Space) to fire; shells bounce once. Right-click, E or Shift lays a mine (touch: tap where to fire, MINE button). Esc pauses, R restarts.',
+  tagline: 'Toy tank duels with Captain Hazel: bank your shells off the walls, lay mines, challenge eight rival clubs for an evening of peace.',
+  howTo: 'Drive with WASD / arrow keys, aim with the mouse, click or Space fires; shells bounce once. Right-click, E or Shift lays a mine. Touch: drag on the left to drive, drag on the right to aim and let go to fire (slide back to cancel), tap the arena to fire there, MINE button for mines. Esc pauses, R restarts.',
   levels: LEVELS,
-  hero: 'RANGER_HEDGEHOG',
+  hero: 'TOY_HAZEL',
+  // The legacy cover depicts an unrelated crewed tank. Canonical 3D stages supply the art.
   art: new URL('../../games-assets/covers/cover-tanks.webp', import.meta.url).href,
   create: (i, env) => new TankSession(i, env),
   view3d: () => import('./tanks-3d.js'),

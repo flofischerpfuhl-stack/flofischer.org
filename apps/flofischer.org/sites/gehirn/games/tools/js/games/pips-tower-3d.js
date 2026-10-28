@@ -1,98 +1,73 @@
-/**
- * Pip’s Tower in 3D (Three.js): the tower of each world (stone, sandstone, ice or basalt, each with its own light and a
- * procedural backdrop), golden pins and levers, glossy water, glowing lava, sand, goo, gas, Fernstone crystals, ice,
- * gates, keys and teleport pads, and the sculpted cast: Pip with Biscuit, Zorblings, Klonkbots, Buzzbots and the boss.
- * The simulation stays 2D (board x right, y down, 360 × 640); here board (x, y) maps to three (x − 180, 320 − y) on the
- * z = 0 plane, which faces the camera head-on so the overlay can use a plain scale + offset.
- *
- * Everything static (sky, hills, the plateau, the tower with its rooms and roof: world/tower-scenery.js) is baked once
- * per level and screen size into a colour + depth image (decor.js Baker) and drawn back as one full-screen quad; only
- * the moving things are real geometry each frame, plus a shadow catcher on the back wall, torch flames and the
- * world's ambient particles (pollen, dust, snow, embers).
- */
-import { THREE, studioEnvironment, createRenderer, texture, mat, addLights, MergedCrowd, Particles, LOW_GPU } from './three-kit.js';
-import { loadModel } from './models.js';
-import { BOARD_W, BOARD_H } from './pips-tower.js';
-import { Baker } from './world/decor.js';
-import { buildTowerScenery, propsReady } from './world/tower-scenery.js';
-
-const DEPTH = 64;          // wall depth (z from −32 to +32)
-const HUD = 56;            // CSS px the HUD covers at the top
-const BX = (x) => x - BOARD_W / 2, BY = (y) => BOARD_H / 2 - y;
-const PR = 5;
-
-// The sculpted cast (scripts/games-sculpt), low detail for play plus the shadow-only bake.
-const load = async (name) => {
-  const [model, shadowModel] = await Promise.all([loadModel(name, 'lo'), loadModel(name, 'sh').catch(() => null)]);
-  return { model, shadowModel };
-};
-await propsReady;
-const CAST = Object.fromEntries(await Promise.all(['PIP', 'BISCUIT', 'ZORBLING', 'KLONKBOT', 'BUZZBOT', 'BLORB', 'KLONK_TANK', 'FROST_WALKER']
-  .map(async (n) => [n, await load(n)])));
-// Model, scale (board px per model unit) and the model's lowest point (it stands on the body's feet).
-const FIG = {
-  hero: { model: 'PIP', s: 64, base: 0 },
-  zorbling: { model: 'ZORBLING', s: 56, base: 0 },
-  klonkbot: { model: 'KLONKBOT', s: 47, base: 0 },
-  buzzbot: { model: 'BUZZBOT', s: 68, base: 0.34 },
-};
-// One boss per world: a big Blorb, the Klonk Tank, the Frost Walker, the Zorb Queen (a royal Blorb).
-const BOSS = [
-  { model: 'BLORB', s: 76, tint: null }, { model: 'KLONK_TANK', s: 66, tint: null },
-  { model: 'FROST_WALKER', s: 70, tint: null }, { model: 'BLORB', s: 80, tint: new THREE.Color(1.25, 0.7, 1.2) },
-];
-
-// The tower and backdrop of each world (docs/games/UNIVERSE.md): procedural, no photo backdrops.
+/** Fernworld fossil vaults: real authored assets, original board physics, one static colour/depth bake. */
+import {
+  THREE,
+  studioEnvironment,
+  createRenderer,
+  addLights,
+  Particles,
+  LOW_GPU,
+} from "./three-kit.js";
+import { BOARD_W, BOARD_H } from "./pips-tower.js";
+import { Baker } from "./world/decor.js";
+import {
+  buildTowerScenery,
+  prepareTowerScenery,
+} from "./world/tower-scenery.js";
+import { AssetLibrary } from "../../games-assets/fernworld/runtime/asset-library.js";
+import { ChannelLibrary } from "../../games-assets/fernworld/runtime/channel-library.js";
+import { createEffectInstances } from "../../games-assets/fernworld/effects.js";
+import {
+  BX,
+  BY,
+  GOLEMS,
+  ENEMIES,
+  TowerActor,
+  named,
+  pinTransform,
+  socketTransform,
+  doorTransform,
+  configureFlap,
+  updateFlap,
+  leverTransform,
+  clamp01,
+} from "./pips-tower-assets.js";
+const HUD = 56,
+  PR = 5;
+// Region lighting is shared by the baked excavation and its live actors.
 const LOOKS = [
-  { // Fernhaven Meadows: warm stone, red roof, grassy mound, sunny morning hills
-    back: ['t-brick', 0xfff2e2], wall: ['t-stone', 0xfff6ea], roof: 0xc2412d, flag: 0x3f9b4a, mound: ['t-grass', 0x86c55e],
-    sun: 0xfff1d6, intensity: 2.5, ambient: 1.25, sky: 0xe8f0ff, ground: 0x8a6a48, exposure: 1.05,
-    bg: { top: 0x4f9ef0, horizon: 0xdff1ff, far: 0x9cc6a0, near: 0x5fae4a, glow: 0xfff3c4, kind: 0 },
+  {
+    sun: 0xfff1d6,
+    intensity: 2.5,
+    ambient: 1.25,
+    sky: 0xe8f0ff,
+    ground: 0x8a6a48,
+    exposure: 1.05,
   },
-  { // Sunbake Dunes: sandstone, terracotta roof, golden hour mesas
-    back: ['t-brick', 0xf7cf98], wall: ['t-stone', 0xf2c088], roof: 0xd9783a, flag: 0x2aa6a0, mound: ['t-sand', 0xffe0b0],
-    sun: 0xffcf96, intensity: 2.7, ambient: 1.1, sky: 0xffe3c2, ground: 0x9a6b3a, exposure: 1.05,
-    bg: { top: 0x5f93db, horizon: 0xffd6a0, far: 0xe2a774, near: 0xc8784a, glow: 0xffd08a, kind: 1 },
+  {
+    sun: 0xffcf96,
+    intensity: 2.7,
+    ambient: 1.1,
+    sky: 0xffe3c2,
+    ground: 0x9a6b3a,
+    exposure: 1.05,
   },
-  { // Frostpeak: icy blue stone, snow caps, crisp peaks and an aurora
-    back: ['t-stone', 0xd6e6f8], wall: ['t-stone', 0xe4eefa], roof: 0x3566c2, flag: 0xe2f2ff, mound: ['t-snow', 0xffffff],
-    sun: 0xe8f2ff, intensity: 2.4, ambient: 1.3, sky: 0xdcecff, ground: 0x7d8fa8, exposure: 1.0, snow: true,
-    bg: { top: 0x3f78c8, horizon: 0xe6f3ff, far: 0xbcd2ea, near: 0x8fb0d4, glow: 0x9ff7d8, kind: 2 },
+  {
+    sun: 0xe8f2ff,
+    intensity: 2.4,
+    ambient: 1.3,
+    sky: 0xdcecff,
+    ground: 0x7d8fa8,
+    exposure: 1.0,
   },
-  { // Ember Isles: basalt, glowing seams, dusk volcanoes under the mothership
-    back: ['t-lavarock', 0xd6c2ba], wall: ['t-lavarock', 0xe2cec6], roof: 0x7a2a4e, flag: 0xff8a3d, mound: ['t-lavarock', 0x947a72],
-    sun: 0xffb27a, intensity: 2.6, ambient: 1.3, sky: 0xffc2a0, ground: 0x4a2a30, exposure: 1.08, seams: true,
-    bg: { top: 0x2a1b40, horizon: 0xe0704a, far: 0x5a3040, near: 0x2c1e26, glow: 0xff9a4a, kind: 3 },
+  {
+    sun: 0xffb27a,
+    intensity: 2.6,
+    ambient: 1.3,
+    sky: 0xffc2a0,
+    ground: 0x4a2a30,
+    exposure: 1.08,
   },
 ];
-
-/** Merge box geometries (position, normal, uv, index) into one, so the tower's walls are one draw call. */
-function merge(geos) {
-  const pos = [], nor = [], uv = [], idx = [];
-  for (const g of geos) {
-    const base = pos.length / 3;
-    pos.push(...g.attributes.position.array); nor.push(...g.attributes.normal.array); uv.push(...g.attributes.uv.array);
-    for (const i of g.index.array) idx.push(base + i);
-    g.dispose();
-  }
-  const out = new THREE.BufferGeometry();
-  out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  out.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
-  out.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-  out.setIndex(idx);
-  return out;
-}
-/** A wall segment [x1, y1, x2, y2] as a box, its stone pattern stretched by length instead of squashed. */
-function wallBox(seg, thick = 14, depth = DEPTH, z = 0) {
-  const [ax, ay, bx, by] = seg;
-  const len = Math.hypot(bx - ax, by - ay) + thick;
-  const g = new THREE.BoxGeometry(len, thick, depth);
-  const uv = g.attributes.uv;
-  for (let i = 0; i < uv.count; i++) uv.setX(i, (uv.getX(i) * len) / 64);
-  g.applyMatrix4(new THREE.Matrix4().compose(new THREE.Vector3(BX((ax + bx) / 2), BY((ay + by) / 2), z),
-    new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -Math.atan2(by - ay, bx - ax)), new THREE.Vector3(1, 1, 1)));
-  return g;
-}
 
 export class PipsTower3D {
   constructor(canvas) {
@@ -101,421 +76,1152 @@ export class PipsTower3D {
     this.scene.environment = studioEnvironment(this.renderer);
     this.scene.environmentIntensity = 0.8;
     this.camera = new THREE.PerspectiveCamera(28, 1, 10, 6000);
-    this.level = null; this.w = 1; this.h = 1;
+    this.w = 1;
+    this.h = 1;
+    this.library = new AssetLibrary();
+    this.channels = new ChannelLibrary();
+    this.actors = [];
+    this.level = null;
+    this.preparing = Promise.resolve();
+    this.disposed = false;
+    this.geometry = new Set();
+    this.materials = new Set();
     this.build();
   }
-
   build() {
-    const s = this.scene;
+    const s = this.scene,
+      ownG = (g) => {
+        this.geometry.add(g);
+        return g;
+      },
+      ownM = (m) => {
+        this.materials.add(m);
+        return m;
+      };
     this.baker = new Baker();
     s.add(this.baker.quad);
-    // the live shadow catcher on the back wall: only the moving things cast onto it (the static shade is baked)
-    this.catcher = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShadowMaterial({ opacity: 0.32, depthWrite: false }));
-    this.catcher.receiveShadow = true; this.catcher.renderOrder = -900; this.catcher.visible = !LOW_GPU; s.add(this.catcher);
-    this.lights = addLights(s, { dir: [-260, 520, 620], shadowBox: 420, mapSize: 2048, intensity: 2.5, ambient: 1.25, sky: 0xe8f0ff, ground: 0x8a6a48 });
+    this.catcher = new THREE.Mesh(
+      ownG(new THREE.PlaneGeometry(1, 1)),
+      ownM(new THREE.ShadowMaterial({ opacity: 0.27, depthWrite: false })),
+    );
+    this.catcher.receiveShadow = true;
+    this.catcher.renderOrder = -900;
+    this.catcher.visible = !LOW_GPU;
+    s.add(this.catcher);
+    this.lights = addLights(s, {
+      dir: [-260, 520, 620],
+      shadowBox: 420,
+      mapSize: 2048,
+      intensity: 2.5,
+      ambient: 1.25,
+      sky: 0xe8f0ff,
+      ground: 0x8a6a48,
+    });
     this.lights.light.shadow.camera.far = 2000;
     this.lights.light.shadow.bias = -0.0004;
-    // materials
-    this.mWater = new THREE.MeshPhysicalMaterial({ color: 0x2b8af5, roughness: 0.05, metalness: 0.0, clearcoat: 1, clearcoatRoughness: 0.05, emissive: 0x0b47a8, emissiveIntensity: 0.45, transparent: true, opacity: 0.9 });
-    this.mLava = new THREE.MeshStandardMaterial({ color: 0xff5a14, roughness: 0.4, emissive: 0xe83200, emissiveIntensity: 0.85 });
-    this.mStone = new THREE.MeshStandardMaterial({ color: 0x6b6460, roughness: 0.9, flatShading: true });
-    this.mGem = new THREE.MeshStandardMaterial({ color: 0x5ff0c8, roughness: 0.18, metalness: 0.1, emissive: 0x16b48a, emissiveIntensity: 0.55, flatShading: true });
-    this.mSand = new THREE.MeshStandardMaterial({ color: 0xe8b46c, roughness: 0.95, flatShading: true });
-    this.mGoo = new THREE.MeshStandardMaterial({ color: 0x9b3cf0, roughness: 0.15, metalness: 0.05, emissive: 0x4c0f8a, emissiveIntensity: 0.55 });
-    this.mGas = new THREE.MeshStandardMaterial({ color: 0xb6f05a, roughness: 0.8, emissive: 0x4f8a10, emissiveIntensity: 0.6, transparent: true, opacity: 0.32, depthWrite: false });
-    const max = 520;
-    const inst = (g, m, shadow = true, n = max) => { const im = new THREE.InstancedMesh(g, m, n); im.instanceMatrix.setUsage(THREE.DynamicDrawUsage); im.frustumCulled = false; im.castShadow = shadow; im.receiveShadow = true; im.count = 0; s.add(im); return im; };
-    this.parts = {
-      water: inst(new THREE.SphereGeometry(PR * 1.85, 12, 10), this.mWater, false),
-      lava: inst(new THREE.SphereGeometry(PR * 1.8, 12, 10), this.mLava, false),
-      stone: inst(new THREE.IcosahedronGeometry(PR * 1.4, 0), this.mStone),
-      gem: inst(new THREE.OctahedronGeometry(PR * 1.35, 0), this.mGem),
-      sand: inst(new THREE.IcosahedronGeometry(PR * 1.25, 0), this.mSand),
-      goo: inst(new THREE.SphereGeometry(PR * 1.75, 10, 8), this.mGoo, false),
-      gas: inst(new THREE.IcosahedronGeometry(PR * 2.6, 1), this.mGas, false, 260),
+    const mat = (color, extras = {}) =>
+      ownM(
+        new THREE.MeshStandardMaterial({ color, roughness: 0.6, ...extras }),
+      );
+    const specs = {
+      water: [
+        new THREE.SphereGeometry(PR * 1.85, 12, 10),
+        ownM(
+          new THREE.MeshPhysicalMaterial({
+            color: 0x438fc0,
+            roughness: 0.09,
+            clearcoat: 1,
+            emissive: 0x17476b,
+            emissiveIntensity: 0.22,
+            transparent: true,
+            opacity: 0.86,
+          }),
+        ),
+        false,
+      ],
+      lava: [
+        new THREE.SphereGeometry(PR * 1.8, 12, 10),
+        mat(0xf36a2a, { emissive: 0xc33d0d, emissiveIntensity: 0.6 }),
+        false,
+      ],
+      stone: [
+        new THREE.IcosahedronGeometry(PR * 1.4, 1),
+        mat(0x797573, { flatShading: true }),
+        false,
+      ],
+      gem: [
+        new THREE.OctahedronGeometry(PR * 1.35, 0),
+        mat(0x66ba8e, { emissive: 0x164b27, emissiveIntensity: 0.3 }),
+        false,
+      ],
+      sand: [
+        new THREE.IcosahedronGeometry(PR * 1.25, 0),
+        mat(0xdab785, { roughness: 1 }),
+        false,
+      ],
+      goo: [
+        new THREE.SphereGeometry(PR * 1.75, 12, 8),
+        mat(0x8f4bb4, {
+          roughness: 0.21,
+          emissive: 0x421359,
+          emissiveIntensity: 0.34,
+        }),
+        false,
+      ],
+      gas: [
+        new THREE.IcosahedronGeometry(PR * 2.6, 1),
+        mat(0xb3c591, {
+          emissive: 0x425a19,
+          emissiveIntensity: 0.3,
+          transparent: true,
+          opacity: 0.26,
+          depthWrite: false,
+        }),
+        false,
+      ],
     };
-    this.parts.gas.renderOrder = 2;
-    this.crowd = {
-      hero: new MergedCrowd(s, null, 1, CAST.PIP),
-      biscuit: new MergedCrowd(s, null, 1, CAST.BISCUIT),
-      zorbling: new MergedCrowd(s, null, 8, CAST.ZORBLING),
-      klonkbot: new MergedCrowd(s, null, 6, CAST.KLONKBOT),
-      buzzbot: new MergedCrowd(s, null, 6, CAST.BUZZBOT),
-    };
-    this.bossCrowds = {};
-    this.fx = new Particles(s, 700);
-    this.glow = new Particles(s, 200, new THREE.SphereGeometry(1, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
-    // ambient life: drifting motes (normal and glowing), chimney smoke
-    const ball = new THREE.SphereGeometry(1, 6, 4);
-    this.amb = new Particles(s, 140, ball, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false }));
-    this.ambGlow = new Particles(s, 90, ball, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
-    this.smoke = new Particles(s, 24, new THREE.IcosahedronGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.22, depthWrite: false }));
-    for (const p of [this.amb, this.ambGlow, this.smoke]) p.mesh.renderOrder = 3;
-    this.ac = new THREE.Color();
-    this.ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.06, 6, 40), new THREE.MeshBasicMaterial({ color: 0xffd36b, transparent: true, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
-    this.ring.visible = false; s.add(this.ring);
-    this.mPin = new THREE.MeshStandardMaterial({ color: 0xffc94a, metalness: 0.9, roughness: 0.22 });
-    this.hoverMat = new THREE.MeshStandardMaterial({ color: 0xffe08a, metalness: 0.8, roughness: 0.2, emissive: 0xffb300, emissiveIntensity: 0.6 });
-    this.mKnob = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3, metalness: 0.1 });
-    this.mGold = new THREE.MeshStandardMaterial({ color: 0xffc83d, roughness: 0.25, metalness: 0.85, emissive: 0x5a3a00, emissiveIntensity: 0.3 });
-    this.m4 = new THREE.Matrix4(); this.q = new THREE.Quaternion(); this.e = new THREE.Euler(); this.v = new THREE.Vector3(); this.sc = new THREE.Vector3();
-    this.tint = new THREE.Color();
-  }
-
-  bossCrowd(world) {
-    const b = BOSS[world] || BOSS[0];
-    const key = `${b.model}:${world}`;
-    if (!this.bossCrowds[key]) this.bossCrowds[key] = { crowd: new MergedCrowd(this.scene, null, 1, CAST[b.model]), ...b };
-    return this.bossCrowds[key];
-  }
-
-  /** The level: the baked diorama (rebuilt when the level, world or theme changes) and the live, moving parts. */
-  buildLevel(sess, dark) {
-    if (this.tower) { this.scene.remove(this.tower); this.tower.traverse((o) => { o.geometry?.dispose(); }); }
-    const tower = (this.tower = new THREE.Group());
-    const L = sess.L, look = (this.look = LOOKS[sess.world] || LOOKS[0]);
-    const b = L.bounds || [40, 40, 320, 600];
-    this.renderer.toneMappingExposure = look.exposure * (dark ? 0.92 : 1);
-    // the diorama depends only on the level and the theme: a retry keeps the scenery and its bake
-    if (this.sceneryFor !== L || this.sceneryDark !== dark) {
-      this.scenery?.dispose();
-      this.scenery = buildTowerScenery({ L, world: sess.world, dark, low: LOW_GPU, look });
-      this.sceneryFor = L; this.sceneryDark = dark;
-      this.bakeDirty = true; this.texReady = -1;
+    this.parts = {};
+    for (const [id, [g, m, shadow]] of Object.entries(specs)) {
+      const mesh = new THREE.InstancedMesh(ownG(g), m, 520);
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      mesh.count = 0;
+      mesh.frustumCulled = false;
+      mesh.castShadow = shadow;
+      mesh.receiveShadow = false;
+      s.add(mesh);
+      this.parts[id] = mesh;
     }
-    this.catcher.scale.set(b[2] - b[0], b[3] - b[1], 1);
-    this.catcher.position.set(BX((b[0] + b[2]) / 2), BY((b[1] + b[3]) / 2), -DEPTH / 2 + 0.5);
-    const wood = mat(0xffffff, { map: texture('t-wood', { repeat: [1, 1] }), roughness: 0.8 });
-    this.breakables = sess.breakables.map((w) => { const m = new THREE.Mesh(wallBox([w.ax, w.ay, w.bx, w.by]), wood); m.castShadow = true; tower.add(m); return m; });
-    // gates: a golden frame with bars
-    this.gates = sess.gates.map((g) => {
-      const grp = new THREE.Group();
-      const len = Math.hypot(g.bx - g.ax, g.by - g.ay);
-      const frame = new THREE.Mesh(new THREE.BoxGeometry(len + 10, 10, DEPTH * 0.5), new THREE.MeshStandardMaterial({ color: 0x7a5418, roughness: 0.5, metalness: 0.4 }));
-      grp.add(frame);
-      for (let x = -len / 2 + 6; x <= len / 2 - 6; x += 14) { const bar = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 13, 8), this.mGold); bar.position.set(x, 0, DEPTH * 0.3); bar.rotation.x = Math.PI / 2; grp.add(bar); }
-      const lock = new THREE.Mesh(new THREE.BoxGeometry(12, 14, 6), this.mGold); lock.position.z = DEPTH * 0.3 + 3; grp.add(lock);
-      grp.position.set(BX((g.ax + g.bx) / 2), BY((g.ay + g.by) / 2), 0);
-      grp.rotation.z = -Math.atan2(g.by - g.ay, g.bx - g.ax);
-      grp.traverse((o) => { o.castShadow = true; });
-      tower.add(grp); return grp;
-    });
-    // ice blocks
-    const mIce = new THREE.MeshPhysicalMaterial({ color: 0xbfe8ff, roughness: 0.08, metalness: 0, clearcoat: 1, transparent: true, opacity: 0.78, emissive: 0x4fa8e0, emissiveIntensity: 0.25 });
-    this.iceMeshes = sess.ice.map((ic) => {
-      const [x0, y0, x1, y1] = ic.rect;
-      const m = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, DEPTH * 0.8, 1, 1, 1), mIce);
-      m.position.set(BX((x0 + x1) / 2), BY((y0 + y1) / 2), 0); m.castShadow = true; tower.add(m); return m;
-    });
-    // levers: a base with a stick on the wall, and the tipping platform
-    const mPlat = mat(0xb4532a, { roughness: 0.6 });
-    this.leverMeshes = sess.levers.map((lv) => {
-      const base = new THREE.Mesh(new THREE.BoxGeometry(20, 8, 16), mat(0x475569, { roughness: 0.5, metalness: 0.4 }));
-      base.position.set(BX(lv.at[0]), BY(lv.at[1]), DEPTH / 2 - 6);
-      const stick = new THREE.Group();
-      const rod = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 20, 8), mat(0x94a3b8, { metalness: 0.6, roughness: 0.3 })); rod.position.y = 10;
-      const knob = new THREE.Mesh(new THREE.SphereGeometry(5.5, 14, 10), this.mKnob); knob.position.y = 21;
-      stick.add(rod, knob); stick.position.copy(base.position); stick.position.y += 2;
-      const len = Math.hypot(lv.base[2] - lv.base[0], lv.base[3] - lv.base[1]);
-      const plat = new THREE.Mesh(new THREE.BoxGeometry(len + 12, 12, DEPTH * 0.9), mPlat);
-      plat.geometry.translate(len / 2, 0, 0); plat.castShadow = true; plat.receiveShadow = true;
-      tower.add(base, stick, plat);
-      return { stick, knob, plat };
-    });
-    // teleport pads and their exits
-    this.portalMeshes = sess.portals.map((pt) => {
-      const [x0, y0, x1, y1] = pt.from;
-      const pad = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, 4, DEPTH * 0.8), new THREE.MeshBasicMaterial({ color: 0xb46bff, transparent: true, opacity: 0.7, toneMapped: false }));
-      pad.position.set(BX((x0 + x1) / 2), BY(y1) + 1, 0);
-      const exit = new THREE.Mesh(new THREE.TorusGeometry(13, 2.6, 8, 28), new THREE.MeshBasicMaterial({ color: 0xd8a8ff, toneMapped: false }));
-      exit.position.set(BX(pt.to[0]), BY(pt.to[1]), 4);
-      tower.add(pad, exit);
-      return { pad, exit };
-    });
-    // pins
-    this.pinMeshes = sess.pins.map((pin) => {
-      const g = new THREE.Group();
-      const bar = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 5.5, pin.len, 16), this.mPin);
-      bar.rotation.z = Math.PI / 2; bar.position.x = pin.len / 2; bar.castShadow = true;
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(11, 3.6, 12, 28), this.mPin);
-      ring.position.x = pin.len + 12;
-      const cap = new THREE.Mesh(new THREE.SphereGeometry(5.5, 12, 10), this.mPin);
-      g.add(bar, ring, cap);
-      g.rotation.z = -Math.atan2(pin.dy, pin.dx);
-      tower.add(g);
-      return g;
-    });
-    // rocks, bombs and keys
-    const stoneTex = texture(look.wall[0], { repeat: [1, 1] });
-    this.rockMeshes = sess.rocks.map((r) => {
-      let m;
-      if (r.kind === 'boulder') {
-        m = new THREE.Mesh(new THREE.IcosahedronGeometry(r.r, 1), mat(0xd8d0c8, { map: stoneTex, flat: true, roughness: 0.9 }));
-      } else if (r.kind === 'key') {
-        m = new THREE.Group();
-        const bow = new THREE.Mesh(new THREE.TorusGeometry(5, 2, 8, 18), this.mGold); bow.position.x = -5;
-        const shaft = new THREE.Mesh(new THREE.BoxGeometry(14, 3.4, 3.4), this.mGold); shaft.position.x = 6;
-        const bit = new THREE.Mesh(new THREE.BoxGeometry(3.4, 6, 3.4), this.mGold); bit.position.set(11, -3, 0);
-        m.add(bow, shaft, bit);
-      } else {
-        m = new THREE.Group();
-        const ball = new THREE.Mesh(new THREE.SphereGeometry(r.r, 18, 14), mat(0x1c1c22, { roughness: 0.25, metalness: 0.3 }));
-        const fuse = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 10, 6), mat(0xa16207)); fuse.position.y = r.r + 3;
-        const spark = new THREE.Mesh(new THREE.SphereGeometry(3, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffd34d, toneMapped: false }));
-        spark.position.y = r.r + 9; m.add(ball, fuse, spark); m.userData.spark = spark;
-      }
-      m.castShadow = true; m.traverse?.((o) => { o.castShadow = true; });
-      tower.add(m); return m;
-    });
-    // the flag on the roof's finial
-    const flagPole = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 46, 8), mat(0x6b4a2a));
-    flagPole.position.set(BX((b[0] + b[2]) / 2), BY(b[1] - 62) + 25, 0); tower.add(flagPole);
-    const flag = new THREE.Mesh(new THREE.PlaneGeometry(30, 18), mat(look.flag, { side: THREE.DoubleSide }));
-    flag.geometry.translate(15, 0, 0);
-    flag.position.set(BX((b[0] + b[2]) / 2), BY(b[1] - 62) + 39, 0); this.flag = flag; tower.add(flag);
-    this.scene.add(tower);
-    // light of the world (for the live parts; the baked scene has its own)
-    const li = this.lights;
-    li.light.color.set(look.sun); li.hemi.color.set(look.sky); li.hemi.groundColor.set(look.ground);
-    li.light.intensity = look.intensity * (dark ? 0.7 : 1); li.hemi.intensity = look.ambient * (dark ? 0.72 : 1);
-    this.level = sess;
+    this.parts.gas.renderOrder = 2;
+    this.flapGuide = new THREE.InstancedMesh(
+      ownG(new THREE.BoxGeometry(1, 1, 1)),
+      ownM(
+        new THREE.MeshBasicMaterial({
+          color: 0x69b8c5,
+          transparent: true,
+          opacity: 0.16,
+          depthWrite: false,
+        }),
+      ),
+      2,
+    );
+    this.flapGuide.count = 0;
+    this.flapGuide.renderOrder = 3;
+    s.add(this.flapGuide);
+    this.controlHalo = new THREE.Mesh(
+      ownG(new THREE.TorusGeometry(12, 1.5, 6, 28)),
+      ownM(
+        new THREE.MeshBasicMaterial({
+          color: 0xffdf8c,
+          transparent: true,
+          opacity: 0.8,
+          depthWrite: false,
+          toneMapped: false,
+        }),
+      ),
+    );
+    this.controlHalo.visible = false;
+    s.add(this.controlHalo);
+    this.fx = new Particles(s, 700);
+    this.glow = new Particles(
+      s,
+      200,
+      new THREE.SphereGeometry(1, 8, 6),
+      new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.85,
+        toneMapped: false,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    );
+    this.amb = new Particles(
+      s,
+      140,
+      new THREE.SphereGeometry(1, 6, 4),
+      new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.8,
+        depthWrite: false,
+      }),
+    );
+    this.ambGlow = new Particles(
+      s,
+      90,
+      new THREE.SphereGeometry(1, 6, 4),
+      new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.85,
+        toneMapped: false,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    );
+    this.smoke = new Particles(
+      s,
+      24,
+      new THREE.IcosahedronGeometry(1, 1),
+      new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.22,
+        depthWrite: false,
+      }),
+    );
+    for (const p of [this.amb, this.ambGlow, this.smoke])
+      p.mesh.renderOrder = 3;
+    this.ring = new THREE.Mesh(
+      ownG(new THREE.TorusGeometry(1, 0.06, 6, 40)),
+      ownM(
+        new THREE.MeshBasicMaterial({
+          color: 0xffd36b,
+          transparent: true,
+          toneMapped: false,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+        }),
+      ),
+    );
+    this.ring.visible = false;
+    s.add(this.ring);
+    this.m4 = new THREE.Matrix4();
+    this.q = new THREE.Quaternion();
+    this.e = new THREE.Euler();
+    this.v = new THREE.Vector3();
+    this.sc = new THREE.Vector3();
+    this.ac = new THREE.Color();
+    this.effects = createEffectInstances(THREE, s, { capacity: 64 });
+    this.reactions = Array.from({ length: 32 }, () => ({
+      start: -99,
+      x: 0,
+      y: 0,
+      type: "star_arc",
+    }));
+    this.reactionSlot = 0;
   }
-
+  prepare(sess) {
+    this.preparing = this.preparing
+      .then(() => this._prepare(sess))
+      .catch((error) => {
+        this.releaseLevel();
+        throw error;
+      });
+    // Permit an explicit UI retry after a failed download while returning the original rejection.
+    const job = this.preparing;
+    this.preparing = job.catch(() => undefined);
+    return job;
+  }
+  async _prepare(sess) {
+    if (this.disposed) throw new Error("Pip renderer disposed");
+    if (this.level === sess && this.ready) return;
+    const ids = new Set([
+      "PIP_KESSEL",
+      "BISCUIT_GLEAMPUP",
+      "PULL_PIN",
+      "PIN_SOCKET",
+      "FERNSTONE_GREEN",
+      "FERNSTONE_CACHE",
+    ]);
+    for (const en of sess.enemies)
+      ids.add(en.type === "chief" ? GOLEMS[sess.world] : ENEMIES[en.type]);
+    if (sess.chief) {
+      ids.add("GRANNY_GRAUSEL");
+      ids.add("GRAUSEL_BROOM_GLIDER");
+    }
+    if (sess.levers.length) {
+      ids.add("HINGED_FLAP");
+      ids.add("VAULT_LEVER");
+    }
+    if (sess.plates.length) ids.add("PRESSURE_PLATE");
+    if (sess.doors.length) ids.add("LINKED_DOOR");
+    if (sess.gates.length) ids.add("KEYED_GATE");
+    if (sess.ice.length) ids.add("ICE_BLOCK");
+    if (sess.breakables.length) ids.add("TIMBER_BREAK_WALL");
+    if (sess.portals.length) ids.add("STAR_TELEPORT_PAD");
+    for (const r of sess.rocks)
+      ids.add(
+        { boulder: "VAULT_BOULDER", bomb: "VAULT_BOMB", key: "VAULT_KEY" }[
+          r.kind
+        ],
+      );
+    for (const [kind] of sess.L.fill)
+      if (["water", "lava", "gas"].includes(kind))
+        ids.add(
+          { water: "WATER_SPOUT", lava: "LAVA_SPOUT", gas: "SWAMP_GAS_VENT" }[
+            kind
+          ],
+        );
+    const lod = (id) =>
+      ["PIP_KESSEL", "BISCUIT_GLEAMPUP"].includes(id) ? undefined : "lo";
+    const [prepared] = await Promise.all([
+      prepareTowerScenery(this.library, this.channels, sess.world),
+      ...Array.from(ids, (id) => this.library.template(id, lod(id))),
+    ]);
+    if (this.disposed)
+      throw new Error("Pip renderer disposed during preparation");
+    this.releaseLevel();
+    this.ready = false;
+    this.prepared = prepared;
+    this.level = sess;
+    this.look = LOOKS[sess.world];
+    this.stage = new THREE.Group();
+    this.scene.add(this.stage);
+    const make = async (id, scale = 1) => {
+      const a = new TowerActor(await this.library.create(id, lod(id)), scale);
+      this.actors.push(a);
+      this.stage.add(a.root);
+      return a;
+    };
+    this.hero = await make("PIP_KESSEL", 28);
+    this.biscuit = await make("BISCUIT_GLEAMPUP", 46);
+    this.heroStart = sess.t;
+    this.enemyActors = [];
+    for (const en of sess.enemies) {
+      const id = en.type === "chief" ? GOLEMS[sess.world] : ENEMIES[en.type];
+      const scale =
+        en.type === "chief"
+          ? 43
+          : en.type === "zorbling"
+            ? 57
+            : en.type === "klonkbot"
+              ? 50
+              : 35;
+      const a = await make(id, scale);
+      a.distance = 0;
+      a.lastX = en.x;
+      a.lamps = a.material((m) => /lamp|lens|hex/i.test(m.name));
+      a.lampOriginal = a.lamps.map((m) => ({
+        emissive: m.emissive?.clone(),
+        color: m.color.clone(),
+      }));
+      this.enemyActors.push(a);
+      if (en.type === "buzzbot")
+        a.rotors = ["Rotor_L", "Rotor_R"].map((n) => {
+          const o = named(a.handle.scene, n);
+          return { node: o, rest: o.quaternion.clone() };
+        });
+      if (en.type === "klonkbot") {
+        a.wheel = named(a.handle.scene, "wheel");
+        a.wheelRest = a.wheel.quaternion.clone();
+      }
+    }
+    this.pinActors = [];
+    this.socketActors = [];
+    for (const p of sess.pins) {
+      const a = await make("PULL_PIN");
+      const inset = pinTransform(a.root, p);
+      this.pinActors.push(a);
+      const b = await make("PIN_SOCKET");
+      socketTransform(b.root, p, inset);
+      this.socketActors.push(b);
+    }
+    this.flapActors = [];
+    this.leverActors = [];
+    for (const lv of sess.levers) {
+      const a = await make("HINGED_FLAP");
+      configureFlap(a, lv);
+      this.flapActors.push(a);
+      const b = await make("VAULT_LEVER");
+      leverTransform(b, lv);
+      this.leverActors.push(b);
+    }
+    this.plateActors = [];
+    for (const pl of sess.plates) {
+      const a = await make("PRESSURE_PLATE");
+      a.root.scale.set((pl.x1 - pl.x0) / 1.3, 24, 40);
+      a.root.position.set(
+        BX((pl.x0 + pl.x1) / 2),
+        BY(pl.y - 6) - 0.2765 * 24,
+        0,
+      );
+      a.plate = named(a.handle.scene, "PlateTravel");
+      a.tint = a.material(() => true);
+      for (const m of a.tint)
+        m.color.set(pl.color).lerp(new THREE.Color(0xffffff), 0.55);
+      this.plateActors.push(a);
+    }
+    this.doorActors = [];
+    for (const d of sess.doors) {
+      const a = await make("LINKED_DOOR");
+      a.material((m, o) => o.name === "SignSurface_Mesh").forEach((m) =>
+        m.color.set(d.color),
+      );
+      doorTransform(a, d, d.open);
+      this.doorActors.push(a);
+    }
+    this.gateActors = [];
+    for (const g of sess.gates) {
+      const a = await make("KEYED_GATE");
+      doorTransform(a, g, 0);
+      this.gateActors.push(a);
+    }
+    this.iceActors = [];
+    for (const ic of sess.ice) {
+      const [x0, y0, x1, y1] = ic.rect,
+        a = await make("ICE_BLOCK");
+      a.root.scale.set((x1 - x0) / 0.94, (y1 - y0) / 1.02, 48 / 0.84);
+      a.root.position.set(BX((x0 + x1) / 2), BY(y1), 0);
+      this.iceActors.push(a);
+    }
+    this.woodActors = [];
+    for (const w of sess.breakables) {
+      const a = await make("TIMBER_BREAK_WALL"),
+        angle = -Math.atan2(w.by - w.ay, w.bx - w.ax),
+        len = Math.hypot(w.bx - w.ax, w.by - w.ay);
+      a.root.scale.set(len / 1.426, 12 / 1.52, 180);
+      a.root.rotation.z = angle;
+      this.v
+        .set(0, 0.8 * a.root.scale.y, 0)
+        .applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+      a.root.position.set(
+        BX((w.ax + w.bx) / 2) - this.v.x,
+        BY((w.ay + w.by) / 2) - this.v.y,
+        0,
+      );
+      a.fragments = Array.from({ length: 5 }, (_, i) => {
+        const n = named(a.handle.scene, "BreakGroup" + i);
+        return { node: n, rest: n.position.clone() };
+      });
+      this.woodActors.push(a);
+    }
+    this.rockActors = [];
+    for (const r of sess.rocks) {
+      const a = await make(
+        { boulder: "VAULT_BOULDER", bomb: "VAULT_BOMB", key: "VAULT_KEY" }[
+          r.kind
+        ],
+        r.kind === "boulder" ? r.r / 0.58 : r.kind === "bomb" ? r.r / 0.33 : 21,
+      );
+      if (r.kind === "bomb") a.handle.scene.position.y = -0.33;
+      this.rockActors.push(a);
+    }
+    this.portalActors = [];
+    for (const pt of sess.portals) {
+      const a = await make(
+        "STAR_TELEPORT_PAD",
+        (pt.from[2] - pt.from[0]) / 0.98,
+      );
+      a.place((pt.from[0] + pt.from[2]) / 2, pt.from[3] + 0.22 * a.scale, 0, 0);
+      const b = await make("STAR_TELEPORT_PAD", 25);
+      b.place(pt.to[0], pt.to[1] + 0.22 * 25, -7, 0);
+      this.portalActors.push([a, b]);
+    }
+    for (const [type, x0, y0, x1] of sess.L.fill) {
+      if (!["water", "lava", "gas"].includes(type)) continue;
+      const a = await make(
+        { water: "WATER_SPOUT", lava: "LAVA_SPOUT", gas: "SWAMP_GAS_VENT" }[
+          type
+        ],
+        21,
+      );
+      a.place((x0 + x1) / 2, y0 + 8, -25, 0);
+    }
+    const cache = await make("FERNSTONE_CACHE", 19);
+    cache.place(
+      Math.max(66, Math.min(294, sess.hero.x - 39)),
+      sess.hero.y + sess.hero.r,
+      -10,
+      0,
+    );
+    this.cache = cache;
+    this.granny = null;
+    this.glider = null;
+    this.escape = null;
+    if (sess.chief) {
+      this.granny = await make("GRANNY_GRAUSEL", 36);
+      this.glider = await make("GRAUSEL_BROOM_GLIDER", 36);
+      this.escape = new THREE.Group();
+      this.stage.add(this.escape);
+      this.escape.add(this.granny.root, this.glider.root);
+      this.granny.root.position.set(0, 0, 0);
+      this.glider.root.position.set(0, 0, 0);
+      this.escape.visible = false;
+    }
+    if (!this.nativeGem) {
+      const template = await this.library.template("FERNSTONE_GREEN", "lo");
+      template.scene.updateMatrixWorld(true);
+      const pieces = [];
+      template.scene.traverse((o) => {
+        if (o.isMesh) pieces.push(o);
+      });
+      if (pieces.length !== 1)
+        throw new Error("Fernstone particle expects one authored primitive");
+      const src = pieces[0],
+        g = src.geometry.clone().applyMatrix4(src.matrixWorld);
+      g.translate(0, -0.1855, 0);
+      g.scale(34, 34, 34);
+      this.geometry.add(g);
+      this.parts.gem.geometry = g;
+      this.parts.gem.material = src.material.clone();
+      this.parts.gem.material.color.set(0x8cc9a4);
+      this.parts.gem.material.emissive.set(0x123d22);
+      this.parts.gem.material.emissiveIntensity = 0.18;
+      this.materials.add(this.parts.gem.material);
+      this.nativeGem = true;
+    }
+    this.deadParts = new Uint8Array(Math.max(520, sess.parts.length));
+    for (const r of this.reactions) r.start = -99;
+    this.effects.clear();
+    this.bakeDirty = true;
+    this.sceneryFor = null;
+    this.ready = true;
+  }
+  releaseLevel() {
+    this.scenery?.dispose();
+    this.scenery = null;
+    this.stage?.removeFromParent();
+    for (const actor of this.actors) actor.dispose();
+    this.actors = [];
+    this.level = null;
+    this.ready = false;
+  }
+  buildLevel(sess, dark) {
+    if (this.level !== sess)
+      throw new Error("Pip level must be prepared before rendering");
+    const L = sess.L,
+      b = L.bounds || [40, 40, 320, 600],
+      look = this.look;
+    this.dark = dark;
+    this.renderer.toneMappingExposure = look.exposure * (dark ? 0.92 : 1);
+    this.scenery?.dispose();
+    this.scenery = buildTowerScenery({
+      L,
+      world: sess.world,
+      dark,
+      low: LOW_GPU,
+      look,
+      prepared: this.prepared,
+    });
+    this.sceneryFor = L;
+    this.sceneryDark = dark;
+    this.bakeDirty = true;
+    this.texReady = -1;
+    this.catcher.scale.set(b[2] - b[0], b[3] - b[1], 1);
+    this.catcher.position.set(
+      BX((b[0] + b[2]) / 2),
+      BY((b[1] + b[3]) / 2),
+      -32 + 0.5,
+    );
+    const li = this.lights;
+    li.light.color.set(look.sun);
+    li.hemi.color.set(look.sky);
+    li.hemi.groundColor.set(look.ground);
+    li.light.intensity = look.intensity * (dark ? 0.7 : 1);
+    li.hemi.intensity = look.ambient * (dark ? 0.72 : 1);
+  }
+  render(sess, view) {
+    if (this.level !== sess || !this.ready) return; // core owns loading/error UI; no old-character fallback
+    if (this.sceneryFor !== sess.L || this.dark !== view.dark) {
+      this.buildLevel(sess, view.dark);
+      this.resize(this.w, this.h, this.renderer.getPixelRatio());
+    }
+    this.bake();
+    const shake = sess.shake > 0 && !view.reduced ? sess.shake * 6 : 0;
+    const tanH = Math.tan((this.camera.fov * Math.PI) / 360),
+      k = shake / (this.dist * tanH);
+    this.baker.shift(
+      this.camera,
+      ((Math.random() - 0.5) * k) / this.camera.aspect,
+      (Math.random() - 0.5) * k,
+    );
+    sess.pins.forEach((p, i) => pinTransform(this.pinActors[i].root, p));
+    sess.levers.forEach((lv, i) => {
+      updateFlap(this.flapActors[i], lv);
+      leverTransform(this.leverActors[i], lv);
+    });
+    sess.doors.forEach((d, i) => doorTransform(this.doorActors[i], d, d.open));
+    sess.gates.forEach((g, i) =>
+      doorTransform(
+        this.gateActors[i],
+        g,
+        g.alive ? 0 : clamp01(g.openT / 0.22),
+      ),
+    );
+    sess.plates.forEach(
+      (p, i) => (this.plateActors[i].plate.position.y = p.down ? -0.075 : 0),
+    );
+    sess.ice.forEach((ic, i) => (this.iceActors[i].root.visible = ic.alive));
+    sess.breakables.forEach((w, i) => {
+      const a = this.woodActors[i];
+      if (!w.alive && a.deadAt == null) a.deadAt = sess.t;
+      const age = a.deadAt == null ? 0 : sess.t - a.deadAt;
+      a.root.visible = age < 0.7;
+      for (let j = 0; j < 5; j++) {
+        const f = a.fragments[j];
+        f.node.position.copy(f.rest);
+        if (age) {
+          f.node.position.x += (j - 2) * age * 0.8;
+          f.node.position.y += age * 0.3 - age * age;
+          f.node.rotation.z = (j - 2) * age * 0.5;
+        }
+      }
+    });
+    sess.rocks.forEach((r, i) => {
+      const a = this.rockActors[i];
+      a.root.visible = r.alive;
+      a.root.position.set(BX(r.x), BY(r.y), 0);
+      a.root.rotation.z = -r.rot;
+    });
+    named(this.cache.handle.scene, "LidPivot").rotation.x =
+      (-Math.PI / 180) *
+      105 *
+      Math.min(1, sess.collected / Math.max(1, sess.need));
+    this.drawGuides(sess);
+    this.drawCharacters(sess, view);
+    this.drawParticles(sess);
+    this.drawFx(sess);
+    this.drawReactions(sess);
+    this.drawAmbient(sess, view);
+    // A zero-count InstancedMesh still makes Three prepare its material/program.
+    // Hide empty particle batches before submission; every live instance is unchanged.
+    for (const p of [this.fx, this.glow, this.amb, this.ambGlow, this.smoke])
+      p.mesh.visible = p.mesh.count > 0;
+    this.renderer.render(this.scene, this.camera);
+  }
+  drawGuides(sess) {
+    let count = 0;
+    for (const lv of sess.flaps) {
+      if (lv.state !== "in" || count >= 2) continue;
+      const [ax, ay, bx, by] = sess.leverSeg(lv, (1 - lv.pos) * lv.turn),
+        len = Math.hypot(bx - ax, by - ay);
+      this.m4.compose(
+        this.v.set(BX((ax + bx) / 2), BY((ay + by) / 2), 5),
+        this.q.setFromEuler(this.e.set(0, 0, -Math.atan2(by - ay, bx - ax))),
+        this.sc.set(len, 9, 2),
+      );
+      this.flapGuide.setMatrixAt(count++, this.m4);
+    }
+    this.flapGuide.count = count;
+    this.flapGuide.visible = count > 0;
+    this.flapGuide.instanceMatrix.needsUpdate = count > 0;
+    const c = sess.controls[sess.hover >= 0 ? sess.hover : sess.hintControl];
+    this.controlHalo.visible = !!c && c.state === "in";
+    if (this.controlHalo.visible)
+      this.controlHalo.position.set(
+        BX(c.kind === "pin" ? c.bx + c.dx * 12 : c.at[0]),
+        BY(c.kind === "pin" ? c.by + c.dy * 12 : c.at[1] - 8),
+        34,
+      );
+  }
+  drawCharacters(sess, view) {
+    const t = sess.t,
+      h = sess.hero,
+      happy = h.mood === "happy";
+    if (h.dead && this.hero.deadAt == null) this.hero.deadAt = h.diedAt ?? t;
+    if (happy && this.hero.happyAt == null) this.hero.happyAt = t;
+    this.hero.place(h.x, h.y + h.r, 4, h.walk ? h.walk * 1.15 : 0.2);
+    this.hero.pose(
+      h.dead ? "Hit_Recover" : happy ? "Celebrate" : h.walk ? "Walk" : "Idle",
+      h.dead ? t - this.hero.deadAt : happy ? t - this.hero.happyAt : t,
+      !h.dead && !happy,
+    );
+    const side = h.x > 180 ? -1 : 1;
+    this.biscuit.place(h.x + side * 29, h.y + h.r, -8, -side * 0.5);
+    this.biscuit.pose(
+      happy
+        ? "Cheer"
+        : h.walk
+          ? "Run"
+          : h.dead
+            ? "Idle"
+            : Math.floor(t / 5) % 3 === 1
+              ? "Sniff"
+              : "Idle",
+      h.walk ? (t * 64) / (46 * 0.349206349) : t,
+      true,
+    );
+    sess.enemies.forEach((en, i) => {
+      const a = this.enemyActors[i];
+      a.distance += Math.abs(en.x - a.lastX);
+      a.lastX = en.x;
+      if (en.dead && a.deadAt == null) {
+        a.deadAt = en.diedAt ?? t;
+        a.brakePhase = a.deadAt * Math.PI * 2 * 3.3;
+      }
+      const age = a.deadAt == null ? 0 : t - a.deadAt;
+      a.place(
+        en.x,
+        en.y + en.r,
+        en.type === "chief" ? -4 : 4,
+        en.charging ? Math.sign(h.x - en.x) * 1.2 : 0.2,
+      );
+      a.root.visible =
+        !en.dead ||
+        age <
+          (en.type === "chief"
+            ? 3.2
+            : en.type === "zorbling" && en.cause === "lava"
+              ? 5
+              : 2.2);
+      if (en.type === "zorbling") {
+        a.pose(
+          en.dead
+            ? en.cause === "lava"
+              ? "Melt"
+              : "Hit"
+            : en.charging
+              ? "Walk_InPlace"
+              : "Idle",
+          en.dead
+            ? age
+            : en.charging
+              ? a.distance / (a.scale * 0.222222222)
+              : t,
+          !en.dead,
+        );
+        if (en.dead && en.cause === "lava")
+          a.lamps.forEach((m, j) => {
+            m.emissive
+              ?.copy(a.lampOriginal[j].emissive)
+              .multiplyScalar(1 - clamp01(age / 0.45));
+            m.color
+              .copy(a.lampOriginal[j].color)
+              .lerp(this.ac.set(0x0a0906), clamp01(age / 0.45));
+          });
+      } else if (en.type === "klonkbot") {
+        a.pose(
+          en.dead
+            ? "deactivated"
+            : en.charging
+              ? "wheel_roll_travel"
+              : "idle_balance",
+          en.dead ? age : en.charging ? a.distance / a.scale : t,
+          !en.dead,
+        );
+        a.wheel.quaternion
+          .copy(a.wheelRest)
+          .multiply(
+            this.q.setFromAxisAngle(
+              this.v.set(1, 0, 0),
+              a.distance / (a.scale * 0.208),
+            ),
+          );
+        if (en.dead) {
+          // Authored deactivated recipe: lens strength 2.6 -> .4 -> 0 at 0/.4/.9s.
+          const fade =
+            age < 0.4
+              ? 1 - (age / 0.4) * (1 - 0.4 / 2.6)
+              : (0.4 / 2.6) * (1 - clamp01((age - 0.4) / 0.5));
+          a.lamps.forEach((m, j) =>
+            m.emissive?.copy(a.lampOriginal[j].emissive).multiplyScalar(fade),
+          );
+        }
+      } else if (en.type === "buzzbot") {
+        // Source hover is .871m above its root; align the delivered visible body with the physics body.
+        a.root.position.y -= 0.871 * a.scale;
+        a.pose(
+          en.dead ? "Disabled" : en.charging ? "FlightTilt" : "Hover",
+          en.dead ? age : t,
+          !en.dead,
+        );
+        const u = clamp01(age / 1.8),
+          phase = en.dead
+            ? a.brakePhase +
+              Math.PI * 2 * 3.3 * 1.8 * (u - u * u + (u * u * u) / 3)
+            : t * Math.PI * 2 * 3.3;
+        a.rotors.forEach((r, j) =>
+          r.node.quaternion
+            .copy(r.rest)
+            .multiply(
+              this.q.setFromAxisAngle(
+                this.v.set(0, 1, 0),
+                (j ? -1 : 1) * phase,
+              ),
+            ),
+        );
+      } else {
+        const hit = t - en.hitT;
+        a.pose(
+          en.dead ? "Disabled" : hit < 1 ? "Hit_Recover" : "Idle",
+          en.dead ? age : hit < 1 ? hit : t,
+          !en.dead && hit >= 1,
+        );
+        if (en.dead)
+          a.lamps.forEach((m, j) =>
+            m.emissive
+              ?.copy(a.lampOriginal[j].emissive)
+              .multiplyScalar(1 - clamp01(age / 0.5)),
+          );
+      }
+    });
+    if (this.escape) {
+      const chiefIndex = sess.enemies.indexOf(sess.chief),
+        a = this.enemyActors[chiefIndex];
+      this.escape.visible = !!sess.chief.dead;
+      if (this.escape.visible) {
+        const age = t - a.deadAt,
+          u = clamp01(age / 3);
+        this.escape.position.set(
+          BX(sess.chief.x) + u * 340,
+          BY(sess.chief.y + sess.chief.r) + 35 + u * u * 390,
+          18,
+        );
+        this.escape.rotation.y = 0.25 + u * 0.6;
+        this.escape.rotation.z = -u * 0.12;
+        this.granny.pose("Mounted_Escape", age, true);
+      }
+    }
+  }
+  drawReactions(sess) {
+    for (let i = 0; i < sess.parts.length; i++) {
+      const p = sess.parts[i];
+      if (p.dead && !this.deadParts[i] && p.t === "goo") {
+        const r = this.reactions[this.reactionSlot++ % 32];
+        Object.assign(r, { start: sess.t, x: p.x, y: p.y, type: "star_arc" });
+      }
+      this.deadParts[i] = p.dead ? 1 : 0;
+    }
+    this.effects.begin();
+    for (const r of this.reactions) {
+      const age = sess.t - r.start;
+      if (age < 0 || age > 0.55) continue;
+      const s = 5 + age * 12;
+      this.m4.compose(
+        this.v.set(BX(r.x), BY(r.y) + age * 10, 12),
+        this.q.setFromEuler(this.e.set(0, 0, age * 3)),
+        this.sc.set(s, s, s),
+      );
+      this.effects.add(r.type, this.m4, 1 - age / 0.55);
+    }
+    for (let i = 0; i < sess.enemies.length; i++) {
+      const en = sess.enemies[i],
+        a = this.enemyActors[i];
+      if (!en.dead || en.cause !== "water" || en.type === "zorbling") continue;
+      const age = sess.t - a.deadAt;
+      if (age > 1) continue;
+      this.m4.compose(
+        this.v.set(BX(en.x), BY(en.y - 20), 15),
+        this.q.setFromEuler(this.e.set(0, 0, age * 10)),
+        this.sc.set(23, 23, 23),
+      );
+      this.effects.add("spark_chain", this.m4, 1 - age);
+    }
+    this.effects.flush();
+  }
   /** Bake the static diorama for the current level and view (again when a texture finishes loading). */
   bake() {
     const sc = this.scenery;
-    const ready = sc.textures.filter((t) => t.image && (t.image.width || t.image.naturalWidth)).length;
+    const ready = sc.textures.filter(
+      (t) => t.image && (t.image.width || t.image.naturalWidth),
+    ).length;
     if (!this.bakeDirty && ready === this.texReady) return;
-    this.bakeDirty = false; this.texReady = ready;
+    this.bakeDirty = false;
+    this.texReady = ready;
     this.baker.shift(this.camera, 0, 0);
     this.camera.position.set(0, this.camY, this.dist);
     const size = this.renderer.getDrawingBufferSize(new THREE.Vector2());
     // supersampled (the bake is also the anti-aliasing of all that detail); dense screens need less
-    const ss = LOW_GPU ? 1 : size.x * size.y > 2.6e6 || this.renderer.getPixelRatio() >= 1.4 ? 1.5 : 2;
+    const ss = LOW_GPU
+      ? 1
+      : size.x * size.y > 2.6e6 || this.renderer.getPixelRatio() >= 1.4
+        ? 1.5
+        : 2;
     sc.fit(this.camera, size.y * ss);
     this.baker.bake(this.renderer, sc.scene, this.camera, ss);
     // the bake's shadow map is only needed while baking
-    sc.scene.traverse((o) => { if (o.isDirectionalLight && o.shadow.map) { o.shadow.map.dispose(); o.shadow.map = null; } });
+    sc.scene.traverse((o) => {
+      if (o.isDirectionalLight && o.shadow.map) {
+        o.shadow.map.dispose();
+        o.shadow.map = null;
+      }
+    });
   }
 
   resize(w, h, dpr) {
-    if (w !== this.w || h !== this.h || dpr !== this.renderer.getPixelRatio()) this.bakeDirty = true;
-    this.w = w; this.h = h;
-    this.renderer.setPixelRatio(dpr); this.renderer.setSize(w, h, false);
+    if (w !== this.w || h !== this.h || dpr !== this.renderer.getPixelRatio())
+      this.bakeDirty = true;
+    this.w = w;
+    this.h = h;
+    this.renderer.setPixelRatio(dpr);
+    this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     // Fit the board (with roof) below the HUD; the z = 0 plane fills `fit` of the free height.
-    const boardH = BOARD_H + 70, boardW = BOARD_W + 40;
+    const boardH = BOARD_H + 70,
+      boardW = BOARD_W + 40;
     const availH = Math.max(80, h - HUD - 6);
     const tanH = Math.tan((this.camera.fov * Math.PI) / 360);
-    const distH = (boardH / 2) / tanH * (h / availH);
-    const distW = (boardW / 2) / (tanH * this.camera.aspect);
+    const distH = (boardH / 2 / tanH) * (h / availH);
+    const distW = boardW / 2 / (tanH * this.camera.aspect);
     this.dist = Math.max(distH, distW);
     // shift the camera so the board's centre sits in the middle of the free area under the HUD
     const pxPerUnit = h / (2 * this.dist * tanH);
     const centreY = BY(BOARD_H / 2 - 35);
-    this.camY = centreY + (HUD / 2) / pxPerUnit;
+    this.camY = centreY + HUD / 2 / pxPerUnit;
     this.camera.position.set(0, this.camY, this.dist);
     this.camera.lookAt(0, this.camY, 0);
-    this.camera.near = this.dist * 0.1; this.camera.far = this.dist + 7000;
+    this.camera.near = this.dist * 0.1;
+    this.camera.far = this.dist + 7000;
     this.camera.updateProjectionMatrix();
   }
 
   layoutFor() {
     const tanH = Math.tan((this.camera.fov * Math.PI) / 360);
     const s = this.h / (2 * this.dist * tanH); // px per board unit on the z = 0 plane
-    const ox = this.w / 2 + (BX(0)) * s, oy = this.h / 2 - (BY(0) - this.camY) * s;
+    const ox = this.w / 2 + BX(0) * s,
+      oy = this.h / 2 - (BY(0) - this.camY) * s;
     return { s, ox, oy };
   }
 
-  render(sess, view) {
-    if (this.level !== sess || this.dark !== view.dark) { this.dark = view.dark; this.buildLevel(sess, view.dark); this.resize(this.w, this.h, this.renderer.getPixelRatio()); }
-    this.bake();
-    // shake moves the whole picture (baked and live alike) in screen space
-    const shake = sess.shake > 0 && !view.reduced ? sess.shake * 6 : 0;
-    const tanH = Math.tan((this.camera.fov * Math.PI) / 360), k = shake / (this.dist * tanH);
-    this.baker.shift(this.camera, (Math.random() - 0.5) * k / this.camera.aspect, (Math.random() - 0.5) * k);
-    if (this.flag) this.flag.rotation.y = Math.sin(sess.t * 3) * 0.3;
-
-    sess.pins.forEach((pin, i) => {
-      const g = this.pinMeshes[i];
-      g.visible = pin.state !== 'out';
-      const [ax, ay] = sess.pinSeg(pin);
-      g.position.set(BX(ax), BY(ay), 0);
-      const hot = pin.i === sess.hover && pin.state === 'in';
-      for (const c of g.children) c.material = hot ? this.hoverMat : this.mPin;
-    });
-    sess.levers.forEach((lv, i) => {
-      const m = this.leverMeshes[i], [ax, ay, bx, by] = [lv.plat.ax, lv.plat.ay, lv.plat.bx, lv.plat.by];
-      m.plat.position.set(BX(ax), BY(ay), 0);
-      m.plat.rotation.z = -Math.atan2(by - ay, bx - ax);
-      m.stick.rotation.z = (lv.turn > 0 ? -1 : 1) * (0.6 - 1.2 * (lv.turn ? lv.ang / lv.turn : 0));
-      m.knob.material = lv.i === sess.hover && lv.state === 'in' ? this.hoverMat : this.mKnob;
-    });
-    this.breakables.forEach((m, i) => { m.visible = sess.breakables[i].alive; });
-    this.gates.forEach((m, i) => { const g = sess.gates[i]; m.visible = g.alive || g.openT < 0.35; if (!g.alive) m.scale.setScalar(Math.max(0.01, 1 - g.openT / 0.35)); });
-    this.iceMeshes.forEach((m, i) => { m.visible = sess.ice[i].alive; });
-    this.portalMeshes.forEach((m, i) => {
-      const pt = sess.portals[i], k = 0.6 + Math.sin(sess.t * 4 + i) * 0.15 + pt.pulse * 0.6;
-      m.exit.rotation.z = sess.t * 2; m.exit.scale.setScalar(0.9 + pt.pulse * 0.4);
-      m.pad.material.opacity = Math.min(1, k);
-    });
-    sess.rocks.forEach((r, i) => {
-      const m = this.rockMeshes[i];
-      m.visible = r.alive;
-      m.position.set(BX(r.x), BY(r.y), 0);
-      if (r.kind !== 'bomb') m.rotation.z = -r.rot;
-      else if (m.userData.spark) m.userData.spark.scale.setScalar(0.7 + Math.random() * 0.6);
-    });
-    this.drawParticles(sess);
-    this.drawCharacters(sess);
-    this.drawFx(sess);
-    this.drawAmbient(sess, view);
-    this.renderer.render(this.scene, this.camera);
-  }
-
   drawParticles(sess) {
-    const counts = { water: 0, lava: 0, stone: 0, gem: 0, sand: 0, goo: 0, gas: 0 };
+    const counts = {
+      water: 0,
+      lava: 0,
+      stone: 0,
+      gem: 0,
+      sand: 0,
+      goo: 0,
+      gas: 0,
+    };
     const meshes = this.parts;
     const { m4, q, e, v, sc } = this;
     for (let i = 0; i < sess.parts.length; i++) {
       const p = sess.parts[i];
       if (p.dead) continue;
-      const mesh = meshes[p.t], n = counts[p.t]++;
+      const mesh = meshes[p.t],
+        n = counts[p.t]++;
       if (n >= mesh.instanceMatrix.count) continue;
       // a little depth jitter per particle so piles read as 3D
       const z = ((i * 7919) % 17) - 8;
       let k = 1;
-      if (p.t === 'gem') q.setFromEuler(e.set(((i * 37) % 10) * 0.2, sess.t * 0.8 + (i % 7) * 0.9, ((i * 13) % 9) * 0.15));
-      else if (p.t === 'stone' || p.t === 'sand') q.setFromEuler(e.set(i, i * 0.7, 0));
-      else { q.identity(); if (p.t === 'lava' || p.t === 'goo') k = 1 + Math.sin(sess.t * 6 + i) * 0.08; else if (p.t === 'gas') k = 0.85 + Math.sin(sess.t * 3 + i) * 0.15; }
-      m4.compose(v.set(BX(p.x), BY(p.y), p.t === 'water' || p.t === 'lava' || p.t === 'goo' ? z * 1.4 : p.t === 'gas' ? z * 2 : z), q, sc.set(k, k, k));
+      if (p.t === "gem")
+        q.setFromEuler(
+          e.set(
+            ((i * 37) % 10) * 0.2,
+            sess.t * 0.8 + (i % 7) * 0.9,
+            ((i * 13) % 9) * 0.15,
+          ),
+        );
+      else if (p.t === "stone" || p.t === "sand")
+        q.setFromEuler(e.set(i, i * 0.7, 0));
+      else {
+        q.identity();
+        if (p.t === "lava" || p.t === "goo")
+          k = 1 + Math.sin(sess.t * 6 + i) * 0.08;
+        else if (p.t === "gas") k = 0.85 + Math.sin(sess.t * 3 + i) * 0.15;
+      }
+      m4.compose(
+        v.set(
+          BX(p.x),
+          BY(p.y),
+          p.t === "water" || p.t === "lava" || p.t === "goo"
+            ? z * 1.4
+            : p.t === "gas"
+              ? z * 2
+              : z,
+        ),
+        q,
+        sc.set(k, k, k),
+      );
       mesh.setMatrixAt(n, m4);
     }
-    for (const [t, mesh] of Object.entries(meshes)) { mesh.count = Math.min(counts[t], mesh.instanceMatrix.count); mesh.instanceMatrix.needsUpdate = true; }
-  }
-
-  /** Recolour instance i of a crowd (burnt, shorted out, the boss's tint). */
-  paint(crowd, i, color) { for (const c of crowd.channels) c.mesh.setColorAt(i, color); }
-
-  drawCharacters(sess) {
-    const h = sess.hero, t = sess.t;
-    const happy = h.mood === 'happy', burnt = h.dead && h.cause === 'lava';
-    const C = this.crowd;
-    for (const c of Object.values(C)) c.begin();
-    // Pip, and Biscuit at his side (on the roomier side, cheering on a win and lying down on a loss)
-    const hop = happy ? Math.abs(Math.sin(t * 10)) * 8 : 0;
-    const feet = BY(h.y + h.r);
-    C.hero.add(BX(h.x), feet + hop, 4, h.walk ? h.walk * 1.2 : 0.25, FIG.hero.s, {
-      phase: h.walk ? t * 12 : t * 2, swing: h.walk ? 1 : 0.15, armsUp: happy || (h.dead && !burnt),
-      squash: h.dead && h.cause === 'boulder' ? 0.8 : 0, lean: h.dead && !burnt ? 0.4 : 0,
-    });
-    if (burnt) this.paint(C.hero, 0, this.tint.setRGB(0.18, 0.15, 0.14));
-    else if (h.dead && (h.cause === 'goo' || h.cause === 'gas')) this.paint(C.hero, 0, this.tint.setRGB(0.75, 1.1, 0.7));
-    const side = h.x > BOARD_W / 2 ? -1 : 1;
-    const sad = !!sess.result && !sess.result.won;
-    C.biscuit.add(BX(h.x + side * 31), feet + (happy ? Math.abs(Math.sin(t * 12 + 1)) * 10 : 0), -8, -side * 0.6, 62, {
-      phase: t * (happy ? 14 : 3), swing: happy ? 1 : 0.2, squash: sad ? 0.35 : 0,
-    });
-    for (const en of sess.enemies) {
-      if (en.dead && en.deathT > 0.8) continue;
-      const fade = en.dead ? Math.max(0.05, 1 - en.deathT / 0.8) : 1;
-      if (en.type === 'chief') {
-        const bc = this.bossCrowd(sess.world);
-        bc.crowd.begin();
-        const hit = t - en.hitT < 0.35;
-        bc.crowd.add(BX(en.x), BY(en.y + en.r), -6, Math.sin(t * 1.3) * 0.25, bc.s * fade, { phase: t * 3, swing: 0.4, flash: hit ? 1 : 0, squash: en.dead ? 0.5 : 0 });
-        if (bc.tint && !hit) this.paint(bc.crowd, 0, bc.tint);
-        bc.crowd.end();
-        continue;
-      }
-      const f = FIG[en.type], crowd = C[en.type];
-      const n = crowd.count;
-      const dir = en.charging ? Math.sign(h.x - en.x) : 0;
-      const bob = en.fly && !en.dead ? Math.sin(t * 5 + en.hx) * 3 : 0;
-      crowd.add(BX(en.x), BY(en.y + en.r) - f.base * f.s + bob, 4, dir * 1.1, f.s * (en.dead ? Math.max(0.4, fade) : 1), {
-        phase: t * (en.charging ? 14 : 3), swing: en.charging ? 1 : 0.2, spin: t * 30,
-        squash: en.dead && en.cause === 'boulder' ? 0.85 : 0, lean: en.dead && en.cause === 'water' ? 0.5 : 0,
-      });
-      if (en.dead && en.cause === 'lava') this.paint(crowd, n, this.tint.setRGB(0.2, 0.17, 0.16));
-      else if (en.dead && en.cause === 'water') { const z = (Math.floor(t * 20) % 2) ? 1.8 : 0.6; this.paint(crowd, n, this.tint.setRGB(z * 0.7, z * 0.85, z * 1.3)); }
+    for (const [t, mesh] of Object.entries(meshes)) {
+      mesh.count = Math.min(counts[t], mesh.instanceMatrix.count);
+      mesh.visible = mesh.count > 0;
+      mesh.instanceMatrix.needsUpdate = mesh.visible;
     }
-    for (const c of Object.values(C)) c.end();
-    for (const bc of Object.values(this.bossCrowds)) if (!sess.chief || bc !== this.bossCrowd(sess.world)) { bc.crowd.begin(); bc.crowd.end(); }
   }
 
   drawFx(sess) {
-    const fx = this.fx, gl = this.glow; fx.begin(); gl.begin();
+    const fx = this.fx,
+      gl = this.glow;
+    fx.begin();
+    gl.begin();
     this.ring.visible = false;
     for (const f of sess.fx) {
       if (f.ring) {
         const q = 1 - f.life / f.max;
-        this.ring.visible = true; this.ring.position.set(BX(f.x), BY(f.y), 10);
-        this.ring.scale.setScalar(Math.max(0.01, f.r * q)); this.ring.material.opacity = 1 - q;
+        this.ring.visible = true;
+        this.ring.position.set(BX(f.x), BY(f.y), 10);
+        this.ring.scale.setScalar(Math.max(0.01, f.r * q));
+        this.ring.material.opacity = 1 - q;
         continue;
       }
       const life = Math.max(0, Math.min(1, (f.life / f.max) * 1.5));
-      if (f.puff) gl.add(BX(f.x), BY(f.y), 20, f.size * 1.2 * (0.4 + life), f.color.startsWith('rgba(241') ? 0x8a8f99 : f.color.startsWith('#a855f7') || f.color.startsWith('rgba(216') ? 0x4a1a6a : 0x3a3530);
-      else fx.add(BX(f.x), BY(f.y), 14, f.size * 0.9 * life + 0.3, f.color, f.life * 8);
+      if (f.puff)
+        gl.add(
+          BX(f.x),
+          BY(f.y),
+          20,
+          f.size * 1.2 * (0.4 + life),
+          f.color.startsWith("rgba(241")
+            ? 0x8a8f99
+            : f.color.startsWith("#a855f7") || f.color.startsWith("rgba(216")
+              ? 0x4a1a6a
+              : 0x3a3530,
+        );
+      else
+        fx.add(
+          BX(f.x),
+          BY(f.y),
+          14,
+          f.size * 0.9 * life + 0.3,
+          f.color,
+          f.life * 8,
+        );
     }
     // Fernstones flying to Pip
     for (const c of sess.coins) {
       const q = 1 - c.life / c.max;
-      const x = c.x + (sess.hero.x - c.x) * q, y = c.y + (sess.hero.y - 40 - c.y) * q - Math.sin(q * Math.PI) * 30;
+      const x = c.x + (sess.hero.x - c.x) * q,
+        y = c.y + (sess.hero.y - 40 - c.y) * q - Math.sin(q * Math.PI) * 30;
       gl.add(BX(x), BY(y), 24, PR * (1.3 - q * 0.6), 0x5ff0c8);
     }
     // lava glow
     for (let i = 0; i < sess.parts.length; i += 3) {
       const p = sess.parts[i];
-      if (!p.dead && p.t === 'lava') gl.add(BX(p.x), BY(p.y), 18, 9 + Math.sin(sess.t * 5 + i) * 2, 0x5a1800);
+      if (!p.dead && p.t === "lava")
+        gl.add(
+          BX(p.x),
+          BY(p.y),
+          18,
+          9 + Math.sin(sess.t * 5 + i) * 2,
+          0x5a1800,
+        );
     }
-    fx.end(); gl.end();
+    fx.end();
+    gl.end();
   }
 
   /** The world's ambient life (cheap: one instanced draw each); none on software WebGL. */
   drawAmbient(sess, view) {
-    const a = this.amb, g = this.ambGlow, sm = this.smoke, c = this.ac;
-    a.begin(); g.begin(); sm.begin();
+    const a = this.amb,
+      g = this.ambGlow,
+      sm = this.smoke,
+      c = this.ac;
+    a.begin();
+    g.begin();
+    sm.begin();
     const sc = this.scenery;
     if (!LOW_GPU && sc && !view.reduced) {
-      const t = sess.t, kind = sc.ambient.kind, dark = this.dark;
-      const h = (i, k) => { const v = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return v - Math.floor(v); };
-      const wrap = (v, lo, hi) => lo + ((((v - lo) % (hi - lo)) + (hi - lo)) % (hi - lo));
-      const n = kind === 'snow' ? 110 : kind === 'ember' ? 60 : kind === 'dust' ? 60 : dark ? 50 : 36;
+      const t = sess.t,
+        kind = sc.ambient.kind,
+        dark = this.dark;
+      const h = (i, k) => {
+        const v = Math.sin(i * 127.1 + k * 311.7) * 43758.5453;
+        return v - Math.floor(v);
+      };
+      const wrap = (v, lo, hi) =>
+        lo + ((((v - lo) % (hi - lo)) + (hi - lo)) % (hi - lo));
+      const n =
+        kind === "snow"
+          ? 110
+          : kind === "ember"
+            ? 60
+            : kind === "dust"
+              ? 60
+              : dark
+                ? 50
+                : 36;
       for (let i = 0; i < n; i++) {
-        const x0 = (h(i, 1) * 2 - 1) * 640, z = -170 + h(i, 2) * 260, sp = 0.5 + h(i, 3);
-        if (kind === 'snow') {
-          const y = wrap(380 - t * 26 * sp - h(i, 4) * 760, -360, 400), x = x0 + Math.sin(t * 0.9 * sp + i) * 16 + t * 6;
-          a.add(wrap(x, -660, 660), y, z, 1.1 + h(i, 5) * 1.6, c.setRGB(1, 1, 1));
-        } else if (kind === 'dust') {
-          const x = wrap(x0 + t * 18 * sp, -660, 660), y = -320 + h(i, 4) * 300 + Math.sin(t * 0.7 + i) * 12;
+        const x0 = (h(i, 1) * 2 - 1) * 640,
+          z = -170 + h(i, 2) * 260,
+          sp = 0.5 + h(i, 3);
+        if (kind === "snow") {
+          const y = wrap(380 - t * 26 * sp - h(i, 4) * 760, -360, 400),
+            x = x0 + Math.sin(t * 0.9 * sp + i) * 16 + t * 6;
+          a.add(
+            wrap(x, -660, 660),
+            y,
+            z,
+            1.1 + h(i, 5) * 1.6,
+            c.setRGB(1, 1, 1),
+          );
+        } else if (kind === "dust") {
+          const x = wrap(x0 + t * 18 * sp, -660, 660),
+            y = -320 + h(i, 4) * 300 + Math.sin(t * 0.7 + i) * 12;
           a.add(x, y, z, 0.7 + h(i, 5) * 0.9, c.setRGB(1, 0.86, 0.62));
-        } else if (kind === 'ember') {
-          const y = wrap(-330 + t * 30 * sp + h(i, 4) * 700, -340, 380), x = x0 + Math.sin(t * 1.3 * sp + i) * 14;
-          if (i % 3) g.add(x, y, z, 0.8 + h(i, 5) * 1.1, c.setRGB(1.6, 0.55 + h(i, 6) * 0.3, 0.12));
-          else a.add(x, wrap(380 - t * 12 * sp - h(i, 4) * 700, -340, 380), z, 1 + h(i, 5), c.setRGB(0.45, 0.4, 0.42));
-        } else { // pollen by day, fireflies at night
-          const x = x0 + Math.sin(t * 0.4 * sp + i * 2) * 40, y = -300 + h(i, 4) * (dark ? 520 : 380) + Math.sin(t * 0.8 * sp + i) * 20;
+        } else if (kind === "ember") {
+          const y = wrap(-330 + t * 30 * sp + h(i, 4) * 700, -340, 380),
+            x = x0 + Math.sin(t * 1.3 * sp + i) * 14;
+          if (i % 3)
+            g.add(
+              x,
+              y,
+              z,
+              0.8 + h(i, 5) * 1.1,
+              c.setRGB(1.6, 0.55 + h(i, 6) * 0.3, 0.12),
+            );
+          else
+            a.add(
+              x,
+              wrap(380 - t * 12 * sp - h(i, 4) * 700, -340, 380),
+              z,
+              1 + h(i, 5),
+              c.setRGB(0.45, 0.4, 0.42),
+            );
+        } else {
+          // pollen by day, fireflies at night
+          const x = x0 + Math.sin(t * 0.4 * sp + i * 2) * 40,
+            y =
+              -300 +
+              h(i, 4) * (dark ? 520 : 380) +
+              Math.sin(t * 0.8 * sp + i) * 20;
           const pulse = dark ? 0.6 + 0.4 * Math.sin(t * 3 * sp + i * 5) : 1;
-          g.add(x, y, z, (dark ? 1.6 : 0.9 + h(i, 5) * 0.7) * pulse, dark ? c.setRGB(0.9, 1.4, 0.45) : c.setRGB(1, 0.95, 0.55));
+          g.add(
+            x,
+            y,
+            z,
+            (dark ? 1.6 : 0.9 + h(i, 5) * 0.7) * pulse,
+            dark ? c.setRGB(0.9, 1.4, 0.45) : c.setRGB(1, 0.95, 0.55),
+          );
         }
       }
       // torch and lantern flames flicker over their baked glow
       sc.torches.forEach((tr, i) => {
         if (tr.smoke) {
           for (let k = 0; k < 10; k++) {
-            const ph = (t * 0.28 + k / 10) % 1, s = (5 + ph * 16) * Math.min(1, (1 - ph) * 4);
-            sm.add(tr.x + ph * 34 + Math.sin(t + k) * 4, tr.y + 6 + ph * 110, tr.z, s, c.setRGB(0.92, 0.92, 0.95), k);
+            const ph = (t * 0.28 + k / 10) % 1,
+              s = (5 + ph * 16) * Math.min(1, (1 - ph) * 4);
+            sm.add(
+              tr.x + ph * 34 + Math.sin(t + k) * 4,
+              tr.y + 6 + ph * 110,
+              tr.z,
+              s,
+              c.setRGB(0.92, 0.92, 0.95),
+              k,
+            );
           }
           return;
         }
-        const f = 0.75 + 0.18 * Math.sin(t * 11 + i * 1.7) + 0.1 * Math.sin(t * 23 + i * 3.1);
-        g.add(tr.x, tr.y + 1, tr.z + 2, tr.size * 0.42 * f, c.set(tr.color).multiplyScalar(0.5));
+        const f =
+          0.75 +
+          0.18 * Math.sin(t * 11 + i * 1.7) +
+          0.1 * Math.sin(t * 23 + i * 3.1);
+        g.add(
+          tr.x,
+          tr.y + 1,
+          tr.z + 2,
+          tr.size * 0.42 * f,
+          c.set(tr.color).multiplyScalar(0.5),
+        );
       });
     }
-    a.end(); g.end(); sm.end();
+    a.end();
+    g.end();
+    sm.end();
   }
 
-  dispose() { this.renderer.dispose(); }
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.releaseLevel();
+    this.effects.dispose();
+    this.baker.dispose();
+    for (const p of [this.fx, this.glow, this.amb, this.ambGlow, this.smoke]) {
+      p.mesh.removeFromParent();
+      p.mesh.geometry.dispose();
+      p.mesh.material.dispose();
+      p.mesh.dispose?.();
+    }
+    for (const g of this.geometry) g.dispose();
+    for (const m of this.materials) m.dispose();
+    this.lights.light.shadow.map?.dispose();
+    this.scene.environment?.dispose();
+    this.library.dispose();
+    this.channels.dispose();
+    this.renderer.dispose();
+  }
 }
-
 export const create = (canvas) => new PipsTower3D(canvas);

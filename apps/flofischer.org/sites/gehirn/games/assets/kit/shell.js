@@ -507,11 +507,12 @@ export function openMenu(anchor, items, opts = {}) {
 const state = { opts: {}, leaf: null, cat: null, arch: 'instant', page: null };
 const pageKey = (pathname) => (pathname || '').replace(/\.html$/, '').replace(/\/index$/, '/');
 export const homeHref = () => new URL('./', ROOT_URL).href;
-export const legalHref = (page) => new URL(`legal/${page}`, ROOT_URL).href;
+export const legalHref = (page) => new URL(`legal/${page}`, 'https://fernwork.net/').href;
 /** Best href for a leaf: same-page sub-tools become a bare `#hash` (no reload; back/forward work). */
 export function hrefFor(idOrLeaf) {
   const l = typeof idOrLeaf === 'string' ? getLeaf(idOrLeaf) : idOrLeaf;
   if (!l) return homeHref();
+  if (l.cat !== 'games') return new URL(l.path, 'https://fernwork.net/').href;
   const u = new URL(l.path, ROOT_URL);
   if (pageKey(u.pathname) === pageKey(location.pathname)) return u.hash || location.pathname + location.search;
   return u.pathname + u.hash;
@@ -520,12 +521,14 @@ export function hrefFor(idOrLeaf) {
 export function catHref(catOrId) {
   const c = typeof catOrId === 'string' ? getCat(catOrId) : catOrId;
   if (!c) return homeHref();
+  if (c.id !== 'games') return new URL(`tools/${c.page}`, 'https://fernwork.net/').href;
   return new URL(`tools/${c.page}`, ROOT_URL).pathname;
 }
 /** Where a leaf's working tool lives (SEO landing cards hand files to the real tool). */
 export function toolHrefFor(idOrLeaf) {
   const l = typeof idOrLeaf === 'string' ? getLeaf(idOrLeaf) : idOrLeaf;
   if (!l) return homeHref();
+  if (l.cat !== 'games') return new URL(l.open || l.path, 'https://fernwork.net/').href;
   if (l.open) { const u = new URL(l.open, ROOT_URL); return u.pathname + u.hash; }
   return hrefFor(l);
 }

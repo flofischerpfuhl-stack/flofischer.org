@@ -1,0 +1,424 @@
+{
+  "category": "characters",
+  "label": "Glimmo",
+  "games": [
+    "fernworld"
+  ],
+  "description": "Original young Ember starter, red-panda climber, cream face, ringed tail and two-tone flame; 0.5 m anatomy.",
+  "budgets": {
+    "hi": 40000,
+    "lo": 24000,
+    "sh": 1800
+  },
+  "lods": {
+    "hi": {
+      "vertices": 26646,
+      "triangles": 39016,
+      "groups": 9,
+      "bytes": 740828,
+      "vertexCap": 1000000,
+      "triangleTarget": 40000,
+      "seamSafe": true,
+      "withinVertexCap": true,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 15460,
+          "triangles": 9206,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00038687989581376314,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_body_surface_matte",
+          "channel": "body",
+          "target": 9206
+        },
+        {
+          "sourceTriangles": 3805,
+          "triangles": 2407,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00034981349017471075,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_armR_surface_matte",
+          "channel": "armR",
+          "target": 2408
+        },
+        {
+          "sourceTriangles": 3785,
+          "triangles": 2405,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0003569575201254338,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_armL_surface_matte",
+          "channel": "armL",
+          "target": 2405
+        },
+        {
+          "sourceTriangles": 3857,
+          "triangles": 2615,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0003346038574818522,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_legR_surface_matte",
+          "channel": "legR",
+          "target": 2616
+        },
+        {
+          "sourceTriangles": 3829,
+          "triangles": 2627,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00030057315598241985,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_legL_surface_matte",
+          "channel": "legL",
+          "target": 2628
+        },
+        {
+          "sourceTriangles": 9956,
+          "triangles": 5698,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0015468895435333252,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_tail_surface_matte",
+          "channel": "tail",
+          "target": 5699
+        },
+        {
+          "sourceTriangles": 5592,
+          "triangles": 5592,
+          "retained": true,
+          "reason": "already below target",
+          "part": "glimmo_body_face_gloss",
+          "channel": "body",
+          "target": 6062
+        },
+        {
+          "sourceTriangles": 1202,
+          "triangles": 660,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0001161633335868828,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_body_face_glow",
+          "channel": "body",
+          "target": 661
+        },
+        {
+          "sourceTriangles": 1200,
+          "triangles": 722,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 8.96382553037256e-05,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_body_face_matte",
+          "channel": "body",
+          "target": 723
+        },
+        {
+          "sourceTriangles": 7084,
+          "triangles": 7084,
+          "retained": true,
+          "reason": "already below target",
+          "part": "glimmo_tail_flame_glow",
+          "channel": "tail",
+          "target": 7591
+        }
+      ]
+    },
+    "lo": {
+      "vertices": 21361,
+      "triangles": 28446,
+      "groups": 9,
+      "bytes": 571709,
+      "vertexCap": 18000,
+      "triangleTarget": 24000,
+      "seamSafe": true,
+      "withinVertexCap": false,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 15460,
+          "triangles": 5524,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0015211243880912662,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_body_surface_matte",
+          "channel": "body",
+          "target": 5524
+        },
+        {
+          "sourceTriangles": 3805,
+          "triangles": 2625,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0002847922150976956,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "locked",
+          "part": "glimmo_armR_surface_matte",
+          "channel": "armR",
+          "target": 1445
+        },
+        {
+          "sourceTriangles": 3785,
+          "triangles": 1443,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0010448022512719035,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_armL_surface_matte",
+          "channel": "armL",
+          "target": 1443
+        },
+        {
+          "sourceTriangles": 3857,
+          "triangles": 1569,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.000931217276956886,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_legR_surface_matte",
+          "channel": "legR",
+          "target": 1570
+        },
+        {
+          "sourceTriangles": 3829,
+          "triangles": 1577,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0009007217013277113,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_legL_surface_matte",
+          "channel": "legL",
+          "target": 1577
+        },
+        {
+          "sourceTriangles": 9956,
+          "triangles": 6688,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0005588174681179225,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "locked",
+          "part": "glimmo_tail_surface_matte",
+          "channel": "tail",
+          "target": 3420
+        },
+        {
+          "sourceTriangles": 5592,
+          "triangles": 3636,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00014321204798761755,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_body_face_gloss",
+          "channel": "body",
+          "target": 3637
+        },
+        {
+          "sourceTriangles": 1202,
+          "triangles": 396,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00022563264064956456,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_body_face_glow",
+          "channel": "body",
+          "target": 397
+        },
+        {
+          "sourceTriangles": 1200,
+          "triangles": 434,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00026757584419101477,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_body_face_matte",
+          "channel": "body",
+          "target": 434
+        },
+        {
+          "sourceTriangles": 7084,
+          "triangles": 4554,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00023410699213854969,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "part": "glimmo_tail_flame_glow",
+          "channel": "tail",
+          "target": 4554
+        }
+      ]
+    },
+    "sh": {
+      "vertices": 1364,
+      "triangles": 1798,
+      "groups": 6,
+      "bytes": 37808,
+      "vertexCap": 2400,
+      "triangleTarget": 1800,
+      "seamSafe": true,
+      "withinVertexCap": true,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 15460,
+          "triangles": 664,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "glimmo_body_surface_matte",
+          "channel": "body",
+          "target": 664
+        },
+        {
+          "sourceTriangles": 3805,
+          "triangles": 173,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "glimmo_armR_surface_matte",
+          "channel": "armR",
+          "target": 174
+        },
+        {
+          "sourceTriangles": 3785,
+          "triangles": 173,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "glimmo_armL_surface_matte",
+          "channel": "armL",
+          "target": 173
+        },
+        {
+          "sourceTriangles": 3857,
+          "triangles": 189,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "glimmo_legR_surface_matte",
+          "channel": "legR",
+          "target": 189
+        },
+        {
+          "sourceTriangles": 3829,
+          "triangles": 189,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "glimmo_legL_surface_matte",
+          "channel": "legL",
+          "target": 189
+        },
+        {
+          "sourceTriangles": 9956,
+          "triangles": 410,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "glimmo_tail_surface_matte",
+          "channel": "tail",
+          "target": 411
+        }
+      ]
+    }
+  },
+  "vertex_cap": 18000,
+  "shadow_cap": 2400,
+  "usageClass": "solo-hero",
+  "crowdEligible": false,
+  "farCrowdLodMissing": true,
+  "seam_safe": true,
+  "ground": true,
+  "ao": false,
+  "sockets": {
+    "mouth": [
+      -0.000117,
+      0.272455,
+      0.356072
+    ],
+    "head": [
+      0.000102,
+      0.342274,
+      0.298319
+    ],
+    "feet": [
+      0,
+      0,
+      0
+    ],
+    "tail_tip": [
+      3.6e-05,
+      0.722216,
+      -0.448599
+    ],
+    "attack": [
+      -0.000117,
+      0.272455,
+      0.356072
+    ]
+  },
+  "sourceScene": "scripts/games-blender/fernworld/sources/glimmo/glimmo.blend",
+  "sourceGlb": "scripts/games-blender/fernworld/sources/glimmo/glimmo.glb",
+  "animation": "Conservative rigid motion partitions and effect sockets; no armature or animation clips.",
+  "source": "scripts/games-blender/fernworld/assets/glimmo_line.py",
+  "id": "GLIMMO",
+  "bounds": [
+    [
+      -0.2028895616531372,
+      0.0,
+      -0.5289782285690308
+    ],
+    [
+      0.2028636485338211,
+      0.7222160696983337,
+      0.37167152762413025
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "armL",
+    "armR",
+    "body",
+    "legL",
+    "legR",
+    "tail"
+  ],
+  "palette": [
+    "#24150e",
+    "#2e211e",
+    "#3a221c",
+    "#3d3331",
+    "#7c2f1f",
+    "#bf5530",
+    "#d2741f",
+    "#f3e1bf",
+    "#f6e6c8",
+    "#ff7a1c",
+    "#ffc93d",
+    "#ffffff"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "df569f04d3fbeaa58d9a3ff18c3a2507acef489fb08d2e37a740024862833452"
+}

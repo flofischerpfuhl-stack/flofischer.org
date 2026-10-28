@@ -1,0 +1,126 @@
+{
+  "units": "metres",
+  "runtimeUp": "+Y",
+  "runtimeForward": "+Z",
+  "sockets": {
+    "pawPalm": {
+      "bone": "hand.l",
+      "bindPointNative": [
+        0.49,
+        -0.005,
+        0.54
+      ],
+      "bindPointGLTF": [
+        0.49,
+        0.54,
+        0.005
+      ],
+      "boneLocalNative": [
+        0.0050079356878995895,
+        0.05614466965198517,
+        0.012423576787114143
+      ],
+      "runtimeResolution": "inverse joint bind-world matrix multiplied by bindPointGLTF gives attachment local offset"
+    },
+    "rightPalm": {
+      "bone": "hand.r",
+      "bindPointNative": [
+        -0.49,
+        -0.005,
+        0.54
+      ],
+      "bindPointGLTF": [
+        -0.49,
+        0.54,
+        0.005
+      ],
+      "boneLocalNative": [
+        -0.005007898900657892,
+        0.05614468827843666,
+        0.012423591688275337
+      ],
+      "runtimeResolution": "inverse joint bind-world matrix multiplied by bindPointGLTF gives attachment local offset"
+    },
+    "mouth": {
+      "bone": "head",
+      "bindPointNative": [
+        0,
+        -0.22,
+        1.43
+      ],
+      "bindPointGLTF": [
+        0,
+        1.43,
+        0.22
+      ],
+      "boneLocalNative": [
+        -7.530280399237199e-09,
+        0.1885746717453003,
+        0.22000004351139069
+      ],
+      "runtimeResolution": "inverse joint bind-world matrix multiplied by bindPointGLTF gives attachment local offset"
+    },
+    "head": {
+      "bone": "head",
+      "bindPointNative": [
+        0,
+        0.02,
+        1.6
+      ],
+      "bindPointGLTF": [
+        0,
+        1.6,
+        -0.02
+      ],
+      "boneLocalNative": [
+        6.845688460543897e-10,
+        0.3585747480392456,
+        -0.019999945536255836
+      ],
+      "runtimeResolution": "inverse joint bind-world matrix multiplied by bindPointGLTF gives attachment local offset"
+    }
+  },
+  "mountedAttachment": {
+    "characterOriginToGliderOrigin": [
+      0,
+      0,
+      0
+    ],
+    "clip": "Mounted_Escape",
+    "recipe": "Place both assets at the same origin; apply all runtime flight translation/rotation to their common parent. No foot/hand IK is needed for the delivered fixed-contact pose."
+  },
+  "gliderContactPointsNative": {
+    "seat": [
+      0,
+      0.06,
+      0.755
+    ],
+    "gripL": [
+      0.245,
+      -0.49,
+      0.98
+    ],
+    "gripR": [
+      -0.245,
+      -0.49,
+      0.98
+    ],
+    "footL": [
+      0.171,
+      -0.36,
+      0.506
+    ],
+    "footR": [
+      -0.171,
+      -0.36,
+      0.506
+    ]
+  },
+  "renderFlags": {
+    "transparent": false,
+    "depthWrite": true,
+    "castShadow": true,
+    "receiveShadow": true,
+    "side": "double-sided for thin leaf/patch surfaces; opaque entire asset"
+  }
+}

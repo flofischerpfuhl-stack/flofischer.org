@@ -1,0 +1,138 @@
+{
+  "asset_id": "PIP_STONE_STOMPER",
+  "character": "pip-stone-stomper.glb",
+  "scale_entire_instance_uniformly": 0.4233654951651481,
+  "coordinates": "glTF Y-up, front +Z; source dimensions and bind matrices unchanged",
+  "rendering": {
+    "draws": 1,
+    "opaque_material_classes": 1,
+    "alpha_mode": "OPAQUE",
+    "textures": "Embedded base color/ORM/emission, source face half pixel-identical",
+    "fx_separate": "stone-stomp-footfx.glb",
+    "fx_draws_when_loaded": 2,
+    "fx_lazy_load": true,
+    "fx_runtime_flags": {
+      "depthWrite": true,
+      "castShadow": false,
+      "receiveShadow": false,
+      "side": "DoubleSide, encoded by glTF doubleSided",
+      "alpha_override": "None; both source FX materials remain opaque and visibility is toggled."
+    }
+  },
+  "clips": {
+    "retained": [
+      "Idle",
+      "Walk",
+      "Attack_Mining_UseItem",
+      "Stomp"
+    ],
+    "stone_skill": "Stomp",
+    "original_legacy_useitem": "Retained for rig compatibility; Stone Stomper has empty hands, no mining tool is spawned.",
+    "shared_read_only": [
+      "FireCast_Left",
+      "Hook_Right",
+      "Jump_Start",
+      "Jump_Air",
+      "Jump_Land",
+      "Glide",
+      "Hit_Recover",
+      "Celebrate"
+    ],
+    "shared_ref": "characters/pip-shared-motion/pip-shared-motion.glb",
+    "shared_binding": "Bind original node names directly; no retargeting or replacement clips. Shared scene remains external and need not be attached."
+  },
+  "stomp": {
+    "duration_seconds": 1.25,
+    "lift_seconds": 0.4583333333333333,
+    "release_or_impact_seconds": 0.625,
+    "world_translation": "Controller owns whole-instance translation and grounding; rig bones/clip unchanged.",
+    "support": "Left sole remains at original ground; right sole lifts 0.155 source units and both return at release. Original sole baseline -0.0020254 source units, unchanged.",
+    "fx_visibility_seconds": [
+      0.625,
+      0.925
+    ],
+    "fx_fade_out_seconds": 0.0,
+    "spawn_policy": "Emit once per Stomp activation, only on successful ground contact at 0.625 s. Load optional FX on demand. Before release there is no visible effect.",
+    "interrupt": "Before release: cancel pending event and hide FX. After release: stop future emits and hide any active FX immediately. No runtime alpha override is required. Skin/cuffs remain visible as equipment. On skin switch unload optional FX and detach any per-instance probes.",
+    "socket": "StoneImpact",
+    "effect_position": "Read live StoneImpact.matrixWorld at release, project onto controller/raycast ground. Preserve live X/Z; no cached rest world position.",
+    "effect_orientation": "Identity world quaternion in glTF Y-up. Use ground normal only if deliberately supported later; never inherit animated foot tilt.",
+    "effect_scale": "Same whole-instance scale as character; source FX template unchanged."
+  },
+  "sockets": {
+    "StonePalm_L": {
+      "parent_bone": "hand.l",
+      "rest_translation_gltf": [
+        0.968,
+        1.10676,
+        0.044
+      ],
+      "rest_frame": "identity: +Y up/thumb, +Z outward palm or foot forward",
+      "all_743_times_skin_space_vs_live_node_matrix_max_error": 1.2467546034802823e-07,
+      "actual_world_translation_range_from_first_sample": 1.215114387613978
+    },
+    "StonePalm_R": {
+      "parent_bone": "hand.r",
+      "rest_translation_gltf": [
+        -0.968,
+        1.10676,
+        0.044
+      ],
+      "rest_frame": "identity: +Y up/thumb, +Z outward palm or foot forward",
+      "all_743_times_skin_space_vs_live_node_matrix_max_error": 2.0275324941892992e-07,
+      "actual_world_translation_range_from_first_sample": 0.9657069716814217
+    },
+    "StoneImpact": {
+      "parent_bone": "foot.r",
+      "rest_translation_gltf": [
+        -0.171,
+        0.007,
+        0.13
+      ],
+      "rest_frame": "identity: +Y up/thumb, +Z outward palm or foot forward",
+      "all_743_times_skin_space_vs_live_node_matrix_max_error": 1.2503521906737092e-07,
+      "actual_world_translation_range_from_first_sample": 0.36468121807871995,
+      "landing_live_world_matrix_model_scale_1": [
+        [
+          0.9999999947340831,
+          -2.0631952924809425e-09,
+          2.155234399534837e-09,
+          -0.17100003526202176
+        ],
+        [
+          3.722847336882275e-09,
+          1.000000152752381,
+          -1.4705452544561126e-07,
+          0.007000004172838081
+        ],
+        [
+          -2.491350627707561e-09,
+          2.3094990203587074e-07,
+          0.9999998812494482,
+          0.16499986432497132
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "effect_orientation": "World Y-up after ground projection; do not inherit foot tilt."
+    }
+  },
+  "socket_semantics": {
+    "StonePalm_L/R": "+Z outward palm, +Y thumb/up in bind glTF frame, +X character-left. These axes animate with original hand bones. For right-hand distal is -X. Empty anchors, no native cast/FX in Stone mode.",
+    "StoneImpact": "Child of foot.r at right sole. Live bone orientation available for foot attachments, while impact FX is explicitly world-up.",
+    "FootFx": "Original rig-local legacy marker retained unchanged for source compatibility; use live StoneImpact for new impact event.",
+    "LeftFootSocket/RightFootSocket": "Original ankle anchors retained bone-parented and live."
+  },
+  "visibility": {
+    "character_and_cuffs": "always visible while Stone skin active",
+    "pickaxe": "absent in this derivative",
+    "fx": "external, event window only"
+  },
+  "animation_blending": "Preserve existing shared motion contract; fade Stomp in/out about 0.10 s. Abort pending landing event on transition. Actual controller/terrain blending is for later integration.",
+  "qa": "glb-qa.json, skin-motion-qa.json, native-and-collision-qa.json, socket-qa.json",
+  "review": "Artist personally checked all final GLB images; Root integration and final user approval are separate."
+}

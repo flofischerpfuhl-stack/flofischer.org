@@ -1,0 +1,523 @@
+{
+  "category": "characters",
+  "label": "Plashling",
+  "games": [
+    "fernworld"
+  ],
+  "description": "Original young Tide starter: rounded bill, pearl fin flaps, water fountain and paddle tail; 0.45 m long.",
+  "budgets": {
+    "hi": 40000,
+    "lo": 24000,
+    "sh": 1800
+  },
+  "lods": {
+    "hi": {
+      "vertices": 18528,
+      "triangles": 35838,
+      "groups": 10,
+      "bytes": 585768,
+      "vertexCap": 1000000,
+      "triangleTarget": 40000,
+      "seamSafe": true,
+      "withinVertexCap": true,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 5000,
+          "triangles": 3982,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 7.963784446474165e-05,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_tail_tail_matte",
+          "channel": "tail",
+          "target": 3983
+        },
+        {
+          "sourceTriangles": 7000,
+          "triangles": 4888,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 6.988857785472646e-05,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_spout_body_waterSolid",
+          "channel": "body",
+          "target": 2779
+        },
+        {
+          "sourceTriangles": 300,
+          "triangles": 300,
+          "retained": true,
+          "reason": "already below target",
+          "part": "plashling_glints_body_glow",
+          "channel": "body",
+          "target": 482
+        },
+        {
+          "sourceTriangles": 1978,
+          "triangles": 1884,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 6.528415542561561e-05,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_fins_wingR_matte",
+          "channel": "wingR",
+          "target": 1884
+        },
+        {
+          "sourceTriangles": 2022,
+          "triangles": 1884,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 7.756871491437778e-05,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_fins_wingL_matte",
+          "channel": "wingL",
+          "target": 1884
+        },
+        {
+          "sourceTriangles": 1516,
+          "triangles": 1516,
+          "retained": true,
+          "reason": "already below target",
+          "part": "plashling_feet_armR_matte",
+          "channel": "armR",
+          "target": 1602
+        },
+        {
+          "sourceTriangles": 1474,
+          "triangles": 1474,
+          "retained": true,
+          "reason": "already below target",
+          "part": "plashling_feet_legR_matte",
+          "channel": "legR",
+          "target": 1480
+        },
+        {
+          "sourceTriangles": 1544,
+          "triangles": 1544,
+          "retained": true,
+          "reason": "already below target",
+          "part": "plashling_feet_armL_matte",
+          "channel": "armL",
+          "target": 1602
+        },
+        {
+          "sourceTriangles": 1466,
+          "triangles": 1466,
+          "retained": true,
+          "reason": "already below target",
+          "part": "plashling_feet_legL_matte",
+          "channel": "legL",
+          "target": 1480
+        },
+        {
+          "sourceTriangles": 2778,
+          "triangles": 2778,
+          "retained": true,
+          "reason": "already below target",
+          "part": "plashling_eyes_body_matte",
+          "channel": "body",
+          "target": 4393
+        },
+        {
+          "sourceTriangles": 24768,
+          "triangles": 11622,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 6.646115070907399e-05,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_body_body_matte",
+          "channel": "body",
+          "target": 11623
+        },
+        {
+          "sourceTriangles": 2500,
+          "triangles": 2500,
+          "retained": true,
+          "reason": "already below target",
+          "part": "plashling_bill_body_matte",
+          "channel": "body",
+          "target": 6809
+        }
+      ]
+    },
+    "lo": {
+      "vertices": 11814,
+      "triangles": 22410,
+      "groups": 10,
+      "bytes": 370924,
+      "vertexCap": 24000,
+      "triangleTarget": 24000,
+      "seamSafe": true,
+      "withinVertexCap": true,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 5000,
+          "triangles": 2390,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0001539087388664484,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_tail_tail_matte",
+          "channel": "tail",
+          "target": 2390
+        },
+        {
+          "sourceTriangles": 7000,
+          "triangles": 1666,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00028050257242284715,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_spout_body_waterSolid",
+          "channel": "body",
+          "target": 1667
+        },
+        {
+          "sourceTriangles": 300,
+          "triangles": 288,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.000160026247613132,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_glints_body_glow",
+          "channel": "body",
+          "target": 289
+        },
+        {
+          "sourceTriangles": 1978,
+          "triangles": 1130,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00017329122056253254,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_fins_wingR_matte",
+          "channel": "wingR",
+          "target": 1130
+        },
+        {
+          "sourceTriangles": 2022,
+          "triangles": 1130,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00017675124399829656,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_fins_wingL_matte",
+          "channel": "wingL",
+          "target": 1130
+        },
+        {
+          "sourceTriangles": 1516,
+          "triangles": 960,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00022154502221383154,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_feet_armR_matte",
+          "channel": "armR",
+          "target": 961
+        },
+        {
+          "sourceTriangles": 1474,
+          "triangles": 888,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0002484787255525589,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_feet_legR_matte",
+          "channel": "legR",
+          "target": 888
+        },
+        {
+          "sourceTriangles": 1544,
+          "triangles": 960,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00022343794989865273,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_feet_armL_matte",
+          "channel": "armL",
+          "target": 961
+        },
+        {
+          "sourceTriangles": 1466,
+          "triangles": 888,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00024996022693812847,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_feet_legL_matte",
+          "channel": "legL",
+          "target": 888
+        },
+        {
+          "sourceTriangles": 2778,
+          "triangles": 2636,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 6.743166159139946e-05,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_eyes_body_matte",
+          "channel": "body",
+          "target": 2636
+        },
+        {
+          "sourceTriangles": 24768,
+          "triangles": 6974,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00012468575732782483,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "plashling_body_body_matte",
+          "channel": "body",
+          "target": 6974
+        },
+        {
+          "sourceTriangles": 2500,
+          "triangles": 2500,
+          "retained": true,
+          "reason": "already below target",
+          "part": "plashling_bill_body_matte",
+          "channel": "body",
+          "target": 4086
+        }
+      ]
+    },
+    "sh": {
+      "vertices": 913,
+      "triangles": 1790,
+      "groups": 8,
+      "bytes": 31037,
+      "vertexCap": 2400,
+      "triangleTarget": 1800,
+      "seamSafe": true,
+      "withinVertexCap": true,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 5000,
+          "triangles": 258,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "plashling_tail_tail_matte",
+          "channel": "tail",
+          "target": 259
+        },
+        {
+          "sourceTriangles": 1978,
+          "triangles": 102,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "plashling_fins_wingR_matte",
+          "channel": "wingR",
+          "target": 102
+        },
+        {
+          "sourceTriangles": 2022,
+          "triangles": 102,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "plashling_fins_wingL_matte",
+          "channel": "wingL",
+          "target": 102
+        },
+        {
+          "sourceTriangles": 1516,
+          "triangles": 104,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "plashling_feet_armR_matte",
+          "channel": "armR",
+          "target": 104
+        },
+        {
+          "sourceTriangles": 1474,
+          "triangles": 96,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "plashling_feet_legR_matte",
+          "channel": "legR",
+          "target": 96
+        },
+        {
+          "sourceTriangles": 1544,
+          "triangles": 102,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "plashling_feet_armL_matte",
+          "channel": "armL",
+          "target": 104
+        },
+        {
+          "sourceTriangles": 1466,
+          "triangles": 94,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "plashling_feet_legL_matte",
+          "channel": "legL",
+          "target": 96
+        },
+        {
+          "sourceTriangles": 24768,
+          "triangles": 756,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "plashling_body_body_matte",
+          "channel": "body",
+          "target": 757
+        },
+        {
+          "sourceTriangles": 2500,
+          "triangles": 176,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "plashling_bill_body_matte",
+          "channel": "body",
+          "target": 177
+        }
+      ]
+    }
+  },
+  "vertex_cap": 24000,
+  "shadow_cap": 2400,
+  "seam_safe": true,
+  "usageClass": "solo-hero",
+  "crowdEligible": false,
+  "farCrowdLodMissing": true,
+  "ground": true,
+  "ao": false,
+  "sockets": {
+    "mouth": [
+      0.001097,
+      0.081259,
+      0.168231
+    ],
+    "head": [
+      0.000602,
+      0.139943,
+      0.08812
+    ],
+    "feet": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "tail_tip": [
+      0.001176,
+      0.037869,
+      -0.273431
+    ],
+    "attack": [
+      0.001097,
+      0.081259,
+      0.168231
+    ],
+    "fountain": [
+      -0.02797,
+      0.305208,
+      -0.00953
+    ]
+  },
+  "sourceScene": "scripts/games-blender/fernworld/sources/plashling/plashling_export.blend",
+  "sourceToonScene": "scripts/games-blender/fernworld/sources/plashling/plashling.blend",
+  "sourceGlb": "scripts/games-blender/fernworld/sources/plashling/plashling.glb",
+  "animation": "Original welded anatomical core; rigid distal limbs, paddle tail and separate fins; no skin rig or clips.",
+  "waterMaterial": {
+    "alpha": 1,
+    "sourceAlpha": 0.78,
+    "roughness": 0.25,
+    "metallic": 0,
+    "colour": "#86d3f6",
+    "adaptation": "Opaque glossy play variant avoids inherited transparent self-overlap; exact transparent sources retained."
+  },
+  "source": "scripts/games-blender/fernworld/assets/plashling_line.py",
+  "id": "PLASHLING",
+  "bounds": [
+    [
+      -0.15891383588314056,
+      0.0,
+      -0.27716514468193054
+    ],
+    [
+      0.16001468896865845,
+      0.3052084147930145,
+      0.1728348433971405
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "armL",
+    "armR",
+    "body",
+    "legL",
+    "legR",
+    "tail",
+    "wingL",
+    "wingR"
+  ],
+  "palette": [
+    "#172450",
+    "#2a5fb4",
+    "#3e7acb",
+    "#3f8fdf",
+    "#86d3f6",
+    "#bdeaf1",
+    "#f6f9fd",
+    "#ffffff"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "a2ad372b543c0a0dbda104b56bc05280a35f5e2a0cdf997930c122d88ebb9376"
+}

@@ -1,0 +1,180 @@
+{
+  "name": "TeamSurface",
+  "mask": "actual exported triangle-index ranges selecting the violet rubber paint region in COLOR_0; inclusive endpoints; optional controller recolor, no additional material",
+  "colorSRGB": [
+    0.38,
+    0.3,
+    0.53
+  ],
+  "colorLinear": [
+    0.1192801876221121,
+    0.07323895587840543,
+    0.24286681390410306
+  ],
+  "files": {
+    "TOY_EQUALITY_Far.glb": {
+      "glbSHA256": "a482be9a681af33166958dadd0b117f5849119ad32eae2725a7e4315800fe3bd",
+      "regions": [
+        {
+          "meshIndex": 2,
+          "meshName": "Rounded_rubber_module_L.002",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              0,
+              103
+            ]
+          ],
+          "triangleCount": 104
+        },
+        {
+          "meshIndex": 4,
+          "meshName": "Rounded_rubber_module_R.002",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              0,
+              103
+            ]
+          ],
+          "triangleCount": 104
+        },
+        {
+          "meshIndex": 6,
+          "meshName": "Elastic_bridge.002",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              164,
+              231
+            ]
+          ],
+          "triangleCount": 68
+        }
+      ]
+    },
+    "TOY_EQUALITY_Hero.glb": {
+      "glbSHA256": "2fc708555667726cc78d5deea1175fcbfcc773e720922dccd9ffdcbc9571add6",
+      "regions": [
+        {
+          "meshIndex": 2,
+          "meshName": "Rounded_rubber_module_L",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              0,
+              993
+            ]
+          ],
+          "triangleCount": 994
+        },
+        {
+          "meshIndex": 4,
+          "meshName": "Rounded_rubber_module_R",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              0,
+              991
+            ]
+          ],
+          "triangleCount": 992
+        },
+        {
+          "meshIndex": 6,
+          "meshName": "Elastic_bridge",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              876,
+              1463
+            ]
+          ],
+          "triangleCount": 588
+        }
+      ]
+    },
+    "TOY_EQUALITY_Lo.glb": {
+      "glbSHA256": "cd29ea7f911500870396f8bfc084df3dfcf9d7c4f8f8cbf332d61573d4fb78f4",
+      "regions": [
+        {
+          "meshIndex": 2,
+          "meshName": "Rounded_rubber_module_L.001",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              0,
+              373
+            ]
+          ],
+          "triangleCount": 374
+        },
+        {
+          "meshIndex": 4,
+          "meshName": "Rounded_rubber_module_R.001",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              0,
+              371
+            ]
+          ],
+          "triangleCount": 372
+        },
+        {
+          "meshIndex": 6,
+          "meshName": "Elastic_bridge.001",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              460,
+              615
+            ]
+          ],
+          "triangleCount": 156
+        }
+      ]
+    },
+    "TOY_EQUALITY_Shadow.glb": {
+      "glbSHA256": "6c1b92f1b04870cda3933fc852ddbb94224f80eb9ce39cafd16762a81363168b",
+      "regions": [
+        {
+          "meshIndex": 2,
+          "meshName": "Rounded_rubber_module_L.003",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              0,
+              39
+            ]
+          ],
+          "triangleCount": 40
+        },
+        {
+          "meshIndex": 4,
+          "meshName": "Rounded_rubber_module_R.003",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              0,
+              39
+            ]
+          ],
+          "triangleCount": 40
+        },
+        {
+          "meshIndex": 6,
+          "meshName": "Elastic_bridge.003",
+          "primitiveIndex": 0,
+          "triangleRangesInclusive": [
+            [
+              60,
+              87
+            ]
+          ],
+          "triangleCount": 28
+        }
+      ]
+    }
+  }
+}

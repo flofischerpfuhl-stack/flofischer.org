@@ -1,0 +1,816 @@
+{
+  "schema": "fernworld.rigid-motion.v1",
+  "asset": "STURMBASTION_NUMBER_BARRIER",
+  "coordinates": "glTF right-handed, Y-up, forward +Z; quaternion [x,y,z,w]; local node TRS",
+  "units": "meters, seconds, radians represented by quaternions",
+  "interpolation": {
+    "translation": "LINEAR",
+    "rotation": "SLERP",
+    "scale": "LINEAR"
+  },
+  "defaultPose": {
+    "ChargeCore": {
+      "translation": [
+        0,
+        0.5799999833106995,
+        0.6230000257492065
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "LidPivot": {
+      "translation": [
+        0,
+        2.140000104904175,
+        -0.3499999940395355
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "LockBoltLeft": {
+      "translation": [
+        -1.1200000047683716,
+        2.0199999809265137,
+        0.019999999552965164
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "LockBoltRight": {
+      "translation": [
+        1.1200000047683716,
+        2.0199999809265137,
+        0.019999999552965164
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "resetPose": {
+    "ChargeCore": {
+      "translation": [
+        0,
+        0.5799999833106995,
+        0.6230000257492065
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "LidPivot": {
+      "translation": [
+        0,
+        2.140000104904175,
+        -0.3499999940395355
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "LockBoltLeft": {
+      "translation": [
+        -1.1200000047683716,
+        2.0199999809265137,
+        0.019999999552965164
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "LockBoltRight": {
+      "translation": [
+        1.1200000047683716,
+        2.0199999809265137,
+        0.019999999552965164
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 1,
+      "loop": true,
+      "keyframes": [
+        {
+          "time": 0,
+          "nodes": {
+            "ChargeCore": {
+              "translation": [
+                0,
+                0.5799999833106995,
+                0.6230000257492065
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LidPivot": {
+              "translation": [
+                0,
+                2.140000104904175,
+                -0.3499999940395355
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltLeft": {
+              "translation": [
+                -1.1200000047683716,
+                2.0199999809265137,
+                0.019999999552965164
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltRight": {
+              "translation": [
+                1.1200000047683716,
+                2.0199999809265137,
+                0.019999999552965164
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "time": 1,
+          "nodes": {
+            "ChargeCore": {
+              "translation": [
+                0,
+                0.5799999833106995,
+                0.6230000257492065
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LidPivot": {
+              "translation": [
+                0,
+                2.140000104904175,
+                -0.3499999940395355
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltLeft": {
+              "translation": [
+                -1.1200000047683716,
+                2.0199999809265137,
+                0.019999999552965164
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltRight": {
+              "translation": [
+                1.1200000047683716,
+                2.0199999809265137,
+                0.019999999552965164
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deplete",
+      "duration": 1,
+      "loop": false,
+      "keyframes": [
+        {
+          "time": 0,
+          "nodes": {
+            "ChargeCore": {
+              "translation": [
+                0,
+                0.5799999833106995,
+                0.6230000257492065
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LidPivot": {
+              "translation": [
+                0,
+                2.140000104904175,
+                -0.3499999940395355
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltLeft": {
+              "translation": [
+                -1.1200000047683716,
+                2.0199999809265137,
+                0.019999999552965164
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltRight": {
+              "translation": [
+                1.1200000047683716,
+                2.0199999809265137,
+                0.019999999552965164
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "time": 0.25,
+          "nodes": {
+            "ChargeCore": {
+              "translation": [
+                0,
+                0.5799999833106995,
+                0.6230000257492065
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LidPivot": {
+              "translation": [
+                0,
+                2.140000104904175,
+                -0.3499999940395355
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltLeft": {
+              "translation": [
+                -1.28,
+                2.02,
+                0.02
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltRight": {
+              "translation": [
+                1.28,
+                2.02,
+                0.02
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "time": 0.85,
+          "nodes": {
+            "ChargeCore": {
+              "translation": [
+                0,
+                0.5799999833106995,
+                0.6230000257492065
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                0.24,
+                1
+              ]
+            },
+            "LidPivot": {
+              "translation": [
+                0,
+                2.140000104904175,
+                -0.3499999940395355
+              ],
+              "rotation": [
+                -0.5372996083468239,
+                0,
+                0,
+                0.8433914458128857
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltLeft": {
+              "translation": [
+                -1.28,
+                2.02,
+                0.02
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltRight": {
+              "translation": [
+                1.28,
+                2.02,
+                0.02
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "time": 1,
+          "nodes": {
+            "ChargeCore": {
+              "translation": [
+                0,
+                0.5799999833106995,
+                0.6230000257492065
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                0.24,
+                1
+              ]
+            },
+            "LidPivot": {
+              "translation": [
+                0,
+                2.140000104904175,
+                -0.3499999940395355
+              ],
+              "rotation": [
+                -0.5372996083468239,
+                0,
+                0,
+                0.8433914458128857
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltLeft": {
+              "translation": [
+                -1.28,
+                2.02,
+                0.02
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltRight": {
+              "translation": [
+                1.28,
+                2.02,
+                0.02
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reset",
+      "duration": 0.8,
+      "loop": false,
+      "keyframes": [
+        {
+          "time": 0,
+          "nodes": {
+            "ChargeCore": {
+              "translation": [
+                0,
+                0.5799999833106995,
+                0.6230000257492065
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                0.24,
+                1
+              ]
+            },
+            "LidPivot": {
+              "translation": [
+                0,
+                2.140000104904175,
+                -0.3499999940395355
+              ],
+              "rotation": [
+                -0.5372996083468239,
+                0,
+                0,
+                0.8433914458128857
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltLeft": {
+              "translation": [
+                -1.28,
+                2.02,
+                0.02
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltRight": {
+              "translation": [
+                1.28,
+                2.02,
+                0.02
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "time": 0.8,
+          "nodes": {
+            "ChargeCore": {
+              "translation": [
+                0,
+                0.5799999833106995,
+                0.6230000257492065
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LidPivot": {
+              "translation": [
+                0,
+                2.140000104904175,
+                -0.3499999940395355
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltLeft": {
+              "translation": [
+                -1.1200000047683716,
+                2.0199999809265137,
+                0.019999999552965164
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "LockBoltRight": {
+              "translation": [
+                1.1200000047683716,
+                2.0199999809265137,
+                0.019999999552965164
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "materialStates": {
+    "material": "ChargeColorZone",
+    "opaque": true,
+    "chargedBaseColor": [
+      0.07,
+      0.73,
+      0.77,
+      1
+    ],
+    "depletedBaseColor": [
+      0.035,
+      0.11,
+      0.13,
+      1
+    ],
+    "note": "Optional runtime baseColorFactor replacement, no emissive/bloom/transparency dependency. GLB animations contain TRS only."
+  },
+  "nativeEditableActions": "Same motions stored as NLA tracks in source.blend. Runtime standard glTF animations and this JSON are alternative playback sources; do not apply both."
+}

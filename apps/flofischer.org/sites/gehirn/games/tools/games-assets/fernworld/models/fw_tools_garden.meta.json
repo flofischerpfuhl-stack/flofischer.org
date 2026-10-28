@@ -1,0 +1,74 @@
+{
+  "category": "props",
+  "label": "Garden tool roll \u00b7 spade hammer and rake",
+  "games": [
+    "generic"
+  ],
+  "description": "Garden tool roll \u00b7 spade hammer and rake; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 1730,
+      "triangles": 3246,
+      "groups": 1,
+      "bytes": 53880,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 1893,
+      "triangles": 3148,
+      "groups": 1,
+      "bytes": 55704,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 367,
+      "triangles": 670,
+      "groups": 1,
+      "bytes": 11465,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "Original Fernworld authored geometry",
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_tools_garden",
+  "bounds": [
+    [
+      -0.625,
+      0.0,
+      -0.4099999964237213
+    ],
+    [
+      0.625,
+      0.1720000058412552,
+      0.5040000081062317
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#49545b",
+    "#624735",
+    "#86664a",
+    "#c09a64"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

@@ -1,0 +1,275 @@
+{
+  "mechanicalPivots": {
+    "TurretPivot": {
+      "node": "TurretYaw",
+      "localAxis": [
+        0,
+        1,
+        0
+      ]
+    },
+    "RecoilPivot": {
+      "node": "BarrelRecoil",
+      "localAxis": [
+        0,
+        0,
+        -1
+      ]
+    },
+    "RollerAxles": {
+      "nodes": [
+        "Wheel-1",
+        "Wheel1"
+      ],
+      "localAxis": [
+        1,
+        0,
+        0
+      ]
+    }
+  },
+  "coordinates": "glTF local Y-up/+Zforward",
+  "live": true,
+  "resolve": "multiply ancestor TRS matrices including current rigid motion, never use rest-world positions while aiming/recoiling",
+  "sockets": {
+    "GroundShadow": {
+      "parent": "Body",
+      "translation": [
+        0,
+        0.014999999664723873,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "forward": [
+        0,
+        0,
+        1
+      ],
+      "verifiedRestWorldTranslation": [
+        0.0,
+        0.014999999664723873,
+        -0.0
+      ],
+      "verifiedRestWorldForward": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "HitFXSocket": {
+      "parent": "Body",
+      "translation": [
+        0,
+        1.100000023841858,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "forward": [
+        0,
+        0,
+        1
+      ],
+      "verifiedRestWorldTranslation": [
+        0.0,
+        1.100000023841858,
+        -0.0
+      ],
+      "verifiedRestWorldForward": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "MotorFXSocket": {
+      "parent": "Body",
+      "translation": [
+        0,
+        0.6600000262260437,
+        -1.399999976158142
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "forward": [
+        0,
+        0,
+        1
+      ],
+      "verifiedRestWorldTranslation": [
+        0.0,
+        0.6600000262260437,
+        -1.399999976158142
+      ],
+      "verifiedRestWorldForward": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "ReinforcementSocket": {
+      "parent": "Body",
+      "translation": [
+        0,
+        0.14000000059604645,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "forward": [
+        0,
+        0,
+        1
+      ],
+      "verifiedRestWorldTranslation": [
+        0.0,
+        0.14000000059604645,
+        -2.0
+      ],
+      "verifiedRestWorldForward": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "MuzzleSocket_Center": {
+      "parent": "BarrelRecoil",
+      "translation": [
+        0,
+        0.009999990463256836,
+        0.5649999976158142
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "forward": [
+        0,
+        0,
+        1
+      ],
+      "verifiedRestWorldTranslation": [
+        0.0,
+        1.6100000143051147,
+        1.3949999809265137
+      ],
+      "verifiedRestWorldForward": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "MuzzleSocket_Left": {
+      "parent": "BarrelRecoil",
+      "translation": [
+        -0.5728351473808289,
+        0.009999990463256836,
+        0.5589635968208313
+      ],
+      "rotation": [
+        0,
+        -0.1395431011915207,
+        0,
+        0.9902160167694092
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "forward": [
+        0,
+        0,
+        1
+      ],
+      "verifiedRestWorldTranslation": [
+        -0.5728351473808289,
+        1.6100000143051147,
+        1.3889635801315308
+      ],
+      "verifiedRestWorldForward": [
+        -0.2763556241989136,
+        0.0,
+        0.9610554575920105
+      ]
+    },
+    "MuzzleSocket_Right": {
+      "parent": "BarrelRecoil",
+      "translation": [
+        0.5728351473808289,
+        0.009999990463256836,
+        0.5589635968208313
+      ],
+      "rotation": [
+        0,
+        0.1395431011915207,
+        0,
+        0.9902160167694092
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "forward": [
+        0,
+        0,
+        1
+      ],
+      "verifiedRestWorldTranslation": [
+        0.5728351473808289,
+        1.6100000143051147,
+        1.3889635801315308
+      ],
+      "verifiedRestWorldForward": [
+        0.2763556241989136,
+        0.0,
+        0.9610554575920105
+      ]
+    }
+  },
+  "restWorldVerification": "Actual Hero GLB reimport, converted from Blender Z-up to glTF Y-up/+Zforward; evaluate current parent TRS at runtime."
+}

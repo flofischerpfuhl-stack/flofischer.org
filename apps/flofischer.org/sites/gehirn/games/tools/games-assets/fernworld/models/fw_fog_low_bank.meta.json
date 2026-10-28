@@ -1,0 +1,77 @@
+{
+  "category": "sky",
+  "label": "Low connected distant valley fog",
+  "games": [
+    "generic"
+  ],
+  "description": "Low connected distant valley fog; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 3956,
+      "triangles": 7908,
+      "groups": 1,
+      "bytes": 126834,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 1012,
+      "triangles": 2020,
+      "groups": 1,
+      "bytes": 32627,
+      "vertexCap": 4500,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 296,
+      "triangles": 588,
+      "groups": 1,
+      "bytes": 9712,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 4500,
+  "shadow_cap": 1200,
+  "ground": false,
+  "ao_dist": 0.15,
+  "wind": {
+    "axis": "+X",
+    "suggestedSpeed": 0.015
+  },
+  "ao": false,
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_fog_low_bank",
+  "bounds": [
+    [
+      -3.6049835681915283,
+      -0.07486163824796677,
+      -0.7487331628799438
+    ],
+    [
+      3.421156883239746,
+      0.5150010585784912,
+      0.7487331032752991
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#cfdde2"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

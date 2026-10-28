@@ -1,0 +1,82 @@
+{
+  "category": "terrain",
+  "label": "Curved fall lip, flow bands and layered foam impact",
+  "games": [
+    "generic"
+  ],
+  "description": "Curved fall lip, flow bands and layered foam impact; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 1888,
+      "triangles": 2844,
+      "groups": 1,
+      "bytes": 53243,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 960,
+      "triangles": 1360,
+      "groups": 1,
+      "bytes": 26520,
+      "vertexCap": 3500,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 0,
+      "triangles": 0,
+      "groups": 0,
+      "bytes": 58,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 3500,
+  "shadow_cap": 1200,
+  "ground": true,
+  "ao_dist": 0.15,
+  "water": {
+    "flowAxis": "-Y",
+    "height": 2.7,
+    "opaque": true
+  },
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_waterfall_ribbon_foam",
+  "bounds": [
+    [
+      -1.0242072343826294,
+      0.007358983624726534,
+      -0.6593639850616455
+    ],
+    [
+      1.0242072343826294,
+      2.700000047683716,
+      1.0649123191833496
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#5a98b3",
+    "#7fb7c7",
+    "#9cc6ce",
+    "#c6dedd",
+    "#d1e9e6",
+    "#f0f2e6"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

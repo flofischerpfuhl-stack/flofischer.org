@@ -1,0 +1,1418 @@
+{
+  "category": "characters",
+  "label": "Pip \u2014 Stone Stomper",
+  "games": [
+    "pips-tower",
+    "pip-and-the-stones-of-petra"
+  ],
+  "description": "Pip in an ochre Rock Fernstone suit: a rounded ammonite fossil shield, worn stone shoulder and knee plates, and fitted impact shoe caps for his ground stomp and extra hit.",
+  "budgets": {
+    "hi": 38000,
+    "lo": 22000,
+    "sh": 1500
+  },
+  "vertex_cap": 16000,
+  "shadow_cap": 1300,
+  "ground": true,
+  "palette_roles": {
+    "skin": 15840645,
+    "hair": 6503464,
+    "top": 11766324,
+    "bottom": 11766324,
+    "boots": 6374190,
+    "belt": 5388072,
+    "helmet": 15559446,
+    "silver": 14342349,
+    "hook": 3617583
+  },
+  "outfit": "stone_stomper",
+  "aliases": [],
+  "source_license": "CC0-1.0",
+  "source_credit": "Kay Lousberg / KayKit Adventurers, custom Pip sculpt adaptation",
+  "sockets": {
+    "head": [
+      0,
+      0.91,
+      0
+    ],
+    "mouth": [
+      0,
+      0.704,
+      0.13
+    ],
+    "feet": [
+      0,
+      0,
+      0.025
+    ],
+    "handL": [
+      -0.25,
+      0.38,
+      0.04
+    ],
+    "handR": [
+      0.318,
+      0.52,
+      0.068
+    ],
+    "attack": [
+      0.362,
+      0.776,
+      0.068
+    ],
+    "hook": [
+      0.362,
+      0.776,
+      0.068
+    ],
+    "keepstone": [
+      0.119,
+      0.354,
+      0.113
+    ]
+  },
+  "base_model": "PIP_KESSEL",
+  "seam_safe": true,
+  "seam_region_lock": false,
+  "source": "scripts/games-blender/fernworld/assets/pip_stone_stomper.py",
+  "id": "PIP_STONE_STOMPER",
+  "bounds": [
+    [
+      -0.3059382438659668,
+      0.0,
+      -0.18488000333309174
+    ],
+    [
+      0.416036456823349,
+      1.0,
+      0.1694784164428711
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "lods": {
+    "hi": {
+      "vertices": 16024,
+      "triangles": 30272,
+      "groups": 6,
+      "bytes": 500073,
+      "vertexCap": 1000000,
+      "triangleTarget": 38000,
+      "seamSafe": true,
+      "withinVertexCap": true,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 26540,
+          "triangles": 2686,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0002963488223031163,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip tailored sweatshirt torso",
+          "channel": "body",
+          "target": 2687
+        },
+        {
+          "sourceTriangles": 7488,
+          "triangles": 1120,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0006281917449086905,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip continuous sleeve wrist hand armL",
+          "channel": "armL",
+          "target": 1120
+        },
+        {
+          "sourceTriangles": 7664,
+          "triangles": 1140,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0009017251431941986,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip continuous sleeve wrist hand armR",
+          "channel": "armR",
+          "target": 1141
+        },
+        {
+          "sourceTriangles": 21020,
+          "triangles": 2160,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0006373459473252296,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": true,
+          "surfaceScale": "whole part",
+          "part": "Pip continuous jeans ankle shoe legL",
+          "channel": "legL",
+          "target": 2160
+        },
+        {
+          "sourceTriangles": 21020,
+          "triangles": 2160,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0006130633410066366,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": true,
+          "surfaceScale": "whole part",
+          "part": "Pip continuous jeans ankle shoe legR",
+          "channel": "legR",
+          "target": 2160
+        },
+        {
+          "sourceTriangles": 39852,
+          "triangles": 7910,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0002567993651609868,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip sculpted face jaw nose ears",
+          "channel": "body",
+          "target": 7911
+        },
+        {
+          "sourceTriangles": 79240,
+          "triangles": 4248,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0006426050094887614,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": true,
+          "surfaceScale": "whole part",
+          "part": "Pip sculpted chestnut hair and swept tufts",
+          "channel": "body",
+          "target": 4249
+        },
+        {
+          "sourceTriangles": 480,
+          "triangles": 480,
+          "retained": true,
+          "reason": "already below target",
+          "part": "Pip simple leather belt",
+          "channel": "body",
+          "target": 1030
+        },
+        {
+          "sourceTriangles": 300,
+          "triangles": 184,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0003215110336896032,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip rounded belt buckle",
+          "channel": "body",
+          "target": 68
+        },
+        {
+          "sourceTriangles": 188,
+          "triangles": 60,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0002750009298324585,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip buckle inner leather",
+          "channel": "body",
+          "target": 60
+        },
+        {
+          "sourceTriangles": 350,
+          "triangles": 350,
+          "retained": true,
+          "reason": "already below target",
+          "part": "surface_eye_left",
+          "channel": "body",
+          "target": 1469
+        },
+        {
+          "sourceTriangles": 44,
+          "triangles": 44,
+          "retained": true,
+          "reason": "already below target",
+          "part": "Pip flat eye catchlight left",
+          "channel": "body",
+          "target": 60
+        },
+        {
+          "sourceTriangles": 348,
+          "triangles": 348,
+          "retained": true,
+          "reason": "already below target",
+          "part": "surface_eye_right",
+          "channel": "body",
+          "target": 1469
+        },
+        {
+          "sourceTriangles": 44,
+          "triangles": 44,
+          "retained": true,
+          "reason": "already below target",
+          "part": "Pip flat eye catchlight right",
+          "channel": "body",
+          "target": 60
+        },
+        {
+          "sourceTriangles": 224,
+          "triangles": 142,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.000275046651950106,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip subtle upper eyelid",
+          "channel": "body",
+          "target": 60
+        },
+        {
+          "sourceTriangles": 256,
+          "triangles": 162,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00011974758672295138,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip arched friendly eyebrow",
+          "channel": "body",
+          "target": 71
+        },
+        {
+          "sourceTriangles": 224,
+          "triangles": 142,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00032874467433430254,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip subtle upper eyelid",
+          "channel": "body",
+          "target": 60
+        },
+        {
+          "sourceTriangles": 256,
+          "triangles": 162,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00011411641025915742,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip arched friendly eyebrow",
+          "channel": "body",
+          "target": 71
+        },
+        {
+          "sourceTriangles": 468,
+          "triangles": 62,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0006730683380737901,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip gentle smile following sculpt",
+          "channel": "body",
+          "target": 63
+        },
+        {
+          "sourceTriangles": 896,
+          "triangles": 896,
+          "retained": true,
+          "reason": "already below target",
+          "part": "round_orange_climbing_helmet",
+          "channel": "body",
+          "target": 4756
+        },
+        {
+          "sourceTriangles": 480,
+          "triangles": 480,
+          "retained": true,
+          "reason": "already below target",
+          "part": "thin_helmet_edge",
+          "channel": "body",
+          "target": 1688
+        },
+        {
+          "sourceTriangles": 416,
+          "triangles": 388,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00011202917085029185,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "headlamp_dark_housing",
+          "channel": "body",
+          "target": 391
+        },
+        {
+          "sourceTriangles": 288,
+          "triangles": 196,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0003332871710881591,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "headlamp_warm_lens",
+          "channel": "body",
+          "target": 196
+        },
+        {
+          "sourceTriangles": 284,
+          "triangles": 184,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00021435452799778432,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "small_keepstone_frame",
+          "channel": "body",
+          "target": 87
+        },
+        {
+          "sourceTriangles": 164,
+          "triangles": 112,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00021781623945571482,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "matte_petra_fossil",
+          "channel": "body",
+          "target": 60
+        },
+        {
+          "sourceTriangles": 100,
+          "triangles": 80,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00023509001766797155,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "single_fossil_vein",
+          "channel": "body",
+          "target": 60
+        },
+        {
+          "sourceTriangles": 108,
+          "triangles": 84,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 2.05620817723684e-05,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "keepstone_belt_loop",
+          "channel": "body",
+          "target": 60
+        },
+        {
+          "sourceTriangles": 280,
+          "triangles": 280,
+          "retained": true,
+          "reason": "already below target",
+          "part": "short_hook_pole",
+          "channel": "armR",
+          "target": 569
+        },
+        {
+          "sourceTriangles": 520,
+          "triangles": 520,
+          "retained": true,
+          "reason": "already below target",
+          "part": "open_climbing_hook",
+          "channel": "armR",
+          "target": 686
+        },
+        {
+          "sourceTriangles": 256,
+          "triangles": 126,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0004036346508655697,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "plain_hook_handgrip",
+          "channel": "armR",
+          "target": 126
+        },
+        {
+          "sourceTriangles": 168,
+          "triangles": 168,
+          "retained": true,
+          "reason": "source fallback: surface deviation",
+          "part": "rounded_pole_end",
+          "channel": "armR",
+          "target": 60
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 336,
+          "retained": true,
+          "reason": "already below target",
+          "part": "Stone Stomper round fossil shield",
+          "channel": "body",
+          "target": 1004
+        },
+        {
+          "sourceTriangles": 672,
+          "triangles": 378,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00037656756467185915,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper single ammonite mineral fossil",
+          "channel": "body",
+          "target": 84
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 242,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0007185032591223717,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper rounded shoulder armL",
+          "channel": "armL",
+          "target": 242
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 204,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0004987147403880954,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper rounded knee legL",
+          "channel": "legL",
+          "target": 205
+        },
+        {
+          "sourceTriangles": 5070,
+          "triangles": 780,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00042870567995123565,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper fitted impact shoe shell legL",
+          "channel": "legL",
+          "target": 780
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 234,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0005521182320080698,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper rounded shoulder armR",
+          "channel": "armR",
+          "target": 234
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 204,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0005361817311495543,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper rounded knee legR",
+          "channel": "legR",
+          "target": 205
+        },
+        {
+          "sourceTriangles": 5070,
+          "triangles": 780,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00042870567995123565,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper fitted impact shoe shell legR",
+          "channel": "legR",
+          "target": 780
+        }
+      ]
+    },
+    "lo": {
+      "vertices": 10639,
+      "triangles": 19522,
+      "groups": 6,
+      "bytes": 327912,
+      "vertexCap": 16000,
+      "triangleTarget": 22000,
+      "seamSafe": true,
+      "withinVertexCap": true,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 26540,
+          "triangles": 1554,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0006043517496436834,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip tailored sweatshirt torso",
+          "channel": "body",
+          "target": 1555
+        },
+        {
+          "sourceTriangles": 7488,
+          "triangles": 648,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00113679061178118,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip continuous sleeve wrist hand armL",
+          "channel": "armL",
+          "target": 649
+        },
+        {
+          "sourceTriangles": 7664,
+          "triangles": 660,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0013429021928459406,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip continuous sleeve wrist hand armR",
+          "channel": "armR",
+          "target": 661
+        },
+        {
+          "sourceTriangles": 21020,
+          "triangles": 1250,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0013851169496774673,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": true,
+          "surfaceScale": "whole part",
+          "part": "Pip continuous jeans ankle shoe legL",
+          "channel": "legL",
+          "target": 1250
+        },
+        {
+          "sourceTriangles": 21020,
+          "triangles": 1250,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0013850978575646877,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": true,
+          "surfaceScale": "whole part",
+          "part": "Pip continuous jeans ankle shoe legR",
+          "channel": "legR",
+          "target": 1250
+        },
+        {
+          "sourceTriangles": 39852,
+          "triangles": 4580,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00044774560956284404,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip sculpted face jaw nose ears",
+          "channel": "body",
+          "target": 4580
+        },
+        {
+          "sourceTriangles": 79240,
+          "triangles": 2460,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0013513271696865559,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": true,
+          "surfaceScale": "whole part",
+          "part": "Pip sculpted chestnut hair and swept tufts",
+          "channel": "body",
+          "target": 2460
+        },
+        {
+          "sourceTriangles": 480,
+          "triangles": 480,
+          "retained": true,
+          "reason": "already below target",
+          "part": "Pip simple leather belt",
+          "channel": "body",
+          "target": 596
+        },
+        {
+          "sourceTriangles": 300,
+          "triangles": 168,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0003215121105313301,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip rounded belt buckle",
+          "channel": "body",
+          "target": 39
+        },
+        {
+          "sourceTriangles": 188,
+          "triangles": 100,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0002345297543797642,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip buckle inner leather",
+          "channel": "body",
+          "target": 16
+        },
+        {
+          "sourceTriangles": 350,
+          "triangles": 350,
+          "retained": true,
+          "reason": "already below target",
+          "part": "surface_eye_left",
+          "channel": "body",
+          "target": 851
+        },
+        {
+          "sourceTriangles": 44,
+          "triangles": 44,
+          "retained": true,
+          "reason": "source fallback: surface deviation",
+          "part": "Pip flat eye catchlight left",
+          "channel": "body",
+          "target": 16
+        },
+        {
+          "sourceTriangles": 348,
+          "triangles": 348,
+          "retained": true,
+          "reason": "already below target",
+          "part": "surface_eye_right",
+          "channel": "body",
+          "target": 850
+        },
+        {
+          "sourceTriangles": 44,
+          "triangles": 44,
+          "retained": true,
+          "reason": "source fallback: surface deviation",
+          "part": "Pip flat eye catchlight right",
+          "channel": "body",
+          "target": 16
+        },
+        {
+          "sourceTriangles": 224,
+          "triangles": 126,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0003898087015841156,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip subtle upper eyelid",
+          "channel": "body",
+          "target": 29
+        },
+        {
+          "sourceTriangles": 256,
+          "triangles": 148,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00023288742522709072,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip arched friendly eyebrow",
+          "channel": "body",
+          "target": 41
+        },
+        {
+          "sourceTriangles": 224,
+          "triangles": 126,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0003328619641251862,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip subtle upper eyelid",
+          "channel": "body",
+          "target": 29
+        },
+        {
+          "sourceTriangles": 256,
+          "triangles": 148,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.000219229725189507,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip arched friendly eyebrow",
+          "channel": "body",
+          "target": 41
+        },
+        {
+          "sourceTriangles": 468,
+          "triangles": 36,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0011759742628782988,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Pip gentle smile following sculpt",
+          "channel": "body",
+          "target": 37
+        },
+        {
+          "sourceTriangles": 896,
+          "triangles": 896,
+          "retained": true,
+          "reason": "already below target",
+          "part": "round_orange_climbing_helmet",
+          "channel": "body",
+          "target": 2753
+        },
+        {
+          "sourceTriangles": 480,
+          "triangles": 480,
+          "retained": true,
+          "reason": "already below target",
+          "part": "thin_helmet_edge",
+          "channel": "body",
+          "target": 977
+        },
+        {
+          "sourceTriangles": 416,
+          "triangles": 224,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00034077989403158426,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "headlamp_dark_housing",
+          "channel": "body",
+          "target": 226
+        },
+        {
+          "sourceTriangles": 288,
+          "triangles": 114,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0005210207891650498,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "headlamp_warm_lens",
+          "channel": "body",
+          "target": 114
+        },
+        {
+          "sourceTriangles": 284,
+          "triangles": 50,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0009894679533317685,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "small_keepstone_frame",
+          "channel": "body",
+          "target": 50
+        },
+        {
+          "sourceTriangles": 164,
+          "triangles": 24,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0007176234503276646,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "matte_petra_fossil",
+          "channel": "body",
+          "target": 25
+        },
+        {
+          "sourceTriangles": 100,
+          "triangles": 58,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.000500063004437834,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "single_fossil_vein",
+          "channel": "body",
+          "target": 16
+        },
+        {
+          "sourceTriangles": 108,
+          "triangles": 108,
+          "retained": true,
+          "reason": "source fallback: surface deviation",
+          "part": "keepstone_belt_loop",
+          "channel": "body",
+          "target": 16
+        },
+        {
+          "sourceTriangles": 280,
+          "triangles": 280,
+          "retained": true,
+          "reason": "already below target",
+          "part": "short_hook_pole",
+          "channel": "armR",
+          "target": 330
+        },
+        {
+          "sourceTriangles": 520,
+          "triangles": 396,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00020746083464473486,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "open_climbing_hook",
+          "channel": "armR",
+          "target": 397
+        },
+        {
+          "sourceTriangles": 256,
+          "triangles": 72,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0010075400350615382,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "plain_hook_handgrip",
+          "channel": "armR",
+          "target": 73
+        },
+        {
+          "sourceTriangles": 168,
+          "triangles": 100,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0006258751382119954,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "rounded_pole_end",
+          "channel": "armR",
+          "target": 34
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 336,
+          "retained": true,
+          "reason": "already below target",
+          "part": "Stone Stomper round fossil shield",
+          "channel": "body",
+          "target": 581
+        },
+        {
+          "sourceTriangles": 672,
+          "triangles": 360,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00037656756467185915,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper single ammonite mineral fossil",
+          "channel": "body",
+          "target": 49
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 238,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0007185032591223717,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper rounded shoulder armL",
+          "channel": "armL",
+          "target": 140
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 118,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0011428759898990393,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper rounded knee legL",
+          "channel": "legL",
+          "target": 119
+        },
+        {
+          "sourceTriangles": 5070,
+          "triangles": 450,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0005859288503415883,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper fitted impact shoe shell legL",
+          "channel": "legL",
+          "target": 451
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 134,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0014166849432513118,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper rounded shoulder armR",
+          "channel": "armR",
+          "target": 135
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 118,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.001039252383634448,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper rounded knee legR",
+          "channel": "legR",
+          "target": 119
+        },
+        {
+          "sourceTriangles": 5070,
+          "triangles": 450,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0005859432276338339,
+          "rejectedCandidates": [],
+          "colourContours": "shared surface; visual QA",
+          "protectedColourVertices": false,
+          "surfaceScale": "whole part",
+          "part": "Stone Stomper fitted impact shoe shell legR",
+          "channel": "legR",
+          "target": 451
+        }
+      ]
+    },
+    "sh": {
+      "vertices": 798,
+      "triangles": 1488,
+      "groups": 5,
+      "bytes": 25969,
+      "vertexCap": 1300,
+      "triangleTarget": 1500,
+      "seamSafe": true,
+      "withinVertexCap": true,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 26540,
+          "triangles": 134,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Pip tailored sweatshirt torso",
+          "channel": "body",
+          "target": 134
+        },
+        {
+          "sourceTriangles": 7488,
+          "triangles": 64,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Pip continuous sleeve wrist hand armL",
+          "channel": "armL",
+          "target": 64
+        },
+        {
+          "sourceTriangles": 7664,
+          "triangles": 64,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Pip continuous sleeve wrist hand armR",
+          "channel": "armR",
+          "target": 65
+        },
+        {
+          "sourceTriangles": 21020,
+          "triangles": 106,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Pip continuous jeans ankle shoe legL",
+          "channel": "legL",
+          "target": 107
+        },
+        {
+          "sourceTriangles": 21020,
+          "triangles": 106,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Pip continuous jeans ankle shoe legR",
+          "channel": "legR",
+          "target": 107
+        },
+        {
+          "sourceTriangles": 39852,
+          "triangles": 150,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Pip sculpted face jaw nose ears",
+          "channel": "body",
+          "target": 150
+        },
+        {
+          "sourceTriangles": 79240,
+          "triangles": 168,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Pip sculpted chestnut hair and swept tufts",
+          "channel": "body",
+          "target": 169
+        },
+        {
+          "sourceTriangles": 480,
+          "triangles": 100,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Pip simple leather belt",
+          "channel": "body",
+          "target": 102
+        },
+        {
+          "sourceTriangles": 300,
+          "triangles": 8,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Pip rounded belt buckle",
+          "channel": "body",
+          "target": 11
+        },
+        {
+          "sourceTriangles": 896,
+          "triangles": 156,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "round_orange_climbing_helmet",
+          "channel": "body",
+          "target": 158
+        },
+        {
+          "sourceTriangles": 480,
+          "triangles": 120,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "thin_helmet_edge",
+          "channel": "body",
+          "target": 122
+        },
+        {
+          "sourceTriangles": 416,
+          "triangles": 14,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "headlamp_dark_housing",
+          "channel": "body",
+          "target": 16
+        },
+        {
+          "sourceTriangles": 284,
+          "triangles": 8,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "small_keepstone_frame",
+          "channel": "body",
+          "target": 9
+        },
+        {
+          "sourceTriangles": 108,
+          "triangles": 8,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "keepstone_belt_loop",
+          "channel": "body",
+          "target": 8
+        },
+        {
+          "sourceTriangles": 280,
+          "triangles": 38,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "short_hook_pole",
+          "channel": "armR",
+          "target": 38
+        },
+        {
+          "sourceTriangles": 520,
+          "triangles": 26,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "open_climbing_hook",
+          "channel": "armR",
+          "target": 26
+        },
+        {
+          "sourceTriangles": 256,
+          "triangles": 12,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "plain_hook_handgrip",
+          "channel": "armR",
+          "target": 12
+        },
+        {
+          "sourceTriangles": 168,
+          "triangles": 8,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "rounded_pole_end",
+          "channel": "armR",
+          "target": 8
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 40,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Stone Stomper round fossil shield",
+          "channel": "body",
+          "target": 40
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 18,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Stone Stomper rounded shoulder armL",
+          "channel": "armL",
+          "target": 18
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 14,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Stone Stomper rounded knee legL",
+          "channel": "legL",
+          "target": 15
+        },
+        {
+          "sourceTriangles": 5070,
+          "triangles": 48,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Stone Stomper fitted impact shoe shell legL",
+          "channel": "legL",
+          "target": 48
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 16,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Stone Stomper rounded shoulder armR",
+          "channel": "armR",
+          "target": 17
+        },
+        {
+          "sourceTriangles": 336,
+          "triangles": 14,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Stone Stomper rounded knee legR",
+          "channel": "legR",
+          "target": 15
+        },
+        {
+          "sourceTriangles": 5070,
+          "triangles": 48,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "Stone Stomper fitted impact shoe shell legR",
+          "channel": "legR",
+          "target": 48
+        }
+      ]
+    }
+  },
+  "channels": [
+    "armL",
+    "armR",
+    "body",
+    "legL",
+    "legR"
+  ],
+  "palette": [
+    "#302018",
+    "#37332f",
+    "#523728",
+    "#61432e",
+    "#633c28",
+    "#71685a",
+    "#754432",
+    "#766b3f",
+    "#825b35",
+    "#827868",
+    "#926d46",
+    "#9cad53",
+    "#b38a34",
+    "#c8b37b",
+    "#d5d18e",
+    "#dad8cd",
+    "#ed6b16",
+    "#f1b585",
+    "#fff2a4",
+    "#fff4de",
+    "#fffbe9"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "1c0c8eacb7f2c58c1ac6a698f61d35adfcbed18af54888fd2446c5cabc934e61"
+}

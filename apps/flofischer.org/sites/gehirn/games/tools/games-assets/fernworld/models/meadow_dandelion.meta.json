@@ -1,0 +1,83 @@
+{
+  "category": "vegetation",
+  "label": "Dandelion",
+  "games": [
+    "generic"
+  ],
+  "description": "Original botanical sculpt: curved folded laminae, tapered stems and individually shaped flowers. Opaque double-sided vertex colours, library only.",
+  "budgets": {
+    "hi": 90000,
+    "lo": 1400,
+    "sh": 350
+  },
+  "vertex_cap": 2600,
+  "shadow_cap": 1800,
+  "lods": {
+    "hi": {
+      "vertices": 2405,
+      "triangles": 2872,
+      "groups": 1,
+      "bytes": 61719,
+      "vertexCap": 1000000,
+      "triangleTarget": 90000
+    },
+    "lo": {
+      "vertices": 954,
+      "triangles": 1010,
+      "groups": 1,
+      "bytes": 23606,
+      "vertexCap": 2600,
+      "triangleTarget": 1400,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 428,
+      "triangles": 350,
+      "groups": 1,
+      "bytes": 9910,
+      "vertexCap": 1800,
+      "triangleTarget": 350,
+      "authoredLod": true
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.18
+  },
+  "sockets": {},
+  "source": "scripts/games-blender/fernworld/assets/meadow_botany.py",
+  "id": "meadow_dandelion",
+  "bounds": [
+    [
+      -0.1576743870973587,
+      0.0,
+      -0.15942619740962982
+    ],
+    [
+      0.16001223027706146,
+      0.33828040957450867,
+      0.12676672637462616
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#2b5837",
+    "#497d38",
+    "#668e46",
+    "#b78b22",
+    "#e7b82c",
+    "#f1c944"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "84fe661dfd7863c79c5710f9b789571dcaf55903ffd333e88ea5cfe97924d01e"
+}

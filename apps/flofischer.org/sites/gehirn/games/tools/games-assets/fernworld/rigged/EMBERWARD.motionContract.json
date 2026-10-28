@@ -1,0 +1,205 @@
+{
+  "axes": "GLB: Y up, +Z forward, metres",
+  "clips": {
+    "Idle": {
+      "duration": 2.0,
+      "loop": true,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": []
+    },
+    "Locomotion": {
+      "duration": 1.0,
+      "loop": true,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0.3166666666666667,
+      "events": [
+        {
+          "time": 0,
+          "bone": "leg_L_paw",
+          "event": "foot_down"
+        },
+        {
+          "time": 0.09999999999999998,
+          "bone": "leg_R_paw",
+          "event": "foot_up"
+        },
+        {
+          "time": 0.5,
+          "bone": "leg_R_paw",
+          "event": "foot_down"
+        },
+        {
+          "time": 0.6,
+          "bone": "leg_L_paw",
+          "event": "foot_up"
+        }
+      ]
+    },
+    "Attack_Cast": {
+      "duration": 1.0,
+      "loop": false,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 0.475,
+          "socket": "mouth",
+          "event": "release"
+        }
+      ]
+    },
+    "Attack_Sweep": {
+      "duration": 1.2,
+      "loop": false,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 0.4,
+          "socket": "tail",
+          "event": "release"
+        }
+      ]
+    },
+    "GroundPulse": {
+      "duration": 1.2,
+      "loop": false,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 0.54,
+          "socket": "ground",
+          "event": "release"
+        }
+      ]
+    },
+    "Hit_Recover": {
+      "duration": 0.8,
+      "loop": false,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": []
+    },
+    "Freed": {
+      "duration": 1.6,
+      "loop": false,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 0.65,
+          "socket": "hex",
+          "event": "hex_break"
+        }
+      ]
+    }
+  },
+  "sockets": [
+    {
+      "name": "mouth",
+      "bone": "head"
+    },
+    {
+      "name": "tail",
+      "bone": "tail_tip"
+    },
+    {
+      "name": "ground",
+      "bone": "root"
+    },
+    {
+      "name": "hex",
+      "bone": "spine"
+    },
+    {
+      "name": "emitter",
+      "bone": "head"
+    },
+    {
+      "name": "hand_arm_L",
+      "bone": "arm_L_paw"
+    },
+    {
+      "name": "hand_arm_R",
+      "bone": "arm_R_paw"
+    },
+    {
+      "name": "hand_leg_L",
+      "bone": "leg_L_paw"
+    },
+    {
+      "name": "hand_leg_R",
+      "bone": "leg_R_paw"
+    }
+  ],
+  "slotSuggestions": {
+    "blaster": {
+      "clip": "Attack_Cast",
+      "socket": "mouth"
+    },
+    "drones": {
+      "clip": "Idle",
+      "socket": "hex"
+    },
+    "wrench": {
+      "clip": "Attack_Sweep",
+      "socket": "tail"
+    },
+    "zap": {
+      "clip": "Attack_Cast",
+      "socket": "emitter"
+    },
+    "mines": {
+      "clip": "GroundPulse",
+      "socket": "ground"
+    }
+  },
+  "footContacts": "Locomotion 0.0..0.6 stance per leg phase; diagonal pairs offset 0.5, Emberward opposite legs offset 0.5",
+  "license": "Original own Fernworld source; derivative authored for Florian",
+  "gait": {
+    "inPlace": true,
+    "cycleSeconds": 1,
+    "footContacts": [
+      {
+        "bone": "leg_L_paw",
+        "phaseOffset": 0,
+        "stance": [
+          0,
+          0.6
+        ],
+        "swing": [
+          0.6,
+          1
+        ]
+      },
+      {
+        "bone": "leg_R_paw",
+        "phaseOffset": 0.5,
+        "stance": [
+          0,
+          0.6
+        ],
+        "swing": [
+          0.6,
+          1
+        ]
+      }
+    ]
+  }
+}

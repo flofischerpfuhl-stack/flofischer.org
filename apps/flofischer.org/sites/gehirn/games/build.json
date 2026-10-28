@@ -1,0 +1,17 @@
+{
+  "sourceCommit": "acd740a9771c855f227396bf0176c57fdbb0cb6b",
+  "packagedAt": "2026-10-28T12:09:34.035297+00:00",
+  "files": 2273,
+  "bytes": 569662474,
+  "games": 4,
+  "campaignLevels": 176,
+  "bonusLevels": 11,
+  "regions": 17,
+  "sourceStatus": "Committed runtime sources; standalone test publication.",
+  "losslessModelCompression": {
+    "files": 710,
+    "originalBytes": 400032976,
+    "gzipBytes": 118522066
+  },
+  "runtimeSha256": "4a552eb2993b007328df63a5c41fade54fe44fc6c924b7199ba667c75c730e72"
+}

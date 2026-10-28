@@ -1,0 +1,94 @@
+{
+  "category": "vegetation/woodland",
+  "label": "Curved pinnate Sahrun palm",
+  "games": [
+    "generic"
+  ],
+  "description": "Curved fluted trunk with old leaf-base chevrons, nine arching pinnate fronds and three small fruits. Prepared library only; no game integration.",
+  "budgets": {
+    "lo": 1800,
+    "hi": 24000
+  },
+  "vertex_cap": 1200,
+  "lods": {
+    "lo": {
+      "vertices": 1187,
+      "triangles": 1330,
+      "groups": 1,
+      "bytes": 29912,
+      "vertexCap": 1200,
+      "triangleTarget": 1331
+    },
+    "hi": {
+      "vertices": 1263,
+      "triangles": 1482,
+      "groups": 1,
+      "bytes": 32344,
+      "vertexCap": 1000000,
+      "triangleTarget": 24000
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "cull": false,
+  "sockets": {},
+  "placement": {
+    "surface": "Sahrun oasis, warm coast, courtyard",
+    "origin": "ground centre, Y-up",
+    "rotationY": "free 0-360 degrees",
+    "uniformScale": [
+      0.8,
+      1.2
+    ]
+  },
+  "reuse": {
+    "family": "woodland",
+    "repeat": "rotate and vary uniform scale; keep species silhouette",
+    "combineWith": [
+      "meadow_fern_rosette",
+      "meadow_moss",
+      "meadow_leaf_litter"
+    ]
+  },
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.17,
+    "note": "Suggested future shader response; authored mesh is static."
+  },
+  "source": "scripts/games-blender/fernworld/assets/woodland.py",
+  "id": "woodland_palm_sahrun",
+  "bounds": [
+    [
+      -0.8767823576927185,
+      -0.021538641303777695,
+      -1.0786534547805786
+    ],
+    [
+      1.311540126800537,
+      2.5687482357025146,
+      0.9871129393577576
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#526f39",
+    "#749149",
+    "#796044",
+    "#7b8a45",
+    "#85704b",
+    "#8d714b",
+    "#91a257",
+    "#9c7e51",
+    "#c2a16b"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "fafca7be6f8e56a5e78ec584e43e4938b7230de0b71f7aa749837f01663db240"
+}

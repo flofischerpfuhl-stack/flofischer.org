@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "meaning": "Production review by the coordinator, not user approval and not game integration.",
+  "default": {
+    "state": "unreviewed",
+    "label": "Noch nicht geprüft"
+  },
+  "sources": {
+    "pip_kessel.py": {
+      "state": "rejected",
+      "label": "Verworfen · Neuaufbau läuft"
+    },
+    "pip_skins_elements.py": {
+      "state": "needs-new-base",
+      "label": "Entwurf · benötigt neue Pip-Basis"
+    },
+    "pip_skins_motion.py": {
+      "state": "needs-new-base",
+      "label": "Entwurf · benötigt neue Pip-Basis"
+    },
+    "pip_stone_stomper.py": {
+      "state": "needs-new-base",
+      "label": "Entwurf · benötigt neue Pip-Basis"
+    },
+    "meadow_botany.py": {
+      "state": "reviewed",
+      "label": "Modellansichten geprüft · leichte Varianten vorhanden"
+    },
+    "terrain_sky.py": {
+      "state": "reviewed",
+      "label": "Modellansichten geprüft · leichte Varianten vorhanden"
+    },
+    "captain_hazel.py": {
+      "state": "reviewed",
+      "label": "Modellansichten geprüft"
+    },
+    "legion_people.py": {
+      "state": "reviewed",
+      "label": "Modellansichten geprüft"
+    },
+    "glimmo_line.py": {
+      "state": "reviewed",
+      "label": "Originalaufbereitung geprüft"
+    },
+    "plashling_line.py": {
+      "state": "reviewed",
+      "label": "Originalaufbereitung geprüft"
+    },
+    "mossel_line.py": {
+      "state": "reviewed",
+      "label": "Originalaufbereitung geprüft"
+    },
+    "woodland.py": {
+      "state": "reviewed",
+      "label": "Modellansichten geprüft"
+    },
+    "generic_architecture.py": {
+      "state": "reviewed",
+      "label": "Modellansichten geprüft"
+    }
+  },
+  "assets": {}
+}

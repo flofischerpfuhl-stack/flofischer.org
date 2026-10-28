@@ -1,0 +1,69 @@
+{
+  "schema": "fernworld.runtime-equipment/1",
+  "asset": "PIP_SPARK_LEAP",
+  "glb_axes": "glTF Y-up, front +Z",
+  "instance_uniform_scale": 0.4233654951651481,
+  "material_class": "one opaque atlas PBR; all embedded, no external resources",
+  "draws": 1,
+  "original_clips": [
+    "Idle",
+    "Walk",
+    "Attack_Mining_UseItem"
+  ],
+  "shared_motion_uri": "characters/pip-shared-motion/pip-shared-motion.glb (existing package; resolve with game asset base at later integration)",
+  "clip_contract": "characters/pip-shared-motion/motion-contract.json",
+  "source_reference_for_clip_contract": "reference/characters/pip-shared-motion/motion-contract.json",
+  "transform_recipe": "worldPosition = bone.matrixWorld * skeleton.boneInverses[boneIndex] * restPositionGltf. Bone.matrixWorld already contains instance/world transforms; do not multiply the instance transform a second time. These rest anchors use the source skin bind coordinates (mesh bindMatrix is identity in this GLB). Directions use the upper3x3 of the same deformation matrix and normalize; effects/bridge keep world +Y up.",
+  "up": [
+    0,
+    1,
+    0
+  ],
+  "interrupt": "Stop optional FX immediately; stop emissions, clear pooled particles/projectiles owned by the interrupted cast as game policy requires; fade back using shared-motion fade times. Equipment remains visible and bound.",
+  "root_motion": "No new root movement; controller owns world jump translation, gravity, double impulse and landing. Air/Glide renders use a documented .18 source-unit presentation lift on the instance, never baked into clips.",
+  "legacy_tool_action": "Attack_Mining_UseItem is preserved for compatibility; it now is an empty equipment gesture and should not be selected as this form ability.",
+  "equipment": "Two compact graphite cuffs with yellow rim and faceted hand-back socket, bound using existing adjacent hand/wrist skin weights. Boot energy hardware remains original.",
+  "ability_clips": [
+    "Jump_Start",
+    "Jump_Air",
+    "Jump_Land"
+  ],
+  "release_seconds": 0.3333333333333333,
+  "release_semantics": "Jump_Start takeoff at .333333 s. Double-jump impulse is controller-owned; at the accepted second-jump event start hand discharge at local FX time 0. No extra source clip and no false fixed event inside looping Jump_Air.",
+  "visibility": "Cuffs and boots always visible; optional discharge only for local FX time [0,.16]. Hide on interrupt or end; no permanent particle layer.",
+  "sockets": {
+    "l": {
+      "bone": "hand.l",
+      "rest_position_gltf": [
+        0.916,
+        1.112,
+        0.155
+      ],
+      "rest_direction_gltf": [
+        0,
+        0,
+        1
+      ],
+      "orientation": "Follow live hand socket position; small discharge remains world-up with identity quaternion. Do not copy hand orientation into the world FX.",
+      "bone_blender_and_raw_gltf": "hand.l",
+      "bone_gltfloader": "handl"
+    },
+    "r": {
+      "bone": "hand.r",
+      "rest_position_gltf": [
+        -0.916,
+        1.112,
+        0.155
+      ],
+      "rest_direction_gltf": [
+        0,
+        0,
+        1
+      ],
+      "orientation": "Follow live hand socket position; small discharge remains world-up with identity quaternion. Do not copy hand orientation into the world FX.",
+      "bone_blender_and_raw_gltf": "hand.r",
+      "bone_gltfloader": "handr"
+    }
+  },
+  "fx": "PIP_SPARK_LEAP_FX.glb is a small optional on-demand discharge; position-only attachment, world-up, hidden on interrupt, no body draw increase. See fx-contract.json."
+}

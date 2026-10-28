@@ -341,5 +341,5 @@ export class Baker {
     e[8] = -dx; e[9] = -dy;
     camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
   }
-  dispose() { this.final?.dispose(); this.final?.depthTexture?.dispose(); this.mat.dispose(); this.resolveMat.dispose(); }
+  dispose() { this.final?.dispose(); this.final?.depthTexture?.dispose(); this.quad.geometry.dispose(); this.resolveScene.traverse(node => node.geometry?.dispose()); this.mat.dispose(); this.resolveMat.dispose(); }
 }

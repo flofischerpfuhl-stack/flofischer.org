@@ -1,0 +1,510 @@
+{
+  "category": "characters",
+  "label": "Tideduke",
+  "games": [
+    "fernworld"
+  ],
+  "description": "Original leviathan platypus: four strong flippers, aqua belly, shoulder foam marks, pearl water crown and striped paddle tail; 2.4 m long.",
+  "budgets": {
+    "hi": 40000,
+    "lo": 24000,
+    "sh": 1800
+  },
+  "lods": {
+    "hi": {
+      "vertices": 21516,
+      "triangles": 38921,
+      "groups": 9,
+      "bytes": 657925,
+      "vertexCap": 1000000,
+      "triangleTarget": 40000,
+      "seamSafe": true,
+      "withinVertexCap": true,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 5498,
+          "triangles": 5218,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0002993908419739455,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_tail_tail_matte",
+          "channel": "tail",
+          "target": 5219
+        },
+        {
+          "sourceTriangles": 1500,
+          "triangles": 1020,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0006551778060384095,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_pearls_body_pearl",
+          "channel": "body",
+          "target": 1020
+        },
+        {
+          "sourceTriangles": 300,
+          "triangles": 300,
+          "retained": true,
+          "reason": "source fallback: surface deviation",
+          "part": "tideduke_glints_body_glow",
+          "channel": "body",
+          "target": 215
+        },
+        {
+          "sourceTriangles": 1510,
+          "triangles": 1510,
+          "retained": true,
+          "reason": "already below target",
+          "part": "tideduke_feet_armR_matte",
+          "channel": "armR",
+          "target": 1610
+        },
+        {
+          "sourceTriangles": 1468,
+          "triangles": 1468,
+          "retained": true,
+          "reason": "already below target",
+          "part": "tideduke_feet_legR_matte",
+          "channel": "legR",
+          "target": 1539
+        },
+        {
+          "sourceTriangles": 1548,
+          "triangles": 1548,
+          "retained": true,
+          "reason": "already below target",
+          "part": "tideduke_feet_armL_matte",
+          "channel": "armL",
+          "target": 1610
+        },
+        {
+          "sourceTriangles": 1474,
+          "triangles": 1474,
+          "retained": true,
+          "reason": "already below target",
+          "part": "tideduke_feet_legL_matte",
+          "channel": "legL",
+          "target": 1539
+        },
+        {
+          "sourceTriangles": 2764,
+          "triangles": 1888,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.00035173443029634655,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_eyes_body_matte",
+          "channel": "body",
+          "target": 1890
+        },
+        {
+          "sourceTriangles": 8051,
+          "triangles": 5403,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0005704180803149939,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_crown_body_waterSolid",
+          "channel": "body",
+          "target": 5403
+        },
+        {
+          "sourceTriangles": 2087,
+          "triangles": 1601,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0005711267585866153,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_crown_body_matte",
+          "channel": "body",
+          "target": 1116
+        },
+        {
+          "sourceTriangles": 26042,
+          "triangles": 14994,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0006109458045102656,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_body_body_matte",
+          "channel": "body",
+          "target": 14994
+        },
+        {
+          "sourceTriangles": 2500,
+          "triangles": 2500,
+          "retained": true,
+          "reason": "already below target",
+          "part": "tideduke_bill_body_matte",
+          "channel": "body",
+          "target": 3847
+        }
+      ]
+    },
+    "lo": {
+      "vertices": 14491,
+      "triangles": 24871,
+      "groups": 9,
+      "bytes": 433140,
+      "vertexCap": 24000,
+      "triangleTarget": 24000,
+      "seamSafe": true,
+      "withinVertexCap": true,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 5498,
+          "triangles": 3130,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0009837645338848233,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_tail_tail_matte",
+          "channel": "tail",
+          "target": 3131
+        },
+        {
+          "sourceTriangles": 1500,
+          "triangles": 612,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.001224987325258553,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_pearls_body_pearl",
+          "channel": "body",
+          "target": 612
+        },
+        {
+          "sourceTriangles": 300,
+          "triangles": 300,
+          "retained": true,
+          "reason": "source fallback: surface deviation",
+          "part": "tideduke_glints_body_glow",
+          "channel": "body",
+          "target": 129
+        },
+        {
+          "sourceTriangles": 1510,
+          "triangles": 966,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.001150430180132389,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_feet_armR_matte",
+          "channel": "armR",
+          "target": 966
+        },
+        {
+          "sourceTriangles": 1468,
+          "triangles": 922,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0012477543205022812,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_feet_legR_matte",
+          "channel": "legR",
+          "target": 923
+        },
+        {
+          "sourceTriangles": 1548,
+          "triangles": 966,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0011952045606449246,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_feet_armL_matte",
+          "channel": "armL",
+          "target": 966
+        },
+        {
+          "sourceTriangles": 1474,
+          "triangles": 922,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0012187515385448933,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_feet_legL_matte",
+          "channel": "legL",
+          "target": 923
+        },
+        {
+          "sourceTriangles": 2764,
+          "triangles": 1134,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.000745909521356225,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_eyes_body_matte",
+          "channel": "body",
+          "target": 1134
+        },
+        {
+          "sourceTriangles": 8051,
+          "triangles": 3241,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0011172028025612235,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_crown_body_waterSolid",
+          "channel": "body",
+          "target": 3242
+        },
+        {
+          "sourceTriangles": 2087,
+          "triangles": 1377,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0007218909449875355,
+          "rejectedCandidates": [
+            "surface deviation"
+          ],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_crown_body_matte",
+          "channel": "body",
+          "target": 670
+        },
+        {
+          "sourceTriangles": 26042,
+          "triangles": 8996,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0012071559904143214,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_body_body_matte",
+          "channel": "body",
+          "target": 8997
+        },
+        {
+          "sourceTriangles": 2500,
+          "triangles": 2308,
+          "retained": false,
+          "reason": "validated shared surface",
+          "maxSurfaceError": 0.0002765021345112473,
+          "rejectedCandidates": [],
+          "colourContours": "locked",
+          "protectedColourVertices": true,
+          "surfaceScale": "connected island",
+          "part": "tideduke_bill_body_matte",
+          "channel": "body",
+          "target": 2308
+        }
+      ]
+    },
+    "sh": {
+      "vertices": 911,
+      "triangles": 1794,
+      "groups": 6,
+      "bytes": 30481,
+      "vertexCap": 2400,
+      "triangleTarget": 1800,
+      "seamSafe": true,
+      "withinVertexCap": true,
+      "surfaceChecks": [
+        {
+          "sourceTriangles": 5498,
+          "triangles": 334,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "tideduke_tail_tail_matte",
+          "channel": "tail",
+          "target": 335
+        },
+        {
+          "sourceTriangles": 1510,
+          "triangles": 102,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "tideduke_feet_armR_matte",
+          "channel": "armR",
+          "target": 103
+        },
+        {
+          "sourceTriangles": 1468,
+          "triangles": 98,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "tideduke_feet_legR_matte",
+          "channel": "legR",
+          "target": 99
+        },
+        {
+          "sourceTriangles": 1548,
+          "triangles": 102,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "tideduke_feet_armL_matte",
+          "channel": "armL",
+          "target": 103
+        },
+        {
+          "sourceTriangles": 1474,
+          "triangles": 98,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "tideduke_feet_legL_matte",
+          "channel": "legL",
+          "target": 99
+        },
+        {
+          "sourceTriangles": 26042,
+          "triangles": 962,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "tideduke_body_body_matte",
+          "channel": "body",
+          "target": 962
+        },
+        {
+          "sourceTriangles": 2500,
+          "triangles": 98,
+          "retained": false,
+          "reason": "shared-surface depth silhouette; colour/detail checks omitted",
+          "part": "tideduke_bill_body_matte",
+          "channel": "body",
+          "target": 99
+        }
+      ]
+    }
+  },
+  "vertex_cap": 24000,
+  "shadow_cap": 2400,
+  "seam_safe": true,
+  "usageClass": "solo-hero",
+  "crowdEligible": false,
+  "farCrowdLodMissing": true,
+  "ground": true,
+  "ao": false,
+  "sockets": {
+    "mouth": [
+      -0.001322,
+      0.8901,
+      0.983259
+    ],
+    "head": [
+      -0.001197,
+      1.102531,
+      0.792851
+    ],
+    "feet": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "tail_tip": [
+      0.005161,
+      0.232287,
+      -1.385814
+    ],
+    "attack": [
+      -0.001322,
+      0.8901,
+      0.983259
+    ],
+    "fountain": [
+      5.4e-05,
+      1.692128,
+      0.682995
+    ]
+  },
+  "sourceScene": "scripts/games-blender/fernworld/sources/plashling/tideduke_export.blend",
+  "sourceToonScene": "scripts/games-blender/fernworld/sources/plashling/tideduke.blend",
+  "sourceGlb": "scripts/games-blender/fernworld/sources/plashling/tideduke.glb",
+  "animation": "Original welded anatomical core; rigid distal limbs, paddle tail and separate fins; no skin rig or clips.",
+  "waterMaterial": {
+    "alpha": 1,
+    "sourceAlpha": 0.78,
+    "roughness": 0.25,
+    "metallic": 0,
+    "colour": "#86d3f6",
+    "adaptation": "Opaque glossy play variant avoids inherited transparent self-overlap; exact transparent sources retained."
+  },
+  "source": "scripts/games-blender/fernworld/assets/plashling_line.py",
+  "id": "TIDEDUKE",
+  "bounds": [
+    [
+      -0.8150511384010315,
+      0.0,
+      -1.4025238752365112
+    ],
+    [
+      0.8143911957740784,
+      1.692128300666809,
+      0.9974761009216309
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "armL",
+    "armR",
+    "body",
+    "legL",
+    "legR",
+    "tail"
+  ],
+  "palette": [
+    "#172450",
+    "#22468c",
+    "#2e68c0",
+    "#3e7acb",
+    "#86d3f6",
+    "#bdeaf1",
+    "#f6f9fd",
+    "#ffffff"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "a2ad372b543c0a0dbda104b56bc05280a35f5e2a0cdf997930c122d88ebb9376"
+}

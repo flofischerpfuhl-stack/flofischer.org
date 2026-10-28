@@ -1,0 +1,81 @@
+{
+  "category": "vegetation",
+  "label": "Unfurling young fern",
+  "games": [
+    "generic"
+  ],
+  "description": "Original botanical sculpt: curved folded laminae, tapered stems and individually shaped flowers. Opaque double-sided vertex colours, library only.",
+  "budgets": {
+    "hi": 90000,
+    "lo": 2200,
+    "sh": 650
+  },
+  "vertex_cap": 4000,
+  "shadow_cap": 1800,
+  "lods": {
+    "hi": {
+      "vertices": 7060,
+      "triangles": 9736,
+      "groups": 1,
+      "bytes": 191116,
+      "vertexCap": 1000000,
+      "triangleTarget": 90000
+    },
+    "lo": {
+      "vertices": 1448,
+      "triangles": 2200,
+      "groups": 1,
+      "bytes": 41036,
+      "vertexCap": 4000,
+      "triangleTarget": 2200,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 463,
+      "triangles": 650,
+      "groups": 1,
+      "bytes": 12876,
+      "vertexCap": 1800,
+      "triangleTarget": 650,
+      "authoredLod": true
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.18
+  },
+  "sockets": {},
+  "source": "scripts/games-blender/fernworld/assets/meadow_botany.py",
+  "id": "meadow_fern_fiddleheads",
+  "bounds": [
+    [
+      -0.13176798820495605,
+      0.0,
+      -0.1050596535205841
+    ],
+    [
+      0.1341770440340042,
+      0.4572536051273346,
+      0.11635255068540573
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#497d38",
+    "#668e46",
+    "#7e9b43",
+    "#86ad53"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "84fe661dfd7863c79c5710f9b789571dcaf55903ffd333e88ea5cfe97924d01e"
+}

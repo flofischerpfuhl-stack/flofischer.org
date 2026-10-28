@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Idle",
+    "frames": 128,
+    "fps": 48,
+    "seconds": 2.6666666666666665,
+    "origin": "new authored analytic IK and explicit sole paths, FK baked; donor reference only",
+    "inPlaceSpeedMetersPerSecond": 0,
+    "gait": "Idle"
+  },
+  {
+    "name": "Walk",
+    "frames": 64,
+    "fps": 48,
+    "seconds": 1.3333333333333333,
+    "origin": "new authored analytic IK and explicit sole paths, FK baked; donor reference only",
+    "inPlaceSpeedMetersPerSecond": 0.09375,
+    "gait": "four-beat walk"
+  },
+  {
+    "name": "Run",
+    "frames": 36,
+    "fps": 48,
+    "seconds": 0.75,
+    "origin": "new authored analytic IK and explicit sole paths, FK baked; donor reference only",
+    "inPlaceSpeedMetersPerSecond": 0.3492063492063492,
+    "gait": "running diagonal trot with suspension"
+  },
+  {
+    "name": "Sniff",
+    "frames": 144,
+    "fps": 48,
+    "seconds": 3.0,
+    "origin": "new authored analytic IK and explicit sole paths, FK baked; donor reference only",
+    "inPlaceSpeedMetersPerSecond": 0,
+    "gait": "Sniff"
+  },
+  {
+    "name": "Cheer",
+    "frames": 128,
+    "fps": 48,
+    "seconds": 2.6666666666666665,
+    "origin": "new authored analytic IK and explicit sole paths, FK baked; donor reference only",
+    "inPlaceSpeedMetersPerSecond": 0,
+    "gait": "Cheer"
+  }
+]

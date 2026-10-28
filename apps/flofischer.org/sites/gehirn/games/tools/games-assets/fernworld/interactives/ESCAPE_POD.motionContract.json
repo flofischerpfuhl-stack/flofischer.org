@@ -1,0 +1,39 @@
+{
+  "bossDockRadius": 0.33,
+  "shellWall": 0.018,
+  "hatchPivotGltf": [
+    -0.167,
+    0.21,
+    0.239
+  ],
+  "quaternionAxis": [
+    0,
+    1,
+    0
+  ],
+  "openDegrees": -110,
+  "openSeconds": 0.65,
+  "closedSeconds": 0.65,
+  "exitEventSeconds": 0.72,
+  "doorwayWidth": 0.284,
+  "doorwayHeight": 0.6,
+  "safePilotRadius": 0.115,
+  "exitDirection": [
+    0,
+    0,
+    1
+  ],
+  "holdAtOpen": true,
+  "motionRecipe": "set HatchPivot quaternion from rest about local +Y by -110 degrees * smoothstep(t/0.65)",
+  "openingSafety": "Only open after free undock; keep hatch open until the actor is outside the complete swept door volume.",
+  "bossPlacementContract": "../POD_PLACEMENT.json",
+  "inheritsBossWorldScale": true,
+  "pilotScalePolicy": "Pilot retains actual boss-inherited world scale. Table does not authorize a pilot size reduction.",
+  "exhaustSocket": "ExhaustSocket",
+  "exhaustDirectionGltf": [
+    0,
+    -1,
+    0
+  ],
+  "exhaustNote": "Socket is an actual point node; attach an external effect directed along local -Y. No particle or light is embedded."
+}

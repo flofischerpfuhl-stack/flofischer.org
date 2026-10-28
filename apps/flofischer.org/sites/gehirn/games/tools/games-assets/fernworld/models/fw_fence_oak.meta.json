@@ -1,0 +1,92 @@
+{
+  "category": "architecture",
+  "label": "Oak two rail fence",
+  "games": [
+    "generic"
+  ],
+  "description": "Oak two rail fence; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 252,
+      "triangles": 84,
+      "groups": 1,
+      "bytes": 4960,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 252,
+      "triangles": 84,
+      "groups": 1,
+      "bytes": 4960,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 40,
+      "triangles": 84,
+      "groups": 1,
+      "bytes": 1567,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "architecture/kenney/fence.glb",
+  "adaptation": {
+    "scale": 2.6,
+    "rotationY": 1.5707963267948966,
+    "pivot": "bounds centre at ground",
+    "units": "metres"
+  },
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_fence_oak",
+  "bounds": [
+    [
+      -1.3000000715255737,
+      0.0,
+      -0.09750013798475266
+    ],
+    [
+      1.3000000715255737,
+      0.9879999756813049,
+      0.09750013798475266
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#b87758",
+    "#b97859",
+    "#bb7a5a",
+    "#bd7b5c",
+    "#bf7c5d",
+    "#c17e5e",
+    "#c27f5f",
+    "#c48160",
+    "#c68262",
+    "#c88363",
+    "#ca8564",
+    "#cc8665",
+    "#cd8766",
+    "#cf8967",
+    "#d18a69",
+    "#d38c6a"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

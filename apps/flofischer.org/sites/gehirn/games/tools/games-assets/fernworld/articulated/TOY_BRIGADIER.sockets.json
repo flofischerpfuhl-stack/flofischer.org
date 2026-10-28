@@ -1,0 +1,201 @@
+{
+  "coordinates": "glTF Y-up/+Zforward, toy-u; local absolute TRS. Resolve hierarchy every frame, including parent Mortar and Body.",
+  "hierarchy": {
+    "TOY_BRIGADIER": null,
+    "Body": "TOY_BRIGADIER",
+    "Mortar": "Body",
+    "MuzzleSocket": "Mortar",
+    "TurretPivot": "Mortar",
+    "FX_Frost": "MuzzleSocket",
+    "GroundShadow": "TOY_BRIGADIER"
+  },
+  "restTRS": {
+    "TOY_BRIGADIER": {
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "MuzzleSocket": {
+      "translation": [
+        0.0,
+        0.637511134147644,
+        0.17082056403160095
+      ],
+      "rotation": [
+        0.13052618503570557,
+        0.0,
+        0.0,
+        0.9914448857307434
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "TurretPivot": {
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "FX_Frost": {
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "GroundShadow": {
+      "translation": [
+        0.0,
+        0.0020000000949949026,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "muzzleForwardLocal": [
+    0,
+    1,
+    0
+  ],
+  "turretAxisLocal": [
+    0,
+    1,
+    0
+  ],
+  "groundShadow": "Root-local XZ anchor y=.002, runtime-only receiver/decal",
+  "actualReimportLiveSamples": {
+    "Mortar_Charge:0.0": {
+      "position_gltf": [
+        0.0,
+        2.4675111770629883,
+        0.30082055926322937
+      ],
+      "forward_gltf": [
+        0.0,
+        0.9659257531166077,
+        0.258819043636322
+      ]
+    },
+    "Mortar_Charge:0.3": {
+      "position_gltf": [
+        0.0,
+        2.4194235801696777,
+        0.1575794816017151
+      ],
+      "forward_gltf": [
+        0.0,
+        0.9991265535354614,
+        0.041787177324295044
+      ]
+    },
+    "Mortar_Charge:0.75": {
+      "position_gltf": [
+        0.0,
+        2.4194235801696777,
+        0.1575794816017151
+      ],
+      "forward_gltf": [
+        0.0,
+        0.9991265535354614,
+        0.041787177324295044
+      ]
+    },
+    "Mortar_Charge:1.5": {
+      "position_gltf": [
+        0.0,
+        2.4194235801696777,
+        0.1575794816017151
+      ],
+      "forward_gltf": [
+        0.0,
+        0.9991265535354614,
+        0.041787177324295044
+      ]
+    },
+    "Mortar_Fire:0.0": {
+      "position_gltf": [
+        0.0,
+        2.4194235801696777,
+        0.1575794816017151
+      ],
+      "forward_gltf": [
+        0.0,
+        0.9991265535354614,
+        0.041787177324295044
+      ]
+    },
+    "Mortar_Fire:0.3": {
+      "position_gltf": [
+        0.0,
+        2.36741042137146,
+        0.22980329394340515
+      ],
+      "forward_gltf": [
+        0.0,
+        0.9885005354881287,
+        0.15121716260910034
+      ]
+    },
+    "Mortar_Fire:0.6": {
+      "position_gltf": [
+        0.0,
+        2.4675111770629883,
+        0.30082055926322937
+      ],
+      "forward_gltf": [
+        0.0,
+        0.9659257531166077,
+        0.258819043636322
+      ]
+    }
+  }
+}

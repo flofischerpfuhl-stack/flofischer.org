@@ -1,0 +1,122 @@
+{
+  "category": "characters",
+  "label": "Halfgrown Legionary",
+  "games": [
+    "fern-rangers",
+    "imperial-legion-vulkara"
+  ],
+  "description": "KayKit-derived sculpted halfgrown legionary; round navy helmet, short crimson Roman crest, gold Sevenstar and beam weapon.",
+  "budgets": {
+    "lo": 3300,
+    "sh": 440,
+    "hi": 22000
+  },
+  "vertex_cap": 2400,
+  "shadow_cap": 500,
+  "authoredHeight": 1.0,
+  "humanKind": "halfgrown",
+  "ground": true,
+  "lods": {
+    "hi": {
+      "vertices": 4025,
+      "triangles": 6772,
+      "groups": 5,
+      "bytes": 119824,
+      "vertexCap": 1000000,
+      "triangleTarget": 22000
+    },
+    "lo": {
+      "vertices": 2001,
+      "triangles": 2932,
+      "groups": 5,
+      "bytes": 56757,
+      "vertexCap": 2400,
+      "triangleTarget": 3300
+    },
+    "sh": {
+      "vertices": 278,
+      "triangles": 442,
+      "groups": 4,
+      "bytes": 9038,
+      "vertexCap": 500,
+      "triangleTarget": 440
+    }
+  },
+  "sockets": {
+    "feet": [
+      0,
+      0,
+      0
+    ],
+    "head": [
+      0,
+      0.785736622954852,
+      0
+    ],
+    "footL": [
+      0.07192658872143774,
+      0,
+      0
+    ],
+    "footR": [
+      -0.06983239412173624,
+      0,
+      0
+    ],
+    "muzzle": [
+      -0.17339730347239757,
+      0.5299924086463396,
+      0.48175993581177223
+    ],
+    "attack": [
+      -0.17339730347239757,
+      0.5299924086463396,
+      0.48175993581177223
+    ]
+  },
+  "sourceAuthor": "Kay Lousberg",
+  "sourceLicense": "CC0-1.0",
+  "sourcePack": "KayKit Character Pack Adventures 1.0",
+  "sourceCommit": "672074b73ba276876a19e8816ecdc5241817ab47",
+  "sourceAdaptation": "Original six body meshes, native posed rig, region recolour, differentiated kind proportions; new helmet, crest, Sevenstar and beamgun.",
+  "source": "scripts/games-blender/fernworld/assets/legion_people.py",
+  "id": "HALFGROWN_LEGIONARY",
+  "bounds": [
+    [
+      -0.27209389209747314,
+      0.0,
+      -0.17396512627601624
+    ],
+    [
+      0.3596842288970947,
+      1.0,
+      0.4812612533569336
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body",
+    "legL",
+    "legR",
+    "recoil"
+  ],
+  "palette": [
+    "#172638",
+    "#182332",
+    "#1b3154",
+    "#1d252d",
+    "#263a4d",
+    "#3c587b",
+    "#593a2b",
+    "#b62b45",
+    "#dce1e4",
+    "#e7b84f",
+    "#edb38a"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "7adf44aefb452e94d4cebc9d65367be68163c16016726419e8991c3a90486c5a"
+}

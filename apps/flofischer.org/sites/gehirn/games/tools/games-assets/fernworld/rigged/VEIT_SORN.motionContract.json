@@ -1,0 +1,175 @@
+{
+  "asset": "VEIT_SORN",
+  "coordinateSystem": {
+    "meters": true,
+    "up": "+Y",
+    "forward": "+Z",
+    "floorY": 0
+  },
+  "rootMotion": "All seven clips in place. Root has no controller displacement. Runtime controller owns world position and heading.",
+  "clips": {
+    "Idle": {
+      "startSeconds": 0.0,
+      "endSeconds": 2.0,
+      "durationSeconds": 2.0,
+      "uniqueTimes": 61,
+      "channels": 69
+    },
+    "Walk": {
+      "startSeconds": 0.0,
+      "endSeconds": 1.0,
+      "durationSeconds": 1.0,
+      "uniqueTimes": 31,
+      "channels": 69
+    },
+    "FrostCast_Left": {
+      "startSeconds": 0.0,
+      "endSeconds": 1.600000023841858,
+      "durationSeconds": 1.600000023841858,
+      "uniqueTimes": 49,
+      "channels": 69
+    },
+    "GroundFrost": {
+      "startSeconds": 0.0,
+      "endSeconds": 1.7999999523162842,
+      "durationSeconds": 1.7999999523162842,
+      "uniqueTimes": 55,
+      "channels": 69
+    },
+    "Hit_Recover": {
+      "startSeconds": 0.0,
+      "endSeconds": 1.0,
+      "durationSeconds": 1.0,
+      "uniqueTimes": 31,
+      "channels": 69
+    },
+    "Stagger": {
+      "startSeconds": 0.0,
+      "endSeconds": 1.2000000476837158,
+      "durationSeconds": 1.2000000476837158,
+      "uniqueTimes": 37,
+      "channels": 69
+    },
+    "Surrender_Captured": {
+      "startSeconds": 0.0,
+      "endSeconds": 2.0,
+      "durationSeconds": 2.0,
+      "uniqueTimes": 61,
+      "channels": 69
+    }
+  },
+  "locomotion": {
+    "cycleSeconds": 1,
+    "referenceSpeedMps": 0.32,
+    "controllerReference": "Advance +Z at 0.32 m/s times playbackRate. Rotate controller as a unit.",
+    "stance": {
+      "left": [
+        0,
+        0.5
+      ],
+      "right": [
+        0.5,
+        1
+      ]
+    },
+    "sampledPhases": 24,
+    "maxMeasuredStanceReferenceDriftM": 8.192948805968436e-06,
+    "legScaling": "No scaling, all scale tracks constant unit scale.",
+    "playback": "Idle/Walk repeat. Other clips play once; Surrender_Captured clamp final pose alive."
+  },
+  "sockets": {
+    "frost_palm_l": {
+      "node": "frost_palm_l",
+      "bone": "hand.l",
+      "axis": "+Z",
+      "purpose": "Frost release, follows posed left palm"
+    },
+    "hand_r": {
+      "node": "hand_r",
+      "bone": "hand.r",
+      "axis": "+Z",
+      "purpose": "Empty right hand; no staff in canonical reference"
+    },
+    "chest": {
+      "node": "socket_chest",
+      "bone": "chest",
+      "axis": "+Z"
+    },
+    "ground": {
+      "node": "ground",
+      "bone": "root",
+      "axis": "+Z",
+      "purpose": "Local ground target half a meter forward, facing ground"
+    },
+    "capture": {
+      "node": "capture",
+      "bone": "hips",
+      "axis": "+Z",
+      "purpose": "Living capture/interaction anchor"
+    }
+  },
+  "attacks": {
+    "FrostCast_Left": {
+      "anticipation": [
+        0,
+        0.3
+      ],
+      "charge": [
+        0.3,
+        0.6
+      ],
+      "releaseSeconds": 0.8,
+      "recoveryEnds": 1.6,
+      "effect": "Existing frost VFX only",
+      "suggestedRadiusM": 1.6,
+      "actualRelease": {
+        "actualSampleSeconds": 0.800000011920929,
+        "positionGLTF": [
+          0.3629404902458191,
+          0.9066908359527588,
+          0.5629550814628601
+        ],
+        "forwardGLTF": [
+          -0.05689000338315964,
+          -0.00011933408677577972,
+          0.9983776807785034
+        ]
+      }
+    },
+    "GroundFrost": {
+      "anticipation": [
+        0,
+        0.35
+      ],
+      "charge": [
+        0.35,
+        0.65
+      ],
+      "releaseSeconds": 0.8,
+      "holdUntil": 1.1,
+      "recoveryEnds": 1.8,
+      "effect": "Existing frost ground effect at ground socket; hand gestures down",
+      "suggestedRadiusM": 2.3,
+      "actualRelease": {
+        "actualSampleSeconds": 0.800000011920929,
+        "positionGLTF": [
+          0.4897787868976593,
+          0.267787903547287,
+          0.4470045566558838
+        ],
+        "forwardGLTF": [
+          0.2541711926460266,
+          -0.9666928052902222,
+          0.029986657202243805
+        ]
+      }
+    }
+  },
+  "capture": "Alive, head lowered and open empty hands. No corpse, shatter, disintegration or handcuffs.",
+  "shadowProxy": {
+    "file": "VEIT_SORN.sh.glb",
+    "visibleColorPass": false,
+    "castShadow": true
+  },
+  "lods": "Identical bind, clip names/durations and live sockets in hi/lo/far/sh. Far/Shadow remove detail islands collapsed by simplification; closed frost arm underneath remains."
+}

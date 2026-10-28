@@ -1,0 +1,552 @@
+{
+  "schema": "fernworld.heavy-rigid.v1",
+  "coordinates": "glTF meters, +Y up, +Z forward, +X right; quaternion rotations, additive local channels",
+  "fps": 120,
+  "pivots_world_gltf_m": {
+    "SQUIRTER": [
+      0.0,
+      0.0032929442822933197,
+      -0.0
+    ],
+    "HullTilt": [
+      0.0,
+      0.2432929426431656,
+      -0.0
+    ],
+    "TurretYaw": [
+      0.0,
+      0.7232929468154907,
+      0.02500000037252903
+    ],
+    "NozzlePitch": [
+      0.0,
+      0.8332929015159607,
+      0.15000000596046448
+    ],
+    "RecoilSlide": [
+      0.0,
+      0.8332929015159607,
+      0.20999999344348907
+    ],
+    "MuzzleSocket": [
+      0.0,
+      0.8332929015159607,
+      0.6539999842643738
+    ],
+    "PumpStroke": [
+      0.23999999463558197,
+      0.6932929158210754,
+      -0.1599999964237213
+    ],
+    "WheelL": [
+      -0.36000001430511475,
+      0.2182929515838623,
+      -0.02500000037252903
+    ],
+    "WheelR": [
+      0.36000001430511475,
+      0.2182929515838623,
+      -0.02500000037252903
+    ]
+  },
+  "recipes": {
+    "WalkRoll": {
+      "loop": true,
+      "channels": [
+        {
+          "node": "SQUIRTER",
+          "path": "translation",
+          "axis": "Z",
+          "times": [
+            0,
+            1
+          ],
+          "values": [
+            0,
+            0.45
+          ],
+          "units": "meters",
+          "pivot": [
+            0.0,
+            0.0032929442822933197,
+            -0.0
+          ],
+          "socket": null,
+          "application": "Add to neutral local translation"
+        },
+        {
+          "node": "WheelL",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.25,
+            0.5,
+            0.75,
+            1
+          ],
+          "values": [
+            0,
+            0.5141705125232108,
+            1.0283410250464216,
+            1.5425115375696323,
+            2.056682050092843
+          ],
+          "units": "radians",
+          "pivot": [
+            -0.36000001430511475,
+            0.2182929515838623,
+            -0.02500000037252903
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        },
+        {
+          "node": "WheelR",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.25,
+            0.5,
+            0.75,
+            1
+          ],
+          "values": [
+            0,
+            0.5141705125232108,
+            1.0283410250464216,
+            1.5425115375696323,
+            2.056682050092843
+          ],
+          "units": "radians",
+          "pivot": [
+            0.36000001430511475,
+            0.2182929515838623,
+            -0.02500000037252903
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        },
+        {
+          "node": "HullTilt",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.25,
+            0.5,
+            0.75,
+            1
+          ],
+          "values": [
+            0,
+            0.025,
+            0,
+            -0.025,
+            0
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.2432929426431656,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        }
+      ],
+      "time_domain": "Unbounded distance: accumulate root travel and each wheel angle across repeats. The embedded one-second clip is an authoring preview; never wrap the world translation at clip end. Runtime root velocity is 0.45 m/s, wheel angle = cumulative distance / measured active-LOD radius.",
+      "duration_s": 1.0,
+      "contact": "Apply root-Y contact correction from active wheel mesh support after rotation; exported clips include baked correction."
+    },
+    "HullLean": {
+      "loop": true,
+      "channels": [
+        {
+          "node": "HullTilt",
+          "path": "rotation",
+          "axis": "Z",
+          "times": [
+            0,
+            0.4,
+            0.8,
+            1.2,
+            1.6
+          ],
+          "values": [
+            0,
+            -0.045,
+            0,
+            0.045,
+            0
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.2432929426431656,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        }
+      ],
+      "duration_s": 1.6,
+      "contact": "Apply root-Y contact correction from active wheel mesh support after rotation; exported clips include baked correction."
+    },
+    "Hit": {
+      "loop": false,
+      "channels": [
+        {
+          "node": "HullTilt",
+          "path": "rotation",
+          "axis": "Y",
+          "times": [
+            0,
+            0.05,
+            0.13,
+            0.24,
+            0.36
+          ],
+          "values": [
+            0,
+            0.075,
+            -0.035,
+            0.012,
+            0
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.2432929426431656,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        },
+        {
+          "node": "HullTilt",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.05,
+            0.13,
+            0.36
+          ],
+          "values": [
+            0,
+            -0.045,
+            0.02,
+            0
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.2432929426431656,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        }
+      ],
+      "duration_s": 0.36,
+      "contact": "Apply root-Y contact correction from active wheel mesh support after rotation; exported clips include baked correction."
+    },
+    "Disabled": {
+      "loop": false,
+      "hold_last": true,
+      "channels": [
+        {
+          "node": "HullTilt",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.4,
+            1
+          ],
+          "values": [
+            0,
+            -0.045,
+            -0.075
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.2432929426431656,
+            -0.0
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        },
+        {
+          "node": "HullTilt",
+          "path": "translation",
+          "axis": "Y",
+          "times": [
+            0,
+            0.4,
+            1
+          ],
+          "values": [
+            0,
+            -0.025,
+            -0.045
+          ],
+          "units": "meters",
+          "pivot": [
+            0.0,
+            0.2432929426431656,
+            -0.0
+          ],
+          "socket": null,
+          "application": "Add to neutral local translation"
+        },
+        {
+          "node": "NozzlePitch",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.4,
+            1
+          ],
+          "values": [
+            0,
+            0.13,
+            0.24
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.8332929015159607,
+            0.15000000596046448
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        },
+        {
+          "node": "PumpStroke",
+          "path": "translation",
+          "axis": "Y",
+          "times": [
+            0,
+            0.4,
+            1
+          ],
+          "values": [
+            0,
+            -0.02,
+            -0.03
+          ],
+          "units": "meters",
+          "pivot": [
+            0.23999999463558197,
+            0.6932929158210754,
+            -0.1599999964237213
+          ],
+          "socket": null,
+          "application": "Add to neutral local translation"
+        }
+      ],
+      "duration_s": 1.0,
+      "contact": "Apply root-Y contact correction from active wheel mesh support after rotation; exported clips include baked correction."
+    },
+    "TurretSweep": {
+      "loop": true,
+      "channels": [
+        {
+          "node": "TurretYaw",
+          "path": "rotation",
+          "axis": "Y",
+          "times": [
+            0,
+            0.5,
+            1,
+            1.5,
+            2
+          ],
+          "values": [
+            0,
+            0.6,
+            0,
+            -0.6,
+            0
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.7232929468154907,
+            0.02500000037252903
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        },
+        {
+          "node": "NozzlePitch",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.5,
+            1,
+            1.5,
+            2
+          ],
+          "values": [
+            0,
+            -0.18,
+            0.05,
+            -0.18,
+            0
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.8332929015159607,
+            0.15000000596046448
+          ],
+          "socket": null,
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        }
+      ],
+      "duration_s": 2.0,
+      "contact": "Apply root-Y contact correction from active wheel mesh support after rotation; exported clips include baked correction."
+    },
+    "RigidFire": {
+      "loop": false,
+      "channels": [
+        {
+          "node": "RecoilSlide",
+          "path": "translation",
+          "axis": "Z",
+          "times": [
+            0,
+            0.055,
+            0.13,
+            0.25,
+            0.5
+          ],
+          "values": [
+            0,
+            -0.06,
+            -0.045,
+            -0.014,
+            0
+          ],
+          "units": "meters",
+          "pivot": [
+            0.0,
+            0.8332929015159607,
+            0.20999999344348907
+          ],
+          "socket": "MuzzleSocket",
+          "application": "Add to neutral local translation"
+        },
+        {
+          "node": "PumpStroke",
+          "path": "translation",
+          "axis": "Y",
+          "times": [
+            0,
+            0.055,
+            0.13,
+            0.25,
+            0.5
+          ],
+          "values": [
+            0,
+            -0.035,
+            -0.015,
+            0.01,
+            0
+          ],
+          "units": "meters",
+          "pivot": [
+            0.23999999463558197,
+            0.6932929158210754,
+            -0.1599999964237213
+          ],
+          "socket": "MuzzleSocket",
+          "application": "Add to neutral local translation"
+        },
+        {
+          "node": "NozzlePitch",
+          "path": "rotation",
+          "axis": "X",
+          "times": [
+            0,
+            0.055,
+            0.15,
+            0.5
+          ],
+          "values": [
+            0,
+            -0.025,
+            0.009,
+            0
+          ],
+          "units": "radians",
+          "pivot": [
+            0.0,
+            0.8332929015159607,
+            0.15000000596046448
+          ],
+          "socket": "MuzzleSocket",
+          "application": "neutral_local_quaternion * axis_angle(axis,value)"
+        }
+      ],
+      "socket": "MuzzleSocket",
+      "emit_time": 0.055,
+      "duration_s": 0.5,
+      "contact": "Apply root-Y contact correction from active wheel mesh support after rotation; exported clips include baked correction."
+    }
+  },
+  "materials": [
+    "Commune_work_enamel",
+    "Single_warm_optic"
+  ],
+  "disable_optic": "At Disabled t=1, runtime may override optic emission to zero; no material animation in glTF.",
+  "wheel_roll_units": "For each active LOD, angle_radians = forward_distance_m / rolling_radius_by_lod_m[LOD][WheelL or WheelR]. JSON channel values refer to Hi; exported LOD clips already use their measured radii.",
+  "rolling_radius_by_lod_m": {
+    "hi": {
+      "WheelL": 0.2187990117284711,
+      "WheelR": 0.2187990117284711
+    },
+    "lo": {
+      "WheelL": 0.2187990117284711,
+      "WheelR": 0.2187990117284711
+    },
+    "far": {
+      "WheelL": 0.21857737723222126,
+      "WheelR": 0.220151297874138
+    },
+    "shadow": {
+      "WheelL": 0.2177937434743447,
+      "WheelR": 0.21754118612850276
+    }
+  },
+  "foam_emit": {
+    "socket": "MuzzleSocket",
+    "forward_local_gltf": [
+      0,
+      0,
+      1
+    ],
+    "radius_m": 0.075,
+    "speed_m_s": 1.6,
+    "lifetime_s": 2.4,
+    "emit_at_s": 0.055,
+    "rendering": {
+      "separate_runtime_effect": true,
+      "alpha_mode": "BLEND",
+      "depth_write": false,
+      "cast_shadow": false,
+      "receive_shadow": false,
+      "side": "FrontSide",
+      "sort": "transparent back-to-front"
+    },
+    "note": "No transparent bubbles or spheres in asset. At emit time sample current socket after yaw, pitch and recoil. Use separate instanced billboard/low-poly bubbles, never nested layered spheres."
+  }
+}

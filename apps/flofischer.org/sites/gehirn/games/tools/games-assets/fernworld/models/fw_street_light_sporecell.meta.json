@@ -1,0 +1,103 @@
+{
+  "category": "props",
+  "label": "Street light \u00b7 fixed sporecell luminaire",
+  "games": [
+    "generic"
+  ],
+  "description": "Street light \u00b7 fixed sporecell luminaire; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 1658,
+      "triangles": 2186,
+      "groups": 1,
+      "bytes": 44272,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 1658,
+      "triangles": 2186,
+      "groups": 1,
+      "bytes": 44272,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 293,
+      "triangles": 520,
+      "groups": 1,
+      "bytes": 9103,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "architecture/kenney/lantern.glb + authored permanent sporecell fixture",
+  "mounting": {
+    "type": "fixed street post",
+    "portable": false,
+    "power": "sealed sporecell diffuser"
+  },
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_street_light_sporecell",
+  "bounds": [
+    [
+      -0.17315879464149475,
+      0.0,
+      -0.17945599555969238
+    ],
+    [
+      0.5,
+      2.4895999431610107,
+      0.17945599555969238
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#49545b",
+    "#5a6078",
+    "#676c84",
+    "#747990",
+    "#7d829c",
+    "#8086a0",
+    "#81869c",
+    "#8389a4",
+    "#8990ac",
+    "#8c92af",
+    "#9197b5",
+    "#959cbb",
+    "#a2a9cb",
+    "#a3aacc",
+    "#aab2d6",
+    "#aeb6da",
+    "#afb7db",
+    "#b0b8dd",
+    "#b4bce2",
+    "#b7dcb6",
+    "#bac3ea",
+    "#bbc3ea",
+    "#bbc4eb",
+    "#bcc5ec",
+    "#bdc5ed",
+    "#bdc6ee",
+    "#d3d3e3",
+    "#e6e6ef"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

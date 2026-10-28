@@ -1,0 +1,220 @@
+{
+  "axes": "GLB: Y up, +Z forward, metres",
+  "clips": {
+    "Idle": {
+      "duration": 2.0,
+      "loop": true,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": []
+    },
+    "Locomotion": {
+      "duration": 1.2,
+      "loop": true,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0.2902777777777778,
+      "events": [
+        {
+          "time": 0.0,
+          "socket": "hand_leg_L",
+          "event": "foot_contact"
+        },
+        {
+          "time": 0.12,
+          "socket": "hand_leg_R",
+          "event": "foot_lift"
+        },
+        {
+          "time": 0.6,
+          "socket": "hand_leg_R",
+          "event": "foot_contact"
+        },
+        {
+          "time": 0.72,
+          "socket": "hand_leg_L",
+          "event": "foot_lift"
+        }
+      ],
+      "footContacts": [
+        {
+          "bone": "leg_L_paw",
+          "socket": "hand_leg_L",
+          "phaseOffset": 0,
+          "stanceFraction": 0.6,
+          "plantTime": 0.0,
+          "liftTime": 0.72
+        },
+        {
+          "bone": "leg_R_paw",
+          "socket": "hand_leg_R",
+          "phaseOffset": 0.5,
+          "stanceFraction": 0.6,
+          "plantTime": 0.6,
+          "liftTime": 0.11999999999999997
+        }
+      ]
+    },
+    "Attack_Cast": {
+      "duration": 1.0,
+      "loop": false,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 0.475,
+          "socket": "mouth",
+          "event": "release"
+        }
+      ]
+    },
+    "Attack_Sweep": {
+      "duration": 1.2,
+      "loop": false,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 0.4,
+          "socket": "frond",
+          "event": "release"
+        }
+      ]
+    },
+    "GroundPulse": {
+      "duration": 1.4,
+      "loop": false,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 0.63,
+          "socket": "ground",
+          "event": "release"
+        }
+      ]
+    },
+    "Hit_Recover": {
+      "duration": 0.8,
+      "loop": false,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": []
+    },
+    "Freed": {
+      "duration": 1.6,
+      "loop": false,
+      "fadeIn": 0.12,
+      "fadeOut": 0.15,
+      "rootMotion": false,
+      "runtimeSpeed": 0,
+      "events": [
+        {
+          "time": 0.65,
+          "socket": "hex",
+          "event": "hex_break"
+        },
+        {
+          "time": 1.3,
+          "event": "escape_ready",
+          "socket": "ground"
+        }
+      ]
+    }
+  },
+  "sockets": [
+    {
+      "name": "mouth",
+      "bone": "head"
+    },
+    {
+      "name": "emitter",
+      "bone": "head"
+    },
+    {
+      "name": "tail",
+      "bone": "tail_tip"
+    },
+    {
+      "name": "frond",
+      "bone": "fronds"
+    },
+    {
+      "name": "hex",
+      "bone": "spine"
+    },
+    {
+      "name": "ground",
+      "bone": "root"
+    },
+    {
+      "name": "hand_arm_L",
+      "bone": "arm_L_paw"
+    },
+    {
+      "name": "hand_arm_R",
+      "bone": "arm_R_paw"
+    },
+    {
+      "name": "hand_leg_L",
+      "bone": "leg_L_paw"
+    },
+    {
+      "name": "hand_leg_R",
+      "bone": "leg_R_paw"
+    },
+    {
+      "name": "hand",
+      "bone": "arm_L_paw"
+    }
+  ],
+  "slotSuggestions": {
+    "blaster": {
+      "clip": "Attack_Cast",
+      "socket": "mouth"
+    },
+    "drones": {
+      "clip": "Idle",
+      "socket": "hex"
+    },
+    "wrench": {
+      "clip": "Attack_Sweep",
+      "socket": "frond"
+    },
+    "zap": {
+      "clip": "Attack_Cast",
+      "socket": "emitter"
+    },
+    "mines": {
+      "clip": "GroundPulse",
+      "socket": "ground"
+    }
+  },
+  "footContacts": "Locomotion: 60 percent stance, 40 percent swing, diagonal pairs; Groveprince opposite legs. Controller translates actor; clips stay in place.",
+  "license": "Original own Fernworld source; derivative authored for Florian",
+  "nature": "Green",
+  "lodUsage": {
+    "hero": "Solo/player and close inspection; preserves approved prepared Lo",
+    "crowd": "Enemy crowd at roughly 72..220 projected pixels high",
+    "far": "Only very small actors, suggested maximum 72 projected pixels high; Root chooses/measures actual transition",
+    "shadow": "Dedicated depth silhouette; not a visible colour LOD",
+    "transition": "Suggested 10-15 percent screen-size hysteresis; no integrated performance claim"
+  },
+  "materialRequirements": {
+    "alphaMode": "OPAQUE",
+    "depthWrite": true,
+    "doubleSided": true,
+    "note": "Open source-derived leaf plates require both faces. No alpha cutout, stacked transparency or external image URI."
+  }
+}

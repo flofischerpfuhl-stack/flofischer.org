@@ -1,0 +1,81 @@
+{
+  "asset": "MINER_HUMAN",
+  "units": "meters",
+  "up": "+Y",
+  "forward": "+Z",
+  "groundY": 0,
+  "rootObjectScale": [
+    1,
+    1,
+    1
+  ],
+  "skeleton": {
+    "type": "KayKit Rig_Medium derived",
+    "jointCount": 23,
+    "sameParentStructureAllLevels": true,
+    "proportions": "Each adult size has its own baked bind dimensions. Human and Dwarf share adult ratios; Halfgrown has short legs and large hands/feet.",
+    "retargetCertification": "Only the four delivered clips on each delivered bind rig are verified; no general retarget guarantee."
+  },
+  "clips": {
+    "Idle": {
+      "seconds": 2,
+      "loop": true
+    },
+    "Walk": {
+      "seconds": 1,
+      "loop": true,
+      "controllerForwardMps": 0.924,
+      "distancePerCycle_m": 0.924
+    },
+    "Rescue_Cheer": {
+      "seconds": 2,
+      "loop": false,
+      "description": "Raise one unarmed hand, wave, settle, and take one restrained joining step. Blend to Walk or Idle."
+    },
+    "Duck_Crouch": {
+      "seconds": 2,
+      "loop": true,
+      "controllerForwardMps": 0.19799999999999998,
+      "distancePerCycle_m": 0.39599999999999996,
+      "description": "Fully crouched small-step gait, with genuine hip/knee/spine deformation and planted stance feet. Blend into/out of crouch outside the roof edge."
+    }
+  },
+  "capsules": {
+    "standingDimensionsWidthDepthHeight_m": [
+      0.6012724041938782,
+      0.50851109623909,
+      1.6475969474995509
+    ],
+    "crouchedSweptDimensionsWidthDepthHeight_m": [
+      0.8302638530731201,
+      0.7734062969684601,
+      1.2604440808063373
+    ],
+    "standingCapsuleRadius_m": 0.3937359645255204,
+    "standingCapsuleHeight_m": 1.6475969474995509,
+    "crouchedCapsuleRadius_m": 0.5673392648826382,
+    "crouchedCapsuleHeight_m": 1.2604440808063373,
+    "radiusNote": "Conservative horizontal circle around the actual measured AABB. Use the documented X/Z center offset; bounds include hands/helmet. These are authored suggested controller dimensions, not a game collision integration.",
+    "standingCenterOffsetXYZ_m": [
+      -8.940696716308594e-08,
+      0.8253722825902514,
+      0.0019229799509048462
+    ],
+    "crouchedCenterOffsetXYZ_m": [
+      -1.1920928955078125e-07,
+      0.6316311776754446,
+      0.09217320382595062
+    ]
+  },
+  "cageExit": {
+    "insideWidth_m": 2.3,
+    "insideDepth_m": 1.28,
+    "insideHeight_m": 1.3,
+    "cageFloorActorY_m": 0.305,
+    "humanNeedsCrouch": true,
+    "humanCrouchRoofClearance_m": 0.03955591919366275,
+    "recipe": "Keep actor scale1. Place Ground at cage floorY0.305. Human uses Duck_Crouch with its documented controller speed until capsule clears the roof. Halfgrown/Dwarf fit standing. Controller collision/gravity transfers the0.305m floor step to world ground; no StepDown/terrain-IK clip is claimed. Never rescale the character invisibly."
+  },
+  "checks": "QA-reimport.json: actual final GLB import, all clip keytimes, four-weight vertices, native-vs-runtime comparison and24 phases each of Walk/Crouch.",
+  "scope": "Asset production only, no game integration/full-game performance claim."
+}

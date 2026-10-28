@@ -1,0 +1,47 @@
+{
+  "executable_blender": "../../scripts/rigid_motion.py",
+  "executable_threejs": "../rigid_motion.js",
+  "basis": "Blender Z up, -Y front; Three.js adapter converts all offsets and local rotation axes to glTF Y up",
+  "pose_mode": "reset bind, assign quaternion postmultiply local axis rotation, updateMatrixWorld",
+  "clips_embedded": false,
+  "tested_glb": "lo.glb",
+  "recipes": {
+    "Hover": {
+      "period_seconds": 2,
+      "BUZZ_DRONE_Root.translationZ": ".045*sin(2*pi*t/2)",
+      "OpticGimbal.rotationZ": "9deg*sin(2*pi*t/3)"
+    },
+    "FlightTilt": {
+      "period_seconds": 2.4,
+      "FlightTilt.rotationX": "-12deg*sin(2*pi*t/2.4)",
+      "OpticGimbal.rotationX": "8deg*sin(2*pi*t/2.4)"
+    },
+    "Fire": {
+      "duration_seconds": 0.6,
+      "envelope": "a=sin(pi*clamp(t/.6,0,1))",
+      "ProjectionNozzle.translationY": ".022*a",
+      "ProjectionNozzle.rotationX": "-7deg*a",
+      "FlightTilt.rotationX": "2deg*a"
+    },
+    "Disabled": {
+      "duration_seconds": 1.8,
+      "envelope": "u=clamp(t/1.8,0,1)",
+      "BUZZ_DRONE_Root.translationZ": "-.871*u*u*(3-2*u)",
+      "Rotor_L.rotationZ": "2*pi*3.3*1.8*(u-u*u+u*u*u/3)",
+      "Rotor_R.rotationZ": "negative Rotor_L phase"
+    }
+  },
+  "ground": {
+    "idle_lowest_surface_m": 0.8709999918937683,
+    "disabled_final_lowest_surface_m": 0.0,
+    "minimum_sampled_clearance_m": 0.0,
+    "static_landing_pad_airgap_m": 0.871
+  },
+  "rotors_when_active": {
+    "Rotor_L.rotationZ": "2*pi*3.3*t",
+    "Rotor_R.rotationZ": "-2*pi*3.3*t",
+    "speed_rpm": 198,
+    "axis": "local Blender Z / glTF Y",
+    "blades_per_rotor": 3
+  }
+}

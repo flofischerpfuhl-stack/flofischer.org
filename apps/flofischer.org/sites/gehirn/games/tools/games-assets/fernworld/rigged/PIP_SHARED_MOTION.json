@@ -1,0 +1,190 @@
+{
+  "schema": "fernworld.shared-motion/1",
+  "asset": "PIP_KESSEL",
+  "basis": "Unchanged Ranger V3; same 23 bone bind skeleton as seven elemental skins",
+  "coordinates": "Authoring Blender Z-up/front -Y; runtime glTF Y-up/front +Z. Track target names are GLTFLoader-sanitized exact original names.",
+  "fps": 48,
+  "root_motion": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": "identity",
+    "world_physics_owner": "game controller",
+    "ground_contact_ankle_lift_source_units": 0.0035,
+    "note": "Source sole skin has a tiny negative rest bound. Original geometry stays unchanged; bone-only IK lifts both ankle targets 0.0035 source units and plants them. Air/Glide can cross model-local zero; runtime world translation owns altitude."
+  },
+  "clips": {
+    "FireCast_Left": {
+      "duration_seconds": 0.8125,
+      "loop": false,
+      "clamp_when_finished": true,
+      "fade_in_seconds": 0.1,
+      "fade_out_seconds": 0.14,
+      "events": {
+        "release": 0.4166666666666667,
+        "fx_on": 0.20833333333333334,
+        "fx_off": 0.5833333333333334
+      },
+      "foot_contacts": "both ankles planted throughout",
+      "root_offset": [
+        0,
+        0,
+        0
+      ]
+    },
+    "Hook_Right": {
+      "duration_seconds": 0.7708333333333334,
+      "loop": false,
+      "clamp_when_finished": true,
+      "fade_in_seconds": 0.1,
+      "fade_out_seconds": 0.12,
+      "events": {
+        "hook_release": 0.3333333333333333
+      },
+      "foot_contacts": "both ankles planted throughout",
+      "root_offset": [
+        0,
+        0,
+        0
+      ]
+    },
+    "Jump_Start": {
+      "duration_seconds": 0.3333333333333333,
+      "loop": false,
+      "clamp_when_finished": true,
+      "fade_in_seconds": 0.08,
+      "fade_out_seconds": 0.06,
+      "events": {
+        "takeoff": 0.3333333333333333
+      },
+      "foot_contacts": "both ankles planted throughout",
+      "root_offset": [
+        0,
+        0,
+        0
+      ]
+    },
+    "Jump_Air": {
+      "duration_seconds": 0.7916666666666666,
+      "loop": true,
+      "clamp_when_finished": false,
+      "fade_in_seconds": 0.06,
+      "fade_out_seconds": 0.08,
+      "events": {},
+      "foot_contacts": "airborne local pose; no world translation",
+      "root_offset": [
+        0,
+        0,
+        0
+      ]
+    },
+    "Jump_Land": {
+      "duration_seconds": 0.5208333333333334,
+      "loop": false,
+      "clamp_when_finished": true,
+      "fade_in_seconds": 0.06,
+      "fade_out_seconds": 0.12,
+      "events": {
+        "foot_contact": 0,
+        "maximum_compression": 0.125
+      },
+      "foot_contacts": "both ankles planted throughout",
+      "root_offset": [
+        0,
+        0,
+        0
+      ]
+    },
+    "Glide": {
+      "duration_seconds": 1.6041666666666667,
+      "loop": true,
+      "clamp_when_finished": false,
+      "fade_in_seconds": 0.18,
+      "fade_out_seconds": 0.18,
+      "events": {},
+      "foot_contacts": "airborne local pose; no world translation",
+      "root_offset": [
+        0,
+        0,
+        0
+      ]
+    },
+    "Hit_Recover": {
+      "duration_seconds": 0.6041666666666666,
+      "loop": false,
+      "clamp_when_finished": true,
+      "fade_in_seconds": 0.04,
+      "fade_out_seconds": 0.14,
+      "events": {
+        "reaction_peak": 0.10416666666666667
+      },
+      "foot_contacts": "both ankles planted throughout",
+      "root_offset": [
+        0,
+        0,
+        0
+      ]
+    },
+    "Celebrate": {
+      "duration_seconds": 1.3958333333333333,
+      "loop": false,
+      "clamp_when_finished": true,
+      "fade_in_seconds": 0.12,
+      "fade_out_seconds": 0.18,
+      "events": {
+        "cheer_peak": 0.4375
+      },
+      "foot_contacts": "both ankles planted throughout",
+      "root_offset": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "sockets": {
+    "FireCast_Left": {
+      "bone_blender": "hand.l",
+      "bone_gltfloader": "handl",
+      "rest_position_blender": [
+        1.065,
+        -0.015,
+        1.14
+      ],
+      "rest_position_gltf": [
+        1.065,
+        1.14,
+        0.015
+      ],
+      "position_recipe": "bone.matrixWorld * inverseBindMatrix * restPositionGltf",
+      "fx": "../pip-elements-ranger/PIP_FIRE_THROW/PIP_FIRE_THROW_FX.glb",
+      "orientation": "world-up; inherit position only, reset quaternion identity; separate object under world scene",
+      "visible_seconds": [
+        0.20833333333333334,
+        0.5833333333333334
+      ],
+      "release_seconds": 0.4166666666666667,
+      "outside_window": "hidden; never display flame on the lowered sleeve"
+    }
+  },
+  "morph_contract": {
+    "Glide": {
+      "skin": "PIP_GALE_GLIDER",
+      "mesh": "Pip_Gale_KiteCape",
+      "shape_key": "Glide",
+      "deploy_to": 1,
+      "deploy_seconds": 0.35,
+      "retract_seconds": 0.2,
+      "clip_contains_morph_track": false
+    }
+  },
+  "unchanged_clips": [
+    "Idle",
+    "Walk",
+    "Attack_Mining_UseItem"
+  ],
+  "not_reimplemented": "Existing Stone Stomp, lift 0.458333 s / landing 0.625 s.",
+  "optional_frost": "Use Hook_Right as a forward/upward pickaxe cast; separate Cast_Right omitted to keep the library bounded."
+}

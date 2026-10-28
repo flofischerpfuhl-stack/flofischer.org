@@ -1,0 +1,16 @@
+{
+  "schema": "fernworld.rigid-motion.v1",
+  "asset": "STURMBASTION_GATE_FRAME",
+  "coordinates": "glTF right-handed, Y-up, forward +Z; quaternion [x,y,z,w]; local node TRS",
+  "units": "meters, seconds, radians represented by quaternions",
+  "interpolation": {
+    "translation": "LINEAR",
+    "rotation": "SLERP",
+    "scale": "LINEAR"
+  },
+  "defaultPose": {},
+  "resetPose": {},
+  "clips": [],
+  "materialStates": {},
+  "nativeEditableActions": "Same motions stored as NLA tracks in source.blend. Runtime standard glTF animations and this JSON are alternative playback sources; do not apply both."
+}

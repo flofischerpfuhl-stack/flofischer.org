@@ -1,0 +1,90 @@
+{
+  "category": "architecture",
+  "label": "Timber balcony \u00b7 deck rails and knee braces",
+  "games": [
+    "generic"
+  ],
+  "description": "Timber balcony \u00b7 deck rails and knee braces; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 3072,
+      "triangles": 6016,
+      "groups": 1,
+      "bytes": 97528,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 3212,
+      "triangles": 5924,
+      "groups": 1,
+      "bytes": 99032,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 497,
+      "triangles": 866,
+      "groups": 1,
+      "bytes": 15155,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": false,
+  "ao_dist": 0.18,
+  "sourceAsset": "Original Fernworld authored geometry; Kenney balcony fragment reviewed and superseded",
+  "mounting": {
+    "type": "wall",
+    "floorY": 0,
+    "bracketsBelowFloor": true
+  },
+  "sockets": {
+    "wall": [
+      0,
+      0,
+      -0.65
+    ],
+    "floor": [
+      0,
+      0.1,
+      0
+    ]
+  },
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_balcony_timber",
+  "bounds": [
+    [
+      -1.3450000286102295,
+      -0.5929849147796631,
+      -0.75
+    ],
+    [
+      1.3450000286102295,
+      1.1500000953674316,
+      0.75
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#624735",
+    "#986c43",
+    "#c09a64"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

@@ -1,0 +1,95 @@
+{
+  "category": "vegetation/woodland",
+  "label": "Russet berry shrub",
+  "games": [
+    "generic"
+  ],
+  "description": "Low irregular branching bush, deep green leaf pads and outward-facing ripe berry bunches. Prepared library only; no game integration.",
+  "budgets": {
+    "lo": 1800,
+    "hi": 24000
+  },
+  "vertex_cap": 1200,
+  "lods": {
+    "lo": {
+      "vertices": 1124,
+      "triangles": 1016,
+      "groups": 1,
+      "bytes": 26393,
+      "vertexCap": 1200,
+      "triangleTarget": 1017
+    },
+    "hi": {
+      "vertices": 1652,
+      "triangles": 2072,
+      "groups": 1,
+      "bytes": 43288,
+      "vertexCap": 1000000,
+      "triangleTarget": 24000
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "cull": false,
+  "sockets": {},
+  "placement": {
+    "surface": "forest edge, forage patch, hedgerow",
+    "origin": "ground centre, Y-up",
+    "rotationY": "free 0-360 degrees",
+    "uniformScale": [
+      0.8,
+      1.2
+    ]
+  },
+  "reuse": {
+    "family": "woodland",
+    "repeat": "rotate and vary uniform scale; keep species silhouette",
+    "combineWith": [
+      "meadow_fern_rosette",
+      "meadow_moss",
+      "meadow_leaf_litter"
+    ]
+  },
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.14,
+    "note": "Suggested future shader response; authored mesh is static."
+  },
+  "source": "scripts/games-blender/fernworld/assets/woodland.py",
+  "id": "woodland_bush_berry",
+  "bounds": [
+    [
+      -0.7508490085601807,
+      -0.011154195293784142,
+      -0.6955827474594116
+    ],
+    [
+      0.7604999542236328,
+      0.7634962797164917,
+      0.7163515090942383
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#3f683e",
+    "#493c30",
+    "#557c43",
+    "#69513a",
+    "#6e9149",
+    "#70513a",
+    "#81403f",
+    "#a34f4b",
+    "#ac5850",
+    "#c16d56"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "855ea84a8ad39c4087fbf9b35076c6224768fc799b64d3b96067f85af181f5dc"
+}

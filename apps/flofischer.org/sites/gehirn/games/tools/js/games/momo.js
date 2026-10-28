@@ -1,22 +1,17 @@
-/**
- * Momo's Last Stand — an arena survivor. Momo (a red panda engineer with one big wrench) walks the arena while her
- * gadgets fire on their own at the nearest alien. Defeated enemies drop energy sparks; a full spark meter means a
- * level-up: pick 1 of 3 cards (new weapons, upgrades, passives). A maxed weapon plus its maxed partner passive fuses
- * into an evolution. Each level has a goal: survive, defend the generator, defeat the elites or beat the boss.
- *
- * The simulation is plain data + update(dt), deterministic per level (seeded), with fixed-size pools and no
- * allocations per step, so tests play it headless (test/unit/games/momo.test.mjs) and big crowds stay smooth.
- * Coordinates: x to the right, y down the screen (towards the camera); the arena is a disc of radius L.arena
- * around 0,0. The 3D view (momo-3d.js) maps (x, y) to three (x, 0, y).
+/** Hexennacht — naturgebundene Fernlings verteidigen die Abtei bis zum Morgen.
+ * Feste Datenpools, deterministische Level und unveränderte Progress-IDs.
+ * Sim (x,y) entspricht Three (x,0,z); nur die Darstellung verwendet echte Modelle.
  */
 import { clamp, rng, label, roundRect } from './core.js';
 import { LEVELS, WORLDS } from './momo-levels.js';
+import { upgradeLevel } from './profile.js';
+import { STARTERS, starter, makeWeapon, moveName, moveEffect, ownMove, weaponKey, evolveToLevel, fossilOffer, grantFossil, clearAttackPayload, stampAttackPayload, NATURE_COLORS, TRAITS } from './fernling-canon.js';
 
 const TAU = Math.PI * 2;
 export const MOMO_R = 0.42;
 const MOMO_SPEED = 4.4, MOMO_HP = 100, SPAWN_DIST = 16.5, GEN_R = 1.0, BOSS_AT = 32;
 const MAX_ENEMIES = 280, MAX_SHOTS = 200, MAX_GEMS = 320, MAX_FOE_SHOTS = 90, MAX_HAZ = 40, MAX_PARTS = 520;
-const MAX_MINES = 12, MAX_BOLTS = 6, MAX_CORPSES = 70, MAX_POPS = 36, MAX_RINGS = 14;
+const MAX_MINES = 12, MAX_BOLTS = 6, MAX_FREED = 70, MAX_POPS = 36, MAX_RINGS = 14;
 const NUM = Array.from({ length: 1000 }, (_, i) => String(i));
 const num = (v) => NUM[Math.min(999, Math.max(0, Math.round(v)))];
 
@@ -34,39 +29,39 @@ export const KINDS = Object.keys(ENEMY);
 const KIND = Object.fromEntries(KINDS.map((k, i) => [k, i]));
 
 export const BOSSES = {
-  tank: { name: 'KLONK TANK', hp: 1100, r: 1.55, speed: 1.45, dmg: 22, score: 1500, h: 3.4 },
-  drill: { name: 'DUNE DRILL MECH', hp: 1900, r: 1.45, speed: 1.75, dmg: 22, score: 2000, h: 3.6 },
-  walker: { name: 'FROST WALKER', hp: 2900, r: 1.6, speed: 1.35, dmg: 24, score: 2500, h: 4.6 },
-  mothership: { name: 'ZORB QUEEN’S MOTHERSHIP', hp: 4200, r: 2.4, speed: 1.6, dmg: 0, score: 3500, h: 4.2, fly: true },
+  tank: { name: 'THORN GOLEM', hp: 1100, r: 1.55, speed: 1.45, dmg: 22, score: 1500, h: 3.4 },
+  drill: { name: 'MORWEN', hp: 1900, r: 1.45, speed: 1.75, dmg: 22, score: 2000, h: 3.6 },
+  walker: { name: 'VEIT SORN', hp: 2900, r: 1.6, speed: 1.35, dmg: 24, score: 2500, h: 4.6 },
+  mothership: { name: 'SYNTHET', hp: 4200, r: 2.4, speed: 1.6, dmg: 0, score: 3500, h: 4.2, fly: true },
 };
 
 // Weapon stats per level (index 0 … 4), index 5 is the evolution.
 export const WEAPONS = {
-  blaster: { name: 'Bubble Blaster', color: '#38bdf8', desc: ['Pops bubbles at the nearest alien', 'More damage', '+1 bubble', 'Bubbles pierce an alien', '+1 bubble, faster'],
+  blaster: { name: 'Ember Shot', color: '#38bdf8', desc: ['Trifft den nächsten verzauberten Fernling', 'Mehr Stärke', '+1 Geschoss', 'Geschosse durchdringen einen Gegner', '+1 Geschoss, schneller'],
     cd: [0.62, 0.58, 0.54, 0.5, 0.45, 0.26], n: [1, 1, 2, 2, 3, 4], dmg: [6, 7.5, 7.5, 8.5, 9.5, 11], pierce: [0, 0, 0, 1, 1, 2] },
-  drones: { name: 'Orbit Drones', color: '#a3e635', desc: ['A drone circles Momo and bonks aliens', '+1 drone', 'Wider orbit, more damage', '+1 drone', '+1 drone, faster'],
+  drones: { name: 'Ember Ring', color: '#a3e635', desc: ['Eine Naturkraft kreist um deinen Fernling', '+1 Begleiter', 'Größere Umlaufbahn, mehr Stärke', '+1 Begleiter', '+1 Begleiter, schneller'],
     n: [1, 2, 2, 3, 4, 6], dmg: [4, 4.5, 5.5, 6, 7, 10], rad: [1.8, 1.8, 2.1, 2.2, 2.3, 2.7], spd: [2.6, 2.6, 2.9, 3.1, 3.4, 4.0] },
-  wrench: { name: 'Boomerang Wrench', color: '#f59e0b', desc: ['Throws a wrench that flies back', 'More damage and reach', '+1 wrench', 'Bigger wrenches', '+1 wrench'],
+  wrench: { name: 'Tail Flare', color: '#f59e0b', desc: ['Ein Naturbogen kehrt zu dir zurück', 'Mehr Stärke und Reichweite', '+1 Naturbogen', 'Größere Naturbögen', '+1 Naturbogen'],
     cd: [2.1, 1.95, 1.85, 1.7, 1.55, 1.15], n: [1, 1, 2, 2, 3, 3], dmg: [10, 12.5, 13, 15, 17, 28], range: [5.5, 6.2, 6.2, 6.8, 7.2, 8], size: [0.55, 0.6, 0.62, 0.78, 0.82, 1.3] },
-  zap: { name: 'Chain Lightning', color: '#c084fc', desc: ['Zaps an alien, jumps to its neighbours', '+1 jump', 'More damage', '+1 jump, faster', '+2 jumps'],
+  zap: { name: 'Leaping Flame', color: '#c084fc', desc: ['Springt zwischen nahen Gegnern weiter', '+1 Sprung', 'Mehr Stärke', '+1 Sprung, schneller', '+2 Sprünge'],
     cd: [1.9, 1.8, 1.7, 1.5, 1.35, 0.8], jumps: [2, 3, 3, 4, 6, 8], dmg: [8, 9, 11.5, 12.5, 14, 20], bolts: [1, 1, 1, 1, 1, 2] },
-  mines: { name: 'Sparkle Mines', color: '#f472b6', desc: ['Drops mines that blast nearby aliens', 'Bigger blast', 'More damage', 'More mines', 'Faster, bigger blasts'],
+  mines: { name: 'Cinder Traps', color: '#f472b6', desc: ['Hinterlässt eine Falle aus eigener Naturkraft', 'Größerer Wirkungsbereich', 'Mehr Stärke', 'Mehr Fallen', 'Schneller und größer'],
     cd: [2.0, 1.9, 1.8, 1.6, 1.4, 1.1], dmg: [16, 18, 23, 25, 30, 42], rad: [1.7, 2.0, 2.0, 2.2, 2.5, 3.1], max: [4, 5, 5, 7, 8, 10] },
 };
 export const PASSIVES = {
-  boots: { name: 'Zoom Boots', color: '#22d3ee', desc: '+8 % move speed' },
-  magnet: { name: 'Spark Magnet', color: '#60a5fa', desc: '+40 % pickup range' },
-  armour: { name: 'Tin Armour', color: '#94a3b8', desc: '−8 % damage taken' },
-  snacks: { name: 'Snack Pack', color: '#fb7185', desc: '+0.4 health per second' },
-  overclock: { name: 'Overclock', color: '#facc15', desc: '−7 % weapon cooldowns' },
+  boots: { name: 'Quick Paws', color: '#22d3ee', desc: '+8 % Lauftempo' },
+  magnet: { name: 'Keen Nose', color: '#60a5fa', desc: '+40 % Sammelradius' },
+  armour: { name: 'Thick Hide', color: '#94a3b8', desc: '−8 % erlittener Schaden' },
+  snacks: { name: 'Deep Rest', color: '#fb7185', desc: '+0,4 Leben pro Sekunde' },
+  overclock: { name: 'Momo’s Call', color: '#facc15', desc: '−7 % Wartezeit zwischen Moves' },
 };
 /** Evolutions: weapon (maxed) + partner passive (maxed). */
 export const EVOLUTIONS = {
-  blaster: { with: 'overclock', name: 'Bubble Storm', desc: 'A fan of piercing bubbles, twice as fast' },
-  drones: { with: 'magnet', name: 'Orbit Swarm', desc: 'Six drones that also pull in sparks' },
-  wrench: { with: 'armour', name: 'Mega Wrench', desc: 'Three giant wrenches' },
-  zap: { with: 'boots', name: 'Thunder Crown', desc: 'Two bolts with eight jumps each' },
-  mines: { with: 'snacks', name: 'Honey Bombs', desc: 'Huge sticky blasts that slow aliens' },
+  blaster: { with: 'overclock', name: 'Firestorm', desc: 'Ein schneller Fächer durchdringender Geschosse' },
+  drones: { with: 'magnet', name: 'Ember Crown', desc: 'Sechs Naturkräfte ziehen zusätzlich Funken an' },
+  wrench: { with: 'armour', name: 'Tail Flare · Combo', desc: 'Drei große zurückkehrende Naturbögen' },
+  zap: { with: 'boots', name: 'Leaping Flame · Combo', desc: 'Zwei Ketten mit je acht Sprüngen' },
+  mines: { with: 'snacks', name: 'Cinder Traps · Combo', desc: 'Große Fallen verlangsamen Gegner' },
 };
 const MAX_WEAPONS = 4, MAX_PASSIVES = 4;
 /** Sparks needed for the next level. */
@@ -81,7 +76,7 @@ class Pool {
 const blankEnemy = () => ({
   kind: 0, def: null, x: 0, y: 0, kx: 0, ky: 0, hp: 0, maxHp: 0, r: 0, speed: 0, dmg: 0, xp: 1, score: 0, mass: 1,
   elite: false, boss: false, fly: false, dead: false, hidden: false, flash: 0, atk: 0, phase: 0, face: 0, shield: 0,
-  toGen: false, shootT: 0, charge: 0, slow: 0, droneCd: 0, hitB: 0, hitW: 0, hitZ: 0, hitH: 0, scale: 1, spawnIn: 0,
+  toGen: false, shootT: 0, charge: 0, slow: 0, droneCd: 0, droneCd0: 0, droneCd1: 0, droneCd2: 0, droneCd3: 0, hitB: 0, hitW: 0, hitZ: 0, hitH: 0, scale: 1, spawnIn: 0,
 });
 const ENEMY_BLANK = blankEnemy();
 /** Reset a pooled enemy in place (no allocation). */
@@ -99,7 +94,11 @@ export class MomoSession {
     this.fxr = rng(L.seed ^ 0x5bd1e995);
     this.hint = L.hint;
     this.R = L.arena;
-    this.t = 0; this.result = null;
+    this.t = 0; this.result = null; this.resultAt = 0; this.settlementSeconds = 0;
+    const chosen = starter(env.starter); this.starter = chosen.id; this.nature = chosen.nature;
+    this.stage = 0; this.model = chosen.models[0]; this.damageScale = 1; this.fossil = null; this.offerIndex = 0;
+    this.castAt = -10; this.castSlot = 'blaster'; this.castFace = 0; this.evolvedAt = -10;
+    this.fxEvents = new Pool(96, () => ({ id: '', x: 0, y: 0, direction: 0, scale: 1, time: 0 }));
     // Momo
     this.x = 0; this.y = 2.5; this.vx = 0; this.vy = 0; this.face = 0; this.moving = 0; this.walk = 0;
     this.hp = MOMO_HP; this.maxHp = MOMO_HP; this.iframes = 0; this.hurtFlash = 0;
@@ -114,15 +113,15 @@ export class MomoSession {
     this.stick = null; this.mouse = null; this.botMove = null; this.inX = 0; this.inY = 0;
     // pools
     this.en = new Pool(MAX_ENEMIES, blankEnemy);
-    this.shots = new Pool(MAX_SHOTS, () => ({ kind: 0, x: 0, y: 0, vx: 0, vy: 0, dmg: 0, r: 0, life: 0, pierce: 0, id: 0, out: true, speed: 0, decel: 0, spin: 0, age: 0 }));
+    this.shots = new Pool(MAX_SHOTS, () => clearAttackPayload({ kind: 0, x: 0, y: 0, vx: 0, vy: 0, dmg: 0, r: 0, life: 0, pierce: 0, id: 0, out: true, speed: 0, decel: 0, spin: 0, age: 0 }));
     this.gems = new Pool(MAX_GEMS, () => ({ kind: 0, x: 0, y: 0, v: 0, pull: false, bob: 0 }));
     this.foeShots = new Pool(MAX_FOE_SHOTS, () => ({ kind: 0, x: 0, y: 0, vx: 0, vy: 0, r: 0, dmg: 0, life: 0 }));
     this.haz = new Pool(MAX_HAZ, () => ({ kind: 0, src: 0, x: 0, y: 0, x2: 0, y2: 0, r: 0, warn: 0, warnMax: 0, act: 0, dmg: 0, hit: false, foes: false, id: 0 }));
-    this.mines = new Pool(MAX_MINES, () => ({ x: 0, y: 0, arm: 0, life: 0, dmg: 0, rad: 0 }));
-    this.bolts = new Pool(MAX_BOLTS, () => ({ pts: new Float32Array(40), n: 0, life: 0 }));
+    this.mines = new Pool(MAX_MINES, () => clearAttackPayload({ x: 0, y: 0, arm: 0, life: 0, dmg: 0, rad: 0 }));
+    this.bolts = new Pool(MAX_BOLTS, () => clearAttackPayload({ pts: new Float32Array(40), n: 0, life: 0 }));
     this.parts = new Pool(MAX_PARTS, () => ({ x: 0, y: 0, h: 0, vx: 0, vy: 0, vh: 0, life: 0, max: 1, size: 0.1, color: 0xffffff, grav: 9 }));
     this.rings = new Pool(MAX_RINGS, () => ({ x: 0, y: 0, r: 0, life: 0, max: 1, color: 0xffffff }));
-    this.corpses = new Pool(MAX_CORPSES, () => ({ kind: 0, x: 0, y: 0, face: 0, life: 0, scale: 1, elite: false }));
+    this.freed = new Pool(MAX_FREED, () => ({ kind: 0, x: 0, y: 0, face: 0, life: 0, age: 0, scale: 1, elite: false }));
     this.pops = new Pool(MAX_POPS, () => ({ text: '', x: 0, y: 0, h: 0, life: 0, max: 1, color: '#fff', size: 1 }));
     // spatial grid over the playfield (enemies only; the boss is checked on its own)
     this.gcs = 2; this.gExt = this.R + 16; this.gDim = Math.ceil((2 * this.gExt) / this.gcs);
@@ -161,12 +160,23 @@ export class MomoSession {
       this.say(L.goal === 'boss' ? 'BOSS LEVEL' : this.goalText(true), 2.2);
       // Professor Owlbert's supply crate: one free card per world already conquered, so later worlds start equipped
       this.kit = L.world + (L.goal === 'boss' ? 1 : 0);
+      // Permanent workshop benefit is exactly one extra choice before movement.
+      // Level/XP and the world's existing supply cards are independent of it.
+      if (upgradeLevel('momo-card') > 0) this.openChoice('workshop');
     }
   }
 
   // ── loadout ──
-  addWeapon(id) { this.weapons.push({ id, lv: 1, evo: false, t: 0.3 }); }
-  weapon(id) { for (const w of this.weapons) if (w.id === id) return w; return null; }
+  addWeapon(id, nature = this.nature, foreign = false) {
+    const uid = weaponKey(nature, id); if (this.weapon(uid) || this.weapons.length >= MAX_WEAPONS) return null;
+    const w = makeWeapon(nature, id, foreign); w.index = this.weapons.length; this.weapons.push(w); return w;
+  }
+  weapon(id) { for (const w of this.weapons) if (w.uid === id || (w.id === id && !w.foreign)) return w; return null; }
+  grantFossil(nature, slot) { const n = this.weapons.length; if (!grantFossil(this, nature, slot)) return false; this.weapons[n].index = n; this.effect('fossil_pickup', this.x, this.y, this.face); return true; }
+  effect(id, x, y, direction = 0, scale = 1) { const f = this.fxEvents.spawn(); if (f) { f.id = id; f.x = x; f.y = y; f.direction = direction; f.scale = scale; f.time = this.time; } }
+  evolve() { if (evolveToLevel(this, this.level)) { this.evolvedAt = this.time; this.castAt = -10; this.effect('evolution', this.x, this.y); this.say(this.model.replaceAll('_', ' '), 2.2, NATURE_COLORS[this.nature]); } }
+  cast(w, x, y) { this.castAt = this.time; this.castSlot = w.id; this.castFace = Math.atan2(x - this.x, y - this.y); }
+
   wi(w) { return w.evo ? 5 : w.lv - 1; }
   get cdMul() { return 1 - 0.07 * this.passives.overclock; }
   get magnetR() { return 1.7 * (1 + 0.4 * this.passives.magnet); }
@@ -175,12 +185,12 @@ export class MomoSession {
     const cards = [], rest = [];
     for (const w of this.weapons) {
       const ev = EVOLUTIONS[w.id];
-      if (!w.evo && w.lv >= 5 && this.passives[ev.with] >= 5) cards.push({ type: 'evo', id: w.id, name: ev.name, desc: ev.desc, color: WEAPONS[w.id].color, lv: 6 });
+      if (!w.evo && w.lv >= 5 && this.passives[ev.with] >= 5) cards.push({ type: 'evo', id: w.id, uid: w.uid, nature: w.nature, name: moveName({ ...w, evo: true }), desc: ev.desc, color: NATURE_COLORS[w.nature], lv: 6 });
     }
     // Every option gets a rough worth plus a random share; the best three are offered, the first is the safe pick.
     const R = () => this.rand() * 22;
-    for (const w of this.weapons) if (w.lv < 5) rest.push({ type: 'weapon', id: w.id, name: WEAPONS[w.id].name, desc: WEAPONS[w.id].desc[w.lv], color: WEAPONS[w.id].color, lv: w.lv + 1, worth: 50 + R() });
-    if (this.weapons.length < MAX_WEAPONS) for (const id of Object.keys(WEAPONS)) if (!this.weapon(id)) rest.push({ type: 'weapon', id, name: WEAPONS[id].name, desc: WEAPONS[id].desc[0], color: WEAPONS[id].color, lv: 1, worth: (this.weapons.length < 3 ? 46 : 22) + R() });
+    for (const w of this.weapons) if (w.lv < 5) rest.push({ type: 'weapon', id: w.id, uid: w.uid, nature: w.nature, name: moveName(w), desc: WEAPONS[w.id].desc[w.lv], color: NATURE_COLORS[w.nature], lv: w.lv + 1, worth: 50 + R() });
+    if (this.weapons.length < MAX_WEAPONS) for (const id of Object.keys(WEAPONS)) if (!this.weapon(id)) rest.push({ type: 'weapon', id, uid: weaponKey(this.nature,id), nature: this.nature, name: moveName(makeWeapon(this.nature,id)), desc: WEAPONS[id].desc[0], color: NATURE_COLORS[this.nature], lv: 1, worth: (this.weapons.length < 3 ? 46 : 22) + R() });
     const owned = Object.values(this.passives).filter((v) => v > 0).length;
     for (const [id, p] of Object.entries(PASSIVES)) {
       const lv = this.passives[id];
@@ -191,7 +201,9 @@ export class MomoSession {
     rest.sort((a, b) => b.worth - a.worth);
     while (cards.length < 3 && rest.length) cards.push(rest.shift());
     if (cards.length > 3) cards.length = 3;
-    if (!cards.length) cards.push({ type: 'heal', id: 'heal', name: 'Fernstone Snack', desc: 'Heal 30 and +250 score', color: '#4ade80', lv: 0 });
+    if (!cards.length) cards.push({ type: 'heal', id: 'heal', name: 'Erholung', desc: '+30 Leben und +250 Punkte', color: '#4ade80', lv: 0 });
+    const offer = fossilOffer(this, { seed: this.L.seed, level: this.level, offerIndex: this.offerIndex++ });
+    if (offer && cards.length && cards[cards.length - 1].type !== 'evo') cards[cards.length - 1] = { ...offer, name: moveName(makeWeapon(offer.nature, offer.slot)), desc: 'Fossilkraft: genau ein fremder Move bis Levelende.', color: NATURE_COLORS[offer.nature], lv: 1 };
     return cards;
   }
   openChoice(reason) {
@@ -204,8 +216,9 @@ export class MomoSession {
   pick(i) {
     const c = this.choice?.cards[i];
     if (!c) return false;
-    if (c.type === 'evo') { const w = this.weapon(c.id); w.evo = true; this.say(c.name.toUpperCase() + '!', 1.8, c.color); this.levelFlash = 1; }
-    else if (c.type === 'weapon') { const w = this.weapon(c.id); if (w) w.lv++; else this.addWeapon(c.id); }
+    if (c.type === 'evo') { const w = this.weapon(c.uid || c.id); w.evo = true; this.say(c.name.toUpperCase() + '!', 1.8, c.color); this.levelFlash = 1; }
+    else if (c.type === 'weapon') { const w = this.weapon(c.uid || c.id); if (w) w.lv++; else this.addWeapon(c.id); }
+    else if (c.type === 'fossil') this.grantFossil(c.nature, c.slot);
     else if (c.type === 'passive') this.passives[c.id]++;
     else { this.hp = Math.min(this.maxHp, this.hp + 30); this.score += 250; }
     this.sound.play('good');
@@ -427,7 +440,7 @@ export class MomoSession {
         const a = gap + 0.55 + (i / n) * (TAU - 1.1);
         this.spawnEnemy(kind, this.x + Math.cos(a) * 13, this.y + Math.sin(a) * 13, false);
       }
-      this.say('SWARM!', 1.2, '#fca5a5');
+      this.say('HEX-SCHAR!', 1.2, '#fca5a5');
     }
     if (L.goal === 'elites' && this.elitesSpawned < L.elites) {
       this.eliteT -= dt;
@@ -437,7 +450,7 @@ export class MomoSession {
         let kind = this.pickKind(); if (kind === 'zipper' || kind === 'buzzbot') kind = 'klonkbot';
         this.spawnEnemy(kind, this.x + Math.cos(a) * 14, this.y + Math.sin(a) * 14, true);
         this.elitesSpawned++;
-        this.say('ELITE INCOMING', 1.4, '#fde047');
+        this.say('STARKER HEX ERSCHEINT', 1.4, '#fde047');
       }
     }
     if (this.bossDue && !this.boss) {
@@ -494,7 +507,7 @@ export class MomoSession {
       if (e.dead) continue;
       if (e.flash > 0) e.flash -= dt;
       if (e.atk > 0) e.atk -= dt;
-      if (e.droneCd > 0) e.droneCd -= dt;
+      for (const field of DRONE_FIELDS) if (e[field] > 0) e[field] -= dt;
       if (e.slow > 0) e.slow -= dt;
       if (e.spawnIn > 0) { e.spawnIn -= dt; if (!e.boss) continue; }
       if (e.boss) continue;
@@ -522,7 +535,7 @@ export class MomoSession {
       // reached the generator: stop and hit it
       if (toGen && dist < GEN_R + e.r + 0.15) {
         vx = 0; vy = 0;
-        if (e.atk <= 0) { e.atk = 1; gen.hp -= e.dmg * 0.3; gen.flash = 1; this.sound.play('hurt', 220); if (this.t - gen.warned > 6) { gen.warned = this.t; this.say('GENERATOR UNDER ATTACK', 1.4, '#fca5a5'); } }
+        if (e.atk <= 0) { e.atk = 1; gen.hp -= e.dmg * 0.3; gen.flash = 1; this.sound.play('hurt', 220); if (this.t - gen.warned > 6) { gen.warned = this.t; this.say('ARCHIV UNTER ANGRIFF', 1.4, '#fca5a5'); } }
       }
       // separation from neighbours (soft, heavier ones push harder)
       const n = this.near(e.x, e.y, e.r);
@@ -564,7 +577,7 @@ export class MomoSession {
     const L = this.L, kind = L.boss;
     b.st += dt;
     b.phase += dt * 2.4;
-    if (!b.phase2 && b.hp < b.maxHp * 0.5) { b.phase2 = true; this.say('ENRAGED!', 1.4, '#f87171'); this.shake = Math.max(this.shake, 0.5); }
+    if (!b.phase2 && b.hp < b.maxHp * 0.5) { b.phase2 = true; this.say('DER HEX VERSTÄRKT SICH!', 1.4, '#f87171'); this.shake = Math.max(this.shake, 0.5); }
     const p2 = b.phase2;
     const dx = this.x - b.x, dy = this.y - b.y, dist = Math.hypot(dx, dy) || 0.001;
     // summons
@@ -674,73 +687,78 @@ export class MomoSession {
     const cdm = this.cdMul;
     for (const w of this.weapons) {
       const S = WEAPONS[w.id], i = this.wi(w);
-      if (w.id === 'drones') { this.droneAngle += S.spd[i] * dt; this.drones(w, S, i); continue; }
+      if (w.id === 'drones') { w.phase += S.spd[i] * dt; if (!w.foreign) this.droneAngle = w.phase; this.drones(w, S, i); continue; }
       w.t -= dt;
       if (w.t > 0) continue;
       if (w.id === 'blaster') {
         const tgt = this.nearest(this.x, this.y, 10);
         if (!tgt) { w.t = 0; continue; }
-        w.t = S.cd[i] * cdm;
+        w.t = S.cd[i] * cdm; this.cast(w, tgt.x, tgt.y);
         const base = Math.atan2(tgt.y - this.y, tgt.x - this.x), n = S.n[i], spread = w.evo ? 0.22 : 0.13;
         for (let k = 0; k < n; k++) {
           const a = base + (k - (n - 1) / 2) * spread, s = this.shots.spawn(); if (!s) break;
+          stampAttackPayload(s, w, this);
           s.kind = 0; s.x = this.x + Math.cos(a) * 0.4; s.y = this.y + Math.sin(a) * 0.4; s.vx = Math.cos(a) * 12; s.vy = Math.sin(a) * 12;
-          s.dmg = S.dmg[i]; s.r = w.evo ? 0.28 : 0.22; s.life = 0.95; s.pierce = S.pierce[i]; s.id = this.ids++; s.age = 0;
+          s.dmg = S.dmg[i] * this.damageScale; s.r = w.evo ? 0.28 : 0.22; s.life = 0.95; s.pierce = S.pierce[i]; s.id = this.ids++; s.age = 0;
         }
         this.sound.play('shot', 90);
       } else if (w.id === 'wrench') {
         const range = S.range[i], tgt = this.nearest(this.x, this.y, range + 2);
         if (!tgt) { w.t = 0; continue; }
-        w.t = S.cd[i] * cdm;
+        w.t = S.cd[i] * cdm; this.cast(w, tgt.x, tgt.y);
         const base = Math.atan2(tgt.y - this.y, tgt.x - this.x), n = S.n[i];
         for (let k = 0; k < n; k++) {
           const a = base + (k - (n - 1) / 2) * 0.55, s = this.shots.spawn(); if (!s) break;
           const v0 = 13;
+          stampAttackPayload(s, w, this);
           s.kind = 1; s.x = this.x; s.y = this.y; s.vx = Math.cos(a); s.vy = Math.sin(a); s.speed = v0; s.decel = (v0 * v0) / (2 * range);
-          s.out = true; s.dmg = S.dmg[i]; s.r = S.size[i]; s.life = 5; s.pierce = 999; s.id = this.ids++; s.spin = 0; s.age = 0;
+          s.out = true; s.dmg = S.dmg[i] * this.damageScale; s.r = S.size[i]; s.life = 5; s.pierce = 999; s.id = this.ids++; s.spin = 0; s.age = 0;
         }
       } else if (w.id === 'zap') {
         const tgt = this.nearest(this.x, this.y, 7.5);
         if (!tgt) { w.t = 0; continue; }
         w.t = S.cd[i] * cdm;
-        for (let k = 0; k < S.bolts[i]; k++) this.zap(k === 0 ? tgt : null, S.jumps[i], S.dmg[i]);
+        this.cast(w, tgt.x, tgt.y);
+        for (let k = 0; k < S.bolts[i]; k++) this.zap(k === 0 ? tgt : null, S.jumps[i], S.dmg[i] * this.damageScale, w);
         this.sound.play('pin', 120);
       } else if (w.id === 'mines') {
         w.t = S.cd[i] * cdm;
-        if (this.mines.n >= S.max[i]) { w.t = 0.3; continue; }
+        let planted = 0; for (let j = 0; j < this.mines.n; j++) if (this.mines.items[j].weaponUid === w.uid) planted++;
+        if (planted >= S.max[i]) { w.t = 0.3; continue; }
         const m = this.mines.spawn(); if (!m) continue;
-        m.x = this.x; m.y = this.y; m.arm = 0.6; m.life = 24; m.dmg = S.dmg[i]; m.rad = S.rad[i];
+        stampAttackPayload(m, w, this); this.cast(w, this.x + Math.sin(this.face), this.y + Math.cos(this.face));
+        m.x = this.x; m.y = this.y; m.arm = 0.6; m.life = 24; m.dmg = S.dmg[i] * this.damageScale; m.rad = S.rad[i];
       }
     }
   }
   drones(w, S, i) {
-    const n = S.n[i], rad = S.rad[i], dmg = S.dmg[i];
+    const n = S.n[i], rad = S.rad[i], dmg = S.dmg[i] * this.damageScale, cd = DRONE_FIELDS[w.index];
     for (let k = 0; k < n; k++) {
-      const a = this.droneAngle + (k / n) * TAU;
+      const a = w.phase + (k / n) * TAU;
       const x = this.x + Math.cos(a) * rad, y = this.y + Math.sin(a) * rad;
       const c = this.near(x, y, 0.42);
       for (let j = 0; j < c; j++) {
         const e = this.en.items[this.qbuf[j]];
-        if (e.droneCd > 0) continue;
-        e.droneCd = 0.42;
+        if (e[cd] > 0) continue;
+        e[cd] = 0.42;
         this.damage(e, dmg, x, y, true, 1.4);
       }
       const b = this.boss;
-      if (b && !b.dead && !b.hidden && b.droneCd <= 0 && (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r + 0.42) ** 2) { b.droneCd = 0.42; this.damage(b, dmg, x, y, false, 0); }
+      if (b && !b.dead && !b.hidden && b[cd] <= 0 && (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r + 0.42) ** 2) { b[cd] = 0.42; this.damage(b, dmg, x, y, false, 0); }
     }
     if (w.evo) {
-      // Orbit Swarm: sparks inside the orbit drift in
+      // Ember Crown: sparks inside the orbit drift in
       const g = this.gems.items, r2 = (rad + 1.2) ** 2;
       for (let k = 0; k < this.gems.n; k++) if ((g[k].x - this.x) ** 2 + (g[k].y - this.y) ** 2 < r2) g[k].pull = true;
     }
   }
-  zap(first, jumps, dmg) {
+  zap(first, jumps, dmg, weapon = this.weapon('zap')) {
     const id = this.ids++;
     let cur = first || this.nearest(this.x, this.y, 7.5, id);
     if (!cur) return;
     const bolt = this.bolts.spawn();
     let n = 0;
-    if (bolt) { bolt.pts[0] = this.x; bolt.pts[1] = this.y; n = 1; bolt.life = 0.22; }
+    if (bolt) { stampAttackPayload(bolt, weapon || makeWeapon(this.nature, 'zap'), this); bolt.pts[0] = this.x; bolt.pts[1] = this.y; n = 1; bolt.life = 0.22; }
     for (let k = 0; k <= jumps && cur; k++) {
       cur.hitZ = id;
       if (bolt && n < 20) { bolt.pts[n * 2] = cur.x; bolt.pts[n * 2 + 1] = cur.y; n++; }
@@ -786,15 +804,15 @@ export class MomoSession {
         }
       }
       if (s.life <= 0) {
-        if (s.kind === 0) this.spray(s.x, s.y, 0.5, 0xbae6fd, 3, 1.4);
+        if (s.kind === 0) this.effect(s.nature + '_burst', s.x, s.y, Math.atan2(s.vx,s.vy), .35);
         this.shots.removeAt(i);
       }
     }
   }
   updateMines(dt) {
-    const it = this.mines.items, honey = this.weapon('mines')?.evo;
+    const it = this.mines.items;
     for (let i = this.mines.n - 1; i >= 0; i--) {
-      const m = it[i];
+      const m = it[i], honey = m.combo;
       m.life -= dt;
       if (m.arm > 0) { m.arm -= dt; continue; }
       let boom = m.life <= 0;
@@ -804,13 +822,14 @@ export class MomoSession {
       for (let j = 0; j < c; j++) { const e = this.en.items[this.qbuf[j]]; this.damage(e, m.dmg, m.x, m.y, false, 3); if (honey) e.slow = 2.6; }
       const b = this.boss;
       if (b && !b.dead && !b.hidden && (b.x - m.x) ** 2 + (b.y - m.y) ** 2 < (b.r + m.rad) ** 2) this.damage(b, m.dmg, m.x, m.y, false, 0);
-      this.boom(m.x, m.y, m.rad, honey ? 0xfbbf24 : 0xf472b6);
+      this.boom(m.x, m.y, m.rad, parseInt(NATURE_COLORS[m.nature].slice(1), 16));
+      this.effect(m.nature + '_burst', m.x, m.y, 0, m.rad * .45);
       this.sound.play('boom', 140);
       this.shake = Math.max(this.shake, 0.18);
       this.mines.removeAt(i);
     }
   }
-  /** Hit an enemy. Shield-Klonks block hits from the front while their shield holds. Returns true when blocked. */
+  /** Hit an enemy. Natural guards block hits from the front while their shield holds. Returns true when blocked. */
   damage(e, dmg, fx, fy, blockable, knock) {
     if (e.dead || e.hidden) return false;
     if (blockable && e.shield > 0) {
@@ -819,7 +838,7 @@ export class MomoSession {
         e.shield -= dmg;
         this.spray(fx, fy, 0.7, 0xfde68a, 3, 2.2);
         this.sound.play('hit', 80);
-        if (e.shield <= 0) { this.popup('SHIELD BROKEN', e.x, e.y, 1.9, '#fdba74', 0.7); this.spray(e.x, e.y, 0.8, 0xf97316, 14, 3); }
+        if (e.shield <= 0) { this.popup('NATURSCHUTZ GEBROCHEN', e.x, e.y, 1.9, '#fdba74', 0.7); this.spray(e.x, e.y, 0.8, 0xf97316, 14, 3); }
         return true;
       }
     }
@@ -836,14 +855,14 @@ export class MomoSession {
     this.kills++;
     this.score += e.score;
     const def = e.def;
-    this.spray(e.x, e.y, 0.5, e.kind === KIND.klonkbot || e.kind === KIND.shield || e.kind === KIND.buzzbot ? 0xcbd5e1 : 0xc084fc, e.elite ? 24 : 7, 2.4);
-    const c = this.corpses.spawn();
-    if (c) { c.kind = e.kind; c.x = e.x; c.y = e.y; c.face = e.face; c.life = 0.4; c.scale = e.scale; c.elite = e.elite; }
+    this.effect('hex_break', e.x, e.y, e.face, e.elite ? 1.2 : .7);
+    const c = this.freed.spawn();
+    if (c) { c.kind = e.kind; c.x = e.x; c.y = e.y; c.face = e.face; c.life = 3.2; c.age = 0; c.scale = e.scale; c.elite = e.elite; }
     this.sound.play('kill', 60);
     if (e.elite) {
       this.elitesKilled++;
       this.dropGem(e.x, e.y, 3, 0);
-      this.popup('ELITE DOWN!', e.x, e.y, 2.2, '#fde047', 1);
+      this.popup('BEFREIT!', e.x, e.y, 2.2, '#fde047', 1);
       this.ring(e.x, e.y, 2.5, 0xfde047, 0.6);
       this.shake = Math.max(this.shake, 0.4);
     } else {
@@ -852,12 +871,11 @@ export class MomoSession {
       if (r < 0.012) this.dropGem(e.x + 0.3, e.y, 1, 0);
       else if (r < 0.016) this.dropGem(e.x - 0.3, e.y, 2, 0);
     }
-    // Blorbs split into two Zorblings (from Frostpeak on)
+    // Two separately arriving Fernlings replace the old biological split.
     if (def.split && this.L.world >= 2) {
       for (let k = 0; k < def.split; k++) {
         const a = e.face + (k ? 1.6 : -1.6);
-        const z = this.spawnEnemy('zorbling', e.x + Math.sin(a) * 0.5, e.y + Math.cos(a) * 0.5, false);
-        if (z) { z.spawnIn = 0; z.kx = Math.sin(a) * 4; z.ky = Math.cos(a) * 4; }
+        this.spawnEnemy('zorbling', this.x + Math.sin(a) * SPAWN_DIST, this.y + Math.cos(a) * SPAWN_DIST, false);
       }
     }
   }
@@ -865,8 +883,9 @@ export class MomoSession {
     this.kills++;
     this.score += b.score;
     this.shake = 1.4;
-    for (let k = 0; k < 4; k++) this.boom(b.x + Math.cos(k * 1.7) * 1.2, b.y + Math.sin(k * 1.7) * 1.2, 3.2, k % 2 ? 0xfacc15 : 0xf97316);
-    this.popup('BOSS DOWN!', b.x, b.y, 4, '#fde047', 1.4);
+    b.defeatedAt = this.time; this.effect(this.L.boss === 'tank' ? 'robot_break' : 'hex_break', b.x, b.y, b.face, 2);
+    if (this.L.boss === 'tank') for (let k = 0; k < 4; k++) this.boom(b.x + Math.cos(k * 1.7) * 1.2, b.y + Math.sin(k * 1.7) * 1.2, 3.2, k % 2 ? 0xfacc15 : 0xf97316);
+    this.popup(this.L.boss === 'tank' ? 'GOLEM GEBANNT' : 'HEX GELÖST', b.x, b.y, 4, '#fde047', 1.4);
     this.sound.play('boom');
     for (let k = 0; k < 12; k++) this.dropGem(b.x + Math.cos(k) * 1.5, b.y + Math.sin(k) * 1.5, 0, 5);
   }
@@ -896,7 +915,7 @@ export class MomoSession {
       this.xp += g.v; this.score += g.v;
       this.sound.play('coin', 45);
       while (this.xp >= this.need) {
-        this.xp -= this.need; this.level++; this.need = xpNeed(this.level);
+        this.xp -= this.need; this.level++; this.need = xpNeed(this.level); this.evolve();
         this.levelFlash = 1;
         this.openChoice('level');
       }
@@ -990,15 +1009,15 @@ export class MomoSession {
   // ── goal ──
   goalText(short = false) {
     const L = this.L;
-    if (L.goal === 'survive') return short ? `SURVIVE ${fmtTime(L.time)}` : `SURVIVE  ${fmtTime(L.time - this.t)}`;
-    if (L.goal === 'defend') return short ? 'DEFEND THE GENERATOR' : `DEFEND  ${fmtTime(L.time - this.t)}`;
-    if (L.goal === 'elites') return short ? `DEFEAT ${L.elites} ELITES` : `ELITES  ${this.elitesKilled} / ${L.elites}`;
+    if (L.goal === 'survive') return short ? `HALTE DURCH ${fmtTime(L.time)}` : `HALTE DURCH  ${fmtTime(L.time - this.t)}`;
+    if (L.goal === 'defend') return short ? 'SCHÜTZE DAS ARCHIV' : `ARCHIVSCHUTZ  ${fmtTime(L.time - this.t)}`;
+    if (L.goal === 'elites') return short ? `BEFREIE ${L.elites} ELITEN` : `ELITEN  ${this.elitesKilled} / ${L.elites}`;
     return BOSSES[L.boss].name;
   }
   checkGoal() {
     const L = this.L;
-    if (this.hp <= 0) { this.hp = 0; this.lose('Momo ran out of health'); return; }
-    if (this.gen && this.gen.hp <= 0) { this.gen.hp = 0; this.boom(this.gen.x, this.gen.y, 3, 0xf97316); this.lose('The generator was destroyed'); return; }
+    if (this.hp <= 0) { this.hp = 0; this.lose('Dein Fernling braucht eine Pause'); return; }
+    if (this.gen && this.gen.hp <= 0) { this.gen.hp = 0; this.boom(this.gen.x, this.gen.y, 3, 0xf97316); this.lose('Das Archiv wurde überrannt'); return; }
     const done = L.goal === 'survive' || L.goal === 'defend' ? this.t >= L.time
       : L.goal === 'elites' ? this.elitesKilled >= L.elites
         : this.boss && this.boss.dead;
@@ -1011,28 +1030,30 @@ export class MomoSession {
     if (L.goal === 'defend') {
       const gs = this.gen.hp / this.gen.max;
       stars = gs >= 0.5 ? (hpShare >= 0.4 ? 3 : 2) : 1;
-      why = `Generator ${Math.round(gs * 100)} %, health ${Math.round(hpShare * 100)} % (★★ generator 50 %, ★★★ and health 40 %).`;
+      why = `Archiv ${Math.round(gs * 100)} %, Leben ${Math.round(hpShare * 100)} % (★★ Archiv 50 %, ★★★ zusätzlich Leben 40 %).`;
     } else if (L.goal === 'survive') {
       stars = hpShare >= 0.4 ? (killShare >= 0.7 ? 3 : 2) : 1;
-      why = `Health ${Math.round(hpShare * 100)} %, ${Math.round(killShare * 100)} % of the horde cleared (★★ health 40 %, ★★★ and 70 % cleared).`;
+      why = `Leben ${Math.round(hpShare * 100)} %, ${Math.round(killShare * 100)} % der Schar befreit (★★ Leben 40 %, ★★★ zusätzlich 70 % befreit).`;
     } else {
       stars = hpShare >= 0.4 ? (this.t <= L.par ? 3 : 2) : 1;
-      why = `Health ${Math.round(hpShare * 100)} %, ${fmtTime(this.t)} (★★ health 40 %, ★★★ and under ${fmtTime(L.par)}).`;
+      why = `Leben ${Math.round(hpShare * 100)} %, ${fmtTime(this.t)} (★★ Leben 40 %, ★★★ zusätzlich unter ${fmtTime(L.par)}).`;
     }
     this.score += 500 + Math.round(this.hp * 5) + (this.gen ? Math.round(this.gen.hp * 3) : 0);
+    this.resultAt = this.time; this.settlementSeconds = this.L.boss === 'drill' ? 5.2 : this.L.boss === 'mothership' ? 4.6 : 3.3;
     this.result = { won: true, stars, score: this.score, reason: why, stats: { kills: this.kills } };
-    // the rest of the horde pops
+    // The remaining Fernlings lose their hex and leave alive.
     const it = this.en.items;
-    for (let i = 0; i < this.en.n; i++) { const e = it[i]; if (!e.dead && !e.boss) { this.spray(e.x, e.y, 0.5, 0xc084fc, 4, 2); const c = this.corpses.spawn(); if (c) { c.kind = e.kind; c.x = e.x; c.y = e.y; c.face = e.face; c.life = 0.4; c.scale = e.scale; c.elite = e.elite; } e.dead = true; } }
+    for (let i = 0; i < this.en.n; i++) { const e = it[i]; if (!e.dead && !e.boss) { this.spray(e.x, e.y, 0.5, 0xc084fc, 4, 2); const c = this.freed.spawn(); if (c) { c.kind = e.kind; c.x = e.x; c.y = e.y; c.face = e.face; c.life = 3.2; c.age = 0; c.scale = e.scale; c.elite = e.elite; } e.dead = true; } }
     this.compactEnemies();
-    this.foeShots.n = 0; this.haz.n = 0;
-    this.say('VICTORY!', 2.5, '#fde047');
-    for (let i = 0; i < 50; i++) this.confetti();
+    this.foeShots.n = 0; this.haz.n = 0; this.shots.n = 0; this.mines.n = 0; this.bolts.n = 0;
+    this.say('MORGENLICHT!', 2.5, '#fde047');
+    this.effect('xp_sparks', this.x, this.y, 0, 1.4);
   }
   lose(reason) {
+    this.resultAt = this.time; this.settlementSeconds = 1.4;
     this.result = { won: false, stars: 0, score: this.score, reason, stats: { kills: this.kills } };
     this.shake = 1;
-    this.say(reason === 'The generator was destroyed' ? 'GENERATOR LOST' : 'KNOCKED OUT', 2.5, '#f87171');
+    this.say(reason === 'Das Archiv wurde überrannt' ? 'ARCHIV VERLOREN' : 'ERSCHÖPFT', 2.5, '#f87171');
   }
 
   // ── effects ──
@@ -1085,14 +1106,14 @@ export class MomoSession {
     }
     const G = this.rings.items;
     for (let i = this.rings.n - 1; i >= 0; i--) { G[i].life -= dt; if (G[i].life <= 0) this.rings.removeAt(i); }
-    const C = this.corpses.items;
-    for (let i = this.corpses.n - 1; i >= 0; i--) { C[i].life -= dt; if (C[i].life <= 0) this.corpses.removeAt(i); }
+    const C = this.freed.items;
+    for (let i = this.freed.n - 1; i >= 0; i--) { const c = C[i]; c.life -= dt; c.age += dt; if (c.age > 1.3) { c.face = Math.atan2(c.x, c.y); c.x += Math.sin(c.face) * dt * 4.6; c.y += Math.cos(c.face) * dt * 4.6; } if (c.life <= 0) this.freed.removeAt(i); }
     const O = this.pops.items;
     for (let i = this.pops.n - 1; i >= 0; i--) { O[i].life -= dt; O[i].h += dt * 1.4; if (O[i].life <= 0) this.pops.removeAt(i); }
     const B = this.bolts.items;
     for (let i = this.bolts.n - 1; i >= 0; i--) { B[i].life -= dt; if (B[i].life <= 0) this.bolts.removeAt(i); }
   }
-  /** Menu backdrop: Momo in the middle of a ring of aliens. */
+  /** Menu backdrop: the selected Fernling faces a ring of hexed creatures. */
   stagePreview() {
     this.y = 0;
     for (let i = 0; i < 22; i++) {
@@ -1146,7 +1167,7 @@ export class MomoSession {
     }
     if (this.gen) { const q = this.proj(this.gen.x, this.gen.y); g.fillStyle = this.gen.flash > 0 ? '#fff' : '#22c55e'; g.beginPath(); g.arc(q.x, q.y - L.k * 0.4, GEN_R * L.k, 0, TAU); g.fill(); }
     for (let i = 0; i < this.gems.n; i++) { const m = this.gems.items[i], q = this.proj(m.x, m.y, 0.2); g.fillStyle = m.kind === 1 ? '#f43f5e' : m.kind === 3 ? '#facc15' : '#67e8f9'; g.fillRect(q.x - 3, q.y - 3, 6, 6); }
-    for (let i = 0; i < this.mines.n; i++) { const m = this.mines.items[i], q = this.proj(m.x, m.y); g.fillStyle = '#f472b6'; g.beginPath(); g.arc(q.x, q.y, L.k * 0.22, 0, TAU); g.fill(); }
+    for (let i = 0; i < this.mines.n; i++) { const m = this.mines.items[i], q = this.proj(m.x, m.y); g.fillStyle = NATURE_COLORS[m.nature]; g.beginPath(); g.arc(q.x, q.y, L.k * 0.22, 0, TAU); g.fill(); }
     for (let i = 0; i < this.en.n; i++) {
       const e = this.en.items[i];
       if (e.dead || e.hidden) continue;
@@ -1157,12 +1178,11 @@ export class MomoSession {
     const m = this.proj(this.x, this.y, 0.45);
     g.fillStyle = this.iframes > 0 ? '#fff' : '#facc15'; g.beginPath(); g.arc(m.x, m.y, MOMO_R * L.k * 1.2, 0, TAU); g.fill();
     g.fillStyle = '#c2410c'; g.beginPath(); g.arc(m.x, m.y - MOMO_R * L.k * 0.9, MOMO_R * L.k * 0.8, 0, TAU); g.fill();
-    for (let i = 0; i < this.shots.n; i++) { const s = this.shots.items[i], q = this.proj(s.x, s.y, 0.5); g.fillStyle = s.kind ? '#f59e0b' : '#7dd3fc'; g.beginPath(); g.arc(q.x, q.y, Math.max(2, s.r * L.k), 0, TAU); g.fill(); }
+    for (let i = 0; i < this.shots.n; i++) { const s = this.shots.items[i], q = this.proj(s.x, s.y, 0.5); g.fillStyle = NATURE_COLORS[s.nature]; g.beginPath(); g.arc(q.x, q.y, Math.max(2, s.r * L.k), 0, TAU); g.fill(); }
     for (let i = 0; i < this.foeShots.n; i++) { const s = this.foeShots.items[i], q = this.proj(s.x, s.y, 0.5); g.fillStyle = s.kind ? '#bae6fd' : '#a3e635'; g.beginPath(); g.arc(q.x, q.y, s.r * L.k, 0, TAU); g.fill(); }
-    const wd = this.weapon('drones');
-    if (wd) {
+    for (const wd of this.weapons) if (wd.id === 'drones') {
       const S = WEAPONS.drones, i = this.wi(wd);
-      for (let k = 0; k < S.n[i]; k++) { const a = this.droneAngle + (k / S.n[i]) * TAU, q = this.proj(this.x + Math.cos(a) * S.rad[i], this.y + Math.sin(a) * S.rad[i], 0.7); g.fillStyle = '#a3e635'; g.beginPath(); g.arc(q.x, q.y, L.k * 0.2, 0, TAU); g.fill(); }
+      for (let k = 0; k < S.n[i]; k++) { const a = wd.phase + (k / S.n[i]) * TAU, q = this.proj(this.x + Math.cos(a) * S.rad[i], this.y + Math.sin(a) * S.rad[i], 0.7); g.fillStyle = NATURE_COLORS[wd.nature]; g.beginPath(); g.arc(q.x, q.y, L.k * 0.2, 0, TAU); g.fill(); }
     }
     g.strokeStyle = '#e9d5ff'; g.lineWidth = 2;
     for (let i = 0; i < this.bolts.n; i++) {
@@ -1183,7 +1203,7 @@ export class MomoSession {
       if (this.gen) {
         const q = this.proj(this.gen.x, this.gen.y, 2.9);
         this.bar(g, q.x, q.y, 70, 8, this.gen.hp / this.gen.max, '#38bdf8');
-        if (this.genRepair && this.gen.hp < this.gen.max) label(g, 'REPAIRING', q.x, q.y - 14, 11, '#bae6fd', 'rgba(0,0,0,.6)');
+        if (this.genRepair && this.gen.hp < this.gen.max) label(g, 'SCHUTZ ERNEUERT', q.x, q.y - 14, 11, '#bae6fd', 'rgba(0,0,0,.6)');
         this.edgeArrow(g, w, h, q.x, q.y + 30, '#38bdf8');
       }
       for (let i = 0; i < this.en.n; i++) {
@@ -1257,6 +1277,7 @@ export class MomoSession {
     g.strokeStyle = '#a3e635'; g.lineWidth = 2.5; g.stroke();
     label(g, 'LV', 26, y - 3, 8, '#a3e635', 'rgba(0,0,0,0)', 800);
     label(g, String(this.level), 26, y + 7, 13, '#fff', 'rgba(0,0,0,.4)', 900);
+    label(g, this.model.replaceAll('_', ' ') + (this.stage < 2 ? ' · Entwicklung LV ' + (this.stage ? 10 : 5) : ' · Hochform'), w / 2, 121, 11, NATURE_COLORS[this.nature], 'rgba(0,0,0,.65)');
     // goal line
     const L = this.L;
     if (L.goal === 'boss' && this.boss && !this.boss.dead) {
@@ -1265,7 +1286,7 @@ export class MomoSession {
       g.fillStyle = this.boss.phase2 ? '#f97316' : '#ef4444'; roundRect(g, bx, by, Math.max(0, bw * this.boss.hp / this.boss.maxHp), 14, 6); g.fill();
       label(g, BOSSES[L.boss].name, w / 2, by + 7, 11, '#fff', 'rgba(0,0,0,.7)');
     } else {
-      const text = L.goal === 'boss' ? `BOSS IN ${fmtTime(BOSS_AT - this.t)}` : this.goalText();
+      const text = this.result ? (this.result.won ? 'DIE ABTEI IST SICHER' : 'MOMO RUFT DICH ZURÜCK') : L.goal === 'boss' ? `BOSS IN ${fmtTime(BOSS_AT - this.t)}` : this.goalText();
       label(g, text, w / 2, 96, 15, '#fff', 'rgba(0,0,0,.65)', 800);
     }
   }
@@ -1273,7 +1294,7 @@ export class MomoSession {
   drawLoadout(g, view) {
     const y = view.h - 34;
     let x = 14;
-    for (const wpn of this.weapons) x = chip(g, x, y, wpn.id, wpn.lv, wpn.evo, WEAPONS[wpn.id].color);
+    for (const wpn of this.weapons) { x = chip(g, x, y, wpn.nature, wpn.lv, wpn.evo, NATURE_COLORS[wpn.nature]); if (wpn.foreign) label(g, 'F', x - 11, y - 5, 9, '#ffe199', '#182231'); }
     x += 6;
     for (const id of PASSIVE_IDS) if (this.passives[id]) x = chip(g, x, y, id, this.passives[id], false, PASSIVES[id].color);
   }
@@ -1285,7 +1306,7 @@ export class MomoSession {
     const cw = narrow ? Math.min(w - 32, 380) : 214, chh = narrow ? 96 : 272, gap = narrow ? 12 : 18;
     const totalW = narrow ? cw : n * cw + (n - 1) * gap, totalH = narrow ? n * chh + (n - 1) * gap : chh;
     const x0 = (w - totalW) / 2, y0 = Math.max(116, (h - totalH) / 2 + 20);
-    label(g, ch.reason === 'chest' ? 'ELITE CHEST — PICK A CARD' : ch.reason === 'kit' ? 'SUPPLY CRATE — PICK A CARD' : `LEVEL ${this.level} — PICK A CARD`, w / 2, y0 - 30, narrow ? 18 : 24, '#fde047', 'rgba(0,0,0,.7)', 900);
+    label(g, ch.reason === 'workshop' ? 'WERKSTATT-HILFE — WÄHLE EINE KARTE' : ch.reason === 'chest' ? 'BEFREIUNG — WÄHLE EINE KARTE' : ch.reason === 'kit' ? 'MOMOS HILFE — WÄHLE EINE KARTE' : `LEVEL ${this.level} — WÄHLE EINE KARTE`, w / 2, y0 - 30, narrow ? 18 : 24, '#fde047', 'rgba(0,0,0,.7)', 900);
     const rects = this.cardRects = this.cardRects || [];
     rects.length = n;
     for (let i = 0; i < n; i++) {
@@ -1297,10 +1318,10 @@ export class MomoSession {
       const sel = view.keyboard && ch.sel === i;
       g.fillStyle = c.type === 'evo' ? '#2a1d05' : '#0f172a'; roundRect(g, x, y, cw, chh, 14); g.fill();
       g.lineWidth = sel ? 4 : 2.5; g.strokeStyle = c.type === 'evo' ? '#fde047' : sel ? '#ffffff' : c.color; g.stroke();
-      const tag = c.type === 'evo' ? 'EVOLUTION' : c.type === 'heal' ? 'SNACK' : c.lv === 1 ? 'NEW' : `LEVEL ${c.lv}`;
+      const tag = c.type === 'fossil' ? 'FOSSIL · BIS LEVELENDE' : c.type === 'evo' ? 'COMBO' : c.type === 'heal' ? 'SNACK' : c.lv === 1 ? 'NEW' : `LEVEL ${c.lv}`;
       if (narrow) {
         g.fillStyle = 'rgba(255,255,255,.07)'; g.beginPath(); g.arc(x + 46, y + chh / 2, 30, 0, TAU); g.fill();
-        drawIcon(g, c.id, x + 46, y + chh / 2, 17, c.color);
+        drawIcon(g, c.nature || c.id, x + 46, y + chh / 2, 17, c.color);
         g.textAlign = 'left'; g.textBaseline = 'alphabetic';
         g.font = '800 11px Geist, Inter, system-ui, sans-serif'; g.fillStyle = c.type === 'evo' ? '#fde047' : c.color; g.fillText(tag, x + 88, y + 28);
         g.font = '800 17px Geist, Inter, system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(c.name, x + 88, y + 50);
@@ -1308,7 +1329,7 @@ export class MomoSession {
         if (view.keyboard) label(g, String(i + 1), x + cw - 18, y + 18, 12, '#94a3b8', 'rgba(0,0,0,0)', 800);
       } else {
         g.fillStyle = 'rgba(255,255,255,.07)'; g.beginPath(); g.arc(x + cw / 2, y + 74, 44, 0, TAU); g.fill();
-        drawIcon(g, c.id, x + cw / 2, y + 74, 25, c.color);
+        drawIcon(g, c.nature || c.id, x + cw / 2, y + 74, 25, c.color);
         label(g, tag, x + cw / 2, y + 140, 12, c.type === 'evo' ? '#fde047' : c.color, 'rgba(0,0,0,0)', 800);
         label(g, c.name, x + cw / 2, y + 164, 19, '#fff', 'rgba(0,0,0,0)', 800);
         g.font = '500 14px Geist, Inter, system-ui, sans-serif'; g.fillStyle = '#cbd5e1'; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
@@ -1322,6 +1343,7 @@ export class MomoSession {
 }
 
 const PASSIVE_IDS = Object.keys(PASSIVES);
+const DRONE_FIELDS = ['droneCd0','droneCd1','droneCd2','droneCd3'];
 function chip(g, x, y, id, lv, evo, color) {
   const size = 26;
   g.fillStyle = 'rgba(9,9,11,.55)'; roundRect(g, x, y, size, size, 7); g.fill();
@@ -1354,16 +1376,24 @@ export function drawIcon(g, id, x, y, r, color) {
   g.fillStyle = color; g.strokeStyle = color; g.lineWidth = Math.max(2, r * 0.18); g.lineCap = 'round'; g.lineJoin = 'round';
   const circle = (cx, cy, rr, fill = true) => { g.beginPath(); g.arc(cx, cy, rr, 0, TAU); if (fill) g.fill(); else g.stroke(); };
   switch (id) {
+    case 'green': g.beginPath(); g.moveTo(0,r); g.bezierCurveTo(-r,-r*.1,-r*.4,-r*.9,r*.7,-r); g.bezierCurveTo(r,r*.2,r*.4,r*.6,0,r); g.fill(); g.strokeStyle='#eff5cf'; g.beginPath();g.moveTo(-r*.1,r*.5);g.lineTo(r*.45,-r*.6);g.stroke();break;
+    case 'ember': g.beginPath();g.moveTo(0,-r);g.bezierCurveTo(-r*.2,-r*.1,-r*.9,-r*.2,-r*.7,r*.35);g.bezierCurveTo(-r*.5,r,r*.7,r,r*.7,r*.2);g.quadraticCurveTo(r*.7,-r*.3,r*.3,-r*.45);g.quadraticCurveTo(r*.2,r*.1,0,-r);g.fill();break;
+    case 'tide': circle(-r*.2,r*.1,r*.65,false);circle(r*.55,-r*.5,r*.28,false);g.fillStyle='#fff';circle(-r*.4,-r*.1,r*.13);break;
+    case 'wind':case 'chime': for(let k=0;k<3;k++){g.beginPath();g.arc(-r*.15,(k-1)*r*.5,r*.6,-1.6,1);g.stroke();}break;
+    case 'frost':for(let k=0;k<3;k++){g.save();g.rotate(k*Math.PI/3);g.beginPath();g.moveTo(-r,0);g.lineTo(r,0);g.stroke();g.restore();}break;
+    case 'rock':case 'ore':g.beginPath();for(let k=0;k<6;k++){const a=k/6*TAU;g[k?'lineTo':'moveTo'](Math.cos(a)*r,Math.sin(a)*r*.8);}g.closePath();g.fill();break;
+    case 'spark':case 'light':case 'star':g.beginPath();for(let k=0;k<10;k++){const a=k/10*TAU-Math.PI/2,rr=k%2?r*.4:r;g[k?'lineTo':'moveTo'](Math.cos(a)*rr,Math.sin(a)*rr);}g.closePath();g.fill();break;
+    case 'night':g.beginPath();g.arc(0,0,r,-1,4.8);g.quadraticCurveTo(-r*.1,0,Math.cos(-1)*r,Math.sin(-1)*r);g.fill();break;
     case 'blaster': circle(-r * 0.3, r * 0.2, r * 0.5, false); circle(r * 0.45, -r * 0.35, r * 0.32, false); circle(r * 0.35, r * 0.55, r * 0.18); break;
     case 'drones': circle(0, 0, r * 0.32); circle(0, 0, r * 0.85, false); circle(r * 0.85, 0, r * 0.2); circle(-r * 0.6, -r * 0.6, r * 0.2); break;
     case 'wrench': g.rotate(-0.8); g.fillRect(-r * 0.14, -r * 0.55, r * 0.28, r * 1.3); g.beginPath(); g.arc(0, -r * 0.62, r * 0.38, 0.25 * Math.PI, 2.75 * Math.PI); g.lineWidth = r * 0.26; g.stroke(); break;
     case 'zap': g.beginPath(); g.moveTo(r * 0.25, -r); g.lineTo(-r * 0.45, r * 0.1); g.lineTo(r * 0.05, r * 0.1); g.lineTo(-r * 0.25, r); g.lineTo(r * 0.5, -r * 0.15); g.lineTo(0, -r * 0.15); g.closePath(); g.fill(); break;
     case 'mines': for (let k = 0; k < 8; k++) { const a = (k / 8) * TAU; g.beginPath(); g.moveTo(Math.cos(a) * r * 0.5, Math.sin(a) * r * 0.5); g.lineTo(Math.cos(a) * r * 0.9, Math.sin(a) * r * 0.9); g.stroke(); } circle(0, 0, r * 0.55); break;
-    case 'boots': g.beginPath(); g.moveTo(-r * 0.5, -r * 0.8); g.lineTo(-r * 0.5, r * 0.5); g.lineTo(r * 0.85, r * 0.5); g.lineTo(r * 0.85, r * 0.15); g.lineTo(-r * 0.05, -r * 0.05); g.lineTo(-r * 0.05, -r * 0.8); g.closePath(); g.fill(); g.fillRect(-r * 0.95, -r * 0.1, r * 0.3, r * 0.12); g.fillRect(-r * 1.05, r * 0.2, r * 0.4, r * 0.12); break;
-    case 'magnet': g.lineWidth = r * 0.42; g.beginPath(); g.arc(0, 0, r * 0.6, Math.PI, 0, true); g.lineTo(r * 0.6, -r * 0.7); g.moveTo(-r * 0.6, 0); g.lineTo(-r * 0.6, -r * 0.7); g.stroke(); g.fillStyle = '#fff'; g.fillRect(-r * 0.82, -r * 0.95, r * 0.44, r * 0.26); g.fillRect(r * 0.38, -r * 0.95, r * 0.44, r * 0.26); break;
+    case 'boots': circle(0,r*.32,r*.5);for(const [a,b]of[[-.65,-.3],[-.22,-.65],[.25,-.65],[.7,-.25]])circle(a*r,b*r,r*.23);break;
+    case 'magnet': g.beginPath();g.moveTo(-r*.7,-r*.35);g.quadraticCurveTo(0,-r*.8,r*.7,-r*.35);g.quadraticCurveTo(r*.3,r*.6,0,r*.6);g.quadraticCurveTo(-r*.3,r*.6,-r*.7,-r*.35);g.fill();g.beginPath();g.moveTo(0,r*.55);g.lineTo(0,r);g.stroke();break;
     case 'armour': g.beginPath(); g.moveTo(0, -r * 0.95); g.lineTo(r * 0.8, -r * 0.6); g.quadraticCurveTo(r * 0.75, r * 0.6, 0, r); g.quadraticCurveTo(-r * 0.75, r * 0.6, -r * 0.8, -r * 0.6); g.closePath(); g.fill(); break;
     case 'snacks': case 'heal': g.beginPath(); g.moveTo(0, r * 0.85); g.bezierCurveTo(-r * 1.2, 0, -r * 0.6, -r * 1.0, 0, -r * 0.35); g.bezierCurveTo(r * 0.6, -r * 1.0, r * 1.2, 0, 0, r * 0.85); g.fill(); break;
-    case 'overclock': circle(0, 0, r * 0.85, false); g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -r * 0.6); g.moveTo(0, 0); g.lineTo(r * 0.45, r * 0.15); g.stroke(); break;
+    case 'overclock':for(let k=0;k<3;k++){g.beginPath();g.arc(-r*.7,0,r*(.45+k*.35),-.8,.8);g.stroke();}break;
     default: circle(0, 0, r * 0.6);
   }
   g.restore();
@@ -1371,11 +1401,13 @@ export function drawIcon(g, id, x, y, r, color) {
 
 export const momo = {
   id: 'momo',
-  title: 'Momo’s Last Stand',
-  tagline: 'Hold the arena against the Zorb horde. Momo’s gadgets fire on their own; you pick the upgrades.',
-  howTo: 'Drag anywhere to move (touch), hold the mouse button to walk towards the cursor, or use WASD / arrow keys. Momo attacks on her own. On a level-up tap a card or press 1–3. Esc pauses, R restarts.',
+  title: 'Hexennacht',
+  starters: Object.values(STARTERS).map(s => ({ id: s.id, label: s.label, description: ({ ember: 'Feuer und Wärme · entwickelt sich zu Coalbear und Emberward', green: 'Samen und Ranken · entwickelt sich zu Moorgrim und Groveprince', tide: 'Blasen und Wellen · entwickelt sich zu Spraycount und Tideduke' })[s.nature] })),
+  defaultStarter: 'glimmo',
+  tagline: 'Halte mit Momo und deinem Fernling die Abtei bis zum Morgen. Befreie die verzauberte Schar und entwickle deine Naturkräfte.',
+  howTo: 'Bewege deinen Fernling per Touch, gedrückter Maustaste oder WASD/Pfeiltasten. Er greift selbst an. Bei einem Levelaufstieg wählst du mit 1–3 eine Karte. Entwicklung auf Level 5 und 10. Seltene Fossilkarten geben einen fremden Move bis Levelende. Esc pausiert, R startet neu.',
   levels: LEVELS,
-  hero: 'MOMO',
+  hero: 'GLIMMO',
   art: new URL('../../games-assets/covers/cover-momo.webp', import.meta.url).href,
   create: (i, env) => new MomoSession(i, env),
   view3d: () => import('./momo-3d.js'),

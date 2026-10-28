@@ -1,0 +1,177 @@
+{
+  "asset": "SYNTHET",
+  "version": 1,
+  "axes": {
+    "native": "Z up, -Y forward",
+    "glTF": "Y up, +Z forward",
+    "units": "metres",
+    "floor": "Y=0 in glTF"
+  },
+  "binding": {
+    "bones": 23,
+    "sameAcrossAllLODs": true,
+    "skinMeshes": 2,
+    "maximumWeightsPerVertex": 4,
+    "noAnimatedBoneScale": true,
+    "skinMeshesMeaning": "GLTFLoader runtime SkinnedMesh objects, one per material primitive",
+    "authoringSkinMeshObjects": 1,
+    "gltfMeshDefinitions": 1,
+    "gltfSkinDefinitions": 1,
+    "materialPrimitives": 2,
+    "runtimeSkinnedMeshes": 2,
+    "drawCallsPerLOD": 2,
+    "materialSplitExplanation": "One authored mesh and one glTF mesh/skin contain two opaque material primitives. GLTFLoader creates two SkinnedMeshes sharing the same skeleton."
+  },
+  "timebase": {
+    "fps": 30,
+    "firstFrame": 0,
+    "allLODsIdentical": true,
+    "clips": {
+      "Idle_Unstable": {
+        "startSeconds": 0,
+        "durationSeconds": 4.0,
+        "frames": [
+          0,
+          120
+        ]
+      },
+      "Heavy_Locomotion": {
+        "startSeconds": 0,
+        "durationSeconds": 2.4,
+        "frames": [
+          0,
+          72
+        ]
+      },
+      "Spark_Charge": {
+        "startSeconds": 0,
+        "durationSeconds": 2.0,
+        "frames": [
+          0,
+          60
+        ]
+      },
+      "Spark_Burst": {
+        "startSeconds": 0,
+        "durationSeconds": 1.6,
+        "frames": [
+          0,
+          48
+        ]
+      },
+      "Sweep": {
+        "startSeconds": 0,
+        "durationSeconds": 2.0,
+        "frames": [
+          0,
+          60
+        ]
+      },
+      "Hit_Recover": {
+        "startSeconds": 0,
+        "durationSeconds": 1.6,
+        "frames": [
+          0,
+          48
+        ]
+      },
+      "Stabilized": {
+        "startSeconds": 0,
+        "durationSeconds": 4.0,
+        "frames": [
+          0,
+          120
+        ]
+      }
+    }
+  },
+  "controller": {
+    "motion": "in-place; controller translates and turns Root in runtime; no embedded root translation",
+    "forwardSpeedMps": 0.234375,
+    "locomotionDurationSeconds": 2.4,
+    "stanceFraction": 0.64,
+    "limbPhases": {
+      "Hand.L": 0,
+      "Hand.R": 0.5,
+      "Foot.L": 0.5,
+      "Foot.R": 0
+    },
+    "controllerPathForQA": "glTF world Z += speed * t. In native world Y -= speed * t. The planted skin sole moves opposite that path.",
+    "noLegScaling": true,
+    "turning": "Blend or steer Root externally; never twist individual planted soles during stance",
+    "runtimeParent": "Translate and turn an external controller group above the animated skeleton; the skeleton Root retains its zero-based local clip transform."
+  },
+  "sockets": {
+    "Socket_ChestCore": {
+      "parentBone": "Chest",
+      "forward": "+Z local, outward from seated chest skin",
+      "radiusM": 0.24,
+      "releaseSeconds": {
+        "Spark_Burst": [
+          0.36
+        ]
+      },
+      "role": "Forward Equal Spark discharge; core patch is embedded and opaque"
+    },
+    "Socket_BackEmit": {
+      "parentBone": "Chest",
+      "forward": "+Z local, dorsal outward",
+      "radiusM": 0.25,
+      "releaseSeconds": {
+        "Spark_Charge": [
+          0.85
+        ],
+        "Spark_Burst": [
+          0.36
+        ]
+      },
+      "role": "Dorsal pressure signal or burst; external effect only"
+    },
+    "Socket_Hand.L": {
+      "parentBone": "Hand.L",
+      "forward": "+Z local, forward from fingers",
+      "radiusM": 0.19,
+      "releaseSeconds": {
+        "Sweep": [
+          0.7
+        ]
+      },
+      "role": "Sweeping hand contact reference"
+    },
+    "Socket_Hand.R": {
+      "parentBone": "Hand.R",
+      "forward": "+Z local, forward from fingers",
+      "radiusM": 0.19,
+      "releaseSeconds": {},
+      "role": "Support-hand and optional contact reference"
+    },
+    "Socket_Ground": {
+      "parentBone": "Root",
+      "forward": "+Z local, down to ground",
+      "radiusM": 1.55,
+      "releaseSeconds": {
+        "Spark_Burst": [
+          0.36
+        ]
+      },
+      "role": "Ground AOE reference; controller owns gameplay collision"
+    }
+  },
+  "vfx": {
+    "includedInGLB": false,
+    "hexSignal": "External violet hex effect, owned by controller, no permanently floating crystals",
+    "equalSpark": "Warm orange only in three seated material inlets",
+    "releaseAuthority": "Controller uses clip times and live socket matrices, not preview lights"
+  },
+  "Stabilized": {
+    "meaning": "Forces fall away; still-living creature settles, then breathes. No death explosion, no captured human. Canon outcome remains Root decision.",
+    "settleBySeconds": 2.32,
+    "livingBreathRepeatSegmentSeconds": [
+      2.4,
+      4.0
+    ],
+    "breathVerticalAmplitudeM": 0.007,
+    "afterClip": "Hold settled state and repeat breath segment; do not jump back to standing Idle"
+  },
+  "attackCollision": "Radius and release times are visual contracts; game damage and target selection stay with controller. No game integration performed."
+}

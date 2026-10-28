@@ -1,0 +1,90 @@
+{
+  "category": "architecture",
+  "label": "Stone paving \u00b7 jointed square",
+  "games": [
+    "generic"
+  ],
+  "description": "Stone paving \u00b7 jointed square; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 564,
+      "triangles": 188,
+      "groups": 1,
+      "bytes": 10786,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 564,
+      "triangles": 188,
+      "groups": 1,
+      "bytes": 10786,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 97,
+      "triangles": 188,
+      "groups": 1,
+      "bytes": 3313,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "architecture/kaykit/floor_tile_large.glb",
+  "adaptation": {
+    "scale": 0.65,
+    "rotationY": 0,
+    "pivot": "bounds centre at ground",
+    "units": "metres"
+  },
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_paving_stone",
+  "bounds": [
+    [
+      -1.2999999523162842,
+      0.0,
+      -1.2999999523162842
+    ],
+    [
+      1.2999999523162842,
+      0.09750001132488251,
+      1.2999999523162842
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#7f746e",
+    "#847973",
+    "#867c75",
+    "#887e77",
+    "#8a8079",
+    "#8a8179",
+    "#8c837b",
+    "#8e857d",
+    "#90887f",
+    "#938a82",
+    "#958d84",
+    "#978f86",
+    "#989087",
+    "#9a928a"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

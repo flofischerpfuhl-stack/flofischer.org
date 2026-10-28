@@ -1,0 +1,479 @@
+{
+  "asset": "TOY_QUOTA",
+  "units": "toy-u, Y-up/+Z front, ground Y0",
+  "sockets": {
+    "HitFXSocket": {
+      "node": "HitFXSocket",
+      "parent": "BodySpring",
+      "localTRS": {
+        "translation": [
+          -0.28999999165534973,
+          1.850000023841858,
+          0.5099999904632568
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        -0.28999999165534973,
+        1.850000023841858,
+        0.5099999904632568
+      ],
+      "restForward": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "RingShotSocket00": {
+      "node": "RingShotSocket00",
+      "parent": "BodySpring",
+      "localTRS": {
+        "translation": [
+          0.25429674983024597,
+          1.2799999713897705,
+          1.117674469947815
+        ],
+        "rotation": [
+          0,
+          0.0998334065079689,
+          0,
+          0.9950041770935059
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        0.25429674983024597,
+        1.2799999713897705,
+        1.117674469947815
+      ],
+      "restForward": [
+        0.1986693129778061,
+        0.0,
+        0.9800665818900294
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "RingShotSocket01": {
+      "node": "RingShotSocket01",
+      "parent": "BodySpring",
+      "localTRS": {
+        "translation": [
+          1.0668699741363525,
+          1.2799999713897705,
+          0.638835072517395
+        ],
+        "rotation": [
+          0,
+          0.47300562262535095,
+          0,
+          0.8810594081878662
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        1.0668699741363525,
+        1.2799999713897705,
+        0.638835072517395
+      ],
+      "restForward": [
+        0.8334921078796498,
+        0.0,
+        0.5525313619296082
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "RingShotSocket02": {
+      "node": "RingShotSocket02",
+      "parent": "BodySpring",
+      "localTRS": {
+        "translation": [
+          1.2544851303100586,
+          1.2799999713897705,
+          -0.20250964164733887
+        ],
+        "rotation": [
+          0,
+          0.7741670608520508,
+          0,
+          0.6329813599586487
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        1.2544851303100586,
+        1.2799999713897705,
+        -0.20250964164733887
+      ],
+      "restForward": [
+        0.9800666380266421,
+        0.0,
+        -0.1986692762166058
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "RingShotSocket03": {
+      "node": "RingShotSocket03",
+      "parent": "BodySpring",
+      "localTRS": {
+        "translation": [
+          0.7072400450706482,
+          1.2799999713897705,
+          -0.9135112166404724
+        ],
+        "rotation": [
+          0,
+          0.9574686288833618,
+          0,
+          0.28853753209114075
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        0.7072400450706482,
+        1.2799999713897705,
+        -0.9135112166404724
+      ],
+      "restForward": [
+        0.5525312704653871,
+        0.0,
+        -0.8334923505915697
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "RingShotSocket04": {
+      "node": "RingShotSocket04",
+      "parent": "BodySpring",
+      "localTRS": {
+        "translation": [
+          -0.25429674983024597,
+          1.2799999713897705,
+          -1.0776745080947876
+        ],
+        "rotation": [
+          0,
+          -0.9950041770935059,
+          0,
+          0.09983339160680771
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        -0.25429674983024597,
+        1.2799999713897705,
+        -1.0776745080947876
+      ],
+      "restForward": [
+        -0.19866928332437084,
+        0.0,
+        -0.9800666248670495
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "RingShotSocket05": {
+      "node": "RingShotSocket05",
+      "parent": "BodySpring",
+      "localTRS": {
+        "translation": [
+          -1.0668699741363525,
+          1.2799999713897705,
+          -0.5988350510597229
+        ],
+        "rotation": [
+          0,
+          -0.881059467792511,
+          0,
+          0.4730055332183838
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        -1.0668699741363525,
+        1.2799999713897705,
+        -0.5988350510597229
+      ],
+      "restForward": [
+        -0.8334920067206042,
+        0.0,
+        -0.5525315715736454
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "RingShotSocket06": {
+      "node": "RingShotSocket06",
+      "parent": "BodySpring",
+      "localTRS": {
+        "translation": [
+          -1.2544851303100586,
+          1.2799999713897705,
+          0.2425096482038498
+        ],
+        "rotation": [
+          0,
+          -0.6329813599586487,
+          0,
+          0.7741670608520508
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        -1.2544851303100586,
+        1.2799999713897705,
+        0.2425096482038498
+      ],
+      "restForward": [
+        -0.9800666380266421,
+        0.0,
+        0.19866919588979925
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "RingShotSocket07": {
+      "node": "RingShotSocket07",
+      "parent": "BodySpring",
+      "localTRS": {
+        "translation": [
+          -0.7072400450706482,
+          1.2799999713897705,
+          0.9535112380981445
+        ],
+        "rotation": [
+          0,
+          -0.28853756189346313,
+          0,
+          0.957468569278717
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        -0.7072400450706482,
+        1.2799999713897705,
+        0.9535112380981445
+      ],
+      "restForward": [
+        -0.5525312931386068,
+        0.0,
+        0.8334921507531519
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "MuzzleSocket": {
+      "node": "MuzzleSocket",
+      "parent": "DrillSpin",
+      "localTRS": {
+        "translation": [
+          0,
+          0,
+          1.0199998617172241
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        0.6499999463558197,
+        1.5053750607164997,
+        1.9387592632817174
+      ],
+      "restForward": [
+        0.0,
+        -0.09983332011468704,
+        0.9950041750295053
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "TurretPivot": {
+      "node": "TurretPivot",
+      "parent": "TurretYaw",
+      "localTRS": {
+        "translation": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          -0.7071068286895752,
+          0,
+          0,
+          0.7071068286895752
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        -0.28999999165534973,
+        1.340000033378601,
+        -0.2199999988079071
+      ],
+      "restForward": [
+        0.0,
+        1.0000001343588565,
+        -1.3435885648505064e-07
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "DustRingSocket": {
+      "node": "DustRingSocket",
+      "parent": "TOY_QUOTA",
+      "localTRS": {
+        "translation": [
+          0,
+          0.02500000037252903,
+          0
+        ],
+        "rotation": [
+          -0.7071068286895752,
+          0,
+          0,
+          0.7071068286895752
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        0.0,
+        0.02500000037252903,
+        0.0
+      ],
+      "restForward": [
+        0.0,
+        1.0000001343588565,
+        -1.3435885648505064e-07
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    },
+    "GroundShadow": {
+      "node": "GroundShadow",
+      "parent": "TOY_QUOTA",
+      "localTRS": {
+        "translation": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          -0.7071068286895752,
+          0,
+          0,
+          0.7071068286895752
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "restWorldPosition_u": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "restForward": [
+        0.0,
+        1.0000001343588565,
+        -1.3435885648505064e-07
+      ],
+      "live": "Resolve node matrixWorld after motion and parent WorldController; transform local +Z as forward. Rest coordinates are not world-space gameplay constants."
+    }
+  },
+  "turret": {
+    "pivotNode": "TurretYaw",
+    "localAxis": [
+      0,
+      1,
+      0
+    ],
+    "authoringRangeRadians": [
+      -0.35,
+      0.35
+    ],
+    "armChain": [
+      "TurretYaw",
+      "ArmPitch",
+      "Slide",
+      "DrillSpin",
+      "MuzzleSocket"
+    ]
+  },
+  "ringShot": {
+    "legacyWorldPhaseMapping": {
+      "controllerYawRadians": 1.1707963267948966,
+      "setWhile": "during hidden root-owned burrow, before surface",
+      "socketKGameAngle": "0.2-k*pi/4 modulo 2pi; reverse socket iteration yields exactly the legacy eight-angle set 0.2+i*pi/4",
+      "reason": "Legacy ring phase is world-fixed, independent of tk.aim. Do not accidentally add the current body aim to that phase.",
+      "worldDirections": "Transform live socket +Z by actual matrixWorld at surface after setting the specified controller heading."
+    },
+    "assetAzimuthZero": "+Z, positive rotation toward +X",
+    "count": 8,
+    "azimuthRadians": [
+      0.2,
+      0.9853981633974482,
+      1.7707963267948965,
+      2.556194490192345,
+      3.3415926535897933,
+      4.126990816987242,
+      4.91238898038469,
+      5.697787143782138
+    ],
+    "speed_gameUnits_per_s": 3.2,
+    "bounces": 0,
+    "timing": "simultaneous at surface event; do not stagger; transform from live sockets. Motion frame and world RootController are separate."
+  },
+  "shadow": "GroundShadow is a transform/socket, no baked plane in GLBs."
+}

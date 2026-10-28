@@ -1,6 +1,6 @@
 /**
  * Fern Rangers — a squad runner shooter in the Fernhaven universe (docs/games/UNIVERSE.md): the Rangers fire non-stop
- * up a road while the Zorb aliens and their Klonkbots come the other way. Steer through number gates (+5, ×2, −3,
+ * up a road while the Commune automatons and their Klonkbots come the other way. Steer through number gates (+5, ×2, −3,
  * fire rate) and shoot them to raise their value, pick up items, keep clear of hazards, beat a boss at the end of
  * every world.
  *
@@ -12,33 +12,77 @@
  */
 import { clamp, lerp, rng, label, roundRect } from './core.js';
 import { LEVELS } from './fern-rangers-levels.js';
+import { upgradeLevel } from './profile.js';
+import { STURMBASTION_LEVELS } from './fern-rangers-sturmbastion-levels.js';
+import { SturmbastionSession } from './fern-rangers-sturmbastion.js';
+import { createRangersProgress } from './fern-rangers-sturmbastion-progress.js';
 
 export const ROAD = 3;
-const CAM_C = 6, VIEW_Z = 64, BULLET_SPEED = 46, WAKE_Z = 40;
+const CAM_C = 6, VIEW_Z = 64, BULLET_SPEED = 46;
+/**
+ * Pacing. A wave of aliens stands in formation until the squad is WAKE_Z away and the wave before it is engaged
+ * (cleared, or closer than ENGAGE_Z); then it hops once (ALERT seconds, so the charge reads) and runs. Waves therefore
+ * come one after another instead of all at once, and nothing charges during the first START_GRACE seconds. A wave
+ * that is closer than MUST_Z charges whatever the wave before it does. A finish guard (`hold`) waits at the finish
+ * line and only lunges when the squad is HOLD_Z away.
+ */
+export const WAKE_Z = 40, ENGAGE_Z = 12, MUST_Z = 22, HOLD_Z = 7, ALERT = 0.45, START_GRACE = 1.6;
+/**
+ * Firepower. Every Ranger counts: a volley does the weapon's damage times the squad size. Up to LANES_MAX soldiers
+ * fire their own tracer; a bigger squad makes the tracers heavier (thicker, brighter, bigger hits) instead of adding
+ * more. Guns never fire more than VOLLEY_MAX volleys a second: faster guns put more damage into each volley (and draw
+ * longer streaks), so the number of shots in the air stays bounded however strong the squad gets.
+ */
+export const LANES_MAX = 24, VOLLEY_MAX = 12;
+const MAX_SHOTS = 640, MAX_PARTS = 600, HIT_SPARKS = 18;
+/** Bullets in flight as flat arrays (no object per shot); removal swaps the last one in. */
+class Shots {
+  constructor(max) {
+    this.max = max; this.n = 0;
+    this.x = new Float32Array(max); this.d = new Float32Array(max); this.prev = new Float32Array(max);
+    this.dmg = new Float32Array(max); this.life = new Float32Array(max); this.heft = new Float32Array(max);
+    this.turret = new Uint8Array(max);
+  }
+  add(x, d, dmg, life, heft, turret = 0) {
+    if (this.n >= this.max) return;
+    const i = this.n++;
+    this.x[i] = x; this.d[i] = d; this.prev[i] = d; this.dmg[i] = dmg; this.life[i] = life; this.heft[i] = heft; this.turret[i] = turret;
+  }
+  remove(i) {
+    const j = --this.n;
+    if (i === j) return;
+    this.x[i] = this.x[j]; this.d[i] = this.d[j]; this.prev[i] = this.prev[j]; this.dmg[i] = this.dmg[j];
+    this.life[i] = this.life[j]; this.heft[i] = this.heft[j]; this.turret[i] = this.turret[j];
+  }
+}
+// bullets look up their targets in a coarse grid across the road: O(shots + targets) instead of shots × targets
+const CELL = 0.5, GRID_X0 = -ROAD - 1, CELLS = Math.ceil((2 * ROAD + 2) / CELL);
+const SLOT_TARGETS = [];
+const cellOf = (x) => Math.max(0, Math.min(CELLS - 1, Math.floor((x - GRID_X0) / CELL)));
 export const WEAPONS = [
-  { name: 'Bubble pistol', rate: 2.2, dmg: 1, color: '#a5f3fc' },
-  { name: 'Bubble rifle', rate: 3.4, dmg: 1.2, color: '#67e8f9' },
-  { name: 'Bubble repeater', rate: 5.5, dmg: 1.35, color: '#5eead4' },
-  { name: 'Bubble storm', rate: 9, dmg: 1.45, color: '#fde047' },
-  { name: 'Sun beam', rate: 11, dmg: 2, color: '#f0abfc' },
+  { name: 'Fernstone pistol', rate: 2.2, dmg: 1, color: '#a5f3fc' },
+  { name: 'Fernstone rifle', rate: 3.4, dmg: 1.2, color: '#67e8f9' },
+  { name: 'Fossil repeater', rate: 5.5, dmg: 1.35, color: '#5eead4' },
+  { name: 'Starburst cells', rate: 9, dmg: 1.45, color: '#fde047' },
+  { name: 'Light fossil beam', rate: 11, dmg: 2, color: '#f0abfc' },
 ];
 /** dmg: soldiers lost per point of health the enemy still has when it reaches the squad (at least one). */
 export const ENEMY = {
-  zorbling: { name: 'Zorbling', hp: 2, speed: 2.2, r: 0.34, dmg: 0.34, score: 10, home: 0.7, h: 0.95 },
-  zipper: { name: 'Zipper', hp: 1.5, speed: 5, r: 0.3, dmg: 0.34, score: 15, home: 1.3, h: 1.15 },
+  zorbling: { name: 'Klonk', hp: 2, speed: 2.2, r: 0.34, dmg: 0.34, score: 10, home: 0.7, h: 0.95 },
+  zipper: { name: 'Darter', hp: 1.5, speed: 5, r: 0.3, dmg: 0.34, score: 15, home: 1.3, h: 1.15 },
   klonk: { name: 'Klonkbot', hp: 5, speed: 1.9, r: 0.38, dmg: 0.3, score: 20, home: 0.6, h: 1.05, metal: true },
   shield: { name: 'Shield-Klonk', hp: 6, speed: 1.5, r: 0.45, dmg: 0.3, score: 35, home: 0.45, h: 1.2, shield: 12, metal: true },
-  spitter: { name: 'Spitter', hp: 4, speed: 2.0, r: 0.36, dmg: 0.34, score: 30, home: 0.45, h: 0.95, range: 15 },
-  blorb: { name: 'Blorb', hp: 18, speed: 1.6, r: 0.62, dmg: 0.4, score: 60, home: 0.55, h: 1.6 },
-  buzz: { name: 'Buzzbot', hp: 3, speed: 3.2, r: 0.32, dmg: 0.34, score: 25, home: 0.9, h: 1.2, fly: true, metal: true },
+  spitter: { name: 'Squirter', hp: 4, speed: 2.0, r: 0.36, dmg: 0.34, score: 30, home: 0.45, h: 0.95, range: 15 },
+  blorb: { name: 'Hulk', hp: 18, speed: 1.6, r: 0.62, dmg: 0.4, score: 60, home: 0.55, h: 1.6 },
+  buzz: { name: 'Buzz drone', hp: 3, speed: 3.2, r: 0.32, dmg: 0.34, score: 25, home: 0.9, h: 1.2, fly: true, metal: true },
   boss: { name: 'Boss', hp: 300, speed: 1.4, r: 1.5, dmg: 0, score: 500, home: 0.35, h: 3.2 },
 };
 /** The four world bosses: how they attack and what they call in. */
 export const BOSSES = {
-  tank: { name: 'KLONK TANK', r: 1.5, h: 2.6, attack: 'shell', minion: 'klonk', every: 3.4 },
-  drill: { name: 'DUNE DRILL MECH', r: 1.4, h: 3.1, attack: 'charge', minion: 'zipper', every: 3.2 },
-  walker: { name: 'FROST WALKER', r: 1.5, h: 3.4, attack: 'breath', minion: 'spitter', every: 3.6 },
-  mothership: { name: 'ZORB MOTHERSHIP', r: 2.2, h: 4.4, attack: 'beam', minion: 'buzz', every: 3.0, core: true },
+  tank: { name: 'COMBINE CRAWLER', r: 1.5, h: 2.6, attack: 'shell', minion: 'klonk', every: 3.4 },
+  drill: { name: 'QUOTA', r: 1.4, h: 3.1, attack: 'charge', minion: 'zipper', every: 3.2 },
+  walker: { name: 'BRIGADIER', r: 1.5, h: 3.4, attack: 'breath', minion: 'spitter', every: 3.6 },
+  mothership: { name: 'EQUALITY', r: 2.2, h: 4.4, attack: 'beam', minion: 'buzz', every: 3.0, core: true },
 };
 export const PICKUPS = {
   medkit: { name: 'MEDKIT', color: '#f87171' },
@@ -90,12 +134,12 @@ export function geyserState(e, t) {
   return k < e.period - 1.9 ? 'idle' : k < e.period - 0.7 ? 'warn' : 'burst';
 }
 
-function makeEnemy(type, d, x, level, o = {}, rand = Math.random) {
+function makeEnemy(type, d, x, level, o = {}, rand = Math.random, wave = -1) {
   const def = ENEMY[type];
   const hp = def.hp * (o.hp || level.hpMul || 1);
   return {
     kind: 'enemy', type, d, x, hp, maxHp: hp, speed: def.speed * (o.speed || 1) * (0.9 + rand() * 0.2),
-    r: def.r, alive: true, active: !!o.active, flash: 0, phase: rand() * 6.28, frozen: 0,
+    r: def.r, alive: true, active: !!o.active, flash: 0, phase: rand() * 6.28, frozen: 0, alert: 0, wave, hold: !!o.hold,
     shield: def.shield ? def.shield * (o.hp || level.hpMul || 1) : 0, split: !!o.split, baseX: x, fire: 1 + rand(),
   };
 }
@@ -103,18 +147,19 @@ function makeEnemy(type, d, x, level, o = {}, rand = Math.random) {
 /** Turn the level script into live entities. */
 function build(level, rand) {
   const ents = [];
-  let group = 0;
+  let group = 0, wave = 0;
   for (const ev of level.events) {
     if (ev.t === 'gate') {
       group++;
       for (const gate of ev.gates) ents.push({ kind: 'gate', d: ev.d, group, ...gate, bx0: gate.x0, bx1: gate.x1, move: ev.move || null, shot: 0, pulse: 0, alive: true });
     } else if (ev.t === 'wave') {
       const cols = ev.cols || Math.min(ev.n, 4);
+      const w = wave++;
       for (let i = 0; i < ev.n; i++) {
         const col = i % cols, row = Math.floor(i / cols);
         const span = ev.x1 - ev.x0;
         const x = cols === 1 ? (ev.x0 + ev.x1) / 2 : ev.x0 + (span * col) / (cols - 1);
-        ents.push(makeEnemy(ev.kind, ev.d + row * (ev.gap || 1.3) + rand() * 0.4, clamp(x + (rand() - 0.5) * 0.35, -ROAD + 0.3, ROAD - 0.3), level, ev, rand));
+        ents.push(makeEnemy(ev.kind, ev.d + row * (ev.gap || 1.3) + rand() * 0.4, clamp(x + (rand() - 0.5) * 0.35, -ROAD + 0.3, ROAD - 0.3), level, ev, rand, w));
       }
     } else if (ev.t === 'boss') {
       const B = BOSSES[ev.kind || 'tank'];
@@ -138,7 +183,7 @@ function build(level, rand) {
 
 export class FernRangersSession {
   constructor(levelIndex, env = {}) {
-    this.index = levelIndex;
+    this.index = levelIndex; this.mode = 'campaign'; this.visualEvents = []; this.visualSequence = 0; this.settlementSeconds = 0;
     this.L = env.level || LEVELS[levelIndex];
     this.sound = env.sound || { play() {} };
     this.preview = !!env.preview;
@@ -147,15 +192,25 @@ export class FernRangersSession {
     this.themeName = this.L.theme || WORLD_THEME[this.world];
     this.theme = THEMES[this.themeName] || THEMES.meadow;
     this.pos = 0; this.speed = this.L.speed; this.t = 0;
-    this.n = this.L.start.soldiers + (env.bonusSoldiers || 0); this.weapon = this.L.start.weapon; this.rateMul = 1;
+    this.squadUpgrade=clamp(Math.floor(upgradeLevel('rangers-squad')),0,3);this.rateUpgrade=clamp(Math.floor(upgradeLevel('rangers-rate')),0,3);
+    this.n = this.L.start.soldiers + (env.bonusSoldiers || 0) + this.squadUpgrade; this.weapon = this.L.start.weapon; this.rateMul = 1 + this.rateUpgrade * .05;
     this.px = 0; this.tx = 0; this.keyDir = 0; this.drag = null;
     this.score = 0; this.kills = 0; this.result = null; this.peak = this.n;
     this.grenades = this.L.start.grenades || 0; this.grenadeCd = 0; this.throws = [];
     this.buffs = { bubble: 0, double: 0, turret: 0, freeze: 0 }; this.revives = 0; this.turretX = 0; this.turretAcc = 0;
     this.ents = build(this.L, this.rand);
     this.boss = this.ents.find((e) => e.type === 'boss') || null;
-    this.bullets = []; this.parts = []; this.popups = []; this.goo = []; this.warnings = [];
-    this.fireAcc = 0; this.shake = 0; this.flash = 0; this.goodFlash = 0; this.countPop = 0; this.muzzle = 0;
+    this.shots = new Shots(MAX_SHOTS); this.parts = []; this.freeParts = []; this.popups = []; this.goo = []; this.warnings = [];
+    this.grid = Array.from({ length: CELLS }, () => []); this.hitCarrier = { dmg: 0, heft: 1 }; this.sparkBudget = HIT_SPARKS;
+    this.lanes = 1; this.heft = 1;
+    // muzzle flash per lane (1 when it just fired) and the lane's offset from the squad centre, for the 3D view
+    this.laneFlash = new Float32Array(LANES_MAX); this.laneX = new Float32Array(LANES_MAX);
+    // the finish: the end of the road, or (boss levels) just past the spot where the boss went down
+    this.goal = this.L.length;
+    this.waveCount = this.L.events.filter((e) => e.t === 'wave').length;
+    this.waveFront = new Float32Array(this.waveCount); this.waveAwake = new Uint8Array(this.waveCount);
+    this.waveHold = this.L.events.filter((e) => e.t === 'wave').map((e) => !!e.hold);
+    this.shake = 0; this.flash = 0; this.goodFlash = 0; this.countPop = 0; this.muzzle = 0;
     this.slots = [];
     this.hint = this.L.hint;
     this.layout = null;
@@ -165,10 +220,14 @@ export class FernRangersSession {
     if (!this.preview) this.popup('GO!', 0, 1.6, '#ffffff', 1.25);
   }
 
+  visual(type, values = {}) { const event = { id: ++this.visualSequence, type, time: this.t, ...values }; this.visualEvents.push(event); return event; }
+
   // ── squad formation (sunflower pattern) ──
   slotTarget(i) {
-    const a = i * 2.39996, r = 0.36 * Math.sqrt(i + 0.35);
-    return { x: Math.cos(a) * r, z: Math.sin(a) * r * 0.75 };
+    // the same spot every time: computed once per slot index
+    let t = SLOT_TARGETS[i];
+    if (!t) { const a = i * 2.39996, r = 0.36 * Math.sqrt(i + 0.35); t = SLOT_TARGETS[i] = { x: Math.cos(a) * r, z: Math.sin(a) * r * 0.75 }; }
+    return t;
   }
   /** The squad bunches up in front of hazards so it fits through the gaps (squeeze 0 … 1). */
   get fullRadius() { return squadRadius(this.n); }
@@ -204,24 +263,32 @@ export class FernRangersSession {
     this.keyDir = (this.keys.r ? 1 : 0) - (this.keys.l ? 1 : 0);
     return true;
   }
-  hud() { return { progress: Math.min(1, this.pos / this.L.length), score: this.score, label: 'Score' }; }
+  hud() { return { progress: Math.min(1, this.pos / this.goal), score: this.score, label: 'Groschen' }; }
 
   // ── simulation ──
   update(dt) {
     this.t += dt;
+    this.visualEvents = this.visualEvents.filter(event => this.t - event.time < 8);
     this.shake = Math.max(0, this.shake - dt * 3); this.flash = Math.max(0, this.flash - dt * 2.5);
     this.goodFlash = Math.max(0, this.goodFlash - dt * 2.5); this.countPop = Math.max(0, this.countPop - dt * 4);
     this.muzzle = Math.max(0, this.muzzle - dt * 10);
+    for (let i = 0; i < LANES_MAX; i++) if (this.laneFlash[i] > 0) this.laneFlash[i] = Math.max(0, this.laneFlash[i] - dt * 12);
     for (const k in this.buffs) this.buffs[k] = Math.max(0, this.buffs[k] - dt);
     this.grenadeCd = Math.max(0, this.grenadeCd - dt);
     this.updateParticles(dt);
-    if (this.result && !this.result.won) return;
+    this.sparkBudget = HIT_SPARKS;
+    if (this.result) return;
 
     if (this.keyDir) this.tx = clamp(this.tx + this.keyDir * 8 * dt, -ROAD, ROAD);
     const lim = ROAD - Math.min(this.radius, ROAD) * 0.6;
     let lo = -lim, hi = lim;
+    // one pass over the road: the fork the squad is in, ice under it
+    let fork = null, ice = false;
+    for (const e of this.ents) {
+      if (e.kind === 'fork') { if (!fork && e.d - this.pos < 0.5 && e.d + e.len - this.pos > -0.5) fork = e; }
+      else if (e.kind === 'ice') { if (e.d - this.pos < 0 && e.d + e.len - this.pos > 0 && this.px > e.x0 - 0.5 && this.px < e.x1 + 0.5) ice = true; }
+    }
     // a fork's median wall keeps the squad on the side it entered
-    const fork = this.ents.find((e) => e.kind === 'fork' && e.d - this.pos < 0.5 && e.d + e.len - this.pos > -0.5);
     if (fork) {
       if (!fork.side) fork.side = this.px < fork.x ? -1 : 1;
       const edge = Math.min(this.radius, 1.2) * 0.6 + 0.25;
@@ -229,22 +296,28 @@ export class FernRangersSession {
     }
     const target = clamp(this.tx, lo, hi);
     // ice: steering barely grips, the squad slides on
-    this.onIce = this.ents.some((e) => e.kind === 'ice' && e.d - this.pos < 0 && e.d + e.len - this.pos > 0 && this.px > e.x0 - 0.5 && this.px < e.x1 + 0.5);
+    this.onIce = ice;
     this.px = clamp(lerp(this.px, target, 1 - Math.exp(-dt * (this.onIce ? 2.2 : 16))), lo, hi);
 
     // Boss fights hold the squad in place.
     const bossNear = this.boss && this.boss.alive && this.boss.d - this.pos < 24;
-    this.speed = lerp(this.speed, bossNear || (this.result && this.pos > this.L.length + 12) ? 0 : this.L.speed, 1 - Math.exp(-dt * 3));
+    this.speed = lerp(this.speed, bossNear || (this.result && this.pos > this.goal + 12) ? 0 : this.L.speed, 1 - Math.exp(-dt * 3));
     this.pos += this.speed * dt;
 
     // bunch up while a hazard, a goo blob or a boss strike is close; spread out again after
-    const tight = this.ents.some((e) => e.alive && (e.kind === 'block' || e.kind === 'laser' || e.kind === 'geyser' || e.kind === 'barrel') && e.d - this.pos > -1.5 && e.d - this.pos < 9)
-      || this.goo.length > 0 || this.warnings.some((w) => !w.done);
+    let tight = this.goo.length > 0;
+    if (!tight) for (const w of this.warnings) if (!w.done) { tight = true; break; }
+    if (!tight) {
+      for (const e of this.ents) {
+        if (e.alive && (e.kind === 'block' || e.kind === 'laser' || e.kind === 'geyser' || e.kind === 'barrel') && e.d - this.pos > -1.5 && e.d - this.pos < 9) { tight = true; break; }
+      }
+    }
     this.squeeze = clamp((this.squeeze || 0) + (tight ? dt * 4 : -dt * 1.5), 0, 1);
     const k = this.radius / this.fullRadius;
-    for (const s of this.slots.keys()) {
-      const slot = this.slots[s], tgt = this.slotTarget(s);
-      slot.x = lerp(slot.x, tgt.x * k, 1 - Math.exp(-dt * 10)); slot.z = lerp(slot.z, tgt.z * (0.6 + 0.4 * k), 1 - Math.exp(-dt * 10));
+    const follow = 1 - Math.exp(-dt * 10), kz = 0.6 + 0.4 * k;
+    for (let i = 0; i < this.slots.length; i++) {
+      const slot = this.slots[i], tgt = this.slotTarget(i);
+      slot.x = lerp(slot.x, tgt.x * k, follow); slot.z = lerp(slot.z, tgt.z * kz, follow);
     }
     if (this.result) return; // won: keep walking and celebrating, nothing can hurt the squad any more
 
@@ -255,15 +328,23 @@ export class FernRangersSession {
     this.updateBullets(dt);
     this.updateThrows(dt);
     this.checkContacts();
-    this.ents = this.ents.filter((e) => e.alive || e.fade > 0);
+    // drop the dead in place (no new array every step)
+    let j = 0;
+    for (let i = 0; i < this.ents.length; i++) { const e = this.ents[i]; if (e.alive || e.fade > 0) this.ents[j++] = e; }
+    this.ents.length = j;
     this.peak = Math.max(this.peak, this.n);
 
     if (this.n <= 0 && this.revives > 0) {
       this.revives--; this.n = 8; this.syncSlots(true); this.buffs.bubble = 3;
       this.popup('REVIVED!', 0, 2, '#86efac', 1.3); this.sound.play('upgrade'); this.goodFlash = 1;
     }
-    if (this.n <= 0) this.lose(this.loseReason || 'The aliens overran your squad');
-    else if (this.pos >= this.L.length && !(this.boss && this.boss.alive)) this.win();
+    if (this.n <= 0) this.lose(this.loseReason || 'The Commune automatons forced an emergency recall');
+    else if (this.pos >= this.goal && !(this.boss && this.boss.alive) && !this.foesAtHand()) this.win();
+  }
+  /** Aliens still fighting right in front of the squad: the level is not over until they are down or through. */
+  foesAtHand() {
+    for (const e of this.ents) if (e.kind === 'enemy' && e.alive && e.d - this.pos > -2.5 && e.d - this.pos < 12) return true;
+    return false;
   }
 
   updateGates() {
@@ -276,15 +357,35 @@ export class FernRangersSession {
     }
   }
 
+  /** Wake the waves in turn (see WAKE_Z): a wave charges once it is close and the one before it is engaged. */
+  wakeWaves() {
+    const front = this.waveFront;
+    front.fill(Infinity);
+    for (const e of this.ents) if (e.kind === 'enemy' && e.alive && e.wave >= 0) front[e.wave] = Math.min(front[e.wave], e.d - this.pos);
+    if (this.t < START_GRACE) return;
+    for (let w = 0; w < this.waveCount; w++) {
+      const z = front[w];
+      if (this.waveAwake[w] || z === Infinity) continue;
+      const ready = this.waveHold[w] ? z < HOLD_Z
+        : z < MUST_Z || (z < WAKE_Z && (w === 0 || front[w - 1] === Infinity || front[w - 1] < ENGAGE_Z));
+      if (!ready) continue;
+      this.waveAwake[w] = 1;
+      for (const e of this.ents) if (e.kind === 'enemy' && e.alive && e.wave === w) { e.active = true; e.alert = this.waveHold[w] ? 0.15 : ALERT; }
+    }
+  }
+
   updateEnemies(dt) {
+    this.wakeWaves();
     for (const e of this.ents) {
       if (e.fade > 0) e.fade -= dt * 3;
       if (e.flash > 0) e.flash -= dt;
       if (e.kind !== 'enemy' || !e.alive) continue;
       const z = e.d - this.pos;
-      if (!e.active && z < WAKE_Z) e.active = true;
+      // the boss (and anything outside a wave) wakes by distance alone
+      if (!e.active && !(e.wave >= 0) && z < WAKE_Z) e.active = true;
       if (!e.active) continue;
       if (e.frozen > 0) { e.frozen -= dt; continue; }
+      if (e.alert > 0) { e.alert -= dt; continue; } // the hop before the charge
       if (e.type === 'boss') { this.updateBoss(e, dt, z); continue; }
       const def = ENEMY[e.type];
       if (e.type === 'spitter' && z < def.range) {
@@ -305,17 +406,18 @@ export class FernRangersSession {
       g.h = 0.4 + Math.sin(clamp(1 - (g.d - this.pos) / g.dist, 0, 1) * Math.PI) * 1.6;
       if (g.d - this.pos <= 0.2 && g.alive) {
         g.alive = false;
-        this.spray(g.x, this.pos + 0.2, 0.3, '#84cc16', 14, 2.4);
+        this.spray(g.x, this.pos + 0.2, 0.3, '#c8e9e4', 14, 2.4);
         if (Math.abs(g.x - this.px) < this.radius * 0.75 + 0.3) {
           const lost = Math.max(2, Math.ceil(this.n * 0.12));
-          if (this.hurt(lost, 'Spitter goo hit your squad')) this.popup('−' + lost, 0, 1.6, '#a3e635', 1);
+          if (this.hurt(lost, 'Squirter foam forced an emergency recall')) this.popup('−' + lost, 0, 1.6, '#c8e9e4', 1);
         }
       }
     }
-    this.goo = this.goo.filter((g) => g.alive);
+    if (this.goo.length && this.goo.some((g) => !g.alive)) this.goo = this.goo.filter((g) => g.alive);
   }
 
   spit(e) {
+    e.fireAt=this.t;
     const dist = e.d - this.pos;
     this.goo.push({ x0: e.x, x: e.x, tx: this.px, d: e.d, dist, speed: 9, h: 0.4, alive: true, hp: 1 });
     this.sound.play('hit', 120);
@@ -348,6 +450,7 @@ export class FernRangersSession {
     }
   }
   bossAttack(e, B, angry) {
+    e.attackAt=this.t;
     // lanes: thirds of the road; one lane is always left safe
     const lanes = [[-ROAD, -1], [-1, 1], [1, ROAD]];
     const sq = this.px < -1 ? 0 : this.px > 1 ? 2 : 1;
@@ -372,7 +475,7 @@ export class FernRangersSession {
       w.t -= dt;
       if (w.kind === 'beam' && w.track > 0) { w.track -= dt; w.x = lerp(w.x, this.px, 1 - Math.exp(-dt * 4)); }
       if (w.t <= 0 && !w.done) {
-        w.done = true;
+        w.done = true;if(w.boss)w.boss.fireAt=this.t;
         const R = this.radius * 0.7;
         const hitBox = w.kind === 'beam' ? Math.abs(this.px - w.x) < w.r + R * 0.6 : this.px + R * 0.6 > w.x0 && this.px - R * 0.6 < w.x1;
         this.shake = Math.max(this.shake, 0.5);
@@ -386,7 +489,7 @@ export class FernRangersSession {
         }
       }
     }
-    this.warnings = this.warnings.filter((w) => w.t > -0.4);
+    if (this.warnings.length && this.warnings.some((w) => w.t <= -0.4)) this.warnings = this.warnings.filter((w) => w.t > -0.4);
     for (const e of this.ents) {
       if (!e.alive) continue;
       const z = e.d - this.pos;
@@ -401,61 +504,89 @@ export class FernRangersSession {
 
   fire(dt) {
     const w = WEAPONS[this.weapon];
-    const shooters = Math.min(this.n, 12);
-    if (shooters <= 0) return;
+    if (this.n <= 0) return;
     const dmgMul = this.buffs.double > 0 ? 2 : 1;
-    this.fireAcc += dt * w.rate * this.rateMul;
+    const rate = w.rate * this.rateMul;
+    const volleys = Math.min(rate, VOLLEY_MAX);
+    // lanes: one tracer per soldier up to LANES_MAX; `heft` = damage a tracer carries relative to one soldier's shot
+    const lanes = Math.min(this.n, LANES_MAX);
+    this.lanes = lanes;
+    this.heft = (this.n / lanes) * (rate / volleys) * dmgMul;
+    // Every lane keeps its own rhythm (a fixed phase per lane), so the tracers form streams instead of rows; the
+    // damage per second is the same as one volley of all lanes `volleys` times a second.
     let fired = false;
-    while (this.fireAcc >= 1) {
-      this.fireAcc -= 1;
-      const per = (w.dmg * this.n * dmgMul) / shooters;
-      // Spread the shooters across the squad's width: the outermost soldiers fire too.
-      for (let i = 0; i < shooters; i++) {
-        const off = shooters === 1 ? 0 : (i / (shooters - 1) - 0.5) * 2 * Math.min(this.radius * 0.85, ROAD);
-        this.bullets.push({ x: this.px + off, d: this.pos + 0.5 + this.rand() * 0.3, prev: this.pos + 0.5, dmg: per, life: this.L.range || 34 });
+    const range = this.L.range || 34;
+    const per = (w.dmg * this.n * dmgMul * (rate / volleys)) / lanes;
+    // spread the lanes across the squad's width (the outermost soldiers fire too), a little jitter so it is no grid
+    const half = Math.min(this.radius * 0.85, ROAD), gap = lanes > 1 ? (2 * half) / (lanes - 1) : 0;
+    const acc = this.laneAcc || (this.laneAcc = Float32Array.from({ length: LANES_MAX }, (_, i) => (i * 0.618034) % 1));
+    for (let i = 0; i < lanes; i++) {
+      acc[i] += dt * volleys;
+      while (acc[i] >= 1) {
+        acc[i] -= 1;
+        const off = lanes === 1 ? 0 : -half + i * gap + (this.rand() - 0.5) * gap * 0.6;
+        // a shot fired part-way through the step has already flown a little
+        this.shots.add(this.px + off, this.pos + 0.5 + (acc[i] / volleys) * BULLET_SPEED, per, range, this.heft);
+        this.laneFlash[i] = 1; this.laneX[i] = off;
+        fired = true;
       }
-      fired = true;
     }
     // the turret drop: an extra gun beside the squad that tracks the nearest enemy
     if (this.buffs.turret > 0) {
-      const foe = this.ents.find((e) => e.kind === 'enemy' && e.alive && e.active && e.d - this.pos > 0 && e.d - this.pos < 26);
+      let foe = null;
+      for (const e of this.ents) if (e.kind === 'enemy' && e.alive && e.active && e.d - this.pos > 0 && e.d - this.pos < 26) { foe = e; break; }
       this.turretX = lerp(this.turretX, foe ? foe.x : this.px, 1 - Math.exp(-dt * 6));
       this.turretAcc += dt * 7;
-      while (this.turretAcc >= 1) { this.turretAcc -= 1; this.bullets.push({ x: this.turretX, d: this.pos + 1, prev: this.pos + 1, dmg: w.dmg * 3 * dmgMul, life: 34, turret: true }); }
+      while (this.turretAcc >= 1) { this.turretAcc -= 1; this.shots.add(this.turretX, this.pos + 1, w.dmg * 3 * dmgMul, 34, 1.4, 1); }
     }
     if (fired) { this.muzzle = 1; this.sound.play('shot', 75); }
   }
 
   updateBullets(dt) {
     const step = BULLET_SPEED * dt;
-    const targets = this.ents.filter((e) => e.alive && (e.kind === 'enemy' ? e.active : e.kind === 'gate' || e.kind === 'barrel' || e.kind === 'crate' || e.kind === 'cage'));
-    for (const b of this.bullets) {
-      b.prev = b.d; b.d += step; b.life -= step;
+    const S = this.shots, grid = this.grid;
+    for (const c of grid) c.length = 0;
+    // Targets go into every grid cell their hit width touches. Waiting aliens can be shot too. Gates are not
+    // targets: bullets fly through them and charge the ones that can be shot up on the way.
+    const gates = this.gateList || (this.gateList = []);
+    gates.length = 0;
+    for (const e of this.ents) {
+      if (!e.alive) continue;
+      if (e.kind === 'gate') { if (e.op === 'add' || e.op === 'rate') gates.push(e); continue; }
+      if (e.kind !== 'enemy' && e.kind !== 'barrel' && e.kind !== 'crate' && e.kind !== 'cage') continue;
+      const z = e.d - this.pos;
+      if (z > 40 || z < -3) continue;
+      const r = (e.kind === 'enemy' ? e.r : 0.5) + 0.06;
+      for (let c = cellOf(e.x - r), c1 = cellOf(e.x + r); c <= c1; c++) grid[c].push(e);
+    }
+    const hb = this.hitCarrier;
+    for (let i = S.n - 1; i >= 0; i--) {
+      const prev = S.d[i], x = S.x[i];
+      const d = prev + step;
+      S.prev[i] = prev; S.d[i] = d; S.life[i] -= step;
+      hb.dmg = S.dmg[i]; hb.heft = S.heft[i];
+      for (const g of gates) if (g.alive && x >= g.x0 && x <= g.x1 && g.d >= prev && g.d <= d) this.hit(g, hb);
       let best = null, bestD = Infinity;
-      for (const e of targets) {
+      for (const e of grid[cellOf(x)]) {
         if (!e.alive) continue;
-        if (e.kind === 'gate') {
-          if (b.x < e.x0 || b.x > e.x1) continue;
-          if (e.d < b.prev || e.d > b.d) continue;
-        } else {
-          const r = e.kind === 'enemy' ? e.r : 0.5;
-          if (Math.abs(b.x - e.x) > r + 0.06) continue;
-          if (e.d + r * 0.6 < b.prev || e.d - r * 0.6 > b.d) continue;
-        }
+        const r = e.kind === 'enemy' ? e.r : 0.5;
+        if (Math.abs(x - e.x) > r + 0.06) continue;
+        if (e.d + r * 0.6 < prev || e.d - r * 0.6 > d) continue;
         if (e.d < bestD) { bestD = e.d; best = e; }
       }
       // goo blobs can be shot out of the air
       for (const g of this.goo) {
-        if (!g.alive || Math.abs(b.x - g.x) > 0.35 || g.d < b.prev - 0.3 || g.d > b.d + 0.3 || g.d >= bestD) continue;
+        if (!g.alive || Math.abs(x - g.x) > 0.35 || g.d < prev - 0.3 || g.d > d + 0.3 || g.d >= bestD) continue;
         best = g; bestD = g.d;
       }
-      if (best && best.speed && best.dist) { best.alive = false; this.spray(best.x, best.d, best.h, '#a3e635', 8, 2); this.score += 5; b.life = 0; continue; }
-      if (best) { this.hit(best, b); b.life = 0; }
+      if (best && best.speed && best.dist) { best.alive = false; this.spray(best.x, best.d, best.h, '#a3e635', 8, 2); this.score += 5; S.remove(i); continue; }
+      if (best) { this.hit(best, hb); S.remove(i); continue; }
+      if (S.life[i] <= 0) S.remove(i);
     }
-    this.bullets = this.bullets.filter((b) => b.life > 0);
   }
 
   hit(e, b) {
+    if (!e.alive) return;
     if (e.kind === 'gate') {
       e.pulse = 1;
       if (e.op !== 'add' && e.op !== 'rate') return;
@@ -477,30 +608,39 @@ export class FernRangersSession {
         // the shield plate soaks up bullets first
         e.shield -= dmg; e.flash = 0.06;
         if (e.shield <= 0) { e.shield = 0; this.spray(e.x, e.d, 0.8, '#cbd5e1', 14, 2.6); this.popupWorld('SHIELD DOWN', e.x, e.d, 1.6, '#e2e8f0', 0.7); this.sound.play('boom', 200); }
-        else this.spray(e.x, e.d, 0.7, '#fde68a', 1, 2);
+        else if (this.sparkBudget > 0) { this.sparkBudget--; this.spray(e.x, e.d, 0.7, '#fde68a', 1, 2); }
         return;
       }
     }
-    e.hp -= dmg; e.flash = 0.08;
+    e.hp -= dmg; e.flash = 0.08; e.hitAt=this.t;
     if (e.kind === 'enemy') {
       if (e.type !== 'boss') e.d += 0.06 * dmg / (e.type === 'blorb' ? 4 : 1);
-      this.spray(e.x, e.d, ENEMY[e.type].h * 0.6, ENEMY[e.type].metal ? '#fbbf24' : '#c084fc', 2);
+      // hit sparks: heavier tracers throw more and faster sparks; a budget per step keeps a hail of hits affordable
+      if (this.sparkBudget > 0) {
+        const k = b.heft > 3 ? 3 : 2;
+        this.sparkBudget -= k;
+        this.spray(e.x, e.d, ENEMY[e.type].h * 0.6, '#fbbf24', k, b.heft > 3 ? 2.4 : 1.6, b.heft > 3 ? 1.4 : 1);
+      }
       this.sound.play('hit', 60);
     }
     if (e.hp > 0) return;
-    e.alive = false; e.fade = 1;
+    e.alive = false; e.fade = 1; e.disabledAt = this.t;
+    this.visual(e.type === 'boss' ? 'boss-escape' : e.type === 'blorb' ? 'hulk-disassembly' : e.kind === 'cage' ? 'cage-rescue' : e.kind === 'crate' ? 'case-open' : 'machine-disabled', { entity: e, x: e.x, d: e.d });
     if (e.kind === 'enemy') {
       const def = ENEMY[e.type];
       this.kills++; this.score += def.score;
-      this.spray(e.x, e.d, def.h * 0.5, def.metal ? '#94a3b8' : '#a855f7', e.type === 'boss' ? 80 : e.type === 'blorb' ? 26 : 10, 3);
+      if(e.type!=='blorb'||!e.split)this.spray(e.x, e.d, def.h * 0.5, '#a8a78a', e.type === 'boss' ? 80 : e.type === 'blorb' ? 26 : 10, 3);
       this.sound.play('kill', 50);
       if (e.type === 'boss') {
+        this.settlementSeconds = 4.5;
         this.shake = 1.2; this.boom(e.x, e.d, 4); this.popupWorld('BOSS DOWN!', e.x, e.d, 3, '#fde047', 1.3);
         this.warnings.length = 0; this.goo.length = 0;
         for (const o of this.ents) if (o.kind === 'enemy' && o.alive) { o.alive = false; o.fade = 1; }
+        // the level ends right here (no empty walk to a finish line further on)
+        this.goal = Math.min(this.goal, this.pos + 3);
       } else if (e.type === 'blorb') {
         this.popupWorld('+' + def.score, e.x, e.d, def.h + 0.4, '#fde047', 0.75);
-        if (e.split) for (const dx of [-0.45, 0.45]) this.ents.push(makeEnemy('zorbling', e.d, clamp(e.x + dx, -ROAD + 0.3, ROAD - 0.3), this.L, { active: true }, this.rand));
+        if (e.split) for (const dx of [-0.45, 0.45]) { const child=makeEnemy('zorbling', e.d, clamp(e.x + dx, -ROAD + 0.3, ROAD - 0.3), this.L, { active: true }, this.rand); child.spawnHull={x:e.x,d:e.d,time:this.t,side:Math.sign(dx)};this.ents.push(child); }
       }
     } else if (e.kind === 'barrel') {
       this.score += 20;
@@ -518,7 +658,8 @@ export class FernRangersSession {
       this.score += 40;
       this.n = Math.min(500, this.n + e.v); this.countPop = 1; this.goodFlash = 1;
       this.spray(e.x, e.d, 0.6, '#86efac', 16, 2.4);
-      this.popupWorld('+' + e.v + ' RANGERS', e.x, e.d, 1.8, '#86efac', 0.9);
+      this.visual('reinforcement',{x:e.x,d:e.d,count:e.v});
+      this.popupWorld('MINERS SAFE · +' + e.v + ' REINFORCEMENTS', e.x, e.d, 1.8, '#86efac', 0.9);
       this.sound.play('good');
       this.syncSlots();
     }
@@ -556,7 +697,7 @@ export class FernRangersSession {
       g.t += dt;
       if (g.t >= g.dur && !g.done) { g.done = true; this.explode(g.tx, g.td, 2.8, 55); }
     }
-    this.throws = this.throws.filter((g) => !g.done);
+    if (this.throws.length && this.throws.some((g) => g.done)) this.throws = this.throws.filter((g) => !g.done);
   }
 
   /** Lose soldiers unless the shield bubble is up; returns whether it hurt. */
@@ -585,7 +726,7 @@ export class FernRangersSession {
         if (overlap > 0) {
           e.hit = true;
           const lost = Math.max(2, Math.ceil(this.n * 0.3));
-          if (this.hurt(lost, 'Your squad ran into an alien barricade')) this.popup('−' + lost, 0, 1.6, '#f87171', 1);
+          if (this.hurt(lost, 'Your squad reached a Commune barricade')) this.popup('−' + lost, 0, 1.6, '#f87171', 1);
         }
       } else if (e.kind === 'laser') {
         if (e.hit || z > 0.2 || z < -0.4) continue;
@@ -630,8 +771,8 @@ export class FernRangersSession {
         if (Math.abs(e.x - this.px) > R + e.r - 0.15) continue;
         e.alive = false; e.fade = 1;
         const dmg = Math.max(1, Math.ceil((e.hp + e.shield * 0.5) * ENEMY[e.type].dmg));
-        this.spray(e.x, e.d, 0.5, '#a855f7', 8, 2);
-        this.hurt(Math.min(dmg, this.n), 'The aliens overran your squad');
+        this.spray(e.x, e.d, 0.5, '#999274', 8, 2);
+        this.hurt(Math.min(dmg, this.n), 'The Commune automatons forced an emergency recall');
       }
     }
   }
@@ -644,7 +785,7 @@ export class FernRangersSession {
     if (e.type === 'grenade') this.grenades += e.v || 1;
     else if (e.type === 'freeze') { this.buffs.freeze = 3.5; for (const o of this.ents) if (o.kind === 'enemy' && o.alive && o.d - this.pos < 45) o.frozen = 3.5; for (const g of this.goo) g.alive = false; }
     else if (e.type === 'bubble') this.buffs.bubble = 6;
-    else if (e.type === 'turret') { this.buffs.turret = 9; this.turretX = this.px; }
+    else if (e.type === 'turret') { this.buffs.turret = 9; this.turretX = this.px;this.turretAt=this.t; }
     else if (e.type === 'double') this.buffs.double = 7;
     else if (e.type === 'revive') this.revives++;
     this.popup(P.name + '!', 0, 2.2, P.color, 1);
@@ -661,15 +802,17 @@ export class FernRangersSession {
     }
     this.n = Math.max(0, Math.min(500, Math.round(applyGate(this.n, gate))));
     const diff = this.n - before;
+    if (diff) this.visual(diff > 0 ? 'reinforcement' : 'recall', { x: this.px, d: this.pos, count: Math.abs(diff) });
     this.countPop = 1;
     if (diff >= 0) { this.goodFlash = 1; this.sound.play('good'); this.popup(gateText(gate), 0, 1.8, '#86efac', 1.3); }
-    else { this.flash = 0.8; this.shake = Math.max(this.shake, 0.4); this.sound.play('bad'); this.popup(gateText(gate), 0, 1.8, '#f87171', 1.3); this.burstSquad(-diff); }
-    if (this.n <= 0) this.loseReason = 'A minus gate wiped out your squad';
+    else { this.flash = 0.8; this.shake = Math.max(this.shake, 0.4); this.sound.play('bad'); this.popup('RECALL '+Math.abs(diff), 0, 1.8, '#f87171', 1.3); this.burstSquad(-diff); }
+    if (this.n <= 0) this.loseReason = 'The jammer recalled the entire squad';
     this.syncSlots();
   }
 
   loseSoldiers(k, reason) {
     if (k <= 0) return;
+    this.visual('recall', { x: this.px, d: this.pos, count: k });
     this.burstSquad(k);
     this.n = Math.max(0, this.n - k);
     this.flash = Math.max(this.flash, 0.7); this.shake = Math.max(this.shake, 0.5); this.countPop = 1;
@@ -680,19 +823,24 @@ export class FernRangersSession {
   burstSquad(k) {
     for (let i = 0; i < Math.min(k, 20); i++) {
       const s = this.slots[this.slots.length - 1 - i] || { x: 0, z: 0 };
-      this.spray(this.px + s.x, this.pos + s.z, 0.5, '#4ade80', 6, 2.5);
+      this.spray(this.px + s.x, this.pos + s.z, 0.5, '#85dfff', 6, 2.5);
     }
   }
 
+  resultReady() { return !this.boss || this.boss.alive || this.boss.disabledAt == null || this.t-this.boss.disabledAt>=4.3; }
+
   win() {
+    if(this.result)return;
     const [two, three] = this.L.stars;
     const stars = this.n >= three ? 3 : this.n >= two ? 2 : 1;
     this.score += this.n * 20;
     this.result = { won: true, stars, score: this.score, soldiers: this.n, reason: `${this.n} Ranger${this.n === 1 ? '' : 's'} made it home (${two} for ★★, ${three} for ★★★).`, stats: { kills: this.kills, rangers: this.n } };
     this.popup('VICTORY!', 0, 2.4, '#fde047', 1.4);
+    const colors = ['#f43f5e', '#facc15', '#22c55e', '#3b82f6', '#a855f7'];
     for (let i = 0; i < 60; i++) {
-      const colors = ['#f43f5e', '#facc15', '#22c55e', '#3b82f6', '#a855f7'];
-      this.parts.push({ x: this.px + (Math.random() - 0.5) * 6, d: this.pos + 2 + Math.random() * 6, h: 3 + Math.random() * 2, vx: (Math.random() - 0.5) * 2, vd: (Math.random() - 0.5) * 2, vh: Math.random() * 3, life: 2.5, max: 2.5, color: colors[i % 5], size: 0.12, grav: 3 });
+      const p = this.part();
+      if (!p) break;
+      Object.assign(p, { x: this.px + (Math.random() - 0.5) * 6, d: this.pos + 2 + Math.random() * 6, h: 3 + Math.random() * 2, vx: (Math.random() - 0.5) * 2, vd: (Math.random() - 0.5) * 2, vh: Math.random() * 3, life: 2.5, max: 2.5, color: colors[i % 5], size: 0.12, grav: 3 });
     }
   }
   lose(reason) {
@@ -701,32 +849,54 @@ export class FernRangersSession {
   }
 
   // ── effects ──
-  spray(x, d, h, color, count, speed = 1.6) {
+  /** A particle from the pool (dead ones are reused, so a hail of hits makes no garbage). */
+  part() {
+    if (this.parts.length >= MAX_PARTS) return null;
+    const p = this.freeParts.pop() || { x: 0, d: 0, h: 0, vx: 0, vd: 0, vh: 0, life: 0, max: 1, color: '#fff', size: 0.1, grav: 9, ring: false, radius: 0 };
+    p.ring = false;
+    this.parts.push(p);
+    return p;
+  }
+  spray(x, d, h, color, count, speed = 1.6, size = 1) {
     if (this.preview) return;
-    for (let i = 0; i < count && this.parts.length < 700; i++) {
-      this.parts.push({ x, d, h, vx: (Math.random() - 0.5) * speed * 2, vd: (Math.random() - 0.3) * speed * 2, vh: Math.random() * speed * 2, life: 0.5 + Math.random() * 0.4, max: 0.9, color, size: 0.07 + Math.random() * 0.06, grav: 9 });
+    for (let i = 0; i < count; i++) {
+      const p = this.part();
+      if (!p) return;
+      p.x = x; p.d = d; p.h = h; p.vx = (Math.random() - 0.5) * speed * 2; p.vd = (Math.random() - 0.3) * speed * 2; p.vh = Math.random() * speed * 2;
+      p.life = 0.5 + Math.random() * 0.4; p.max = 0.9; p.color = color; p.size = (0.07 + Math.random() * 0.06) * size; p.grav = 9;
     }
   }
   boom(x, d, radius) {
     if (this.preview) return;
-    this.parts.push({ ring: true, x, d, h: 0.1, life: 0.45, max: 0.45, radius });
-    for (let i = 0; i < 40 && this.parts.length < 760; i++) {
+    const ring = this.part();
+    if (ring) { ring.ring = true; ring.x = x; ring.d = d; ring.h = 0.1; ring.life = 0.45; ring.max = 0.45; ring.radius = radius; }
+    for (let i = 0; i < 40; i++) {
+      const p = this.part();
+      if (!p) return;
       const a = Math.random() * 6.28, v = 2 + Math.random() * 5;
-      this.parts.push({ x, d, h: 0.4, vx: Math.cos(a) * v, vd: Math.sin(a) * v, vh: 2 + Math.random() * 5, life: 0.6 + Math.random() * 0.5, max: 1.1, color: i % 3 ? '#f97316' : '#facc15', size: 0.12 + Math.random() * 0.12, grav: 8 });
+      p.x = x; p.d = d; p.h = 0.4; p.vx = Math.cos(a) * v; p.vd = Math.sin(a) * v; p.vh = 2 + Math.random() * 5;
+      p.life = 0.6 + Math.random() * 0.5; p.max = 1.1; p.color = i % 3 ? '#f97316' : '#facc15'; p.size = 0.12 + Math.random() * 0.12; p.grav = 8;
     }
   }
   popup(text, x, h, color, size) { this.popups.push({ text, x, z: 0.6, h, color, size, life: 1.1, max: 1.1, squad: true }); }
   popupWorld(text, x, d, h, color, size) { this.popups.push({ text, x, d, h, color, size, life: 1.1, max: 1.1 }); }
   updateParticles(dt) {
-    for (const p of this.parts) {
+    const parts = this.parts;
+    let j = 0;
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
       p.life -= dt;
+      if (p.life <= 0) { this.freeParts.push(p); continue; }
+      parts[j++] = p;
       if (p.ring) continue;
       p.x += p.vx * dt; p.d += p.vd * dt; p.h += p.vh * dt; p.vh -= p.grav * dt;
       if (p.h < 0) { p.h = 0; p.vh *= -0.3; p.vx *= 0.6; p.vd *= 0.6; }
     }
-    this.parts = this.parts.filter((p) => p.life > 0);
-    for (const p of this.popups) { p.life -= dt; p.h += dt * 0.9; }
-    this.popups = this.popups.filter((p) => p.life > 0);
+    parts.length = j;
+    if (this.popups.length) {
+      for (const p of this.popups) { p.life -= dt; p.h += dt * 0.9; }
+      if (this.popups.some((p) => p.life <= 0)) this.popups = this.popups.filter((p) => p.life > 0);
+    }
   }
 
   // ── drawing ──
@@ -799,7 +969,7 @@ export class FernRangersSession {
       }
     }
     for (const wv of this.warnings) this.drawWarning2d(g, wv, quad);
-    const fz = this.L.length - this.pos;
+    const fz = this.goal - this.pos;
     if (fz > near && fz < VIEW_Z) {
       const cells = 12;
       for (let row = 0; row < 2; row++) for (let i = 0; i < cells; i++) {
@@ -837,11 +1007,12 @@ export class FernRangersSession {
 
     const wcol = WEAPONS[this.weapon].color;
     g.strokeStyle = wcol; g.lineCap = 'round';
-    for (const bl of this.bullets) {
-      const z = bl.d - this.pos;
+    const S = this.shots;
+    for (let i = 0; i < S.n; i++) {
+      const z = S.d[i] - this.pos;
       if (z > VIEW_Z) continue;
-      const p0 = this.proj(bl.x, z, 0.55), p1 = this.proj(bl.x, z + 1.3, 0.55);
-      g.lineWidth = Math.max(2, p0.s * 0.09);
+      const p0 = this.proj(S.x[i], z, 0.55), p1 = this.proj(S.x[i], z + 1.3, 0.55);
+      g.lineWidth = Math.max(2, p0.s * 0.09 * Math.min(2.2, Math.sqrt(S.heft[i])));
       g.beginPath(); g.moveTo(p0.x, p0.y); g.lineTo(p1.x, p1.y); g.stroke();
     }
     g.lineCap = 'butt';
@@ -980,19 +1151,22 @@ export class FernRangersSession {
 
   drawSoldier(g, x, z, i) {
     const p = this.proj(x, z), s = p.s;
-    const u = s * 0.24;
+    const giant=i>0&&i%17===0,duck=i%3===1,half=i>0&&i%3===0;
+    const u = s * 0.24 * (giant?2.1:duck?.76:half?.62:1);
     const bob = Math.sin(this.t * 14 + i) * u * 0.08;
     this.drawShadow(g, x, z, 0.24);
     const y = p.y + bob;
-    g.fillStyle = '#41552a';
+    g.fillStyle = '#172a48';
     const step = Math.sin(this.t * 14 + i) * u * 0.25;
     g.fillRect(p.x - u * 0.45, y - u * 1.2 + step, u * 0.35, u * 1.2 - step);
     g.fillRect(p.x + u * 0.1, y - u * 1.2 - step, u * 0.35, u * 1.2 + step);
-    g.fillStyle = '#5d7a35'; roundRect(g, p.x - u * 0.6, y - u * 2.6, u * 1.2, u * 1.6, u * 0.35); g.fill();
+    g.fillStyle = '#172a48'; roundRect(g, p.x - u * 0.6, y - u * 2.6, u * 1.2, u * 1.6, u * 0.35); g.fill();
     g.fillStyle = '#f1f4f6'; g.fillRect(p.x + u * 0.25, y - u * 3.5, u * 0.28, u * 1.6);
     if (this.muzzle > 0.4 && i < 12) { g.fillStyle = WEAPONS[this.weapon].color; g.beginPath(); g.arc(p.x + u * 0.39, y - u * 3.7, u * 0.38 * this.muzzle, 0, 6.28); g.fill(); }
-    g.fillStyle = ['#f6efe7', '#e8752c', '#d9b38a', '#9a9aa0'][i & 3]; g.beginPath(); g.arc(p.x, y - u * 3, u * 0.55, 0, 6.28); g.fill();
-    g.fillStyle = '#5d7a35'; g.beginPath(); g.arc(p.x, y - u * 3.15, u * 0.6, Math.PI, 0); g.fill();
+    g.fillStyle = duck?'#fffefa':giant?'#bd947a':half?'#d3a173':'#f6cfa4'; g.beginPath(); g.arc(p.x, y - u * 3, u * 0.55, 0, 6.28); g.fill();
+    g.fillStyle = '#172a48'; g.beginPath(); g.arc(p.x, y - u * 3.15, u * 0.6, Math.PI, 0); g.fill();
+    g.fillStyle='#d6b454';g.fillRect(p.x-u*.5,y-u*2.5,u,.16*u);if(duck){g.fillStyle='#f2b544';g.fillRect(p.x-u*.4,y-u*2.9,u*.8,u*.2);}
+    g.fillStyle='#c6434c';g.fillRect(p.x-u*.08,y-u*3.9,u*.16,u*.5);
   }
 
   drawEnt(g, e, z) {
@@ -1033,15 +1207,15 @@ export class FernRangersSession {
     const big = e.type === 'blorb' ? 1.8 : e.type === 'boss' ? 4 : 1;
     const u = s * 0.24 * big;
     this.drawShadow(g, e.x, z, e.r);
-    const metal = ENEMY[e.type].metal;
-    const body = e.flash > 0 ? '#fff' : e.frozen > 0 ? '#bae6fd' : metal ? '#e07a2c' : '#8f4fe6';
+    const metal = true;
+    const body = e.flash > 0 ? '#fff' : e.frozen > 0 ? '#bae6fd' : '#74734a';
     g.fillStyle = body;
     if (metal) { roundRect(g, p.x - u * 0.7, p.y - u * 3, u * 1.4, u * 2.6, u * 0.3); g.fill(); }
     else { g.beginPath(); g.ellipse(p.x, p.y - u * 1.4, u * 1.1, u * 1.4, 0, 0, 6.28); g.fill(); }
     g.fillStyle = '#fff'; g.beginPath(); g.arc(p.x, p.y - u * (metal ? 2.3 : 1.7), u * 0.45, 0, 6.28); g.fill();
     g.fillStyle = metal ? '#ffd23a' : '#4c1d95'; g.beginPath(); g.arc(p.x, p.y - u * (metal ? 2.3 : 1.7), u * 0.22, 0, 6.28); g.fill();
     if (e.shield > 0) { g.fillStyle = '#e07a2c'; g.strokeStyle = '#8f959e'; g.lineWidth = Math.max(2, u * 0.15); roundRect(g, p.x - u * 1.1, p.y - u * 2.4, u * 2.2, u * 2.2, u * 0.2); g.fill(); g.stroke(); }
-    if (e.type === 'spitter') { g.fillStyle = '#84cc16'; g.fillRect(p.x + u * 0.5, p.y - u * 1.3, u * 0.9, u * 0.35); }
+    if (e.type === 'spitter') { g.fillStyle = '#c8e9e4'; g.fillRect(p.x + u * 0.5, p.y - u * 1.3, u * 0.9, u * 0.35); }
   }
 
   drawBarrel(g, e, z) {
@@ -1104,11 +1278,12 @@ export class FernRangersSession {
 export const fernRangers = {
   id: 'fern-rangers',
   title: 'Fern Rangers',
-  tagline: 'Hold the road. Grow the squad. Bubble the invasion.',
+  tagline: 'Lead the Legion. Protect the mines. Bring everyone home.',
   howTo: 'Drag (touch), move the mouse or hold ← → / A D to steer. Shoot red gates to raise their number. Space throws a grenade. Esc pauses, R restarts.',
-  levels: LEVELS,
-  hero: 'RANGER_BUNNY',
-  art: new URL('../../games-assets/k-fern-rangers.webp', import.meta.url).href,
-  create: (i, env) => new FernRangersSession(i, env),
+  levels: [...LEVELS, ...STURMBASTION_LEVELS],
+  createProgress: createRangersProgress,
+  hero: 'CAPTAIN_HAZEL',
+  art: new URL('../../games-assets/covers/cover-fern-rangers.webp', import.meta.url).href,
+  create: (i, env) => i < LEVELS.length ? new FernRangersSession(i, env) : new SturmbastionSession(i - LEVELS.length, env),
   view3d: () => import('./fern-rangers-3d.js'),
 };

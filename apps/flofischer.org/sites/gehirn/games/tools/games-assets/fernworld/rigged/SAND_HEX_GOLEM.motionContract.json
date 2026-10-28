@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "asset_ids": [
+    "MOSS_HEX_GOLEM",
+    "SAND_HEX_GOLEM"
+  ],
+  "role": "Soulless tower puzzle constructs, stone and violet hex light",
+  "coordinates": {
+    "native": "+Z up, -Y forward",
+    "glb": "+Y up, +Z forward",
+    "units": "metres",
+    "ground": "native Z=0, GLB Y=0"
+  },
+  "skin": {
+    "bones": 18,
+    "mesh_objects": 1,
+    "opaque_material_classes": 2,
+    "maximum_weights": 1,
+    "rigid_stone_plates": true
+  },
+  "clips": {
+    "Idle": {
+      "duration_s": 2,
+      "loop": true,
+      "feet": "Both soles planted"
+    },
+    "Walk": {
+      "duration_s": 2,
+      "loop": true,
+      "in_place": true,
+      "controller_speed_m_s": 0.18,
+      "controller_direction_native": [
+        0,
+        -1,
+        0
+      ],
+      "controller_direction_glb": [
+        0,
+        0,
+        1
+      ],
+      "controller_travel_per_cycle_m": 0.36,
+      "foot_step_length_m": 0.18,
+      "maximum_swing_clearance_m": 0.085,
+      "left_stance_phase": "[0,0.5)",
+      "right_stance_phase": "[0.5,1)",
+      "stance_contract": "Translate root at a constant 0.18 metres/second in forward direction. Same actual weighted skinned sole points must remain fixed on world ground in every stance window. Animation root has vertical settling only. Speed scaling must scale controller translation and clip playback together."
+    },
+    "Attack_Slam": {
+      "duration_s": 2,
+      "loop": false,
+      "anticipation_phase": 0.27,
+      "raised_phase": 0.45,
+      "impact_phase": [
+        0.62,
+        0.73
+      ],
+      "recovery_phase": 0.88,
+      "feet": "Both soles planted through rigid two-segment leg articulation; no scale/stretch",
+      "impact_clearance": "Stone fist corners stop a few centimetres above floor; GroundImpact socket is the exact effect/collision plane. No floor penetration."
+    },
+    "Hit_Recover": {
+      "duration_s": 1,
+      "loop": false
+    },
+    "Stagger": {
+      "duration_s": 1.5,
+      "loop": false
+    },
+    "Disabled": {
+      "duration_s": 2,
+      "loop": false,
+      "end_behavior": "Hold final frame; controlled coherent stone settling, no living death pose"
+    }
+  },
+  "sockets": {
+    "Socket_Fist.L": "Rigid child of Hand.L",
+    "Socket_Fist.R": "Rigid child of Hand.R",
+    "Socket_ChestCore": "Rigid child of Core",
+    "Socket_Weakpoint": {
+      "bone": "Core",
+      "radius_m": 0.21
+    },
+    "Socket_GroundImpact": "Exact floor plane, 0.65m forward of root",
+    "Socket_RootShadow": "Root shadow anchor, 6mm above ground"
+  },
+  "deactivation": "Controller may set Core bone scale to zero to collapse/hide the separate core vertex group inside the breastplate, and switch off hex-material emission. Do not apply corpse/ragdoll behavior.",
+  "fracture_packet": {
+    "clusters_per_golem": 6,
+    "names": [
+      "Fracture_Torso",
+      "Fracture_Head",
+      "Fracture_Arm.L",
+      "Fracture_Arm.R",
+      "Fracture_Leg.L",
+      "Fracture_Leg.R"
+    ],
+    "instancing": "Each part package contains six actual glTF mesh nodes, with local vertices around actual node pivots and preserved assembly translations. Instantiate packet at construct world transform; retain all node transforms for initial assembled pose. Pool temporarily, then recycle together.",
+    "sample_pose_recipe": "At a destruction transition taken from Idle phase 0, replace the skin with the rest-assembled six-node packet at the same construct world transform. Give head +0.6m/s up; arms +/-0.5m/s lateral; legs +/-0.2m/s lateral. Torso settles first. For a break triggered from an articulated pose, the controller must choose an explicit transition or freeze the evaluated skin into the same six groups; the supplied rigid packet does not claim exact pose matching.",
+    "pool_budget": "At most six temporary clusters for one destroyed golem. No asset-count multiplication or persistent debris population.",
+    "assembly_pose": "Bind/Idle phase 0. The reusable six-cluster packet is not a pose-adaptive snapshot of Disabled or Slam."
+  },
+  "controller_owned": [
+    "lava/melting visuals",
+    "water short-out timing",
+    "crush timing",
+    "damage and weakpoint radius behavior",
+    "ground impact effects",
+    "temporary debris physics/pooling",
+    "material emission switching"
+  ],
+  "review_status": "Artist QA is recorded separately; independent Root browser review and final Florian approval are not implied. No in-game performance assertion."
+}

@@ -1,0 +1,65 @@
+{
+  "schema": "fernworld.rigid-motion-layering/1",
+  "base_contract": "Motion.json",
+  "coordinates": "glTF +Y up, +Z forward, local absolute TRS, quaternion xyzw",
+  "initialization": "On spawn or LOD bind, initialize every asset node from Motion.json rest. The world controller owns the asset root placement. For standalone diagnostics, restore all restTRS before a clip. For simultaneous layers, build a working local pose from rest each frame and apply only the properties below; then preserve the controller root placement. Static sockets keep authored local restTRS and inherit their parents.",
+  "clip_channel_masks": {
+    "Idle": {},
+    "Travel": {
+      "WheelsFront": [
+        "rotation"
+      ],
+      "WheelsRear": [
+        "rotation"
+      ]
+    },
+    "AimYaw": {
+      "TurretYaw": [
+        "rotation"
+      ]
+    },
+    "Fire_Recoil": {
+      "BarrelRecoil": [
+        "translation",
+        "scale"
+      ]
+    },
+    "Hit": {
+      "Body": [
+        "rotation"
+      ],
+      "TurretYaw": [
+        "rotation"
+      ]
+    },
+    "Toy_Disabled": {
+      "TurretYaw": [
+        "translation",
+        "rotation"
+      ],
+      "BarrelRecoil": [
+        "translation",
+        "rotation",
+        "scale"
+      ]
+    }
+  },
+  "layer_order": [
+    "Travel rotation (phase from controller speed/radius)",
+    "AimYaw rotation (absolute local yaw)",
+    "Rocket_Charge OR Fire_Recoil on BarrelRecoil, never summed",
+    "Hit local rotation delta after underlying yaw",
+    "Toy_Disabled overrides and cancels the above"
+  ],
+  "rules": [
+    "All translation/scale recipe values are absolute local values. Never add absolute translations together. Interpolate positions/scales linearly; rotations use shortest-path normalized SLERP.",
+    "Idle is a resting diagnostic pose and owns no simultaneous gameplay properties; it must not reset Travel or AimYaw.",
+    "Travel modifies only the two axle rotations. Accumulate phase continuously using speed/radius; stopping holds the phase. Do not apply its diagnostic TurretYaw or BarrelRecoil rest keys.",
+    "AimYaw owns only TurretYaw.rotation. Fire_Recoil owns BarrelRecoil.translation and resets scale to rest; it must preserve the current aim, body and wheel pose.",
+    "Hit rotations compose as local deltas: q_delta=inverse(q_rest)*q_hit; q_final=q_underlying*q_delta. Fade this delta to identity at Hit end, revealing the underlying AimYaw. Hit does not reset wheel or recoil properties.",
+    "Ace Rocket_Charge owns BarrelRecoil.translation/scale for 0.45s. At release cancel charge and start Fire_Recoil; reset BarrelRecoil.scale to rest immediately. Never leave the inflated charge scale after release/cancel.",
+    "Toy_Disabled cancels Travel/AimYaw/Fire_Recoil/Hit/Rocket_Charge. Capture and hold current axle quaternions (motor stopped), reset recoil TRS to rest, and blend the current turret TRS into the disabled recipe over 0.08s. The full diagnostic recipe has canonical stationary wheels; the live disabled mask does not overwrite the held wheel phase.",
+    "At normal event end reset only the owned properties to their underlying layer values: recoil translation/scale to rest, Hit delta to identity, AimYaw remains controller-owned. On re-enable blend turret/recoil back to underlying rest/aim; resume wheel phase from the held value.",
+    "Use a 0.08s normalized SLERP/linear transition from the captured current local pose when entering or replacing an event recipe; do not globally reset the asset at an event boundary."
+  ]
+}

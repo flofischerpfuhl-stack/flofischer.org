@@ -1,0 +1,155 @@
+{
+  "coordinates": "Y-up +Z-forward; socket local identity rotation; +Z forward",
+  "sockets": {
+    "MuzzleSocket_1": {
+      "parent": "BarrelRecoil",
+      "translation": [
+        -0.09200000017881393,
+        -0.025000005960464478,
+        0.22999998927116394
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "MuzzleSocket_2": {
+      "parent": "BarrelRecoil",
+      "translation": [
+        0.09200000017881393,
+        -0.025000005960464478,
+        0.22999998927116394
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "MuzzleSocket_3": {
+      "parent": "BarrelRecoil",
+      "translation": [
+        0.0,
+        0.07500001788139343,
+        0.22999998927116394
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "TurretPivot": {
+      "parent": "TurretYaw",
+      "translation": [
+        0.0,
+        0.0,
+        -0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "GroundShadow": {
+      "parent": "TOY_SWARMER",
+      "translation": [
+        0.0,
+        0.0010000000474974513,
+        -0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "FX_Exhaust": {
+      "parent": "Body",
+      "translation": [
+        0.0,
+        0.2199999988079071,
+        -0.37439998984336853
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "FX_Hit": {
+      "parent": "Body",
+      "translation": [
+        0.0,
+        0.2800000011920929,
+        -0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "TurretAxis": [
+    0,
+    1,
+    0
+  ],
+  "emissionDirections": {
+    "FX_Exhaust": [
+      0,
+      0,
+      -1
+    ],
+    "FX_Hit": [
+      0,
+      1,
+      0
+    ]
+  }
+}

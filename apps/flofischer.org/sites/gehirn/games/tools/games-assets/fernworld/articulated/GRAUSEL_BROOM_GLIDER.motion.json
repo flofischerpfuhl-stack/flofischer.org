@@ -1,0 +1,13 @@
+{
+  "mode": "common-parent-flight",
+  "independentAnimatedNodes": [],
+  "character": "GRANNY_GRAUSEL",
+  "clip": "Mounted_Escape",
+  "sharedOrigin": [
+    0,
+    0,
+    0
+  ],
+  "flightTranslationRotation": "game controller applies to the common parent of character and glider",
+  "shadowLodIsVisibleMesh": false
+}

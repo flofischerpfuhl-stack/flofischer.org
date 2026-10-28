@@ -1,0 +1,84 @@
+{
+  "category": "architecture",
+  "label": "Oak board wall \u00b7 corner return",
+  "games": [
+    "generic"
+  ],
+  "description": "Oak board wall \u00b7 corner return; independent reusable library asset, detailed source mesh and authored atlas preserved.",
+  "lods": {
+    "hi": {
+      "vertices": 156,
+      "triangles": 52,
+      "groups": 1,
+      "bytes": 3175,
+      "vertexCap": 1000000,
+      "triangleTarget": 60000
+    },
+    "lo": {
+      "vertices": 156,
+      "triangles": 52,
+      "groups": 1,
+      "bytes": 3175,
+      "vertexCap": 22000,
+      "triangleTarget": 15000
+    },
+    "sh": {
+      "vertices": 40,
+      "triangles": 52,
+      "groups": 1,
+      "bytes": 1318,
+      "vertexCap": 1600,
+      "triangleTarget": 900
+    }
+  },
+  "budgets": {
+    "hi": 60000,
+    "lo": 15000,
+    "sh": 900
+  },
+  "vertex_cap": 22000,
+  "shadow_cap": 1600,
+  "ground": true,
+  "ao_dist": 0.18,
+  "sourceAsset": "architecture/kenney/wall-wood-corner.glb",
+  "adaptation": {
+    "scale": 2.6,
+    "rotationY": 1.5707963267948966,
+    "pivot": "bounds centre at ground",
+    "units": "metres"
+  },
+  "source": "scripts/games-blender/fernworld/assets/generic_architecture.py",
+  "id": "fw_wall_timber_corner",
+  "bounds": [
+    [
+      -1.3000000715255737,
+      0.0,
+      -1.3000001907348633
+    ],
+    [
+      1.3000000715255737,
+      2.5999999046325684,
+      1.3000001907348633
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#85503e",
+    "#8c5541",
+    "#945945",
+    "#9c5e48",
+    "#be7c5d",
+    "#c3805f",
+    "#c78362",
+    "#cc8665"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "2a6e36a97f643d0d07eed4b4229b0d3d2d47fa29afc5c645dfd134842a6cf0c0"
+}

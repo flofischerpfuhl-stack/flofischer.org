@@ -1,0 +1,12 @@
+{
+  "activeSurface": "Constant spore active surface",
+  "holdAxis": "+Y",
+  "emission": "constant glTF emissiveTexture, strength 1; no lights",
+  "activeSurfaceAtlasIndex": 49,
+  "activeSurfaceGltfUV": [
+    0.1875,
+    0.8984375
+  ],
+  "activeSurfaceSocket": "ActiveSporeSurface",
+  "surfaceMeaning": "Native named panel uses UV swatch49 inside the single runtime body mesh; socket is a real point node, emission is constant in glTF."
+}

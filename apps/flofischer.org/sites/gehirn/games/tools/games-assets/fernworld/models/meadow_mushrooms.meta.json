@@ -1,0 +1,82 @@
+{
+  "category": "vegetation",
+  "label": "Three woodland mushrooms",
+  "games": [
+    "generic"
+  ],
+  "description": "Original botanical sculpt: curved folded laminae, tapered stems and individually shaped flowers. Opaque double-sided vertex colours, library only.",
+  "budgets": {
+    "hi": 90000,
+    "lo": 1400,
+    "sh": 350
+  },
+  "vertex_cap": 2600,
+  "shadow_cap": 1800,
+  "lods": {
+    "hi": {
+      "vertices": 1845,
+      "triangles": 2718,
+      "groups": 1,
+      "bytes": 51526,
+      "vertexCap": 1000000,
+      "triangleTarget": 90000
+    },
+    "lo": {
+      "vertices": 576,
+      "triangles": 840,
+      "groups": 1,
+      "bytes": 16197,
+      "vertexCap": 2600,
+      "triangleTarget": 1400,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 202,
+      "triangles": 350,
+      "groups": 1,
+      "bytes": 6294,
+      "vertexCap": 1800,
+      "triangleTarget": 350,
+      "authoredLod": true
+    }
+  },
+  "ground": true,
+  "ao": false,
+  "wind": {
+    "channel": "body",
+    "rootY": 0,
+    "response": 0.18
+  },
+  "sockets": {},
+  "source": "scripts/games-blender/fernworld/assets/meadow_botany.py",
+  "id": "meadow_mushrooms",
+  "bounds": [
+    [
+      -0.14967544376850128,
+      0.0,
+      -0.12986858189105988
+    ],
+    [
+      0.1482100486755371,
+      0.22160854935646057,
+      0.1010846272110939
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#9e825d",
+    "#b97b45",
+    "#c28b58",
+    "#d1c3a3",
+    "#d9be93"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "84fe661dfd7863c79c5710f9b789571dcaf55903ffd333e88ea5cfe97924d01e"
+}

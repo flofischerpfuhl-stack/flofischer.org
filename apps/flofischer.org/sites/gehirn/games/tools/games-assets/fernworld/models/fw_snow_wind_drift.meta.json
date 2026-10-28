@@ -1,0 +1,75 @@
+{
+  "category": "terrain",
+  "label": "Snow windward ramp and sculpted lee cornice",
+  "games": [
+    "generic"
+  ],
+  "description": "Snow windward ramp and sculpted lee cornice; detailed authored source and deliberate Lo/Shadow shape, opaque vertex colour.",
+  "lods": {
+    "hi": {
+      "vertices": 646,
+      "triangles": 1106,
+      "groups": 1,
+      "bytes": 19461,
+      "vertexCap": 1000000,
+      "triangleTarget": 100000
+    },
+    "lo": {
+      "vertices": 248,
+      "triangles": 394,
+      "groups": 1,
+      "bytes": 7398,
+      "vertexCap": 2200,
+      "triangleTarget": 12000,
+      "authoredLod": true
+    },
+    "sh": {
+      "vertices": 121,
+      "triangles": 238,
+      "groups": 1,
+      "bytes": 4118,
+      "vertexCap": 1200,
+      "triangleTarget": 1600,
+      "authoredLod": true
+    }
+  },
+  "budgets": {
+    "hi": 100000,
+    "lo": 12000,
+    "sh": 1600
+  },
+  "vertex_cap": 2200,
+  "shadow_cap": 1200,
+  "ground": true,
+  "ao_dist": 0.15,
+  "source": "scripts/games-blender/fernworld/assets/terrain_sky.py",
+  "id": "fw_snow_wind_drift",
+  "bounds": [
+    [
+      -1.9500000476837158,
+      -0.004540016409009695,
+      -0.8500000238418579
+    ],
+    [
+      1.9500000476837158,
+      0.549786388874054,
+      0.8500000238418579
+    ]
+  ],
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "channels": [
+    "body"
+  ],
+  "palette": [
+    "#9db8cc",
+    "#d5e1e7",
+    "#e2eced",
+    "#f1f3ea"
+  ],
+  "pipeline": "fernworld-v1",
+  "authoring": "Blender Python",
+  "integration": "prepared-only",
+  "sourceSha256": "6ae0de1406b3d0abcb9e2dcdf7ab1e4482ff74f2fb16faab7045a99121547840"
+}

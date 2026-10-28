@@ -1,0 +1,63 @@
+{
+  "fps": 24,
+  "rotationMode": "QUATERNION",
+  "actionSlot": "explicit matching OBJECT slot for each action",
+  "clips": {
+    "Idle": {
+      "frames": 65,
+      "durationSeconds": 2.6666667,
+      "loop": true,
+      "events": []
+    },
+    "Spell_Cackle": {
+      "frames": 41,
+      "durationSeconds": 1.6666667,
+      "loop": false,
+      "events": [
+        {
+          "time": 0.3333333,
+          "event": "paw_telegraph"
+        },
+        {
+          "time": 0.8333333,
+          "event": "hex_release",
+          "socket": "pawPalm"
+        },
+        {
+          "time": 1.6666667,
+          "event": "return_idle"
+        }
+      ]
+    },
+    "Mounted_Escape": {
+      "frames": 49,
+      "durationSeconds": 2,
+      "loop": true,
+      "events": [
+        {
+          "time": 0,
+          "event": "attach_glider_at_shared_origin"
+        }
+      ],
+      "motion": "Seated fixed-contact flight pose; subtle head look. Root translation belongs to runtime glider controller.",
+      "defeat": "Escape; no gore or dead-body state."
+    }
+  },
+  "sourceRig": "KayKit Adventurers 2.0 Rig_Medium, relaxed arms baked as new bind rest, original hierarchy/names and sensible bone lengths retained",
+  "sourceClipsUsed": [],
+  "authoredClips": [
+    "Idle",
+    "Spell_Cackle",
+    "Mounted_Escape"
+  ],
+  "gltfImport": {
+    "timeOriginOffsetSeconds": 0.041666666666666664,
+    "recipe": "Clone each imported clip and shift every track time by -1/24 once before mixer.clipAction; reset duration. Author contract times and release event then match exactly.",
+    "reason": "Authored frames1..N are exported with first key at1/24, not0. All delivered source GLB bytes remain unchanged.",
+    "rawClipDurations": {
+      "Idle": 2.7083333333333335,
+      "Spell_Cackle": 1.7083333333333333,
+      "Mounted_Escape": 2.0416666666666665
+    }
+  }
+}

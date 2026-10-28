@@ -1,0 +1,96 @@
+{
+  "schema": "fernworld.sockets.v1",
+  "asset": "WAX_HULK",
+  "sockets": [
+    {
+      "name": "Socket_ShoveL",
+      "parent": "ArmL",
+      "translation": [
+        -0.0559999942779541,
+        -0.5040000081062317,
+        0.23800000548362732
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "space": "local glTF meters; follows parent transform",
+      "role": "shove contact"
+    },
+    {
+      "name": "Socket_ShoveR",
+      "parent": "ArmR",
+      "translation": [
+        0.0559999942779541,
+        -0.5040000081062317,
+        0.23800000548362732
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "space": "local glTF meters; follows parent transform",
+      "role": "shove contact"
+    },
+    {
+      "name": "Socket_Lamp",
+      "parent": "Body",
+      "translation": [
+        -0.0560000017285347,
+        0.3219999670982361,
+        0.3709999918937683
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "space": "local glTF meters; follows parent transform",
+      "role": "lamp anchor"
+    },
+    {
+      "name": "Socket_Ground",
+      "parent": "WAX_HULK",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "space": "local glTF meters; follows parent transform",
+      "role": "controller ground anchor"
+    }
+  ],
+  "forward": "+Z glTF",
+  "melt": "Shove and Lamp anchors do not follow vertex morphs; disable their functional use during Melt. Ground remains the controller anchor."
+}

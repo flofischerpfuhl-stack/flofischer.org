@@ -1,0 +1,23 @@
+{
+  "coordinate_space": "Blender native Z-up, front -Y; world-axis turns are conjugated by each original bone rest quaternion",
+  "pivot_rule": "Rotate original pose bones at unchanged KayKit joints, never rotate geometry around world origin",
+  "PIP_GALE_GLIDER": {
+    "cape_morph": {"mesh":"Pip_Gale_KiteCape","target":"Glide","folded":0,"deployed":1,"presentation":0.28,"deploy_seconds":0.35,"retract_seconds":0.2},
+    "world_axis_Y_degrees":{"upperarm.l":20,"upperarm.r":-20,"lowerarm.r":20},
+    "world_axis_X_degrees":{"upperleg.l":-14,"upperleg.r":-14,"lowerleg.l":28,"lowerleg.r":28},
+    "root_lift_source_units":0.22
+  },
+  "PIP_SPARK_LEAP": {
+    "phase":"double-jump activation, asymmetric knee lift and energy heel read",
+    "world_axis_Y_degrees":{"upperarm.l":52,"upperarm.r":-25},
+    "world_axis_X_degrees":{"lowerarm.l":-55,"lowerarm.r":-25,"upperleg.l":-40,"lowerleg.l":75,"upperleg.r":22,"lowerleg.r":32},
+    "root_lift_source_units":0.3
+  },
+  "PIP_FROST_BRIDGE": {
+    "phase":"pickaxe cast toward short bridge direction",
+    "world_axis_Y_degrees":{"upperarm.l":58,"upperarm.r":-32,"lowerarm.r":58},
+    "world_axis_Z_degrees":{"chest":-8},
+    "root_lift_source_units":0
+  },
+  "animation_safety":"Use quaternion mode. Mute source NLA only while previewing procedural activation; restore it for original clip export. Do not replace original action slots."
+}
