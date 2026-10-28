@@ -85,7 +85,7 @@ export const LEVELS = [
   // ── World 3 · Frostpeak: Blorbs that split, Spitters, ice floors ──
   level(2, 0, 'Frost auf den Stufen', 'survive', { time: 150, hint: 'Auf Eis rutscht dein Fernling weiter. Plane deine Kurven', intro: { blorb: 2, spitter: 1 } }),
   level(2, 1, 'Wellen im Schnee', 'survive', { time: 160, hint: 'Spraycount kündigt seinen Angriff an. Weiche den Blasen aus', intro: { blorb: 2 } }),
-  level(2, 2, 'Ruf aus der Ferne', 'survive', { time: 170, hint: 'Nach einer Befreiung nähert sich weitere Hex-Verstärkung vom Rand' }),
+  level(2, 2, 'Nachhall des Hex', 'survive', { time: 170, hint: 'Nach einer Befreiung ruft der Hex zwei neue Gegner an diese Stelle' }),
   level(2, 3, 'Das Frostarchiv', 'defend', { time: 170 }),
   level(2, 4, 'Gefrorener Kreuzgang', 'survive', { time: 180 }),
   level(2, 5, 'Hüter im Schneesturm', 'elites', { elites: 5, par: 165 }),

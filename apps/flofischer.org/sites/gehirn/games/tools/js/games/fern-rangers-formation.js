@@ -37,7 +37,8 @@ function baseFormation(s) {
 }
 export function warmCampaignFormations(s){for(let n=1;n<=90;n++)baseFormation({n,fullRadius:.35*Math.sqrt(n)+.25,slotTarget:i=>s.slotTarget(i)});}
 export function campaignFormation(s) {
- const base=baseFormation(s),frontLimit=Math.max(.5,Math.min(s.radius*.75-.12,Math.max(...s.slots.map(p=>p.z)))),shift=frontLimit-.5,half=Math.min(s.radius,3-Math.abs(s.px)),spread=Math.max(0,half-base.half);
+ const squeeze=Math.max(s.squeeze||0,s.formationSqueeze||0),radius=s.fullRadius+(Math.min(s.fullRadius,1.15)-s.fullRadius)*squeeze;
+ const base=baseFormation(s),frontLimit=Math.max(.5,Math.min(radius*.75-.12,Math.max(...s.slots.map(p=>p.z)))),shift=frontLimit-.5,half=Math.min(radius,3-Math.abs(s.px)),spread=Math.max(0,half-base.half);
  return base.places.map(a=>{
   const x=a.cx+a.cx/base.half*spread,offset=x-a.cx;
   return {i:a.i,id:a.id,x:x+(a.p.min[0]+a.p.max[0])/2*RANGER_SCALE,z:-a.d-shift,size:RANGER_SCALE,left:a.left+offset,right:a.right+offset,front:a.front+shift,back:a.back+shift};

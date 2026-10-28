@@ -310,13 +310,16 @@ export class FernRangersSession {
     this.pos += this.speed * dt;
 
     // bunch up while a hazard, a goo blob or a boss strike is close; spread out again after
-    let tight = this.goo.length > 0 || !!fork;
+    let tight = this.goo.length > 0;
     if (!tight) for (const w of this.warnings) if (!w.done) { tight = true; break; }
     if (!tight) {
       for (const e of this.ents) {
         if (e.alive && (e.kind === 'block' || e.kind === 'laser' || e.kind === 'geyser' || e.kind === 'barrel') && e.d - this.pos > -1.5 && e.d - this.pos < 9) { tight = true; break; }
       }
     }
+    // Forks regroup the visible company only. The combat footprint also sets
+    // bullet lanes and contact damage, and must retain the campaign's balance.
+    this.formationSqueeze = clamp((this.formationSqueeze || 0) + (tight || fork ? dt * 4 : -dt * 1.5), 0, 1);
     this.squeeze = clamp((this.squeeze || 0) + (tight ? dt * 4 : -dt * 1.5), 0, 1);
     const k = this.radius / this.fullRadius;
     const follow = 1 - Math.exp(-dt * 10), kz = 0.6 + 0.4 * k;
@@ -645,7 +648,9 @@ export class FernRangersSession {
         this.goal = Math.min(this.goal, this.pos + 3);
       } else if (e.type === 'blorb') {
         this.popupWorld('+' + def.score, e.x, e.d, def.h + 0.4, '#fde047', 0.75);
-        if (e.split) for (const dx of [-0.45, 0.45]) { const child=makeEnemy('zorbling', e.d, clamp(e.x + dx, -ROAD + 0.3, ROAD - 0.3), this.L, { active: true }, this.rand); child.spawnHull={x:e.x,d:e.d,time:this.t,side:Math.sign(dx)};this.ents.push(child); }
+        // Keep the defeated hull still for its animation, but preserve the hit
+        // impulse in the live children's original spawn position.
+        if (e.split) for (const dx of [-0.45, 0.45]) { const child=makeEnemy('zorbling', e.d + 0.06 * dmg / 4, clamp(e.x + dx, -ROAD + 0.3, ROAD - 0.3), this.L, { active: true }, this.rand); child.spawnHull={x:e.x,d:e.d,time:this.t,side:Math.sign(dx)};this.ents.push(child); }
       }
     } else if (e.kind === 'barrel') {
       this.score += 20;

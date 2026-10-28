@@ -402,6 +402,9 @@ export class FernRangers3D {
 
   drawRoadside(s) {
     const pos = s.pos;
+    // Leave clear sightlines around authored forks. World-space exclusions
+    // keep the same clusters absent before, during and after the approach.
+    const forks = s.L.events.filter(e => e.t === 'fork');
     if (this.roadside) {
       const R = this.roadside;
       R.begin();
@@ -410,6 +413,7 @@ export class FernRangers3D {
       for (let i=0;i<9;i++) {
         const d=Math.floor(pos/16)*16+i*16-16, z=d-pos;
         if(z>FAR-5)break;
+        if(forks.some(e => d >= e.d - 18 && d <= e.d + e.len + 18))continue;
         const slot=Math.round(d/16), side=slot%2?1:-1;
         const x=side*(ROAD+3.2), yaw=side*.24;
         if(s.themeName==='meadow') {

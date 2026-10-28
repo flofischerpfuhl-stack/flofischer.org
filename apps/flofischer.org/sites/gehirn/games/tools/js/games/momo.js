@@ -877,11 +877,13 @@ export class MomoSession {
       if (r < 0.012) this.dropGem(e.x + 0.3, e.y, 1, 0);
       else if (r < 0.016) this.dropGem(e.x - 0.3, e.y, 2, 0);
     }
-    // Two separately arriving Fernlings replace the old biological split.
+    // The hex calls two reinforcements at the cleared foe. Preserve the original
+    // immediate local pressure; sending them to the arena edge softened worlds 3/4.
     if (def.split && this.L.world >= 2) {
       for (let k = 0; k < def.split; k++) {
         const a = e.face + (k ? 1.6 : -1.6);
-        this.spawnEnemy('zorbling', this.x + Math.sin(a) * SPAWN_DIST, this.y + Math.cos(a) * SPAWN_DIST, false);
+        const z = this.spawnEnemy('zorbling', e.x + Math.sin(a) * 0.5, e.y + Math.cos(a) * 0.5, false);
+        if (z) { z.spawnIn = 0; z.kx = Math.sin(a) * 4; z.ky = Math.cos(a) * 4; }
       }
     }
   }

@@ -59,7 +59,9 @@ export class SturmbastionSession {
                 this.add(-1, w.x + (i % 3 - 1) * .32, this.L.length - 2 + Math.floor(i / 3) * .4, n, 0, !!w.heavy);
             }
         }
-        const shielded = this.coreShielded;
+        // enemyMass is settled at the end of the step. Include this step's
+        // newly spawned defenders before consuming any attackers at the core.
+        const shielded = this.coreShielded || this.groups.some(g => g.side === -1 && g.n > 0);
         this.grid.clear();
         for (const g of this.groups) {
             if (g.n <= 0)
