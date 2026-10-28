@@ -95,7 +95,7 @@ export function mountHub(host,{onPlay}) {
  }
  function setFocus(index){focus=(index+4)%4;renderPanel();dirty=true;}
  const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
- canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,yaw:formYaw};canvas.setPointerCapture(e.pointerId);});
+ canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,yaw:formYaw};try{canvas.setPointerCapture(e.pointerId);}catch{/* synthetic or already released pointer */}});
  canvas.addEventListener('pointermove',e=>{if(drag&&service==='atelier')formYaw=drag.yaw+(e.clientX-drag.x)*.012;});
  canvas.addEventListener('pointerup',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag=null;if(service==='atelier')return;if(Math.abs(dx)>45){setFocus(focus-Math.sign(dx));return;}if(Math.hypot(dx,dy)>8)return;const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);const hit=ray.intersectObjects(cabinets.map(c=>c.scene),true)[0];if(hit){const i=cabinets.findIndex(c=>c.scene.getObjectById(hit.object.id));if(i===focus)onPlay(GAMES[i].id);else setFocus(i);}});
  canvas.addEventListener('pointercancel',()=>{drag=null;});
