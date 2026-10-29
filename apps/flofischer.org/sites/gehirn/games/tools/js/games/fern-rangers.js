@@ -11,7 +11,7 @@
  * enemies that reach the squad, to gates you chose and to hazards you walked into, never to something unavoidable.
  */
 import { clamp, lerp, rng, label, roundRect } from './core.js';
-import { RANGER_SCALE, TROOP_PROFILES, placeSquadBadge } from './fern-rangers-formation.js';
+import { LIVE_TROOP_HEIGHT, placeSquadBadge } from './fern-rangers-formation.js';
 import { LEVELS } from './fern-rangers-levels.js';
 import { upgradeLevel } from './profile.js';
 import { STURMBASTION_LEVELS } from './fern-rangers-sturmbastion-levels.js';
@@ -1066,13 +1066,13 @@ export class FernRangersSession {
         // Decision text belongs in the screen overlay: stable contrast and a
         // minimum readable size, independent of tiny authored number plates.
         const p = this.proj((e.x0 + e.x1) / 2, z - .18, 1.42);
-        const size = Math.round(Math.max(18, Math.min(44, p.s * .62)) * (1 + (e.pulse || 0) * .08));
+        const size = Math.round(Math.max(22, Math.min(56, p.s * .74)) * (1 + (e.pulse || 0) * .08));
         const text = gateText(e);
         g.font = `900 ${size}px Geist, Inter, system-ui, sans-serif`;
         const width = g.measureText(text).width + size * .6;
-        g.fillStyle = gateGood(e) ? 'rgba(13,66,102,.94)' : 'rgba(112,24,38,.94)';
+        g.fillStyle = gateGood(e) ? '#1f6fd6' : '#d23447';
         roundRect(g, p.x - width / 2, p.y - size * .7, width, size * 1.4, size * .18); g.fill();
-        g.strokeStyle = gateGood(e) ? '#8be7ff' : '#ffaab7'; g.lineWidth = 2; g.stroke();
+        g.strokeStyle = '#fff'; g.lineWidth = Math.max(2, size * .09); g.stroke();
         label(g, text, p.x, p.y, size, '#fff', 'rgba(0,0,0,.7)', 900);
       } else if (e.kind === 'enemy' && (e.type === 'blorb' || e.type === 'boss' || e.shield > 0)) {
         const top = this.proj(e.x, z, e.type === 'boss' ? BOSSES[e.boss].h + 0.9 : e.type === 'blorb' ? 2.25 : 1.75);
@@ -1094,7 +1094,7 @@ export class FernRangersSession {
     const { w, h } = view;
     // squad count bubble
     if (this.n > 0 && !(this.result && !this.result.won)) {
-      const height=this.projFn?(this.n>=18?TROOP_PROFILES.GIANT_LEGIONARY.max[1]:TROOP_PROFILES.CAPTAIN_HAZEL.max[1])*RANGER_SCALE+.22:1.2+this.radius*.5;
+      const height=this.projFn?LIVE_TROOP_HEIGHT.CAPTAIN_HAZEL+.22:1.2+this.radius*.5;
       const top=this.proj(this.px,-.4,height),anchor=view.gl?.squadBadgeAnchor?.();if(anchor){top.x=anchor.x;top.s=anchor.s;}
       const sc = 1 + this.countPop * 0.35;
       const txt = String(this.n);

@@ -416,6 +416,13 @@ export class PipsTower3D {
     this.socketActors = [];
     for (const p of sess.pins) {
       const a = await make("PULL_PIN");
+      // Warm, readable metal marks the physical grip in every region, without
+      // marking a correct move or changing the pin's collider/touch target.
+      for (const m of a.material((_, o) => o.name === "Grip_Mesh")) {
+        m.emissive.set(0xe6a52b);
+        m.emissiveIntensity = 0.35;
+        m.roughness = 0.38;
+      }
       const inset = pinTransform(a.root, p);
       this.pinActors.push(a);
       const b = await make("PIN_SOCKET");

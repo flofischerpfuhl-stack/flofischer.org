@@ -5,6 +5,7 @@
 import { clamp, rng, label, roundRect } from './core.js';
 import { LEVELS, WORLDS } from './momo-levels.js';
 import { upgradeLevel } from './profile.js';
+import { choiceLayout } from './momo-choice-layout.js';
 import { STARTERS, starter, makeWeapon, moveName, moveEffect, ownMove, weaponKey, evolveToLevel, fossilOffer, grantFossil, clearAttackPayload, stampAttackPayload, NATURE_COLORS, TRAITS } from './fernling-canon.js';
 
 import { FREED_RECOIL, FREED_BREAK, FREED_ESCAPE } from './momo-motion.js';
@@ -159,7 +160,9 @@ export class MomoSession {
     this.buildGrid();
     if (this.preview) this.stagePreview();
     else {
-      this.say(L.goal === 'boss' ? 'BOSS LEVEL' : this.goalText(true), 2.2);
+      // The persistent goal line already explains survive/defend/elites.
+      // Do not repeat it as a second large banner over a phone's playfield.
+      if(L.goal==='boss')this.say('BOSS LEVEL',2.2);
       // Professor Owlbert's supply crate: one free card per world already conquered, so later worlds start equipped
       this.kit = L.world + (L.goal === 'boss' ? 1 : 0);
       // Permanent workshop benefit is exactly one extra choice before movement.
@@ -231,6 +234,7 @@ export class MomoSession {
   }
 
   // ── input ──
+  inputHint(mode){return this.index===0&&mode==='touch'?'Ziehe mit einem Finger, um deinen Fernling zu bewegen. Er greift selbst an.':this.hint;}
   cancelInput() {
     this.keys = { u: false, d: false, l: false, r: false };
     this.stick = null; this.mouse = null;
@@ -1305,7 +1309,7 @@ export class MomoSession {
     g.strokeStyle = '#a3e635'; g.lineWidth = 2.5; g.stroke();
     label(g, 'LV', 26, y - 3, 8, '#a3e635', 'rgba(0,0,0,0)', 800);
     label(g, String(this.level), 26, y + 7, 13, '#fff', 'rgba(0,0,0,.4)', 900);
-    label(g, this.model.replaceAll('_', ' ') + (this.stage < 2 ? ' · Entwicklung LV ' + (this.stage ? 10 : 5) : ' · Hochform'), w / 2, 121, 11, NATURE_COLORS[this.nature], 'rgba(0,0,0,.65)');
+    label(g, this.model.replaceAll('_', ' ') + (this.stage < 2 ? ' · Entwicklung ab Level ' + (this.stage ? 10 : 5) : ' · Hochform'), w / 2, 121, 11, NATURE_COLORS[this.nature], 'rgba(0,0,0,.65)');
     // goal line
     const L = this.L;
     if (L.goal === 'boss' && this.boss && !this.boss.dead) {
@@ -1329,30 +1333,39 @@ export class MomoSession {
   drawCards(g, view) {
     const { w, h } = view, ch = this.choice, a = Math.min(1, ch.t * 5);
     g.fillStyle = `rgba(4,6,12,${0.55 * a})`; g.fillRect(0, 0, w, h);
-    const narrow = w < 640;
     const n = ch.cards.length;
-    const cw = narrow ? Math.min(w - 32, 380) : 214, chh = narrow ? 96 : 272, gap = narrow ? 12 : 18;
-    const totalW = narrow ? cw : n * cw + (n - 1) * gap, totalH = narrow ? n * chh + (n - 1) * gap : chh;
-    const x0 = (w - totalW) / 2, y0 = Math.max(116, (h - totalH) / 2 + 20);
-    label(g, ch.reason === 'workshop' ? 'WERKSTATT-HILFE — WÄHLE EINE KARTE' : ch.reason === 'chest' ? 'BEFREIUNG — WÄHLE EINE KARTE' : ch.reason === 'kit' ? 'STARTVORRAT — WÄHLE EINE KARTE' : `LEVEL ${this.level} — WÄHLE EINE KARTE`, w / 2, y0 - 30, narrow ? 18 : 24, '#fde047', 'rgba(0,0,0,.7)', 900);
+    const {stack:narrow,compact,cw,ch:chh,gap,x:x0,y:y0}=choiceLayout(w,h,n);
+    const heading=ch.reason==='workshop'?'WERKSTATT-HILFE':ch.reason==='chest'?'BEFREIUNG':ch.reason==='kit'?'STARTVORRAT':`LEVEL ${this.level}`;
+    const title=`${heading} — WÄHLE EINE KARTE`,titleSize=compact||w<360?15:narrow?18:24;
+    label(g,title,w/2,y0-24,fitLabel(g,title,titleSize,w-24,900),'#fde047','rgba(0,0,0,.7)',900);
     const rects = this.cardRects = this.cardRects || [];
     rects.length = n;
     for (let i = 0; i < n; i++) {
       const c = ch.cards[i];
       const pop = Math.min(1, Math.max(0, ch.t * 6 - i * 0.6));
-      const x = narrow ? x0 : x0 + i * (cw + gap), y = (narrow ? y0 + i * (chh + gap) : y0) + (1 - pop) * 30;
+      const restY=narrow?y0+i*(chh+gap):y0;
+      const x = narrow ? x0 : x0 + i * (cw + gap), y = restY + (1-pop)*Math.min(30,Math.max(0,h-8-restY-chh));
       rects[i] = { x, y, w: cw, h: chh };
       g.globalAlpha = pop;
       const sel = view.keyboard && ch.sel === i;
       g.fillStyle = c.type === 'evo' ? '#2a1d05' : '#0f172a'; roundRect(g, x, y, cw, chh, 14); g.fill();
       g.lineWidth = sel ? 4 : 2.5; g.strokeStyle = c.type === 'evo' ? '#fde047' : sel ? '#ffffff' : c.color; g.stroke();
       const tag = c.type === 'fossil' ? 'FOSSIL · BIS LEVELENDE' : c.type === 'evo' ? 'COMBO' : c.type === 'heal' ? 'SNACK' : c.lv === 1 ? 'NEW' : `LEVEL ${c.lv}`;
-      if (narrow) {
+      if (compact) {
+        g.fillStyle='rgba(255,255,255,.07)';g.beginPath();g.arc(x+cw/2,y+27,21,0,TAU);g.fill();
+        drawIcon(g,c.nature||c.id,x+cw/2,y+27,15,c.color);
+        label(g,tag,x+cw/2,y+57,11,c.type==='evo'?'#fde047':c.color,'rgba(0,0,0,0)',800);
+        g.textAlign='center';g.textBaseline='alphabetic';g.font='800 15px Geist, Inter, system-ui, sans-serif';g.fillStyle='#fff';
+        wrap(g,c.name,x+cw/2,y+79,cw-20,17,2);
+        g.font='500 13px Geist, Inter, system-ui, sans-serif';g.fillStyle='#cbd5e1';
+        wrap(g,c.desc,x+cw/2,y+119,cw-20,16,Math.max(1,Math.floor((chh-119-10)/16)+1));
+        if(view.keyboard)label(g,String(i+1),x+cw-14,y+16,11,'#94a3b8','rgba(0,0,0,0)',800);
+      } else if (narrow) {
         g.fillStyle = 'rgba(255,255,255,.07)'; g.beginPath(); g.arc(x + 46, y + chh / 2, 30, 0, TAU); g.fill();
         drawIcon(g, c.nature || c.id, x + 46, y + chh / 2, 17, c.color);
         g.textAlign = 'left'; g.textBaseline = 'alphabetic';
         g.font = '800 11px Geist, Inter, system-ui, sans-serif'; g.fillStyle = c.type === 'evo' ? '#fde047' : c.color; g.fillText(tag, x + 88, y + 28);
-        g.font = '800 17px Geist, Inter, system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(c.name, x + 88, y + 50);
+        g.font = `800 ${fitLabel(g,c.name,17,cw-100,800)}px Geist, Inter, system-ui, sans-serif`; g.fillStyle = '#fff'; g.fillText(c.name, x + 88, y + 50);
         g.font = '500 13px Geist, Inter, system-ui, sans-serif'; g.fillStyle = '#cbd5e1'; wrap(g, c.desc, x + 88, y + 70, cw - 100, 16, 2);
         if (view.keyboard) label(g, String(i + 1), x + cw - 18, y + 18, 12, '#94a3b8', 'rgba(0,0,0,0)', 800);
       } else {
@@ -1398,6 +1411,7 @@ function wrap(g, text, x, y, maxW, lh, maxLines) {
   }
   if (line) g.fillText(line, x, y + n * lh);
 }
+function fitLabel(g,text,size,width,weight){g.font=`${weight} ${size}px Geist, Inter, system-ui, sans-serif`;return Math.min(size,size*width/Math.max(1,g.measureText(text).width));}
 /** Small vector glyphs for cards and the loadout row. */
 export function drawIcon(g, id, x, y, r, color) {
   g.save(); g.translate(x, y);

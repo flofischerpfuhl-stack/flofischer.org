@@ -18,6 +18,7 @@ const Z = new T.Vector3(0, 0, 1),
   Y = new T.Vector3(0, 1, 0),
   X = new T.Vector3(1, 0, 0);
 const v = new T.Vector3();
+const pinBasis = new T.Matrix4(), pinSide = new T.Vector3();
 export const clamp01 = (n) => Math.max(0, Math.min(1, n));
 
 export function named(root, name) {
@@ -106,7 +107,12 @@ export function pinTransform(root, pin) {
   // B is the old control end, not the authored collar. Match the actual PullAxis
   // to B + 12, preserving its touch target and keeping edge grips on a phone.
   const inset = -named(root, "PullAxis").position.z * 50 - 12;
-  root.quaternion.setFromUnitVectors(Z, v.set(-pin.dx, pin.dy, 0));
+  // The authored eye lies in the YZ plane. Aligning only the shaft leaves
+  // vertical pins edge-on, hiding their pulling ring. Keep its normal toward
+  // the board camera while preserving the shaft and both authored anchors.
+  root.quaternion.setFromRotationMatrix(pinBasis.makeBasis(
+    Z, pinSide.set(pin.dy, pin.dx, 0), v.set(-pin.dx, pin.dy, 0),
+  ));
   root.position.set(
     BX(pin.bx + pin.dx * (pin.off - inset)),
     BY(pin.by + pin.dy * (pin.off - inset)),

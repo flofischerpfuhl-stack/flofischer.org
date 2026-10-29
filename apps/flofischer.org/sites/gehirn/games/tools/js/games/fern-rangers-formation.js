@@ -1,6 +1,17 @@
 /** Presentation units and a bounded representative company. Native geometry and
- * logical strength remain untouched. Bodies remain inside the simulated footprint; shots retain their exact trajectory. */
-export const RANGER_SCALE = .39;
+ * logical strength remain untouched. The live game already overlaps arms and equipment in its crowd. Packing uses
+ * body cores, while full silhouettes drive labels and road-edge clearance.
+ * Simulation radii and shot trajectories are independent and remain unchanged. */
+// Native character roles match the visible heights of the live Ranger species.
+// The additional Giant keeps its wide silhouette without becoming a foreground wall.
+export const LIVE_TROOP_HEIGHT = {
+ CAPTAIN_HAZEL:1.5748433714, HUMAN_LEGIONARY:1.4305843355,
+ HALFGROWN_LEGIONARY:1.3066313502, DUCK_LEGIONARY:1.3199991919,
+ GIANT_LEGIONARY:1.5748433714,
+};
+// Captive Fox height in the live game, retargeted uniformly to cage and all miners.
+// Dwarf/Halfgrown/Human proportions and authored doorway clearance stay intact.
+export const MINER_CAGE_SCALE = 0.631480273656410;
 export const TROOP_PROFILES = {
  CAPTAIN_HAZEL:{min:[-.473886,0,-.374529],max:[.473886,1.69973,.479994],muzzle:[.391,.605,.25],owner:'armR'},
  HUMAN_LEGIONARY:{min:[-.488680,0,-.273265],max:[.300938,1.699277,.401702],muzzle:[-.008474,.973685,.359181],owner:'recoil'},
@@ -8,6 +19,11 @@ export const TROOP_PROFILES = {
  GIANT_LEGIONARY:{min:[-1.225065,0,-.526149],max:[.710544,3.398535,.973536],muzzle:[.068424,2.115102,.900472],owner:'recoil'},
  DUCK_LEGIONARY:{min:[-.331798,0,-.221585],max:[.446260,1.298902,.595848],muzzle:[-.214683,.656182,.596465],owner:'armR'},
 };
+// Optical correction from paired silhouettes at the live camera, three gait phases.
+// Different boot/helmet depth changes perspective height even at equal mesh height.
+export const TROOP_SCREEN_FIT = {CAPTAIN_HAZEL:.940, HUMAN_LEGIONARY:.926,
+ HALFGROWN_LEGIONARY:1.019, DUCK_LEGIONARY:.996, GIANT_LEGIONARY:.933};
+export const troopScale = id => TROOP_SCREEN_FIT[id]*LIVE_TROOP_HEIGHT[id] / (TROOP_PROFILES[id].max[1]-TROOP_PROFILES[id].min[1]);
 export const troopId = i => i===0?'CAPTAIN_HAZEL':i===17?'GIANT_LEGIONARY':i%3===0?'HALFGROWN_LEGIONARY':i%3===1?'DUCK_LEGIONARY':'HUMAN_LEGIONARY';
 export function representativeIndices(n) {
  const count=n<=15?n:Math.min(24,15+Math.ceil((Math.min(n,90)-15)/10));
@@ -19,17 +35,25 @@ const formationCache=new Map();
 function baseFormation(s) {
  const count=Math.min(90,s.n),key=count;if(formationCache.has(key))return formationCache.get(key);
  const ids=representativeIndices(count),half=Math.min(1.15,s.fullRadius),k=Math.min(1.15,s.fullRadius)/s.fullRadius,kz=.6+.4*k;
- const backLimit=Math.max(half,...Array.from({length:Math.min(count,90)},(_,i)=>-s.slotTarget(i).z*kz));
+ const backLimit=Math.max(s.fullRadius,...Array.from({length:Math.min(count,90)},(_,i)=>-s.slotTarget(i).z*kz))+.4;
  const out=[],marginX=.022,marginD=.035,step=.025;
- const make=(i,cx,front)=>{const id=troopId(i),p=TROOP_PROFILES[id],width=(p.max[0]-p.min[0])*RANGER_SCALE+2*marginX,depth=(p.max[2]-p.min[2])*RANGER_SCALE+2*marginD,d=front-p.max[2]*RANGER_SCALE-marginD;return {i,id,p,cx,d,width,depth,left:cx-width/2,right:cx+width/2,front,back:front-depth};};
+ const make=(i,cx,front)=>{
+  const id=troopId(i),p=TROOP_PROFILES[id],size=troopScale(id);
+  const width=(p.max[0]-p.min[0])*size+2*marginX,depth=(p.max[2]-p.min[2])*size+2*marginD;
+  // Heads, arms and long guns interleave just as in the live sunflower crowd.
+  // Keep independently separated torso/foot cores instead of shrinking all art.
+  const coreWidth=width*.60,coreDepth=depth*.50,d=front-p.max[2]*size-marginD;
+  return {i,id,p,size,cx,d,width,depth,left:cx-width/2,right:cx+width/2,front,back:front-depth,
+   core:{left:cx-coreWidth/2,right:cx+coreWidth/2,front:front-(depth-coreDepth)/2,back:front-(depth+coreDepth)/2}};
+ };
  // The canonical Giant is an anchored rear rank, never a moving foreground wall.
- if(ids.includes(17)){const a=make(17,0,0);a.front=-backLimit+a.depth;a.back=-backLimit;a.d=a.front-a.p.max[2]*RANGER_SCALE-marginD;out.push(a);}
+ if(ids.includes(17)){const shape=make(17,0,0);out.push(make(17,0,-Math.min(backLimit,2.2+count*.005)+shape.depth));}
  for(const i of ids) {
   if(i===17)continue;
-  const shape=make(i,0,.5),preferred=Math.max(-half+.25,Math.min(half-.25,s.slotTarget(i).x*.55));
-  const xs=[];for(let x=-half+shape.width/2;x<=half-shape.width/2+.00001;x+=step)xs.push(x);xs.sort((a,b)=>Math.abs(a-preferred)-Math.abs(b-preferred));
+  const shape=make(i,0,.5),preferred=count>1&&count<=4&&i===0?-half+shape.width/2:Math.max(-half+.25,Math.min(half-.25,s.slotTarget(i).x*.55));
+  const xs=[];for(let x=-half+(shape.core.right-shape.core.left)/2;x<=half-(shape.core.right-shape.core.left)/2+.00001;x+=step)xs.push(x);xs.sort((a,b)=>Math.abs(a-preferred)-Math.abs(b-preferred));
   let found=null;
-  for(let front=.5;front-shape.depth>=-backLimit-.00001&&!found;front-=step)for(const cx of xs){const a=make(i,cx,front);if(out.every(b=>a.right<=b.left+.000001||b.right<=a.left+.000001||a.front<=b.back+.000001||b.front<=a.back+.000001)){found=a;break;}}
+  for(let front=.5;front-shape.depth>=-backLimit-.00001&&!found;front-=step)for(const cx of xs){const a=make(i,cx,front);if(out.every(b=>a.core.right<=b.core.left+.000001||b.core.right<=a.core.left+.000001||a.core.front<=b.core.back+.000001||b.core.front<=a.core.back+.000001)){found=a;break;}}
   if(!found)throw new Error('Rangers representative footprint cannot fit '+count+'/'+i);
   out.push(found);
  }
@@ -41,7 +65,7 @@ export function campaignFormation(s) {
  const base=baseFormation(s),frontLimit=Math.max(.5,Math.min(radius*.75-.12,Math.max(...s.slots.map(p=>p.z)))),shift=frontLimit-.5,half=Math.min(radius,3-Math.abs(s.px)),spread=Math.max(0,half-base.half);
  return base.places.map(a=>{
   const x=a.cx+a.cx/base.half*spread,offset=x-a.cx;
-  return {i:a.i,id:a.id,x:x+(a.p.min[0]+a.p.max[0])/2*RANGER_SCALE,z:-a.d-shift,size:RANGER_SCALE,left:a.left+offset,right:a.right+offset,front:a.front+shift,back:a.back+shift};
+  return {i:a.i,id:a.id,x:x+(a.p.min[0]+a.p.max[0])/2*a.size,z:-a.d-shift,size:a.size,left:a.left+offset,right:a.right+offset,front:a.front+shift,back:a.back+shift,core:{left:a.core.left+offset,right:a.core.right+offset,front:a.core.front+shift,back:a.core.back+shift}};
  });
 }
 export function nearestMuzzle(places,x) {

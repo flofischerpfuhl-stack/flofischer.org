@@ -6,6 +6,8 @@ import { ChannelLibrary } from '../../games-assets/fernworld/runtime/channel-lib
 import { bakeRigid } from '../../games-assets/fernworld/runtime/baked-rigid.js';
 import { BakedCrowd, bakeCrowd } from '../../games-assets/fernworld/runtime/baked-crowd.js';
 export const ENEMY_ASSET = { zorbling: 'KLONK', zipper: 'DARTER', klonk: 'KLONKBOT', shield: 'SHIELD_KLONK', spitter: 'SQUIRTER', blorb: 'HULK', buzz: 'BUZZ_DRONE' };
+// Screen-height calibration against the current live cast at identical cameras.
+export const ENEMY_DRAW_SCALE = {zorbling:1.45,zipper:1.078,klonk:.945,shield:1.017,spitter:1.136,blorb:.939,buzz:1.034};
 export const BOSS_ASSET = { tank: 'COMBINE_CRAWLER', drill: 'QUOTA_DRILL_MECH', walker: 'BRIGADIER_FROST_STRIDER', mothership: 'EQUALITY_MODULE_SHIP' };
 export const PICKUP_ASSET = { medkit: 'MEDIC_CASE', grenade: 'FERNSTONE_GRENADE', freeze: 'FROST_BOMB', bubble: 'LIGHT_SHIELD_CELL', turret: 'TURRET_DROP', double: 'DAMAGE_CELL', revive: 'REVIVE_TOKEN', magnet: 'MAGNET_PICKUP' };
 export const matrix = new T.Matrix4(), position = new T.Vector3(), scale = new T.Vector3(), rotation = new T.Quaternion(), Y = new T.Vector3(0, 1, 0);
@@ -90,7 +92,7 @@ class RotaryBatch {
 }
 class AtlasBatch {
     constructor(scene, template, capacity) { this.template=template; let skinned = false; template.scene.traverse(o => { if (o.isSkinnedMesh)
-        skinned = true; }); this.atlas = (skinned ? bakeCrowd : bakeRigid)(template, { fps: template.lod === 'far' ? 12 : 24 }); this.batch = new BakedCrowd(this.atlas, capacity); this.root = this.batch.root; scene.add(this.root); this.n = 0; this.capacity = capacity; }
+        skinned = true; }); this.atlas = (skinned ? bakeCrowd : bakeRigid)(template, { fps: template.motionFps || (template.lod === 'far' ? 12 : 24) }); this.batch = new BakedCrowd(this.atlas, capacity); this.root = this.batch.root; scene.add(this.root); this.n = 0; this.capacity = capacity; }
     begin() { this.n = 0; }
     add(m, clip, time, options = {}) { if (this.n >= this.capacity)
         throw new Error('Rangers crowd pool exceeded'); this.batch.setMatrix(this.n, m);
@@ -145,19 +147,20 @@ export class RangersArt {
     end() { this.shadows.end(); for (const b of this.batches.values())
         b.end(); for (const c of this.channels.values())
         c.end(); }
-    troop(i, x, z, time, { y = 0, yaw = Math.PI, recall = false, speed = 6, firing = 0, size = 1 } = {}) {
+    troop(i, x, z, time, { y = 0, yaw = Math.PI, recall = false, speed = 6, firing = 0, size = 1, lean = 0 } = {}) {
         const id = troopId(i);
         const b = this.batches.get(id + ':lo');
         if (!b) throw new Error('Unprepared Legionary ' + id);
-        const phase = time * .95 + i * .173, walk = Math.max(0, Math.min(1, speed / 3));
-        if (id === 'DUCK_LEGIONARY') b.add(transform(x,y,z,yaw,size), recall ? 'Retreat' : 'Walk', phase, {next:'Idle',nextTime:phase,blend:recall?0:1-walk});
-        else b.add(transform(x,y,z,yaw,size), recall ? 'Retreat' : firing > .1 ? 'WalkFire' : 'Walk', phase, {next:firing > .1?'IdleFire':'Idle',nextTime:phase,blend:recall?0:1-walk});
+        const phase=time+i*1.7/11, walking=speed>.5, base=recall?'Retreat':walking?'Walk':'Idle';
+        const poseMatrix=transform(x,y,z,yaw,size);
+        if(lean){this.leanEuler??=new T.Euler();rotation.setFromEuler(this.leanEuler.set(lean,yaw,0));poseMatrix.compose(position.set(x,y,z),rotation,scale.setScalar(size));}
+        b.add(poseMatrix,base,phase,{next:walking?'WalkFire':'IdleFire',nextTime:phase,blend:recall?0:Math.max(0,Math.min(1,firing))});
         this.shadows.add(x,z,(id==='GIANT_LEGIONARY'?.7:.32)*size);
         const socket=b.muzzleSocket;if(!socket)return null;
         const o=(b.n-1)*3,frame=b.batch.motion.array[o],next=b.batch.motion.array[o+1],blend=b.batch.motion.array[o+2],data=b.atlas.parts[0].data,stride=b.atlas.rigidNodes;
         const m=this.muzzleMatrix||(this.muzzleMatrix=new T.Matrix4()),v=this.muzzlePoint||(this.muzzlePoint=new T.Vector3());
         const offset=(frame*stride+socket.bone)*16,other=(next*stride+socket.bone)*16;for(let j=0;j<16;j++)m.elements[j]=data[offset+j]*(1-blend)+data[other+j]*blend;
-        return v.copy(socket.local).applyMatrix4(m).multiplyScalar(size).applyAxisAngle(Y,yaw).add(position.set(x,y,z));
+        return v.copy(socket.local).applyMatrix4(m).applyMatrix4(poseMatrix);
     }
     machine(type, x, z, time, { active = true, speed = 1, phase = 0, disabled = false, age = 0, near = false, split = false, hitAge = 99, fireAge = 99, wheelPhase = time, alert = 0, shield = true, frozen = false } = {}) {
         const id = ENEMY_ASSET[type], lod = near ? 'lo' : 'far', b = this.batches.get(id + ':' + lod) || this.batches.get(id + ':far');
@@ -199,24 +202,23 @@ export class RangersArt {
         if(frozen && !disabled)t=phase;
         if(disabled)instanceTint.setRGB(.22,.27,.25);else if(frozen)instanceTint.setRGB(.45,.8,1);else if(hitAge<.09)instanceTint.setRGB(2.4,2.1,1.4);else instanceTint.setRGB(1,1,1);
         const settle = disabled ? Math.max(0,Math.min(1,(age-.65)/1.35)) : 0;
-        const hop = !disabled && alert > 0 ? Math.sin(Math.min(1,alert/.5)*Math.PI)*.18 : 0;
-        const m = transform(x, hop - settle*settle*2.4, z, disabled ? Math.min(1,age/.45)*.26 : 0);
+        const hop = !disabled && alert > 0 ? Math.abs(Math.sin(alert*14))*.35 : 0;
+        const m = transform(x, hop - settle*settle*2.4, z, disabled ? Math.min(1,age/.45)*.26 : 0, ENEMY_DRAW_SCALE[type]);
         // An unmistakable tip-over starts immediately, followed by the authored
         // broken pose and a slow clean-up below the road, rather than a pop.
         if(disabled && !split) m.multiply(tipMatrix.makeRotationZ(Math.min(1,age/.5)*.52));
         b.add(m, clip, t, { loop: !disabled && hitAge >= .26 && fireAge >= .32, speed, tint:instanceTint, phase: id === 'BUZZ_DRONE' ? (disabled ? time - age + Math.min(age, 1.8) - Math.min(age, 1.8) ** 2 / 3.6 : frozen ? phase : time) : wheelPhase });
         if (settle < .8) this.shadows.add(x, z, id === 'HULK' ? .65 : .35);
     }
-    async prepareHulkSockets() { if(this.hulkSockets)return; const t = await this.template('HULK', 'lo'), root = t.scene.clone(true), mixer = new T.AnimationMixer(root), action = mixer.clipAction(t.animations.find(c => c.name === 'Disassembly')); action.setLoop(T.LoopOnce, 1); action.clampWhenFinished = true; action.play(); action.time = 1.2; mixer.update(0); root.updateMatrixWorld(true); this.hulkSockets = [-1, 1].map(side => root.getObjectByName(side < 0 ? 'spawnKlonkSocketL' : 'spawnKlonkSocketR').getWorldPosition(new T.Vector3())); mixer.stopAllAction(); mixer.uncacheRoot(root); }
+    async prepareHulkSockets() { if(this.hulkSockets)return; const t = await this.template('HULK', 'lo'), root = t.scene.clone(true), mixer = new T.AnimationMixer(root), action = mixer.clipAction(t.animations.find(c => c.name === 'Disassembly')); action.setLoop(T.LoopOnce, 1); action.clampWhenFinished = true; action.play(); action.time = 1.2; mixer.update(0); root.updateMatrixWorld(true); this.hulkSockets = [-1, 1].map(side => root.getObjectByName(side < 0 ? 'spawnKlonkSocketL' : 'spawnKlonkSocketR').getWorldPosition(new T.Vector3()).multiplyScalar(ENEMY_DRAW_SCALE.blorb)); mixer.stopAllAction(); mixer.uncacheRoot(root); }
     async prepareTroops() {
         if(this.troopsPrepared)return;
-        for (const id of ['CAPTAIN_HAZEL','HUMAN_LEGIONARY','HALFGROWN_LEGIONARY','GIANT_LEGIONARY']) {
-            const template = legionaryMotion(id, await this.library.model(id,'lo'));
+        for (const id of ['CAPTAIN_HAZEL','HUMAN_LEGIONARY','HALFGROWN_LEGIONARY','GIANT_LEGIONARY','DUCK_LEGIONARY']) {
+            const template = legionaryMotion(id, id==='DUCK_LEGIONARY'?await this.template(id,'lo'):await this.library.model(id,'lo'));
             this.troopTemplates.push(template);
             this.library.signal?.throwIfAborted();const started=performance.now();this.library.progress({phase:'bake',id,lod:'lo',done:false});
-            const b = new AtlasBatch(this.scene,template,96);this.library.progress({phase:'bake',id,lod:'lo',done:true,milliseconds:performance.now()-started}); applyIbl(b.root,this.env,.55); this.batches.set(id+':lo',b);
+            const b = new AtlasBatch(this.scene,template,id==='DUCK_LEGIONARY'?160:96);this.library.progress({phase:'bake',id,lod:'lo',done:true,milliseconds:performance.now()-started}); applyIbl(b.root,this.env,.55); this.batches.set(id+':lo',b);
         }
-        await this.batch('DUCK_LEGIONARY',160,'lo');
         for(const [id,profile] of Object.entries(TROOP_PROFILES)) {
             const b=this.batches.get(id+':lo');b.template.scene.updateMatrixWorld(true);
             const bone=b.atlas.sourceMeshes.findIndex(mesh=>{for(let p=mesh;p;p=p.parent)if(p.name===profile.owner)return true;return false;});

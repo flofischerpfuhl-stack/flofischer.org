@@ -1,9 +1,15 @@
-/** Ranger-only motion for the reviewed rigid channel cast. Clip keys keep the
- * gun aimed while feet take short steps; locomotion never swings the rifle. */
+/** Live Ranger gait retargeted to the immutable Fernworld channel meshes. */
 import { THREE as T } from './three-kit.js';
+import { troopScale, TROOP_PROFILES } from './fern-rangers-formation.js';
+export const LIVE_WALK = {angularSpeed:11,period:2*Math.PI/11,legAmplitude:.7,armAmplitude:0,bodyBob:.04};
+export function liveWalkPose(phase,swing=1) {
+ const step=Math.sin(phase)*swing;
+ return {leg:step*.7,arm:0,bob:Math.abs(step)*.04};
+}
 export function legionaryMotion(id, model) {
-  const scene = new T.Group(), joints = new Map(), materials = new Map();
-  for (const part of model) {
+  const scene = Array.isArray(model)?new T.Group():model.scene, joints = new Map(), materials = new Map();
+  if(!Array.isArray(model))for(const name of ['body','recoil','legL','legR','armL','armR']){const node=scene.getObjectByName(name);if(node)joints.set(name,node);}
+  for (const part of Array.isArray(model)?model:[]) {
     let joint = joints.get(part.ch);
     if (!joint) {
       joint = new T.Group(); joint.name = part.ch; joint.position.fromArray(part.pivot || [0, 0, 0]);
@@ -16,27 +22,27 @@ export function legionaryMotion(id, model) {
     }
     const mesh = new T.Mesh(part.geometry, material); mesh.position.copy(joint.position).negate(); joint.add(mesh);
   }
-  const times = [0,.125,.25,.375,.5,.625,.75,.875,1], duration = .68;
-  const animations = [];
+  const duration = LIVE_WALK.period, times = Array.from({length:65},(_,i)=>i*duration/64);
+  const animations = [], size = troopScale(id);
   for (const name of ['Idle','Walk','IdleFire','WalkFire','Retreat']) {
-    const walking = name.startsWith('Walk') || name === 'Retreat', fire = name.endsWith('Fire'), tracks = [];
-    // These cyclic pose keys deliberately use a small stride, two quiet weight
-    // transfers and planted shoulders. Every clip owns every controlled joint.
+    const walking=name.startsWith('Walk')||name==='Retreat', swing=walking?1:.15, fire=name.endsWith('Fire'), tracks=[];
     for (const [channel,joint] of joints) {
       const rotations=[], positions=[];
-      for (let i=0;i<times.length;i++) {
-        const stride=[-.28,-.20,0,.20,.28,.20,0,-.20,-.28][i], side=channel==='legL'?1:channel==='legR'?-1:0;
-        const arm=channel==='armL'||channel==='armR';
-        const angle=walking&&side?stride*side:arm?(name==='Retreat'?-1.8:-.12):0;
+      for (const t of times) {
+        const pose=liveWalkPose(t*LIVE_WALK.angularSpeed,swing);
+        const angle=channel==='legL'?pose.leg:channel==='legR'?-pose.leg:
+          (channel==='armL'||channel==='armR')&&name==='Retreat'?-2.6:0;
         rotations.push(...new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),angle));
-        const recoil=fire&&channel==='recoil'?[0,.04,.012,0,0,.04,.012,0,0][i]:0;
-        positions.push(joint.position.x,joint.position.y,joint.position.z+recoil);
+        // Live bob moves body/recoil only: feet stay planted and the root does not hop.
+        // The actual live troop meshes have no swinging arm channels: both
+        // armed hands live in recoil. Native separated arms follow that same bob.
+        const bob=['body','recoil','armL','armR'].includes(channel)?pose.bob*1.1/size:0;
+        positions.push(joint.position.x,joint.position.y+bob,joint.position.z+(fire&&(channel==='recoil'||channel===TROOP_PROFILES[id].owner)?.066/size:0));
       }
-      tracks.push(new T.QuaternionKeyframeTrack(channel+'.quaternion',times.map(t=>t*duration),rotations));
-      tracks.push(new T.VectorKeyframeTrack(channel+'.position',times.map(t=>t*duration),positions));
+      tracks.push(new T.QuaternionKeyframeTrack(channel+'.quaternion',times,rotations));
+      tracks.push(new T.VectorKeyframeTrack(channel+'.position',times,positions));
     }
-    tracks.push(new T.VectorKeyframeTrack('.position',times.map(t=>t*duration),times.flatMap((_,i)=>[0,walking?[0,.012,.022,.012,0,.012,.022,.012,0][i]:0,0])));
     animations.push(new T.AnimationClip(name,duration,tracks));
   }
-  return {id,lod:'lo',scene,animations,ownedMaterials:[...materials.values()]};
+  return {id,lod:'lo',motionFps:60,scene,animations,ownedMaterials:[...materials.values()]};
 }

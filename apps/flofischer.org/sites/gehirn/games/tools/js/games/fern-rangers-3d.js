@@ -1,7 +1,7 @@
 /** Fern Rangers: authored campaign and Sturmbastion assets, bounded motion
  * batches, native sockets and shared WebGL context. Gameplay stays in sessions. */
 import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, TextPlane, projector, LOW_GPU } from './three-kit.js';
-import { RANGER_SCALE, TROOP_PROFILES, warmCampaignFormations, campaignFormation, nearestMuzzle, shotSegment } from './fern-rangers-formation.js';
+import { LIVE_TROOP_HEIGHT, TROOP_PROFILES, warmCampaignFormations, campaignFormation, nearestMuzzle, shotSegment } from './fern-rangers-formation.js';
 import { RangersArt, ENEMY_ASSET, BOSS_ASSET } from './fern-rangers-art.js';
 import { RangerSettlements, RangerRoute } from './fern-rangers-scenery.js';
 import { RangerProps } from './fern-rangers-props.js';
@@ -9,14 +9,15 @@ import { Sturmbastion3D } from './fern-rangers-sturmbastion-3d.js';
 import { tuft, windy } from './world/island.js';
 
 import { RangerPanorama } from './fern-rangers-panorama.js';
+import { MeadowScenery } from './fern-rangers-meadow.js';
 import { ROAD, WEAPONS, BOSSES, LANES_MAX } from './fern-rangers.js';
 
 const FAR = 92;
 const THEMES = {
   meadow: {
     ground: 't-grass', sky: { top: 0x4f9ef0, horizon: 0xe4f3ff }, fog: 0xd2e8fa,
-    light: { sun: 0xfff1d6, sky: 0xd6ecff, ground: 0x4f6e2c, intensity: 2.6, ambient: 1.2 }, exposure: 1.05,
-    near: ['woodland_birch_young','woodland_bush_flowering','meadow_fern_arching','fw_granite_moss'], far: ['woodland_oak_old','woodland_birch_young'], grass: { colour: [0.27, 0.55, 0.32], height: 0.24 },
+    light: { sun: 0xffe6bf, sky: 0xcfe6ff, ground: 0x5a7a30, intensity: 3.0, ambient: 1.0 }, exposure: 1.05,
+    near: [], far: [], // composed by MeadowScenery grass: { colour: [0.27, 0.55, 0.32], height: 0.24 },
   },
   dunes: {
     ground: 't-sand', sky: { top: 0x5f93db, horizon: 0xffe2b0 }, fog: 0xf6dcb4,
@@ -35,6 +36,11 @@ const THEMES = {
   },
 };
 
+// The painted meadow grass of the original Rangers ground, loaded once (clones share the image).
+let grassTex = null;
+const meadowGrass = () => grassTex ||= new THREE.TextureLoader().loadAsync(new URL('../../games-assets/t-grass.webp', import.meta.url).href).then((t) => {
+  t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; return t;
+});
 function canvasTex(w, h, draw, repeat) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   draw(c.getContext('2d'), w, h);
@@ -184,7 +190,7 @@ export class FernRangers3D {
   }
 
   routeTexture(name,len) {
-    const palette={meadow:['#777b69','#8c8e7c','#626956'],dunes:['#a58b68','#b59e79','#907a5a'],frost:['#87959d','#a7b0b3','#73838b'],ember:['#605961','#766b70','#4c474f']}[name]||['#777b69','#8c8e7c','#626956'];
+    const palette={meadow:['#a99677','#b8a585','#7f6f55'],dunes:['#a58b68','#b59e79','#907a5a'],frost:['#87959d','#a7b0b3','#73838b'],ember:['#605961','#766b70','#4c474f']}[name]||['#777b69','#8c8e7c','#626956'];
     return canvasTex(512,512,(g,w,h)=>{
       g.fillStyle=palette[2];g.fillRect(0,0,w,h);
       for(let row=0;row<12;row++)for(let col=-1;col<9;col++){
@@ -210,8 +216,10 @@ export class FernRangers3D {
     for(const bank of this.emberBanks)bank.visible=name==='ember';
     this.tile = 10;
     for (const [m, len] of [[this.ground, this.nearLen], [this.groundFar, this.strip]]) {
-      m.material.map?.dispose();m.material.map=this.groundTexture(name,len);
-      m.material.color.set(name === 'meadow' ? 0xb8c6a5 : 0xffffff);
+      m.material.map?.dispose();
+      if (name === 'meadow') { const t = (await meadowGrass()).clone(); t.repeat.set(400 / 5, len / 5); t.needsUpdate = true; m.material.map = t; }
+      else m.material.map=this.groundTexture(name,len);
+      m.material.color.set(name === 'meadow' ? 0xc4d8a4 : 0xffffff);
       m.material.needsUpdate = true;
     }
     for(const [m,len] of [[this.road,this.nearLen],[this.roadFar,this.strip]]){m.material.map?.dispose();m.material.map=this.routeTexture(name,len);m.material.color.set(0xffffff);m.material.needsUpdate=true;}
@@ -231,13 +239,21 @@ export class FernRangers3D {
     this.scene.background = new THREE.Color(th.fog);
     await this.pano.build({library:this.art.library,world:Math.max(0,world),dark,low:LOW_GPU,fog:th.fog,light:th.light}); this.panoDirty = true;
     if (this.loop) { this.scene.remove(this.loop.group, this.loop.static); this.loop.dispose(); }
-    this.settlements?.dispose();this.settlements=await RangerSettlements.create(this.art.library,this.scene,Math.max(0,world),this.env);
-    this.loop = new RangerRoute({ world: Math.max(0, world), road: ROAD, P: 128, low: LOW_GPU, dark });
-    this.scene.add(this.loop.group, this.loop.static);
-    this.roadside = new Roadside(this.scene, near, 40);
-    this.farProps = new Roadside(this.scene, far, 12);
-    // far props stand outside the shadow box: no shadow pass for them
-    for (const k of this.farProps.kinds) for (const { mesh } of k.meshes) mesh.castShadow = false;
+    this.settlements?.dispose();this.settlements=null;this.meadow?.dispose();this.meadow=null;this.loop=null;
+    if (name === 'meadow') {
+      // Fernhaven: one composed route (hedges, groves, landmarks on side slopes) replaces the loose roadside props.
+      const meadow = await MeadowScenery.create({ library: this.art.library, road: ROAD, low: LOW_GPU });
+      if (this.themeName !== key) { meadow.dispose(); return; }
+      this.meadow = meadow; this.scene.add(meadow.group);
+    } else {
+      this.settlements=await RangerSettlements.create(this.art.library,this.scene,Math.max(0,world),this.env);
+      this.loop = new RangerRoute({ world: Math.max(0, world), road: ROAD, P: 128, low: LOW_GPU, dark });
+      this.scene.add(this.loop.group, this.loop.static);
+      this.roadside = new Roadside(this.scene, near, 40);
+      this.farProps = new Roadside(this.scene, far, 12);
+      // far props stand outside the shadow box: no shadow pass for them
+      for (const k of this.farProps.kinds) for (const { mesh } of k.meshes) mesh.castShadow = false;
+    }
     if (this.grass) { this.scene.remove(this.grass);this.grass.geometry.dispose();this.grass.material.dispose();this.grass.dispose(); this.grass = null;this.grassMats=false; }
     if (th.grass && !LOW_GPU) this.grass = this.makeGrass(th.grass);
     applyIbl(this.scene, this.env, 0.55);
@@ -327,7 +343,7 @@ export class FernRangers3D {
     this.native?.dispose();this.art?.dispose();this.native=null;this.art=null;this.bossActor=null;this.bossActorId=null;this.regionKey=null;this.campaignCompiled=false;
     this.roadside?.dispose(this.campaignScene);this.farProps?.dispose(this.campaignScene);this.roadside=this.farProps=null;
     if(this.loop){this.campaignScene.remove(this.loop.group,this.loop.static);this.loop.dispose();this.loop=null;}
-    this.settlements?.dispose();this.settlements=null;
+    this.settlements?.dispose();this.settlements=null;this.meadow?.dispose();this.meadow=null;
     if(this.grass){this.grass.removeFromParent();this.grass.geometry.dispose();this.grass.material.dispose();this.grass.dispose();this.grass=null;}
     this.pano?.scene?.traverse(o=>{o.geometry?.dispose();o.material?.dispose?.();});if(this.pano)this.pano.scene=null;this.themeName=null;
   }
@@ -359,7 +375,7 @@ export class FernRangers3D {
     cam.position.set(camX + (Math.random() - 0.5) * shake * 0.25, 4.1 + (Math.random() - 0.5) * shake * 0.2, 6.4);
     cam.lookAt(camX * 0.7, .8, -7);
     if(this.pano.base)this.pano.mesh.position.set(this.pano.base.x+camX*.98,this.pano.base.y,this.pano.base.z);
-    this.loop?.update(s.pos);this.settlements?.update(s.pos);
+    this.loop?.update(s.pos);this.settlements?.update(s.pos);this.meadow?.update(s.pos,s.t);
     const L = this.lights.light;
     L.position.set(-5 + s.px * 0.3, 12, 4); L.target.position.set(s.px * 0.3, 0, -6);
 
@@ -457,14 +473,14 @@ export class FernRangers3D {
     if(!lost) {
       this.troopPlaces=campaignFormation(s);
       for(const p of this.troopPlaces) {
-        const muzzle=this.art.troop(p.i,s.px+p.x,p.z,s.t,{size:p.size,speed:s.speed,firing:s.muzzle});
+        const muzzle=this.art.troop(p.i,s.px+p.x,p.z,s.t,{size:p.size,speed:s.speed,firing:s.muzzle,lean:s.onIce?(s.tx-s.px)*.08:0});
         if(muzzle){p.mx=muzzle.x;p.my=muzzle.y;p.mz=muzzle.z;}
       }
     }
     this.bubble.visible=s.buffs.bubble>0&&!lost;
     if(this.bubble.visible){
       const places=this.troopPlaces||[],near=Math.max(0,...places.map(p=>p.z)),far=Math.min(0,...places.map(p=>p.z)),r=s.radius+.7;
-      const h=(s.n>=18?TROOP_PROFILES.GIANT_LEGIONARY.max[1]:TROOP_PROFILES.CAPTAIN_HAZEL.max[1])*RANGER_SCALE;this.bubble.position.set(s.px,h/2,(near+far)/2);this.bubble.scale.set(r,h/2+.2,Math.max(r,(near-far)/2+.7));
+      const h=Math.max(...places.map(p=>LIVE_TROOP_HEIGHT[p.id]));this.bubble.position.set(s.px,h/2,(near+far)/2);this.bubble.scale.set(r,h/2+.2,Math.max(r,(near-far)/2+.7));
     }
     this.native.turret(s);
   }

@@ -9,12 +9,13 @@
  */
 import { THREE } from './three-kit.js';
 import { skyMaterial } from './world/sky.js';
+import { loadModel } from './models.js';
 const WORLD = [
   { // Fernhaven Meadows: sunny morning, rolling green hills, cottages, a windmill, ivy and flowers
     sky: { top: 0x3f8fe6, horizon: 0xe4f3ff, glow: 0xfff1c4, cloud: 0xffffff, shade: 0xb8c8e0 },
     fog: 0xd2e6f4, ground: [0x4f9a35, 0x8cc95a], groundTex: 't-grass', far: [0x6aa860, 0x9cc8a0], rock: [0.6, 0.57, 0.52],
     tuft: [[0.08, 0.2, 0.05], [0.34, 0.6, 0.18]], flowers: [0xffffff, 0xfff2a8, 0xf2a6c4, 0xb9a6f2, 0xff8a5c], ferns: true, ivy: true, moss: 0.8,
-    trees: ['woodland_oak_old','woodland_birch_young'], small: ['woodland_bush_flowering','fw_granite_moss'], houses: [], landmark: 'woodland_oak_old',
+    trees: ['old:TREE_ROUND'], small: ['old:BUSH'], houses: ['old:COTTAGE'], landmark: 'old:WINDMILL',
     torch: 0xffb050, window: 0xbfe4ff, banner: [0x3f9b4a, 0xfff4d6], wood: 0x8a5a33, metal: 0x3a3a40, trim: 0xf3ead8,
     ambient: { kind: 'pollen', color: 0xfff2a8 }, smoke: true, hills: 'roll',
   },
@@ -68,7 +69,7 @@ export class RangerPanorama {
   async build({ world = 0, dark = false, low = false, fog = 0xd2e8fa, light = null, library }) {
     this.scene?.traverse((o) => { o.geometry?.dispose(); o.material?.dispose?.(); });
     const W = WORLD[world] || WORLD[0], rand = rng(5 + world * 31), noise = createNoise(11 + world);
-    const PROPS = Object.fromEntries(await Promise.all([...new Set([...W.trees,...W.small,...W.houses,W.landmark])].map(async id=>[id,await library.model(id,'lo')])));
+    const PROPS = Object.fromEntries(await Promise.all([...new Set([...W.trees,...W.small,...W.houses,W.landmark])].map(async id=>[id,await (id.startsWith('old:')?loadModel(id.slice(4),'lo'):library.model(id,'lo'))])));
     const nativeHeight = name => Math.max(.1, ...PROPS[name].map(part=>{part.geometry.computeBoundingBox();return part.geometry.boundingBox.max.y;}));
     const scene = (this.scene = new THREE.Scene());
     scene.fog = new THREE.Fog(new THREE.Color(fog).multiplyScalar(dark ? 0.55 : 1), 120, 760);

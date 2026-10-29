@@ -363,7 +363,7 @@ export function mountGame(root, game) {
   const view = { w: 1, h: 1, dpr: 1, dark: isDark(), reduced: reducedMotion(), time: 0, keyboard: !!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches };
 
   let startedAt = 0;
-  let session = null, level = 0, screen = 'menu', active = false, raf = 0, lastT = 0, acc = 0, settlementTime = 0, hintTimer = 0, hintAt = 0, resultAt = 0;
+  let session = null, level = 0, screen = 'menu', active = false, raf = 0, lastT = 0, acc = 0, settlementTime = 0, hintTimer = 0, hintAt = 0, hintAfterChoice = null, resultAt = 0;
   let preview = null;
   const starterSelect = ref('starter');
   function syncStarter() {
@@ -388,6 +388,7 @@ export function mountGame(root, game) {
     screen = name;
     stage.dataset.screen = name;
     for (const [key, el] of Object.entries(screens)) el.hidden = key !== name && !(key === 'menu' && name === 'loading' && loadingMap);
+    if(name==='pause'||name==='result')screens[name].scrollTop=0;
     screens.menu.inert = name === 'loading';
     if (ow) { if (name === 'menu' && active) { ow.refresh(); ow.activate(); } else ow.deactivate(); }
     hud.hidden = !(name === 'play' || name === 'pause');
@@ -481,7 +482,19 @@ export function mountGame(root, game) {
     if (screen === 'loading') return;
     if (ow && screen === 'menu') { g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, canvas.width, canvas.height); return; }
     const s = session || preview || (preview = game.create(screen === 'menu' ? nextOpenLevel() : level, { sound, preview: true, starter: selectedStarter, hint: () => false }));
+    // Some start supplies appear after the first simulation steps. Pause an
+    // already visible instruction too, rather than letting its wall-clock timer
+    // expire while the player reads a card.
+    if(s===session&&s.choice&&hintAt){
+      if(!Number.isFinite(s.levelHintUntil)||s.t<s.levelHintUntil)hintAfterChoice=ref('hint').textContent;
+      clearTimeout(hintTimer);hintAt=0;
+    }
+    if(s===session&&!s.choice&&screen==='play'&&!helpOpen&&hintAfterChoice)showLevelHint(hintAfterChoice);
+    if(s===session&&hintAt&&!s.choice&&!helpOpen)ref('hint').hidden=false;
     if (s === session && Number.isFinite(s.levelHintUntil) && s.t >= s.levelHintUntil) ref('hint').hidden = true;
+    // A choice owns the playfield. Neither the opening hint nor a queued tip may
+    // cover its card names or intercept a player's reading of the options.
+    if(s===session&&s.choice){ref('hint').hidden=true;if(tipShown)hideTip();}
     g.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
     g.clearRect(0, 0, view.w, view.h);
     let t0 = performance.now();
@@ -560,7 +573,7 @@ export function mountGame(root, game) {
     loadHistory.push(currentLoad);if(loadHistory.length>12)loadHistory.shift();
     sound.unlock();
     session?.cancelInput?.();
-    level = i; settlementTime = 0; acc = 0;
+    level = i; settlementTime = 0; acc = 0; hintAfterChoice = null;
     if (!retry) runStarter = selectedStarter;
     session = game.create(i, { sound, preview: false, starter: runStarter, hint: requestTip });
     const preparing = session;
@@ -590,7 +603,7 @@ export function mountGame(root, game) {
     const k = progress.keys[i];
     ref('level').textContent = worlds ? `${k.n === 'boss' ? `World ${k.world} boss` : `${k.world}-${k.n}`} · ${game.levels[i].name}` : `${i + 1} · ${game.levels[i].name}`;
     setScreen(active ? 'play' : 'pause');
-    const text = session.hint || game.levels[i].hint;
+    const text = session.inputHint?.(inputMode) ?? (session.hint || game.levels[i].hint);
     // a game's very first level opens the help card first; the level's own hint follows when it closes
     root.querySelector('[data-act="puzzle-hint"]').hidden = !session?.puzzleHintAvailable;
     if (active && HELP[game.id] && !introSeen(game.id)) { markIntro(game.id); showLevelHint(''); hintAfterHelp = text; openHelp(); }
@@ -602,9 +615,10 @@ export function mountGame(root, game) {
   function showLevelHint(text) {
     const hint = ref('hint');
     clearTimeout(hintTimer);
-    hint.hidden = !text; hint.textContent = text || '';
-    hintAt = text ? performance.now() : 0;
-    if (text) hintTimer = setTimeout(() => { hint.hidden = true; hintAt = 0; }, 3200);
+    hintAfterChoice = text && session?.choice ? text : null;
+    hint.hidden = !text || !!hintAfterChoice; hint.textContent = text || '';
+    hintAt = text && !hintAfterChoice ? performance.now() : 0;
+    if (hintAt) hintTimer = setTimeout(() => { hint.hidden = true; hintAt = 0; }, 3200);
   }
   function finish(result) {
     if (screen !== 'play') return;
@@ -672,6 +686,7 @@ export function mountGame(root, game) {
     if (raf) { cancelAnimationFrame(raf); raf = 0; }
     renderHelp(inputMode);
     helpEl.hidden = false;
+    helpEl.scrollTop = 0;
     stage.classList.add('has-help');
     root.querySelector('.gm-help__done').focus({ preventScroll: true });
   }
@@ -716,7 +731,7 @@ export function mountGame(root, game) {
     if (++tickN >= 15) { tickN = 0; checkTips(); }
   }
   function checkTips() {
-    if (!session || session.result || !tips.length || !tipsOn()) return;
+    if (!session || session.result || session.choice || !tips.length || !tipsOn()) return;
     const ctx = { t: playT, mode: inputMode, level };
     for (const tip of tips) {
       if (tip === tipShown || tipQueue.includes(tip) || tipSeen(game.id, tip.id)) continue;
@@ -736,7 +751,7 @@ export function mountGame(root, game) {
     return true;
   }
   function pumpTips() {
-    if (tipShown || !tipQueue.length || helpOpen || screen !== 'play') return;
+    if (tipShown || !tipQueue.length || helpOpen || session?.choice || screen !== 'play') return;
     // the level's own hint gets a moment first, then a tip takes its place
     const wait = hintAt ? 1600 - (performance.now() - hintAt) : 0;
     clearTimeout(tipTimer);
@@ -780,7 +795,7 @@ export function mountGame(root, game) {
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   stage.addEventListener('pointerdown', (e) => { if (e.pointerType) { inputMode = e.pointerType === 'mouse' ? 'keys' : 'touch'; view.touch = inputMode === 'touch'; } }, true);
   // iOS: no page scroll or double-tap zoom while playing.
-  stage.addEventListener('touchmove', (e) => { if (screen === 'play') e.preventDefault(); }, { passive: false });
+  stage.addEventListener('touchmove', (e) => { if (screen === 'play' && !helpOpen) e.preventDefault(); }, { passive: false });
 
   root.addEventListener('click', (e) => {
     const lv = e.target.closest('.gm-level[data-level]');

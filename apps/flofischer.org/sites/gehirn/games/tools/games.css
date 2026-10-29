@@ -118,7 +118,7 @@ body[data-fw-cat="games"] { overflow: hidden; }
 /* ───────────── Screens (menu, pause, result) ───────────── */
 .gm-screen {
   position: absolute; inset: 0; z-index: 3;
-  display: grid; place-items: center;
+  display: flex;
   padding: var(--space-4);
   overflow: auto;
   background: color-mix(in srgb, var(--bg) 35%, transparent);
@@ -127,6 +127,7 @@ body[data-fw-cat="games"] { overflow: hidden; }
 }
 .gm-screen[hidden] { display: none; }
 .gm-card {
+  margin: auto; /* tall screens begin at their reachable top, like the help card */
   width: min(460px, 100%);
   display: flex; flex-direction: column; gap: var(--space-3);
   padding: var(--space-6);
@@ -344,6 +345,13 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
   .gm-card { gap: var(--space-2); padding: var(--space-4); }
   .gm-howto, .gm-art { display: none; }
 }
+/* A short phone still exposes every pause action, including the sound toggle.
+   Long result explanations can scroll from the top rather than being centred
+   above the clipping edge. These rules deliberately exclude the 3D hub. */
+@media (max-height: 480px) and (min-width: 480px) {
+  .gm-pause .gm-card {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:min(560px,100%);gap:var(--space-2);padding:var(--space-3);}
+  .gm-pause .gm-title {grid-column:1/-1;font-size:var(--text-lg);line-height:var(--lh-lg);}
+}
 
 /* ───────────── Help: the How to play card, the "?" buttons and the mechanic tips (core.js, games-help.js) ─────────────
    The card is a kit card over the stage (it pauses the level); tips are a dark banner like the level hint, never in
@@ -549,6 +557,7 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
 .gm-ow__sr {position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}
 .gm-ow__sr:focus-within {width:auto!important;height:auto!important;clip:auto!important;clip-path:none!important;left:12px!important;right:12px!important;top:auto!important;bottom:16px!important;margin:0!important;padding:8px!important;z-index:10}
 .gm-ow__hint {position:absolute;bottom:12px;left:50%;transform:translateX(-50%);margin:0;padding:6px 12px;max-width:calc(100% - 32px);box-sizing:border-box;border-radius:20px;background:var(--surface-overlay);color:var(--text-2);font-size:var(--text-2xs);white-space:nowrap;pointer-events:none}
+@media(max-height:480px) and (min-width:480px){.gm-ow__hint{display:none}}
 .gm-ow__canvas:focus-visible {outline:2px solid var(--accent-fill);outline-offset:-4px}
 .gm-ow__context {pointer-events:none}
 @media(max-width:639px){.gm-ow__hint{font-size:var(--text-2xs);white-space:normal;text-align:center;bottom:8px;width:max-content}}
@@ -566,3 +575,25 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
 .gm-scene-loading__body small,.gm-ow__loading small {font-size:var(--text-2xs);line-height:1.4;color:var(--text-3)}
 .gm-ow__loading {flex-direction:column;align-items:stretch;gap:6px;white-space:normal;width:min(360px,calc(100% - 60px));box-sizing:border-box;text-align:center}
 .gm-ow__loading .fw-btn {align-self:center}
+
+/* Save-code entry remains a normal, independently scrollable document region. */
+.fw-canteen__dialog:not(.is-fallback) {
+  touch-action: pan-y; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 639px), (max-height: 479px) {
+  .fw-canteen__dialog:not(.is-fallback) {
+    top: var(--space-4); bottom: auto; left: var(--space-4); right: var(--space-4);
+    width: auto; max-height: calc(100% - var(--space-8));
+  }
+}
+.fw-canteen__dialog:not(.is-fallback) textarea { font-size: var(--text-md); line-height: var(--lh-md); }
+.fw-canteen__dialog:not(.is-fallback) .fw-canteen__close { position: sticky; top: 0; float: right; z-index: 1; }
+
+/* Short landscape keeps the selected level in the world plaque, freeing the
+   separate descriptive row for the actual scene. */
+.gm-ow__levelcompact{display:none}
+@media(max-height:480px) and (min-width:480px){
+ .gm-ow__context{display:none}
+ .gm-ow__world .gm-ow__kicker{display:none}
+ .gm-ow__levelcompact{display:block;font-size:var(--text-2xs);line-height:var(--lh-2xs);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
+}

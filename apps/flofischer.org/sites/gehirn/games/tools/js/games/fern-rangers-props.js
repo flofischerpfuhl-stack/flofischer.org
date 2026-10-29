@@ -2,7 +2,7 @@
  * boss/escape capsules retain a scene graph for live authored socket queries. */
 import { THREE as T, TextPlane, applyIbl } from './three-kit.js';
 import { gateGood, gateText, laserOn, laserWarn, geyserState } from './fern-rangers.js';
-import { RANGER_SCALE } from './fern-rangers-formation.js';
+import { MINER_CAGE_SCALE, troopScale } from './fern-rangers-formation.js';
 import { PICKUP_ASSET, transform, ownMaterials } from './fern-rangers-art.js';
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 export function propClips(template) {
@@ -19,7 +19,7 @@ export function propClips(template) {
     return clips;
 }
 export class RangerProps {
-    constructor(scene, art, env) { this.scene = scene; this.art = art; this.env = env; this.batches = new Map(); this.labels = []; this.labelIndex = 0; this.v = new T.Vector3(); this.q = new T.Quaternion(); this.scale = new T.Vector3(); this.m = new T.Matrix4(); this.temp = new T.Matrix4(); this.fx = []; this.lastTurret = false; this.hazard = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshBasicMaterial({ transparent: true, opacity: .65, depthWrite: false }), 96); this.hazard.instanceMatrix.setUsage(T.DynamicDrawUsage); this.hazard.frustumCulled = false; this.scene.add(this.hazard); this.hazardCount = 0; this.color = new T.Color(); }
+    constructor(scene, art, env) { this.scene = scene; this.art = art; this.env = env; this.batches = new Map(); this.labels = []; this.labelIndex = 0; this.v = new T.Vector3(); this.q = new T.Quaternion(); this.scale = new T.Vector3(); this.m = new T.Matrix4(); this.temp = new T.Matrix4(); this.fx = []; this.lastTurret = false; this.gateGlass = new T.InstancedMesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .34, depthWrite: false, side: T.DoubleSide, toneMapped: false }), 12); this.gateGlass.frustumCulled = false; this.gateGlass.count = 0; this.gateGlass.renderOrder = 5; scene.add(this.gateGlass); this.gateCount = 0; this.hazard = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshBasicMaterial({ transparent: true, opacity: .65, depthWrite: false }), 96); this.hazard.instanceMatrix.setUsage(T.DynamicDrawUsage); this.hazard.frustumCulled = false; this.scene.add(this.hazard); this.hazardCount = 0; this.color = new T.Color(); }
     async prepare(s,{onProgress,signal}={}) {
         const check=()=>signal?.throwIfAborted();check();
         const ids = new Set(['LANDING_POD', 'ESCAPE_POD', 'FERNSTONE_GRENADE']);
@@ -70,7 +70,7 @@ export class RangerProps {
     }
     reset(){this.begin();this.lastTurret=false;this.escapeFor=null;this.escapeStart=null;this.turretAt=undefined;this.hazard.count=0;}
     id(e) { return e.kind === 'gate' ? (e.op === 'rate' ? 'FIRE_RATE_CELL_GATE' : gateGood(e) ? 'LANDING_GATE_FRAME' : 'JAMMER_GATE_FRAME') : e.kind === 'pickup' ? PICKUP_ASSET[e.type] : ({ barrel: 'FUEL_BARREL', crate: 'FERNSTONE_WEAPON_CASE', cage: 'MINER_CAGE', block: 'ROAD_BLOCK', laser: 'LASER_FENCE_PYLON', fork: null, geyser: 'LAVA_GEYSER_RIM' })[e.kind]; }
-    begin() { this.labelIndex = 0; this.hazardCount = 0; for (const p of this.labels)
+    begin() { this.labelIndex = 0; this.hazardCount = 0; this.gateCount = 0; for (const p of this.labels)
         p.mesh.visible = false; for (const f of this.fx)
         f.visible = false; if (this.escapePod)
         this.escapePod.scene.visible = false; if (this.turretActor)
@@ -88,10 +88,12 @@ export class RangerProps {
                 return;
             const width = e.x1 - e.x0, scale = width / (e.op === 'rate' ? 3.2 : 4.4);
             this.put(id, x, 0, -z, { width: scale, height: .78 });
+            // The opening glows in the gate's colour (blue helps, red costs), readable from far down the road.
+            const n = this.gateCount++; if (n < 12) { this.m.makeScale(width * .9, 1.55, 1).setPosition(x, .86, -z); this.gateGlass.setMatrixAt(n, this.m); this.gateGlass.setColorAt(n, this.color.setHex(e.op === 'rate' ? 0xffc23a : gateGood(e) ? 0x3a9bff : 0xff4a5a)); }
             // Large, camera-projected decision text is drawn by session.drawLabels.
         }
         else if (e.kind === 'cage') {
-            this.put(id,x,0,-z,{size:RANGER_SCALE,clip:e.alive?'Rest':'Open',time:age});
+            this.put(id,x,0,-z,{size:MINER_CAGE_SCALE,clip:e.alive?'Rest':'Open',time:age});
             for (let i = 0; i < 3; i++) {
                 const name = ['MINER_HUMAN', 'MINER_HALFGROWN', 'MINER_DWARF'][i];
                 const elapsed=Math.max(0,age-.72), out=!e.alive&&age>.72;
@@ -103,7 +105,7 @@ export class RangerProps {
                 const clip=crouched?'Duck_Crouch':!out?'Idle':cheering?'Rescue_Cheer':'Walk';
                 const time=crouched?(out?elapsed*4:s.t):!out?s.t:cheering?elapsed-2.2:elapsed/[.924,.588,.168][i];
                 const floor=.305*(1-clamp((distance-crouchExit)/.35));
-                this.art.batches.get(name+':lo').add(transform(x+(i-1)*.65*RANGER_SCALE,floor*RANGER_SCALE,-z+Math.min(2.5,distance)*RANGER_SCALE,0,RANGER_SCALE),clip,time,{loop:!cheering});
+                this.art.batches.get(name+':lo').add(transform(x+(i-1)*.65*MINER_CAGE_SCALE,floor*MINER_CAGE_SCALE,-z+Math.min(2.5,distance)*MINER_CAGE_SCALE,0,MINER_CAGE_SCALE),clip,time,{loop:!cheering});
             }
         }
         else if (e.kind === 'crate') {
@@ -152,13 +154,15 @@ export class RangerProps {
                 beam.scale.setScalar(1 - age * .6);
             }
             if (e.type === 'reinforcement' && age < 4 && pods++ < 2) {
+                const personnelScale=troopScale('HUMAN_LEGIONARY');
                 const x = e.x >= 0 ? -4.8 : 4.8, y = age < .55 ? (1 - age / .55) ** 2 * 5 : age > 3 ? (age - 3) ** 2 * 6 : 0;
-                // Human doorway contract requires uniform 3.97x pod. It lands beside the
+                // Pod and departing Human share the campaign role scale. The native
+                // doorway contract requires a uniform 3.97x pod. It lands beside the
                 // road and opens only on the ground; personnel exit after .72 seconds.
-                this.put('LANDING_POD', x, y*RANGER_SCALE, z, { size: 3.97*RANGER_SCALE, clip: age > .55 ? 'Open' : 'Rest', time: age - .55 });
+                this.put('LANDING_POD', x, y*personnelScale, z, { size: 3.97*personnelScale, clip: age > .55 ? 'Open' : 'Rest', time: age - .55 });
                 if (age > 1.27 && age < 3) {
                     const exit = clamp((age - 1.27) / .65), walk = clamp((age - 1.92) / .85);
-                    this.art.troop(2, x + Math.sign(-x) * walk * 2.3*RANGER_SCALE, z + (0.51 + exit * .4) * 3.97*RANGER_SCALE, s.t, { size:RANGER_SCALE,y: .215 * 3.97*RANGER_SCALE * (1 - clamp((exit - .65) / .35)), yaw: walk ? Math.sign(-x) * Math.PI / 2 : 0 });
+                    this.art.troop(2, x + Math.sign(-x) * walk * 2.3*personnelScale, z + (0.51 + exit * .4) * 3.97*personnelScale, s.t, { size:personnelScale,y: .215 * 3.97*personnelScale * (1 - clamp((exit - .65) / .35)), yaw: walk ? Math.sign(-x) * Math.PI / 2 : 0 });
                 }
             }
         }
@@ -232,9 +236,9 @@ export class RangerProps {
     }
     hazardBox(x, y, z, w, h, d, color) { const n = this.hazardCount++; if (n >= 96)
         throw new Error('Hazard pool exceeded'); this.m.makeScale(w, h, d).setPosition(x, y, z); this.hazard.setMatrixAt(n, this.m); this.hazard.setColorAt(n, this.color.setHex(color)); }
-    end() { this.hazard.count = this.hazardCount; this.hazard.instanceMatrix.needsUpdate = true; if (this.hazard.instanceColor)
+    end() { this.gateGlass.count = Math.min(12, this.gateCount); this.gateGlass.instanceMatrix.needsUpdate = true; if (this.gateGlass.instanceColor) this.gateGlass.instanceColor.needsUpdate = true; this.hazard.count = this.hazardCount; this.hazard.instanceMatrix.needsUpdate = true; if (this.hazard.instanceColor)
         this.hazard.instanceColor.needsUpdate = true; }
-    dispose() { this.hazard.removeFromParent(); this.hazard.geometry.dispose(); this.hazard.material.dispose(); for (const p of this.labels) {
+    dispose() { this.gateGlass.removeFromParent(); this.gateGlass.geometry.dispose(); this.gateGlass.material.dispose(); this.hazard.removeFromParent(); this.hazard.geometry.dispose(); this.hazard.material.dispose(); for (const p of this.labels) {
         p.mesh.removeFromParent();
         p.mesh.geometry.dispose();
         p.mesh.material.map?.dispose();
