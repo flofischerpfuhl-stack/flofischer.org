@@ -208,7 +208,7 @@
 
     const sprite = new Image();
     sprite.decoding = "async";
-    sprite.src = "./assets/brain-frames.webp";
+    sprite.src = canvas.dataset.frames || "./assets/brain-frames.webp";
     sprite.addEventListener("load", () => {
       const work = document.createElement("canvas");
       work.width = sprite.naturalWidth;

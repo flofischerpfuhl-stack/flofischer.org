@@ -265,43 +265,35 @@ def main() -> int:
         if (SITES / "shared/hub" / legacy_file).exists():
             errors.append(f"shared/hub/{legacy_file}: legacy first-person runtime must be removed")
 
-    brain_path = SITES / "shared/gehirn/models/brain.glb"
-    if not brain_path.is_file() or brain_path.stat().st_size > 1_500_000:
-        errors.append("shared/gehirn/models/brain.glb: optimized visible-systems model must stay below 1.5 MB")
-    elif brain_path.read_bytes()[:4] == b"glTF":
-        data = brain_path.read_bytes()
-        json_length, json_type = struct.unpack_from("<II", data, 12)
-        if json_type == 0x4E4F534A:
-            document = json.loads(data[20:20 + json_length].decode("utf-8"))
-            categories = {node.get("extras", {}).get("bx_cat") for node in document.get("nodes", [])}
-            if not categories <= {"cortex", "cerebellum", "brainstem"}:
-                errors.append("shared/gehirn/models/brain.glb: contains anatomy systems that are never rendered")
-
-    brain_script = (SITES / "shared/gehirn/gehirn-three.js").read_text(encoding="utf-8")
+    # Gehirn: dot-screen brain (pre-rendered frames on a canvas) and lazily loaded project videos.
     brain_markup = (SITES / "gehirn/index.html").read_text(encoding="utf-8")
+    frames_path = SITES / "shared/gehirn/assets/brain-frames.webp"
+    if not frames_path.is_file() or frames_path.stat().st_size > 250_000:
+        errors.append("shared/gehirn/assets/brain-frames.webp: missing or exceeds 250 KB performance budget")
+    if "data-brain-canvas" not in brain_markup or "data-frames=" not in brain_markup:
+        errors.append("gehirn/index.html: missing dot-screen brain canvas")
+    gehirn_script = (SITES / "shared/gehirn/site.js").read_text(encoding="utf-8")
     for marker, label in (
-        ("data-brain-loader", "brain loading indicator"),
-        ("data-brain-progress", "brain loading progress"),
+        ('root.classList.contains("motion")', "reduced-motion handling"),
+        ("IntersectionObserver", "visibility-gated rendering and video playback"),
+        ("canvas.dataset.frames", "frame sprite taken from the markup"),
     ):
-        if marker not in brain_markup:
-            errors.append(f"gehirn/index.html: missing {label}")
-    for marker, label in (
-        ("renderer.setAnimationLoop(render)", "renderer-managed brain loop"),
-        ("1000 / 30", "mobile brain frame cap"),
-        ("const materials = new Map()", "shared brain material cache"),
-    ):
-        if marker not in brain_script:
-            errors.append(f"shared/gehirn/gehirn-three.js: missing {label}")
-    for name in ("fernwork", "suprabench", "paper2form"):
+        if marker not in gehirn_script:
+            errors.append(f"shared/gehirn/site.js: missing {label}")
+    for name in ("fernwork", "suprabench"):
         webm = SITES / "shared/gehirn/previews" / f"{name}.webm"
         if not webm.is_file() or webm.stat().st_size > 500_000:
             errors.append(f"shared/gehirn/previews/{name}.webm: missing or exceeds 500 KB performance budget")
         if brain_markup.find(f"{name}.webm") > brain_markup.find(f"{name}.mp4"):
             errors.append(f"gehirn/index.html: {name} must offer WebM before MP4 fallback")
-    if "project-video" in brain_markup and " autoplay" in brain_markup:
-        errors.append("gehirn/index.html: offscreen project videos must not autoplay during initial load")
-    if brain_markup.count('preload="none"') != 9:
-        errors.append("gehirn/index.html: project videos must defer loading until their cut is visible")
+    if " autoplay" in brain_markup:
+        errors.append("gehirn/index.html: project videos must not autoplay during initial load")
+    if brain_markup.count("<video ") != brain_markup.count('preload="none"'):
+        errors.append("gehirn/index.html: every project video must defer loading until it is visible")
+    if "prefers-reduced-motion" not in brain_markup:
+        errors.append("gehirn/index.html: reduced-motion bootstrap is missing")
+    if "noindex" in brain_markup:
+        errors.append("gehirn/index.html: the public page must not be noindex")
 
     seele_script = (SITES / "shared/seele/seele.js").read_text(encoding="utf-8")
     seele_style = (SITES / "shared/seele/seele.css").read_text(encoding="utf-8")

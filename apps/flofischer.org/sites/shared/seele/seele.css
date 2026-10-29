@@ -1367,3 +1367,12 @@ html[data-language="de"] [data-lang-copy="de"] {
     transition: none;
   }
 }
+
+/* flo logo in the back-to-hub link */
+.realm-seele .hub-link .flo-logo {
+  flex: none;
+  width: auto;
+  height: 1.55em;
+  margin-right: 0.7em;
+  overflow: visible;
+}

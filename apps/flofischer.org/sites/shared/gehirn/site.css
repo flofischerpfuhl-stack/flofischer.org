@@ -291,17 +291,19 @@ html[data-language="de"] p[data-lang-copy="de"] {
   text-decoration: none;
 }
 
-.mark-ring {
-  width: 1.75rem;
-  height: 1.75rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 3;
+.flo-logo {
+  display: block;
+  width: auto;
+  height: 1.3rem;
+  overflow: visible;
 }
 
-.mark-ring .mark-dot {
-  fill: var(--red);
-  stroke: none;
+.mark-sep {
+  margin: 0 -0.15rem;
+  opacity: 0.45;
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  font-weight: 300;
 }
 
 .mark-word {
@@ -1637,6 +1639,17 @@ html[data-language="de"] p[data-lang-copy="de"] {
 
 .foot-end a {
   text-decoration: none;
+}
+
+.foot-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.foot-mark .flo-logo {
+  height: 1.1rem;
+  color: var(--bone);
 }
 
 .foot-end a:hover {

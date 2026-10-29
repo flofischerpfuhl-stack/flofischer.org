@@ -1,4 +1,4 @@
-const PWA_VERSION = "2026-09-24-1";
+const PWA_VERSION = "2026-10-29-1";
 const CACHE_PREFIX = "ff-pwa-";
 const CACHE_NAME = `${CACHE_PREFIX}${self.PWA_CONFIG.site}-${PWA_VERSION}`;
 const scopeUrl = new URL(self.registration.scope);
@@ -64,7 +64,7 @@ async function networkFirstStatic(request) {
   }
 }
 
-const MOCKUPS = ["fernwork", "builder", "win", "games", "fernlings", "redesign"]; // keep in sync with worker/mockups.js
+const MOCKUPS = ["fernwork", "builder", "win", "games", "fernlings"]; // keep in sync with worker/mockups.js
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;

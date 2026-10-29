@@ -9,7 +9,6 @@ export const MOCKUPS = new Set([
   "fernwork", // Fernwork One redesign mockups
   "builder", // HimmelCAD Builder UI redesign (builder-ui-lab)
   "win", // one-time Windows PC remote-access setup page (SSH + Tailscale)
-  "redesign", // gehirn.flofischer.org start page redesign draft (review only, live page unchanged)
   "games", // Fernworld Games test build: Fern Rangers, Pip's Tower, Fernling-Arena and Bounce Brigade
 ]);
 
