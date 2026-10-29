@@ -9,7 +9,7 @@ import { Sturmbastion3D } from './fern-rangers-sturmbastion-3d.js';
 import { tuft, windy } from './world/island.js';
 
 import { RangerPanorama } from './fern-rangers-panorama.js';
-import { MeadowScenery } from './fern-rangers-meadow.js';
+import { MeadowScenery, lawnTexture } from './fern-rangers-meadow.js';
 import { ROAD, WEAPONS, BOSSES, LANES_MAX } from './fern-rangers.js';
 
 const FAR = 92;
@@ -36,11 +36,6 @@ const THEMES = {
   },
 };
 
-// The painted meadow grass of the original Rangers ground, loaded once (clones share the image).
-let grassTex = null;
-const meadowGrass = () => grassTex ||= new THREE.TextureLoader().loadAsync(new URL('../../games-assets/t-grass.webp', import.meta.url).href).then((t) => {
-  t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; return t;
-});
 function canvasTex(w, h, draw, repeat) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   draw(c.getContext('2d'), w, h);
@@ -217,9 +212,9 @@ export class FernRangers3D {
     this.tile = 10;
     for (const [m, len] of [[this.ground, this.nearLen], [this.groundFar, this.strip]]) {
       m.material.map?.dispose();
-      if (name === 'meadow') { const t = (await meadowGrass()).clone(); t.repeat.set(400 / this.tile, len / this.tile) /* one tile = this.tile units, as the scroll offset pos / tile assumes */; t.needsUpdate = true; m.material.map = t; }
+      if (name === 'meadow') { const t = lawnTexture().clone(); t.repeat.set(400 / this.tile, len / this.tile) /* one tile = this.tile units, as the scroll offset pos / tile assumes */; t.needsUpdate = true; m.material.map = t; }
       else m.material.map=this.groundTexture(name,len);
-      m.material.color.set(name === 'meadow' ? 0xc4d8a4 : 0xffffff);
+      m.material.color.set(0xffffff);
       m.material.needsUpdate = true;
     }
     for(const [m,len] of [[this.road,this.nearLen],[this.roadFar,this.strip]]){m.material.map?.dispose();m.material.map=this.routeTexture(name,len);m.material.color.set(0xffffff);m.material.needsUpdate=true;}

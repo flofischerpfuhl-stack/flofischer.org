@@ -65,6 +65,43 @@ export function kenneyModel(path, { recolour = true, grey = null } = {}) {
 }
 
 const CH = 32;
+/** A strip of chunky grass spikes, 1 unit long (console-map style lawn edge), dark at the root, light at the tips. */
+function frill(height = 0.34, spikes = 7, rows = 2) {
+  const pos = [], col = [], root = new THREE.Color(0x2f7a1e), tip = new THREE.Color(0x8fd04e);
+  for (let r = 0; r < rows; r++) for (let k = 0; k < spikes; k++) {
+    const x0 = k / spikes - 0.5 + (r ? 0.5 / spikes : 0), x1 = x0 + 1 / spikes, xm = (x0 + x1) / 2 + (r ? 0.02 : -0.02), h = height * (0.75 + ((k * 7 + r * 3) % 5) * 0.1), zr = r ? -0.06 : 0.04;
+    pos.push(x0, 0, zr, x1, 0, zr, xm, h, zr + 0.02);
+    col.push(...root.toArray(), ...root.toArray(), ...tip.toArray());
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(new Array(pos.length / 3).fill([0, 0.6, 0.8]).flat(), 3));
+  return g;
+}
+/**
+ * Stylised mown lawn (one tile = 10 units): two broad soft bands of light and deeper green across the road, a gentle
+ * wave in the band edges and a faint fleck of blades — low frequency like a hand-painted console map, not a photo.
+ */
+let lawn = null;
+export function lawnTexture() {
+  if (lawn) return lawn;
+  const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S;
+  const g = cv.getContext('2d'), img = g.createImageData(S, S), A = [0x3f, 0x96, 0x24], B = [0x74, 0xc4, 0x3a];
+  let seed = 7; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const fleck = new Float32Array(S * S); for (let i = 0; i < 2600; i++) { const x = (r() * S) | 0, y = (r() * S) | 0, v = (r() - 0.5) * 0.12; for (let k = 0; k < 3; k++) fleck[((y + k) % S) * S + x] += v; }
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    // band position along the road (v), with a wave across it; tileable in both directions
+    const v = y / S + 0.035 * Math.sin((x / S) * Math.PI * 2) + 0.015 * Math.sin((x / S) * Math.PI * 6 + 1);
+    const t = 0.5 + 0.5 * Math.sin(v * Math.PI * 2), band = t * t * (3 - 2 * t), f = 1 + fleck[y * S + x];
+    const i = (y * S + x) * 4;
+    for (let c = 0; c < 3; c++) img.data[i + c] = Math.max(0, Math.min(255, (A[c] + (B[c] - A[c]) * band) * f));
+    img.data[i + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  lawn = new THREE.CanvasTexture(cv); lawn.colorSpace = THREE.SRGBColorSpace; lawn.wrapS = lawn.wrapT = THREE.RepeatWrapping; lawn.anisotropy = 4;
+  return lawn;
+}
+
 /** The meadow side slope: rises from flat verges into hills, periodic in z with period P. */
 export function meadowHeight(x, z, P, noise) {
   const a = Math.abs(x), t = (z / P) * Math.PI * 2;
@@ -97,7 +134,8 @@ export class MeadowScenery {
       if (!footprint.has(model)) { const b = new THREE.Box3(); for (const g of model) { g.geometry.computeBoundingBox(); b.union(g.geometry.boundingBox); } footprint.set(model, [b.max.x - b.min.x, b.max.z - b.min.z]); }
       return footprint.get(model);
     };
-    const put = (model, x, z, { yaw = 0, s = 1, tint = 0xffffff, sink = 0.04, sx = 1, sy = 1, y = null, shade = true } = {}) => {
+    let grassTuft = null; // set below; tufts around the feet of props
+    const put = (model, x, z, { yaw = 0, s = 1, tint = 0xffffff, sink = 0.04, sx = 1, sy = 1, y = null, shade = true, tufts = shade ? 4 : 0 } = {}) => {
       const zz = ((z % P) - P) % P, bin = chunks[Math.min(NC - 1, Math.floor(-zz / CH))];
       const r = 0.35 * s, ground = y ?? Math.min(H(x, zz), H(x + r, zz), H(x - r, zz), H(x, zz + r), H(x, zz - r));
       const m = mtx([x, ground - sink * s, zz], [0, yaw, 0], [s * sx, s * sy, s]), t = tint instanceof THREE.Color ? tint : new THREE.Color(tint);
@@ -106,9 +144,20 @@ export class MeadowScenery {
         (g.mat === 'glow' ? bin.glow : bin.matte).add(g.geometry, m, t);
       }
       if (shade) {
-        const [fx, fz] = foot(model), w = fx * s * sx * 1.25, d = fz * s * 1.25;
-        // the sun stands left and in front: the shadow leans a little right and back
-        shadows.push({ x: x + 0.12 * w, y: Math.max(H(x, zz), ground) + 0.03, z: zz - 0.08 * d, w, d, yaw });
+        const [fx, fz] = foot(model), w = fx * s * sx, d = fz * s;
+        // the sun stands left, high and in front: a dark core at the foot, and a long soft shadow falling right and back
+        const gy = Math.max(H(x, zz), ground) + 0.03;
+        shadows.push({ x, y: gy, z: zz, w: w * 1.05, d: d * 1.05, yaw, k: 1 });
+        shadows.push({ x: x + 0.35 * w, y: gy + 0.002, z: zz - 0.25 * d, w: w * 1.5, d: d * 1.7, yaw: yaw * 0.3 - 0.5, k: 0.55 });
+      }
+      // grass grows around the foot, so the prop stands in the meadow instead of on it
+      if (tufts && grassTuft) {
+        const [fx, fz] = foot(model), rx = fx * s * sx * 0.5, rz = fz * s * 0.5;
+        for (let i = 0; i < tufts; i++) {
+          const a = (i / tufts) * 6.283 + rand() * 0.8, tx = x + Math.cos(a) * rx * (0.85 + rand() * 0.3), tz = z + Math.sin(a) * rz * (0.85 + rand() * 0.3), tzz = ((tz % P) - P) % P;
+          const tb = chunks[Math.min(NC - 1, Math.floor(-tzz / CH))];
+          tb.matte.add(grassTuft[0].geometry, mtx([tx, H(tx, tzz), tzz], [0, -a + Math.PI / 2, 0], [0.7, 0.7 + rand() * 0.5, 0.7]), 0xffffff);
+        }
       }
     };
     const green = (k) => new THREE.Color().setHSL(0.27 + (rand() - 0.5) * 0.05, 0.55 + rand() * 0.15, 0.42 + rand() * 0.1).multiplyScalar(k);
@@ -116,7 +165,7 @@ export class MeadowScenery {
 
     // 1. The slopes themselves: two strips of terrain per chunk, so each chunk can be culled.
     {
-      const c0 = new THREE.Color(0xc4d8a4), c1 = new THREE.Color(0xd6e6b4), c2 = new THREE.Color(0xa8c48c), cFar = new THREE.Color(0xc8dcd0), c = new THREE.Color();
+      const c0 = new THREE.Color(0xf2f6ea), c1 = new THREE.Color(0xffffff), c2 = new THREE.Color(0xd8e6c8), cFar = new THREE.Color(0xd6e8e4), c = new THREE.Color();
       const xs = []; for (let x = 6.5; x < 56; x += x < 26 ? 1.5 : 5) xs.push(x);
       for (let k = 0; k < NC; k++) for (const side of [-1, 1]) {
         const zs = []; for (let z = -k * CH; z >= -(k + 1) * CH - 0.001; z -= 2) zs.push(z);
@@ -142,13 +191,19 @@ export class MeadowScenery {
     // 2. The verge: flower clumps and tall grass between road edge and hedges, denser in the "flower meadow" stretches.
     // (low-poly procedural blossoms of the original road; the sculpted meadow flora is ~1k triangles per stem)
     const blossom = [[0xffffff, 0xffd23f, 8], [0xfff2a8, 0xff8a3d, 5], [0xf2a6c4, 0xffd23f, 5], [0xb9a6f2, 0xffd23f, 5], [0xff7a5c, 0xffd23f, 5]].map(([c, m, n]) => [{ mat: 'matte', geometry: flower(c, m, n) }]);
-    const grassTuft = [{ mat: 'matte', geometry: tuft(rng(50), 7, [0.08, 0.2, 0.05], [0.34, 0.6, 0.18]) }];
+    grassTuft = [{ mat: 'matte', geometry: frill(0.3, 5, 2) }];
     for (const side of [-1, 1]) for (let z = -0.5; z > -P; z -= 0.7) {
       const bloom = 0.5 + 0.5 * Math.sin((z / P) * Math.PI * 8 + side);
       if (rand() > 0.3 + bloom * 0.5) continue;
       const x = side * (edge + 0.2 + rand() * 1.9), f = blossom[(rand() * (bloom > 0.6 ? 5 : 2)) | 0];
       for (let n = 0; n < 2 + ((rand() * 3) | 0); n++) put(f, x + (rand() - 0.5) * 0.5, z + (rand() - 0.5) * 0.5, { yaw: rand() * 6.3, s: 0.24 + rand() * 0.12, sink: 0, shade: false });
-      if (rand() < 0.5) put(grassTuft, x + side * 0.4, z, { yaw: rand() * 6.3, s: 0.45, sy: 0.7 + rand() * 0.4, sink: 0, shade: false });
+      if (rand() < 0.5) put(grassTuft, x + side * 0.4, z, { yaw: (rand() - 0.5) * 0.6, s: 0.8, sy: 0.7 + rand() * 0.4, sink: 0, shade: false });
+    }
+    // a spiky grass frill along both road edges, as console maps edge every lawn
+    const edgeFrill = frill(0.34, 8, 2);
+    for (const side of [-1, 1]) for (let z = -0.5; z > -P; z -= 0.9) {
+      const zz = ((z % P) - P) % P, bin = chunks[Math.min(NC - 1, Math.floor(-zz / CH))];
+      bin.matte.add(edgeFrill, mtx([side * (edge + 0.06), 0, zz], [0, -side * Math.PI / 2 + (rand() - 0.5) * 0.15, 0], [1.05, 0.8 + rand() * 0.4, 1]), 0xffffff);
     }
     // 3. Frame: hedge runs and fence runs with lanterns, broken by gaps where the view opens onto a landmark.
     const views = [-40, -88, -136, -184, -232].map((z) => [z - 10, z + 10]);
@@ -158,7 +213,7 @@ export class MeadowScenery {
       for (let z = -1; z > -P; z -= 1) {
         if (inView(z, side)) continue;
         const run = Math.floor((z - side * 37) / 18) & 3; // 18-unit runs: hedge, hedge, fence, open
-        if (run < 2) { put(hedge, x, z, { yaw: 0, s: 2.1, sx: 1.05, sy: 0.9 + 0.15 * Math.sin(z * 0.7), tint: leafTint(), sink: 0.13 }); }
+        if (run < 2) { put(hedge, x, z, { yaw: 0, s: 2.1, sx: 1.05, sy: 0.9 + 0.15 * Math.sin(z * 0.7), tint: leafTint(), sink: 0.13, tufts: 2 }); }
         else if (run === 2 && ((-z | 0) % 2 === 0)) {
           put(fence, x, z - 1, { yaw: Math.PI / 2, s: 2.0, tint: 0xc08a5a });
           if ((-z | 0) % 12 === 0) { put(lantern, x - side * 0.15, z, { s: 1.35 }); chunks[Math.min(NC - 1, Math.floor(((-z) % P) / CH))].glow.add(new THREE.SphereGeometry(0.09, 8, 6), mtx([x - side * 0.15, 1.95, z], [0, 0, 0], 1), new THREE.Color(0xffc870).multiplyScalar(1.6)); }
@@ -206,7 +261,10 @@ export class MeadowScenery {
         put(tree, x + side * 6, z - 6, { s: 3, tint: leafTint() }); put(tree, x - side * 1, z + 7, { s: 2.6, tint: leafTint() });
       },
       (z, side) => { // wheat field with pumpkins and a cart
-        const x0 = side * 9;
+        const x0 = side * 9, box = [{ mat: 'matte', geometry: new THREE.BoxGeometry(1, 1, 1) }];
+        // tilled soil: a dark bed with one raised furrow per crop row, sunk into the meadow at the edges
+        put(box, x0 + side * 3.15, z - 0.5, { s: 14.5, sx: 7.6 / 14.5, sy: 0.1 / 14.5, y: H(x0 + side * 3.15, z) - 0.04, sink: 0, tint: 0x4a3220, shade: false });
+        for (let r = 0; r < 7; r++) put(box, x0 + side * r * 1.05, z - 0.5, { s: 14, sx: 0.62 / 14, sy: 0.16 / 14, y: H(x0 + side * r * 1.05, z) - 0.03, sink: 0, tint: 0x6b4a2c, shade: false });
         for (let r = 0; r < 7; r++) for (let c = 0; c < 11; c++) put(wheat, x0 + side * r * 1.05, z - 7 + c * 1.3, { s: 1.6 + rand() * 0.3, yaw: rand() * 0.4, tint: 0xf0c45a, shade: false });
         for (let i = 0; i < 8; i++) put(pumpkin, x0 + side * (8 + rand() * 3), z - 5 + rand() * 10, { s: 1.6, yaw: rand() * 6.3, shade: false });
         put(cart, x0 + side * 9.5, z + 6, { s: 1.8, yaw: 0.6 }); put(fence, x0 - side * 0.8, z - 8, { s: 2, yaw: 0 });
@@ -232,9 +290,7 @@ export class MeadowScenery {
     const glow = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
     // the slopes carry the same painted grass as the flat road-side ground (10 units per tile)
     const slope = new THREE.MeshLambertMaterial({ vertexColors: true });
-    new THREE.TextureLoader().loadAsync(new URL('../../games-assets/t-grass.webp', import.meta.url).href).then((t) => {
-      t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; slope.map = t; slope.needsUpdate = true; self.grassTex = t;
-    }).catch(() => {});
+    slope.map = lawnTexture();
     self.materials = [matte, glow, slope];
     chunks.forEach((c, k) => {
       const g = new THREE.Group(); g.userData.z = -(k + 0.5) * CH;
@@ -243,6 +299,8 @@ export class MeadowScenery {
       if (!c.glow.empty) g.add(new THREE.Mesh(c.glow.geometry(), glow));
       self.group.add(g); self.chunks.push(g);
     });
+    // the next repeat follows right behind (shared geometry), so the far road is never bare late in a level
+    for (const g of [...self.chunks]) { const c = g.clone(); c.position.z = -P; c.userData.z = g.userData.z - P; self.group.add(c); self.chunks.push(c); }
     // contact shadows: one instanced soft disc per standing prop, drawn over the ground and slopes
     {
       const cv = document.createElement('canvas'); cv.width = cv.height = 64;
@@ -252,9 +310,17 @@ export class MeadowScenery {
       const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
       const geo = new THREE.PlaneGeometry(1, 1); geo.rotateX(-Math.PI / 2);
       const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
-      const mesh = new THREE.InstancedMesh(geo, mat, shadows.length), q = new THREE.Quaternion(), e = new THREE.Euler(), M = new THREE.Matrix4(), v = new THREE.Vector3(), sc = new THREE.Vector3();
-      shadows.forEach((d, i) => { M.compose(v.set(d.x, d.y, d.z), q.setFromEuler(e.set(0, d.yaw, 0)), sc.set(d.w, 1, d.d)); mesh.setMatrixAt(i, M); });
-      mesh.frustumCulled = false; mesh.renderOrder = 1; self.group.add(mesh); self.materials.push(mat); self.shadowTex = tex;
+      self.materials.push(mat);
+      const q = new THREE.Quaternion(), e = new THREE.Euler(), M = new THREE.Matrix4(), v = new THREE.Vector3(), sc = new THREE.Vector3();
+      for (const [k, opacity] of [[1, 0.85], [0.55, 0.42]]) {
+        const list = shadows.filter((d) => d.k === k), m = k === 1 ? mat : mat.clone();
+        m.opacity = opacity; if (m !== mat) self.materials.push(m);
+        const mesh = new THREE.InstancedMesh(geo, m, list.length);
+        list.forEach((d, i) => { M.compose(v.set(d.x, d.y, d.z), q.setFromEuler(e.set(0, d.yaw, 0)), sc.set(d.w, 1, d.d)); mesh.setMatrixAt(i, M); });
+        mesh.frustumCulled = false; mesh.renderOrder = 1; self.group.add(mesh);
+        const wrap = mesh.clone(); wrap.position.z = -P; self.group.add(wrap); // the next repeat
+      }
+      self.shadowTex = tex;
     }
     // windmill sails turn: their own small meshes per mill (the bodies are merged above)
     const sails = windmill.filter((g) => g.ch === 'spin');
@@ -265,6 +331,7 @@ export class MeadowScenery {
       holder.position.set(w.x, ground, w.z); holder.rotation.y = w.yaw; holder.scale.setScalar(w.s);
       pivot.position.set(...g.pivot); m.position.set(-g.pivot[0], -g.pivot[1], -g.pivot[2]);
       pivot.add(m); holder.add(pivot); self.group.add(holder); self.sails.push({ pivot, holder, z: w.z });
+      const h2 = holder.clone(); h2.position.z -= P; self.group.add(h2); self.sails.push({ pivot: h2.children[0], holder: h2, z: w.z - P });
     }
     self.height = H;
     return self;
@@ -279,8 +346,9 @@ export class MeadowScenery {
 
   dispose() {
     this.group.removeFromParent();
-    this.group.traverse((o) => { if (o.isMesh && !this.sails.some((s) => s.pivot.children.includes(o))) o.geometry?.dispose(); });
+    const done = new Set();
+    this.group.traverse((o) => { if (o.isMesh && !done.has(o.geometry) && !this.sails.some((s) => s.pivot.children.includes(o))) { done.add(o.geometry); o.geometry?.dispose(); } });
     for (const m of this.materials) m.dispose();
-    this.shadowTex?.dispose(); this.grassTex?.dispose();
+    this.shadowTex?.dispose();
   }
 }
