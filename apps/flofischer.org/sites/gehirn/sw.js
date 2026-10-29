@@ -3,9 +3,9 @@ self.PWA_CONFIG = {
   shell: [
     "/",
     "/manifest.webmanifest",
-    "/icons/icon-192.png",
-    "/icons/icon-512.png",
-    "/icons/favicon.svg",
+    "/icons/icon-192.png?v=2",
+    "/icons/icon-512.png?v=2",
+    "/icons/favicon.svg?v=2",
     "/shared/language.js",
     "/shared/gehirn/site.css?v=1",
     "/shared/gehirn/site.js?v=1",

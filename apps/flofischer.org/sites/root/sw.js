@@ -3,8 +3,8 @@ self.PWA_CONFIG = {
   shell: [
     "/",
     "/manifest.webmanifest",
-    "/icons/icon-192.png",
-    "/icons/icon-512.png",
+    "/icons/icon-192.png?v=2",
+    "/icons/icon-512.png?v=2",
     "/shared/language.js",
     "/shared/hub/hub.css",
     "/shared/hub/diorama.css",
