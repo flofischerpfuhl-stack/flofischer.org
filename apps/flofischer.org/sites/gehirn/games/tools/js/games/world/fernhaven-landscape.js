@@ -86,7 +86,8 @@ export function fernhaven(world, onChange) {
     // the region's own harbour floor shows under its water: nothing of ours may rise there
     if (d === 0 && inLake(x, z)) return floorY - 2;
     // where the region's rim is water (no dry rim sample within 1.2 m), our land must stay under the surface too
-    const mouth = d < 7 && r && rimGap > 1.44;
+    // the harbour mouth: rim points that lie in the lake outline (the region's own water reaches the edge there)
+    const mouth = d < 7 && inLake(Math.max(-hx, Math.min(hx, x)), Math.max(-hz, Math.min(hz, z)));
     if (mouth && d === 0) return floorY - 2;
     if (mouth) return waterLevel - 0.22 - smoothstep(0, 4, d) * 0.4 + smoothstep(4.5, 7, d) * 0.5;
     if (d === 0) { // under the region (its own ground covers this): dip away from the rim height at once
@@ -134,14 +135,7 @@ export function fernhaven(world, onChange) {
     // meets the water level), with the region cut out so its own water stays the only surface there
     const W0 = LX0 - 4, W1 = Math.min(LX1 + 6, 60), Z0 = LZ0 - 6, Z1 = LZ1 + 4;
     const shore = new T.Shape([[W0, -Z0], [W1, -Z0], [W1, -Z1], [W0, -Z1]].map(([a, b]) => new T.Vector2(a, b)));
-    // the region rectangle in shape coordinates, clipped to the water table (holes must lie inside the outline)
-    const ha = Math.max(-hx - ox, W0 + 0.01), hb = Math.min(hx - ox, W1 - 0.01), hz0 = Math.max(-hz - oz, Z0 + 0.01), hz1 = Math.min(hz - oz, Z1 - 0.01);
-    if (hb <= W1 - 0.02) shore.holes.push(new T.Path([[ha, -hz0], [ha, -hz1], [hb, -hz1], [hb, -hz0]].map(([a, b]) => new T.Vector2(a, b))));
-    else { // the region reaches past the table's right edge: cut it as a notch in the outline instead
-      shore.curves.length = 0; shore.currentPoint.set(0, 0);
-      for (const [i, [a, b]] of [[W0, -Z0], [W1, -Z0], [W1, -hz0], [ha, -hz0], [ha, -hz1], [W1, -hz1], [W1, -Z1], [W0, -Z1]].entries()) shore[i ? 'lineTo' : 'moveTo'](a, b);
-      shore.closePath();
-    }
+    // no hole for the region: the table lies 2 cm under the region's own water, which covers it where it exists
     const g = new T.ShapeGeometry(shore, 4); geometries.push(g);
     let m, waterY = 0.13;
     if (regionWater) {
@@ -161,7 +155,7 @@ export function fernhaven(world, onChange) {
       regionWater.updateWorldMatrix(true, false);
       for (let i = 0; i < pos.count; i++) ys.push(v.fromBufferAttribute(pos, i).applyMatrix4(regionWater.matrixWorld).y);
       ys.sort((a, b) => a - b);
-      waterY = (ys[Math.floor(ys.length * 0.1)] - group.position.y) / u - 0.004; waterLevel = waterY;
+      waterLevel = (ys[Math.floor(ys.length * 0.1)] - group.position.y) / u; waterY = waterLevel - 0.02;
     } else { m = new T.MeshStandardMaterial({ color: 0x3483a3, roughness: 0.55, side: T.DoubleSide }); materials.push(m); }
     const water = new T.Mesh(g, m); water.rotation.x = -Math.PI / 2; water.position.set(ox, waterY, oz); group.add(water);
   }
@@ -174,10 +168,10 @@ export function fernhaven(world, onChange) {
   }
   Promise.all([MODELS, DRESSING]).then(([[tree, bush, cottage, windmill, rock], d]) => {
     if (group.userData.released) return;
-    rim = (d?.rim || []).filter((r) => r.y > -0.5).map((r) => ({ X: r.x + ox, Z: r.z + oz, Y: r.y + oy, c: r.c }));
+    rim = (d?.rim || []).map((r) => ({ X: r.x + ox, Z: r.z + oz, Y: r.y + oy, c: r.c }));
     buildTerrain();
     const trees = [], treeTint = [], bushes = [], bushTint = [], tint = (k = 1) => new T.Color().setRGB((0.86 + rand() * 0.22) * k, (0.9 + rand() * 0.18) * k, (0.78 + rand() * 0.2) * k);
-    const free = (x, z) => !inLake(x, z) && !nearLake(x, z, 1) && outside(x, z) > 1.2;
+    const free = (x, z) => !inLake(x, z) && !nearLake(x, z, 1) && outside(x, z) > 1.2 && H(x, z) > waterLevel + 0.2 && H(x + 0.8, z) > waterLevel && H(x - 0.8, z) > waterLevel && H(x, z + 0.8) > waterLevel && H(x, z - 0.8) > waterLevel;
     // groves near the region rim, then woods on the ridges
     for (let k = 0; k < 900 && trees.length < 115; k++) {
       const a = rand() * 6.3, dd = 1.6 + Math.pow(rand(), 1.6) * 60, x = Math.cos(a) * (hx + dd), z = Math.sin(a) * (hz + dd);
@@ -197,7 +191,7 @@ export function fernhaven(world, onChange) {
       else if ((along -= 2 * hz) < 2 * hx) { x = hx - along; z = hz; } else { along -= 2 * hx; x = -hx; z = hz - along; }
       const nx = Math.sign(x) * (Math.abs(x) >= hx - 1e-6 ? 1 : 0), nz = Math.sign(z) * (Math.abs(z) >= hz - 1e-6 ? 1 : 0);
       const px = x + nx * (0.15 + rand() * 0.5), pz = z + nz * (0.15 + rand() * 0.5);
-      if (nearLake(px, pz, 2.2) || rand() < 0.15) continue;
+      if (nearLake(px, pz, 2.2) || H(px + nx * 0.6, pz + nz * 0.6) < waterLevel + 0.15 || rand() < 0.15) continue;
       const r = rimAt(px, pz), y = r ? Math.min(r.Y, H(px + nx * 0.6, pz + nz * 0.6)) : H(px, pz);
       if ((t | 0) % 4 === 0 && rand() < 0.5) { trees.push(mtx([px, y - 0.1, pz], [0, rand() * 6.3, 0], 1.3 + rand())); treeTint.push(tint()); }
       else { bushes.push(mtx([px, y - 0.06, pz], [0, rand() * 6.3, 0], 1.1 + rand() * 0.8)); bushTint.push(tint()); }
@@ -223,7 +217,7 @@ export function fernhaven(world, onChange) {
       const shoreB = [], shoreT = [], shoreR = [];
       for (let k = 0; k < lake.length; k++) {
         const [lx, lz] = lake[k], x = lx + ox + (rand() - 0.5) * 2.5, z = lz + oz + (rand() - 0.5) * 2.5;
-        if (inLake(x, z) || outside(x, z) < 1 || Math.abs(lx) > 60 || Math.abs(lz) > 60) continue;
+        if (!free(x, z) || Math.abs(lx) > 60 || Math.abs(lz) > 60) continue;
         shoreB.push(mtx([x, H(x, z) - 0.05, z], [0, rand() * 6.3, 0], 0.9 + rand() * 0.8)); shoreT.push(tint());
         if (k % 3 === 0) shoreR.push(mtx([lx + ox, floorY + 0.1, lz + oz], [0, rand() * 6.3, 0], 0.6 + rand()));
       }

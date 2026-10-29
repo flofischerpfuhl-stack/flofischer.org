@@ -116,13 +116,13 @@ export class MeadowScenery {
 
     // 1. The slopes themselves: two strips of terrain per chunk, so each chunk can be culled.
     {
-      const c0 = new THREE.Color(0x5f9f3a), c1 = new THREE.Color(0x8cc155), c2 = new THREE.Color(0x3f7f2e), cFar = new THREE.Color(0x8fb98a), c = new THREE.Color();
-      const xs = []; for (let x = 6.5; x < 90; x += x < 30 ? 1.25 : 4) xs.push(x);
+      const c0 = new THREE.Color(0xc4d8a4), c1 = new THREE.Color(0xd6e6b4), c2 = new THREE.Color(0xa8c48c), cFar = new THREE.Color(0xc8dcd0), c = new THREE.Color();
+      const xs = []; for (let x = 6.5; x < 56; x += x < 26 ? 1.5 : 5) xs.push(x);
       for (let k = 0; k < NC; k++) for (const side of [-1, 1]) {
         const zs = []; for (let z = -k * CH; z >= -(k + 1) * CH - 0.001; z -= 2) zs.push(z);
-        const pos = [], col = [], idx = [];
+        const pos = [], col = [], idx = [], uv = [];
         for (const z of zs) for (const ax of xs) {
-          const x = side * ax, y = H(x, z) - 0.03; pos.push(x, y, z);
+          const x = side * ax, y = H(x, z) - 0.03; pos.push(x, y, z); uv.push(x / 10, z / 10);
           const n = noise.fbm2(x * 0.12, z * 0.12, 3) * 0.5 + 0.5, slope = smoothstep(9, 20, ax);
           c.copy(c0).lerp(c1, n * 0.8).lerp(c2, smoothstep(0.62, 0.9, noise.fbm2(x * 0.05 + 7, z * 0.05, 2) * 0.5 + 0.5) * 0.5 * slope).lerp(cFar, smoothstep(30, 85, ax) * 0.55);
           col.push(c.r, c.g, c.b);
@@ -130,10 +130,10 @@ export class MeadowScenery {
         const nx = xs.length;
         for (let j = 0; j < zs.length - 1; j++) for (let i = 0; i < nx - 1; i++) {
           const a = j * nx + i, b = a + 1, d = a + nx, e = d + 1;
-          if (side > 0) idx.push(a, d, b, b, d, e); else idx.push(a, b, d, b, e, d);
+          if (side > 0) idx.push(a, b, d, b, e, d); else idx.push(a, d, b, b, d, e); // counter-clockwise seen from above
         }
         const g = new THREE.BufferGeometry();
-        g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.setIndex(idx); g.computeVertexNormals();
+        g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals();
         chunks[k].terrain = (chunks[k].terrain || []).concat(g);
       }
     }
@@ -230,10 +230,15 @@ export class MeadowScenery {
     // Lambert: the scenery is matte and fills most of the screen, so it takes the cheapest lit shading (HD 630 budget)
     const matte = new THREE.MeshLambertMaterial({ vertexColors: true });
     const glow = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
-    self.materials = [matte, glow];
+    // the slopes carry the same painted grass as the flat road-side ground (10 units per tile)
+    const slope = new THREE.MeshLambertMaterial({ vertexColors: true });
+    new THREE.TextureLoader().loadAsync(new URL('../../games-assets/t-grass.webp', import.meta.url).href).then((t) => {
+      t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; slope.map = t; slope.needsUpdate = true; self.grassTex = t;
+    }).catch(() => {});
+    self.materials = [matte, glow, slope];
     chunks.forEach((c, k) => {
       const g = new THREE.Group(); g.userData.z = -(k + 0.5) * CH;
-      for (const t of c.terrain || []) { const m = new THREE.Mesh(t, matte); m.receiveShadow = true; g.add(m); }
+      for (const t of c.terrain || []) { const m = new THREE.Mesh(t, slope); m.receiveShadow = true; g.add(m); }
       if (!c.matte.empty) { const m = new THREE.Mesh(c.matte.geometry(), matte); m.receiveShadow = true; g.add(m); }
       if (!c.glow.empty) g.add(new THREE.Mesh(c.glow.geometry(), glow));
       self.group.add(g); self.chunks.push(g);
@@ -276,6 +281,6 @@ export class MeadowScenery {
     this.group.removeFromParent();
     this.group.traverse((o) => { if (o.isMesh && !this.sails.some((s) => s.pivot.children.includes(o))) o.geometry?.dispose(); });
     for (const m of this.materials) m.dispose();
-    this.shadowTex?.dispose();
+    this.shadowTex?.dispose(); this.grassTex?.dispose();
   }
 }
