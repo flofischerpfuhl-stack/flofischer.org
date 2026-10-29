@@ -5,14 +5,14 @@
     {
       "file": "runtime/loading-cache.js",
       "source": "scripts/games-blender/fernworld/runtime/loading-cache.js",
-      "bytes": 8193,
-      "sha256": "c07f90a767d95d7956960454ae839a506d5d28cdc0dca84222c97245eeba00aa"
+      "bytes": 8753,
+      "sha256": "564c3c7ee0db3012ec5f3ce302d9276e05a3a32717d3b0f152e740bdbfc2d413"
     },
     {
       "file": "runtime/asset-library.js",
       "source": "scripts/games-blender/fernworld/runtime/asset-library.js",
-      "bytes": 10680,
-      "sha256": "77aa324c4c4857ee7e4a288d9c28b6ecc9aa0e849c3c8228a463ed8f46c18829"
+      "bytes": 10920,
+      "sha256": "15a71e32424c26feb61f00130d3df8558dcdf3b646e844cf61817fdebafd98e7"
     },
     {
       "file": "runtime/channel-library.js",
@@ -23,8 +23,8 @@
     {
       "file": "runtime/world-library.js",
       "source": "scripts/games-blender/fernworld/runtime/world-library.js",
-      "bytes": 7170,
-      "sha256": "ab31573a487d06fcca25181553df91fae7226e5968bebbdec6aedd91d6c94bc2"
+      "bytes": 7999,
+      "sha256": "51c007dec34f83a7f6402645e08b298662767c5e1a654b00d0b905c36acac4dd"
     },
     {
       "file": "runtime/rigid-clips.js",
@@ -73,6 +73,24 @@
       "source": "scripts/games-blender/fernworld/vendor/SOURCE.json",
       "bytes": 531,
       "sha256": "4b7fedca7d3925116add4b8517a6bc8f3f3ce38e88ebd8259d93c5ea64eb4c13"
+    },
+    {
+      "file": "vendor/meshopt_decoder.module.js",
+      "source": "npm:meshoptimizer@1.3.0/meshopt_decoder.mjs",
+      "bytes": 29019,
+      "sha256": "10b313edaa0e322b0c1b46443f6c8b186b42139fe1eca189d50c09511d0ebedc"
+    },
+    {
+      "file": "vendor/LICENSE-meshoptimizer.txt",
+      "source": "npm:meshoptimizer@1.3.0/LICENSE.md",
+      "bytes": 1079,
+      "sha256": "f03037ca7bad1e3eb7f4a63fa6084a8baabd5ba30d3c239a9a7f35705d873e26"
+    },
+    {
+      "file": "vendor/SOURCE-meshoptimizer.json",
+      "source": "tools/games-assets/fernworld/vendor/SOURCE-meshoptimizer.json",
+      "bytes": 1042,
+      "sha256": "9e40d89fc3e86b7136cd3a1b16d8eb87752e92c8ac6865d7628a93c8fd7272cf"
     }
   ],
   "sharedThreeVersion": "0.170.0",

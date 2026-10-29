@@ -3,8 +3,9 @@
  * materials and clips. Each actor gets independent nodes, morph weights and bones.
  * No implicit centering, fitting, placement, shadow or lighting policy is applied.
  */
-import { loadBytes, loadJSON, invalidateDownload } from './loading-cache.js';
+import { loadBytes, loadJSON, invalidateDownload, expectBytes } from './loading-cache.js';
 import { GLTFLoader } from '../vendor/GLTFLoader.js';
+import { MeshoptDecoder } from '../vendor/meshopt_decoder.module.js';
 import { recipeClips } from './rigid-clips.js';
 import { articulatedClips, inPlaceWalkRoll } from './articulated-clips.js';
 
@@ -55,7 +56,7 @@ export class AssetLibrary {
   constructor({ base = DEFAULT_BASE, onProgress = null, signal = null } = {}) {
     this.base = new URL(base, import.meta.url);
     this.onProgress = onProgress; this.signal = signal;this.lifetime=new AbortController();
-    this.loader = new GLTFLoader();
+    this.loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
     this.jsonCache = new Map();
     this.templates = new Map();
     this.resources = new Set();
@@ -121,6 +122,7 @@ export class AssetLibrary {
     const single = definition.file && !Object.keys(definition.lods ?? {}).length;
     const selectedFile = file ?? (single && !requestedLod ? definition.file : undefined);
     if (!selectedFile) throw new Error(`Missing authored LOD ${id}/${lod}`);
+    expectBytes(new URL(selectedFile, this.base), (file ? definition.lods?.[lod]?.bytes : undefined) ?? definition.bytes);
     const data = await this._gltf(selectedFile);
     try {
       let animations = data.animations;

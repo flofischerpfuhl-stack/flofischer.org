@@ -30,8 +30,8 @@
       "lods": {
         "hi": {
           "file": "articulated/KLONK.hi.glb",
-          "sha256": "978481a3fcd06925648da838e281fb26d73e5f62500585bd23e51a618e5bd3ef",
-          "bytes": 512044,
+          "sha256": "44add77f7bc5e745901b70334d443be520bdb98d49b63c7dc560f2b7cc1f87ab",
+          "bytes": 128092,
           "triangles": 10319,
           "vertices": 13855,
           "primitives": 5,
@@ -50,8 +50,8 @@
         },
         "lo": {
           "file": "articulated/KLONK.lo.glb",
-          "sha256": "7c9febfa7b8dbd59b2cf0aefb629dfef09088c3d81ca64b14188726c4538b5d7",
-          "bytes": 123592,
+          "sha256": "ed79439089b177f2bdf60a466378b6bdfbeb876765251d90eeae1709ba9598da",
+          "bytes": 32676,
           "triangles": 2584,
           "vertices": 3167,
           "primitives": 5,
@@ -70,8 +70,8 @@
         },
         "far": {
           "file": "articulated/KLONK.far.glb",
-          "sha256": "44413ee7495013e8e6e9cdd487c8bd451982bcf68853e883abbb4435d88df7dc",
-          "bytes": 46100,
+          "sha256": "dab3fddbcadf33be0ee377fb4680ee74e42d9f50ac482b54913aa677e5e4a65e",
+          "bytes": 16316,
           "triangles": 868,
           "vertices": 1068,
           "primitives": 5,
@@ -90,8 +90,8 @@
         },
         "shadow": {
           "file": "articulated/KLONK.shadow.glb",
-          "sha256": "e28288d751302ed38f11ce6b89d70ad0577e9a7d6c32f2ad290ba58bdafb3642",
-          "bytes": 30672,
+          "sha256": "4530390d6a3bea7acdf0a654845b9d14027e18353f81bbecc1aedaf8b5b5b89a",
+          "bytes": 12216,
           "triangles": 536,
           "vertices": 684,
           "primitives": 4,
@@ -138,8 +138,8 @@
       "lods": {
         "hi": {
           "file": "articulated/KLONKBOT.hi.glb",
-          "sha256": "f7393b2dc9dcd6359b695a4001f103a974165461c6a1e82f22ddc9f01107e281",
-          "bytes": 517620,
+          "sha256": "d57e1356618d8756f822a24b22562ba0b88ec355ce7c4e342f9e21f13b6681d1",
+          "bytes": 125284,
           "triangles": 10486,
           "vertices": 13998,
           "primitives": 5,
@@ -158,8 +158,8 @@
         },
         "lo": {
           "file": "articulated/KLONKBOT.lo.glb",
-          "sha256": "ccd9351240b7f7c4314c42beb8629468944c30b92ad00790a2c1ec9cbef444ea",
-          "bytes": 130160,
+          "sha256": "5e2b3a519f2218066013ca5c2adc0bbb0fb9a06a53e03502bc20088bf6496a89",
+          "bytes": 33724,
           "triangles": 2744,
           "vertices": 3343,
           "primitives": 5,
@@ -178,8 +178,8 @@
         },
         "far": {
           "file": "articulated/KLONKBOT.far.glb",
-          "sha256": "f08dc2817db5cb89d468c692f4fdc573abc0720c52a64c4fa9c818b286e37fe1",
-          "bytes": 45568,
+          "sha256": "694bfac1fbeaf0762443ce296e22df2694e4f98619b4032b11d222d94892fc68",
+          "bytes": 16168,
           "triangles": 868,
           "vertices": 1052,
           "primitives": 5,
@@ -198,8 +198,8 @@
         },
         "shadow": {
           "file": "articulated/KLONKBOT.shadow.glb",
-          "sha256": "7e58c439e498d6e04c8f798703d4d3651e159a0920fdc0bbfca01c145d167c7e",
-          "bytes": 28944,
+          "sha256": "4de44e0844e5bd73dc18e4aa5f4c757c17f6ccd16810087e7f320c177f62b455",
+          "bytes": 11704,
           "triangles": 508,
           "vertices": 636,
           "primitives": 4,
@@ -246,8 +246,8 @@
       "lods": {
         "hi": {
           "file": "articulated/SHIELD_KLONK.hi.glb",
-          "sha256": "69b865111bc79b056a49e2972096946b14629a03c3b64fdf01bb35eeba66a639",
-          "bytes": 566364,
+          "sha256": "06385a38f6f97011d85027607ae9314b40378e882593a9381542221fbdeca534",
+          "bytes": 141740,
           "triangles": 11202,
           "vertices": 15351,
           "primitives": 6,
@@ -266,8 +266,8 @@
         },
         "lo": {
           "file": "articulated/SHIELD_KLONK.lo.glb",
-          "sha256": "24a4f7fde4c787d12fd26aca21f5680b6fed78474b88519d0c2cd8cd39df3f9c",
-          "bytes": 144336,
+          "sha256": "2994af7db3bde5d1457e5aa90c4158d404050d678c16fa570c9cc2138fe387df",
+          "bytes": 37836,
           "triangles": 2996,
           "vertices": 3703,
           "primitives": 6,
@@ -286,8 +286,8 @@
         },
         "far": {
           "file": "articulated/SHIELD_KLONK.far.glb",
-          "sha256": "9714f4994f9e7c7d8cf87b3ccd609fdd22ed66d87aa904ff93cff8a67369b7c0",
-          "bytes": 53364,
+          "sha256": "c8b5732dfbbc5ccf397d9520d2fb9c4e7e439172923c6f8ed9e82b409419d803",
+          "bytes": 18520,
           "triangles": 996,
           "vertices": 1236,
           "primitives": 6,
@@ -306,8 +306,8 @@
         },
         "shadow": {
           "file": "articulated/SHIELD_KLONK.shadow.glb",
-          "sha256": "d973edf5d81058b6765b5548d50c2fc2654971598b7ccdc5239bd39b42f2176e",
-          "bytes": 32648,
+          "sha256": "e7a539a2169dd5f51df8e7f7a9c306510794b44e3df051358dfb3f8748472041",
+          "bytes": 13300,
           "triangles": 552,
           "vertices": 708,
           "primitives": 5,
@@ -354,8 +354,8 @@
       "lods": {
         "hi": {
           "file": "articulated/DUCK_LEGIONARY.hi.glb",
-          "sha256": "51c2989e970d701b1dd65cb0212c42b1c2e186ed042a57c3227fc16d689f7290",
-          "bytes": 286608,
+          "sha256": "30ce44daab72e4a18d1c3b514fb4a0715ae8f00721748de8c08113212d75e1b6",
+          "bytes": 71032,
           "triangles": 10836,
           "vertices": 6007,
           "primitives": 5,
@@ -374,8 +374,8 @@
         },
         "lo": {
           "file": "articulated/DUCK_LEGIONARY.lo.glb",
-          "sha256": "1cf2d63fc8a01cf524d8ba2a2011f9c4798c77adfd6c371ab1a349dccca4d94b",
-          "bytes": 89928,
+          "sha256": "c838b97c7634e93a6df3dc62a6a208e4683907f1862c293326a2f6fad9efd6e6",
+          "bytes": 27288,
           "triangles": 2992,
           "vertices": 1851,
           "primitives": 5,
@@ -394,8 +394,8 @@
         },
         "far": {
           "file": "articulated/DUCK_LEGIONARY.far.glb",
-          "sha256": "9ffbe27d1b403e2b8d29ce8b05c0388a8663023c7608df0fb277596bd769211d",
-          "bytes": 45032,
+          "sha256": "fd0dd54c1912ab61183fdccd67445395e801dcefc2d35e9d5404cca84445bb5b",
+          "bytes": 16384,
           "triangles": 1324,
           "vertices": 883,
           "primitives": 5,
@@ -414,8 +414,8 @@
         },
         "sh": {
           "file": "articulated/DUCK_LEGIONARY.sh.glb",
-          "sha256": "f285b62592519216b4fd4b6ad9634294cd3c41049abeaefc0f1bc574e5103c15",
-          "bytes": 24544,
+          "sha256": "85af729a1da9462d414d73c6e04326261246c20e034149ec92c858085b05a36c",
+          "bytes": 11000,
           "triangles": 658,
           "vertices": 425,
           "primitives": 5,
@@ -468,8 +468,8 @@
       "lods": {
         "hi": {
           "file": "articulated/DARTER.hi.glb",
-          "sha256": "44692d41cba0c30b19cfc44e6ff588b71a8f7969f5411dc3bad574837e3b820c",
-          "bytes": 620980,
+          "sha256": "d446cd969ce3a3334eade0761b3916be05dbc853c9998097a036602dfe47204d",
+          "bytes": 127668,
           "triangles": 9576,
           "vertices": 15411,
           "primitives": 8,
@@ -488,8 +488,8 @@
         },
         "lo": {
           "file": "articulated/DARTER.lo.glb",
-          "sha256": "eba243fcbdca4ddc569ec903aacd3b1a2dea9247f13a77b4ffdfb8d0baa72701",
-          "bytes": 249256,
+          "sha256": "d5d01284003c6e487e8fe471dbf277b4f51bbf199832825a0e08661d3c5e2b1f",
+          "bytes": 59152,
           "triangles": 4172,
           "vertices": 5998,
           "primitives": 8,
@@ -508,8 +508,8 @@
         },
         "far": {
           "file": "articulated/DARTER.far.glb",
-          "sha256": "f8bad24aaa2e813d5ea413b7178636c5a22561e96734ae6461fbc958624aae8f",
-          "bytes": 58864,
+          "sha256": "037f690c8ae1999509fb6774fc2584c76f3978ae5b9db0e3c839904f514b7de6",
+          "bytes": 19936,
           "triangles": 908,
           "vertices": 1272,
           "primitives": 8,
@@ -528,8 +528,8 @@
         },
         "shadow": {
           "file": "articulated/DARTER.shadow.glb",
-          "sha256": "5ba0b4bb7f1ce7dc2a405e58f3ea11de3729d1cef9c0e94b1a83d8b0b4cee3bf",
-          "bytes": 37020,
+          "sha256": "efb2add5cc5dc16f5671f658c8de71eab53d9ba765c4f15c800b18e4855b3508",
+          "bytes": 13684,
           "triangles": 480,
           "vertices": 800,
           "primitives": 5,
@@ -582,8 +582,8 @@
       "lods": {
         "hi": {
           "file": "articulated/BUZZ_DRONE.hi.glb",
-          "sha256": "4439868d15ae833b145465f6bd4c11078045dfbff3cbfa54d9dc265171bbee63",
-          "bytes": 740076,
+          "sha256": "3769822ed955535db8e7887c15918c8dcc8993dc6a29e9527e2e0c71d366e554",
+          "bytes": 149464,
           "triangles": 14004,
           "vertices": 18025,
           "primitives": 6,
@@ -602,8 +602,8 @@
         },
         "lo": {
           "file": "articulated/BUZZ_DRONE.lo.glb",
-          "sha256": "a58799d039e743af7d713231a2d462b73cf7e55e4115680182dc1fd68fc3fcee",
-          "bytes": 209652,
+          "sha256": "e4e45bed6ab62532fa6dde969c1c0b15aaea0b6be149760137926e2eb6bc43c0",
+          "bytes": 50768,
           "triangles": 3804,
           "vertices": 5051,
           "primitives": 6,
@@ -622,8 +622,8 @@
         },
         "far": {
           "file": "articulated/BUZZ_DRONE.far.glb",
-          "sha256": "5a8a1e2aef2d53e90ffbe171486f5568715eeddc8d2e81ad6e96fad82ee2da61",
-          "bytes": 59976,
+          "sha256": "f2c29e573542fab24de31d28e4ebe175577410f5da4867e2ef447ef7b1771e20",
+          "bytes": 19608,
           "triangles": 980,
           "vertices": 1329,
           "primitives": 6,
@@ -642,8 +642,8 @@
         },
         "shadow": {
           "file": "articulated/BUZZ_DRONE.shadow.glb",
-          "sha256": "5e2e9556241df212d9b9fc44977efac21d090bc9d48490ce08713547c40fcfdf",
-          "bytes": 34768,
+          "sha256": "0872b5d74ab7fff0ad612b5de4d1e40683a37cc7a1ccc06e82a81de32ce94512",
+          "bytes": 12912,
           "triangles": 496,
           "vertices": 732,
           "primitives": 5,
@@ -689,8 +689,8 @@
       "lods": {
         "hi": {
           "file": "articulated/GRAUSEL_BROOM_GLIDER.hi.glb",
-          "sha256": "c5835790761e1ac108b6164d1d27e22932207a59b56bb398db635f260849eb2c",
-          "bytes": 143700,
+          "sha256": "2b35b8bde86d314f6d3d561921d2b3764f93cfbde9e0bfc17abd6af0caa36b98",
+          "bytes": 36380,
           "triangles": 5800,
           "vertices": 2990,
           "primitives": 1,
@@ -709,8 +709,8 @@
         },
         "lo": {
           "file": "articulated/GRAUSEL_BROOM_GLIDER.lo.glb",
-          "sha256": "bf4c463f7b1c0ec21103f3ffed4043310beecaf85e0fd984ecf8e200e7b80ad8",
-          "bytes": 45292,
+          "sha256": "b258a74efe70f898d52097dfdc096c4a2a3b55a917c15a74e6cba4df473363b4",
+          "bytes": 14160,
           "triangles": 1700,
           "vertices": 940,
           "primitives": 1,
@@ -729,8 +729,8 @@
         },
         "sh": {
           "file": "articulated/GRAUSEL_BROOM_GLIDER.sh.glb",
-          "sha256": "8861475d505b0797f6af64a2533cf1f8e830820d4898335f6283ff7c49a1fdf7",
-          "bytes": 20088,
+          "sha256": "084eabfb3ea56b2737d410af0e6bb235a1a81952661785afaa1e371a2354fb48",
+          "bytes": 7716,
           "triangles": 650,
           "vertices": 415,
           "primitives": 1,
@@ -779,8 +779,8 @@
       "lods": {
         "hi": {
           "file": "articulated/HULK.hi.glb",
-          "sha256": "927eb937dbf85934123f6f14a611e17503ac78c502ea25feabb6bef8bb3f4fee",
-          "bytes": 1501932,
+          "sha256": "11ee023e386238127d1d08249f6220b7bf31578710cffbc22d06d37e0ebb75bc",
+          "bytes": 247208,
           "triangles": 17068,
           "vertices": 30924,
           "primitives": 7,
@@ -799,8 +799,8 @@
         },
         "lo": {
           "file": "articulated/HULK.lo.glb",
-          "sha256": "f2cbd43edb3cc8267cb81d28b1d715e9a578276df0aa2bccac98dd798b2e8a5e",
-          "bytes": 587320,
+          "sha256": "e227b8d077c256d39e304d432a741d4c472140d81cd13fe8f6cb6cdbcaf771ee",
+          "bytes": 115520,
           "triangles": 5522,
           "vertices": 11659,
           "primitives": 7,
@@ -819,8 +819,8 @@
         },
         "far": {
           "file": "articulated/HULK.far.glb",
-          "sha256": "efffd3b4e2fd1f023fbdc1ceaf0cb96592036f532d59a994e60f754dc972af83",
-          "bytes": 181964,
+          "sha256": "ef04136b51fa4196d0dd37e9419cfb1a1f083ac329a78397cbc2ffcf997cc821",
+          "bytes": 45616,
           "triangles": 1258,
           "vertices": 2962,
           "primitives": 7,
@@ -839,8 +839,8 @@
         },
         "shadow": {
           "file": "articulated/HULK.shadow.glb",
-          "sha256": "7b167970342e31c48cbf5acfb2313cc12d4acb203cf4d3d11cf914d727aef5a5",
-          "bytes": 129252,
+          "sha256": "cd2f1617b5adb4035e232b9eff602e52eab56b462017787334394517803fcd50",
+          "bytes": 35756,
           "triangles": 740,
           "vertices": 1861,
           "primitives": 6,
@@ -889,8 +889,8 @@
       "lods": {
         "hi": {
           "file": "articulated/SQUIRTER.hi.glb",
-          "sha256": "e44d37c95f9b97e29a597621e3c9ab8ec1faee16b3bbce1a07a1afcefa55d51d",
-          "bytes": 1142464,
+          "sha256": "b7aceb7969bd5ecd36f188652bd5cd92c4300bf88e1c0800f140da8f6efd065a",
+          "bytes": 200656,
           "triangles": 17516,
           "vertices": 22755,
           "primitives": 9,
@@ -909,8 +909,8 @@
         },
         "lo": {
           "file": "articulated/SQUIRTER.lo.glb",
-          "sha256": "e56dac268b0a75393d05f9bbc7bba8e61e042614e742782942b6d3533ed83d5f",
-          "bytes": 451000,
+          "sha256": "51d2d64a6e6b78fa8d9f8b010ff08105b6b7e51dadead2efa8a9c43b99f52153",
+          "bytes": 96584,
           "triangles": 5614,
           "vertices": 8528,
           "primitives": 9,
@@ -929,8 +929,8 @@
         },
         "far": {
           "file": "articulated/SQUIRTER.far.glb",
-          "sha256": "1f661e25bf800dfc064e56d37d8401df9bbf3c27d87c1c4114d0c64cd36d3509",
-          "bytes": 151632,
+          "sha256": "e0530d02e0c72c85c09c1025a473210f570ac9a95c8c8262b9f300e515e6f222",
+          "bytes": 42028,
           "triangles": 1290,
           "vertices": 2227,
           "primitives": 9,
@@ -949,8 +949,8 @@
         },
         "shadow": {
           "file": "articulated/SQUIRTER.shadow.glb",
-          "sha256": "5e0558537952c892c6189b509b949b19a43c75e8ae6b9e9098bf1ac01cc37c4d",
-          "bytes": 110060,
+          "sha256": "9b7bbf3238bf81dcc1122cb99d9111cae2f8cf7e1acd172caffcf4552de030ca",
+          "bytes": 33592,
           "triangles": 724,
           "vertices": 1381,
           "primitives": 8,
@@ -1005,8 +1005,8 @@
       "lods": {
         "hi": {
           "file": "articulated/COMBINE_CRAWLER.hi.glb",
-          "sha256": "263b724d7c7a89a8413bdf228360956494a0fdac13d97af067fd27ea40e4e31e",
-          "bytes": 1729796,
+          "sha256": "0f802fc143593092e093d6c44ed17861dc48ea96f7334e8e6e1ac29e70ae942e",
+          "bytes": 455708,
           "triangles": 35678,
           "vertices": 48728,
           "primitives": 11,
@@ -1025,8 +1025,8 @@
         },
         "lo": {
           "file": "articulated/COMBINE_CRAWLER.lo.glb",
-          "sha256": "580631c2849392dd5cdc6975ef921a30fc31e063de93982637539c17e0632d04",
-          "bytes": 528928,
+          "sha256": "dbf02f31438b0336fac4be2c392c464bb42c1e4ed494fbe10683b2e79570f4d2",
+          "bytes": 154192,
           "triangles": 11486,
           "vertices": 14025,
           "primitives": 11,
@@ -1045,8 +1045,8 @@
         },
         "far": {
           "file": "articulated/COMBINE_CRAWLER.far.glb",
-          "sha256": "87d97c5fdc5d7b1d57766aeee520bebe1fc30b099c7624903b57ece9e3758a91",
-          "bytes": 191000,
+          "sha256": "73d5794361f4a2546575e1e977b605a394d46aa283173c334decb790f740ea9e",
+          "bytes": 65904,
           "triangles": 3032,
           "vertices": 4448,
           "primitives": 11,
@@ -1065,8 +1065,8 @@
         },
         "shadow": {
           "file": "articulated/COMBINE_CRAWLER.shadow.glb",
-          "sha256": "cf7bf4e6c14772882f76a801f5de48e0d2fbea9a0cb3b05cc1153d80055dd805",
-          "bytes": 110184,
+          "sha256": "f7876712bb798da416be9f27e326a0929ffcbe6d4d4f9c3c8b1b91ee561156c8",
+          "bytes": 37516,
           "triangles": 1286,
           "vertices": 2147,
           "primitives": 10,
@@ -1120,8 +1120,8 @@
       "lods": {
         "hi": {
           "file": "articulated/BRIGADIER_FROST_STRIDER.hi.glb",
-          "sha256": "bf86fce00e4e81d579e9c866c15fbc13b5c021841388110f9884b71ec30d146d",
-          "bytes": 4485088,
+          "sha256": "2a4a826e42a2c321923c587c7361a9b0051ff0f6e085ad600f468e605fc25fa4",
+          "bytes": 902068,
           "triangles": 40704,
           "vertices": 99921,
           "primitives": 16,
@@ -1140,8 +1140,8 @@
         },
         "lo": {
           "file": "articulated/BRIGADIER_FROST_STRIDER.lo.glb",
-          "sha256": "eeafcba186243f4261fd2312b6efbd226fa82f9474ea11007fe0c54ddd9adf6c",
-          "bytes": 1670456,
+          "sha256": "d8e26d18d1efb4e2e2469a5b3e80711a29ff2e560dd828a2ea390e168042d22d",
+          "bytes": 388412,
           "triangles": 13484,
           "vertices": 32724,
           "primitives": 16,
@@ -1160,8 +1160,8 @@
         },
         "far": {
           "file": "articulated/BRIGADIER_FROST_STRIDER.far.glb",
-          "sha256": "5612e94d3c21da78f7f83fb28a8fdc6722e06a36959bf3ba65aedae0ede7d903",
-          "bytes": 685468,
+          "sha256": "097b7a1fc982cb8ef2cd5d1d20a36910e108a2cf59cd23b5294ee8eb8f6191bd",
+          "bytes": 186360,
           "triangles": 3640,
           "vertices": 9260,
           "primitives": 16,
@@ -1180,8 +1180,8 @@
         },
         "shadow": {
           "file": "articulated/BRIGADIER_FROST_STRIDER.shadow.glb",
-          "sha256": "395e21430ea1e0e4a8be9d87b2be5e9e9524209bd9d54d39cd8168fb4cc5d887",
-          "bytes": 450100,
+          "sha256": "bd2ea97e08c34c611f62ac989e6a2b738e043075832adcd3b03ade04bbc613aa",
+          "bytes": 118696,
           "triangles": 1224,
           "vertices": 3664,
           "primitives": 16,
@@ -1234,8 +1234,8 @@
       "lods": {
         "hi": {
           "file": "articulated/QUOTA_DRILL_MECH.hi.glb",
-          "sha256": "a1e54d740c9839ba948772ba8693d49c0cc5268658445d300a38d07f2086402e",
-          "bytes": 2311344,
+          "sha256": "1ad588abb2ecbcd810d691fcaa754bad4e9b0a0f84b2d7e34bfa4881ef69c3d2",
+          "bytes": 455936,
           "triangles": 35828,
           "vertices": 50407,
           "primitives": 8,
@@ -1254,8 +1254,8 @@
         },
         "lo": {
           "file": "articulated/QUOTA_DRILL_MECH.lo.glb",
-          "sha256": "b48805a33bf92cbfd589dd2eaf326074fa800b0676eb07d00f2c5f8cd3cca437",
-          "bytes": 1149204,
+          "sha256": "ff2902b18ea9c73209f8c5c1d96ef4714e1b997335a2233d1e37e1ef300c4910",
+          "bytes": 266968,
           "triangles": 11990,
           "vertices": 24812,
           "primitives": 8,
@@ -1274,8 +1274,8 @@
         },
         "far": {
           "file": "articulated/QUOTA_DRILL_MECH.far.glb",
-          "sha256": "bd67db32dc4c93243f80f816954bec7fcbaa68cd04a464508daf7e7969f0d901",
-          "bytes": 425916,
+          "sha256": "c063e35ecf5decaf70232e7870877650de98e4bfb8d2642a490f216c0cd8ea1c",
+          "bytes": 113264,
           "triangles": 3184,
           "vertices": 7129,
           "primitives": 8,
@@ -1294,8 +1294,8 @@
         },
         "shadow": {
           "file": "articulated/QUOTA_DRILL_MECH.shadow.glb",
-          "sha256": "ae4a72cb0f4f4f35498b1e33b8c164a7763c7e27d1bc7c40e71638b51d3f7048",
-          "bytes": 198260,
+          "sha256": "474cdae3161ec1c487281f400abee932e47f30a7b70164ab873d673f85043615",
+          "bytes": 70516,
           "triangles": 1012,
           "vertices": 2360,
           "primitives": 8,
@@ -1351,8 +1351,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_HAZEL.hi.glb",
-          "sha256": "7df28e973cc97d0ce3eab3a2ea3d4834ff954b9aa2521c77feffdb963585c8b2",
-          "bytes": 239468,
+          "sha256": "35320a72e7f0e89464073242ccd28fff587abee9eb9c4369d6c7203abe2e8508",
+          "bytes": 59104,
           "triangles": 8696,
           "vertices": 4973,
           "primitives": 5,
@@ -1371,8 +1371,8 @@
         },
         "lo": {
           "file": "articulated/TOY_HAZEL.lo.glb",
-          "sha256": "4c68ffac6178bdbe8eb89f1ac6c3b1baeb015279e4547208fa972e52b51e8fdd",
-          "bytes": 114640,
+          "sha256": "b2147c7905e229b4e6618c6125f5a27a0130918c352ec721328de0fd84e349b5",
+          "bytes": 31528,
           "triangles": 3796,
           "vertices": 2199,
           "primitives": 5,
@@ -1391,8 +1391,8 @@
         },
         "far": {
           "file": "articulated/TOY_HAZEL.far.glb",
-          "sha256": "e96488ae924b087af17aae354e11d5d2c2b56d77b97e1ff5f7ab531a041b7929",
-          "bytes": 39628,
+          "sha256": "39d8b65c9fc53ebd853ce2195277d552e5ff595963e5373ebb66796cd946509c",
+          "bytes": 14652,
           "triangles": 1094,
           "vertices": 686,
           "primitives": 5,
@@ -1411,8 +1411,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_HAZEL.shadow.glb",
-          "sha256": "dd5818a9e575003d94c30cf405fad18d1efd4a7802f0124db5dc406674daad62",
-          "bytes": 22364,
+          "sha256": "1917e95f080c4530e1dd47b47a438bb8f535733fa3819580fae9170e282d08e3",
+          "bytes": 10876,
           "triangles": 534,
           "vertices": 346,
           "primitives": 5,
@@ -1468,8 +1468,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_ROOKIE.hi.glb",
-          "sha256": "c16a0e7710b674c27f4513135e536618348391e6b96de4555fcb6e41a3f9217d",
-          "bytes": 265016,
+          "sha256": "5562a65252d382351b3cc02a56498725cfd1ea13077e7abee819a40e604d7806",
+          "bytes": 62604,
           "triangles": 9348,
           "vertices": 5351,
           "primitives": 5,
@@ -1488,8 +1488,8 @@
         },
         "lo": {
           "file": "articulated/TOY_ROOKIE.lo.glb",
-          "sha256": "fe2bab760e66cceb134833d5a562d2f52a6e68a27a423a7346133bde8fef4dd2",
-          "bytes": 118840,
+          "sha256": "f05490123d116fd360b5d69cab49463c7b09d3c487d355c06d56ca8938d98308",
+          "bytes": 31428,
           "triangles": 3794,
           "vertices": 2229,
           "primitives": 5,
@@ -1508,8 +1508,8 @@
         },
         "far": {
           "file": "articulated/TOY_ROOKIE.far.glb",
-          "sha256": "80047b7af082d1c9ed5dab61d14c88349a0625488e3b4b9fec3251f031a65438",
-          "bytes": 41112,
+          "sha256": "6d51cc33a1676d569c587514ae96707cdba6546968e9f6765883013b820811bc",
+          "bytes": 14652,
           "triangles": 1094,
           "vertices": 698,
           "primitives": 5,
@@ -1528,8 +1528,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_ROOKIE.shadow.glb",
-          "sha256": "11ac94a66bdc9b4026863571125913e7fef0d407c7b2bc968ce311547e41a5c4",
-          "bytes": 23628,
+          "sha256": "299dfa1df9e5d1cea2b5e262ed29c21ee183459649aeb6d70dae4f286290c857",
+          "bytes": 10808,
           "triangles": 536,
           "vertices": 358,
           "primitives": 5,
@@ -1585,8 +1585,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_SCOUT.hi.glb",
-          "sha256": "749fa400156a5f78ea37fb15ef130b2cad26af98a8e33bb72ce98e690aad5845",
-          "bytes": 233012,
+          "sha256": "60f764d398aa3496be7c0c61a7ab556433348a009277ce2f6a12e794737e0f4f",
+          "bytes": 58044,
           "triangles": 8472,
           "vertices": 4861,
           "primitives": 5,
@@ -1605,8 +1605,8 @@
         },
         "lo": {
           "file": "articulated/TOY_SCOUT.lo.glb",
-          "sha256": "2a996fc35fee257b6a13ba9a7d610db697f9252654546e97fc7384e3d354700f",
-          "bytes": 115912,
+          "sha256": "e5afba26bd6887637b62d458c829d9b1397c814d07c4bf7a6a7601eda369a729",
+          "bytes": 32084,
           "triangles": 3794,
           "vertices": 2242,
           "primitives": 5,
@@ -1625,8 +1625,8 @@
         },
         "far": {
           "file": "articulated/TOY_SCOUT.far.glb",
-          "sha256": "5de34ab04c534710795acac1072d474c1dee3e98256dba44a5cc9d0d0ccdccdf",
-          "bytes": 39880,
+          "sha256": "b88d4424c9c415bba5bbccc41b57ab7ff3f2b38794b7a70ae8d2b6a456369a40",
+          "bytes": 14596,
           "triangles": 1098,
           "vertices": 693,
           "primitives": 5,
@@ -1645,8 +1645,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_SCOUT.shadow.glb",
-          "sha256": "872fb226dd8cd5d051f23b4b66160f00e73610e205afbf8f3718870d10d0d727",
-          "bytes": 22324,
+          "sha256": "d2aaee7949daf811158ec60a9cf191edf18c0bd673864007f4d59b2ac99a0b52",
+          "bytes": 10856,
           "triangles": 534,
           "vertices": 346,
           "primitives": 5,
@@ -1702,8 +1702,8 @@
       "lods": {
         "hi": {
           "file": "articulated/EQUALITY_MODULE_SHIP.hi.glb",
-          "sha256": "b623984298ffae60ea85f5a83b3f04ef97ced6a5479b7a510f41b392f459e28a",
-          "bytes": 2809284,
+          "sha256": "4f9a415ad5df0e1baa18ccbb68e458aa038b314df9afa448530af3c47f1cfa53",
+          "bytes": 470112,
           "triangles": 36396,
           "vertices": 50032,
           "primitives": 16,
@@ -1722,8 +1722,8 @@
         },
         "lo": {
           "file": "articulated/EQUALITY_MODULE_SHIP.lo.glb",
-          "sha256": "ebf28f5ca398b9ec7657a5ff02ead673a054deab9ad03d269b0d43d7bd023b12",
-          "bytes": 1860120,
+          "sha256": "4b9ce154c508ecd77eaaf45fa5595fbf17aa73c6e44c89a70c8a0c57a5970b8f",
+          "bytes": 315532,
           "triangles": 12000,
           "vertices": 34333,
           "primitives": 16,
@@ -1742,8 +1742,8 @@
         },
         "far": {
           "file": "articulated/EQUALITY_MODULE_SHIP.far.glb",
-          "sha256": "a46a772bba92ba55cdbfbc5fefc95701f69b4eae960d60b5d72bd80099511780",
-          "bytes": 545120,
+          "sha256": "1cd416cec480ae51477ed80c1e1f48d6dc3371dcb0bd47666f3c007fe3973936",
+          "bytes": 132804,
           "triangles": 3068,
           "vertices": 8796,
           "primitives": 16,
@@ -1762,8 +1762,8 @@
         },
         "shadow": {
           "file": "articulated/EQUALITY_MODULE_SHIP.shadow.glb",
-          "sha256": "f1f2fef113719242a872127862d4e427d7d09f6b6d94d3b7425e64c4dfb34df0",
-          "bytes": 287064,
+          "sha256": "e1f6cb6e4e9ebdf805eb3b4a5941328776bd7b74e3b8aa84475faccc609ef1a6",
+          "bytes": 89280,
           "triangles": 1294,
           "vertices": 3810,
           "primitives": 16,
@@ -1823,8 +1823,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_ZIPPER.hi.glb",
-          "sha256": "f81e9d827bef3c4dd6503e1050d809bcb2fb40420991a5c67d6dc45fdc681e0f",
-          "bytes": 438340,
+          "sha256": "efd5be9e4b4ab951e6c4f71512537e8776469151c5e25d5a554e1374df3b1443",
+          "bytes": 76100,
           "triangles": 11584,
           "vertices": 8267,
           "primitives": 6,
@@ -1843,8 +1843,8 @@
         },
         "lo": {
           "file": "articulated/TOY_ZIPPER.lo.glb",
-          "sha256": "1f47ef1ef922a917761f06f87f43bed61514ee3d10ec094e5793dad1a29d2d81",
-          "bytes": 190988,
+          "sha256": "8843632a34e9a25b19cae85e2a41311f205735abddc2114e53401a0c3c09695a",
+          "bytes": 37564,
           "triangles": 4594,
           "vertices": 3512,
           "primitives": 6,
@@ -1863,8 +1863,8 @@
         },
         "far": {
           "file": "articulated/TOY_ZIPPER.far.glb",
-          "sha256": "0532fd9faf2114b291ada52def05b45003fe33e1550fc26b32c2626215a0811d",
-          "bytes": 56024,
+          "sha256": "30e5241b7cf4700614f3daf731798c7ec0e41d5daa2de0adf2ceafffc3d1c8ab",
+          "bytes": 15280,
           "triangles": 1136,
           "vertices": 917,
           "primitives": 6,
@@ -1883,8 +1883,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_ZIPPER.shadow.glb",
-          "sha256": "83f6f96b251cc8f97f3b029d350899534b96461df91af02b321a2afd902765cf",
-          "bytes": 22316,
+          "sha256": "f38f79ca8613a717d352b5f801779db2776ff9256064e1a03a8a4f8760ac2fa1",
+          "bytes": 9392,
           "triangles": 376,
           "vertices": 276,
           "primitives": 6,
@@ -1944,8 +1944,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_MINER.hi.glb",
-          "sha256": "cedf730cf63d108e42a5238a711c5f4e0b6ab931d7418e217a79174b041ad53a",
-          "bytes": 492080,
+          "sha256": "aab3dd40f17de1192614025d25038cab2326a93222f9138d0bb4a9ed8540f45a",
+          "bytes": 86008,
           "triangles": 14240,
           "vertices": 9128,
           "primitives": 6,
@@ -1964,8 +1964,8 @@
         },
         "lo": {
           "file": "articulated/TOY_MINER.lo.glb",
-          "sha256": "222b73d0dea1d2c5c6dc06150de5cfd04f5771e8790ba802bbc62fb65c7bf85a",
-          "bytes": 184220,
+          "sha256": "b57b7e599767b4caf4ae00ed6ec6c5347234e34df47eb2f7e333977baa6e3968",
+          "bytes": 35976,
           "triangles": 4594,
           "vertices": 3360,
           "primitives": 6,
@@ -1984,8 +1984,8 @@
         },
         "far": {
           "file": "articulated/TOY_MINER.far.glb",
-          "sha256": "0264f0a28f38a28f156969ab5667d4f61b47daedda5ed746d07e097b271114bf",
-          "bytes": 56028,
+          "sha256": "03c6813db70f2fce561484b66342f8beae7b8cdaa8a4dbff791667ec2f5303c6",
+          "bytes": 14928,
           "triangles": 1136,
           "vertices": 919,
           "primitives": 6,
@@ -2004,8 +2004,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_MINER.shadow.glb",
-          "sha256": "d901c070554b1fc3fe261ae93e0efa3c48f3973a4d698509d777900fd42b815f",
-          "bytes": 22832,
+          "sha256": "184beb7422b21c70ce4f6555a77d5c9f0a9e8c797ac7bf01eba1c95718ed0bd8",
+          "bytes": 9232,
           "triangles": 360,
           "vertices": 294,
           "primitives": 6,
@@ -2065,8 +2065,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_BANKER.hi.glb",
-          "sha256": "13835c020d9c261d19fdc85e6a10567bece898618cddb402f26d59c1ebc29e15",
-          "bytes": 428376,
+          "sha256": "65953c868761a19b7ca7d8a0035e2b510bf97103f97224cb4f376238e3cb042b",
+          "bytes": 72948,
           "triangles": 11784,
           "vertices": 8046,
           "primitives": 5,
@@ -2085,8 +2085,8 @@
         },
         "lo": {
           "file": "articulated/TOY_BANKER.lo.glb",
-          "sha256": "d098738364f60de7e3fbc21e358eaa137f195f604adab88a926cb43e97fb6ac3",
-          "bytes": 187136,
+          "sha256": "bb57fdb7422f357660443a6b0f9e4ba9c61d108f03f0cadeb5bd1aaf9b5ad14c",
+          "bytes": 35340,
           "triangles": 4594,
           "vertices": 3457,
           "primitives": 5,
@@ -2105,8 +2105,8 @@
         },
         "far": {
           "file": "articulated/TOY_BANKER.far.glb",
-          "sha256": "c7f34703bbe4cc870c8f61013d06a635532f1276a5a813141d927388abb9dff5",
-          "bytes": 54172,
+          "sha256": "9f0eec5aa4c450c113798eab9228c8b91e459bd6598145b101a33834db5996a4",
+          "bytes": 14080,
           "triangles": 1134,
           "vertices": 934,
           "primitives": 5,
@@ -2125,8 +2125,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_BANKER.shadow.glb",
-          "sha256": "69e8953c31e9bea30c8f5c2670ed7c35652f42827138b0cb85331369b16d139d",
-          "bytes": 17964,
+          "sha256": "ddde5428e9682148bb6b9f38afe6d277a7039c83b4f5f2f95f02427fc062fc9d",
+          "bytes": 8028,
           "triangles": 312,
           "vertices": 230,
           "primitives": 5,
@@ -2188,8 +2188,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_GANTER_PARADE_TANK.hi.glb",
-          "sha256": "45abeba951de5498a17bba3c2c6a25b46d8ab4837bcdd3620c45da1ed09fa67d",
-          "bytes": 883512,
+          "sha256": "9f8360812b487e5afa2a5d57c13ff483c95c4a6c8bb17575fc1400454fa35826",
+          "bytes": 171744,
           "triangles": 30992,
           "vertices": 15970,
           "primitives": 10,
@@ -2208,8 +2208,8 @@
         },
         "lo": {
           "file": "articulated/TOY_GANTER_PARADE_TANK.lo.glb",
-          "sha256": "25e84236850c3f513e81404635b0a5e0e3a4c67f937b43ce8da231bcf2b53c27",
-          "bytes": 273776,
+          "sha256": "e386d63ab6877c38dca13b0add4629b7ced72f8631b12c95ac783342a49fb0dd",
+          "bytes": 64460,
           "triangles": 9198,
           "vertices": 4912,
           "primitives": 10,
@@ -2228,8 +2228,8 @@
         },
         "far": {
           "file": "articulated/TOY_GANTER_PARADE_TANK.far.glb",
-          "sha256": "94e3d22b0241ce0ec32b7714f19866f63921512059c32ec65893532a7d39d2a7",
-          "bytes": 77264,
+          "sha256": "e3bb066928bb2fd0b8f4e68acf08272cb1b7390bf3b3536c299eff4301ee7158",
+          "bytes": 25580,
           "triangles": 2328,
           "vertices": 1316,
           "primitives": 10,
@@ -2248,8 +2248,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_GANTER_PARADE_TANK.shadow.glb",
-          "sha256": "6ae99315bc8bb6c795a848dd01d2cae4c142e566f9507d0fbb2f08c89e9a89af",
-          "bytes": 34156,
+          "sha256": "d4a3be2c79c630e35003ebd811972f7eaf7ad91b823f02dcb4605d0d319f777f",
+          "bytes": 13744,
           "triangles": 1084,
           "vertices": 570,
           "primitives": 7,
@@ -2316,8 +2316,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_SWARMER.hi.glb",
-          "sha256": "8433bb1bfff275145a3ea9e6ffe8b634da1c8290c2f995f8f3b836757b4f3f57",
-          "bytes": 291684,
+          "sha256": "cb19fdb0dfe042eb8f19391d661b602a9163743e66292dfeaeff99ad8203d8c3",
+          "bytes": 60288,
           "triangles": 9148,
           "vertices": 5449,
           "primitives": 5,
@@ -2336,8 +2336,8 @@
         },
         "lo": {
           "file": "articulated/TOY_SWARMER.lo.glb",
-          "sha256": "c05a4a36d1d6f23d37d5c5f7e1dcc95e0160ced3b5e43cfc73c406ace5ee65a7",
-          "bytes": 125868,
+          "sha256": "ab1f7890b137b410c69df11735c9acd231465a6c7b51865b1b0fe91562312633",
+          "bytes": 30536,
           "triangles": 3676,
           "vertices": 2301,
           "primitives": 5,
@@ -2356,8 +2356,8 @@
         },
         "far": {
           "file": "articulated/TOY_SWARMER.far.glb",
-          "sha256": "9582c0aec13d8eec2b36ce8a0c05f9994ef02b6085dd4e8f38db287d221de931",
-          "bytes": 41484,
+          "sha256": "079e423c828fb1e71c6906a5dd0d4bc147b73d29135eca6d32737f700a385f34",
+          "bytes": 14472,
           "triangles": 1062,
           "vertices": 720,
           "primitives": 5,
@@ -2376,8 +2376,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_SWARMER.shadow.glb",
-          "sha256": "4b01df561f1296b8d8fa283d1599737100f78c8c4f88fb84ecaab62a450de465",
-          "bytes": 19996,
+          "sha256": "6c3651fdba293dbe6a585971169a8ff45dc126c08f97a487e8e596bfc0a50501",
+          "bytes": 10232,
           "triangles": 456,
           "vertices": 321,
           "primitives": 5,
@@ -2444,8 +2444,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_GHOST.hi.glb",
-          "sha256": "2454d28304028b9d816a760c2d1713208f8951da21c427dce6cd22a2f7882a93",
-          "bytes": 253496,
+          "sha256": "b32cbf81e099e327a13be45187f07b880dfca35479057bc71b13941d2214919f",
+          "bytes": 53312,
           "triangles": 8140,
           "vertices": 4771,
           "primitives": 5,
@@ -2464,8 +2464,8 @@
         },
         "lo": {
           "file": "articulated/TOY_GHOST.lo.glb",
-          "sha256": "20ca022b46b08e7027abef381eade550f0591cd6d3b2cc47c98bcf85079b3aa9",
-          "bytes": 109296,
+          "sha256": "445f916684ab5911c84d4267e0ceb0be9fab58649350f0743dbd092fe721b0be",
+          "bytes": 27284,
           "triangles": 3276,
           "vertices": 2011,
           "primitives": 5,
@@ -2484,8 +2484,8 @@
         },
         "far": {
           "file": "articulated/TOY_GHOST.far.glb",
-          "sha256": "8d7af7c086b5fc293fc67cf248a838ebb042713b3129ad8b9ea7716cd6244e5c",
-          "bytes": 31240,
+          "sha256": "794fbcb50d421ceb30d7c4481bea50d6d9a0572342531a83f7b56f636fffe5e1",
+          "bytes": 12296,
           "triangles": 822,
           "vertices": 542,
           "primitives": 5,
@@ -2504,8 +2504,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_GHOST.shadow.glb",
-          "sha256": "7f76b760b2256a067f5545ca058008a1c54b8ff38a8e2e4c8894e2896916884b",
-          "bytes": 15916,
+          "sha256": "6a9b99fe4585d010c92f5a032edb423e24bace05b93f06288a1ba021e45979e5",
+          "bytes": 9180,
           "triangles": 356,
           "vertices": 256,
           "primitives": 5,
@@ -2572,8 +2572,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_ACE.hi.glb",
-          "sha256": "d5c3cedb3ea27a2448ddc17c43a2b3057e31bf918ba0146469805f89dc0b15ea",
-          "bytes": 331328,
+          "sha256": "753107145659843d2dc7f60de61912962e519cef6f6653b10e78a3af6919b592",
+          "bytes": 67444,
           "triangles": 10300,
           "vertices": 6199,
           "primitives": 5,
@@ -2592,8 +2592,8 @@
         },
         "lo": {
           "file": "articulated/TOY_ACE.lo.glb",
-          "sha256": "71b1c88be1d1a77bf7d327391438803d36b4e5b74f1cb8a77e657260f523a551",
-          "bytes": 137440,
+          "sha256": "916f7fbd68a7cc97b84df53f5a586424a995a805f30d09acb04e59fe703d4993",
+          "bytes": 32352,
           "triangles": 3954,
           "vertices": 2532,
           "primitives": 5,
@@ -2612,8 +2612,8 @@
         },
         "far": {
           "file": "articulated/TOY_ACE.far.glb",
-          "sha256": "9b08bd68fdaac99de6b6e0ef483dc5247b586f67de0d15851de5f2c9e0c1e34c",
-          "bytes": 42780,
+          "sha256": "79452279f52f403979ac77036478b7d4d8456c87e151ae1f6ff61f04ac255946",
+          "bytes": 14300,
           "triangles": 1058,
           "vertices": 756,
           "primitives": 5,
@@ -2632,8 +2632,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_ACE.shadow.glb",
-          "sha256": "c67d4cf4bb330d4659b38c76f362564bf50e13a56387ebd5d19cdcbd6ee7fc74",
-          "bytes": 17976,
+          "sha256": "3e89c35f4aa135478e1efdf8deffffcdb15da08b665f524d571da01109fdda86",
+          "bytes": 9552,
           "triangles": 400,
           "vertices": 289,
           "primitives": 5,
@@ -2693,8 +2693,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_QUOTA.hi.glb",
-          "sha256": "3a1754d171fbcd578b83a88caddf79c2fe6c82de3a162a1e3d985d76a9d8e734",
-          "bytes": 2476824,
+          "sha256": "7a9c496b5647f179d9e9a38f3dca5f60f02a42450dad0f5e85e40653da96eac1",
+          "bytes": 509340,
           "triangles": 29190,
           "vertices": 63586,
           "primitives": 9,
@@ -2713,8 +2713,8 @@
         },
         "lo": {
           "file": "articulated/TOY_QUOTA.lo.glb",
-          "sha256": "37dadf843cf09964657c0dafc44ccc6482a11b09456fd770eabaa1923211d5ab",
-          "bytes": 767544,
+          "sha256": "04db4c7137508621db69d6e72ba2aad600cecea21e0bf4de844eccab8eefe470",
+          "bytes": 185160,
           "triangles": 8492,
           "vertices": 19557,
           "primitives": 9,
@@ -2733,8 +2733,8 @@
         },
         "far": {
           "file": "articulated/TOY_QUOTA.far.glb",
-          "sha256": "8441158bfba269c27e3aef64526c0a2e95c9e970eddea9c8bfeef4917fc29281",
-          "bytes": 201172,
+          "sha256": "5f5b54553d69221c6eb0d3268b388d248deb7be383a3456acb03ef367ade6511",
+          "bytes": 58748,
           "triangles": 2086,
           "vertices": 4894,
           "primitives": 9,
@@ -2753,8 +2753,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_QUOTA.shadow.glb",
-          "sha256": "5e9f296fc57cfe6908c354ebefa3b76c005fb9bdc70c601a324ff04138bf6f58",
-          "bytes": 101168,
+          "sha256": "e312cd3f4072f52b7e864cd80663bad479f560d0417bc19928a65dcf3ef742d7",
+          "bytes": 32836,
           "triangles": 992,
           "vertices": 2305,
           "primitives": 9,
@@ -3071,8 +3071,8 @@
         },
         "lo": {
           "file": "articulated/TOY_EQUALITY.lo.glb",
-          "sha256": "cd29ea7f911500870396f8bfc084df3dfcf9d7c4f8f8cbf332d61573d4fb78f4",
-          "bytes": 532412,
+          "sha256": "87255aac289b455994e60278dcc144455f34d25bb01ae4d967c639ae528f5b66",
+          "bytes": 106720,
           "triangles": 7500,
           "vertices": 6994,
           "primitives": 10,
@@ -3091,8 +3091,8 @@
         },
         "far": {
           "file": "articulated/TOY_EQUALITY.far.glb",
-          "sha256": "a482be9a681af33166958dadd0b117f5849119ad32eae2725a7e4315800fe3bd",
-          "bytes": 248948,
+          "sha256": "3b5dd1dd49057e31631a3790099dd80691dae78482e03bdf4a0208aa31ca4637",
+          "bytes": 57232,
           "triangles": 1868,
           "vertices": 1790,
           "primitives": 10,
@@ -3111,8 +3111,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_EQUALITY.shadow.glb",
-          "sha256": "6c1b92f1b04870cda3933fc852ddbb94224f80eb9ce39cafd16762a81363168b",
-          "bytes": 191440,
+          "sha256": "aa4e40b81616906fc5fddc105c411141b32de086ac80b071041ef2d3c8770edb",
+          "bytes": 46128,
           "triangles": 860,
           "vertices": 722,
           "primitives": 10,
@@ -3172,8 +3172,8 @@
       "lods": {
         "hi": {
           "file": "articulated/TOY_BRIGADIER.hi.glb",
-          "sha256": "83bf14ef94700614d19ff4830db390641c35af527de811b585a80985add7344b",
-          "bytes": 958880,
+          "sha256": "9afed9802a50cff5434749c3709b89f41549debd53204272c67e061e18ffd547",
+          "bytes": 175272,
           "triangles": 29992,
           "vertices": 17440,
           "primitives": 10,
@@ -3192,8 +3192,8 @@
         },
         "lo": {
           "file": "articulated/TOY_BRIGADIER.lo.glb",
-          "sha256": "e8827883236b1213c06470398eb127f6bf7e5f34d0e692c15963ad8aac03f811",
-          "bytes": 293688,
+          "sha256": "97277c8291473e3b2a65f23486ca9fb25e66eb463a17cfc03821d1d277f16469",
+          "bytes": 60776,
           "triangles": 7992,
           "vertices": 5324,
           "primitives": 10,
@@ -3212,8 +3212,8 @@
         },
         "far": {
           "file": "articulated/TOY_BRIGADIER.far.glb",
-          "sha256": "beed821a94a751abaef79133e0eae63c48c4e7ee908dd2338e84f4c61f273b75",
-          "bytes": 98712,
+          "sha256": "d4f4abf0f7c389c88ed5b301c3ccffb9f8c3cbec8ca8511b5e37f8551c8a6aa7",
+          "bytes": 24496,
           "triangles": 2040,
           "vertices": 1706,
           "primitives": 10,
@@ -3232,8 +3232,8 @@
         },
         "shadow": {
           "file": "articulated/TOY_BRIGADIER.shadow.glb",
-          "sha256": "599a62e88aa0c615d5bc57220e3eed3de0342dc722cd98527bf04910a1cdc928",
-          "bytes": 80748,
+          "sha256": "1b084f9e7fb42dafe7637750dbaa01724aa4e14775aeeb8b0e538baa129a8798",
+          "bytes": 19816,
           "triangles": 982,
           "vertices": 2904,
           "primitives": 10,

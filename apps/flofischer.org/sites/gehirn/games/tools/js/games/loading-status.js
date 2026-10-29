@@ -1,43 +1,79 @@
-/** DOM-only progress for a loading step, never an invented overall percentage.
- * A byte denominator is meaningful only for one known-length active transfer.
- * Error/finished scopes ignore late events from concurrent resource requests.
+/** Slim loading bar shared by the hub, the overworld and level preparation.
+ * The fill is determinate by bytes received / bytes expected where the loader knows both
+ * (Content-Length or a catalog size hint) and falls back to counting finished preparation
+ * steps. It never moves backwards inside one load. The caption names the place or level only.
+ * Late events after finish/fail are ignored. Errors keep a visible action button.
  */
-import { formatLoadProgress } from '../../games-assets/fernworld/runtime/loading-cache.js';
-const megabytes = bytes => `${(bytes / 1048576).toLocaleString('de', { maximumFractionDigits: 1 })} MB`;
-export function createLoadingStatus({ root, text, progress, detail }) {
-  const transfers = new Map(), downloaded = new Map();
-  let open = false;
-  function indeterminate() { progress.removeAttribute('value');progress.removeAttribute('max'); }
-  function begin(message) {
-    open = true;transfers.clear();downloaded.clear();root.hidden = false;progress.hidden = false;detail.hidden = false;
-    text.textContent = message;detail.textContent = 'Spieldaten · Modelle · Szene und Licht';
-    progress.setAttribute('aria-valuetext', 'Aktueller Ladeschritt; Gesamtdauer noch unbekannt');indeterminate();
+const FADE_MS = 280;
+
+/** Markup for one bar; the host element must be `position: relative` (the stage). */
+export function loadingBarHTML(extra = '') {
+  return '<div class="gm-loadbar" data-load="root" hidden>'
+    + '<div class="gm-loadbar__track" data-load="bar" role="progressbar" aria-label="Loading" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="gm-loadbar__fill" data-load="fill"></div></div>'
+    + '<div class="gm-loadbar__row"><span class="gm-loadbar__caption" data-load="caption" role="status"></span>'
+    + '<button type="button" class="fw-btn fw-btn--sm gm-loadbar__action" data-load="retry" hidden>Retry</button>' + extra + '</div></div>';
+}
+
+export function bindLoadingStatus(scope) {
+  const part = key => scope.querySelector(`[data-load="${key}"]`);
+  return createLoadingStatus({ root: part('root'), bar: part('bar'), fill: part('fill'), caption: part('caption'), retry: part('retry') });
+}
+
+export function createLoadingStatus({ root, bar, fill, caption, retry }) {
+  const downloads = new Map();
+  let open = false, value = 0, steps = 0, timer = 0, action = null;
+  retry?.addEventListener?.('click', () => action?.());
+  function paint(next) {
+    value = Math.max(value, Math.min(1, next));
+    fill.style.transform = `scaleX(${value})`;
+    bar.setAttribute('aria-valuenow', String(Math.round(value * 100)));
   }
+  function reset() {
+    clearTimeout(timer);
+    downloads.clear(); steps = 0; value = 0; action = null;
+    root.classList?.remove('is-done', 'is-error');
+    if (retry) retry.hidden = true;
+    bar.hidden = false;
+  }
+  function begin(name) {
+    reset(); open = true;
+    root.hidden = false; caption.textContent = name ?? '';
+    paint(0.03);
+  }
+  /** Show the bar for `name` unless a load is already running (keeps its progress). */
+  function ensure(name) { if (!open) begin(name); }
   function update(event) {
     if (!open) return;
-    indeterminate();
     if (event.phase === 'download' && event.url && !event.cacheHit) {
-      downloaded.set(event.url, Math.max(downloaded.get(event.url) ?? 0, event.loaded ?? 0));
-      if (event.done) transfers.delete(event.url);else transfers.set(event.url, event);
+      const previous = downloads.get(event.url) ?? { loaded: 0, total: 0 };
+      const total = event.total > 0 ? event.total : previous.total;
+      downloads.set(event.url, { loaded: Math.max(previous.loaded, event.loaded ?? 0), total, done: !!event.done });
+      // A finished transfer of unknown size is only a step: it must not claim the whole byte budget.
+      if (event.done && !(total > 0)) steps++;
+    } else if (event.done !== false) steps++;
+    let known = 0, got = 0;
+    for (const item of downloads.values()) {
+      if (item.total > 0) { known += item.total; got += item.done ? item.total : Math.min(item.loaded, item.total); }
     }
-    const bytes = [...downloaded.values()].reduce((sum,value) => sum+value,0);
-    if (event.phase === 'download' && transfers.size > 1) {
-      text.textContent = `Spieldaten laden · ${transfers.size} Dateien gleichzeitig …`;
-      detail.textContent = `${megabytes(bytes)} geladen · anschließend Modelle und Licht`;
-    } else if (event.phase === 'download' && !event.cacheHit && !event.done && transfers.size === 1) {
-      text.textContent = 'Spieldaten laden …';
-      const known = Number.isFinite(event.total) && event.total > 0 && event.loaded < event.total;
-      detail.textContent = `Aktuelle Datei: ${megabytes(event.loaded ?? 0)}${known ? ` / ${megabytes(event.total)}` : ''} · danach Modelle und Licht`;
-      if (known) { progress.max=event.total;progress.value=event.loaded; }
-    } else {
-      text.textContent = event.phase === 'download' && event.done && !event.cacheHit ? 'Geladene Spieldaten vorbereiten …' : formatLoadProgress(event);
-      detail.textContent = bytes ? `${megabytes(bytes)} geladen · aktueller Vorbereitungsschritt` : 'Modelle und Szene werden vorbereitet …';
-    }
-    progress.setAttribute('aria-valuetext', detail.textContent);
+    const stepPart = 1 - 0.85 ** steps;
+    paint(known > 0 ? 0.8 * (got / known) + 0.17 * stepPart : 0.5 * stepPart);
   }
-  function fail(message) {
-    open = false;transfers.clear();text.textContent = message;progress.hidden = true;detail.hidden = true;indeterminate();
+  /** `retryAction` (optional) gives the error state its visible button. */
+  function fail(message, { action: retryAction = null, label = 'Retry' } = {}) {
+    open = false; clearTimeout(timer); downloads.clear();
+    root.classList?.remove('is-done'); root.classList?.add('is-error');
+    root.hidden = false; caption.textContent = message; bar.hidden = true;
+    action = retryAction;
+    if (retry) { retry.textContent = label; retry.hidden = !retryAction; }
   }
-  function finish() { open=false;transfers.clear();indeterminate();root.hidden=true; }
-  return { begin, update, fail, finish };
+  function finish() {
+    const wasOpen = open, wasError = root.classList?.contains('is-error');
+    open = false; downloads.clear(); clearTimeout(timer);
+    if (root.hidden) return;
+    if (!wasOpen || wasError) { root.hidden = true; root.classList?.remove('is-error'); return; }
+    paint(1);
+    root.classList?.add('is-done');
+    timer = setTimeout(() => { root.hidden = true; root.classList?.remove('is-done'); }, FADE_MS);
+  }
+  return { begin, ensure, update, fail, finish, get value() { return value; } };
 }

@@ -29,7 +29,7 @@
       "materials": 2,
       "drawcalls": 2,
       "bones": 23,
-      "sha256": "c3b0843955e7ad25a432abec72881171d4ce48b989d6b8ddf4667b0720d8272a"
+      "sha256": "4a9359c2a6ee91b7482d5b82a66029410bc9bf31384ea9fad4df70a51fdcd817"
     },
     "lo": {
       "triangles": 10997,
@@ -37,7 +37,7 @@
       "materials": 2,
       "drawcalls": 2,
       "bones": 23,
-      "sha256": "b205489d21113ab48c0f03e1329ee96a9d02b94f090fa8a5ff83cd0431258907"
+      "sha256": "ff8d44df3c0878ecf55211a9a3fc017e0816aeb9c1f908ac6d758de4d5a2cecb"
     },
     "far": {
       "triangles": 2988,
@@ -45,7 +45,7 @@
       "materials": 2,
       "drawcalls": 2,
       "bones": 23,
-      "sha256": "e85928ad5b93c89aec50d5cb5cb881f4b9876a81602a8e3a0c6cc31e2a2c4f7d"
+      "sha256": "f457d958afe8c5c9192da58803d9481d6b4a65a2afbb85b0906394a1a1e6dccc"
     },
     "shadow": {
       "triangles": 1188,
@@ -53,7 +53,7 @@
       "materials": 1,
       "drawcalls": 1,
       "bones": 23,
-      "sha256": "5244c0cc8f2a6093ecc52a7b2021adb089f35c3670a28314f4aa9ae5590e41cf"
+      "sha256": "9fec4358059ec213ee92b22ef5eaa4a88ed9be84861b724a6d1317b6fc4cf086"
     }
   },
   "coordinates": {

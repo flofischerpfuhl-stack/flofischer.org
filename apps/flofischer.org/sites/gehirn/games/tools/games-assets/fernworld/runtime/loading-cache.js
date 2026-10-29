@@ -4,6 +4,7 @@
  */
 const BYTE_LIMIT = 48 * 1024 * 1024, JSON_LIMIT = 12 * 1024 * 1024;
 const ENTRY_LIMIT = 256, INFLIGHT_LIMIT = 48, CONCURRENCY = 6;
+const expected = new Map();
 const bytes = new Map(), metadata = new Map(), inflight = new Map(), queue = [];
 let byteSize = 0, jsonSize = 0, active = 0;
 const counters = { downloads: 0, hits: 0, coalesced: 0, failures: 0, evictions: 0 };
@@ -36,7 +37,7 @@ function notify(entry, event) {
 }
 async function run(entry) {
   counters.downloads++;
-  const response = await fetch(entry.url, { signal: entry.controller.signal });
+  const response = await fetch(entry.url, entry.priority ? { signal: entry.controller.signal, priority: entry.priority } : { signal: entry.controller.signal });
   if (!response.ok) {
     const error=new Error(`Asset HTTP ${response.status}: ${entry.url}`);
     if(response.status===409)error.code='ASSET_VERSION_MISMATCH';
@@ -44,7 +45,8 @@ async function run(entry) {
   }
   // Fetch streams are decoded; Content-Length may describe gzip/brotli bytes.
   const header = Number(response.headers.get('content-length'));
-  const total = !response.headers.get('content-encoding') && header > 0 ? header : null;
+  // Content-Length of an encoded body is not the decoded size; fall back to the catalog hint (decoded size).
+  const total = !response.headers.get('content-encoding') && header > 0 ? header : expected.get(entry.url) ?? null;
   let value;
   if (response.body?.getReader) {
     const reader = response.body.getReader(), chunks = []; let loaded = 0;
@@ -78,7 +80,10 @@ export function assetRequestURL(input) {
   if(/^[a-f0-9]{64}$/.test(revision??''))url.searchParams.set('v',revision);
   return url.href;
 }
-export function loadBytes(url, { onProgress, signal } = {}) {
+/** Decoded size a catalog promises for `url`; lets progress be determinate when the server compresses the body. */
+export function expectBytes(url, size) { if (size > 0) expected.set(assetRequestURL(url), size); }
+/** `priority: 'low'` is a fetch hint for speculative downloads (prefetch). */
+export function loadBytes(url, { onProgress, signal, priority } = {}) {
   url = assetRequestURL(url);
   if (signal?.aborted) return Promise.reject(abortError());
   const cached = bytes.get(url);
@@ -93,7 +98,7 @@ export function loadBytes(url, { onProgress, signal } = {}) {
   if (entry) counters.coalesced++;
   else {
     if (inflight.size >= INFLIGHT_LIMIT) return Promise.reject(new Error('Zu viele gleichzeitige Asset-Anfragen'));
-    entry = { url, controller: new AbortController(), listeners: new Set(), progress: null };
+    entry = { url, controller: new AbortController(), listeners: new Set(), progress: null, priority };
     inflight.set(url, entry); queue.push(entry);
   }
   const promise = new Promise((resolve, reject) => {

@@ -3,7 +3,7 @@
   "asset": "LANDING_POD",
   "units": "metres",
   "axes": "Y-up,+Z-forward",
-  "podSha256": "d7207450fb77337edd2e8be7c03c638cacada57acbc22a953b61646bb8c290d7",
+  "podSha256": "cea15a8bc6c006cff5bcb67a323208707e161b4b7bb56dd435263e7e13e253a7",
   "independentFromBossDocks": true,
   "certifiedBinaryRayRectangle": {
     "x": [
@@ -1031,7 +1031,7 @@
       "actorScalePolicy": "Actor world dimensions remain unchanged. Apply this scale to LANDING_POD only; it is independent of boss docking scales.",
       "fitMeaning": "Full unposed bbox through certified opening rectangle; weapon/helmet included where present. Nominal height rows require actor width/depth as inputs before final fit claim.",
       "source": "tools/games-assets/fernworld/models/HUMAN_LEGIONARY.hi.glb",
-      "sha256": "341048172fa99ff23db1bb0226b025b7358abe31939a55bc947e381f8c6de301",
+      "sha256": "56c90bb8e34fdda85e664847ecbbfdcedffccd01ccf7d7ec0e9eb8e49d319bab",
       "measuredWorldBounds": [
         [
           -0.48867928981781006,
@@ -1064,7 +1064,7 @@
       "actorScalePolicy": "Actor world dimensions remain unchanged. Apply this scale to LANDING_POD only; it is independent of boss docking scales.",
       "fitMeaning": "Full unposed bbox through certified opening rectangle; weapon/helmet included where present. Nominal height rows require actor width/depth as inputs before final fit claim.",
       "source": "tools/games-assets/fernworld/models/HALFGROWN_LEGIONARY.hi.glb",
-      "sha256": "5b4625423a3f7f9d6af2ac1e51fee5b60d83c8c41679666360801e16dba4ba29",
+      "sha256": "1cb0a24639204e62d0fba4ea11ce294f4dd72414f3dd92fc8d02a5a57ab7aa0e",
       "measuredWorldBounds": [
         [
           -0.27209389209747314,
@@ -1097,7 +1097,7 @@
       "actorScalePolicy": "Actor world dimensions remain unchanged. Apply this scale to LANDING_POD only; it is independent of boss docking scales.",
       "fitMeaning": "Full unposed bbox through certified opening rectangle; weapon/helmet included where present. Nominal height rows require actor width/depth as inputs before final fit claim.",
       "source": "tools/games-assets/fernworld/models/GIANT_LEGIONARY.hi.glb",
-      "sha256": "e977595933d3003c60d614a9407b96b80e0df39a924c00c59ca85cc54d24a82a",
+      "sha256": "e45f9baae2409e6debdcb7758c519d5e0f44d7db7f06cadb2885d06220ecafce",
       "measuredWorldBounds": [
         [
           -1.2250646352767944,
@@ -1130,7 +1130,7 @@
       "actorScalePolicy": "Actor world dimensions remain unchanged. Apply this scale to LANDING_POD only; it is independent of boss docking scales.",
       "fitMeaning": "Full unposed bbox through certified opening rectangle; weapon/helmet included where present. Nominal height rows require actor width/depth as inputs before final fit claim.",
       "source": "scripts/games-blender/fernworld/characters/duck-legionary/DUCK_LEGIONARY.hi.glb",
-      "sha256": "51c2989e970d701b1dd65cb0212c42b1c2e186ed042a57c3227fc16d689f7290",
+      "sha256": "30ce44daab72e4a18d1c3b514fb4a0715ae8f00721748de8c08113212d75e1b6",
       "measuredWorldBounds": [
         [
           -0.33687811344861984,

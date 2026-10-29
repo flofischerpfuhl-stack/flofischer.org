@@ -1,0 +1,11 @@
+{
+  "library": "meshoptimizer (JS/WASM decoder)",
+  "version": "1.3.0",
+  "licence": "MIT (see LICENSE-meshoptimizer.txt)",
+  "upstream": "https://github.com/zeux/meshoptimizer",
+  "source": "npm package meshoptimizer@1.3.0, file meshopt_decoder.mjs, copied unchanged as meshopt_decoder.module.js",
+  "source_sha256": "10b313edaa0e322b0c1b46443f6c8b186b42139fe1eca189d50c09511d0ebedc",
+  "use": "GLTFLoader.setMeshoptDecoder(MeshoptDecoder) for EXT_meshopt_compression in the runtime GLBs",
+  "encoder": "gltfpack 1.3.0 (npm gltfpack): -cc -kn -km -ke -af 0 -ac -vc 10 -vt 14 -ar 16 -at 24 -as 24; environments additionally -vp 16 -vn 10 (quantized positions/normals), every other GLB -vpf -vnf (float positions and normals, because game code edits those arrays); no simplification",
+  "note": "21 GLBs whose node names, extras, morph names or clip durations would change under gltfpack (WAX_*, STURMBASTION_* idle clips, GLIMMO, PIP_GALE_GLIDER, PIP_KESSEL, TOY_EQUALITY.hi) stay uncompressed. Originals of all others are in git history."
+}

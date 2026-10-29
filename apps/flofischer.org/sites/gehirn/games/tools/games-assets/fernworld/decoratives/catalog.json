@@ -80,9 +80,9 @@
       "sha256": {
         "native": "d000c6e68dbbdaad273fe3b7129e2b587877b3dfe4e711ba4c0f63631f0d61f1",
         "exports": {
-          "hi": "5996dc26e2ac7c9a543963151c0febdde5d201750b030db70821242f2bb2dfb1",
-          "lo": "ef5f6f4deba999c26e3f6df892287183cf52d298874ac8fa9c68b20e154b31bd",
-          "sh": "d037058b80c97fff380aed996b2bd832dd5584eaa44af521c13b70e0b0f3bc24"
+          "hi": "f9a4c731a18fd9797ffa9e0eff3b0fd85a11e15f234d6fcdd003170925d26bcf",
+          "lo": "0f8483c995bea467e7b956b09b249e6081ebd1b33639f6c6e32aada72928df8e",
+          "sh": "12aa0fdbd798ab76bbf53dbcb7033263f92e6021bcd8cb67bd665275f3d79ce5"
         }
       },
       "previews": {
@@ -102,8 +102,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/ALPINE_BLOOM.hi.glb",
-          "sha256": "5996dc26e2ac7c9a543963151c0febdde5d201750b030db70821242f2bb2dfb1",
-          "bytes": 155996,
+          "sha256": "f9a4c731a18fd9797ffa9e0eff3b0fd85a11e15f234d6fcdd003170925d26bcf",
+          "bytes": 30980,
           "triangles": 1824,
           "vertices": 3558,
           "primitives": 1,
@@ -122,8 +122,8 @@
         },
         "lo": {
           "file": "decoratives/ALPINE_BLOOM.lo.glb",
-          "sha256": "ef5f6f4deba999c26e3f6df892287183cf52d298874ac8fa9c68b20e154b31bd",
-          "bytes": 58456,
+          "sha256": "0f8483c995bea467e7b956b09b249e6081ebd1b33639f6c6e32aada72928df8e",
+          "bytes": 14488,
           "triangles": 648,
           "vertices": 1296,
           "primitives": 1,
@@ -142,8 +142,8 @@
         },
         "shadow": {
           "file": "decoratives/ALPINE_BLOOM.shadow.glb",
-          "sha256": "d037058b80c97fff380aed996b2bd832dd5584eaa44af521c13b70e0b0f3bc24",
-          "bytes": 26932,
+          "sha256": "12aa0fdbd798ab76bbf53dbcb7033263f92e6021bcd8cb67bd665275f3d79ce5",
+          "bytes": 8812,
           "triangles": 276,
           "vertices": 564,
           "primitives": 1,
@@ -245,9 +245,9 @@
       "sha256": {
         "native": "7e2c44cfa3e89c9f71e89c8b1972cbb355f54093ae700be4355c610095227e48",
         "exports": {
-          "hi": "e7cd2b5d3393e8b2a7782db1103111f247d992cba8cbc12bf913b914f9de8c74",
-          "lo": "85cf50adcf4f3cb264551ea7be85125e78de4232236d331efd03a3a678968f08",
-          "sh": "70928e475fd6b82a4bbe4221c8e07bb6ff9ad1fa0f63a1d48d96585371fd92b7"
+          "hi": "d86d790d4dcc5d6b2af6fa57f1eb782d04a28ceb2bbf00e093df11b2c8b7762a",
+          "lo": "392d93021327bf286f7b488fa94454ba46e1943daa8dc163fd93aab805b21b55",
+          "sh": "e1a0e378dcf4d66a56fd528d24c7d9ec22a36525e247e73df7fd6717d1cb309f"
         }
       },
       "previews": {
@@ -267,8 +267,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/ALPINE_DWARF_PINE.hi.glb",
-          "sha256": "e7cd2b5d3393e8b2a7782db1103111f247d992cba8cbc12bf913b914f9de8c74",
-          "bytes": 236288,
+          "sha256": "d86d790d4dcc5d6b2af6fa57f1eb782d04a28ceb2bbf00e093df11b2c8b7762a",
+          "bytes": 47832,
           "triangles": 2580,
           "vertices": 5452,
           "primitives": 1,
@@ -287,8 +287,8 @@
         },
         "lo": {
           "file": "decoratives/ALPINE_DWARF_PINE.lo.glb",
-          "sha256": "85cf50adcf4f3cb264551ea7be85125e78de4232236d331efd03a3a678968f08",
-          "bytes": 92812,
+          "sha256": "392d93021327bf286f7b488fa94454ba46e1943daa8dc163fd93aab805b21b55",
+          "bytes": 23368,
           "triangles": 908,
           "vertices": 2116,
           "primitives": 1,
@@ -307,8 +307,8 @@
         },
         "shadow": {
           "file": "decoratives/ALPINE_DWARF_PINE.shadow.glb",
-          "sha256": "70928e475fd6b82a4bbe4221c8e07bb6ff9ad1fa0f63a1d48d96585371fd92b7",
-          "bytes": 65024,
+          "sha256": "e1a0e378dcf4d66a56fd528d24c7d9ec22a36525e247e73df7fd6717d1cb309f",
+          "bytes": 17964,
           "triangles": 570,
           "vertices": 1472,
           "primitives": 1,
@@ -410,9 +410,9 @@
       "sha256": {
         "native": "7d9c3896bbf952adbc3d704775de438090d50a089de82763f060b8ded2ea7424",
         "exports": {
-          "hi": "8c20f71d6c498db178aaa751d2214120388a6375936494558b4664ea362213fc",
-          "lo": "41ae5a409e420262c7574283351821569fc18bc86eff48b2f607377081fa2100",
-          "sh": "d9ed1ab34af5137fca0730617f314bb232e940330b18f85978eaa8e657ede652"
+          "hi": "d4d8952b267c73b61cab98d5378036443cd8cb316f8b58e66419ac478fd546a2",
+          "lo": "389bc938cb13f2d4fd5b5d58da7bdfb445b0cf060d2c66deb0f5aa745cd1795d",
+          "sh": "f36739522d58df4f460513a3ff2b742caee5c0d11f0211aeed51265d7fbaf7f5"
         }
       },
       "previews": {
@@ -432,8 +432,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/ALPINE_FERN.hi.glb",
-          "sha256": "8c20f71d6c498db178aaa751d2214120388a6375936494558b4664ea362213fc",
-          "bytes": 414024,
+          "sha256": "d4d8952b267c73b61cab98d5378036443cd8cb316f8b58e66419ac478fd546a2",
+          "bytes": 75172,
           "triangles": 4788,
           "vertices": 9564,
           "primitives": 1,
@@ -452,8 +452,8 @@
         },
         "lo": {
           "file": "decoratives/ALPINE_FERN.lo.glb",
-          "sha256": "41ae5a409e420262c7574283351821569fc18bc86eff48b2f607377081fa2100",
-          "bytes": 59480,
+          "sha256": "389bc938cb13f2d4fd5b5d58da7bdfb445b0cf060d2c66deb0f5aa745cd1795d",
+          "bytes": 14912,
           "triangles": 660,
           "vertices": 1320,
           "primitives": 1,
@@ -472,8 +472,8 @@
         },
         "shadow": {
           "file": "decoratives/ALPINE_FERN.shadow.glb",
-          "sha256": "d9ed1ab34af5137fca0730617f314bb232e940330b18f85978eaa8e657ede652",
-          "bytes": 33996,
+          "sha256": "f36739522d58df4f460513a3ff2b742caee5c0d11f0211aeed51265d7fbaf7f5",
+          "bytes": 9960,
           "triangles": 360,
           "vertices": 728,
           "primitives": 1,
@@ -575,9 +575,9 @@
       "sha256": {
         "native": "f109b4ca4234f823f396c9b42a14bc72f7ea67901fc4d19e567a18f7cae3ecd2",
         "exports": {
-          "hi": "a7f0b93f58bf04c1b5946739312aeba6e772575fc7924c9bd36a4a72cf0f9fdd",
-          "lo": "c84aa960a57e96b51bb523010b0097ea3df8a35e6a7cd4cfb00f7344fdc44d6f",
-          "sh": "97308715023b2e99091e9c0d5a337aa18a3c7a109306b95bc9cb56180d0b6400"
+          "hi": "72357c486948eb0fe423ad3a794b59cd298de22086845b1112565ca7752df85c",
+          "lo": "94b2c80ebf02b035c4d8ffd58ac76b70941e36fc912fa8b570624d714e026fbc",
+          "sh": "209596180d8e1eaabf97e8d4486a6fdee76fe6a687ed0c5ab2075129976562ea"
         }
       },
       "previews": {
@@ -597,8 +597,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/ASH_GRASS_CLUMP.hi.glb",
-          "sha256": "a7f0b93f58bf04c1b5946739312aeba6e772575fc7924c9bd36a4a72cf0f9fdd",
-          "bytes": 92172,
+          "sha256": "72357c486948eb0fe423ad3a794b59cd298de22086845b1112565ca7752df85c",
+          "bytes": 19604,
           "triangles": 1040,
           "vertices": 2080,
           "primitives": 1,
@@ -617,8 +617,8 @@
         },
         "lo": {
           "file": "decoratives/ASH_GRASS_CLUMP.lo.glb",
-          "sha256": "c84aa960a57e96b51bb523010b0097ea3df8a35e6a7cd4cfb00f7344fdc44d6f",
-          "bytes": 20264,
+          "sha256": "94b2c80ebf02b035c4d8ffd58ac76b70941e36fc912fa8b570624d714e026fbc",
+          "bytes": 7356,
           "triangles": 204,
           "vertices": 408,
           "primitives": 1,
@@ -637,8 +637,8 @@
         },
         "shadow": {
           "file": "decoratives/ASH_GRASS_CLUMP.shadow.glb",
-          "sha256": "97308715023b2e99091e9c0d5a337aa18a3c7a109306b95bc9cb56180d0b6400",
-          "bytes": 9596,
+          "sha256": "209596180d8e1eaabf97e8d4486a6fdee76fe6a687ed0c5ab2075129976562ea",
+          "bytes": 5176,
           "triangles": 80,
           "vertices": 160,
           "primitives": 1,
@@ -740,9 +740,9 @@
       "sha256": {
         "native": "ca78253a101e78f1a237ed7c659d19170188e98c9f98b6cd31c3e96b9d14e8a8",
         "exports": {
-          "hi": "5f1de0dd2e2ba379876d1e4e76d03ae61f516bf95960c1308708434255f0e968",
-          "lo": "c5b679274bc2c1202a45a024d751175f7588130e5ca341e3460c56a308b15433",
-          "sh": "f150895f9940aa616bebe792d61eef2540a64c6adeb0b484da868eb09d32b74e"
+          "hi": "2d2f972c907799a0bfc6fb379e47f020bb746314008974dd66aba0d9732d0fca",
+          "lo": "ae674b400983b5463e325a5acbeeaf73fe8b6acc3c87ad6978d93e425b73c27a",
+          "sh": "3174cb243ac45c61277206caad857e5dd2ed788e405b8cfd18e98ccc7074517b"
         }
       },
       "previews": {
@@ -762,8 +762,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/BASALT_ROOT_SHRUB.hi.glb",
-          "sha256": "5f1de0dd2e2ba379876d1e4e76d03ae61f516bf95960c1308708434255f0e968",
-          "bytes": 291240,
+          "sha256": "2d2f972c907799a0bfc6fb379e47f020bb746314008974dd66aba0d9732d0fca",
+          "bytes": 61480,
           "triangles": 2420,
           "vertices": 6848,
           "primitives": 1,
@@ -782,8 +782,8 @@
         },
         "lo": {
           "file": "decoratives/BASALT_ROOT_SHRUB.lo.glb",
-          "sha256": "c5b679274bc2c1202a45a024d751175f7588130e5ca341e3460c56a308b15433",
-          "bytes": 69748,
+          "sha256": "ae674b400983b5463e325a5acbeeaf73fe8b6acc3c87ad6978d93e425b73c27a",
+          "bytes": 18712,
           "triangles": 586,
           "vertices": 1586,
           "primitives": 1,
@@ -802,8 +802,8 @@
         },
         "shadow": {
           "file": "decoratives/BASALT_ROOT_SHRUB.shadow.glb",
-          "sha256": "f150895f9940aa616bebe792d61eef2540a64c6adeb0b484da868eb09d32b74e",
-          "bytes": 41344,
+          "sha256": "3174cb243ac45c61277206caad857e5dd2ed788e405b8cfd18e98ccc7074517b",
+          "bytes": 12696,
           "triangles": 360,
           "vertices": 910,
           "primitives": 1,
@@ -905,9 +905,9 @@
       "sha256": {
         "native": "0e4fb4f067357cb699b8ea72cacc7a79507482e188baa0be667c5fbf070b4c80",
         "exports": {
-          "hi": "7192939aff5f0d2b1b4ccd720305d8588aaa2a5518230f48e3f2515603efdf5b",
-          "lo": "a8e658eb708a0658f434496f02cf4b7ef1f8dabe0b4f615d1ab3591e15483b15",
-          "sh": "8c0ddb045bde5245d2d260060a689849386d508f06ce7eda83ccc7fc17dc7546"
+          "hi": "b15ec3609aa933281ccbad8964c228a5659766c04315278175ee54ffee2f954e",
+          "lo": "6558389c4671254111e9d6808cceb372fe1c17d9cd854be9a1978763372b1b89",
+          "sh": "7630c9af9434e9374c6202086a62631aae2f73431a45391c1d1aadf4c8dc34f3"
         }
       },
       "previews": {
@@ -927,8 +927,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/CHAR_FERN.hi.glb",
-          "sha256": "7192939aff5f0d2b1b4ccd720305d8588aaa2a5518230f48e3f2515603efdf5b",
-          "bytes": 414016,
+          "sha256": "b15ec3609aa933281ccbad8964c228a5659766c04315278175ee54ffee2f954e",
+          "bytes": 75440,
           "triangles": 4788,
           "vertices": 9564,
           "primitives": 1,
@@ -947,8 +947,8 @@
         },
         "lo": {
           "file": "decoratives/CHAR_FERN.lo.glb",
-          "sha256": "a8e658eb708a0658f434496f02cf4b7ef1f8dabe0b4f615d1ab3591e15483b15",
-          "bytes": 59480,
+          "sha256": "6558389c4671254111e9d6808cceb372fe1c17d9cd854be9a1978763372b1b89",
+          "bytes": 14972,
           "triangles": 660,
           "vertices": 1320,
           "primitives": 1,
@@ -967,8 +967,8 @@
         },
         "shadow": {
           "file": "decoratives/CHAR_FERN.shadow.glb",
-          "sha256": "8c0ddb045bde5245d2d260060a689849386d508f06ce7eda83ccc7fc17dc7546",
-          "bytes": 33992,
+          "sha256": "7630c9af9434e9374c6202086a62631aae2f73431a45391c1d1aadf4c8dc34f3",
+          "bytes": 9984,
           "triangles": 360,
           "vertices": 728,
           "primitives": 1,
@@ -1069,8 +1069,8 @@
       "sha256": {
         "native": "8bba35e969e555fa3c3b08dd07f17ce6dbf99ba26a2ad360f4bba248219083ce",
         "exports": {
-          "hi": "cef513f8ffb292fba7c8a1dda4f0ae9ef8bd79d48010ed0f77eb0ac2242e5109",
-          "lo": "480e558930b5bad3a48b790ed6b18e95bdcaab175146265c90e44e8fb9538377"
+          "hi": "222e34e0ca5ce8cdfd7698ce01f0f15ec9d04cc9f20cf8b6f14da33113c79263",
+          "lo": "5334d32527054d4af82df2f419b837b76c7af903eb069e30a132ab3b7cc1a891"
         }
       },
       "previews": {
@@ -1090,8 +1090,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/CUSHION_MOSS.hi.glb",
-          "sha256": "cef513f8ffb292fba7c8a1dda4f0ae9ef8bd79d48010ed0f77eb0ac2242e5109",
-          "bytes": 158504,
+          "sha256": "222e34e0ca5ce8cdfd7698ce01f0f15ec9d04cc9f20cf8b6f14da33113c79263",
+          "bytes": 32816,
           "triangles": 1802,
           "vertices": 3624,
           "primitives": 1,
@@ -1110,8 +1110,8 @@
         },
         "lo": {
           "file": "decoratives/CUSHION_MOSS.lo.glb",
-          "sha256": "480e558930b5bad3a48b790ed6b18e95bdcaab175146265c90e44e8fb9538377",
-          "bytes": 54964,
+          "sha256": "5334d32527054d4af82df2f419b837b76c7af903eb069e30a132ab3b7cc1a891",
+          "bytes": 14256,
           "triangles": 600,
           "vertices": 1216,
           "primitives": 1,
@@ -1213,9 +1213,9 @@
       "sha256": {
         "native": "780a682416a0cb522b94a7ace1c5bdbd50bb11891ac664e9d79670add3707e23",
         "exports": {
-          "hi": "b0617a9fbef0ba9347124a4d971b79b81b000a581c7a191f553d5b285bf3f094",
-          "lo": "28794fa1da2e2a818dacf26280ba6363ee2a9eb3a77bb8a3a20298cae8a84798",
-          "sh": "45d7242ca6180b7e1acce531a643bc4bd7dcdfb05c5c9c5412e53f67b37595b9"
+          "hi": "f475b4b288f3ebc3f7f4fb6a0c5aa1c9d58d810816b3c8ee93b27ab11fa4799f",
+          "lo": "7e9ada28caa5e05419afdcc63bb488857594a8efd518c1d60860cfb2e142f7c3",
+          "sh": "7c5428fb8ac2c1bf5c9af00ba1b98123753de49506856563dc08ba5a5ea63edb"
         }
       },
       "previews": {
@@ -1235,8 +1235,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/DESERT_BLOOM.hi.glb",
-          "sha256": "b0617a9fbef0ba9347124a4d971b79b81b000a581c7a191f553d5b285bf3f094",
-          "bytes": 259200,
+          "sha256": "f475b4b288f3ebc3f7f4fb6a0c5aa1c9d58d810816b3c8ee93b27ab11fa4799f",
+          "bytes": 48996,
           "triangles": 3024,
           "vertices": 5958,
           "primitives": 1,
@@ -1255,8 +1255,8 @@
         },
         "lo": {
           "file": "decoratives/DESERT_BLOOM.lo.glb",
-          "sha256": "28794fa1da2e2a818dacf26280ba6363ee2a9eb3a77bb8a3a20298cae8a84798",
-          "bytes": 81160,
+          "sha256": "7e9ada28caa5e05419afdcc63bb488857594a8efd518c1d60860cfb2e142f7c3",
+          "bytes": 19004,
           "triangles": 912,
           "vertices": 1824,
           "primitives": 1,
@@ -1275,8 +1275,8 @@
         },
         "shadow": {
           "file": "decoratives/DESERT_BLOOM.shadow.glb",
-          "sha256": "45d7242ca6180b7e1acce531a643bc4bd7dcdfb05c5c9c5412e53f67b37595b9",
-          "bytes": 55836,
+          "sha256": "7c5428fb8ac2c1bf5c9af00ba1b98123753de49506856563dc08ba5a5ea63edb",
+          "bytes": 14388,
           "triangles": 612,
           "vertices": 1236,
           "primitives": 1,
@@ -1378,9 +1378,9 @@
       "sha256": {
         "native": "c8eda3e7d82566a1984da1c9a2734319e2292e5844d08c1cde00f8d727549d52",
         "exports": {
-          "hi": "c00849b93d682d5ddf9a37434d01edf7b7a4f142019f4b1919e832db42ce23b9",
-          "lo": "79c586419dccd8bb33cd0af731605a1736aa0a5070cc8c21333206724fb24fe6",
-          "sh": "dbb1f2ce0bde953a544ac4169cc03ce03c74d88a665f48814257a5550aad6b0a"
+          "hi": "91d7d5d9fc436b5cf3b1adca3b0e8cf334fa05e769d61df39960094f77d0487d",
+          "lo": "54a60eabc54ec7642bb08e1b1c570c30ec3742f5cbe841606c8e44c2dfb39b4e",
+          "sh": "8214d3dd4d884d7dc527d3bacbe037e2c9a489de400d0f25428bf8ed3141cbdf"
         }
       },
       "previews": {
@@ -1400,8 +1400,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/DESERT_FERN.hi.glb",
-          "sha256": "c00849b93d682d5ddf9a37434d01edf7b7a4f142019f4b1919e832db42ce23b9",
-          "bytes": 496588,
+          "sha256": "91d7d5d9fc436b5cf3b1adca3b0e8cf334fa05e769d61df39960094f77d0487d",
+          "bytes": 89736,
           "triangles": 5748,
           "vertices": 11484,
           "primitives": 1,
@@ -1420,8 +1420,8 @@
         },
         "lo": {
           "file": "decoratives/DESERT_FERN.lo.glb",
-          "sha256": "79c586419dccd8bb33cd0af731605a1736aa0a5070cc8c21333206724fb24fe6",
-          "bytes": 87000,
+          "sha256": "54a60eabc54ec7642bb08e1b1c570c30ec3742f5cbe841606c8e44c2dfb39b4e",
+          "bytes": 19860,
           "triangles": 980,
           "vertices": 1960,
           "primitives": 1,
@@ -1440,8 +1440,8 @@
         },
         "shadow": {
           "file": "decoratives/DESERT_FERN.shadow.glb",
-          "sha256": "dbb1f2ce0bde953a544ac4169cc03ce03c74d88a665f48814257a5550aad6b0a",
-          "bytes": 33996,
+          "sha256": "8214d3dd4d884d7dc527d3bacbe037e2c9a489de400d0f25428bf8ed3141cbdf",
+          "bytes": 10000,
           "triangles": 360,
           "vertices": 728,
           "primitives": 1,
@@ -1543,9 +1543,9 @@
       "sha256": {
         "native": "47d32985c537d530e90b6dda2beab8b72b0998fdfed7bfa52c9d694fe42884d6",
         "exports": {
-          "hi": "ec849cf4f9c23316c5b8cae919fff9dee3aacf09b01ffe3068ce6403d57f8f0f",
-          "lo": "c09702efd457d81be556354e6b4cb0cc3efa2b070118c9b5d88fa80c02474c8b",
-          "sh": "e10d631e269bbb642988683976a6064ca531021267cbb7d7ff7f2f23c3729cc2"
+          "hi": "7f5d1b9a56102b767dcc44da2a9af2ecc4a1f0e59ba92bcf88b788298886ec23",
+          "lo": "dcbbb58d6011175fe6670ad1400e568c6124de0a4723568398fb90e328a45a57",
+          "sh": "275ab5a98d604eb8d9babe6dae4550c4ec2fdaf4876c30588863f161cc46448c"
         }
       },
       "previews": {
@@ -1565,8 +1565,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/DRY_BRANCH_SHRUB.hi.glb",
-          "sha256": "ec849cf4f9c23316c5b8cae919fff9dee3aacf09b01ffe3068ce6403d57f8f0f",
-          "bytes": 246804,
+          "sha256": "7f5d1b9a56102b767dcc44da2a9af2ecc4a1f0e59ba92bcf88b788298886ec23",
+          "bytes": 51120,
           "triangles": 2214,
           "vertices": 5768,
           "primitives": 1,
@@ -1585,8 +1585,8 @@
         },
         "lo": {
           "file": "decoratives/DRY_BRANCH_SHRUB.lo.glb",
-          "sha256": "c09702efd457d81be556354e6b4cb0cc3efa2b070118c9b5d88fa80c02474c8b",
-          "bytes": 58040,
+          "sha256": "dcbbb58d6011175fe6670ad1400e568c6124de0a4723568398fb90e328a45a57",
+          "bytes": 15552,
           "triangles": 448,
           "vertices": 1314,
           "primitives": 1,
@@ -1605,8 +1605,8 @@
         },
         "shadow": {
           "file": "decoratives/DRY_BRANCH_SHRUB.shadow.glb",
-          "sha256": "e10d631e269bbb642988683976a6064ca531021267cbb7d7ff7f2f23c3729cc2",
-          "bytes": 31200,
+          "sha256": "275ab5a98d604eb8d9babe6dae4550c4ec2fdaf4876c30588863f161cc46448c",
+          "bytes": 10084,
           "triangles": 230,
           "vertices": 676,
           "primitives": 1,
@@ -1708,9 +1708,9 @@
       "sha256": {
         "native": "49366beea479886dbd1fbb2dab9e920a9aa6981b328cc9b5059ac6fcf3213584",
         "exports": {
-          "hi": "37c4a9ba28a57a2338de36c4494206c8eea4258caba0013d2aa1891a283508b4",
-          "lo": "5ed49d93fa17e20683232da154832d044a3717176768c83447bed369480976e0",
-          "sh": "a75770bf3429b5dec349a2dc1149fa0aec983316664ebb514fdff142da36079a"
+          "hi": "524cd566b89f2a89d38b62d3b3f27919c9c222a64d7f70ca1527d19326ba5ae4",
+          "lo": "aa637431af3ef012ebaf91eeb661ee37fcbb076c71d3884824b9d698c66337d5",
+          "sh": "e3a1f43b2a341ca84f859ee89e8038ed5312b29c8088aff14780810cdc3fa4ac"
         }
       },
       "previews": {
@@ -1730,8 +1730,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/EMBER_BLOOM.hi.glb",
-          "sha256": "37c4a9ba28a57a2338de36c4494206c8eea4258caba0013d2aa1891a283508b4",
-          "bytes": 145676,
+          "sha256": "524cd566b89f2a89d38b62d3b3f27919c9c222a64d7f70ca1527d19326ba5ae4",
+          "bytes": 29292,
           "triangles": 1704,
           "vertices": 3318,
           "primitives": 1,
@@ -1750,8 +1750,8 @@
         },
         "lo": {
           "file": "decoratives/EMBER_BLOOM.lo.glb",
-          "sha256": "5ed49d93fa17e20683232da154832d044a3717176768c83447bed369480976e0",
-          "bytes": 55356,
+          "sha256": "aa637431af3ef012ebaf91eeb661ee37fcbb076c71d3884824b9d698c66337d5",
+          "bytes": 13932,
           "triangles": 612,
           "vertices": 1224,
           "primitives": 1,
@@ -1770,8 +1770,8 @@
         },
         "shadow": {
           "file": "decoratives/EMBER_BLOOM.shadow.glb",
-          "sha256": "a75770bf3429b5dec349a2dc1149fa0aec983316664ebb514fdff142da36079a",
-          "bytes": 24868,
+          "sha256": "e3a1f43b2a341ca84f859ee89e8038ed5312b29c8088aff14780810cdc3fa4ac",
+          "bytes": 8412,
           "triangles": 252,
           "vertices": 516,
           "primitives": 1,
@@ -1873,9 +1873,9 @@
       "sha256": {
         "native": "72a77659925fac78de24bbbee69f6a559b836a5b04e458c5599f8f29b4417656",
         "exports": {
-          "hi": "45337e52534076a114a66051c2fbe2dcb8eb3dca7fb259341300ddb167ad2e52",
-          "lo": "406ceb47464f46cd3172417a6c39cc966e5a25a1ca3c43ce075002e02b60d36b",
-          "sh": "b2310d9006d17807c074003233a075e6659cfa1e1539b52916786c414b269d16"
+          "hi": "2e91998e19e7164b607364787cf53201268fb48f2b9154045d5e6ce1106b3959",
+          "lo": "c5d1956f6aff9f5a83f2a5fc5a23c384b37b9af892fa62a4f669bb97c42b3edd",
+          "sh": "1cfea6744c2bb9122576e8d7c9d655e379d50f30c9b619eb5b496a21c14b348e"
         }
       },
       "previews": {
@@ -1895,8 +1895,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/FROST_GRASS.hi.glb",
-          "sha256": "45337e52534076a114a66051c2fbe2dcb8eb3dca7fb259341300ddb167ad2e52",
-          "bytes": 127944,
+          "sha256": "2e91998e19e7164b607364787cf53201268fb48f2b9154045d5e6ce1106b3959",
+          "bytes": 25956,
           "triangles": 1456,
           "vertices": 2912,
           "primitives": 1,
@@ -1915,8 +1915,8 @@
         },
         "lo": {
           "file": "decoratives/FROST_GRASS.lo.glb",
-          "sha256": "406ceb47464f46cd3172417a6c39cc966e5a25a1ca3c43ce075002e02b60d36b",
-          "bytes": 31956,
+          "sha256": "c5d1956f6aff9f5a83f2a5fc5a23c384b37b9af892fa62a4f669bb97c42b3edd",
+          "bytes": 9660,
           "triangles": 340,
           "vertices": 680,
           "primitives": 1,
@@ -1935,8 +1935,8 @@
         },
         "shadow": {
           "file": "decoratives/FROST_GRASS.shadow.glb",
-          "sha256": "b2310d9006d17807c074003233a075e6659cfa1e1539b52916786c414b269d16",
-          "bytes": 16472,
+          "sha256": "1cfea6744c2bb9122576e8d7c9d655e379d50f30c9b619eb5b496a21c14b348e",
+          "bytes": 6548,
           "triangles": 160,
           "vertices": 320,
           "primitives": 1,
@@ -2037,8 +2037,8 @@
       "sha256": {
         "native": "fe05d32c57075437d31ff37541460186d90b788946f045ad62b5d932a1863701",
         "exports": {
-          "hi": "7f367cdd6a5568a582550f1087375289f482e8c14ff832f44fa36b7d2cc6b2c1",
-          "lo": "5a52e10e67aa624bc11db108fb895c0f81f41a35bf188a538b49d2179e736c1c"
+          "hi": "00a4458324ccb041d6d1f93df990501c96f11e04815eac3d74055d7864ca153f",
+          "lo": "55a9198e4e208799a1bd7516fe51bd882fee89248e9edf0903f2446bfdfaa096"
         }
       },
       "previews": {
@@ -2058,8 +2058,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/GLOW_MOSS_PATCH.hi.glb",
-          "sha256": "7f367cdd6a5568a582550f1087375289f482e8c14ff832f44fa36b7d2cc6b2c1",
-          "bytes": 185620,
+          "sha256": "00a4458324ccb041d6d1f93df990501c96f11e04815eac3d74055d7864ca153f",
+          "bytes": 37032,
           "triangles": 2120,
           "vertices": 4254,
           "primitives": 1,
@@ -2078,8 +2078,8 @@
         },
         "lo": {
           "file": "decoratives/GLOW_MOSS_PATCH.lo.glb",
-          "sha256": "5a52e10e67aa624bc11db108fb895c0f81f41a35bf188a538b49d2179e736c1c",
-          "bytes": 68388,
+          "sha256": "55a9198e4e208799a1bd7516fe51bd882fee89248e9edf0903f2446bfdfaa096",
+          "bytes": 17060,
           "triangles": 756,
           "vertices": 1528,
           "primitives": 1,
@@ -2180,8 +2180,8 @@
       "sha256": {
         "native": "ae2515541c8c86bbecabd25356926fb36d87275615af56ad227dbfeadd7cd797",
         "exports": {
-          "hi": "8b3693e39d0667c84a9814985cefc9cd9e66e002f0464ea363a21e74e7097f3e",
-          "lo": "02d06cd5bc2f7d18acc55f972ef939be31fd6702b6c07c2679b2284350def937"
+          "hi": "fddbcafc11372182fb9e8d019198249d9fc9ab8afa80e68c496033b743a29f9b",
+          "lo": "6ab410fc0008e973b50b1c50e6ddcffea0cf5451276cfca43fec5000cbe7e2c3"
         }
       },
       "previews": {
@@ -2201,8 +2201,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/LAVA_EDGE_LICHEN.hi.glb",
-          "sha256": "8b3693e39d0667c84a9814985cefc9cd9e66e002f0464ea363a21e74e7097f3e",
-          "bytes": 95544,
+          "sha256": "fddbcafc11372182fb9e8d019198249d9fc9ab8afa80e68c496033b743a29f9b",
+          "bytes": 20620,
           "triangles": 1068,
           "vertices": 2160,
           "primitives": 1,
@@ -2221,8 +2221,8 @@
         },
         "lo": {
           "file": "decoratives/LAVA_EDGE_LICHEN.lo.glb",
-          "sha256": "02d06cd5bc2f7d18acc55f972ef939be31fd6702b6c07c2679b2284350def937",
-          "bytes": 45672,
+          "sha256": "6ab410fc0008e973b50b1c50e6ddcffea0cf5451276cfca43fec5000cbe7e2c3",
+          "bytes": 12728,
           "triangles": 490,
           "vertices": 1000,
           "primitives": 1,
@@ -2324,9 +2324,9 @@
       "sha256": {
         "native": "d7770f980b35a4c0baefbd43ec6cdfcdcb530acd4cd02bcd196baa39ce6b3107",
         "exports": {
-          "hi": "c49d7459444e70db0e795b1cad880e566fbf024b4fe1b15006d41471afed821d",
-          "lo": "1cdcfa0a30d08ed8a389ed38de8369f2c70c0193b2bf984abd51f5dd0afa0f28",
-          "sh": "0a5b7b14346cfa04dfa7d8b884735ad4cd549c64d05bf63a90cdf3629e3dd5ed"
+          "hi": "be0a0638ba1ac08f1cb471f957b634d5cf232c5cdfea6b5f03158c31e4689efc",
+          "lo": "0bb9674ca1fd014359effe78397e5d9f0a2a696431a1d9003a402869dde8a25e",
+          "sh": "15845232ebd63d4d2394a2dbe8d7b395c9be7e9e84c9ff7a5a84ad16db69c850"
         }
       },
       "previews": {
@@ -2346,8 +2346,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/OASIS_REED.hi.glb",
-          "sha256": "c49d7459444e70db0e795b1cad880e566fbf024b4fe1b15006d41471afed821d",
-          "bytes": 152592,
+          "sha256": "be0a0638ba1ac08f1cb471f957b634d5cf232c5cdfea6b5f03158c31e4689efc",
+          "bytes": 27936,
           "triangles": 1764,
           "vertices": 3482,
           "primitives": 1,
@@ -2366,8 +2366,8 @@
         },
         "lo": {
           "file": "decoratives/OASIS_REED.lo.glb",
-          "sha256": "1cdcfa0a30d08ed8a389ed38de8369f2c70c0193b2bf984abd51f5dd0afa0f28",
-          "bytes": 27480,
+          "sha256": "0bb9674ca1fd014359effe78397e5d9f0a2a696431a1d9003a402869dde8a25e",
+          "bytes": 8324,
           "triangles": 288,
           "vertices": 576,
           "primitives": 1,
@@ -2386,8 +2386,8 @@
         },
         "shadow": {
           "file": "decoratives/OASIS_REED.shadow.glb",
-          "sha256": "0a5b7b14346cfa04dfa7d8b884735ad4cd549c64d05bf63a90cdf3629e3dd5ed",
-          "bytes": 16448,
+          "sha256": "15845232ebd63d4d2394a2dbe8d7b395c9be7e9e84c9ff7a5a84ad16db69c850",
+          "bytes": 6532,
           "triangles": 156,
           "vertices": 320,
           "primitives": 1,
@@ -2489,9 +2489,9 @@
       "sha256": {
         "native": "bf76029b48fe02fc4e13e45e1e06f780eb72a33e9b645328d5561fdf7ace71ff",
         "exports": {
-          "hi": "5b31f6589c0165bd0da6ef702e19ee814e2fa18b17d3b5bed84a00a0f155fd76",
-          "lo": "b98cdfa8e6604c2d7deda6a25c93b0a584250cc391da4aea9c8d27893d4f748c",
-          "sh": "cbcb1e61c20c11dd3a6b15d833991ac7f9c3d5c727408b91af29364540784700"
+          "hi": "53822014b255dd14f1f6fd8ebe546ac4893792b104104366336ec8e70f2f31f6",
+          "lo": "8d2a799cbdaeb25d10ab9f0fa6a6caef89804d8e87048677ae7e13c8200e3a68",
+          "sh": "a93637d8e305978fb7a2eb8b68add6026882b1506949a24b36e5bbb56a59efb3"
         }
       },
       "previews": {
@@ -2511,8 +2511,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/SAND_GRASS_CLUMP.hi.glb",
-          "sha256": "5b31f6589c0165bd0da6ef702e19ee814e2fa18b17d3b5bed84a00a0f155fd76",
-          "bytes": 153856,
+          "sha256": "53822014b255dd14f1f6fd8ebe546ac4893792b104104366336ec8e70f2f31f6",
+          "bytes": 30348,
           "triangles": 1760,
           "vertices": 3514,
           "primitives": 1,
@@ -2531,8 +2531,8 @@
         },
         "lo": {
           "file": "decoratives/SAND_GRASS_CLUMP.lo.glb",
-          "sha256": "b98cdfa8e6604c2d7deda6a25c93b0a584250cc391da4aea9c8d27893d4f748c",
-          "bytes": 48136,
+          "sha256": "8d2a799cbdaeb25d10ab9f0fa6a6caef89804d8e87048677ae7e13c8200e3a68",
+          "bytes": 12524,
           "triangles": 528,
           "vertices": 1056,
           "primitives": 1,
@@ -2551,8 +2551,8 @@
         },
         "shadow": {
           "file": "decoratives/SAND_GRASS_CLUMP.shadow.glb",
-          "sha256": "cbcb1e61c20c11dd3a6b15d833991ac7f9c3d5c727408b91af29364540784700",
-          "bytes": 27388,
+          "sha256": "a93637d8e305978fb7a2eb8b68add6026882b1506949a24b36e5bbb56a59efb3",
+          "bytes": 8600,
           "triangles": 284,
           "vertices": 574,
           "primitives": 1,
@@ -2654,9 +2654,9 @@
       "sha256": {
         "native": "b7ea14bda5076038e39c78419e2da03d30a904e1ea77639b7ba1a287c6859cef",
         "exports": {
-          "hi": "a498d6d48ca7a24a9c0c712bd6a6ee75557372a9b7173643d878e433550e195c",
-          "lo": "e0aad0107c4db3973e4016ffcec30853c4e51327c8858bb6f05ea279d9e98302",
-          "sh": "c99206fc982da4068ec86888dd07dd19a5801182badb872ad467806219d292c2"
+          "hi": "ac394ceeb1e6042e5d81671c5942d98672beae0b702dcf446f349bde00547324",
+          "lo": "e04e5f9f344a1ea7431a7cc585827679b22425a1d146523d5d658ac7b31845a4",
+          "sh": "b6e3d902170ff032365203eefccc5d50db501b91245b9b9fac2dece9e835bee2"
         }
       },
       "previews": {
@@ -2676,8 +2676,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/SNOWCAP_SHRUB.hi.glb",
-          "sha256": "a498d6d48ca7a24a9c0c712bd6a6ee75557372a9b7173643d878e433550e195c",
-          "bytes": 284272,
+          "sha256": "ac394ceeb1e6042e5d81671c5942d98672beae0b702dcf446f349bde00547324",
+          "bytes": 59132,
           "triangles": 2646,
           "vertices": 6640,
           "primitives": 1,
@@ -2696,8 +2696,8 @@
         },
         "lo": {
           "file": "decoratives/SNOWCAP_SHRUB.lo.glb",
-          "sha256": "e0aad0107c4db3973e4016ffcec30853c4e51327c8858bb6f05ea279d9e98302",
-          "bytes": 68512,
+          "sha256": "e04e5f9f344a1ea7431a7cc585827679b22425a1d146523d5d658ac7b31845a4",
+          "bytes": 18088,
           "triangles": 568,
           "vertices": 1558,
           "primitives": 1,
@@ -2716,8 +2716,8 @@
         },
         "shadow": {
           "file": "decoratives/SNOWCAP_SHRUB.shadow.glb",
-          "sha256": "c99206fc982da4068ec86888dd07dd19a5801182badb872ad467806219d292c2",
-          "bytes": 38828,
+          "sha256": "b6e3d902170ff032365203eefccc5d50db501b91245b9b9fac2dece9e835bee2",
+          "bytes": 11868,
           "triangles": 321,
           "vertices": 853,
           "primitives": 1,
@@ -2819,9 +2819,9 @@
       "sha256": {
         "native": "143991293a129e9d3ef7568f5882c953202618674d644fe6eb014fab7fb572de",
         "exports": {
-          "hi": "2f92bbfec59a7826806296f44815c69b0d6f538b2eba7f7ce680b275bd225d2d",
-          "lo": "345aa30fc5750b847dfb12884582905fa6c6dcf875d2ea5da3a5bf874b1923a3",
-          "sh": "1337b661c3aa72d37f71cf01faefb9b2462941be48af538c65815da4f9768dc9"
+          "hi": "f04fabd70a41af57e11d99abe5a180dbba068a6148076bbbac5c7142e0f0b378",
+          "lo": "8dc0233d928379fe9be70634e865bc6f022c2c0b48c4f97f116f4ccf71f2384d",
+          "sh": "e40ecfca81750b4df5f7efb43be395c0e8c3cbc422ee9baf1376c98d68d9fca8"
         }
       },
       "previews": {
@@ -2841,8 +2841,8 @@
       "lods": {
         "hi": {
           "file": "decoratives/SUCCULENT_ROSETTE.hi.glb",
-          "sha256": "2f92bbfec59a7826806296f44815c69b0d6f538b2eba7f7ce680b275bd225d2d",
-          "bytes": 233912,
+          "sha256": "f04fabd70a41af57e11d99abe5a180dbba068a6148076bbbac5c7142e0f0b378",
+          "bytes": 46224,
           "triangles": 2688,
           "vertices": 5376,
           "primitives": 1,
@@ -2861,8 +2861,8 @@
         },
         "lo": {
           "file": "decoratives/SUCCULENT_ROSETTE.lo.glb",
-          "sha256": "345aa30fc5750b847dfb12884582905fa6c6dcf875d2ea5da3a5bf874b1923a3",
-          "bytes": 82200,
+          "sha256": "8dc0233d928379fe9be70634e865bc6f022c2c0b48c4f97f116f4ccf71f2384d",
+          "bytes": 19744,
           "triangles": 924,
           "vertices": 1848,
           "primitives": 1,
@@ -2881,8 +2881,8 @@
         },
         "shadow": {
           "file": "decoratives/SUCCULENT_ROSETTE.shadow.glb",
-          "sha256": "1337b661c3aa72d37f71cf01faefb9b2462941be48af538c65815da4f9768dc9",
-          "bytes": 60528,
+          "sha256": "e40ecfca81750b4df5f7efb43be395c0e8c3cbc422ee9baf1376c98d68d9fca8",
+          "bytes": 15424,
           "triangles": 672,
           "vertices": 1344,
           "primitives": 1,

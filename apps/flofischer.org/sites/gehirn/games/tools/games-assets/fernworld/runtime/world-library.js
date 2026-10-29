@@ -4,10 +4,23 @@
  */
 import * as T from 'three';
 import { AssetLibrary, disposeScene } from './asset-library.js';
+import { loadBytes, expectBytes } from './loading-cache.js';
 
 const finite3 = value => Array.isArray(value) && value.length === 3 && value.every(Number.isFinite);
 
 export class WorldLibrary extends AssetLibrary {
+  /** Bytes only (layout JSON plus the compressed GLB), low priority; no parsing and no GPU work.
+   * The downloads land in the shared loading cache, so a later region() starts without network time. */
+  async prefetchRegion(familyId, regionKey, { signal } = {}) {
+    const catalog = await this.json('environments/catalog.json');
+    const definition = catalog.families.find(f => f.id === familyId)?.regions.find(r => r.region === regionKey);
+    if (!definition) return;
+    await this.json(definition.layoutFile);
+    const url = new URL(definition.file, this.base);
+    expectBytes(url, definition.bytes);
+    await loadBytes(url, { signal: this.loadSignal(signal), priority: 'low' });
+  }
+
   async region(familyId, regionKey) {
     const catalog = await this.json('environments/catalog.json');
     const family = catalog.families.find(f => f.id === familyId);
@@ -20,6 +33,7 @@ export class WorldLibrary extends AssetLibrary {
     }
     const unitScale = layout.relativeScale?.recommendedWholeRegionMeterScale ?? 1;
     if (!(unitScale > 0) || !Number.isFinite(unitScale)) throw new Error('Invalid authored world scale');
+    expectBytes(new URL(definition.file, this.base), definition.bytes);
     const data = await this._gltf(definition.file);
     // Water is a single quiet transparent surface, never a second shadow layer.
     data.scene.traverse(node => {

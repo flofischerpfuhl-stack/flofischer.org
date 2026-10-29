@@ -1,7 +1,7 @@
 {
   "asset_id": "PIP_STONE_STOMPER",
   "character_glb": "pip-stone-stomper.glb",
-  "character_sha256": "2cbc01f91347d738278d4450693f67ec06066abe192db655d8a55a607c2b1632",
+  "character_sha256": "9a9a4ffde176cae35e037f9ad950e96764018c335fe3acf20621ef300894cdab",
   "coordinates": "glTF Y-up, front +Z; source dimensions and bind matrices unchanged",
   "instance_scale_to_1m": 0.4233654951651481,
   "runtime_contract": "runtime-contract.json",

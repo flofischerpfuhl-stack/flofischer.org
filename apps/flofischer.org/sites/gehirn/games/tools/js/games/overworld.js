@@ -1,6 +1,6 @@
 /** A continuous expedition through authored Fernworld regions; only its visible chapter owns GPU resources. */
 import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, LOW_GPU } from './three-kit.js';
-import { createLoadingStatus } from './loading-status.js';
+import { bindLoadingStatus, loadingBarHTML } from './loading-status.js';
 import { WorldLibrary, fitWorldCamera } from '../../games-assets/fernworld/runtime/world-library.js';
 import { ChannelLibrary } from '../../games-assets/fernworld/runtime/channel-library.js';
 import { landscape } from './world/overworld-landscape.js';
@@ -101,7 +101,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     <p class="gm-ow__hint">Ziel antippen · am leuchtenden Tor starten · ziehen: umsehen</p>
     <div class="gm-ow__lock" data-ow="lock" hidden></div>
     <section class="gm-ow__card gm-ow__sr" data-ow="card" aria-live="polite" hidden></section>
-    <div class="gm-ow__loading" data-ow="loading" role="status"><span data-ow="loading-text">Die Reise wird vorbereitet…</span><progress class="gm-scene-loading__progress" data-ow="loading-progress" aria-label="Aktueller Ladeschritt der Region"></progress><small data-ow="loading-detail">Spieldaten · Modelle · Szene und Licht</small><button class="fw-btn fw-btn--sm" data-ow="retry" hidden>Erneut versuchen</button></div>
+    ${loadingBarHTML()}
     <ol class="gm-ow__list gm-ow__sr" data-ow="list" aria-label="${escapeText(title)} – Level" hidden></ol>`;
   const $ = key => host.querySelector(`[data-ow="${key}"]`), canvas = host.querySelector('canvas');
   const renderer = createRenderer(canvas), scene = new THREE.Scene();
@@ -109,7 +109,23 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .01, 200);
   const env = studioEnvironment(renderer), lights = addLights(scene, { dir: [-12, 24, 15], shadowBox: 18, mapSize: 2048, intensity: 2.4, ambient: 1.1 });
   const worlds = [...new Set(levels.map(l => l.world ?? 0))].sort((a,b)=>a-b).map(index => ({ index, levels: levels.map((lv,i)=>({...lv,i})).filter(l=>(l.world??0)===index) }));
-  const loadingStatus=createLoadingStatus({root:$('loading'),text:$('loading-text'),progress:$('loading-progress'),detail:$('loading-detail')});
+  const loadingStatus=bindLoadingStatus(host);
+  // Neighbouring regions are fetched as bytes only (low priority) while the player looks at this one,
+  // so travelling is instant. Navigating aborts every prefetch except the one for the destination.
+  const prefetches=new Map();let prefetchTimer=0;
+  function cancelPrefetch(except=-1){clearTimeout(prefetchTimer);for(const [index,controller] of prefetches)if(index!==except){controller.abort();prefetches.delete(index);}}
+  function prefetchNeighbours(){
+    clearTimeout(prefetchTimer);
+    prefetchTimer=setTimeout(()=>{
+      if(destroyed||pending)return;const at=worlds.findIndex(w=>w.index===regionIndex);if(at<0)return;
+      for(const neighbour of [worlds[at-1],worlds[at+1]]){
+        if(!neighbour||regionCache.has(neighbour.index)||prefetches.has(neighbour.index))continue;
+        const controller=new AbortController(),index=neighbour.index;prefetches.set(index,controller);
+        library.prefetchRegion(index===4?'sturmbastion':config.family,REGIONS[index],{signal:controller.signal}).catch(()=>{}).finally(()=>{if(prefetches.get(index)===controller)prefetches.delete(index);});
+      }
+    },400);
+  }
+  const retryLoad=()=>versionMismatch?location.reload():setWorld(world,{keepSel:true,force:true});
   const loadProgress=event=>{onProgress?.(event);loadingStatus.update(event);};
   const library = new WorldLibrary({onProgress:loadProgress}), actors = new ChannelLibrary({onProgress:loadProgress});
   const view = { yaw: 0, pitch: 0, zoom: 1, panX: 0, panZ: 0, tYaw: 0, tPitch: 0, tZoom: 1, tPanX: 0, tPanZ: 0 };
@@ -213,7 +229,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   }
   async function openStarterPicker(){
     if(!starters.length||starterPicking)return;const version=++starterPickerVersion;
-    if(!starterActors.length)loadingStatus.begin('Fernlinge werden vorbereitet …');
+    if(!starterActors.length)loadingStatus.begin('Companions');
     await ensureStarters();if(destroyed||!active||version!==starterPickerVersion)return;
     starterPicking=true;invalidateWayfinding();wayfindingDirty=false;loadingStatus.finish();pickerVisibility();
     wayfindingReport={complete:true,phase:'starter-choice',world,selected:sel,width,height,posts:[],milliseconds:0,maxSliceMilliseconds:0};kick();
@@ -328,8 +344,8 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     hop=null;syncDom();
     if(!force&&regionIndex===world){++serial;pendingIndex=-1;pending=null;loadingStatus.finish();paintNodes();placeHero();kick();return Promise.resolve();}
     if(!force&&pendingIndex===world&&pending)return pending;
-    invalidateWayfinding();const request=++serial,target=world;pendingIndex=target;versionMismatch=false;
-    loadingStatus.begin(`Reise nach ${NAMES[target]} …`);host.classList.toggle('is-travelling',!!region);$('retry').hidden=true;
+    invalidateWayfinding();cancelPrefetch(world);const request=++serial,target=world;pendingIndex=target;versionMismatch=false;
+    loadingStatus.begin(NAMES[target]);host.classList.toggle('is-travelling',!!region);
     if(hero)hero.root.visible=false;if(companion)companion.root.visible=false;for(const a of starterActors)a.root.visible=false;
     pending=(async()=>{
       let next, reuse=false;
@@ -354,8 +370,8 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
         lights.light.position.copy(center).add(new THREE.Vector3(-radius*.8,radius*1.5,radius));lights.light.target.position.copy(center);lights.light.target.updateMatrixWorld();
         Object.assign(lights.light.shadow.camera,{left:-radius,right:radius,top:radius,bottom:-radius,near:Math.max(.001,radius*.02),far:radius*6});lights.light.shadow.camera.updateProjectionMatrix();
         applyIbl(region.root,env,.55);fit();paintNodes();placeHero();placeStarters();pickerVisibility();focusNode(true);renderer.shadowMap.needsUpdate=true;
-        loadingStatus.begin('Reisekarte wird vorbereitet …');host.classList.remove('is-travelling');syncDom();if(state.open(sel))onSelect?.(sel);kick();
-      }catch(error){if(next&&!reuse&&region!==next)next.release();if(request!==serial||destroyed)return;console.error('[games] map load failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'Das Spiel wurde aktualisiert. Lade die Seite neu.':'Diese Region konnte nicht geladen werden. Versuch es noch einmal.');$('retry').textContent=versionMismatch?'Seite neu laden':'Erneut versuchen';$('retry').hidden=false;}
+        host.classList.remove('is-travelling');syncDom();if(state.open(sel))onSelect?.(sel);kick();prefetchNeighbours();
+      }catch(error){if(next&&!reuse&&region!==next)next.release();if(request!==serial||destroyed)return;console.error('[games] map load failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'This region could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}
       finally{if(request===serial){pendingIndex=-1;pending=null;}}
     })();return pending;
   }
@@ -384,7 +400,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       for(const root of[region.root,visuals.context.group,visuals.gates,visuals.posts])root.traverseVisible(mesh=>{if(mesh.isMesh&&!mesh.userData.owDepthOnly)geometries.add(mesh.geometry);});
       const preparation={buildMilliseconds:0,builds:0};
       wayfindingTask={generation:wayfindingGeneration,world,selected:sel,width,height,startedAt,preparation,prep:prepareOcclusionGeometries(geometries,preparation),search:null,cpuMilliseconds:performance.now()-startedAt,maxSliceMilliseconds:0,slices:[]};
-      loadingStatus.begin('Reisekarte wird vorbereitet …');
+      loadingStatus.ensure(NAMES[world]);
       wayfindingReport={complete:false,phase:'index',world,selected:sel,width,height,startedAt};
     }
     const task=wayfindingTask;
@@ -398,7 +414,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
         const canvasRect=canvas.getBoundingClientRect(),hudRects=[...host.querySelectorAll('.gm-ow__top,.gm-ow__context')].map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height),hintRect=host.querySelector('.gm-ow__hint').getBoundingClientRect();
         const topInset=Math.max(8,...hudRects.map(r=>r.bottom-canvasRect.top+8)),bottomInset=hintRect.width&&hintRect.height?Math.max(8,canvasRect.bottom-hintRect.top+8):8;
         task.search=createWayfindingPlan({actions:visuals.actions.filter(a=>a.root.visible),selected:selected.pos,camera:camera.clone(),width,height,unit:region.unitScale,topInset,bottomInset,occluders:[region.root,visuals.context.group],groundOccluders:[region.root],groundFloors:visuals.context.group.children.filter(n=>n.isMesh&&n.visible&&['CircleGeometry','PlaneGeometry'].includes(n.geometry.type)&&!n.material.transparent),groundPath:region.route,fineOccluders:[visuals.gates,visuals.posts],protectedLabels:visuals.nodes.map(n=>n.label),protectedActors:[hero?.root,companion?.root,...starterActors.filter(a=>a.root.visible).map(a=>a.root)].filter(Boolean)});
-        wayfindingReport.phase='placement';$('loading-text').textContent='Reisekarte wird vorbereitet …';$('loading-detail').textContent='';
+        wayfindingReport.phase='placement';
       }
       do{const step=task.search.next();if(step.done){result=step.value;break;}}while(performance.now()-sliceStart<5);
     }
@@ -487,17 +503,17 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   canvas.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);drag=null;});canvas.addEventListener('contextmenu',e=>e.preventDefault());
   canvas.addEventListener('wheel',e=>{if(wayfindingTask)invalidateWayfinding();e.preventDefault();view.tZoom=THREE.MathUtils.clamp(view.tZoom*Math.exp(e.deltaY*.0012),.14,1.7);},{passive:false});
   canvas.addEventListener('dblclick',resetView);canvas.style.touchAction='none';
-  host.addEventListener('click',e=>{const b=e.target.closest('[data-ow],[data-ow-level],[data-region]');if(!b)return;if(b.dataset.region!==undefined){setWorld(Number(b.dataset.region));return;}if(b.dataset.owLevel!==undefined){moveTo(Number(b.dataset.owLevel));$('list').hidden=true;$('levels').setAttribute('aria-expanded','false');return;}const action=b.dataset.ow;if(action==='levels'){$('list').hidden=!$('list').hidden;b.setAttribute('aria-expanded',String(!$('list').hidden));}else if(action==='sound')toggleSound();else if(action==='reset')resetView();else if(action==='prev')setWorld(world-1);else if(action==='next')setWorld(world+1);else if(action==='retry'){if(versionMismatch)location.reload();else setWorld(world,{keepSel:true,force:true});}else if(action==='play'&&state.open(sel))onPlay(sel);});
+  host.addEventListener('click',e=>{const b=e.target.closest('[data-ow],[data-ow-level],[data-region]');if(!b)return;if(b.dataset.region!==undefined){setWorld(Number(b.dataset.region));return;}if(b.dataset.owLevel!==undefined){moveTo(Number(b.dataset.owLevel));$('list').hidden=true;$('levels').setAttribute('aria-expanded','false');return;}const action=b.dataset.ow;if(action==='levels'){$('list').hidden=!$('list').hidden;b.setAttribute('aria-expanded',String(!$('list').hidden));}else if(action==='sound')toggleSound();else if(action==='reset')resetView();else if(action==='prev')setWorld(world-1);else if(action==='next')setWorld(world+1);else if(action==='play'&&state.open(sel)){cancelPrefetch();onPlay(sel);}});
   function key(e){if(!active||e.target.closest?.('input,textarea,select'))return false;if(starterPicking&&e.key==='Escape'){closeStarterPicker();return true;}if(e.key==='Escape'&&!$('list').hidden){$('list').hidden=true;$('levels').setAttribute('aria-expanded','false');$('levels').focus();return true;}if(e.key==='Home'){resetView();return true;}const open=worlds.find(w=>w.index===world).levels.filter(l=>state.open(l.i)),k=open.findIndex(l=>l.i===sel);if(e.key==='PageDown'||(e.key==='ArrowRight'&&e.shiftKey))setWorld(world+1);else if(e.key==='PageUp'||(e.key==='ArrowLeft'&&e.shiftKey))setWorld(world-1);else if(e.key==='ArrowRight'&&k>=0&&k<open.length-1)moveTo(open[k+1].i);else if(e.key==='ArrowLeft'&&k>0)moveTo(open[k-1].i);else if((e.key==='Enter'||e.key===' ')&&state.open(sel)&&!e.target.closest?.('button'))onPlay(sel);else return false;return true;}
   const observer=new ResizeObserver(()=>{if(active)resize();});observer.observe(canvas);
   return {
     syncSound,
-    activate(){window.__owView=debugView;if(active)return;active=true;resize();if(!initialized){initialized=true;lastCurrent=state.current();sel=lastCurrent;setWorld(levels[sel]?.world??0,{keepSel:true});}else{syncDom();kick();}},
-    deactivate(){if(starterPicking)closeStarterPicker();if(wayfindingTask)invalidateWayfinding();active=false;if(raf)cancelAnimationFrame(raf);raf=0;},
+    activate(){window.__owView=debugView;if(active)return;active=true;resize();if(regionIndex>=0)prefetchNeighbours();if(!initialized){initialized=true;lastCurrent=state.current();sel=lastCurrent;setWorld(levels[sel]?.world??0,{keepSel:true});}else{syncDom();kick();}},
+    deactivate(){cancelPrefetch();if(starterPicking)closeStarterPicker();if(wayfindingTask)invalidateWayfinding();active=false;if(raf)cancelAnimationFrame(raf);raf=0;},
     refresh(){const current=state.current();if(!initialized||current!==lastCurrent){lastCurrent=current;sel=current;setWorld(levels[sel]?.world??0,{keepSel:true});}else{paintNodes();syncDom();placeHero();kick();}},key,
-    async refreshHero(){try{await ensureActors();placeHero();placeStarters();invalidateWayfinding();kick();}catch(error){console.error('[games] companion change failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'Das Spiel wurde aktualisiert. Lade die Seite neu.':'Dein Fernling konnte nicht geladen werden. Versuch es erneut.');$('retry').textContent=versionMismatch?'Seite neu laden':'Erneut versuchen';$('loading').hidden=false;$('retry').hidden=false;}},
+    async refreshHero(){try{await ensureActors();placeHero();placeStarters();invalidateWayfinding();kick();}catch(error){console.error('[games] companion change failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'Your companion could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}},
     get selected(){return sel;},get world(){return world;},get loaded(){return regionIndex===world&&!pending;},get ready(){return pending??Promise.resolve();},
-    destroy(){wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();renderer.dispose();}
+    destroy(){cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();renderer.dispose();}
   };
 }
 

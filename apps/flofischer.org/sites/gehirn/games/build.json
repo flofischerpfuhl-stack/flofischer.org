@@ -1,18 +1,18 @@
 {
-  "sourceCommit": "5ac923c8ce3acec9289cfd1e439b10f453c0c7a6",
-  "packagedAt": "2026-10-29T21:54:58.776710+00:00",
-  "files": 2356,
-  "bytes": 570941367,
+  "sourceCommit": "0ddaa81d6310e1dc570d8c841e92f726b9cb96c0",
+  "packagedAt": "2026-10-29T23:29:39.427347+00:00",
+  "files": 2423,
+  "bytes": 191394896,
   "games": 4,
   "campaignLevels": 176,
   "bonusLevels": 11,
   "regions": 17,
   "sourceStatus": "Committed runtime sources; standalone test publication.",
-  "losslessModelCompression": {
-    "files": 710,
-    "originalBytes": 400032976,
-    "gzipBytes": 118522066
+  "meshoptModelGzip": {
+    "files": 768,
+    "originalBytes": 94042712,
+    "gzipBytes": 45549567
   },
-  "assetVersion": "25795559dcaded0a8e597ad5359329b0402a6642888f548788bf25b4775fbe53",
-  "runtimeSha256": "8b55a44e03bd8a2147c7c9f13f32c526325a2c5e428d5da6ae142b6e0a1e4edc"
+  "assetVersion": "aa3aeb374ffc0260af0dd16944ed7d5f2349921657d762573a4d8b5ad057b439",
+  "runtimeSha256": "b8385f1e7a76959f7ec0c01b8e5dd3cb00decb337f8b7db876834c1490ba7c8a"
 }

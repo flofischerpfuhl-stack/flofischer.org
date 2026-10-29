@@ -22,7 +22,7 @@
   "bubble_runtime_flags": null,
   "shared_motion": {
     "source": "../pip-shared-motion/pip-shared-motion.glb",
-    "sha256": "89217deecffe18268c9f89803645f479b3f948344e4c6f63d2d79f639877b064",
+    "sha256": "2deb8e093f582ea52e4875640014d0ee5330d5c2cff5ec9b0dce6f5e0fd94599",
     "clips": [
       "FireCast_Left",
       "Hook_Right",
