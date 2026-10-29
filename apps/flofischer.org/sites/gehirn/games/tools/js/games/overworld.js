@@ -96,7 +96,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     <canvas class="gm-ow__canvas" aria-label="Reise durch die 3D-Welt. Pfeiltasten: nächstes Ziel. Enter: spielen. Bild auf und ab: Region. Home: Übersicht." tabindex="0"></canvas>
     <div class="gm-ow__top"><div class="gm-ow__world"><span class="gm-ow__kicker" data-ow="kicker"></span><strong data-ow="world"></strong><span class="gm-ow__levelcompact" data-ow="level-name"></span></div><div class="gm-ow__stars">${icon('star',{size:16})}<span class="fw-num" data-ow="stars"></span></div></div>
     <div class="gm-ow__nav gm-ow__sr"><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="prev" aria-label="Vorherige Region">${icon('chevron-left',{size:22})}</button><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="next" aria-label="Nächste Region">${icon('chevron-right',{size:22})}</button></div>
-    <nav class="gm-ow__journey gm-ow__sr" data-ow="journey" aria-label="Deine Reise durch Fernworld"></nav>
+    <nav class="gm-ow__journey" data-ow="journey" aria-label="Deine Reise durch Fernworld"></nav>
     <div class="gm-ow__tools gm-ow__sr"><button class="fw-btn fw-btn--sm" data-ow="reset">Übersicht</button><button class="fw-btn fw-btn--sm" data-ow="sound" aria-pressed="true">Ton an</button><button class="fw-btn fw-btn--sm" data-ow="levels" aria-expanded="false">Level wählen</button></div><p class="gm-ow__context" data-ow="context"></p>
     <p class="gm-ow__hint">Ziel antippen · am leuchtenden Tor starten · ziehen: umsehen</p>
     <div class="gm-ow__lock" data-ow="lock" hidden></div>

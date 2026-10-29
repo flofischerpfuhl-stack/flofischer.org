@@ -597,3 +597,6 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
  .gm-ow__world .gm-ow__kicker{display:none}
  .gm-ow__levelcompact{display:block;font-size:var(--text-2xs);line-height:var(--lh-2xs);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
 }
+/* The region bar is visible again (switching worlds must not depend on finding a 3D signpost); the hint sits above it. */
+.gm-ow__journey ~ .gm-ow__hint {bottom:78px}
+@media(max-width:639px){.gm-ow__journey ~ .gm-ow__hint{bottom:72px}}
