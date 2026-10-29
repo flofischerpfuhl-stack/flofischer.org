@@ -11,14 +11,21 @@
     data-description-en="Gehirn — selected software projects by Florian Fischer."
     data-description-de="Gehirn — ausgewählte Softwareprojekte von Florian Fischer."
   />
-  <meta name="theme-color" content="#0f0f10" />
+  <meta name="theme-color" content="#0d0d0e" />
   <title>Gehirn — Projects</title>
-  <script>document.documentElement.classList.add("js");</script>
+  <script>
+    (function (d) {
+      var c = d.documentElement.classList;
+      c.add("js");
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) c.add("motion");
+      try { if (sessionStorage.getItem("gehirn-intro")) c.add("intro-seen"); } catch (e) {}
+    })(document);
+  </script>
   <script src="/shared/language.js"></script>
   <link rel="preload" href="./assets/geist.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="./assets/geist-mono.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="./assets/brain-frames.webp" as="image" fetchpriority="low" />
-  <link rel="stylesheet" href="./style.css?v=1" />
+  <link rel="preload" href="./assets/brain-frames.webp" as="image" />
+  <link rel="stylesheet" href="./style.css?v=2" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
 </head>
@@ -27,6 +34,20 @@
     <span data-lang-copy="en">Skip to projects</span>
     <span data-lang-copy="de">Zu den Projekten</span>
   </a>
+
+  <div class="loader" data-loader aria-hidden="true">
+    <div class="loader-top">
+      <span>Gehirn</span>
+      <span>Selected software projects</span>
+    </div>
+    <div class="loader-count"><span data-loader-count>000</span><small>%</small></div>
+    <div class="loader-line"><i data-loader-line></i></div>
+  </div>
+
+  <div class="cursor" data-cursor aria-hidden="true">
+    <span class="cursor-dot"></span>
+    <span class="cursor-ring"><span class="cursor-label" data-cursor-label></span></span>
+  </div>
 
   <header class="bar" data-bar data-theme="dark">
     <a class="mark" href="#top" aria-label="Gehirn">
@@ -41,22 +62,23 @@
     </nav>
 
     <div class="bar-tools">
-      <a class="bar-hub" href="https://flofischer.org/">Hub <span aria-hidden="true">↗</span></a>
+      <span class="bar-readout" data-readout aria-hidden="true">00 / Gehirn</span>
+      <a class="bar-hub" href="https://flofischer.org/" data-cursor-text="Hub">Hub <span aria-hidden="true">↗</span></a>
       <div class="lang" role="group" aria-label="Language / Sprache">
         <button type="button" data-language-button="en" aria-pressed="true">EN</button>
         <button type="button" data-language-button="de" aria-pressed="false">DE</button>
       </div>
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="menu" data-menu-button>
-        <span data-lang-copy="en">Index</span>
-        <span data-lang-copy="de">Index</span>
+        <span>Index</span>
         <span class="menu-icon" aria-hidden="true"></span>
       </button>
     </div>
+    <span class="bar-progress" data-progress aria-hidden="true"></span>
   </header>
 
   <div class="menu" id="menu" data-menu hidden>
     <nav aria-label="Index">
-      <p class="label"><span data-lang-copy="en">Index</span><span data-lang-copy="de">Index</span></p>
+      <p class="label">Index</p>
       <a href="#fernwork"><span class="n">01</span>Fernwork</a>
       <a href="#suprabench"><span class="n">02</span>SupraBench</a>
       <a href="#paper2form"><span class="n">03</span>Paper2Form</a>
@@ -72,40 +94,55 @@
   </div>
 
   <main>
-    <section class="hero" id="top" data-theme="dark" data-section="top">
-      <div class="hero-rail" aria-hidden="true"><i>+</i><i>+</i><i>+</i></div>
-      <p class="hero-line reveal">
-        <span data-lang-copy="en">Selected software projects<br />by Florian Fischer.</span>
-        <span data-lang-copy="de">Ausgewählte Softwareprojekte<br />von Florian Fischer.</span>
-        <span class="hero-rule" aria-hidden="true"></span>
-      </p>
+    <!-- 00 Hero: dot-screen brain, pinned while the dots disperse -->
+    <section class="hero" id="top" data-theme="dark" data-section="top" data-label="00 / Gehirn">
+      <div class="hero-stage" data-hero-stage>
+        <canvas class="hero-canvas" data-brain-canvas role="img" aria-label="Rotating brain drawn as a dot screen"></canvas>
+        <div class="brain-anchor" data-brain data-cursor-text="Drag" data-cursor-text-de="Ziehen"></div>
 
-      <div class="brain" data-brain>
-        <canvas data-brain-canvas role="img" aria-label="Slowly rotating brain drawn as a dot screen"></canvas>
+        <p class="hero-line">
+          <span data-lang-copy="en">Selected software projects<br />by Florian Fischer.</span>
+          <span data-lang-copy="de">Ausgewählte Softwareprojekte<br />von Florian Fischer.</span>
+          <span class="hero-rule" aria-hidden="true"></span>
+        </p>
+
+        <dl class="hud" aria-hidden="true">
+          <div><dt>Rot</dt><dd data-hud-rot>000.0°</dd></div>
+          <div><dt>Frame</dt><dd data-hud-frame>01/48</dd></div>
+          <div><dt>Dots</dt><dd data-hud-dots>0000</dd></div>
+          <div><dt>Input</dt><dd>Drag ↔</dd></div>
+        </dl>
+
+        <div class="hero-marks" aria-hidden="true"><i>+</i><i>+</i><i>+</i><i>+</i></div>
+
+        <h1 class="wordmark" aria-label="Gehirn" data-wordmark>
+          <span class="wm-line" aria-hidden="true"><span>g</span><span>e</span><span>h</span><span>i</span><span>r</span><span>n</span></span>
+        </h1>
+
+        <a class="hero-cue" href="#index" aria-label="Scroll to projects">
+          <span>Scroll</span><i aria-hidden="true"></i>
+        </a>
       </div>
-
-      <h1 class="wordmark" aria-label="Gehirn">
-        <svg viewBox="0 0 1000 372" aria-hidden="true" focusable="false">
-          <text x="0" y="290" textLength="1000" lengthAdjust="spacing">gehirn</text>
-        </svg>
-      </h1>
     </section>
 
-    <section class="index" id="index" data-theme="light" data-section="index">
-      <div class="label-row reveal">
-        <span class="tag">00</span>
-        <span class="hatch" aria-hidden="true"></span>
-        <span>Index</span>
+    <!-- 00 Statement: words fill in while scrolling -->
+    <section class="statement" id="index" data-theme="light" data-section="index" data-label="00 / Index">
+      <div class="statement-pin" data-scrub-pin>
+      <div class="statement-stage">
+        <div class="label-row">
+          <span class="tag">00</span>
+          <span class="hatch" aria-hidden="true"></span>
+          <span>Index</span>
+          <span class="label-end">03 <span data-lang-copy="en">projects</span><span data-lang-copy="de">Projekte</span></span>
+        </div>
+        <p class="statement-text" data-lang-copy="en" data-scrub>Selected <span class="pill-img"><img src="./assets/poster-fernwork.webp" alt="" width="160" height="100" /></span> software projects <span class="pill-img"><img src="./assets/poster-suprabench.webp" alt="" width="160" height="100" /></span> by Florian Fischer <span class="pill-img"><img src="./assets/poster-paper2form.webp" alt="" width="160" height="100" /></span></p>
+        <p class="statement-text" data-lang-copy="de" data-scrub>Ausgewählte <span class="pill-img"><img src="./assets/poster-fernwork.webp" alt="" width="160" height="100" /></span> Softwareprojekte <span class="pill-img"><img src="./assets/poster-suprabench.webp" alt="" width="160" height="100" /></span> von Florian Fischer <span class="pill-img"><img src="./assets/poster-paper2form.webp" alt="" width="160" height="100" /></span></p>
+      </div>
       </div>
 
-      <h2 class="statement reveal">
-        <span data-lang-copy="en">Selected<br />software projects.</span>
-        <span data-lang-copy="de">Ausgewählte<br />Softwareprojekte.</span>
-      </h2>
-
-      <ol class="index-list">
+      <ol class="index-list" data-index-list>
         <li class="reveal">
-          <a href="#fernwork">
+          <a href="#fernwork" data-preview="./assets/poster-fernwork.webp" data-cursor-text="View" data-cursor-text-de="Ansehen">
             <span class="index-n">01</span>
             <span class="index-name">Fernwork</span>
             <span class="index-kind">
@@ -116,7 +153,7 @@
           </a>
         </li>
         <li class="reveal">
-          <a href="#suprabench">
+          <a href="#suprabench" data-preview="./assets/poster-suprabench.webp" data-cursor-text="View" data-cursor-text-de="Ansehen">
             <span class="index-n">02</span>
             <span class="index-name">SupraBench</span>
             <span class="index-kind">
@@ -127,7 +164,7 @@
           </a>
         </li>
         <li class="reveal">
-          <a href="#paper2form">
+          <a href="#paper2form" data-preview="./assets/poster-paper2form.webp" data-cursor-text="View" data-cursor-text-de="Ansehen">
             <span class="index-n">03</span>
             <span class="index-name">Paper2Form</span>
             <span class="index-kind">
@@ -138,141 +175,156 @@
           </a>
         </li>
       </ol>
+      <div class="hover-preview" data-hover-preview aria-hidden="true"><img alt="" data-hover-img /></div>
     </section>
 
-    <section class="project" id="fernwork" data-theme="light" data-section="fernwork">
-      <div class="label-row reveal">
-        <span class="tag">01</span>
-        <span class="hatch" aria-hidden="true"></span>
-        <span data-lang-copy="en">Private browser workspace</span>
-        <span data-lang-copy="de">Privater Browser-Arbeitsplatz</span>
-        <span class="label-end">fernwork.net</span>
+    <!-- Marquee -->
+    <div class="marquee" data-marquee data-theme="dark" data-section="marquee" data-label="00 / Index" aria-hidden="true">
+      <div class="marquee-row" data-marquee-row="1">
+        <span>Fernwork <b>✳</b> SupraBench <b>✳</b> Paper2Form <b>✳</b>&nbsp;</span><span>Fernwork <b>✳</b> SupraBench <b>✳</b> Paper2Form <b>✳</b>&nbsp;</span>
       </div>
-      <h2 class="project-title reveal">Fernwork</h2>
-      <div class="project-body">
-        <figure class="screen reveal" data-screen>
-          <div class="screen-bar">
-            <span class="screen-dot" aria-hidden="true"></span>
-            <span>fernwork.net</span>
-            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false">
-              <span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span>
-            </button>
-          </div>
+      <div class="marquee-row marquee-outline" data-marquee-row="-1">
+        <span>fernwork.net <b>/</b> suprabench.com <b>/</b> paper2form.com <b>/</b>&nbsp;</span><span>fernwork.net <b>/</b> suprabench.com <b>/</b> paper2form.com <b>/</b>&nbsp;</span>
+      </div>
+    </div>
+
+    <!-- 01 Fernwork -->
+    <section class="project project-fernwork" id="fernwork" data-theme="dark" data-section="fernwork" data-label="01 / Fernwork" data-project>
+      <div class="project-stage">
+        <div class="project-hud">
+          <span class="tag">01</span><span class="hud-of">/ 03</span>
+          <span class="hatch" aria-hidden="true"></span>
+          <span class="hud-kind">
+            <span data-lang-copy="en">Private browser workspace</span>
+            <span data-lang-copy="de">Privater Browser-Arbeitsplatz</span>
+          </span>
+          <span class="label-end">fernwork.net</span>
+        </div>
+        <h2 class="project-title" data-title>Fernwork</h2>
+        <figure class="screen" data-screen>
           <video muted loop playsinline preload="none" poster="./assets/poster-fernwork.webp" width="1540" height="962" aria-label="Screen recording of fernwork.net">
             <source src="/shared/gehirn/previews/fernwork.webm?v=4" type="video/webm" />
             <source src="/shared/gehirn/previews/fernwork.mp4?v=4" type="video/mp4" />
           </video>
         </figure>
-        <div class="project-copy reveal">
+        <div class="project-card" data-card>
+          <div class="card-head">
+            <span class="card-n">01</span>
+            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false"><span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span></button>
+          </div>
           <p class="lede">
             <span data-lang-copy="en">A private workspace for PDFs, images, video, office documents, CAD and everyday utilities. Files are processed locally in the browser — without uploads.</span>
             <span data-lang-copy="de">Ein privater Arbeitsplatz für PDFs, Bilder, Video, Office-Dokumente, CAD und alltägliche Werkzeuge. Dateien werden lokal im Browser verarbeitet — ohne Upload.</span>
           </p>
-          <a class="pill" href="https://fernwork.net" target="_blank" rel="noopener">
+          <a class="pill" href="https://fernwork.net" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen">
             <span data-lang-copy="en">Open fernwork.net</span>
             <span data-lang-copy="de">fernwork.net öffnen</span>
             <span class="pill-icon" aria-hidden="true">↗</span>
           </a>
         </div>
+        <span class="project-meter" aria-hidden="true"><i data-meter></i></span>
       </div>
     </section>
 
-    <section class="project project-flip project-dark" id="suprabench" data-theme="dark" data-section="suprabench">
-      <div class="label-row reveal">
-        <span class="tag">02</span>
-        <span class="hatch" aria-hidden="true"></span>
-        <span data-lang-copy="en">Community-driven AI rankings</span>
-        <span data-lang-copy="de">Community-basierte KI-Rankings</span>
-        <span class="label-end">suprabench.com</span>
-      </div>
-      <h2 class="project-title reveal">SupraBench</h2>
-      <div class="project-body">
-        <figure class="screen reveal" data-screen>
-          <div class="screen-bar">
-            <span class="screen-dot" aria-hidden="true"></span>
-            <span>suprabench.com</span>
-            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false">
-              <span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span>
-            </button>
-          </div>
+    <!-- 02 SupraBench -->
+    <section class="project project-suprabench" id="suprabench" data-theme="light" data-section="suprabench" data-label="02 / SupraBench" data-project>
+      <div class="project-stage">
+        <div class="project-hud">
+          <span class="tag">02</span><span class="hud-of">/ 03</span>
+          <span class="hatch" aria-hidden="true"></span>
+          <span class="hud-kind">
+            <span data-lang-copy="en">Community-driven AI rankings</span>
+            <span data-lang-copy="de">Community-basierte KI-Rankings</span>
+          </span>
+          <span class="label-end">suprabench.com</span>
+        </div>
+        <h2 class="project-title" data-title>SupraBench</h2>
+        <figure class="screen" data-screen>
           <video muted loop playsinline preload="none" poster="./assets/poster-suprabench.webp" width="1540" height="962" aria-label="Screen recording of suprabench.com">
             <source src="/shared/gehirn/previews/suprabench.webm?v=4" type="video/webm" />
             <source src="/shared/gehirn/previews/suprabench.mp4?v=4" type="video/mp4" />
           </video>
         </figure>
-        <div class="project-copy reveal">
+        <div class="project-card" data-card>
+          <div class="card-head">
+            <span class="card-n">02</span>
+            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false"><span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span></button>
+          </div>
           <p class="lede">
             <span data-lang-copy="en">AI model rankings that weigh benchmark quality, difficulty, saturation and community trust instead of rewarding bench-maxing.</span>
             <span data-lang-copy="de">KI-Modellrankings, die Qualität, Schwierigkeit, Sättigung und Vertrauen in Benchmarks gewichten, statt Bench-Maxing zu belohnen.</span>
           </p>
-          <a class="pill" href="https://suprabench.com" target="_blank" rel="noopener">
+          <a class="pill" href="https://suprabench.com" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen">
             <span data-lang-copy="en">Open suprabench.com</span>
             <span data-lang-copy="de">suprabench.com öffnen</span>
             <span class="pill-icon" aria-hidden="true">↗</span>
           </a>
         </div>
+        <span class="project-meter" aria-hidden="true"><i data-meter></i></span>
       </div>
     </section>
 
-    <section class="project" id="paper2form" data-theme="light" data-section="paper2form">
-      <div class="label-row reveal">
-        <span class="tag">03</span>
-        <span class="hatch" aria-hidden="true"></span>
-        <span data-lang-copy="en">Document to digital form</span>
-        <span data-lang-copy="de">Dokument zu digitalem Formular</span>
-        <span class="label-end">paper2form.com</span>
-      </div>
-      <h2 class="project-title reveal">Paper2Form</h2>
-      <div class="project-body">
-        <figure class="screen reveal" data-screen>
-          <div class="screen-bar">
-            <span class="screen-dot" aria-hidden="true"></span>
-            <span>paper2form.com</span>
-            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false">
-              <span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span>
-            </button>
-          </div>
+    <!-- 03 Paper2Form -->
+    <section class="project project-paper2form" id="paper2form" data-theme="dark" data-section="paper2form" data-label="03 / Paper2Form" data-project>
+      <div class="project-stage">
+        <div class="project-hud">
+          <span class="tag">03</span><span class="hud-of">/ 03</span>
+          <span class="hatch" aria-hidden="true"></span>
+          <span class="hud-kind">
+            <span data-lang-copy="en">Document to digital form</span>
+            <span data-lang-copy="de">Dokument zu digitalem Formular</span>
+          </span>
+          <span class="label-end">paper2form.com</span>
+        </div>
+        <h2 class="project-title" data-title>Paper2Form</h2>
+        <figure class="screen" data-screen>
           <video muted loop playsinline preload="none" poster="./assets/poster-paper2form.webp" width="1540" height="962" aria-label="Screen recording of paper2form.com">
             <source src="/shared/gehirn/previews/paper2form.webm?v=4" type="video/webm" />
             <source src="/shared/gehirn/previews/paper2form.mp4?v=4" type="video/mp4" />
           </video>
         </figure>
-        <div class="project-copy reveal">
+        <div class="project-card" data-card>
+          <div class="card-head">
+            <span class="card-n">03</span>
+            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false"><span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span></button>
+          </div>
           <p class="lede">
             <span data-lang-copy="en">Turns scanned paper and handwritten documents into structured data, then transfers detected fields into Google Forms or Microsoft Forms.</span>
             <span data-lang-copy="de">Verwandelt gescannte und handschriftliche Dokumente in strukturierte Daten und überträgt erkannte Felder in Google Forms oder Microsoft Forms.</span>
           </p>
-          <a class="pill" href="https://paper2form.com" target="_blank" rel="noopener">
+          <a class="pill" href="https://paper2form.com" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen">
             <span data-lang-copy="en">Open paper2form.com</span>
             <span data-lang-copy="de">paper2form.com öffnen</span>
             <span class="pill-icon" aria-hidden="true">↗</span>
           </a>
         </div>
+        <span class="project-meter" aria-hidden="true"><i data-meter></i></span>
       </div>
     </section>
   </main>
 
-  <footer class="foot" data-theme="dark" data-section="foot">
+  <footer class="foot" data-theme="dark" data-section="foot" data-label="↗ / Hub">
     <div class="foot-grid">
-      <a class="foot-hub" href="https://flofischer.org/">
+      <a class="foot-hub" href="https://flofischer.org/" data-cursor-text="Hub">
         <span class="label">flofischer.org</span>
         <span class="foot-big">Hub <span aria-hidden="true">↗</span></span>
       </a>
       <nav class="foot-nav" aria-label="Projects">
-        <a href="https://fernwork.net" target="_blank" rel="noopener"><span class="n">01</span>fernwork.net ↗</a>
-        <a href="https://suprabench.com" target="_blank" rel="noopener"><span class="n">02</span>suprabench.com ↗</a>
-        <a href="https://paper2form.com" target="_blank" rel="noopener"><span class="n">03</span>paper2form.com ↗</a>
+        <a href="https://fernwork.net" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen"><span class="n">01</span>fernwork.net ↗</a>
+        <a href="https://suprabench.com" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen"><span class="n">02</span>suprabench.com ↗</a>
+        <a href="https://paper2form.com" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen"><span class="n">03</span>paper2form.com ↗</a>
       </nav>
       <div class="foot-end">
-        <span class="mark-word">Gehirn</span>
+        <span>Gehirn</span>
         <a href="#top">
           <span data-lang-copy="en">Back to top ↑</span>
           <span data-lang-copy="de">Nach oben ↑</span>
         </a>
       </div>
     </div>
+    <div class="foot-word reveal" aria-hidden="true">gehirn</div>
   </footer>
 
-  <script src="./app.js?v=1" defer></script>
+  <script src="./app.js?v=2" defer></script>
 </body>
 </html>
