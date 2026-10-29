@@ -25,15 +25,12 @@
   <link rel="preload" href="./assets/geist.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="./assets/geist-mono.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="./assets/brain-frames.webp" as="image" />
-  <link rel="stylesheet" href="./style.css?v=2" />
+  <link rel="stylesheet" href="./style.css?v=3" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
 </head>
 <body data-title-en="Gehirn — Projects" data-title-de="Gehirn — Projekte">
-  <a class="skip" href="#index">
-    <span data-lang-copy="en">Skip to projects</span>
-    <span data-lang-copy="de">Zu den Projekten</span>
-  </a>
+  <a class="skip" href="#index"><span data-lang-copy="en">Skip to projects</span><span data-lang-copy="de">Zu den Projekten</span></a>
 
   <div class="loader" data-loader aria-hidden="true">
     <div class="loader-top">
@@ -44,11 +41,6 @@
     <div class="loader-line"><i data-loader-line></i></div>
   </div>
 
-  <div class="cursor" data-cursor aria-hidden="true">
-    <span class="cursor-dot"></span>
-    <span class="cursor-ring"><span class="cursor-label" data-cursor-label></span></span>
-  </div>
-
   <header class="bar" data-bar data-theme="dark">
     <a class="mark" href="#top" aria-label="Gehirn">
       <svg class="mark-ring" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" /><circle class="mark-dot" cx="22.5" cy="9.5" r="2.6" /></svg>
@@ -56,14 +48,15 @@
     </a>
 
     <nav class="bar-index" aria-label="Projects">
-      <a href="#fernwork" data-nav="fernwork"><span class="n">01</span>Fernwork</a>
-      <a href="#suprabench" data-nav="suprabench"><span class="n">02</span>SupraBench</a>
-      <a href="#paper2form" data-nav="paper2form"><span class="n">03</span>Paper2Form</a>
+      <a href="#bergwork" data-nav="bergwork"><span class="n">01</span>berg:work</a>
+      <a href="#fernwork" data-nav="fernwork"><span class="n">02</span>Fernwork</a>
+      <a href="#himmelcad" data-nav="himmelcad"><span class="n">03</span>Himmel:CAD</a>
+      <a href="#suprabench" data-nav="suprabench"><span class="n">04</span>SupraBench</a>
     </nav>
 
     <div class="bar-tools">
       <span class="bar-readout" data-readout aria-hidden="true">00 / Gehirn</span>
-      <a class="bar-hub" href="https://flofischer.org/" data-cursor-text="Hub">Hub <span aria-hidden="true">↗</span></a>
+      <a class="bar-hub" href="https://flofischer.org/">Hub <span aria-hidden="true">↗</span></a>
       <div class="lang" role="group" aria-label="Language / Sprache">
         <button type="button" data-language-button="en" aria-pressed="true">EN</button>
         <button type="button" data-language-button="de" aria-pressed="false">DE</button>
@@ -79,9 +72,10 @@
   <div class="menu" id="menu" data-menu hidden>
     <nav aria-label="Index">
       <p class="label">Index</p>
-      <a href="#fernwork"><span class="n">01</span>Fernwork</a>
-      <a href="#suprabench"><span class="n">02</span>SupraBench</a>
-      <a href="#paper2form"><span class="n">03</span>Paper2Form</a>
+      <a href="#bergwork"><span class="n">01</span>berg:work</a>
+      <a href="#fernwork"><span class="n">02</span>Fernwork</a>
+      <a href="#himmelcad"><span class="n">03</span>Himmel:CAD</a>
+      <a href="#suprabench"><span class="n">04</span>SupraBench</a>
       <a class="menu-hub" href="https://flofischer.org/"><span class="n">↗</span>Hub</a>
     </nav>
     <div class="menu-lang">
@@ -94,15 +88,13 @@
   </div>
 
   <main>
-    <!-- 00 Hero: dot-screen brain, pinned while the dots disperse -->
     <section class="hero" id="top" data-theme="dark" data-section="top" data-label="00 / Gehirn">
       <div class="hero-stage" data-hero-stage>
         <canvas class="hero-canvas" data-brain-canvas role="img" aria-label="Rotating brain drawn as a dot screen"></canvas>
-        <div class="brain-anchor" data-brain data-cursor-text="Drag" data-cursor-text-de="Ziehen"></div>
+        <div class="brain-anchor" data-brain></div>
 
         <p class="hero-line">
-          <span data-lang-copy="en">Selected software projects<br />by Florian Fischer.</span>
-          <span data-lang-copy="de">Ausgewählte Softwareprojekte<br />von Florian Fischer.</span>
+          <span data-lang-copy="en">Selected software projects<br />by Florian Fischer.</span><span data-lang-copy="de">Ausgewählte Softwareprojekte<br />von Florian Fischer.</span>
           <span class="hero-rule" aria-hidden="true"></span>
         </p>
 
@@ -125,206 +117,207 @@
       </div>
     </section>
 
-    <!-- 00 Statement: words fill in while scrolling -->
-    <section class="statement" id="index" data-theme="light" data-section="index" data-label="00 / Index">
-      <div class="statement-pin" data-scrub-pin>
-      <div class="statement-stage">
-        <div class="label-row">
-          <span class="tag">00</span>
-          <span class="hatch" aria-hidden="true"></span>
-          <span>Index</span>
-          <span class="label-end">03 <span data-lang-copy="en">projects</span><span data-lang-copy="de">Projekte</span></span>
-        </div>
-        <p class="statement-text" data-lang-copy="en" data-scrub>Selected <span class="pill-img"><img src="./assets/poster-fernwork.webp" alt="" width="160" height="100" /></span> software projects <span class="pill-img"><img src="./assets/poster-suprabench.webp" alt="" width="160" height="100" /></span> by Florian Fischer <span class="pill-img"><img src="./assets/poster-paper2form.webp" alt="" width="160" height="100" /></span></p>
-        <p class="statement-text" data-lang-copy="de" data-scrub>Ausgewählte <span class="pill-img"><img src="./assets/poster-fernwork.webp" alt="" width="160" height="100" /></span> Softwareprojekte <span class="pill-img"><img src="./assets/poster-suprabench.webp" alt="" width="160" height="100" /></span> von Florian Fischer <span class="pill-img"><img src="./assets/poster-paper2form.webp" alt="" width="160" height="100" /></span></p>
+    <section class="index" id="index" data-theme="light" data-section="index" data-label="00 / Index">
+      <div class="label-row reveal">
+        <span class="tag">00</span>
+        <span class="hatch" aria-hidden="true"></span>
+        <span>Index</span>
+        <span class="label-end">04 <span data-lang-copy="en">projects</span><span data-lang-copy="de">Projekte</span></span>
       </div>
-      </div>
-
-      <ol class="index-list" data-index-list>
+      <ol class="index-list">
         <li class="reveal">
-          <a href="#fernwork" data-preview="./assets/poster-fernwork.webp" data-cursor-text="View" data-cursor-text-de="Ansehen">
+          <a href="#bergwork">
             <span class="index-n">01</span>
-            <span class="index-name">Fernwork</span>
-            <span class="index-kind">
-              <span data-lang-copy="en">Private browser workspace</span>
-              <span data-lang-copy="de">Privater Browser-Arbeitsplatz</span>
-            </span>
+            <span class="index-name">berg:work</span>
+            <span class="index-kind"><span data-lang-copy="en">PDF and image editor in the browser</span><span data-lang-copy="de">PDF- und Bildeditor im Browser</span></span>
             <span class="index-arrow" aria-hidden="true">↓</span>
           </a>
         </li>
         <li class="reveal">
-          <a href="#suprabench" data-preview="./assets/poster-suprabench.webp" data-cursor-text="View" data-cursor-text-de="Ansehen">
+          <a href="#fernwork">
             <span class="index-n">02</span>
-            <span class="index-name">SupraBench</span>
-            <span class="index-kind">
-              <span data-lang-copy="en">Community-driven AI rankings</span>
-              <span data-lang-copy="de">Community-basierte KI-Rankings</span>
-            </span>
+            <span class="index-name">Fernwork</span>
+            <span class="index-kind"><span data-lang-copy="en">Private browser workspace</span><span data-lang-copy="de">Privater Browser-Arbeitsplatz</span></span>
             <span class="index-arrow" aria-hidden="true">↓</span>
           </a>
         </li>
         <li class="reveal">
-          <a href="#paper2form" data-preview="./assets/poster-paper2form.webp" data-cursor-text="View" data-cursor-text-de="Ansehen">
+          <a href="#himmelcad">
             <span class="index-n">03</span>
-            <span class="index-name">Paper2Form</span>
-            <span class="index-kind">
-              <span data-lang-copy="en">Document to digital form</span>
-              <span data-lang-copy="de">Dokument zu digitalem Formular</span>
-            </span>
+            <span class="index-name">Himmel:CAD</span>
+            <span class="index-kind"><span data-lang-copy="en">Offline-first CAD and photogrammetry</span><span data-lang-copy="de">Offline-CAD und Photogrammetrie</span></span>
+            <span class="index-arrow" aria-hidden="true">↓</span>
+          </a>
+        </li>
+        <li class="reveal">
+          <a href="#suprabench">
+            <span class="index-n">04</span>
+            <span class="index-name">SupraBench</span>
+            <span class="index-kind"><span data-lang-copy="en">Community-driven AI rankings</span><span data-lang-copy="de">Community-basierte KI-Rankings</span></span>
             <span class="index-arrow" aria-hidden="true">↓</span>
           </a>
         </li>
       </ol>
-      <div class="hover-preview" data-hover-preview aria-hidden="true"><img alt="" data-hover-img /></div>
     </section>
 
-    <!-- Marquee -->
-    <div class="marquee" data-marquee data-theme="dark" data-section="marquee" data-label="00 / Index" aria-hidden="true">
-      <div class="marquee-row" data-marquee-row="1">
-        <span>Fernwork <b>✳</b> SupraBench <b>✳</b> Paper2Form <b>✳</b>&nbsp;</span><span>Fernwork <b>✳</b> SupraBench <b>✳</b> Paper2Form <b>✳</b>&nbsp;</span>
-      </div>
-      <div class="marquee-row marquee-outline" data-marquee-row="-1">
-        <span>fernwork.net <b>/</b> suprabench.com <b>/</b> paper2form.com <b>/</b>&nbsp;</span><span>fernwork.net <b>/</b> suprabench.com <b>/</b> paper2form.com <b>/</b>&nbsp;</span>
-      </div>
-    </div>
-
-    <!-- 01 Fernwork -->
-    <section class="project project-fernwork" id="fernwork" data-theme="dark" data-section="fernwork" data-label="01 / Fernwork" data-project>
-      <div class="project-stage">
-        <div class="project-hud">
-          <span class="tag">01</span><span class="hud-of">/ 03</span>
-          <span class="hatch" aria-hidden="true"></span>
-          <span class="hud-kind">
-            <span data-lang-copy="en">Private browser workspace</span>
-            <span data-lang-copy="de">Privater Browser-Arbeitsplatz</span>
-          </span>
-          <span class="label-end">fernwork.net</span>
-        </div>
-        <h2 class="project-title" data-title>Fernwork</h2>
-        <figure class="screen" data-screen>
-          <video muted loop playsinline preload="none" poster="./assets/poster-fernwork.webp" width="1540" height="962" aria-label="Screen recording of fernwork.net">
-            <source src="/shared/gehirn/previews/fernwork.webm?v=4" type="video/webm" />
-            <source src="/shared/gehirn/previews/fernwork.mp4?v=4" type="video/mp4" />
-          </video>
-        </figure>
-        <div class="project-card" data-card>
-          <div class="card-head">
-            <span class="card-n">01</span>
-            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false"><span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span></button>
+    <section class="project project-bergwork" id="bergwork" data-theme="dark" data-section="bergwork" data-label="01 / berg:work" data-project>
+      <div class="project-pin" data-pin>
+        <div class="project-stage">
+          <div class="project-hud">
+            <span class="tag">01</span><span class="hud-of">/ 04</span>
+            <span class="hatch" aria-hidden="true"></span>
+            <span class="hud-kind"><span data-lang-copy="en">PDF and image editor in the browser</span><span data-lang-copy="de">PDF- und Bildeditor im Browser</span></span>
+            <span class="label-end">bergwork.app</span>
           </div>
-          <p class="lede">
-            <span data-lang-copy="en">A private workspace for PDFs, images, video, office documents, CAD and everyday utilities. Files are processed locally in the browser — without uploads.</span>
-            <span data-lang-copy="de">Ein privater Arbeitsplatz für PDFs, Bilder, Video, Office-Dokumente, CAD und alltägliche Werkzeuge. Dateien werden lokal im Browser verarbeitet — ohne Upload.</span>
-          </p>
-          <a class="pill" href="https://fernwork.net" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen">
-            <span data-lang-copy="en">Open fernwork.net</span>
-            <span data-lang-copy="de">fernwork.net öffnen</span>
-            <span class="pill-icon" aria-hidden="true">↗</span>
-          </a>
+          <h2 class="project-title" data-title>berg:work</h2>
+          <figure class="screen" data-screen>
+            <video muted loop playsinline preload="none" poster="./assets/poster-bergwork.webp" width="1600" height="886" aria-label="Screen recording of bergwork.app"><source src="./assets/bergwork-pdf.mp4" type="video/mp4" /></video>
+          </figure>
+          <div class="project-card" data-card>
+            <div class="card-head">
+              <span class="card-n">01</span>
+              <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false"><span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span></button>
+            </div>
+            <p class="lede"><span data-lang-copy="en">Two editors that run in your browser: change the text, pictures and drawings inside any PDF, and edit photos in layers. Files are opened and saved on your computer — nothing is uploaded, no account.</span><span data-lang-copy="de">Zwei Editoren, die im Browser laufen: Text, Bilder und Zeichnungen in jedem PDF ändern und Fotos in Ebenen bearbeiten. Dateien werden auf dem eigenen Rechner geöffnet und gespeichert — kein Upload, kein Konto.</span></p>
+            <a class="pill" href="https://bergwork.app" target="_blank" rel="noopener"><span data-lang-copy="en">Open bergwork.app</span><span data-lang-copy="de">bergwork.app öffnen</span><span class="pill-icon" aria-hidden="true">↗</span></a>
+          </div>
+          <span class="project-meter" aria-hidden="true"><i data-meter></i></span>
         </div>
-        <span class="project-meter" aria-hidden="true"><i data-meter></i></span>
+      </div>
+
+      <div class="project-detail">
+        <div class="detail-head reveal">
+          <p class="detail-kicker">01 / berg:work</p>
+          <dl class="facts"><div class="fact"><dt><span data-lang-copy="en">Status</span><span data-lang-copy="de">Status</span></dt><dd><span data-lang-copy="en">Live</span><span data-lang-copy="de">Live</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Runs in</span><span data-lang-copy="de">Läuft in</span></dt><dd><span data-lang-copy="en">Browser · desktop apps for Linux and Windows in development</span><span data-lang-copy="de">Browser · Desktop-Apps für Linux und Windows in Arbeit</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Account</span><span data-lang-copy="de">Konto</span></dt><dd><span data-lang-copy="en">None</span><span data-lang-copy="de">Keins</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Tracking</span><span data-lang-copy="de">Tracking</span></dt><dd><span data-lang-copy="en">None — no analytics, no cookies</span><span data-lang-copy="de">Keins — keine Analyse, keine Cookies</span></dd></div></dl>
+        </div>
+        <div class="detail-grid"><article class="box box-wide has-media reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">berg:work PDF</span><span data-lang-copy="de">berg:work PDF</span></p><h3 class="box-title"><span data-lang-copy="en">Move anything.</span><span data-lang-copy="de">Alles verschieben.</span></h3><p class="box-text"><span data-lang-copy="en">Every line of text, every picture and every drawing in a PDF is an object you can grab. Drag the heading somewhere else, pick up a drawing and turn it, retype a word in the document’s own font — then save a normal PDF.</span><span data-lang-copy="de">Jede Textzeile, jedes Bild und jede Zeichnung im PDF ist ein Objekt zum Anfassen. Die Überschrift woandershin ziehen, eine Zeichnung drehen, ein Wort in der Schrift des Dokuments neu tippen — und dann ein normales PDF speichern.</span></p></div><div class="box-media"><img src="./assets/bw-pages.webp" alt="" width="1200" height="867" loading="lazy" decoding="async" /></div></article><article class="box box-narrow has-media reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">Also inside</span><span data-lang-copy="de">Auch dabei</span></p><h3 class="box-title"><span data-lang-copy="en">Pages, redaction, signatures, OCR.</span><span data-lang-copy="de">Seiten, Schwärzen, Signieren, OCR.</span></h3><p class="box-text"><span data-lang-copy="en">Pages, redaction, signatures and text recognition for scans are in there too — and they all run on your device.</span><span data-lang-copy="de">Seiten, Schwärzen, Signaturen und Texterkennung für Scans sind auch drin — und laufen alle auf dem eigenen Gerät.</span></p></div><div class="box-media"><img src="./assets/bw-ocr.webp" alt="" width="1200" height="884" loading="lazy" decoding="async" /></div></article><article class="box box-narrow has-media reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">berg:work Image</span><span data-lang-copy="de">berg:work Image</span></p><h3 class="box-title"><span data-lang-copy="en">Layers that stay loose.</span><span data-lang-copy="de">Ebenen, die beweglich bleiben.</span></h3><p class="box-text"><span data-lang-copy="en">Take a product out of its background on your own computer, drop it into a new scene, scale it, turn it and put text over it. Layers stay movable and adjustments stay editable, so nothing is final until you export.</span><span data-lang-copy="de">Ein Produkt auf dem eigenen Rechner freistellen, in eine neue Szene setzen, skalieren, drehen und Text darüberlegen. Ebenen bleiben verschiebbar und Korrekturen bearbeitbar — fertig ist erst, was exportiert wird.</span></p></div><div class="box-media box-video" data-video-box><video muted loop playsinline preload="none" poster="./assets/poster-bergwork-image.webp" width="1000" height="1146" aria-label="Screen recording"><source src="./assets/bergwork-image.mp4" type="video/mp4" /></video><button class="screen-toggle box-toggle" type="button" data-video-toggle aria-pressed="false"><span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span></button></div></article><article class="box box-wide has-media reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">AI on your machine</span><span data-lang-copy="de">KI auf dem eigenen Rechner</span></p><h3 class="box-title"><span data-lang-copy="en">Cut-outs without uploads.</span><span data-lang-copy="de">Freistellen ohne Upload.</span></h3><p class="box-text"><span data-lang-copy="en">Background removal and subject selection run on your computer. A larger model is downloaded only if you choose it. Image projects are a documented ZIP of JSON and image files, so your work never depends on the site.</span><span data-lang-copy="de">Hintergrund entfernen und Motiv auswählen läuft auf dem eigenen Rechner. Ein größeres Modell wird nur geladen, wenn man es auswählt. Bildprojekte sind ein dokumentiertes ZIP aus JSON und Bilddateien — die Arbeit hängt nie an der Website.</span></p></div><div class="box-media"><img src="./assets/bw-cutout.webp" alt="" width="1200" height="714" loading="lazy" decoding="async" /></div></article></div>
+        <div class="detail-links reveal"><a class="pill pill-on-field" href="https://bergwork.app/app/pdf/" target="_blank" rel="noopener"><span data-lang-copy="en">Open the PDF editor</span><span data-lang-copy="de">PDF-Editor öffnen</span><span class="pill-icon" aria-hidden="true">↗</span></a><a class="pill pill-on-field" href="https://bergwork.app/app/image/" target="_blank" rel="noopener"><span data-lang-copy="en">Open the image editor</span><span data-lang-copy="de">Bildeditor öffnen</span><span class="pill-icon" aria-hidden="true">↗</span></a><a class="pill pill-on-field" href="https://bergwork.app" target="_blank" rel="noopener"><span data-lang-copy="en">bergwork.app</span><span data-lang-copy="de">bergwork.app</span><span class="pill-icon" aria-hidden="true">↗</span></a></div>
       </div>
     </section>
-
-    <!-- 02 SupraBench -->
-    <section class="project project-suprabench" id="suprabench" data-theme="light" data-section="suprabench" data-label="02 / SupraBench" data-project>
-      <div class="project-stage">
-        <div class="project-hud">
-          <span class="tag">02</span><span class="hud-of">/ 03</span>
-          <span class="hatch" aria-hidden="true"></span>
-          <span class="hud-kind">
-            <span data-lang-copy="en">Community-driven AI rankings</span>
-            <span data-lang-copy="de">Community-basierte KI-Rankings</span>
-          </span>
-          <span class="label-end">suprabench.com</span>
-        </div>
-        <h2 class="project-title" data-title>SupraBench</h2>
-        <figure class="screen" data-screen>
-          <video muted loop playsinline preload="none" poster="./assets/poster-suprabench.webp" width="1540" height="962" aria-label="Screen recording of suprabench.com">
-            <source src="/shared/gehirn/previews/suprabench.webm?v=4" type="video/webm" />
-            <source src="/shared/gehirn/previews/suprabench.mp4?v=4" type="video/mp4" />
-          </video>
-        </figure>
-        <div class="project-card" data-card>
-          <div class="card-head">
-            <span class="card-n">02</span>
-            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false"><span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span></button>
+    <section class="project project-fernwork" id="fernwork" data-theme="dark" data-section="fernwork" data-label="02 / Fernwork" data-project>
+      <div class="project-pin" data-pin>
+        <div class="project-stage">
+          <div class="project-hud">
+            <span class="tag">02</span><span class="hud-of">/ 04</span>
+            <span class="hatch" aria-hidden="true"></span>
+            <span class="hud-kind"><span data-lang-copy="en">Private browser workspace</span><span data-lang-copy="de">Privater Browser-Arbeitsplatz</span></span>
+            <span class="label-end">fernwork.net</span>
           </div>
-          <p class="lede">
-            <span data-lang-copy="en">AI model rankings that weigh benchmark quality, difficulty, saturation and community trust instead of rewarding bench-maxing.</span>
-            <span data-lang-copy="de">KI-Modellrankings, die Qualität, Schwierigkeit, Sättigung und Vertrauen in Benchmarks gewichten, statt Bench-Maxing zu belohnen.</span>
-          </p>
-          <a class="pill" href="https://suprabench.com" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen">
-            <span data-lang-copy="en">Open suprabench.com</span>
-            <span data-lang-copy="de">suprabench.com öffnen</span>
-            <span class="pill-icon" aria-hidden="true">↗</span>
-          </a>
+          <h2 class="project-title" data-title>Fernwork</h2>
+          <figure class="screen" data-screen>
+            <video muted loop playsinline preload="none" poster="./assets/poster-fernwork.webp" width="1540" height="962" aria-label="Screen recording of fernwork.net"><source src="/shared/gehirn/previews/fernwork.webm?v=4" type="video/webm" /><source src="/shared/gehirn/previews/fernwork.mp4?v=4" type="video/mp4" /></video>
+          </figure>
+          <div class="project-card" data-card>
+            <div class="card-head">
+              <span class="card-n">02</span>
+              <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false"><span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span></button>
+            </div>
+            <p class="lede"><span data-lang-copy="en">A private workspace for PDFs, images, video, office documents, CAD and everyday utilities. Files are processed locally in the browser — without uploads.</span><span data-lang-copy="de">Ein privater Arbeitsplatz für PDFs, Bilder, Video, Office-Dokumente, CAD und alltägliche Werkzeuge. Dateien werden lokal im Browser verarbeitet — ohne Upload.</span></p>
+            <a class="pill" href="https://fernwork.net" target="_blank" rel="noopener"><span data-lang-copy="en">Open fernwork.net</span><span data-lang-copy="de">fernwork.net öffnen</span><span class="pill-icon" aria-hidden="true">↗</span></a>
+          </div>
+          <span class="project-meter" aria-hidden="true"><i data-meter></i></span>
         </div>
-        <span class="project-meter" aria-hidden="true"><i data-meter></i></span>
+      </div>
+
+      <div class="project-detail">
+        <div class="detail-head reveal">
+          <p class="detail-kicker">02 / Fernwork</p>
+          <dl class="facts"><div class="fact"><dt><span data-lang-copy="en">Status</span><span data-lang-copy="de">Status</span></dt><dd><span data-lang-copy="en">Live</span><span data-lang-copy="de">Live</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Price</span><span data-lang-copy="de">Preis</span></dt><dd><span data-lang-copy="en">Free</span><span data-lang-copy="de">Kostenlos</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Backend</span><span data-lang-copy="de">Backend</span></dt><dd><span data-lang-copy="en">None — everything runs in the browser</span><span data-lang-copy="de">Keins — alles läuft im Browser</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Sign-up</span><span data-lang-copy="de">Anmeldung</span></dt><dd><span data-lang-copy="en">None, no tracking</span><span data-lang-copy="de">Keine, kein Tracking</span></dd></div></dl>
+        </div>
+        <div class="detail-grid"><article class="box box-narrow reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">PDF tools</span><span data-lang-copy="de">PDF-Werkzeuge</span></p><h3 class="box-title"><span data-lang-copy="en">Edit, merge, sign, redact.</span><span data-lang-copy="de">Bearbeiten, zusammenführen, signieren, schwärzen.</span></h3><p class="box-text"><span data-lang-copy="en">Edit, merge, split, compress, sign, OCR and redact PDFs — without the file ever leaving your device.</span><span data-lang-copy="de">PDFs bearbeiten, zusammenführen, teilen, komprimieren, signieren, per OCR erkennen und schwärzen — ohne dass die Datei das Gerät verlässt.</span></p></div></article><article class="box box-narrow reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">Convert & view</span><span data-lang-copy="de">Umwandeln & ansehen</span></p><h3 class="box-title"><span data-lang-copy="en">Do anything with a file.</span><span data-lang-copy="de">Alles mit einer Datei machen.</span></h3><p class="box-text"><span data-lang-copy="en">Convert images, video, audio, documents and spreadsheets. View DXF drawings, IFC building models, point clouds, STL/OBJ meshes, shapefiles, DOCX, PPTX, XLSX and SQLite files.</span><span data-lang-copy="de">Bilder, Video, Audio, Dokumente und Tabellen umwandeln. DXF-Zeichnungen, IFC-Gebäudemodelle, Punktwolken, STL/OBJ-Netze, Shapefiles, DOCX, PPTX, XLSX und SQLite-Dateien ansehen.</span></p></div></article><article class="box box-narrow reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">Text, security, utilities</span><span data-lang-copy="de">Text, Sicherheit, Werkzeuge</span></p><h3 class="box-title"><span data-lang-copy="en">The small things, too.</span><span data-lang-copy="de">Auch die kleinen Dinge.</span></h3><p class="box-text"><span data-lang-copy="en">JSON formatter, text diff, regex tester, hashes, JWTs, passwords, UUIDs, QR codes, a colour picker, drawing, mind maps and Mermaid diagrams.</span><span data-lang-copy="de">JSON-Formatierer, Textvergleich, Regex-Tester, Hashes, JWTs, Passwörter, UUIDs, QR-Codes, Farbwähler, Zeichnen, Mindmaps und Mermaid-Diagramme.</span></p></div></article><article class="box box-half has-media reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">Calculator</span><span data-lang-copy="de">Rechner</span></p><h3 class="box-title"><span data-lang-copy="en">Calculate and plot.</span><span data-lang-copy="de">Rechnen und plotten.</span></h3><p class="box-text"><span data-lang-copy="en">Evaluate expressions and plot functions side by side.</span><span data-lang-copy="de">Ausdrücke berechnen und Funktionen direkt daneben zeichnen.</span></p></div><div class="box-media"><img src="./assets/fw-calc.webp" alt="" width="1200" height="750" loading="lazy" decoding="async" /></div></article><article class="box box-half has-media reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">Units</span><span data-lang-copy="de">Einheiten</span></p><h3 class="box-title"><span data-lang-copy="en">Convert units.</span><span data-lang-copy="de">Einheiten umrechnen.</span></h3><p class="box-text"><span data-lang-copy="en">Length, area, volume, weight, temperature, speed, pressure, energy, data, angle and slope, and more.</span><span data-lang-copy="de">Länge, Fläche, Volumen, Gewicht, Temperatur, Geschwindigkeit, Druck, Energie, Daten, Winkel und Steigung und mehr.</span></p></div><div class="box-media"><img src="./assets/fw-units.webp" alt="" width="1200" height="750" loading="lazy" decoding="async" /></div></article></div>
+        <div class="detail-links reveal"><a class="pill pill-on-field" href="https://fernwork.net" target="_blank" rel="noopener"><span data-lang-copy="en">Open fernwork.net</span><span data-lang-copy="de">fernwork.net öffnen</span><span class="pill-icon" aria-hidden="true">↗</span></a></div>
       </div>
     </section>
-
-    <!-- 03 Paper2Form -->
-    <section class="project project-paper2form" id="paper2form" data-theme="dark" data-section="paper2form" data-label="03 / Paper2Form" data-project>
-      <div class="project-stage">
-        <div class="project-hud">
-          <span class="tag">03</span><span class="hud-of">/ 03</span>
-          <span class="hatch" aria-hidden="true"></span>
-          <span class="hud-kind">
-            <span data-lang-copy="en">Document to digital form</span>
-            <span data-lang-copy="de">Dokument zu digitalem Formular</span>
-          </span>
-          <span class="label-end">paper2form.com</span>
-        </div>
-        <h2 class="project-title" data-title>Paper2Form</h2>
-        <figure class="screen" data-screen>
-          <video muted loop playsinline preload="none" poster="./assets/poster-paper2form.webp" width="1540" height="962" aria-label="Screen recording of paper2form.com">
-            <source src="/shared/gehirn/previews/paper2form.webm?v=4" type="video/webm" />
-            <source src="/shared/gehirn/previews/paper2form.mp4?v=4" type="video/mp4" />
-          </video>
-        </figure>
-        <div class="project-card" data-card>
-          <div class="card-head">
-            <span class="card-n">03</span>
-            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false"><span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span></button>
+    <section class="project project-himmelcad" id="himmelcad" data-theme="dark" data-section="himmelcad" data-label="03 / Himmel:CAD" data-project>
+      <div class="project-pin" data-pin>
+        <div class="project-stage">
+          <div class="project-hud">
+            <span class="tag">03</span><span class="hud-of">/ 04</span>
+            <span class="hatch" aria-hidden="true"></span>
+            <span class="hud-kind"><span data-lang-copy="en">Offline-first CAD and photogrammetry</span><span data-lang-copy="de">Offline-CAD und Photogrammetrie</span></span>
+            <span class="label-end">himmelcad.com</span>
           </div>
-          <p class="lede">
-            <span data-lang-copy="en">Turns scanned paper and handwritten documents into structured data, then transfers detected fields into Google Forms or Microsoft Forms.</span>
-            <span data-lang-copy="de">Verwandelt gescannte und handschriftliche Dokumente in strukturierte Daten und überträgt erkannte Felder in Google Forms oder Microsoft Forms.</span>
-          </p>
-          <a class="pill" href="https://paper2form.com" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen">
-            <span data-lang-copy="en">Open paper2form.com</span>
-            <span data-lang-copy="de">paper2form.com öffnen</span>
-            <span class="pill-icon" aria-hidden="true">↗</span>
-          </a>
+          <h2 class="project-title" data-title>Himmel:CAD</h2>
+          <figure class="screen" data-screen>
+            <video muted loop playsinline preload="none" poster="./assets/poster-himmelcad.webp" width="1280" height="800" aria-label="Screen recording of himmelcad.com"><source src="./assets/himmelcad-assembler.mp4" type="video/mp4" /></video>
+          </figure>
+          <div class="project-card" data-card>
+            <div class="card-head">
+              <span class="card-n">03</span>
+              <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false"><span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span></button>
+            </div>
+            <p class="lede"><span data-lang-copy="en">A family of offline-first CAD, photogrammetry and viewing software for 3D printing and civil engineering. Assembler already runs as a preview in the browser; the other products are in development.</span><span data-lang-copy="de">Eine Familie von Offline-Software für CAD, Photogrammetrie und 3D-Ansicht — für 3D-Druck und Bauingenieurwesen. Assembler läuft schon als Vorschau im Browser, die anderen Produkte sind in Entwicklung.</span></p>
+            <a class="pill" href="https://himmelcad.com" target="_blank" rel="noopener"><span data-lang-copy="en">Open himmelcad.com</span><span data-lang-copy="de">himmelcad.com öffnen</span><span class="pill-icon" aria-hidden="true">↗</span></a>
+          </div>
+          <span class="project-meter" aria-hidden="true"><i data-meter></i></span>
         </div>
-        <span class="project-meter" aria-hidden="true"><i data-meter></i></span>
+      </div>
+
+      <div class="project-detail">
+        <div class="detail-head reveal">
+          <p class="detail-kicker">03 / Himmel:CAD</p>
+          <dl class="facts"><div class="fact"><dt><span data-lang-copy="en">Status</span><span data-lang-copy="de">Status</span></dt><dd><span data-lang-copy="en">In development · Assembler as browser preview</span><span data-lang-copy="de">In Entwicklung · Assembler als Browser-Vorschau</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Works</span><span data-lang-copy="de">Arbeitet</span></dt><dd><span data-lang-copy="en">Offline-first, projects stay on your device</span><span data-lang-copy="de">Offline zuerst, Projekte bleiben auf dem Gerät</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Licence</span><span data-lang-copy="de">Lizenz</span></dt><dd><span data-lang-copy="en">BSL 1.1 — free for up to 3 people</span><span data-lang-copy="de">BSL 1.1 — kostenlos bis 3 Personen</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Products</span><span data-lang-copy="de">Produkte</span></dt><dd><span data-lang-copy="en">Assembler · PhotoLab · Builder · WeltView</span><span data-lang-copy="de">Assembler · PhotoLab · Builder · WeltView</span></dd></div></dl>
+        </div>
+        <div class="detail-grid"><article class="box box-wide has-media reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">Assembler · browser preview</span><span data-lang-copy="de">Assembler · Browser-Vorschau</span></p><h3 class="box-title"><span data-lang-copy="en">CAD for parts you print.</span><span data-lang-copy="de">CAD für Teile, die man druckt.</span></h3><p class="box-text"><span data-lang-copy="en">Sketch with constraints, model solids on an exact geometry kernel, check the part and send it to your slicer. The printability view places a face on the plate and suggests orientations; export STL or 3MF. STEP import keeps exact geometry, names and colours.</span><span data-lang-copy="de">Mit Bedingungen skizzieren, Volumen auf einem exakten Geometriekern modellieren, das Teil prüfen und an den Slicer schicken. Die Druckansicht legt eine Fläche aufs Druckbett und schlägt Ausrichtungen vor; Export als STL oder 3MF. Beim STEP-Import bleiben exakte Geometrie, Namen und Farben erhalten.</span></p></div><div class="box-media"><img src="./assets/hc-print.webp" alt="" width="1200" height="750" loading="lazy" decoding="async" /></div></article><article class="box box-narrow reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">PhotoLab · first release in progress</span><span data-lang-copy="de">PhotoLab · erstes Release in Arbeit</span></p><h3 class="box-title"><span data-lang-copy="en">Images become measured products.</span><span data-lang-copy="de">Aus Bildern werden Messprodukte.</span></h3><p class="box-text"><span data-lang-copy="en">Turns image and control data into aligned cameras, dense point clouds, DSM and DTM elevation products, orthomosaics, textured meshes and Gaussian splats — offline, with a record of how each result was made.</span><span data-lang-copy="de">Macht aus Bildern und Passpunkten ausgerichtete Kameras, dichte Punktwolken, DSM- und DTM-Höhenmodelle, Orthomosaike, texturierte Netze und Gaussian Splats — offline und mit Nachweis, wie jedes Ergebnis entstanden ist.</span></p></div></article><article class="box box-half reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">Builder · internal build</span><span data-lang-copy="de">Builder · interner Build</span></p><h3 class="box-title"><span data-lang-copy="en">3D-first Civil CAD.</span><span data-lang-copy="de">Civil-CAD, 3D zuerst.</span></h3><p class="box-text"><span data-lang-copy="en">The flagship: 3D-first Civil CAD with first-class 2D and 2.5D construction. Point clouds, terrain, CAD, raster, mesh and BIM work in one project.</span><span data-lang-copy="de">Das Flaggschiff: Civil-CAD mit 3D zuerst und vollwertiger 2D- und 2,5D-Konstruktion. Punktwolken, Gelände, CAD, Raster, Netze und BIM in einem Projekt.</span></p></div></article><article class="box box-half reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">WeltView · publication planned</span><span data-lang-copy="de">WeltView · Veröffentlichung geplant</span></p><h3 class="box-title"><span data-lang-copy="en">Share and view.</span><span data-lang-copy="de">Teilen und ansehen.</span></h3><p class="box-text"><span data-lang-copy="en">A read-only browser viewer for shared Himmel:CAD projects.</span><span data-lang-copy="de">Ein reiner Browser-Viewer für geteilte Himmel:CAD-Projekte.</span></p></div></article><article class="box box-half has-media reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">Template · Bracket</span><span data-lang-copy="de">Vorlage · Winkel</span></p></div><div class="box-media"><img src="./assets/hc-bracket.webp" alt="" width="1200" height="750" loading="lazy" decoding="async" /></div></article><article class="box box-half has-media reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">Template · Cable clip</span><span data-lang-copy="de">Vorlage · Kabelclip</span></p></div><div class="box-media"><img src="./assets/hc-clip.webp" alt="" width="1200" height="750" loading="lazy" decoding="async" /></div></article></div>
+        <div class="detail-links reveal"><a class="pill pill-on-field" href="https://assembler.himmelcad.com/" target="_blank" rel="noopener"><span data-lang-copy="en">Open Assembler</span><span data-lang-copy="de">Assembler öffnen</span><span class="pill-icon" aria-hidden="true">↗</span></a><a class="pill pill-on-field" href="https://himmelcad.com" target="_blank" rel="noopener"><span data-lang-copy="en">himmelcad.com</span><span data-lang-copy="de">himmelcad.com</span><span class="pill-icon" aria-hidden="true">↗</span></a></div>
+      </div>
+    </section>
+    <section class="project project-suprabench" id="suprabench" data-theme="light" data-section="suprabench" data-label="04 / SupraBench" data-project>
+      <div class="project-pin" data-pin>
+        <div class="project-stage">
+          <div class="project-hud">
+            <span class="tag">04</span><span class="hud-of">/ 04</span>
+            <span class="hatch" aria-hidden="true"></span>
+            <span class="hud-kind"><span data-lang-copy="en">Community-driven AI rankings</span><span data-lang-copy="de">Community-basierte KI-Rankings</span></span>
+            <span class="label-end">suprabench.com</span>
+          </div>
+          <h2 class="project-title" data-title>SupraBench</h2>
+          <figure class="screen" data-screen>
+            <video muted loop playsinline preload="none" poster="./assets/poster-suprabench.webp" width="1540" height="962" aria-label="Screen recording of suprabench.com"><source src="/shared/gehirn/previews/suprabench.webm?v=4" type="video/webm" /><source src="/shared/gehirn/previews/suprabench.mp4?v=4" type="video/mp4" /></video>
+          </figure>
+          <div class="project-card" data-card>
+            <div class="card-head">
+              <span class="card-n">04</span>
+              <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false"><span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span></button>
+            </div>
+            <p class="lede"><span data-lang-copy="en">AI model rankings that weigh benchmark quality, difficulty, saturation and community trust instead of rewarding bench-maxing.</span><span data-lang-copy="de">KI-Modellrankings, die Qualität, Schwierigkeit, Sättigung und Vertrauen in Benchmarks gewichten, statt Bench-Maxing zu belohnen.</span></p>
+            <a class="pill" href="https://suprabench.com" target="_blank" rel="noopener"><span data-lang-copy="en">Open suprabench.com</span><span data-lang-copy="de">suprabench.com öffnen</span><span class="pill-icon" aria-hidden="true">↗</span></a>
+          </div>
+          <span class="project-meter" aria-hidden="true"><i data-meter></i></span>
+        </div>
+      </div>
+
+      <div class="project-detail">
+        <div class="detail-head reveal">
+          <p class="detail-kicker">04 / SupraBench</p>
+          <dl class="facts"><div class="fact"><dt><span data-lang-copy="en">Status</span><span data-lang-copy="de">Status</span></dt><dd><span data-lang-copy="en">Live</span><span data-lang-copy="de">Live</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Run by</span><span data-lang-copy="de">Getragen von</span></dt><dd><span data-lang-copy="en">The community — no corporate influence</span><span data-lang-copy="de">Der Community — kein Konzerneinfluss</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Licence</span><span data-lang-copy="de">Lizenz</span></dt><dd><span data-lang-copy="en">BSL 1.1, source on GitLab</span><span data-lang-copy="de">BSL 1.1, Quellcode auf GitLab</span></dd></div><div class="fact"><dt><span data-lang-copy="en">Output</span><span data-lang-copy="de">Ergebnis</span></dt><dd><span data-lang-copy="en">One SupraScore per model</span><span data-lang-copy="de">Ein SupraScore pro Modell</span></dd></div></dl>
+        </div>
+        <div class="detail-grid"><article class="box box-narrow reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">The problem</span><span data-lang-copy="de">Das Problem</span></p><h3 class="box-title"><span data-lang-copy="en">Leaderboards that say little.</span><span data-lang-copy="de">Ranglisten, die wenig sagen.</span></h3><p class="box-text"><span data-lang-copy="en">Contamination: the test set leaked into training data. Saturation: every frontier model scores 99 %. Bench-maxing: a model is tuned for popular benches and looks great there while being unusable in practice.</span><span data-lang-copy="de">Kontamination: Die Testdaten sind ins Training gerutscht. Sättigung: Jedes Spitzenmodell erreicht 99 %. Bench-Maxing: Ein Modell wird auf beliebte Benchmarks getrimmt und glänzt dort, ist im Alltag aber kaum brauchbar.</span></p></div></article><article class="box box-wide has-media reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">Bench weight</span><span data-lang-copy="de">Benchmark-Gewicht</span></p><h3 class="box-title"><span data-lang-copy="en">Not all benchmarks are equal.</span><span data-lang-copy="de">Nicht jeder Benchmark zählt gleich.</span></h3><p class="box-text"><span data-lang-copy="en">Every benchmark gets a community-voted quality and difficulty score, plus an automatic saturation penalty. Benchmarks are scored on relevance, contamination resistance, discriminability and reproducibility.</span><span data-lang-copy="de">Jeder Benchmark bekommt einen von der Community abgestimmten Qualitäts- und Schwierigkeitswert plus einen automatischen Sättigungsabzug. Bewertet werden Relevanz, Kontaminationsresistenz, Trennschärfe und Reproduzierbarkeit.</span></p></div><div class="box-media"><img src="./assets/sb-benchmarks.webp" alt="" width="1200" height="750" loading="lazy" decoding="async" /></div></article><article class="box box-wide has-media reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">The math, in the open</span><span data-lang-copy="de">Die Rechnung, offen</span></p><h3 class="box-title"><span data-lang-copy="en">One honest number per model.</span><span data-lang-copy="de">Eine ehrliche Zahl pro Modell.</span></h3><p class="box-text"><span data-lang-copy="en">The SupraScore respects how trustworthy and how informative each underlying benchmark actually is. The About page explains how scores are computed, how the community corrects mistakes and what stops gaming.</span><span data-lang-copy="de">Der SupraScore berücksichtigt, wie vertrauenswürdig und aussagekräftig jeder zugrunde liegende Benchmark wirklich ist. Die About-Seite erklärt, wie gerechnet wird, wie die Community Fehler korrigiert und was Manipulation verhindert.</span></p></div><div class="box-media"><img src="./assets/sb-about.webp" alt="" width="1200" height="750" loading="lazy" decoding="async" /></div></article><article class="box box-narrow reveal"><div class="box-body"><p class="box-label"><span data-lang-copy="en">Community</span><span data-lang-copy="de">Community</span></p><h3 class="box-title"><span data-lang-copy="en">Corrected in public.</span><span data-lang-copy="de">Öffentlich korrigiert.</span></h3><p class="box-text"><span data-lang-copy="en">Rankings, benchmark ratings and sources are maintained by the community; official results and community submissions are marked separately.</span><span data-lang-copy="de">Rankings, Benchmark-Bewertungen und Quellen pflegt die Community; offizielle Ergebnisse und Community-Einträge sind getrennt gekennzeichnet.</span></p></div></article></div>
+        <div class="detail-links reveal"><a class="pill pill-on-field" href="https://suprabench.com" target="_blank" rel="noopener"><span data-lang-copy="en">Open suprabench.com</span><span data-lang-copy="de">suprabench.com öffnen</span><span class="pill-icon" aria-hidden="true">↗</span></a></div>
       </div>
     </section>
   </main>
 
   <footer class="foot" data-theme="dark" data-section="foot" data-label="↗ / Hub">
     <div class="foot-grid">
-      <a class="foot-hub" href="https://flofischer.org/" data-cursor-text="Hub">
+      <a class="foot-hub" href="https://flofischer.org/">
         <span class="label">flofischer.org</span>
         <span class="foot-big">Hub <span aria-hidden="true">↗</span></span>
       </a>
       <nav class="foot-nav" aria-label="Projects">
-        <a href="https://fernwork.net" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen"><span class="n">01</span>fernwork.net ↗</a>
-        <a href="https://suprabench.com" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen"><span class="n">02</span>suprabench.com ↗</a>
-        <a href="https://paper2form.com" target="_blank" rel="noopener" data-cursor-text="Open" data-cursor-text-de="Öffnen"><span class="n">03</span>paper2form.com ↗</a>
+        <a href="https://bergwork.app" target="_blank" rel="noopener"><span class="n">01</span>bergwork.app ↗</a>
+        <a href="https://fernwork.net" target="_blank" rel="noopener"><span class="n">02</span>fernwork.net ↗</a>
+        <a href="https://himmelcad.com" target="_blank" rel="noopener"><span class="n">03</span>himmelcad.com ↗</a>
+        <a href="https://suprabench.com" target="_blank" rel="noopener"><span class="n">04</span>suprabench.com ↗</a>
       </nav>
       <div class="foot-end">
         <span>Gehirn</span>
-        <a href="#top">
-          <span data-lang-copy="en">Back to top ↑</span>
-          <span data-lang-copy="de">Nach oben ↑</span>
-        </a>
+        <a href="#top"><span data-lang-copy="en">Back to top ↑</span><span data-lang-copy="de">Nach oben ↑</span></a>
       </div>
     </div>
     <div class="foot-word reveal" aria-hidden="true">gehirn</div>
   </footer>
 
-  <script src="./app.js?v=2" defer></script>
+  <script src="./app.js?v=3" defer></script>
 </body>
 </html>

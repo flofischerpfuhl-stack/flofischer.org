@@ -41,7 +41,6 @@
     }
     document.querySelectorAll("[data-video-toggle]").forEach(syncToggleLabel);
     if (persist) window.FFLanguage?.set(language);
-    scrubDirty = true;
   }
 
   document.querySelectorAll("[data-language-button]").forEach((button) => {
@@ -59,9 +58,9 @@
   const heroStage = document.querySelector("[data-hero-stage]");
   const letters = [...document.querySelectorAll(".wm-line > span")];
   const heroFade = [...document.querySelectorAll(".hero-line, .hud, .hero-marks, .hero-cue")];
-  const scrubPin = document.querySelector("[data-scrub-pin]");
   const projects = [...document.querySelectorAll("[data-project]")].map((section) => ({
     section,
+    pin: section.querySelector("[data-pin]"),
     screen: section.querySelector("[data-screen]"),
     video: section.querySelector("video"),
     title: section.querySelector("[data-title]"),
@@ -70,40 +69,6 @@
     meter: section.querySelector("[data-meter]"),
     toggle: section.querySelector("[data-video-toggle]"),
   }));
-  const marquee = document.querySelector("[data-marquee]");
-  const marqueeRows = [...document.querySelectorAll("[data-marquee-row]")].map((row) => ({
-    row,
-    dir: Number(row.dataset.marqueeRow) || 1,
-    x: 0,
-    width: 0,
-  }));
-
-  /* ---------- Statement: split words ---------- */
-
-  const scrubTexts = [...document.querySelectorAll("[data-scrub]")].map((paragraph) => {
-    const nodes = [...paragraph.childNodes];
-    paragraph.textContent = "";
-    nodes.forEach((node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        node.textContent.split(/(\s+)/).forEach((part) => {
-          if (!part) return;
-          if (/^\s+$/.test(part)) {
-            paragraph.appendChild(document.createTextNode(" "));
-          } else {
-            const span = document.createElement("span");
-            span.className = "w";
-            span.textContent = part;
-            paragraph.appendChild(span);
-          }
-        });
-      } else {
-        node.classList?.add("w");
-        paragraph.appendChild(node);
-      }
-    });
-    return { paragraph, words: [...paragraph.querySelectorAll(".w")], lit: -1 };
-  });
-  let scrubDirty = true;
 
   /* ---------- Menu ---------- */
 
@@ -152,9 +117,14 @@
 
   /* ---------- Videos ---------- */
 
+  function videoFor(button) {
+    const box = button.closest("[data-video-box]");
+    if (box) return box.querySelector("video");
+    return button.closest("[data-project]")?.querySelector("[data-screen] video") || null;
+  }
+
   function syncToggleLabel(button) {
-    const section = button.closest("[data-project]");
-    const video = section?.querySelector("video");
+    const video = videoFor(button);
     const paused = !video || video.paused;
     button.setAttribute("aria-pressed", paused ? "true" : "false");
     button.querySelectorAll("[data-lang-copy]").forEach((span) => {
@@ -169,64 +139,38 @@
     if (promise && typeof promise.catch === "function") promise.catch(() => {});
   }
 
-  projects.forEach((project) => {
-    const { video, toggle, section } = project;
-    if (!motion) section.dataset.userPaused = "true";
+  document.querySelectorAll("[data-video-toggle]").forEach((toggle) => {
+    const video = videoFor(toggle);
+    if (!video) return;
+    if (!motion) video.dataset.userPaused = "true";
     video.addEventListener("playing", () => syncToggleLabel(toggle));
     video.addEventListener("pause", () => syncToggleLabel(toggle));
     toggle.addEventListener("click", () => {
       if (video.paused) {
-        section.dataset.userPaused = "false";
+        video.dataset.userPaused = "false";
         play(video);
       } else {
-        section.dataset.userPaused = "true";
+        video.dataset.userPaused = "true";
         video.pause();
       }
     });
     syncToggleLabel(toggle);
   });
 
-  /* ---------- Cursor + index preview ---------- */
-
-  const finePointer = window.matchMedia("(pointer: fine)").matches;
-  const cursor = document.querySelector("[data-cursor]");
-  const cursorLabel = document.querySelector("[data-cursor-label]");
-  const preview = document.querySelector("[data-hover-preview]");
-  const previewImg = document.querySelector("[data-hover-img]");
-  const mouse = { x: vw / 2, y: vh / 2, cx: vw / 2, cy: vh / 2, px: vw / 2, py: vh / 2, seen: false };
-  let previewOn = false;
-
-  if (motion && finePointer) {
-    root.classList.add("has-cursor");
-    window.addEventListener("pointermove", (event) => {
-      if (event.pointerType !== "mouse") return;
-      mouse.x = event.clientX;
-      mouse.y = event.clientY;
-      if (!mouse.seen) {
-        mouse.seen = true;
-        mouse.cx = mouse.px = mouse.x;
-        mouse.cy = mouse.py = mouse.y;
-      }
-      cursor.classList.remove("is-hidden");
-    }, { passive: true });
-    document.addEventListener("mouseleave", () => cursor.classList.add("is-hidden"));
-    document.addEventListener("mouseover", (event) => {
-      const target = event.target.closest("[data-cursor-text], a, button");
-      const text = target?.dataset.cursorText
-        ? (lang() === "de" && target.dataset.cursorTextDe) || target.dataset.cursorText
-        : "";
-      cursorLabel.textContent = text;
-      cursor.classList.toggle("is-active", Boolean(text));
-      cursor.classList.toggle("is-hover", Boolean(target) && !text);
-      const row = event.target.closest("[data-preview]");
-      if (row) {
-        if (previewImg.getAttribute("src") !== row.dataset.preview) previewImg.src = row.dataset.preview;
-        previewOn = true;
-      } else {
-        previewOn = false;
-      }
-      preview.classList.toggle("is-on", previewOn);
-    });
+  // Videos inside the detail boxes play while they are in view.
+  const boxVideos = [...document.querySelectorAll("[data-video-box] video")];
+  if ("IntersectionObserver" in window) {
+    const boxObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const video = entry.target;
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.4) {
+          if (video.dataset.userPaused !== "true") play(video);
+        } else if (!video.paused) {
+          video.pause();
+        }
+      });
+    }, { threshold: [0, 0.4] });
+    boxVideos.forEach((video) => boxObserver.observe(video));
   }
 
   /* ---------- Halftone brain ---------- */
@@ -515,8 +459,6 @@
   /* ---------- Scroll engine ---------- */
 
   let lastScroll = -1;
-  let lastY = window.scrollY;
-  let velocity = 0;
   let layoutDirty = true;
   let heroVisible = true;
   let hudAt = 0;
@@ -528,9 +470,6 @@
   function measure() {
     vh = window.innerHeight;
     vw = window.innerWidth;
-    marqueeRows.forEach((m) => {
-      m.width = m.row.firstElementChild.getBoundingClientRect().width;
-    });
     brain?.resize();
     layoutDirty = false;
   }
@@ -570,29 +509,15 @@
     });
   }
 
-  function updateScrub() {
-    if (!motion || !scrubPin) return;
-    const rect = scrubPin.getBoundingClientRect();
-    const p = clamp((vh * 0.55 - rect.top) / Math.max(1, rect.height - vh * 0.6));
-    scrubTexts.forEach((text) => {
-      if (text.paragraph.offsetParent === null) return;
-      const lit = Math.round(p * text.words.length * 1.08);
-      if (lit === text.lit && !scrubDirty) return;
-      text.lit = lit;
-      text.words.forEach((word, i) => word.classList.toggle("on", i < lit));
-    });
-    scrubDirty = false;
-  }
-
   function updateProjects() {
     const small = portrait.matches;
     projects.forEach((project) => {
-      const rect = project.section.getBoundingClientRect();
+      const rect = project.pin.getBoundingClientRect();
       const visible = rect.top < vh && rect.bottom > 0;
       if (motion && visible) {
         const p = clamp(-rect.top / Math.max(1, rect.height - vh));
-        const e = smooth(0.02, 0.5, p);
-        const c = smooth(0.52, 0.78, p);
+        const e = smooth(0.0, 0.42, p);
+        const c = smooth(0.45, 0.72, p);
         const s0 = small ? 0.6 : 0.34;
         const scale = s0 + (1 - s0) * e;
         const tilt = small ? (1 - e) * -4 : 0;
@@ -607,42 +532,11 @@
         project.meter.style.transform = `scaleX(${p.toFixed(4)})`;
         project.hud.style.opacity = String(1 - smooth(0.2, 0.42, p) * 0.85);
       }
-      const wantsPlay = visible && project.section.dataset.userPaused !== "true"
+      const wantsPlay = visible && project.video.dataset.userPaused !== "true"
         && (!motion || clamp(-rect.top / Math.max(1, rect.height - vh)) > 0 || rect.top < vh * 0.4);
       if (wantsPlay) play(project.video);
       else if (!project.video.paused && !visible) project.video.pause();
     });
-  }
-
-  function updateMarquee(dt) {
-    if (!motion || !marquee) return;
-    const rect = marquee.getBoundingClientRect();
-    if (rect.bottom < 0 || rect.top > vh) return;
-    const boost = Math.min(Math.abs(velocity) * 0.9, 1600);
-    marqueeRows.forEach((m) => {
-      if (!m.width) return;
-      m.x -= m.dir * (60 + boost) * dt;
-      if (m.x <= -m.width) m.x += m.width;
-      if (m.x > 0) m.x -= m.width;
-      m.row.style.transform = `translate3d(${m.x.toFixed(1)}px, 0, 0)`;
-    });
-  }
-
-  function updateCursor() {
-    if (!root.classList.contains("has-cursor")) return;
-    mouse.cx += (mouse.x - mouse.cx) * 0.22;
-    mouse.cy += (mouse.y - mouse.cy) * 0.22;
-    cursor.style.transform = `translate3d(${mouse.cx.toFixed(1)}px, ${mouse.cy.toFixed(1)}px, 0)`;
-    if (previewOn) {
-      const dx = mouse.x - mouse.px;
-      mouse.px += dx * 0.12;
-      mouse.py += (mouse.y - mouse.py) * 0.12;
-      const rot = clamp(dx * 0.05, -8, 8);
-      preview.style.transform = `translate3d(${(mouse.px + 28).toFixed(1)}px, ${(mouse.py - 110).toFixed(1)}px, 0) rotate(${rot.toFixed(2)}deg)`;
-    } else {
-      mouse.px = mouse.x;
-      mouse.py = mouse.y;
-    }
   }
 
   let last = performance.now();
@@ -652,17 +546,12 @@
     last = now;
     if (layoutDirty) measure();
     const y = window.scrollY;
-    velocity = velocity * 0.85 + ((y - lastY) / Math.max(dt, 0.001)) * 0.15;
-    lastY = y;
-    if (y !== lastScroll || scrubDirty) {
+    if (y !== lastScroll) {
       lastScroll = y;
       updateBar();
       updateHero();
-      updateScrub();
       updateProjects();
     }
-    updateMarquee(dt);
-    updateCursor();
     if (brain && !document.hidden) {
       brain.tick(now, dt, heroVisible);
       if (now - hudAt > 120 && heroVisible) {
