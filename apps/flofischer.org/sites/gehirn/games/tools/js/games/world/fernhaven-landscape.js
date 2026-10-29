@@ -53,10 +53,18 @@ export function fernhaven(world, onChange) {
     return out;
   };
   const lake = [[-90, 3.2], ...wavy([-90, 3.2], [-11.99, 3.2], 40, 6), [-11.99, 3.2], [-11.99, 10], [-6.4, 10], ...wavy([-6.4, 10], [-20, 90], 40, 7), [-20, 90], [-90, 90]];
-  const inLake = (x, z) => {
-    let inside = false; const X = x - ox, Z = z - oz;
+  const inPolygon = (X, Z) => {
+    let inside = false;
     for (let i = 0, j = lake.length - 1; i < lake.length; j = i++) { const [xi, zi] = lake[i], [xj, zj] = lake[j]; if ((zi > Z) !== (zj > Z) && X < ((xj - xi) * (Z - zi)) / (zj - zi) + xi) inside = !inside; }
     return inside;
+  };
+  // the outline rasterised once at 0.5 m (terrain and props ask hundreds of thousands of times)
+  const LX0 = Math.min(...lake.map((p) => p[0])) - 1, LX1 = Math.max(...lake.map((p) => p[0])) + 1, LZ0 = Math.min(...lake.map((p) => p[1])) - 1, LZ1 = Math.max(...lake.map((p) => p[1])) + 1, CELL = 0.5;
+  const LW = Math.ceil((LX1 - LX0) / CELL), LH = Math.ceil((LZ1 - LZ0) / CELL), lakeMask = new Uint8Array(LW * LH);
+  for (let j = 0; j < LH; j++) for (let i = 0; i < LW; i++) lakeMask[j * LW + i] = inPolygon(LX0 + (i + 0.5) * CELL, LZ0 + (j + 0.5) * CELL) ? 1 : 0;
+  const inLake = (x, z) => {
+    const i = Math.floor((x - ox - LX0) / CELL), j = Math.floor((z - oz - LZ0) / CELL);
+    return i >= 0 && j >= 0 && i < LW && j < LH && lakeMask[j * LW + i] === 1;
   };
   const nearLake = (x, z, r) => inLake(x + r, z) || inLake(x - r, z) || inLake(x, z + r) || inLake(x, z - r);
   const outside = (x, z) => Math.hypot(Math.max(0, Math.abs(x) - hx), Math.max(0, Math.abs(z) - hz));
@@ -64,11 +72,13 @@ export function fernhaven(world, onChange) {
   let rim = [];
   const rimAt = (x, z) => {
     const px = Math.max(-hx, Math.min(hx, x)), pz = Math.max(-hz, Math.min(hz, z));
+    if ((x - px) ** 2 + (z - pz) ** 2 > 100) return null; // only the first 10 m beyond the rim blend with it
     let best = null, bd = 1e9;
     for (const r of rim) { const d = (r.X - px) ** 2 + (r.Z - pz) ** 2; if (d < bd) { bd = d; best = r; } }
     return best;
   };
   const MEADOW = 0.35;
+  let waterLevel = 0.13; // set from the region's own water below
   const H = (x, z) => {
     const d = outside(x, z);
     const r = rimAt(x, z);
@@ -77,11 +87,18 @@ export function fernhaven(world, onChange) {
       // keep the rim height a little way under the region's edge, so no gap opens between two grid rows
       return Math.max(floorY - 2, (r ? r.Y : MEADOW) - 0.05 - Math.max(0, inside - 0.9) * 2);
     }
-    if (inLake(x, z)) return floorY - smoothstep(0, 6, d) * 0.6;
+    // the lake bed stays just under the surface near the shore and falls away further out
+    if (inLake(x, z)) {
+      // shore distance: how far until a neighbour is dry land
+      let shore = 6; for (const r of [0.8, 1.6, 3, 4.5]) if (!inLake(x + r, z) || !inLake(x - r, z) || !inLake(x, z + r) || !inLake(x, z - r)) { shore = r; break; }
+      return waterLevel - 0.18 - smoothstep(0.8, 6, shore) * 0.7;
+    }
     const roll = noise.fbm2(x * 0.035, z * 0.035, 4) * 0.5 + 0.5, ridge = Math.pow(1 - Math.abs(noise.fbm2(x * 0.012 + 3, z * 0.012, 3)), 2);
     const hills = smoothstep(6, 26, d) * (0.3 + roll * 2.4) + smoothstep(24, 80, d) * (4 + ridge * 16 + roll * 4) + smoothstep(80, 150, d) * 18;
     const base = r ? r.Y + (MEADOW - r.Y) * smoothstep(0, 9, d) : MEADOW;
-    return base + hills * (nearLake(x, z, 2.5) ? 0.55 : 1);
+    // land never dips under the water level, so no lake surface can hang above dry ground
+    const h = base + hills * (nearLake(x, z, 2.5) ? 0.55 : 1);
+    return nearLake(x, z, 3) ? Math.max(h, waterLevel + 0.12) : h;
   };
   // flat-shaded vertex colours like the region itself (no texture), so both read as one landscape
   const terrainMaterial = new T.MeshLambertMaterial({ vertexColors: true }); materials.push(terrainMaterial);
@@ -95,7 +112,8 @@ export function fernhaven(world, onChange) {
       pos.push(x, y, z);
       c.copy(near).lerp(mid, n * 0.5).lerp(forest, smoothstep(25, 60, d) * 0.45).lerp(far, smoothstep(50, 150, d) * 0.75);
       if (r?.c) c.lerp(rc.setRGB(...r.c), 1 - smoothstep(0, 7, d)); // start in the region's own colour
-      if (inLake(x, z)) c.lerp(sand, 0.8); else if (nearLake(x, z, 1.6)) c.lerp(sand, 0.65);
+      // sand only on the low beach right at the water, never up a slope
+      if (inLake(x, z)) c.lerp(sand, 0.8); else if (nearLake(x, z, 1.6)) c.lerp(sand, 0.65 * (1 - smoothstep(waterLevel + 0.2, waterLevel + 0.6, y)));
       col.push(c.r, c.g, c.b);
     }
     for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const a = j * (N + 1) + i, b = a + 1, d = a + N + 1, e = d + 1; idx.push(a, d, b, b, d, e); }
@@ -123,7 +141,7 @@ export function fernhaven(world, onChange) {
       // the lake sits just under the region's own water level
       regionWater.geometry.computeBoundingBox();
       const top = new T.Vector3(0, regionWater.geometry.boundingBox.max.y, 0); regionWater.localToWorld(top);
-      waterY = (top.y - group.position.y) / u - 0.004;
+      waterY = (top.y - group.position.y) / u - 0.004; waterLevel = waterY;
     } else { m = new T.MeshStandardMaterial({ color: 0x3483a3, roughness: 0.55, side: T.DoubleSide }); materials.push(m); }
     const water = new T.Mesh(g, m); water.rotation.x = -Math.PI / 2; water.position.set(ox, waterY, oz); group.add(water);
   }
