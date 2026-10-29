@@ -14,6 +14,25 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Bergschrift";
+  src: url("./assets/bergschrift.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kamikaze";
+  src: url("./assets/kamikaze.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Clash Display";
+  src: url("./assets/clash-display-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
   --ink: #0d0d0e;
   --ink-soft: #1a1a1c;
@@ -735,7 +754,7 @@ html[data-language="de"] p[data-lang-copy="de"] {
 .index-list a {
   position: relative;
   display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr) minmax(0, 1fr) 2rem;
+  grid-template-columns: 4.5rem minmax(0, 1.4fr) minmax(0, 1fr) 2rem;
   align-items: baseline;
   gap: 1rem;
   padding: clamp(1.1rem, 2.4vw, 2.2rem) 0;
@@ -827,11 +846,14 @@ html[data-language="de"] p[data-lang-copy="de"] {
 }
 
 .project-suprabench {
-  --field: #cdee37;
-  --field-2: #e6ff7a;
-  --fg: var(--ink);
-  --fg-muted: rgba(13, 13, 14, 0.74);
-  --line: rgba(13, 13, 14, 0.22);
+  --field: #050505;
+  --field-2: #2b3605;
+  --accent: #e5fe40;
+}
+
+.project-suprabench .project-stage::before {
+  color: var(--accent);
+  opacity: 0.18;
 }
 
 .motion .project-pin {
@@ -1056,6 +1078,131 @@ html[data-language="de"] p[data-lang-copy="de"] {
   transform: scaleX(0);
 }
 
+/* ---------- Wordmarks (each project's own) ---------- */
+
+.wm {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.wm-bergwork {
+  font-family: "Bergschrift", Impact, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #f3f0e6;
+  text-shadow: 0.06em 0.06em 0 #0a0a0a;
+}
+
+.wm-himmelcad {
+  font-family: "Kamikaze", Impact, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #f3f0e6;
+  text-shadow: 0.035em 0.035em 0 #2e86ff;
+}
+
+.wm-suprabench {
+  font-family: "Clash Display", var(--sans);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--bone);
+}
+
+.wm-suprabench span {
+  color: #e5fe40;
+}
+
+.wm-fernwork {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12em;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+}
+
+.wm-fernwork img {
+  width: 0.82em;
+  height: 0.82em;
+}
+
+/* measured widths: berg:work 9.35em, Himmel:CAD 5.92em, SupraBench. 6.45em, Fernwork 5em → ~86cqw */
+.project-title .wm-bergwork {
+  font-size: 9.2cqw;
+}
+
+.project-title .wm-himmelcad {
+  font-size: 14cqw;
+}
+
+.project-title .wm-suprabench {
+  font-size: 13cqw;
+}
+
+/* index rows: logo + wordmark on paper */
+.index-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+}
+
+.index-logo {
+  width: 0.8em;
+  height: 0.8em;
+  object-fit: contain;
+}
+
+.index-wm .wm-fernwork img {
+  display: none;
+}
+
+.index-wm .wm-bergwork,
+.index-wm .wm-himmelcad {
+  color: var(--ink);
+}
+
+.index-wm .wm-bergwork {
+  font-size: 0.55em;
+  text-shadow: 0.05em 0.05em 0 rgba(13, 13, 14, 0.18);
+}
+
+.index-wm .wm-himmelcad {
+  font-size: 0.7em;
+  text-shadow: 0.035em 0.035em 0 #2e86ff;
+}
+
+.index-wm .wm-suprabench {
+  font-size: 0.85em;
+  color: var(--ink);
+}
+
+.index-wm .wm-suprabench span {
+  color: var(--ink);
+  background: #e5fe40;
+  padding: 0 0.04em;
+}
+
+.index-list a:hover .index-wm .wm,
+.index-list a:focus-visible .index-wm .wm {
+  color: var(--bone);
+}
+
+.index-list a:hover .index-wm .wm-suprabench span,
+.index-list a:focus-visible .index-wm .wm-suprabench span {
+  color: var(--ink);
+}
+
+.card-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.card-logo {
+  width: 2.6rem;
+  height: 2.6rem;
+  object-fit: contain;
+}
+
 /* ---------- Project detail ---------- */
 
 .project-detail {
@@ -1075,8 +1222,185 @@ html[data-language="de"] p[data-lang-copy="de"] {
 }
 
 .detail-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   margin: 0;
   color: var(--fg-muted);
+}
+
+.detail-kicker img {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+}
+
+.detail-group + .detail-group {
+  margin-top: clamp(3.5rem, 8vw, 6.5rem);
+}
+
+.group-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1.25rem clamp(1.25rem, 3vw, 2.5rem);
+  align-items: start;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+.group-head:not(:has(.group-logo)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.group-logo {
+  width: clamp(3.5rem, 7vw, 5.5rem);
+  height: clamp(3.5rem, 7vw, 5.5rem);
+  object-fit: contain;
+}
+
+.group-title {
+  margin: 0 0 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.group-claim {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2.2rem, 5.2vw, 4.8rem);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
+.group-intro {
+  max-width: 44rem;
+  margin: 0;
+  font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
+  line-height: 1.45;
+  opacity: 0.9;
+}
+
+.group-public .group-title,
+.group-planned .group-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  color: var(--ink);
+}
+
+.group-public .group-title {
+  background: #8ef0a8;
+}
+
+.group-planned .group-title {
+  background: rgba(239, 237, 232, 0.85);
+}
+
+.detail-group-planned .box {
+  border-style: dashed;
+  background: transparent;
+}
+
+.box-logo {
+  width: 2rem;
+  height: 2rem;
+  margin-right: 0.6rem;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+.detail-group-planned .box-label {
+  display: flex;
+  align-items: center;
+  font-family: var(--sans);
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: var(--fg);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 1rem;
+  padding: 0.28rem 0.65rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badge i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge-public {
+  color: #8ef0a8;
+}
+
+.badge-progress {
+  color: #ffd27a;
+}
+
+.badge-internal {
+  color: #ffb08a;
+}
+
+.badge-planned {
+  color: rgba(239, 237, 232, 0.7);
+}
+
+.badge-planned i {
+  background: transparent;
+  border: 1px solid currentColor;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: clamp(1.5rem, 3vw, 2.5rem) 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.stat {
+  padding: 1.25rem 1.25rem 0 0;
+}
+
+.stat + .stat {
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--line);
+}
+
+.stat dt {
+  font-family: var(--mono);
+  font-size: clamp(2.6rem, 6vw, 5.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  white-space: nowrap;
+}
+
+.stat dd {
+  margin: 0.6rem 0 0;
+  max-width: 18rem;
+  color: var(--fg-muted);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.project-suprabench .stat dt,
+.project-suprabench .group-claim {
+  color: var(--accent);
 }
 
 .facts {
@@ -1283,6 +1607,15 @@ html[data-language="de"] p[data-lang-copy="de"] {
 
 .foot-nav a:hover {
   color: #fff;
+}
+
+.foot-nav img {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.6rem;
+  vertical-align: -0.3rem;
+  object-fit: contain;
 }
 
 .foot-end {
@@ -1510,6 +1843,21 @@ html[data-language="de"] p[data-lang-copy="de"] {
   }
 
   .detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stat,
+  .stat + .stat {
+    padding: 1rem 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .group-head {
     grid-template-columns: minmax(0, 1fr);
   }
 
