@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" data-language="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="referrer" content="no-referrer" />
+  <meta
+    name="description"
+    content="Gehirn — selected software projects by Florian Fischer."
+    data-description-en="Gehirn — selected software projects by Florian Fischer."
+    data-description-de="Gehirn — ausgewählte Softwareprojekte von Florian Fischer."
+  />
+  <meta name="theme-color" content="#0f0f10" />
+  <title>Gehirn — Projects</title>
+  <script>document.documentElement.classList.add("js");</script>
+  <script src="/shared/language.js"></script>
+  <link rel="preload" href="./assets/geist.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="./assets/geist-mono.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="./assets/brain-frames.webp" as="image" fetchpriority="low" />
+  <link rel="stylesheet" href="./style.css?v=1" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+</head>
+<body data-title-en="Gehirn — Projects" data-title-de="Gehirn — Projekte">
+  <a class="skip" href="#index">
+    <span data-lang-copy="en">Skip to projects</span>
+    <span data-lang-copy="de">Zu den Projekten</span>
+  </a>
+
+  <header class="bar" data-bar data-theme="dark">
+    <a class="mark" href="#top" aria-label="Gehirn">
+      <svg class="mark-ring" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" /><circle class="mark-dot" cx="22.5" cy="9.5" r="2.6" /></svg>
+      <span class="mark-word">Gehirn</span>
+    </a>
+
+    <nav class="bar-index" aria-label="Projects">
+      <a href="#fernwork" data-nav="fernwork"><span class="n">01</span>Fernwork</a>
+      <a href="#suprabench" data-nav="suprabench"><span class="n">02</span>SupraBench</a>
+      <a href="#paper2form" data-nav="paper2form"><span class="n">03</span>Paper2Form</a>
+    </nav>
+
+    <div class="bar-tools">
+      <a class="bar-hub" href="https://flofischer.org/">Hub <span aria-hidden="true">↗</span></a>
+      <div class="lang" role="group" aria-label="Language / Sprache">
+        <button type="button" data-language-button="en" aria-pressed="true">EN</button>
+        <button type="button" data-language-button="de" aria-pressed="false">DE</button>
+      </div>
+      <button class="menu-button" type="button" aria-expanded="false" aria-controls="menu" data-menu-button>
+        <span data-lang-copy="en">Index</span>
+        <span data-lang-copy="de">Index</span>
+        <span class="menu-icon" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="menu" id="menu" data-menu hidden>
+    <nav aria-label="Index">
+      <p class="label"><span data-lang-copy="en">Index</span><span data-lang-copy="de">Index</span></p>
+      <a href="#fernwork"><span class="n">01</span>Fernwork</a>
+      <a href="#suprabench"><span class="n">02</span>SupraBench</a>
+      <a href="#paper2form"><span class="n">03</span>Paper2Form</a>
+      <a class="menu-hub" href="https://flofischer.org/"><span class="n">↗</span>Hub</a>
+    </nav>
+    <div class="menu-lang">
+      <span class="label"><span data-lang-copy="en">Language</span><span data-lang-copy="de">Sprache</span></span>
+      <div class="lang" role="group" aria-label="Language / Sprache">
+        <button type="button" data-language-button="en" aria-pressed="true">EN</button>
+        <button type="button" data-language-button="de" aria-pressed="false">DE</button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <section class="hero" id="top" data-theme="dark" data-section="top">
+      <div class="hero-rail" aria-hidden="true"><i>+</i><i>+</i><i>+</i></div>
+      <p class="hero-line reveal">
+        <span data-lang-copy="en">Selected software projects<br />by Florian Fischer.</span>
+        <span data-lang-copy="de">Ausgewählte Softwareprojekte<br />von Florian Fischer.</span>
+        <span class="hero-rule" aria-hidden="true"></span>
+      </p>
+
+      <div class="brain" data-brain>
+        <canvas data-brain-canvas role="img" aria-label="Slowly rotating brain drawn as a dot screen"></canvas>
+      </div>
+
+      <h1 class="wordmark" aria-label="Gehirn">
+        <svg viewBox="0 0 1000 372" aria-hidden="true" focusable="false">
+          <text x="0" y="290" textLength="1000" lengthAdjust="spacing">gehirn</text>
+        </svg>
+      </h1>
+    </section>
+
+    <section class="index" id="index" data-theme="light" data-section="index">
+      <div class="label-row reveal">
+        <span class="tag">00</span>
+        <span class="hatch" aria-hidden="true"></span>
+        <span>Index</span>
+      </div>
+
+      <h2 class="statement reveal">
+        <span data-lang-copy="en">Selected<br />software projects.</span>
+        <span data-lang-copy="de">Ausgewählte<br />Softwareprojekte.</span>
+      </h2>
+
+      <ol class="index-list">
+        <li class="reveal">
+          <a href="#fernwork">
+            <span class="index-n">01</span>
+            <span class="index-name">Fernwork</span>
+            <span class="index-kind">
+              <span data-lang-copy="en">Private browser workspace</span>
+              <span data-lang-copy="de">Privater Browser-Arbeitsplatz</span>
+            </span>
+            <span class="index-arrow" aria-hidden="true">↓</span>
+          </a>
+        </li>
+        <li class="reveal">
+          <a href="#suprabench">
+            <span class="index-n">02</span>
+            <span class="index-name">SupraBench</span>
+            <span class="index-kind">
+              <span data-lang-copy="en">Community-driven AI rankings</span>
+              <span data-lang-copy="de">Community-basierte KI-Rankings</span>
+            </span>
+            <span class="index-arrow" aria-hidden="true">↓</span>
+          </a>
+        </li>
+        <li class="reveal">
+          <a href="#paper2form">
+            <span class="index-n">03</span>
+            <span class="index-name">Paper2Form</span>
+            <span class="index-kind">
+              <span data-lang-copy="en">Document to digital form</span>
+              <span data-lang-copy="de">Dokument zu digitalem Formular</span>
+            </span>
+            <span class="index-arrow" aria-hidden="true">↓</span>
+          </a>
+        </li>
+      </ol>
+    </section>
+
+    <section class="project" id="fernwork" data-theme="light" data-section="fernwork">
+      <div class="label-row reveal">
+        <span class="tag">01</span>
+        <span class="hatch" aria-hidden="true"></span>
+        <span data-lang-copy="en">Private browser workspace</span>
+        <span data-lang-copy="de">Privater Browser-Arbeitsplatz</span>
+        <span class="label-end">fernwork.net</span>
+      </div>
+      <h2 class="project-title reveal">Fernwork</h2>
+      <div class="project-body">
+        <figure class="screen reveal" data-screen>
+          <div class="screen-bar">
+            <span class="screen-dot" aria-hidden="true"></span>
+            <span>fernwork.net</span>
+            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false">
+              <span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span>
+            </button>
+          </div>
+          <video muted loop playsinline preload="none" poster="./assets/poster-fernwork.webp" width="1540" height="962" aria-label="Screen recording of fernwork.net">
+            <source src="/shared/gehirn/previews/fernwork.webm?v=4" type="video/webm" />
+            <source src="/shared/gehirn/previews/fernwork.mp4?v=4" type="video/mp4" />
+          </video>
+        </figure>
+        <div class="project-copy reveal">
+          <p class="lede">
+            <span data-lang-copy="en">A private workspace for PDFs, images, video, office documents, CAD and everyday utilities. Files are processed locally in the browser — without uploads.</span>
+            <span data-lang-copy="de">Ein privater Arbeitsplatz für PDFs, Bilder, Video, Office-Dokumente, CAD und alltägliche Werkzeuge. Dateien werden lokal im Browser verarbeitet — ohne Upload.</span>
+          </p>
+          <a class="pill" href="https://fernwork.net" target="_blank" rel="noopener">
+            <span data-lang-copy="en">Open fernwork.net</span>
+            <span data-lang-copy="de">fernwork.net öffnen</span>
+            <span class="pill-icon" aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="project project-flip project-dark" id="suprabench" data-theme="dark" data-section="suprabench">
+      <div class="label-row reveal">
+        <span class="tag">02</span>
+        <span class="hatch" aria-hidden="true"></span>
+        <span data-lang-copy="en">Community-driven AI rankings</span>
+        <span data-lang-copy="de">Community-basierte KI-Rankings</span>
+        <span class="label-end">suprabench.com</span>
+      </div>
+      <h2 class="project-title reveal">SupraBench</h2>
+      <div class="project-body">
+        <figure class="screen reveal" data-screen>
+          <div class="screen-bar">
+            <span class="screen-dot" aria-hidden="true"></span>
+            <span>suprabench.com</span>
+            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false">
+              <span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span>
+            </button>
+          </div>
+          <video muted loop playsinline preload="none" poster="./assets/poster-suprabench.webp" width="1540" height="962" aria-label="Screen recording of suprabench.com">
+            <source src="/shared/gehirn/previews/suprabench.webm?v=4" type="video/webm" />
+            <source src="/shared/gehirn/previews/suprabench.mp4?v=4" type="video/mp4" />
+          </video>
+        </figure>
+        <div class="project-copy reveal">
+          <p class="lede">
+            <span data-lang-copy="en">AI model rankings that weigh benchmark quality, difficulty, saturation and community trust instead of rewarding bench-maxing.</span>
+            <span data-lang-copy="de">KI-Modellrankings, die Qualität, Schwierigkeit, Sättigung und Vertrauen in Benchmarks gewichten, statt Bench-Maxing zu belohnen.</span>
+          </p>
+          <a class="pill" href="https://suprabench.com" target="_blank" rel="noopener">
+            <span data-lang-copy="en">Open suprabench.com</span>
+            <span data-lang-copy="de">suprabench.com öffnen</span>
+            <span class="pill-icon" aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="project" id="paper2form" data-theme="light" data-section="paper2form">
+      <div class="label-row reveal">
+        <span class="tag">03</span>
+        <span class="hatch" aria-hidden="true"></span>
+        <span data-lang-copy="en">Document to digital form</span>
+        <span data-lang-copy="de">Dokument zu digitalem Formular</span>
+        <span class="label-end">paper2form.com</span>
+      </div>
+      <h2 class="project-title reveal">Paper2Form</h2>
+      <div class="project-body">
+        <figure class="screen reveal" data-screen>
+          <div class="screen-bar">
+            <span class="screen-dot" aria-hidden="true"></span>
+            <span>paper2form.com</span>
+            <button class="screen-toggle" type="button" data-video-toggle aria-pressed="false">
+              <span data-lang-copy="en">Pause</span><span data-lang-copy="de">Pause</span>
+            </button>
+          </div>
+          <video muted loop playsinline preload="none" poster="./assets/poster-paper2form.webp" width="1540" height="962" aria-label="Screen recording of paper2form.com">
+            <source src="/shared/gehirn/previews/paper2form.webm?v=4" type="video/webm" />
+            <source src="/shared/gehirn/previews/paper2form.mp4?v=4" type="video/mp4" />
+          </video>
+        </figure>
+        <div class="project-copy reveal">
+          <p class="lede">
+            <span data-lang-copy="en">Turns scanned paper and handwritten documents into structured data, then transfers detected fields into Google Forms or Microsoft Forms.</span>
+            <span data-lang-copy="de">Verwandelt gescannte und handschriftliche Dokumente in strukturierte Daten und überträgt erkannte Felder in Google Forms oder Microsoft Forms.</span>
+          </p>
+          <a class="pill" href="https://paper2form.com" target="_blank" rel="noopener">
+            <span data-lang-copy="en">Open paper2form.com</span>
+            <span data-lang-copy="de">paper2form.com öffnen</span>
+            <span class="pill-icon" aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot" data-theme="dark" data-section="foot">
+    <div class="foot-grid">
+      <a class="foot-hub" href="https://flofischer.org/">
+        <span class="label">flofischer.org</span>
+        <span class="foot-big">Hub <span aria-hidden="true">↗</span></span>
+      </a>
+      <nav class="foot-nav" aria-label="Projects">
+        <a href="https://fernwork.net" target="_blank" rel="noopener"><span class="n">01</span>fernwork.net ↗</a>
+        <a href="https://suprabench.com" target="_blank" rel="noopener"><span class="n">02</span>suprabench.com ↗</a>
+        <a href="https://paper2form.com" target="_blank" rel="noopener"><span class="n">03</span>paper2form.com ↗</a>
+      </nav>
+      <div class="foot-end">
+        <span class="mark-word">Gehirn</span>
+        <a href="#top">
+          <span data-lang-copy="en">Back to top ↑</span>
+          <span data-lang-copy="de">Nach oben ↑</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./app.js?v=1" defer></script>
+</body>
+</html>
