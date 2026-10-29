@@ -69,12 +69,13 @@ export function fernhaven(world, onChange) {
   const nearLake = (x, z, r) => inLake(x + r, z) || inLake(x - r, z) || inLake(x, z + r) || inLake(x, z - r);
   const outside = (x, z) => Math.hypot(Math.max(0, Math.abs(x) - hx), Math.max(0, Math.abs(z) - hz));
   // the region's rim: the land starts at the rim's height and colour, then eases into the valley
-  let rim = [];
+  let rim = [], rimGap = 0;
   const rimAt = (x, z) => {
     const px = Math.max(-hx, Math.min(hx, x)), pz = Math.max(-hz, Math.min(hz, z));
     if ((x - px) ** 2 + (z - pz) ** 2 > 100) return null; // only the first 10 m beyond the rim blend with it
     let best = null, bd = 1e9;
     for (const r of rim) { const d = (r.X - px) ** 2 + (r.Z - pz) ** 2; if (d < bd) { bd = d; best = r; } }
+    rimGap = bd; // squared distance from the rim point to the nearest dry sample: far means the rim is water there
     return best;
   };
   const MEADOW = 0.35;
@@ -82,6 +83,12 @@ export function fernhaven(world, onChange) {
   const H = (x, z) => {
     const d = outside(x, z);
     const r = rimAt(x, z);
+    // the region's own harbour floor shows under its water: nothing of ours may rise there
+    if (d === 0 && inLake(x, z)) return floorY - 2;
+    // where the region's rim is water (no dry rim sample within 1.2 m), our land must stay under the surface too
+    const mouth = d < 7 && r && rimGap > 1.44;
+    if (mouth && d === 0) return floorY - 2;
+    if (mouth) return waterLevel - 0.22 - smoothstep(0, 4, d) * 0.4 + smoothstep(4.5, 7, d) * 0.5;
     if (d === 0) { // under the region (its own ground covers this): dip away from the rim height at once
       const inside = Math.min(hx - Math.abs(x), hz - Math.abs(z));
       // keep the rim height a little way under the region's edge, so no gap opens between two grid rows
@@ -96,9 +103,8 @@ export function fernhaven(world, onChange) {
     const roll = noise.fbm2(x * 0.035, z * 0.035, 4) * 0.5 + 0.5, ridge = Math.pow(1 - Math.abs(noise.fbm2(x * 0.012 + 3, z * 0.012, 3)), 2);
     const hills = smoothstep(6, 26, d) * (0.3 + roll * 2.4) + smoothstep(24, 80, d) * (4 + ridge * 16 + roll * 4) + smoothstep(80, 150, d) * 18;
     const base = r ? r.Y + (MEADOW - r.Y) * smoothstep(0, 9, d) : MEADOW;
-    // land never dips under the water level, so no lake surface can hang above dry ground
-    const h = base + hills * (nearLake(x, z, 2.5) ? 0.55 : 1);
-    return nearLake(x, z, 3) ? Math.max(h, waterLevel + 0.12) : h;
+    // (the water is one table under the whole lake side: wherever the ground is lower, it is under water)
+    return base + hills * (nearLake(x, z, 2.5) ? 0.55 : 1);
   };
   // flat-shaded vertex colours like the region itself (no texture), so both read as one landscape
   const terrainMaterial = new T.MeshLambertMaterial({ vertexColors: true }); materials.push(terrainMaterial);
@@ -113,7 +119,7 @@ export function fernhaven(world, onChange) {
       c.copy(near).lerp(mid, n * 0.5).lerp(forest, smoothstep(25, 60, d) * 0.45).lerp(far, smoothstep(50, 150, d) * 0.75);
       if (r?.c) c.lerp(rc.setRGB(...r.c), 1 - smoothstep(0, 7, d)); // start in the region's own colour
       // sand only on the low beach right at the water, never up a slope
-      if (inLake(x, z)) c.lerp(sand, 0.8); else if (nearLake(x, z, 1.6)) c.lerp(sand, 0.65 * (1 - smoothstep(waterLevel + 0.2, waterLevel + 0.6, y)));
+      c.lerp(sand, 0.75 * (1 - smoothstep(waterLevel + 0.15, waterLevel + 0.55, y))); // beaches and lake bed: wherever the ground meets the water
       col.push(c.r, c.g, c.b);
     }
     for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const a = j * (N + 1) + i, b = a + 1, d = a + N + 1, e = d + 1; idx.push(a, d, b, b, d, e); }
@@ -124,7 +130,18 @@ export function fernhaven(world, onChange) {
   // the lake: the region's own water material and one flat water colour, so harbour water and lake are one surface
   {
     let regionWater = null; world.root?.traverse((o) => { if (!regionWater && o.isMesh && o.material?.name === 'water') regionWater = o; });
-    const shore = new T.Shape(); lake.forEach(([x, z], i) => shore[i ? 'lineTo' : 'moveTo'](x, -z)); shore.closePath();
+    // one water table over the whole lake side (the land above it hides it, so the shoreline is wherever the ground
+    // meets the water level), with the region cut out so its own water stays the only surface there
+    const W0 = LX0 - 4, W1 = Math.min(LX1 + 6, 60), Z0 = LZ0 - 6, Z1 = LZ1 + 4;
+    const shore = new T.Shape([[W0, -Z0], [W1, -Z0], [W1, -Z1], [W0, -Z1]].map(([a, b]) => new T.Vector2(a, b)));
+    // the region rectangle in shape coordinates, clipped to the water table (holes must lie inside the outline)
+    const ha = Math.max(-hx - ox, W0 + 0.01), hb = Math.min(hx - ox, W1 - 0.01), hz0 = Math.max(-hz - oz, Z0 + 0.01), hz1 = Math.min(hz - oz, Z1 - 0.01);
+    if (hb <= W1 - 0.02) shore.holes.push(new T.Path([[ha, -hz0], [ha, -hz1], [hb, -hz1], [hb, -hz0]].map(([a, b]) => new T.Vector2(a, b))));
+    else { // the region reaches past the table's right edge: cut it as a notch in the outline instead
+      shore.curves.length = 0; shore.currentPoint.set(0, 0);
+      for (const [i, [a, b]] of [[W0, -Z0], [W1, -Z0], [W1, -hz0], [ha, -hz0], [ha, -hz1], [W1, -hz1], [W1, -Z1], [W0, -Z1]].entries()) shore[i ? 'lineTo' : 'moveTo'](a, b);
+      shore.closePath();
+    }
     const g = new T.ShapeGeometry(shore, 4); geometries.push(g);
     let m, waterY = 0.13;
     if (regionWater) {
@@ -138,10 +155,13 @@ export function fernhaven(world, onChange) {
         const cols = new Float32Array(g.attributes.position.count * 3); for (let i = 0; i < cols.length; i += 3) { cols[i] = r; cols[i + 1] = gg; cols[i + 2] = b; }
         g.setAttribute('color', new T.BufferAttribute(cols, 3));
       }
-      // the lake sits just under the region's own water level
-      regionWater.geometry.computeBoundingBox();
-      const top = new T.Vector3(0, regionWater.geometry.boundingBox.max.y, 0); regionWater.localToWorld(top);
-      waterY = (top.y - group.position.y) / u - 0.004; waterLevel = waterY;
+      // the lake continues the harbour basin: the 10th percentile of the region's water heights (its stream runs
+      // down from 1.8, a few waterfall-foot vertices dip to -0.4, the basin itself is flat at 0.14)
+      const pos = regionWater.geometry.attributes.position, v = new T.Vector3(), ys = [];
+      regionWater.updateWorldMatrix(true, false);
+      for (let i = 0; i < pos.count; i++) ys.push(v.fromBufferAttribute(pos, i).applyMatrix4(regionWater.matrixWorld).y);
+      ys.sort((a, b) => a - b);
+      waterY = (ys[Math.floor(ys.length * 0.1)] - group.position.y) / u - 0.004; waterLevel = waterY;
     } else { m = new T.MeshStandardMaterial({ color: 0x3483a3, roughness: 0.55, side: T.DoubleSide }); materials.push(m); }
     const water = new T.Mesh(g, m); water.rotation.x = -Math.PI / 2; water.position.set(ox, waterY, oz); group.add(water);
   }

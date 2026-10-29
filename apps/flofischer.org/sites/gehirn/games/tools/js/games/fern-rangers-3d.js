@@ -217,7 +217,7 @@ export class FernRangers3D {
     this.tile = 10;
     for (const [m, len] of [[this.ground, this.nearLen], [this.groundFar, this.strip]]) {
       m.material.map?.dispose();
-      if (name === 'meadow') { const t = (await meadowGrass()).clone(); t.repeat.set(400 / 5, len / 5); t.needsUpdate = true; m.material.map = t; }
+      if (name === 'meadow') { const t = (await meadowGrass()).clone(); t.repeat.set(400 / this.tile, len / this.tile) /* one tile = this.tile units, as the scroll offset pos / tile assumes */; t.needsUpdate = true; m.material.map = t; }
       else m.material.map=this.groundTexture(name,len);
       m.material.color.set(name === 'meadow' ? 0xc4d8a4 : 0xffffff);
       m.material.needsUpdate = true;
