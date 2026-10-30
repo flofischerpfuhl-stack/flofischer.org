@@ -5,14 +5,11 @@ import { bindLoadingStatus, loadingBarHTML } from './loading-status.js';
 import { WorldLibrary, fitWorldCamera } from '../../games-assets/fernworld/runtime/world-library.js';
 import { ChannelLibrary } from '../../games-assets/fernworld/runtime/channel-library.js';
 import { gradeRegion } from './world/fernhaven-landscape.js';
-import { island } from './world/island-terrain.js';
-import { playset } from './world/playset.js';
 import { paintBackdrop } from './world/backdrops.js';
-import { styleOf } from './world/world-styles.js';
+import { styleOf, layoutOf } from './world/world-styles.js';
 import { createSea } from './world/sea.js';
-import { createHorizon } from './world/horizon.js';
-import { createArchipelago, layoutFromMap } from './world/archipelago.js';
-import { createSkyClouds } from './world/cloud-bank.js';
+import { createArchipelago } from './world/archipelago.js';
+import { perspectiveFit } from './world/perspective-fit.js';
 import { createWayfindingPlan } from './overworld-wayfinding.js';
 import { fitRouteOverview, separateBadgeCenters } from './overworld-overview.js';
 import { prepareOcclusionGeometries } from './overworld-occlusion.js';
@@ -27,11 +24,11 @@ const MAPS = {
   momo: { family: 'momo', hero: 'GLIMMO' },
   tanks: { family: 'bounce', hero: 'TOY_HAZEL' },
 };
-const WORLD_PHI=1,WORLD_THETA=Math.PI/4,SKY_FRACTION=.21;
-/** Island centres, heights and sea bounds for a map laid out for a wide or a tall screen (chosen once, when the map is mounted). */
-function archLayout(style,portrait,wide){
-  const c=layoutFromMap(portrait?style.map.portrait:wide?style.map.wide:style.map.landscape,{tilt:.57,elevations:style.elevations}),centers=c.map(([x,z])=>[x-c[0][0],z-c[0][1]]),xs=centers.map(p=>p[0]),zs=centers.map(p=>p[1]);
-  return{centers,levels:centers.map((_,i)=>style.elevations?.[i]??0),bounds:{x0:Math.min(...xs)-140,x1:Math.max(...xs)+140,z0:Math.min(...zs)-140,z1:Math.max(...zs)+140}};
+const WORLD_THETA=Math.PI/4,FOV=30,TAN=Math.tan(FOV*Math.PI/360),BADGE_SIZE=.85,SKY_FRACTION=.21;
+/** Region centres, heights and sea bounds for a map laid out for a wide or a tall screen (chosen once, when the map is mounted). */
+function archLayout(style,portrait){
+  const l=layoutOf(style,portrait),b=l.bounds;
+  return{...l,slabBounds:b,bounds:{x0:b.x0-90,x1:b.x1+90,z0:b.z0-90,z1:b.z1+90}};
 }
 /** The authored regions of some games are modelled in toy scale (Bounce Brigade: 1:20); the map wants them at the size of the others, so scale the loaded region up in place. */
 function normaliseScale(w){
@@ -116,25 +113,24 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   host.classList.add('gm-ow');host.classList.add('gm-ow--map');
   host.innerHTML = `
     <canvas class="gm-ow__canvas" aria-label="Journey through the 3D world. Arrow keys: next stop. Enter: play. Page up and down: region. Home: overview." tabindex="0"></canvas>
-    <div class="gm-ow__top"><div class="gm-ow__world"><span class="gm-ow__kicker" data-ow="kicker"></span><strong data-ow="world"></strong><span class="gm-ow__levelcompact" data-ow="level-name"></span></div><div class="gm-ow__stars">${icon('star',{size:16})}<span class="fw-num" data-ow="stars"></span></div></div>
+    <div class="gm-ow__top"><div class="gm-ow__world"><span class="gm-ow__kicker" data-ow="kicker"></span><strong data-ow="world"></strong><span class="gm-ow__levelcompact" data-ow="level-name"></span><span class="gm-ow__context" data-ow="context"></span></div><div class="gm-ow__stars">${icon('star',{size:16})}<span class="fw-num" data-ow="stars"></span></div></div>
     <div class="gm-ow__nav gm-ow__sr"><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="prev" aria-label="Previous region">${icon('chevron-left',{size:22})}</button><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="next" aria-label="Next region">${icon('chevron-right',{size:22})}</button></div>
     <nav class="gm-ow__journey gm-ow__sr" data-ow="journey" aria-label="Your journey through Fernworld"></nav>
     <nav class="gm-ow__compass" data-ow="compass" aria-label="Islands" hidden></nav>
-    <div class="gm-ow__tools gm-ow__sr"><button class="fw-btn fw-btn--sm" data-ow="reset">Overview</button><button class="fw-btn fw-btn--sm" data-ow="sound" aria-pressed="true">Sound on</button><button class="fw-btn fw-btn--sm" data-ow="levels" aria-expanded="false">Choose level</button></div><p class="gm-ow__context" data-ow="context"></p>
-    <p class="gm-ow__hint">Tap a stop · start at the glowing gate · drag to look around</p>
+    <div class="gm-ow__tools"><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="sound" aria-pressed="true" aria-label="Sound on" title="Sound">${icon('volume-2',{size:20})}</button><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="reset" aria-label="Overview of this region" title="Overview of this region">${icon('maximize',{size:20})}</button><button type="button" class="gm-ow__sr" data-ow="levels" aria-expanded="false">Choose level</button></div>
+    <p class="gm-ow__hint" data-ow="hint" hidden></p>
     <div class="gm-ow__lock" data-ow="lock" hidden></div>
-    <section class="gm-ow__card gm-ow__sr" data-ow="card" aria-live="polite" hidden></section>
+    <section class="gm-ow__card" data-ow="card" aria-live="polite" hidden></section>
     ${loadingBarHTML()}
     <ol class="gm-ow__list gm-ow__sr" data-ow="list" aria-label="${escapeText(title)} – levels" hidden></ol>`;
   const $ = key => host.querySelector(`[data-ow="${key}"]`), canvas = host.querySelector('canvas');
   const renderer = createRenderer(canvas), scene = new THREE.Scene();
   renderer.shadowMap.autoUpdate = false;
-  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .01, 200);
-  const style = styleOf(config.family), ISLAND_R = style.radius, layout = archLayout(style, innerWidth < innerHeight * .85, innerWidth > innerHeight * 1.9), ARCH_CENTERS = layout.centers, ARCH_LEVELS = layout.levels, ARCH_BOUNDS = layout.bounds;
-  const rugAt = ARCH_CENTERS.reduce((m, c) => [m[0] + c[0] / ARCH_CENTERS.length, m[1] + c[1] / ARCH_CENTERS.length], [0, 0]), rugR = Math.max(...ARCH_CENTERS.map(c => Math.hypot(c[0] - rugAt[0], c[1] - rugAt[1]))) + 70;
-  const sea = createSea({ ...ARCH_BOUNDS, flavour: style.sea.flavour, palette: style.sea.palette, level: style.sea.level, rug: { x: rugAt[0], z: rugAt[1], rx: 1 / rugR, rz: 1 / rugR, a: '#b5504c', b: '#f3dfb0' } });
+  const camera = new THREE.PerspectiveCamera(FOV, 1, .5, 4000), fitCam = new THREE.OrthographicCamera(-1, 1, 1, -1, .01, 200);
+  const style = styleOf(config.family), layout = archLayout(style, innerWidth < innerHeight * .85), ARCH_CENTERS = layout.centers, ARCH_LEVELS = layout.levels, ARCH_BOUNDS = layout.bounds, WORLD_PHI = style.view?.phi ?? 1;
+  const sea = createSea({ ...ARCH_BOUNDS, flavour: style.sea.flavour, palette: style.sea.palette, level: style.sea.level, rug: { x: 0, z: 0, rx: 1e4, rz: 1e4 } });
   scene.add(sea.mesh);
-  let horizon = null, skyClouds = null; // created with the first region, when its spacing is known
+  let mapStarted = false; // the map is built after the first region is on screen
   const env = studioEnvironment(renderer), lights = addLights(scene, { dir: [-12, 24, 15], shadowBox: 18, mapSize: 2048, intensity: 2.4, ambient: 1.1 });
   // shared Wind Waker cel look on every world map (?shade=none turns it off); applyIbl converts through env.userData.shading
   const shading = shadeFromUrl() ? createShading(shadeFromUrl(), { ambient: .7 }) : null; if (shading) env.userData.shading = shading;
@@ -162,13 +158,13 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   let world = 0, sel = 0, active = false, raf = 0, last = 0, hop = null, drag = null;
   let region = null, regionIndex = -1, visuals = null, serial = 0, pendingIndex = -1, pending = null, destroyed = false, versionMismatch=false;
   let initialized=false,lastCurrent=-1,entryAt=0,entryDirection=1,skyTexture=null,regionSpacing=0,travelMs=850,travelDistance=0,departing=null,travelHold=null,horizonTimer=0;const regionCache=new Map(),arrivalFrom=new THREE.Vector3();
-  let arch=null,worldView=false,worldTarget=0,worldK=0,worldH=40,lastH=0,departH=0,autoTour=false,revealing=false,revealed=null,tourTimer=0,departingIndex=-1,pxScale=10,veilAt=0;const lastLook=new THREE.Vector3(),worldLook=new THREE.Vector3();
+  let arch=null,worldView=false,worldTarget=0,worldK=0,worldDist=200,lastH=0,departH=0,autoTour=false,revealing=false,revealed=null,tourTimer=0,departingIndex=-1,pxScale=10,veilAt=0;const lastLook=new THREE.Vector3(),worldLook=new THREE.Vector3();
   let starterPicking=false,starterPickerVersion=0;let travelView=true, wayfindingDirty=true, wayfindingReport=null, wayfindingTask=null, wayfindingGeneration=0;const canceledWayfinding=[];
   let hero = null, companion = null, span = 30, aspect = 1, width = 1, height = 1;
-  const look = new THREE.Vector3(), ahead = new THREE.Vector3(), offset = new THREE.Vector3(), signOffset = new THREE.Vector3(), spherical = new THREE.Spherical();
+  const look = new THREE.Vector3(), ahead = new THREE.Vector3(), offset = new THREE.Vector3(), spherical = new THREE.Spherical();
   const pointers = new Map(), ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
-  const debugView = { renderer, scene, camera, get wayfinding(){return wayfindingReport}, get region() { return region?.definition; },get regionBox(){return region&&{unit:region.unitScale,min:region.bounds.min.toArray(),max:region.bounds.max.toArray(),camera:region.cameraPosition.toArray(),target:region.cameraTarget.toArray()}},get hero(){return loadedHero},get heroPosition(){return hero?.root.position.toArray()},get choosingStarter(){return starterPicking},get starters(){return starterActors.map(a=>({id:a.id,visible:a.root.visible,position:a.root.position.toArray()}))},get targets(){return visuals?{nodes:visuals.nodes.map(n=>({i:n.lv.i,open:state.open(n.lv.i),position:n.label.position.toArray()})),actions:visuals.actions.filter(a=>a.root.visible).map(a=>({action:a.action,position:a.face.getWorldPosition(new THREE.Vector3()).toArray(),size:a.face.getWorldScale(new THREE.Vector3()).toArray()}))}:{}},get selected(){return sel},get world(){return world},get cachedRegions(){return [...regionCache.keys()]},get archipelago(){return arch?.debug()},get worldView(){return worldView},get worldK(){return worldK},enterWorld:()=>enterWorld(),leaveWorld:()=>leaveWorld(),get islands(){return [...regionCache.entries()].map(([i,h])=>({region:i,...(h.visuals.context.state||{})}))} };
+  const debugView = { renderer, scene, camera, get wayfinding(){return wayfindingReport}, get region() { return region?.definition; },get regionBox(){return region&&{unit:region.unitScale,min:region.bounds.min.toArray(),max:region.bounds.max.toArray(),camera:region.cameraPosition.toArray(),target:region.cameraTarget.toArray()}},get hero(){return loadedHero},get heroPosition(){return hero?.root.position.toArray()},get choosingStarter(){return starterPicking},get starters(){return starterActors.map(a=>({id:a.id,visible:a.root.visible,position:a.root.position.toArray()}))},get targets(){return visuals?{nodes:visuals.nodes.map(n=>({i:n.lv.i,open:state.open(n.lv.i),position:n.label.position.toArray()})),actions:visuals.actions.filter(a=>a.root.visible).map(a=>({action:a.action,position:a.face.getWorldPosition(new THREE.Vector3()).toArray(),size:a.face.getWorldScale(new THREE.Vector3()).toArray()}))}:{}},get selected(){return sel},get world(){return world},get cachedRegions(){return [...regionCache.keys()]},get archipelago(){return arch?.debug()},get worldView(){return worldView},get worldK(){return worldK},get distance(){return lastH/TAN},get joins(){return arch?.joinPoints()??[]},get look(){return lastLook.toArray()},get hud(){return{hint:!$('hint').hidden,sign:visuals?.actions.filter(a=>a.root.visible).length??0}},enterWorld:()=>enterWorld(),leaveWorld:()=>leaveWorld(),get islands(){return [...regionCache.entries()].map(([i,h])=>({region:i,...(h.visuals.context.state||{})}))} };
   const themeMedia=matchMedia('(prefers-color-scheme: dark)');
   function background(){
     const dark=document.documentElement.dataset.theme?document.documentElement.dataset.theme==='dark':themeMedia.matches;
@@ -245,16 +241,20 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     if(!anchor||!region)return;
     for(let i=0;i<starterActors.length;i++){
       const a=starterActors[i];a.root.visible=starterPicking&&regionIndex===world;
-      const facing=region.cameraPosition.clone().sub(region.cameraTarget).setY(0).normalize(),right=new THREE.Vector3(facing.z,0,-facing.x),spacing=Math.max(1.8*region.unitScale,90*(camera.top-camera.bottom)/height);a.root.scale.setScalar(region.unitScale);a.root.position.copy(anchor).addScaledVector(facing,2*region.unitScale).addScaledVector(right,(i-1)*spacing);a.root.rotation.y=.45;
+      const facing=region.cameraPosition.clone().sub(region.cameraTarget).setY(0).normalize(),right=new THREE.Vector3(facing.z,0,-facing.x),spacing=Math.max(1.8*region.unitScale,90/ppm(anchor));a.root.scale.setScalar(region.unitScale);a.root.position.copy(anchor).addScaledVector(facing,2*region.unitScale).addScaledVector(right,(i-1)*spacing);a.root.rotation.y=.45;
       const sign=visuals?.actions.find(sign=>sign.action.starter===a.id);
       if(sign){sign.root.visible=a.root.visible;sign.root.position.copy(anchor).addScaledVector(facing,2.9*region.unitScale).addScaledVector(right,(i-1)*spacing).add(new THREE.Vector3(0,-region.unitScale,0));}
     }
   }
 
+  let hintTimer=0;
+  function showHint(text,ms=0){clearTimeout(hintTimer);const el=$('hint');el.textContent=text;el.hidden=!text;if(text&&ms)hintTimer=setTimeout(()=>{el.hidden=true;},ms);}
+  /** The first visit to a game's map gets one short line; it never comes back. */
+  function firstVisitHint(){const key=`fw:games:${gameId}:map-hint`;try{if(localStorage.getItem(key)||JSON.parse(localStorage.getItem('fw:games:help')||'{}').off)return;localStorage.setItem(key,'1');}catch{return;}showHint('Tap a gate to travel there, a signpost or bridge to go to another region.',5200);}
   function pickerVisibility(){
-    for(const a of visuals?.actions??[])a.root.visible=a.action.starter?starterPicking:!starterPicking&&!worldView&&(!a.action.play||state.open(sel));
+    for(const a of visuals?.actions??[])a.root.visible=a.action.starter?starterPicking:false;
     placeHero();placeStarters();
-    host.querySelector('.gm-ow__hint').textContent=starterPicking?'Pick your Fernling right in the scene.':arch?style.hint:starters.length?'Tap a Fernling to choose · tap a stop to travel':'Tap a stop · start at the glowing gate · drag to look around';
+    showHint(starterPicking?'Pick your Fernling right in the scene.':'');
   }
   async function openStarterPicker(){
     if(!starters.length||starterPicking)return;const version=++starterPickerVersion;
@@ -294,14 +294,10 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       dummy.position.copy(p);dummy.position.y+=.75*unit;dummy.rotation.set(0,Math.atan2(w.nodeTangents[k].x,w.nodeTangents[k].z),0);dummy.scale.setScalar(1);dummy.updateMatrix();gates.setMatrixAt(k,dummy.matrix);const yaw=dummy.rotation.y;for(let side=0;side<2;side++){dummy.position.copy(p).add(new THREE.Vector3(Math.cos(yaw)*(side?1:-1)*.8,.375,-Math.sin(yaw)*(side?1:-1)*.8).multiplyScalar(unit));dummy.updateMatrix();posts.setMatrixAt(k*2+side,dummy.matrix);}dummy.rotation.set(0,0,0);
       nodes.push({lv,pos:p,label,maps,index:k,distance:w.nodeDistances[k]});
     });
-    const badgeLinks=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xd9cba0,transparent:true,opacity:.85}));badgeLinks.geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(nodes.length*6),3));badgeLinks.geometry.setDrawRange(0,0);badgeLinks.frustumCulled=false;badgeLinks.userData.owOwned=true;group.add(pads,stars,ring,gates,posts,badgeLinks);scene.add(group);
+    group.add(pads,stars,ring,gates,posts);scene.add(group);
     const rangers=config.family==='rangers';if(rangers&&world===0)gradeRegion(w.root);
-    const lift=ARCH_LEVELS[world]??0,onChange=()=>{shading?.apply(context.group,{outline:false});wayfindingDirty=true;kick();},biome=style.biomes[world];
-    const context=style.ground==='playset'?playset(w,{biome,seed:world+3,sea,onChange}):island(w,
-      style.ground==='terrace'?{biome,lift,beach:false,drop:3,keel:{slope:.6,depth:lift+16,floor:-2.5},seed:world+3,onChange}
-      :style.ground==='floating'?{biome:`sky-${biome}`,beach:false,drop:2.5,keel:{slope:1.2,depth:26,floor:style.sea.level-4},seed:world+3,onChange}
-      :{biome,harbour:!!style.harbour?.[world],sea,dressing:rangers&&world===0?new URL('../../games-assets/fernworld/environments/rangers/viridis.dressing.json',import.meta.url).href:null,seed:world+3,onChange});
-    scene.add(context.group);applyIbl(context.group,env,.55);
+    // the land around the region belongs to the shared map; this stub only keeps the region's per-visit resources in one place
+    const context={group:new THREE.Group(),state:{ready:true},release(){context.group.removeFromParent();}};scene.add(context.group);
     if(rangers&&(world===0||world===4))w.root.traverse(m=>{if(m.isMesh&&m.material?.name==='water'){m.material.dispose();m.material=sea.material();}});
     const actions=[];
     function sign(action,text,pos,color=0x8e6540) {
@@ -311,19 +307,12 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;root.userData.setLabel=value=>{paint(value);texture.needsUpdate=true;};
       const face=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthTest:true}));face.position.y=1.22*unit;face.scale.set(1.9*unit,.64*unit,1);face.userData.owOwned=true;root.add(face);group.add(root);actions.push({action,root,face,pos:face.position.clone().add(pos),routePosition:pos.clone()});return root;
     }
-    const first=nodes[0].pos,last=nodes.at(-1).pos;
-    if(world<worlds.at(-1).index){const trail=new THREE.InstancedMesh(new THREE.BoxGeometry(.48*unit,.05*unit,.65*unit),new THREE.MeshStandardMaterial({color:config.family==='bounce'?0xd3b681:0xa79d7a,roughness:.95}),9);trail.userData.owOwned=true;for(let i=0;i<9;i++){dummy.position.copy(last).add(new THREE.Vector3(1+i*.85,.02,-.5-i*.25).multiplyScalar(unit));dummy.rotation.set(0,.25,0);dummy.scale.setScalar(1);dummy.updateMatrix();trail.setMatrixAt(i,dummy.matrix);}group.add(trail);}
-    const lookout=first.clone().add((config.family==='pip'?new THREE.Vector3(-.9,0,-1.8):new THREE.Vector3(-2.1,0,-1)).multiplyScalar(unit));
-    let back=null;if(world>0){back=sign({region:world-1},'‹ '+NAMES[world-1],lookout.clone());back.children[0].scale.y=2;back.children[0].position.y=1.1*unit;back.children[1].position.y=2.15*unit;}
-    if(world<worlds.at(-1).index)sign({region:world+1},NAMES[world+1]+' ›',last.clone().add(new THREE.Vector3(2.1,0,-.5).multiplyScalar(unit)));
+    const first=nodes[0].pos;
     for(let i=0;i<starters.length;i++){const a=starters[i],facing=w.cameraPosition.clone().sub(w.cameraTarget).setY(0).normalize(),right=new THREE.Vector3(facing.z,0,-facing.x),tag=sign({starter:a.id},a.label,first.clone().addScaledVector(facing,2.9*unit).addScaledVector(right,(i-1)*1.8*unit).add(new THREE.Vector3(0,-unit,0)),0x596d50);tag.children[1].scale.set(1.7*unit,.5*unit,1);tag.children[1].material.depthTest=false;tag.children[1].renderOrder=3;tag.visible=false;}
-    const overview=sign({overview:true},'⌖ Overview',lookout,0x52675d);overview.children[0].visible=world===0;
-    const sound=sign({sound:true},(getSound?.()??true)?'Sound on':'Sound off',lookout.clone(),0x53696a),soundHeight=world>0?3.1:2.2;sound.children[0].scale.y=soundHeight/1.1;sound.children[0].position.y=soundHeight*unit/2;sound.children[1].position.y=(soundHeight-.05)*unit;overview.children[0].visible=false;if(back)back.children[0].visible=false;sound.userData.soundEnabled=getSound?.()??true;
-    const start=sign({play:true},'▶ START',first.clone().add(new THREE.Vector3(1.5,0,.2).multiplyScalar(unit)),0x42755e);start.children[0].scale.y=.4;start.children[0].position.y=.22*unit;start.children[1].position.y=.4*unit;
     const depth=opaqueDepthLayer([w.root,context.group]);
-    return {group,pads,stars,ring,gates,posts,nodes,unit,context,actions,start,overview,sound,depth,badgeLinks};
+    return {group,pads,stars,ring,gates,posts,nodes,unit,context,actions,depth};
   }
-  function syncSound(enabled=getSound?.()??true){const text=enabled?'Sound on':'Sound off';$('sound').textContent=text;$('sound').setAttribute('aria-pressed',String(enabled));for(const held of regionCache.values()){const target=held.visuals.sound;if(target.userData.soundEnabled!==enabled){target.userData.soundEnabled=enabled;target.userData.setLabel(text);}}}
+  function syncSound(enabled=getSound?.()??true){const b=$('sound');b.setAttribute('aria-pressed',String(enabled));b.setAttribute('aria-label',enabled?'Sound on':'Sound off');b.innerHTML=icon(enabled?'volume-2':'volume-x',{size:20});}
   function toggleSound(){const enabled=onSound?.();syncSound(typeof enabled==='boolean'?enabled:(getSound?.()??true));}
   function paintNodes() {
     invalidateWayfinding();
@@ -337,7 +326,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     }
     visuals.posts.instanceColor.needsUpdate=true;visuals.gates.instanceColor.needsUpdate=true;visuals.pads.instanceColor.needsUpdate=true;visuals.stars.count=count;visuals.stars.instanceMatrix.needsUpdate=true;if(visuals.stars.instanceColor)visuals.stars.instanceColor.needsUpdate=true;
     const selected=visuals.nodes.find(n=>n.lv.i===sel);visuals.ring.visible=!!selected;
-    if(selected){visuals.ring.position.copy(selected.pos);visuals.ring.position.y+=.09*visuals.unit;visuals.start.position.copy(selected.pos).add(new THREE.Vector3(1.65,.03,.25).multiplyScalar(visuals.unit));visuals.start.visible=state.open(sel);}
+    if(selected){visuals.ring.position.copy(selected.pos);visuals.ring.position.y+=.09*visuals.unit;}
   }
   function syncDom() {
     const wd=worlds.find(w=>w.index===world);
@@ -350,7 +339,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     $('stars').textContent=`${levels.reduce((n,_,i)=>n+state.stars(i),0)} / ${levels.length*3}`;
     $('prev').disabled=world===worlds[0].index;$('next').disabled=world===worlds.at(-1).index;
     $('lock').hidden=state.worldOpen(world);$('lock').textContent=state.worldOpen(world)?'':state.need(world);
-    const lv=levels[sel],card=$('card');card.hidden=!lv || (lv.world??0)!==world || !state.worldOpen(world);
+    const lv=levels[sel],card=$('card');card.hidden=!lv || (lv.world??0)!==world || !state.worldOpen(world) || worldView;
     if(!card.hidden){const n=wd.levels.findIndex(l=>l.i===sel)+1,st=state.stars(sel),best=state.best(sel),open=state.open(sel);
       card.innerHTML=`<div class="gm-ow__cardhead"><span class="gm-ow__kicker">${lv.boss?'Boss':`Level ${world+1}-${n}`}</span><strong>${escapeText(lv.name)}</strong></div><div class="gm-ow__cardstars" aria-label="${st} of 3 stars">${[0,1,2].map(k=>`<span class="${k<st?'is-on':''}">${icon('star',{size:18})}</span>`).join('')}</div>${best?`<div class="gm-ow__best">Best <span class="fw-num">${best.toLocaleString('en')}</span></div>`:''}<button type="button" class="fw-btn fw-btn--primary gm-ow__play" data-ow="play" ${open?'':'disabled'}>${icon(open?'play':'lock',{size:16})}${open?(st?'Play again':'Play'):'Locked'}</button>`;
     }
@@ -386,19 +375,23 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   }
   function finishVeil(){arch?.unveil(regionIndex,{reduced:motionPreference.matches});}
   function buildMap(){
-    arch=createArchipelago({islands:ARCH_CENTERS.map(([x,z],i)=>({name:NAMES[i],biome:style.biomes[i],x,z,radius:ISLAND_R,level:ARCH_LEVELS[i]})),sea,style,mobile:matchMedia('(max-width:639px)').matches});
-    scene.add(arch.group);shading?.apply(arch.group,{outline:false});
-    horizon=createHorizon({spacing:0,zs:[],centers:ARCH_CENTERS,bounds:ARCH_BOUNDS,kind:style.horizon,level:style.sea.level});scene.add(horizon.group);if(style.skyClouds){skyClouds=createSkyClouds();scene.add(skyClouds.group);}arch.ready.then(()=>{if(destroyed)return;shading?.apply(arch.group,{outline:false});kick();});shading?.apply(horizon.group,{outline:false});horizon.group.userData.onTrees=()=>{shading?.apply(horizon.group,{outline:false});kick();};
+    if(mapStarted||destroyed)return;mapStarted=true;
+    const count=style.biomes.length,keys=Array.from({length:count},(_,i)=>[i===4?'sturmbastion':config.family,REGIONS[i]]);
+    arch=createArchipelago({layout,names:NAMES,keys,sea,style,mobile:matchMedia('(max-width:639px)').matches,prepare:(i,root)=>{
+      if(config.family==='rangers'&&(i===0||i===4))root.traverse(m=>{if(m.isMesh&&m.material?.name==='water'){m.material.dispose();m.material=sea.material();}});
+    }});
+    scene.add(arch.group);
+    arch.ready.then(()=>{if(destroyed)return;applyIbl(arch.group,env,.55);shading?.apply(arch.group,{outline:false});renderer.shadowMap.needsUpdate=true;wayfindingDirty=true;kick();});
     for(const [index,held] of regionCache)arch.setFull(index,index===regionIndex||(!!departing&&held.visuals===departing));
     syncArchipelago();pickerVisibility();syncCompass();worldFit();kick();setTimeout(playReveals,300);
   }
   function worldFit(){
     if(!region||!arch)return;
-    const s=new THREE.Spherical(spherical.radius||60,WORLD_PHI,WORLD_THETA),base=camera.clone(),points=[];
-    base.position.copy(region.cameraTarget).add(new THREE.Vector3().setFromSpherical(s));base.lookAt(region.cameraTarget);base.updateMatrixWorld(true);
-    ARCH_CENTERS.forEach(([x,z],i)=>{const y=ARCH_LEVELS[i];for(const [dx,dz] of [[-1,-1],[1,1],[-1,1],[1,-1]])points.push(new THREE.Vector3(x+dx*ISLAND_R*.9,style.ground==='floating'?y-10:y,z+dz*ISLAND_R*.9));points.push(new THREE.Vector3(x,y+34,z));});
-    const r=fitRouteOverview({camera:base,points,target:region.cameraTarget,width,height,unit:1,span,topInset:Math.max(height<=400?60:96,height*SKY_FRACTION),bottomInset:height<=400?64:width<640?150:122});
-    worldLook.set(region.cameraTarget.x+r.panX,region.cameraTarget.y,region.cameraTarget.z+r.panZ);worldH=r.zoom*span*.5;
+    const points=[];
+    ARCH_CENTERS.forEach(([x,z],i)=>{const y=ARCH_LEVELS[i],[hx,hz]=layout.halves[i],pad=style.fitPad??0,top=style.ground==='mountain'?y+10:y+9;for(const dx of [-1,1])for(const dz of [-1,1]){points.push(new THREE.Vector3(x+dx*(hx+pad),(style.base??y)-1,z+dz*(hz+pad)));points.push(new THREE.Vector3(x+dx*hx,top,z+dz*hz));}});
+    points.push(...arch.fitPoints());
+    const r=perspectiveFit({fov:FOV,aspect,points,phi:WORLD_PHI,theta:WORLD_THETA,width,height,topInset:Math.max(height<=400?60:84,0),bottomInset:height<=400?64:width<640?170:130,side:width<640?10:30});
+    worldLook.copy(r.look);worldDist=r.distance;
   }
   function enterWorld(auto=false){
     if(!arch||!region||worldView||destroyed)return;
@@ -428,7 +421,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   }
   function fit() {
     if(!region)return;
-    span=fitWorldCamera(camera,region,aspect,1.08);if(sea){camera.near=-400;camera.far=900;camera.updateProjectionMatrix();}
+    span=fitWorldCamera(fitCam,region,aspect,1.08);camera.aspect=aspect;camera.updateProjectionMatrix();
     offset.copy(region.cameraPosition).sub(region.cameraTarget);spherical.setFromVector3(offset);
   }
   function placeHero() {
@@ -466,7 +459,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
         if(!cached){
           normaliseScale(region);
           if(!regionSpacing)regionSpacing=Math.max(region.bounds.getSize(new THREE.Vector3()).x,region.bounds.getSize(new THREE.Vector3()).z)*1.13;
-          if(sea&&!horizon&&!horizonTimer)horizonTimer=setTimeout(()=>{horizonTimer=0;if(destroyed||horizon)return;buildMap();},400);
+          if(sea&&!mapStarted&&!horizonTimer)horizonTimer=setTimeout(()=>{horizonTimer=0;if(destroyed||mapStarted)return;buildMap();},400);
           const shift=new THREE.Vector3(ARCH_CENTERS[target][0],ARCH_LEVELS[target],ARCH_CENTERS[target][1]);
           region.root.position.add(shift);region.bounds.translate(shift);region.cameraPosition.add(shift);region.cameraTarget.add(shift);for(const v of [...region.nodePositions,...region.route])v.add(shift);
           scene.add(region.root);visuals=makeNodes(region,wd);
@@ -482,7 +475,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
         lights.light.position.copy(center).add(new THREE.Vector3(-radius*.8,radius*1.5,radius));lights.light.target.position.copy(center);lights.light.target.updateMatrixWorld();
         Object.assign(lights.light.shadow.camera,{left:-radius,right:radius,top:radius,bottom:-radius,near:Math.max(.001,radius*.02),far:radius*6});lights.light.shadow.camera.updateProjectionMatrix();
         applyIbl(region.root,env,.55);if(shading){shading.apply(region.root,{outline:false});shading.apply(visuals.context.group,{outline:false});shading.apply(visuals.group,{outline:false});}fit();worldFit();paintNodes();placeHero();placeStarters();pickerVisibility();const flightFrom=arrivalFrom.clone();focusNode(true);if(travelling)arrivalFrom.copy(flightFrom);syncArchipelago();renderer.shadowMap.needsUpdate=true;
-        host.classList.remove('is-travelling');syncDom();if(state.open(sel))onSelect?.(sel);kick();prefetchNeighbours();if(!travelHold)finishVeil();setTimeout(playReveals,700);
+        host.classList.remove('is-travelling');syncDom();if(!hadRegion)firstVisitHint();if(state.open(sel))onSelect?.(sel);kick();prefetchNeighbours();if(!travelHold)finishVeil();setTimeout(playReveals,700);
       }catch(error){arch?.unveil(target,{reduced:true});if(next&&!reuse&&region!==next)next.release();if(request!==serial||destroyed)return;console.error('[games] map load failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'This region could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}
       finally{if(request===serial){pendingIndex=-1;pending=null;}}
     })();return pending;
@@ -523,9 +516,9 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       if(!task.search){
         const selected=visuals.nodes.find(n=>n.lv.i===sel);if(!selected)return;
         placeStarters();scene.updateMatrixWorld(true);
-        const canvasRect=canvas.getBoundingClientRect(),hudRects=[...host.querySelectorAll('.gm-ow__top,.gm-ow__context')].map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height),bottomRects=[host.querySelector('.gm-ow__hint'),$('compass')].map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height);
+        const canvasRect=canvas.getBoundingClientRect(),hudRects=[...host.querySelectorAll('.gm-ow__top')].map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height),bottomRects=[$('card'),$('compass')].map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height);
         const topInset=Math.max(8,...hudRects.map(r=>r.bottom-canvasRect.top+8)),bottomInset=bottomRects.length?Math.max(8,...bottomRects.map(r=>canvasRect.bottom-r.top+8)):8;
-        task.search=createWayfindingPlan({actions:visuals.actions.filter(a=>a.root.visible),selected:selected.pos,camera:camera.clone(),width,height,unit:region.unitScale,topInset,bottomInset,occluders:[region.root,visuals.context.group],groundOccluders:[region.root],groundFloors:visuals.context.group.children.filter(n=>n.isMesh&&n.visible&&['CircleGeometry','PlaneGeometry'].includes(n.geometry.type)&&!n.material.transparent),groundPath:region.route,fineOccluders:[visuals.gates,visuals.posts],protectedLabels:visuals.nodes.map(n=>n.label),protectedActors:[hero?.root,companion?.root,...starterActors.filter(a=>a.root.visible).map(a=>a.root)].filter(Boolean)});
+        task.search=createWayfindingPlan({actions:visuals.actions.filter(a=>a.root.visible),selected:selected.pos,camera:camera.clone(),width,height,unit:region.unitScale,pixelsPerMetre:ppm(selected.pos),topInset,bottomInset,occluders:[region.root,visuals.context.group],groundOccluders:[region.root],groundFloors:visuals.context.group.children.filter(n=>n.isMesh&&n.visible&&['CircleGeometry','PlaneGeometry'].includes(n.geometry.type)&&!n.material.transparent),groundPath:region.route,fineOccluders:[visuals.gates,visuals.posts],protectedLabels:visuals.nodes.map(n=>n.label),protectedActors:[hero?.root,companion?.root,...starterActors.filter(a=>a.root.visible).map(a=>a.root)].filter(Boolean)});
         wayfindingReport.phase='placement';
       }
       do{const step=task.search.next();if(step.done){result=step.value;break;}}while(performance.now()-sliceStart<5);
@@ -540,26 +533,19 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   function focusNode(immediate=false){$('lock').hidden=true;travelView=true;invalidateWayfinding();const n=visuals?.nodes.find(n=>n.lv.i===sel);if(!n||!region)return;const target=n.pos.clone();if(aspect<.9){const next=visuals.nodes[n.index+1];if(config.family==='pip'&&next)target.lerp(next.pos,.35);}view.tPanX=(target.x-region.cameraTarget.x)/region.unitScale;view.tPanZ=(target.z-region.cameraTarget.z)/region.unitScale;view.tZoom=Math.min(.62,Math.max(5.5,Math.min(aspect<.9?(config.family==='pip'?12:16):11,height/42))*region.unitScale/span);if(immediate){view.panX=view.tPanX;view.panZ=view.tPanZ;view.zoom=view.tZoom;arrivalFrom.copy(n.pos);}}
   function overviewTarget(){
     if(!region||!visuals)return{zoom:1,panX:0,panZ:0};
-    const base=camera.clone(),s=spherical.clone();s.phi=THREE.MathUtils.clamp(s.phi,.22,1.36);base.position.copy(region.cameraTarget).add(new THREE.Vector3().setFromSpherical(s));base.lookAt(region.cameraTarget);base.updateMatrixWorld(true);
+    const base=fitCam.clone(),s=spherical.clone();s.phi=THREE.MathUtils.clamp(s.phi,.22,1.36);base.position.copy(region.cameraTarget).add(new THREE.Vector3().setFromSpherical(s));base.lookAt(region.cameraTarget);base.updateMatrixWorld(true);
     return fitRouteOverview({camera:base,points:visuals.nodes.map(n=>n.pos),target:region.cameraTarget,width,height,unit:region.unitScale,span});
   }
   function resetView(){if(wayfindingTask)invalidateWayfinding();$('lock').hidden=true;if(worldView){worldView=false;worldTarget=0;pickerVisibility();}travelView=false;const target=overviewTarget();Object.assign(view,{tYaw:0,tPitch:0,tZoom:target.zoom,tPanX:target.panX,tPanZ:target.panZ});}
+  /** Pixels per metre at a world point, for the perspective camera. */
+  function ppm(point){return height/(2*TAN*Math.max(.5,camera.position.distanceTo(point)));}
   function resize(){invalidateWayfinding();const r=canvas.getBoundingClientRect();width=Math.max(1,r.width);height=Math.max(1,r.height);aspect=width/height;renderer.setPixelRatio(LOW_GPU?.6:Math.min(1.5,devicePixelRatio||1));renderer.setSize(width,height,false);fit();worldFit();if(worldView){/* the frame follows worldFit */}else if(travelView)focusNode();else if(region){const target=overviewTarget();Object.assign(view,{tZoom:target.zoom,tPanX:target.panX,tPanZ:target.panZ});}kick();}
   function kick(){if(active&&!raf&&!destroyed){last=0;raf=requestAnimationFrame(frame);}}
+  /** Level numbers hang over their gates at a fixed size in the world, so they grow and shrink with the camera like everything else. */
   function placeBadges(){
     if(!visuals)return;
-    const scale=height/(camera.top-camera.bottom),size=Math.max(.55*region.unitScale,24/scale);
+    const size=BADGE_SIZE*region.unitScale;
     for(const n of visuals.nodes){n.label.position.copy(n.pos);n.label.position.y+=1.65*region.unitScale;n.label.scale.setScalar(size);n.label.visible=worldK<.5;}
-    visuals.badgeLinks.visible=false;
-    if(travelView||worldK>.5)return;
-    const projected=visuals.nodes.map(n=>{const p=n.label.position.clone().project(camera);return{x:(p.x*.5+.5)*width,y:(-p.y*.5+.5)*height};}),separated=separateBadgeCenters(projected,size*scale),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),vertices=visuals.badgeLinks.geometry.attributes.position;
-    let count=0;
-    for(let i=0;i<visuals.nodes.length;i++){
-      const lift=(projected[i].y-separated[i].y)/(scale*up.y);if(lift<.001)continue;
-      const n=visuals.nodes[i],start=n.pos.clone();start.y+=1.5*region.unitScale;n.label.position.y+=lift;
-      vertices.setXYZ(count++,start.x,start.y,start.z);vertices.setXYZ(count++,n.label.position.x,n.label.position.y,n.label.position.z);
-    }
-    vertices.needsUpdate=true;visuals.badgeLinks.geometry.setDrawRange(0,count);visuals.badgeLinks.visible=count>0;
   }
   function frame(t){
     raf=0;if(!active||destroyed)return;const dt=Math.min(.05,(t-(last||t))/1000);last=t;const time=t/1000,reduced=motionPreference.matches;
@@ -571,8 +557,11 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       if(hop&&hero){look.x=hero.root.position.x;look.z=hero.root.position.z;}
       const we=ease01(worldK);if(we>0)look.lerp(worldLook,we);
       const phi0=THREE.MathUtils.clamp(spherical.phi-view.pitch,.22,1.36),theta0=spherical.theta+view.yaw,phi=we>0?THREE.MathUtils.lerp(phi0,WORLD_PHI,we):phi0,theta=we>0?theta0+(((WORLD_THETA-theta0+Math.PI*3)%(Math.PI*2))-Math.PI)*we:theta0;
-      offset.setFromSphericalCoords(spherical.radius,phi,theta);camera.position.copy(look).add(offset);camera.lookAt(look);
-      let h=span*.5*view.zoom;if(departH&&progress<1)h=THREE.MathUtils.lerp(departH,h,ease01(progress));if(travelDistance&&progress<1){const peak=Math.max(1,travelDistance*.62/aspect/h);h*=1+(peak-1)*Math.sin(Math.PI*progress);}if(we>0)h=THREE.MathUtils.lerp(h,worldH,we);lastH=h;lastLook.copy(look);camera.left=-h*aspect;camera.right=h*aspect;camera.bottom=-h;camera.top=h;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);placeBadges();pxScale=height/(camera.top-camera.bottom);arch?.update(time,{pxScale,showCurrent:worldK>.25,signWidth:Math.max(66,Math.min(118,height*.13))});if(sea){const horizonY=h*(1-2*SKY_FRACTION);sea.setSky(THREE.MathUtils.lerp(h*2.5,horizonY,we),h-horizonY,Math.min(1,we*3));skyClouds?.place(camera,h,aspect,reduced?0:time,Math.min(1,we*1.5),1-2*SKY_FRACTION);}
+      let h=span*.5*view.zoom;if(departH&&progress<1)h=THREE.MathUtils.lerp(departH,h,ease01(progress));if(travelDistance&&progress<1){const peak=Math.max(1,travelDistance*.62/aspect/h);h*=1+(peak-1)*Math.sin(Math.PI*progress);}
+      let distance=h/TAN;if(we>0)distance=THREE.MathUtils.lerp(distance,worldDist,we);lastH=distance*TAN;lastLook.copy(look);
+      offset.setFromSphericalCoords(distance,phi,theta);camera.position.copy(look).add(offset);camera.lookAt(look);camera.updateMatrixWorld(true);
+      placeBadges();arch?.update(time,{showCurrent:worldK>.25});
+      if(sea)sea.setSky(1e5,1,0);
       if(wayfindingDirty&&!starterPicking&&travelView&&regionIndex===world){
         const settled=!hop&&worldK<.01&&t-entryAt>travelLength&&Math.abs(view.zoom-view.tZoom)<.0002&&Math.abs(view.panX-view.tPanX)+Math.abs(view.panZ-view.tPanZ)<.002&&Math.abs(view.yaw-view.tYaw)+Math.abs(view.pitch-view.tPitch)<.002;
         advanceWayfinding(settled);
@@ -580,12 +569,12 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       if(!travelView&&regionIndex===world&&(wayfindingReport?.phase!=='overview'||wayfindingReport.width!==width||wayfindingReport.height!==height)){
         if(wayfindingTask)invalidateWayfinding();wayfindingDirty=false;wayfindingReport={complete:true,phase:'overview',world,selected:sel,width,height};loadingStatus.finish();
       }
-      for(const held of regionCache.values())held.region.update(time,reduced);if(sea){sea.update(reduced?0:time,look);horizon?.update(reduced?0:time);}
+      for(const held of regionCache.values())held.region.update(time,reduced);if(sea){sea.update(reduced?0:time,look);}
       if(hop&&hero){const k=Math.min(1,(t-hop.start)/hop.duration),e=k*k*(3-2*k),d=THREE.MathUtils.lerp(hop.from,hop.to,e);region.pointAtDistance(d,hero.root.position);hero.root.position.y+=(.07+(reduced?0:Math.abs(Math.sin(k*Math.PI*6))*.06))*region.unitScale;region.pointAtDistance(d+Math.sign(hop.to-hop.from)*.04*region.unitScale,ahead);hero.root.rotation.y=Math.atan2(ahead.x-hero.root.position.x,ahead.z-hero.root.position.z);if(companion){companion.root.position.copy(hero.root.position);companion.root.position.x-=.6*region.unitScale;companion.root.rotation.y=hero.root.rotation.y;}renderer.shadowMap.needsUpdate=true;if(k===1){hop=null;placeHero();}}
-      if(hop&&hero)placeStarters(hero.root.position);else if(starterPicking){placeStarters();const scale=height/(camera.top-camera.bottom);for(const a of visuals.actions.filter(a=>a.action.starter))a.face.scale.set(85/scale,25/scale,1);wayfindingReport={...wayfindingReport,complete:true,phase:'starter-choice',world,selected:sel,width,height};}
+      if(hop&&hero)placeStarters(hero.root.position);else if(starterPicking){placeStarters();for(const a of visuals.actions.filter(a=>a.action.starter)){const scale=ppm(a.root.position);a.face.scale.set(85/scale,25/scale,1);}wayfindingReport={...wayfindingReport,complete:true,phase:'starter-choice',world,selected:sel,width,height};}
       for(const a of starterActors)if(a.root.visible)a.animate(reduced?0:dt,!!hop,time);
       hero?.animate(reduced?0:dt,!!hop,time);companion?.animate(reduced?0:dt,!!hop,time);
-      if(visuals){signOffset.copy(offset).setY(0).normalize().multiplyScalar(.14*region.unitScale);for(const a of visuals.actions){a.face.position.x=signOffset.x;a.face.position.z=signOffset.z;}visuals.ring.material.opacity=reduced?.8:.72+Math.sin(time*3)*.15;}
+      if(visuals){visuals.ring.material.opacity=reduced?.8:.72+Math.sin(time*3)*.15;}
       renderer.render(scene,camera);
     }else renderer.render(scene,camera);
     raf=requestAnimationFrame(frame);
@@ -628,7 +617,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     refresh(){const current=state.current();if(!initialized||current!==lastCurrent){lastCurrent=current;sel=current;setWorld(levels[sel]?.world??0,{keepSel:true});}else{paintNodes();syncDom();placeHero();kick();setTimeout(playReveals,500);}},key,
     async refreshHero(){try{await ensureActors();placeHero();placeStarters();invalidateWayfinding();kick();}catch(error){console.error('[games] companion change failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'Your companion could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}},
     get selected(){return sel;},get world(){return world;},get loaded(){return regionIndex===world&&!pending;},get ready(){return pending??Promise.resolve();},
-    destroy(){clearTimeout(horizonTimer);clearTimeout(tourTimer);cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();shading?.dispose();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();arch?.dispose();sea?.dispose();horizon?.release();skyClouds?.dispose();renderer.dispose();}
+    destroy(){clearTimeout(horizonTimer);clearTimeout(tourTimer);cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();shading?.dispose();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();arch?.dispose();sea?.dispose();renderer.dispose();}
   };
 }
 

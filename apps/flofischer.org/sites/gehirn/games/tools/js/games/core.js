@@ -524,6 +524,7 @@ export function mountGame(root, game) {
       syncHud();
     }
     view.time = t / 1000;
+    view.alpha = animate && session ? acc / STEP : 1;
     draw();
     if (animate) raf = requestAnimationFrame(frame);
   }
@@ -879,7 +880,7 @@ export function mountGame(root, game) {
       const n = Math.round(seconds / STEP);
       for (let i = 0; i < n && screen === 'play'; i++) { session.update(STEP); tipTick(); if (session.result) break; }
       if (session.result) finish(session.result);
-      syncHud(); draw();
+      syncHud(); view.alpha = 1; draw();
       return session.result || null;
     },
     finish: (result) => finish(result),

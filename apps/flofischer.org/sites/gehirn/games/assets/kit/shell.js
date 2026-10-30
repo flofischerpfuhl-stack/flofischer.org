@@ -524,6 +524,14 @@ export function catHref(catOrId) {
   if (c.id !== 'games') return new URL(`tools/${c.page}`, 'https://fernwork.net/').href;
   return new URL(`tools/${c.page}`, ROOT_URL).pathname;
 }
+const CAT_HUB_HASH = { games: '#arcade' };
+/** Hub entry of a category whose landing is a tab of its own page (Games → Arcade); empty for the others. */
+function hubLink(c) {
+  const hash = CAT_HUB_HASH[c.id]; if (!hash) return '';
+  const u = new URL(`tools/${c.page}`, ROOT_URL);
+  const href = pageKey(u.pathname) === pageKey(location.pathname) ? hash : u.pathname + hash;
+  return `<a class="fw-tslist__leaf fw-tslist__hub" href="${esc(href)}" data-hub="${c.id}">${esc(c.label)} hub</a>`;
+}
 /** Where a leaf's working tool lives (SEO landing cards hand files to the real tool). */
 export function toolHrefFor(idOrLeaf) {
   const l = typeof idOrLeaf === 'string' ? getLeaf(idOrLeaf) : idOrLeaf;
@@ -823,7 +831,7 @@ function openSwitcherSheet(trigger) {
         return tools.length === 1
           ? `<a class="fw-tslist__cat" href="${esc(catHref(c))}" data-leaf="${tools[0].id}" ${c.id === curCat ? 'aria-current="page"' : ''}><span class="fw-catalog__icon">${icon(c.icon)}</span>${esc(c.label)}</a>`
           : `<button class="fw-tslist__cat" type="button" aria-expanded="${c.id === curCat}" data-cat="${c.id}"><span class="fw-catalog__icon">${icon(c.icon)}</span>${esc(c.label)}${icon('chevron-right', { className: 'fw-tslist__chev' })}</button>
-        <div class="fw-tslist__leaves">${tools.map((t) => `<a class="fw-tslist__leaf" href="${esc(hrefFor(t))}" data-leaf="${t.id}" ${curTool === t.id ? 'aria-current="page"' : ''}>${esc(t.chip || t.name)}</a>`).join('')}</div>`; }).join('')}</div>
+        <div class="fw-tslist__leaves">${hubLink(c)}${tools.map((t) => `<a class="fw-tslist__leaf" href="${esc(hrefFor(t))}" data-leaf="${t.id}" ${curTool === t.id ? 'aria-current="page"' : ''}>${esc(t.chip || t.name)}</a>`).join('')}</div>`; }).join('')}</div>
     </div>
     <div class="fw-cmd__list fw-ts-results" hidden></div></div>`);
   if (trigger) trigger.setAttribute('aria-expanded', 'true');

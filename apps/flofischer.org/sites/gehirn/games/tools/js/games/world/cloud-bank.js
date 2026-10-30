@@ -34,14 +34,14 @@ export function shadowTex() {
 }
 
 /** radius: island radius in scene metres. The bank covers the island and rises about half a radius above the sea. */
-export function createCloudBank({ radius = 20, seed = 1, puffs = 16, baseY = 0, shadowY = SEA_Y + 0.25, tint = null } = {}) {
+export function createCloudBank({ radius = 20, seed = 1, puffs = 16, baseY = 0, shadowY = SEA_Y + 0.25, tint = null, shadowOn = true } = {}) {
   const rand = rng(seed * 97 + 13), group = new T.Group(); group.name = 'CloudBank';
   const geometry = puffGeometry(seed);
   const material = new T.MeshBasicMaterial({ vertexColors: true, toneMapped: false, fog: false, transparent: true, depthWrite: false });
   if (tint) material.color.set(tint);
   const mesh = new T.InstancedMesh(geometry, material, puffs); mesh.frustumCulled = false; mesh.renderOrder = 3; group.add(mesh);
   const shadowMaterial = new T.MeshBasicMaterial({ map: shadowTex(), transparent: true, depthWrite: false, toneMapped: false, fog: false });
-  const shadow = new T.Mesh(new T.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), shadowMaterial); shadow.position.y = shadowY; shadow.renderOrder = -1; shadow.frustumCulled = false; group.add(shadow);
+  const shadow = new T.Mesh(new T.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), shadowMaterial); shadow.position.y = shadowY; shadow.renderOrder = -1; shadow.frustumCulled = false; shadow.visible = shadowOn; group.add(shadow);
   const items = [];
   for (let i = 0; i < puffs; i++) {
     const ring = i < 3 ? 0.12 : i < 10 ? 0.5 : 0.82, a = (i / puffs) * 6.2832 * 2.3 + rand() * 0.8;
@@ -101,28 +101,5 @@ export function coverController(group, layout) {
       } else if (group.visible && cover > 0) draw(time);
       else if (dirty) draw(time);
     },
-  };
-}
-
-/** Slow ambient clouds in the sky band of the world view. `place` keeps them on screen: (camera, half height, aspect, time, visibility 0..1, lowest sky edge as fraction of half height). */
-export function createSkyClouds({ count = 8, seed = 5 } = {}) {
-  const r = rng(seed), group = new T.Group(); group.name = 'SkyClouds';
-  const geometry = puffGeometry(seed + 2), material = new T.MeshBasicMaterial({ vertexColors: true, toneMapped: false, fog: false, transparent: true, depthTest: false, depthWrite: false });
-  const mesh = new T.InstancedMesh(geometry, material, count); mesh.frustumCulled = false; mesh.renderOrder = -1; group.add(mesh);
-  const items = Array.from({ length: count }, (_, i) => ({ x: (i + r() * 0.8) / count, y: r(), s: 0.045 + r() * 0.05, v: 0.004 + r() * 0.006 }));
-  const dummy = new T.Object3D(), right = new T.Vector3(), up = new T.Vector3(), fwd = new T.Vector3();
-  return {
-    group,
-    place(camera, h, aspect, time, show, low) {
-      group.visible = show > 0.01; if (!group.visible) return;
-      material.opacity = show; camera.matrixWorld.extractBasis(right, up, fwd);
-      for (let i = 0; i < count; i++) {
-        const it = items[i], u = ((it.x + time * it.v) % 1 + 1) % 1, y = low + (1 - low) * (0.12 + 0.8 * it.y);
-        dummy.position.copy(camera.position).addScaledVector(right, (u * 2.5 - 1.25) * h * aspect).addScaledVector(up, y * h).addScaledVector(fwd, -120);
-        dummy.scale.set(it.s * h * 1.7, it.s * h * 0.8, it.s * h * 0.8); dummy.rotation.set(0, 0.4, 0); dummy.updateMatrix(); mesh.setMatrixAt(i, dummy.matrix);
-      }
-      mesh.instanceMatrix.needsUpdate = true;
-    },
-    dispose() { group.removeFromParent(); geometry.dispose(); material.dispose(); mesh.dispose(); },
   };
 }

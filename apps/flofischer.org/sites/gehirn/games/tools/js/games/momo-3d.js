@@ -6,18 +6,17 @@ import { createShading, shadeFromUrl } from './cel-shading.js';
 import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, BlobShadows, LOW_GPU } from './three-kit.js';
 import { buildArena, overlayGround } from './world/arena.js';
 import { paintedGround } from './world/arena-ground.js';
-import { KINDS, WEAPONS } from './momo.js';
+import { KINDS, WEAPONS, MOMO_R } from './momo.js';
 import { STARTERS, ENEMY_MODELS, BOSS_MODELS, moveEffect } from './fernling-canon.js';
 import { ChannelLibrary } from '../../games-assets/fernworld/runtime/channel-library.js';
 import { bakeCrowd, BakedCrowd } from '../../games-assets/fernworld/runtime/baked-crowd.js';
 import { createEffectPool, createEffectInstances } from '../../games-assets/fernworld/effects.js';
+import { PLAYER_SCALE, ENEMY_SCALE, WILD_RATIO } from './momo-scale.js';
 import { followHeading, wrappedAngle, strideTime, releaseTime, castClip, castTrack, FREED_BREAK, FREED_ESCAPE } from './momo-motion.js';
 import { SMAAPass } from '../../vendor/three-0.170.0/postprocessing/SMAAPass.js';
 import { OutputPass } from '../../vendor/three-0.170.0/postprocessing/OutputPass.js';
 const DAWN = new THREE.Color(0xffe2ac), WHITE = new THREE.Color(1,1,1), TAU=Math.PI*2;
-// Explicit gameplay display scales preserve authored origin, anatomy and floor.
-const PLAYER_SCALE={GLIMMO:1.8,COALBEAR:.85,EMBERWARD:.74,MOSSEL:2.65,MOORGRIM:1.02,GROVEPRINCE:.79,PLASHLING:3.6,SPRAYCOUNT:.95,TIDEDUKE:1.0};
-const ENEMY_SCALE={GLIMMO:1.6,COALBEAR:1.1,EMBERWARD:.95,MOSSEL:2.3,MOORGRIM:.95,GROVEPRINCE:.72,PLASHLING:2.8,SPRAYCOUNT:.8,TIDEDUKE:.78,GUSTGLIDER:.58};
+// Display scales (one table, visual only): momo-scale.js.
 
 const THEMES=[
  {ground:'t-grass',tint:0xffffff,fog:0x78899d,sun:0xffe8ba,sky:0xbbd5ed,soil:0x3c5547},
@@ -266,7 +265,7 @@ export class Momo3D {
     this.rim=new THREE.Mesh(new THREE.RingGeometry(.993,1.007,128),new THREE.MeshBasicMaterial({color:0xb8d4bc,transparent:true,opacity:.5,depthWrite:false}));this.rim.rotation.x=-Math.PI/2;this.rim.position.y=.025;root.add(this.rim);
     this.blobs=new BlobShadows(root,355,.3);
     this.gemsM=new Inst(root,facetGem(),new THREE.MeshBasicMaterial({vertexColors:true,toneMapped:false}),340);
-    this.hazDisc=new Decals(root,40,'disc');this.hazLine=new Decals(root,40,'line');this.soft=new Decals(root,16,'soft');
+    this.hazDisc=new Decals(root,40,'disc');this.hazLine=new Decals(root,40,'line');this.soft=new Decals(root,16,'soft');this.aura=new Decals(root,300,'soft');this.reach=new Decals(root,40,'disc');this.aim=new Decals(root,16,'line');
     this.ice=new THREE.InstancedMesh(new THREE.CircleGeometry(1,40).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({color:0x8ccfff,map:iceTexture(),roughness:.05,metalness:.2,transparent:true,opacity:.92,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}),12);this.ice.count=0;this.ice.receiveShadow=true;this.ice.frustumCulled=false;root.add(this.ice);
     this.sparks=new Particles(root,600);this.sparks.mesh.material.userData.cheapIbl=true;
     this.dust=new Particles(root,160,new THREE.IcosahedronGeometry(1,0),new THREE.MeshBasicMaterial({color:0xe4c9a7,transparent:true,opacity:.6,depthWrite:false}));
@@ -368,15 +367,19 @@ export class Momo3D {
   render(s,view){
     if(this.session!==s)return;
     this.renderer.info.reset();
-    const dt=s.choice?0:Math.min(.1,Math.max(0,s.time-this.lastTime));this.lastTime=s.time;
-    const tx=s.x+s.vx*.25,tz=s.y+s.vy*.2-.6;if(!this.camInit){this.camPos.set(tx,0,tz);this.camInit=true;}this.camPos.x+=(tx-this.camPos.x)*.12;this.camPos.z+=(tz-this.camPos.z)*.12;
+    // Simulation runs in fixed steps; the Fernling and the camera are drawn between the last two steps and animated on wall time,
+    // so a frame that happened to hold zero or two steps no longer jerks him against the smoothly following camera.
+    const wall=view?.time>0?Math.min(.1,Math.max(0,view.time-(this.lastWall??view.time))):null;if(view?.time>0)this.lastWall=view.time;
+    const dt=s.choice?0:wall??Math.min(.1,Math.max(0,s.time-this.lastTime));this.lastTime=s.time;
+    const al=Math.min(1,Math.max(0,view?.alpha??1)),px=s.px??s.x,py=s.py??s.y;this.ix=px+(s.x-px)*al;this.iy=py+(s.y-py)*al;this.iwalk=(s.pwalk??s.walk)+(s.walk-(s.pwalk??s.walk))*al;
+    const tx=this.ix+s.vx*.25,tz=this.iy+s.vy*.2-.6,follow=wall==null?.12:1-Math.exp(-wall*7.7);if(!this.camInit){this.camPos.set(tx,0,tz);this.camInit=true;}this.camPos.x+=(tx-this.camPos.x)*follow;this.camPos.z+=(tz-this.camPos.z)*follow;
     // near the rim the camera leans outward and pulls back a little, so the lip, cliff side and islets of the slab frame the field
     const reach=Math.hypot(this.camPos.x,this.camPos.z),lean=Math.min(1,Math.max(0,(reach-(s.R-9))/8));this.lean=(this.lean??0)+(lean-(this.lean??0))*.06;const push=this.lean*this.lean*(3-2*this.lean)*(2.2+1.6*Math.max(0,this.camPos.z)/Math.max(1,reach))/Math.max(1,reach);
     const shake=s.shake>0&&!view.reduced?s.shake*.35:0,sx=(Math.random()-.5)*shake+this.camPos.x*push,sz=(Math.random()-.5)*shake+this.camPos.z*push,d=this.camDist*(1+.16*this.lean);
     this.scene.fog.near=d+4;this.scene.fog.far=d+34;this.camera.position.set(this.camPos.x+sx,Math.sin(this.tilt)*d,this.camPos.z+Math.cos(this.tilt)*d+sz);this.camera.lookAt(this.camPos.x+sx,0,this.camPos.z+sz);this.camera.updateMatrixWorld();
     const light=this.lights.light;light.position.set(this.camPos.x-6,14,this.camPos.z+8);light.target.position.set(this.camPos.x,0,this.camPos.z);
     const dawn=s.result?.won?Math.min(1,(s.time-s.resultAt)/2):0;this.renderer.toneMappingExposure=1+.1*dawn;this.lights.light.color.set(THEMES[s.L.world].sun).lerp(DAWN,dawn*.35);
-    this.motionDt=dt;this.drawPlayer(s);this.drawCrowds(s);this.drawBoss(s);this.drawMoves(s);this.drawGround(s);this.drawFx(s);
+    this.motionDt=dt;this.drawPlayer(s,view);this.drawCrowds(s);this.drawBoss(s);this.drawMoves(s);this.drawGround(s);this.drawFx(s);
     this.sparks.mesh.visible=this.sparks.n>0;this.dust.mesh.visible=this.dust.n>0;
     for(let i=0;i<s.fxEvents.n;i++){const f=s.fxEvents.items[i];if(s.time-f.time>.25)continue;this.P.set(f.x,.08,f.y);this.delta.set(Math.sin(f.direction),0,Math.cos(f.direction));this.effects.emit(f.id,this.P,this.delta,f.scale);}s.fxEvents.n=0;this.effects.update(dt);
     if(this.frame++%2===0)this.renderer.shadowMap.needsUpdate=true;if(this.postAA)this.postAA.render(this.renderer,this.scene,this.camera);else this.renderer.render(this.scene,this.camera);
@@ -390,9 +393,15 @@ export class Momo3D {
     }
     a.mixer.update(0);a.root.updateMatrixWorld(true);
   }
-  drawPlayer(s){
+  flashPlayer(a,k){
+    const list=a.flash??(a.flash=(()=>{const out=[];a.root.traverse(o=>{for(const m of o.material?(Array.isArray(o.material)?o.material:[o.material]):[])if(m.emissive&&!out.some(x=>x.m===m))out.push({m,base:m.emissive.clone(),i:m.emissiveIntensity});});return out;})());
+    for(const f of list){if(k>0.01){f.m.emissive.setRGB(1,.18,.14);f.m.emissiveIntensity=Math.max(f.i,k*1.6);}else{f.m.emissive.copy(f.base);f.m.emissiveIntensity=f.i;}}
+  }
+  drawPlayer(s,view){
     for(const actor of this.players)actor.root.visible=false;
-    const a=this.players[s.stage],dt=this.motionDt;a.root.visible=true;a.root.position.set(s.x,.012,s.y);a.root.scale.setScalar(PLAYER_SCALE[s.model]);
+    const a=this.players[s.stage],dt=this.motionDt;a.root.visible=true;const hit=Math.max(0,s.iframes-.2)/.25,ps=PLAYER_SCALE[s.model],kn=hit*hit*.45;
+    a.root.position.set(this.ix+(s.hurtDx??0)*kn,.012,this.iy+(s.hurtDy??0)*kn);a.root.scale.set(ps*(1+.14*hit),ps*(1-.16*hit),ps*(1+.14*hit));
+    a.root.visible=!(s.iframes>0&&s.iframes<.36&&!view.reduced&&Math.floor(s.time*26)%2);this.flashPlayer(a,hit);
     // Predict only the visual wind-up. The simulation still releases every move
     // at its original cooldown, position and logical aim, including combos.
     const age=s.time-s.castAt;let slot=s.castSlot,clock=releaseTime(s.model,slot)+age,attack=age>=0&&age<.42,predictive=false;
@@ -404,7 +413,7 @@ export class Momo3D {
     const travel=Math.hypot(s.vx,s.vy),heading=travel>.35?Math.atan2(s.vx,s.vy):attack?target:s.face;
     a.visualFace=followHeading(a.visualFace??s.face,heading,dt,travel>.35?9:7);a.root.rotation.y=a.visualFace;
     a.gait=(a.gait??0)+(Math.min(1,s.moving*3)-(a.gait??0))*(1-Math.exp(-dt*16));
-    const walkClip=a.actions.get('Locomotion').getClip(),walk=strideTime(s.model,s.walk,walkClip.duration),gait=a.gait;
+    const walkClip=a.actions.get('Locomotion').getClip(),walk=strideTime(s.model,this.iwalk,walkClip.duration),gait=a.gait;
     if(s.result&&!s.result.won)this.blendPose(a,[['Hit_Recover',Math.min(.62,s.time-s.resultAt),1,false]]);
     else{
       const envelope=attack?Math.min(1,Math.max(0,clock/releaseTime(s.model,slot)),predictive?1:Math.max(0,(.42-age)/.14)):0;
@@ -417,7 +426,7 @@ export class Momo3D {
   }
   drawCrowds(s){
     this.crowdProjection.multiplyMatrices(this.camera.projectionMatrix,this.camera.matrixWorldInverse);this.crowdFrustum.setFromProjectionMatrix(this.crowdProjection);this.crowdCulled=0;
-    for(const tiers of this.crowds.values())for(const t of tiers)t.n=0;this.blobs.begin();this.hex.begin();this.blobs.add(s.x,s.y,.57);this.hex.add(s.x,.025,s.y,.55,1,.55,0,0,0,0xa2e7ca);
+    for(const tiers of this.crowds.values())for(const t of tiers)t.n=0;this.blobs.begin();this.hex.begin();this.blobs.add(this.ix,this.iy,.57);this.playerRing(s);this.aura.begin();this.reach.begin();this.aim.begin();
     const put=(id,x,y,face,scale,clip,time,loop=true,transition=null)=>{const tiers=this.crowds.get(id);if(!tiers)throw Error(`Unprepared regional Fernling ${id}`);const far=(x-s.x)**2+(y-s.y)**2>144,t=tiers[far?1:0];this.M.compose(this.P.set(x,id==='GUSTGLIDER'?.4:.008,y),this.Q.setFromEuler(this.E.set(0,face,0)),this.S.setScalar(scale));const bounds=t.batch.atlas.poseBounds[t.batch.frame(clip,time,loop)];this.crowdSphere.center.copy(bounds.center).applyMatrix4(this.M);this.crowdSphere.radius=bounds.radius*scale;if(transition?.blend>0){const other=t.batch.atlas.poseBounds[t.batch.frame(transition.next,transition.nextTime,false)];this.other.copy(other.center).applyMatrix4(this.M);this.crowdSphere.radius=Math.max(this.crowdSphere.radius,other.radius*scale+this.other.distanceTo(this.crowdSphere.center));}if(!this.crowdFrustum.intersectsSphere(this.crowdSphere)){this.crowdCulled++;return false;}if(t.n>=350)throw Error('Fernling crowd capacity');t.batch.setMatrix(t.n,this.M);t.batch.setPose(t.n,clip,time,{...transition,loop});t.n++;return true;};
     // Instanced opaque draws keep their input order. Draw nearer actors first
     // so overlapping crowd surfaces can fail the GPU's early depth test.
@@ -427,19 +436,19 @@ export class Momo3D {
     for(const i of order){
       const e=s.en.items[i];const id=this.kindModels[e.kind],fly=id==='GUSTGLIDER',scale=ENEMY_SCALE[id]*e.scale;
       const locomotion=fly?'Flap':e.moving>.05?'Locomotion':'Idle',tiers=this.crowds.get(id),duration=tiers[0].batch.clipByName.get(locomotion).duration;
-      const time=fly?s.t:locomotion==='Idle'?s.t:strideTime(id,e.stride,duration,e.scale),hitAge=s.time-e.hitAt,castAge=s.time-e.castAt;
+      const time=fly?s.t:locomotion==='Idle'?s.t:strideTime(id,e.stride,duration,e.scale*WILD_RATIO),hitAge=s.time-e.hitAt,castAge=s.time-e.castAt;
       let transition=null;
       if(hitAge<.38)transition={next:'Hit_Recover',nextTime:hitAge,nextLoop:false,blend:Math.max(0,Math.min(1,hitAge/.06,(.38-hitAge)/.14))};
       else if(e.charge>.05)transition={next:fly?'Dive_Attack':'Attack_Cast',nextTime:e.charge*.475,nextLoop:false,blend:Math.min(1,e.charge*4)*(e.moving>.05?.65:1)};
       else if(castAge<.35)transition={next:fly?'Dive_Attack':'Attack_Cast',nextTime:.475+castAge,nextLoop:false,blend:Math.max(0,(.35-castAge)/.35)*(e.moving>.05?.65:1)};
       const visible=put(id,e.x,e.y,e.face,scale,locomotion,time,true,transition);if(visible)this.blobs.add(e.x,e.y,e.r*1.18);
-      if(visible)this.hex.add(e.x,.25,e.y,e.r*1.12,1,e.r*1.12,0,s.t*.7+e.phase,0,e.elite?0xcdb071:0xa384da);
+      if(visible)this.foeState(s,e);
     }
     for(let i=0;i<s.freed.n;i++){
       const f=s.freed.items[i],id=this.kindModels[f.kind],fly=id==='GUSTGLIDER',escape=f.age>=FREED_ESCAPE,clip=escape?(fly?'Flap':'Locomotion'):'Freed';
       const duration=this.crowds.get(id)[0].batch.clipByName.get(clip).duration;
-      f.visible=put(id,f.x,f.y,f.face,ENEMY_SCALE[id]*f.scale,clip,escape?(fly?f.age:strideTime(id,f.stride,duration,f.scale)):f.age,escape);if(f.visible)this.blobs.add(f.x,f.y,.4*f.scale);
-      if(f.visible&&f.age<FREED_BREAK)this.hex.add(f.x,.25,f.y,.5*f.scale,1,.5*f.scale,0,s.t*.7,0,0xc2a3e8);
+      f.visible=put(id,f.x,f.y,f.face,ENEMY_SCALE[id]*f.scale,clip,escape?(fly?f.age:strideTime(id,f.stride,duration,f.scale*WILD_RATIO)):f.age,escape);if(f.visible)this.blobs.add(f.x,f.y,.4*f.scale);
+      if(f.visible&&f.age<FREED_BREAK){const k=f.age/FREED_BREAK,r=(.5+1.6*k)*f.scale;this.hex.add(f.x,.25,f.y,r,1,r,0,0,0,0xfff3b0);}
     }
     // Victory releases use the existing enemy slots, avoiding both a full
     // secondary crowd allocation and the old 70-creature truncation.
@@ -447,10 +456,25 @@ export class Momo3D {
       const e=s.en.items[i];if(e.freedAt<0||e.boss)continue;
       const id=this.kindModels[e.kind],age=s.time-e.freedAt,travel=Math.max(0,age-FREED_ESCAPE)*4.6,face=Math.atan2(e.x,e.y),x=e.x+Math.sin(face)*travel,y=e.y+Math.cos(face)*travel;
       const clip=age<FREED_ESCAPE?'Freed':id==='GUSTGLIDER'?'Flap':'Locomotion',duration=this.crowds.get(id)[0].batch.clipByName.get(clip).duration;
-      put(id,x,y,followHeading(e.face,face,Math.min(age,1),5),ENEMY_SCALE[id]*e.scale,clip,age<FREED_ESCAPE?age:strideTime(id,travel,duration,e.scale),age>=FREED_ESCAPE);this.blobs.add(x,y,e.r);
-      if(age<FREED_BREAK)this.hex.add(x,.25,y,e.r,1,e.r,0,s.t*.7,0,0xc2a3e8);
+      put(id,x,y,followHeading(e.face,face,Math.min(age,1),5),ENEMY_SCALE[id]*e.scale,clip,age<FREED_ESCAPE?age:strideTime(id,travel,duration,e.scale*WILD_RATIO),age>=FREED_ESCAPE);this.blobs.add(x,y,e.r);
+      if(age<FREED_BREAK){const r=e.r*(1+3*age/FREED_BREAK);this.hex.add(x,.25,y,r,1,r,0,0,0,0xfff3b0);}
     }
-    for(const tiers of this.crowds.values())for(const t of tiers){t.batch.setCount(t.n);t.batch.flush();}this.hex.end();this.blobs.end();
+    for(const tiers of this.crowds.values())for(const t of tiers){t.batch.setCount(t.n);t.batch.flush();}this.hex.end();this.blobs.end();this.aura.end();this.reach.end();this.aim.end();
+  }
+  /** Hostile / recharging / spawning look different at a glance: red aura + a ring at the real touch distance, grey and growing back while the hit is recharging. */
+  foeState(s,e){
+    const touch=e.r+MOMO_R,spawning=e.spawnIn>0,cool=e.atk>0&&!spawning,dx=s.x-e.x,dz=s.y-e.y,d=Math.hypot(dx,dz);
+    if(spawning){this.hex.add(e.x,.25,e.y,touch*.7,1,touch*.7,0,0,0,0x9ca3af);return;}
+    if(cool){const k=Math.min(1,e.atk/.9),r=touch*(1-.5*k);this.hex.add(e.x,.25,e.y,r,1,r,0,s.t*.7+e.phase,0,0x7b8499);return;}
+    const near=d<touch+1.9,pulse=near?1+.07*Math.sin(s.t*14):1,r=touch*pulse;
+    this.aura.add(e.x,e.y,e.r*3.6,e.r*3.6,s.t*.5+e.phase,e.elite?0xff9d2e:0xff2f3a,.62,s.t+e.phase,.02);
+    this.hex.add(e.x,.25,e.y,r,1.5,r,0,s.t*.7+e.phase,0,e.elite?0xffc24a:0xff4747);
+    if(near)this.reach.add(e.x,e.y,touch*2,touch*2,0,0xff2a2a,.6+.3*Math.abs(Math.sin(s.t*12)),Math.min(1,Math.max(0,1-(d-touch)/1.9)),.035);
+    if(e.charge>0){const len=7,a=Math.atan2(dz,dx);this.aim.add(e.x+Math.cos(a)*len/2,e.y+Math.sin(a)*len/2,len,.42,-a,0xff8a30,.5+.4*Math.abs(Math.sin(s.t*16)),e.charge,.04);}
+  }
+  playerRing(s){
+    const inv=s.iframes>0,age=.45-s.iframes,r=inv?.8+.35*Math.min(1,age/.45):MOMO_R;
+    this.hex.add(this.ix,.025,this.iy,r,1,r,0,0,0,inv?(age<.12?0xff4d4d:0x8fe3ff):0xa2e7ca);
   }
   drawBoss(s){
     const b=s.boss,a=this.bossActor;if(!a)return;a.root.visible=!!b;if(this.serpent)this.serpent.root.visible=!!b;if(!b)return;

@@ -21,12 +21,12 @@ function staticOccluders(root,unit){
 /** Place real signposts beside the selected stop. They stay in world space when
  * the player rotates the map; only arrival or a viewport change places them again.
  * Prefer a clear foreground patch instead of drawing signs through scenery. */
-export function* createWayfindingPlan({actions,selected,camera,width,height,unit,occluders,protectedActors=[],protectedLabels=[],protectedMeshes=[],fineOccluders=[],groundOccluders=[],groundFloors=[],groundPath=[],topInset=height<=400?76:110,bottomInset=height>400?48:20}) {
+export function* createWayfindingPlan({actions,selected,camera,width,height,unit,pixelsPerMetre=null,occluders,protectedActors=[],protectedLabels=[],protectedMeshes=[],fineOccluders=[],groundOccluders=[],groundFloors=[],groundPath=[],topInset=height<=400?76:110,bottomInset=height>400?48:20}) {
   const started=performance.now(),occlusion={buildMilliseconds:0,builds:0};
   const cameraRight=new T.Vector3(1,0,0).applyQuaternion(camera.quaternion);
   const cameraUp=new T.Vector3(0,1,0).applyQuaternion(camera.quaternion);
   const faceOffset=new T.Vector3(0,0,1).applyQuaternion(camera.quaternion).setY(0).normalize().multiplyScalar(.14*unit);
-  const ray=new T.Raycaster(),scale=height/(camera.top-camera.bottom),margin=18;
+  const ray=new T.Raycaster(),scale=pixelsPerMetre??height/(camera.top-camera.bottom),margin=18;
   // Keep readable physical boards when the travel camera shows more ground.
   for(const a of actions)a.face.scale.set((a.action.starter?85:95)/scale,(a.action.starter?25:32)/scale,1);
   const project=p=>{const q=p.clone().project(camera);return{x:(q.x*.5+.5)*width,y:(-q.y*.5+.5)*height};};

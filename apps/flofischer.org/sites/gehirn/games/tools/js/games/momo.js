@@ -103,7 +103,7 @@ export class MomoSession {
     this.castAt = -10; this.castSlot = 'blaster'; this.castFace = 0; this.evolvedAt = -10;
     this.fxEvents = new Pool(96, () => ({ id: '', x: 0, y: 0, direction: 0, scale: 1, time: 0 }));
     // Momo
-    this.x = 0; this.y = 2.5; this.vx = 0; this.vy = 0; this.face = 0; this.moving = 0; this.walk = 0;
+    this.x = 0; this.y = 2.5; this.vx = 0; this.vy = 0; this.face = 0; this.moving = 0; this.walk = 0; this.px = 0; this.py = 2.5; this.pwalk = 0; this.hurtDx = 0; this.hurtDy = 0;
     this.hp = MOMO_HP; this.maxHp = MOMO_HP; this.iframes = 0; this.hurtFlash = 0;
     this.level = 1; this.xp = 0; this.need = xpNeed(1); this.pending = 0; this.choice = null; this.kit = 0; this.kitLeft = 0; this.autoPick = false;
     this.weapons = []; this.passives = { boots: 0, magnet: 0, armour: 0, snacks: 0, overclock: 0 };
@@ -368,6 +368,7 @@ export class MomoSession {
     const tvx = this.inX * spd, tvy = this.inY * spd;
     const k = 1 - Math.exp(-dt * (this.onIce ? 2.2 : 18));
     this.vx += (tvx - this.vx) * k; this.vy += (tvy - this.vy) * k;
+    this.px = this.x; this.py = this.y; this.pwalk = this.walk;
     this.x += this.vx * dt; this.y += this.vy * dt;
     const d = Math.hypot(this.x, this.y), lim = this.R - 0.6;
     if (d > lim) {
@@ -1017,10 +1018,12 @@ export class MomoSession {
     const dmg = amount * (1 - 0.08 * this.passives.armour);
     this.hp -= dmg; this.iframes = 0.45; this.hurtFlash = 1;
     this.shake = Math.max(this.shake, 0.35);
-    this.popup(num(dmg), this.x, this.y, 1.9, '#f87171', 0.75);
+    this.popup('-' + num(dmg), this.x, this.y, 2.1, '#ff5d5d', 1.15);
     this.sound.play('hurt', 150);
     const dx = this.x - fx, dy = this.y - fy, d = Math.hypot(dx, dy) || 1;
     this.vx += (dx / d) * 3; this.vy += (dy / d) * 3;
+    this.hurtDx = dx / d; this.hurtDy = dy / d;
+    this.ring(this.x, this.y, 2.6, 0xff4d4d, 0.4);
   }
 
   // ── goal ──
@@ -1231,7 +1234,8 @@ export class MomoSession {
     if (!this.preview) {
       const m = this.proj(this.x, this.y, 1.85);
       const mx = m.x, my = m.y;
-      this.bar(g, mx, my, 46, 6, this.hp / this.maxHp, this.hp / this.maxHp > 0.35 ? '#4ade80' : '#f87171');
+      const hf = this.hurtFlash;
+      this.bar(g, mx, my, 46 + 26 * hf, 6 + 5 * hf, this.hp / this.maxHp, hf > 0.6 ? '#ffffff' : this.hp / this.maxHp > 0.35 ? '#4ade80' : '#f87171');
       if (this.gen) {
         const q = this.proj(this.gen.x, this.gen.y, 2.9);
         this.bar(g, q.x, q.y, 70, 8, this.gen.hp / this.gen.max, '#38bdf8');
@@ -1257,7 +1261,7 @@ export class MomoSession {
     // screen flashes
     if (this.hurtFlash > 0) {
       const v = g.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.max(w, h) * 0.75);
-      v.addColorStop(0, 'rgba(239,68,68,0)'); v.addColorStop(1, `rgba(239,68,68,${0.45 * this.hurtFlash})`);
+      v.addColorStop(0, 'rgba(239,68,68,0)'); v.addColorStop(1, `rgba(239,68,68,${0.6 * this.hurtFlash})`);
       g.fillStyle = v; g.fillRect(0, 0, w, h);
     }
     if (this.inStorm) { g.fillStyle = 'rgba(214,170,110,.18)'; g.fillRect(0, 0, w, h); }

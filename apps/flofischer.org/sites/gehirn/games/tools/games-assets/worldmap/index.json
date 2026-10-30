@@ -1,0 +1,80 @@
+{
+ "pip": {
+  "viridis": {
+   "file": "pip/viridis.far.glb",
+   "bytes": 62396
+  },
+  "sahrun": {
+   "file": "pip/sahrun.far.glb",
+   "bytes": 45868
+  },
+  "hibern": {
+   "file": "pip/hibern.far.glb",
+   "bytes": 38516
+  },
+  "vulkara": {
+   "file": "pip/vulkara.far.glb",
+   "bytes": 40740
+  }
+ },
+ "rangers": {
+  "viridis": {
+   "file": "rangers/viridis.far.glb",
+   "bytes": 57284
+  },
+  "sahrun": {
+   "file": "rangers/sahrun.far.glb",
+   "bytes": 32416
+  },
+  "hibern": {
+   "file": "rangers/hibern.far.glb",
+   "bytes": 30544
+  },
+  "vulkara": {
+   "file": "rangers/vulkara.far.glb",
+   "bytes": 27552
+  }
+ },
+ "momo": {
+  "viridis": {
+   "file": "momo/viridis.far.glb",
+   "bytes": 44120
+  },
+  "sahrun": {
+   "file": "momo/sahrun.far.glb",
+   "bytes": 36652
+  },
+  "hibern": {
+   "file": "momo/hibern.far.glb",
+   "bytes": 35872
+  },
+  "vulkara": {
+   "file": "momo/vulkara.far.glb",
+   "bytes": 40448
+  }
+ },
+ "bounce": {
+  "viridis": {
+   "file": "bounce/viridis.far.glb",
+   "bytes": 49208
+  },
+  "sahrun": {
+   "file": "bounce/sahrun.far.glb",
+   "bytes": 36808
+  },
+  "hibern": {
+   "file": "bounce/hibern.far.glb",
+   "bytes": 33108
+  },
+  "vulkara": {
+   "file": "bounce/vulkara.far.glb",
+   "bytes": 37512
+  }
+ },
+ "sturmbastion": {
+  "sturmbastion": {
+   "file": "sturmbastion/sturmbastion.far.glb",
+   "bytes": 62280
+  }
+ }
+}

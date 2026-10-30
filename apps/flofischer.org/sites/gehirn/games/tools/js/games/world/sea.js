@@ -60,7 +60,7 @@ float seaNoise(vec2 x) { vec2 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0
   vec2 g2 = p.xz * vec2(0.45, 0.8) + vec2(-uTime * 0.03, 5.0), id2 = floor(g2), fr2 = fract(g2) - 0.5;
   float on2 = step(0.9, seaHash(id2 + 1.7)) * (0.5 + 0.5 * sin(uTime * 0.5 + seaHash(id2 + 2.3) * 6.2832));
   float dash2 = (1.0 - smoothstep(0.1, 0.2, length(vec2(fr2.x * 0.42, fr2.y * 1.7)))) * on2;
-  c = mix(c, uFoam, min(1.0, dash + dash2) * 0.38 * (0.45 + 0.55 * smoothstep(0.0, 0.4, t)));
+  c = mix(c, uFoam, min(1.0, dash + dash2) * 0.38 * (0.45 + 0.55 * smoothstep(0.0, 0.4, t)) * (1.0 - smoothstep(35.0, 150.0, length(vSeaPos - cameraPosition))));
   float e = sd + 0.22 * sin(uTime * 1.3 + sd * 3.2 + p.x * 0.17);
   float foam = 1.0 - smoothstep(0.18, 0.5, e);
   float ring = (1.0 - smoothstep(0.05, 0.15, abs(e - 1.55))) * 0.7 * step(0.6, sd) * (1.0 - smoothstep(2.4, 4.0, sd));
