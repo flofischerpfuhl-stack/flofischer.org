@@ -11,6 +11,7 @@ import { createShading, shadeFromUrl } from './cel-shading.js';
 
 import { RangerPanorama } from './fern-rangers-panorama.js';
 import { MeadowScenery, lawnTexture } from './fern-rangers-meadow.js';
+import { paintedGround } from './fern-rangers-worlds.js';
 import { ROAD, WEAPONS, BOSSES, LANES_MAX } from './fern-rangers.js';
 
 const FAR = 92;
@@ -32,7 +33,7 @@ const THEMES = {
   },
   ember: {
     ground: 't-lavarock', sky: { top: 0x2a1b40, horizon: 0xe0704a }, fog: 0x6a3446,
-    light: { sun: 0xffb27a, sky: 0xff9a6a, ground: 0x3a1408, intensity: 2.2, ambient: 1.0 }, exposure: 1.05,
+    light: { sun: 0xffc08a, sky: 0xffa882, ground: 0x6a2a18, intensity: 2.6, ambient: 1.5 }, exposure: 1.2,
     near: ['fw_basalt_columns','fw_petra_raw_fossil','fw_lava_fissure'], far: ['fw_cliff_corner','fw_basalt_columns'], grass: { colour: [0.06, 0.35, 0.22], height: 0.15 }, ufo: true,
   },
 };
@@ -137,10 +138,14 @@ export class FernRangers3D {
     this.roadFar.material.alphaMap = fade;
     this.nearLen = NEAR_LEN; this.strip = STRIP;
     this.emberBanks=[-1,1].map(side=>{const bank=new THREE.Mesh(new THREE.BoxGeometry(17,.24,NEAR_LEN+STRIP),cheap(mat(0x343942,{map:texture('t-lavarock',{repeat:[1.7,(NEAR_LEN+STRIP)/10]}),roughness:.95})));bank.position.set(side*(ROAD+8.5),-.13,20-(NEAR_LEN+STRIP)/2);bank.visible=false;s.add(bank);return bank;});
-    const curbTex = canvasTex(64,64,(g,w,h)=>{g.fillStyle='#8f8e7c';g.fillRect(0,0,w,h);g.fillStyle='#6c6b5f';g.fillRect(0,0,w,3);g.fillStyle='#aba997';g.fillRect(0,4,w,3);},[1,(FAR+40)/1.3]);
+    // the road is a slab: a raised verge lip (grass, sand, snow or rock on top, earth or stone on its side) runs along both edges
+    const curbTex = canvasTex(4, 4, () => {}, [1, 1]);
     this.curbs = [-1, 1].map((side) => {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, FAR + 40), cheap(mat(0xffffff, { map: curbTex, roughness: 0.6 })));
-      m.position.set(side * (ROAD + 0.12), 0.07, -(FAR + 40) / 2 + 20); m.receiveShadow = true; m.castShadow = true;
+      const geo = new THREE.BoxGeometry(0.62, 0.24, FAR + 40);
+      geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(geo.attributes.position.count * 3).fill(1), 3));
+      const lipMat = cheap(mat(0xffffff, { roughness: 0.8 })); lipMat.vertexColors = true;
+      const m = new THREE.Mesh(geo, lipMat);
+      m.position.set(side * (ROAD + 0.28), 0.12, -(FAR + 40) / 2 + 20); m.receiveShadow = true; m.castShadow = true;
       s.add(m); return m;
     });
     this.curbTex = curbTex;
@@ -211,12 +216,18 @@ export class FernRangers3D {
     this.themeName = key; this.renderDark = dark; this.shading?.setDark(!!dark);
     const th = THEMES[name] || THEMES.meadow;
     this.th = th;
-    for(const bank of this.emberBanks)bank.visible=name==='ember';
+    for(const bank of this.emberBanks)bank.visible=false;
     this.tile = 10;
+    const lip = { meadow: [0x7ed03a, 0x7a5230], dunes: [0xf0cf8c, 0xb8743c], frost: [0xffffff, 0x7096c4], ember: [0x8a5a52, 0x2e2028] }[name] || [0x7ed03a, 0x7a5230];
+    for (const curb of this.curbs) {
+      const col = curb.geometry.attributes.color, top = new THREE.Color(lip[0]), side = new THREE.Color(lip[1]);
+      for (let i = 0; i < col.count; i++) { const c = Math.floor(i / 4) === 2 ? top : side; col.setXYZ(i, c.r, c.g, c.b); }
+      col.needsUpdate = true;
+    }
     for (const [m, len] of [[this.ground, this.nearLen], [this.groundFar, this.strip]]) {
       m.material.map?.dispose();
       if (name === 'meadow') { const t = lawnTexture().clone(); t.repeat.set(400 / this.tile, len / this.tile) /* one tile = this.tile units, as the scroll offset pos / tile assumes */; t.needsUpdate = true; m.material.map = t; }
-      else m.material.map=this.groundTexture(name,len);
+      else { const t = paintedGround(name).clone(); t.repeat.set(400 / this.tile, len / this.tile); t.needsUpdate = true; m.material.map = t; }
       m.material.color.set(0xffffff);
       m.material.needsUpdate = true;
     }
@@ -239,20 +250,10 @@ export class FernRangers3D {
     if (this.pano.scene) this.shading?.apply(this.pano.scene, { outline: false });
     if (this.loop) { this.scene.remove(this.loop.group, this.loop.static); this.loop.dispose(); }
     this.settlements?.dispose();this.settlements=null;this.meadow?.dispose();this.meadow=null;this.loop=null;
-    if (name === 'meadow') {
-      // Fernhaven: one composed route (hedges, groves, landmarks on side slopes) replaces the loose roadside props.
-      const meadow = await MeadowScenery.create({ library: this.art.library, road: ROAD, low: LOW_GPU });
-      if (this.themeName !== key) { meadow.dispose(); return; }
-      this.meadow = meadow; this.scene.add(meadow.group);
-    } else {
-      this.settlements=await RangerSettlements.create(this.art.library,this.scene,Math.max(0,world),this.env);
-      this.loop = new RangerRoute({ world: Math.max(0, world), road: ROAD, P: 128, low: LOW_GPU, dark });
-      this.scene.add(this.loop.group, this.loop.static);
-      this.roadside = new Roadside(this.scene, near, 40);
-      this.farProps = new Roadside(this.scene, far, 12);
-      // far props stand outside the shadow box: no shadow pass for them
-      for (const k of this.farProps.kinds) for (const { mesh } of k.meshes) mesh.castShadow = false;
-    }
+    // one composed route per world (terraced slopes, framing, groups, landmarks) replaces the loose roadside props
+    const scenery = await MeadowScenery.create({ library: this.art.library, road: ROAD, low: LOW_GPU, world: name });
+    if (this.themeName !== key) { scenery.dispose(); return; }
+    this.meadow = scenery; this.scene.add(scenery.group);
     if (this.grass) { this.scene.remove(this.grass);this.grass.geometry.dispose();this.grass.material.dispose();this.grass.dispose(); this.grass = null;this.grassMats=false; }
     if (th.grass && !LOW_GPU) this.grass = this.makeGrass(th.grass);
     applyIbl(this.scene, this.env, 0.55);
@@ -383,7 +384,6 @@ export class FernRangers3D {
     const gOff = (pos / this.tile) % 1, rOff = (pos / 8) % 1;
     if (this.ground.material.map) { this.ground.material.map.offset.y = gOff; this.groundFar.material.map.offset.y = (gOff + this.nearLen / this.tile) % 1; }
     this.road.material.map.offset.y = rOff; this.roadFar.material.map.offset.y = (rOff + this.nearLen / 8) % 1;
-    this.curbTex.offset.y = (pos / 2) % 1;
     const m = this._dash || (this._dash = new THREE.Matrix4());
     let n = 0;
     for (let i = 0; i < 40; i++) {

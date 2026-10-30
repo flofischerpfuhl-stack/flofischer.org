@@ -5,7 +5,10 @@ import { bindLoadingStatus, loadingBarHTML } from './loading-status.js';
 import { WorldLibrary, fitWorldCamera } from '../../games-assets/fernworld/runtime/world-library.js';
 import { ChannelLibrary } from '../../games-assets/fernworld/runtime/channel-library.js';
 import { landscape } from './world/overworld-landscape.js';
-import { fernhaven, gradeRegion } from './world/fernhaven-landscape.js';
+import { gradeRegion } from './world/fernhaven-landscape.js';
+import { island, BIOME_OF } from './world/island-terrain.js';
+import { createSea } from './world/sea.js';
+import { createHorizon } from './world/horizon.js';
 import { createWayfindingPlan } from './overworld-wayfinding.js';
 import { fitRouteOverview, separateBadgeCenters } from './overworld-overview.js';
 import { prepareOcclusionGeometries } from './overworld-occlusion.js';
@@ -20,8 +23,9 @@ const MAPS = {
   momo: { family: 'momo', hero: 'GLIMMO' },
   tanks: { family: 'bounce', hero: 'TOY_HAZEL' },
 };
+const ARCHIPELAGO_Z=[0,.14,-.12,.16,-.08];
 const SKY = ['#78b4ea','#e3c393','#c5dce9','#b698ab','#a8b2c4'];
-const JOURNEYS={rangers:['Waldpfade & Außenposten','Dünen & Karawanen','Schneepässe & Festungen','Basaltpfade & Maschinen'],pip:['Das grüne Fossilgewölbe','Das versunkene Archiv','Die Reifgalerie','Die Basaltkrone'],momo:['Lichtungen & Fernlinge','Oasen & Fernlinge','Schneefelder & Fernlinge','Glutlicht & Fernlinge'],bounce:['Der Waldpokal','Das Dünenturnier','Der Winterpokal','Das Kraterfinale']};
+const JOURNEYS={rangers:['Forest trails & outposts','Dunes & caravans','Snow passes & fortresses','Basalt paths & machines'],pip:['The green fossil vault','The sunken archive','The frost gallery','The basalt crown'],momo:['Clearings & Fernlings','Oases & Fernlings','Snowfields & Fernlings','Glowlight & Fernlings'],bounce:['The forest cup','The dune tournament','The winter cup','The crater final']};
 const escapeText = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function badge(text, { bg, fg }) {
@@ -94,20 +98,23 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   if (!config) throw new Error(`No authored world family for ${gameId}`);
   host.classList.add('gm-ow');
   host.innerHTML = `
-    <canvas class="gm-ow__canvas" aria-label="Reise durch die 3D-Welt. Pfeiltasten: nächstes Ziel. Enter: spielen. Bild auf und ab: Region. Home: Übersicht." tabindex="0"></canvas>
+    <canvas class="gm-ow__canvas" aria-label="Journey through the 3D world. Arrow keys: next stop. Enter: play. Page up and down: region. Home: overview." tabindex="0"></canvas>
     <div class="gm-ow__top"><div class="gm-ow__world"><span class="gm-ow__kicker" data-ow="kicker"></span><strong data-ow="world"></strong><span class="gm-ow__levelcompact" data-ow="level-name"></span></div><div class="gm-ow__stars">${icon('star',{size:16})}<span class="fw-num" data-ow="stars"></span></div></div>
-    <div class="gm-ow__nav gm-ow__sr"><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="prev" aria-label="Vorherige Region">${icon('chevron-left',{size:22})}</button><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="next" aria-label="Nächste Region">${icon('chevron-right',{size:22})}</button></div>
-    <nav class="gm-ow__journey" data-ow="journey" aria-label="Deine Reise durch Fernworld"></nav>
-    <div class="gm-ow__tools gm-ow__sr"><button class="fw-btn fw-btn--sm" data-ow="reset">Übersicht</button><button class="fw-btn fw-btn--sm" data-ow="sound" aria-pressed="true">Ton an</button><button class="fw-btn fw-btn--sm" data-ow="levels" aria-expanded="false">Level wählen</button></div><p class="gm-ow__context" data-ow="context"></p>
-    <p class="gm-ow__hint">Ziel antippen · am leuchtenden Tor starten · ziehen: umsehen</p>
+    <div class="gm-ow__nav gm-ow__sr"><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="prev" aria-label="Previous region">${icon('chevron-left',{size:22})}</button><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="next" aria-label="Next region">${icon('chevron-right',{size:22})}</button></div>
+    <nav class="gm-ow__journey" data-ow="journey" aria-label="Your journey through Fernworld"></nav>
+    <div class="gm-ow__tools gm-ow__sr"><button class="fw-btn fw-btn--sm" data-ow="reset">Overview</button><button class="fw-btn fw-btn--sm" data-ow="sound" aria-pressed="true">Sound on</button><button class="fw-btn fw-btn--sm" data-ow="levels" aria-expanded="false">Choose level</button></div><p class="gm-ow__context" data-ow="context"></p>
+    <p class="gm-ow__hint">Tap a stop · start at the glowing gate · drag to look around</p>
     <div class="gm-ow__lock" data-ow="lock" hidden></div>
     <section class="gm-ow__card gm-ow__sr" data-ow="card" aria-live="polite" hidden></section>
     ${loadingBarHTML()}
-    <ol class="gm-ow__list gm-ow__sr" data-ow="list" aria-label="${escapeText(title)} – Level" hidden></ol>`;
+    <ol class="gm-ow__list gm-ow__sr" data-ow="list" aria-label="${escapeText(title)} – levels" hidden></ol>`;
   const $ = key => host.querySelector(`[data-ow="${key}"]`), canvas = host.querySelector('canvas');
   const renderer = createRenderer(canvas), scene = new THREE.Scene();
   renderer.shadowMap.autoUpdate = false;
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .01, 200);
+  const sea = config.family === 'rangers' ? createSea() : null;
+  if (sea) scene.add(sea.mesh);
+  let horizon = null; // created with the first region, when its spacing is known
   const env = studioEnvironment(renderer), lights = addLights(scene, { dir: [-12, 24, 15], shadowBox: 18, mapSize: 2048, intensity: 2.4, ambient: 1.1 });
   // shared Wind Waker cel look, Fern Rangers map only for now (?shade=none turns it off); applyIbl converts through env.userData.shading
   const shading = config.family === 'rangers' && shadeFromUrl() ? createShading(shadeFromUrl(), { ambient: .7 }) : null; if (shading) env.userData.shading = shading;
@@ -134,18 +141,18 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   const view = { yaw: 0, pitch: 0, zoom: 1, panX: 0, panZ: 0, tYaw: 0, tPitch: 0, tZoom: 1, tPanX: 0, tPanZ: 0 };
   let world = 0, sel = 0, active = false, raf = 0, last = 0, hop = null, drag = null;
   let region = null, regionIndex = -1, visuals = null, serial = 0, pendingIndex = -1, pending = null, destroyed = false, versionMismatch=false;
-  let initialized=false,lastCurrent=-1,entryAt=0,entryDirection=1,skyTexture=null,regionSpacing=0;const regionCache=new Map(),arrivalFrom=new THREE.Vector3();
+  let initialized=false,lastCurrent=-1,entryAt=0,entryDirection=1,skyTexture=null,regionSpacing=0,travelMs=850,travelDistance=0,departing=null,travelHold=null,horizonTimer=0;const regionCache=new Map(),arrivalFrom=new THREE.Vector3();
   let starterPicking=false,starterPickerVersion=0;let travelView=true, wayfindingDirty=true, wayfindingReport=null, wayfindingTask=null, wayfindingGeneration=0;const canceledWayfinding=[];
   let hero = null, companion = null, span = 30, aspect = 1, width = 1, height = 1;
   const look = new THREE.Vector3(), ahead = new THREE.Vector3(), offset = new THREE.Vector3(), signOffset = new THREE.Vector3(), spherical = new THREE.Spherical();
   const pointers = new Map(), ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
-  const debugView = { renderer, scene, camera, get wayfinding(){return wayfindingReport}, get region() { return region?.definition; },get hero(){return loadedHero},get heroPosition(){return hero?.root.position.toArray()},get choosingStarter(){return starterPicking},get starters(){return starterActors.map(a=>({id:a.id,visible:a.root.visible,position:a.root.position.toArray()}))},get targets(){return visuals?{nodes:visuals.nodes.map(n=>({i:n.lv.i,open:state.open(n.lv.i),position:n.label.position.toArray()})),actions:visuals.actions.filter(a=>a.root.visible).map(a=>({action:a.action,position:a.face.getWorldPosition(new THREE.Vector3()).toArray(),size:a.face.getWorldScale(new THREE.Vector3()).toArray()}))}:{}},get selected(){return sel},get world(){return world},get cachedRegions(){return [...regionCache.keys()]} };
+  const debugView = { renderer, scene, camera, get wayfinding(){return wayfindingReport}, get region() { return region?.definition; },get hero(){return loadedHero},get heroPosition(){return hero?.root.position.toArray()},get choosingStarter(){return starterPicking},get starters(){return starterActors.map(a=>({id:a.id,visible:a.root.visible,position:a.root.position.toArray()}))},get targets(){return visuals?{nodes:visuals.nodes.map(n=>({i:n.lv.i,open:state.open(n.lv.i),position:n.label.position.toArray()})),actions:visuals.actions.filter(a=>a.root.visible).map(a=>({action:a.action,position:a.face.getWorldPosition(new THREE.Vector3()).toArray(),size:a.face.getWorldScale(new THREE.Vector3()).toArray()}))}:{}},get selected(){return sel},get world(){return world},get cachedRegions(){return [...regionCache.keys()]},get islands(){return [...regionCache.entries()].map(([i,h])=>({region:i,...(h.visuals.context.state||{})}))} };
   const themeMedia=matchMedia('(prefers-color-scheme: dark)');
   function background(){
     const dark=document.documentElement.dataset.theme?document.documentElement.dataset.theme==='dark':themeMedia.matches;
     const c=document.createElement('canvas');c.width=768;c.height=512;const g=c.getContext('2d'),base=new THREE.Color(SKY[world]);
-    shading?.setDark(dark);if(dark)base.multiplyScalar(.35);const sky=`#${base.getHexString()}`,gradient=g.createLinearGradient(0,0,0,512);gradient.addColorStop(0,dark?'#101b2a':sky);gradient.addColorStop(.6,dark?sky:'#f5efe0');gradient.addColorStop(1,dark?'#19232d':sky);g.fillStyle=gradient;g.fillRect(0,0,768,512);
+    shading?.setDark(dark);sea?.setDark(dark);if(dark)base.multiplyScalar(.35);const sky=`#${base.getHexString()}`,gradient=g.createLinearGradient(0,0,0,512);gradient.addColorStop(0,dark?'#101b2a':sky);gradient.addColorStop(.6,dark?sky:'#f5efe0');gradient.addColorStop(1,dark?'#19232d':sky);g.fillStyle=gradient;g.fillRect(0,0,768,512);
     const sun=g.createRadialGradient(140,95,5,140,95,150);sun.addColorStop(0,dark?'#d4e7f455':'#fff6ccaa');sun.addColorStop(1,'#ffffff00');g.fillStyle=sun;g.fillRect(0,0,350,280);
     for(let layer=0;layer<3;layer++){g.beginPath();g.moveTo(0,512);for(let x=0;x<=768;x+=24){const wave=Math.sin(x*.009+world*1.9+layer)*26+Math.sin(x*.023+layer*3.1)*11;g.lineTo(x,310+layer*55+wave*(world===2?1.7:1));}g.lineTo(768,512);g.closePath();const ridge=new THREE.Color(['#658d76','#b28754','#8da7c6','#8d6777','#6a7e92'][world]);if(dark)ridge.multiplyScalar(.65);g.fillStyle=`#${ridge.getHexString()}${['26','38','49'][layer]}`;g.fill();}
     skyTexture?.dispose();skyTexture=new THREE.CanvasTexture(c);skyTexture.colorSpace=THREE.SRGBColorSpace;scene.background=skyTexture;kick();
@@ -228,7 +235,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   function pickerVisibility(){
     for(const a of visuals?.actions??[])a.root.visible=a.action.starter?starterPicking:!starterPicking&&(!a.action.play||state.open(sel));
     placeHero();placeStarters();
-    host.querySelector('.gm-ow__hint').textContent=starterPicking?'Wähle deinen Fernling direkt in der Szene.':starters.length?'Fernling antippen: wählen · Ziel antippen: reisen':'Ziel antippen · am leuchtenden Tor starten · ziehen: umsehen';
+    host.querySelector('.gm-ow__hint').textContent=starterPicking?'Pick your Fernling right in the scene.':starters.length?'Tap a Fernling to choose · tap a stop to travel':'Tap a stop · start at the glowing gate · drag to look around';
   }
   async function openStarterPicker(){
     if(!starters.length||starterPicking)return;const version=++starterPickerVersion;
@@ -269,7 +276,9 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       nodes.push({lv,pos:p,label,maps,index:k,distance:w.nodeDistances[k]});
     });
     const badgeLinks=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xd9cba0,transparent:true,opacity:.85}));badgeLinks.geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(nodes.length*6),3));badgeLinks.geometry.setDrawRange(0,0);badgeLinks.frustumCulled=false;badgeLinks.userData.owOwned=true;group.add(pads,stars,ring,gates,posts,badgeLinks);scene.add(group);
-    const fernhavenWorld=config.family==='rangers'&&world===0;if(fernhavenWorld)gradeRegion(w.root);const context=fernhavenWorld?fernhaven(w,()=>{wayfindingDirty=true;kick();}):landscape(w,world===4?'rangers':config.family,world);scene.add(context.group);applyIbl(context.group,env,.55);
+    const archipelago=config.family==='rangers';if(archipelago&&world===0)gradeRegion(w.root);
+    const context=archipelago?island(w,{biome:BIOME_OF[world],harbour:world===0||world===4,sea,dressing:world===0?new URL('../../games-assets/fernworld/environments/rangers/viridis.dressing.json',import.meta.url).href:null,seed:world+3,onChange:()=>{shading?.apply(context.group,{outline:false});wayfindingDirty=true;kick();}}):landscape(w,world===4?'rangers':config.family,world);scene.add(context.group);applyIbl(context.group,env,.55);
+    if(archipelago&&(world===0||world===4))w.root.traverse(m=>{if(m.isMesh&&m.material?.name==='water'){m.material.dispose();m.material=sea.material();}});
     const actions=[];
     function sign(action,text,pos,color=0x8e6540) {
       const root=new THREE.Group();root.position.copy(pos);
@@ -284,13 +293,13 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     let back=null;if(world>0){back=sign({region:world-1},'‹ '+NAMES[world-1],lookout.clone());back.children[0].scale.y=2;back.children[0].position.y=1.1*unit;back.children[1].position.y=2.15*unit;}
     if(world<worlds.at(-1).index)sign({region:world+1},NAMES[world+1]+' ›',last.clone().add(new THREE.Vector3(2.1,0,-.5).multiplyScalar(unit)));
     for(let i=0;i<starters.length;i++){const a=starters[i],facing=w.cameraPosition.clone().sub(w.cameraTarget).setY(0).normalize(),right=new THREE.Vector3(facing.z,0,-facing.x),tag=sign({starter:a.id},a.label,first.clone().addScaledVector(facing,2.9*unit).addScaledVector(right,(i-1)*1.8*unit).add(new THREE.Vector3(0,-unit,0)),0x596d50);tag.children[1].scale.set(1.7*unit,.5*unit,1);tag.children[1].material.depthTest=false;tag.children[1].renderOrder=3;tag.visible=false;}
-    const overview=sign({overview:true},'⌖ Aussicht',lookout,0x52675d);overview.children[0].visible=world===0;
-    const sound=sign({sound:true},(getSound?.()??true)?'Ton an':'Ton aus',lookout.clone(),0x53696a),soundHeight=world>0?3.1:2.2;sound.children[0].scale.y=soundHeight/1.1;sound.children[0].position.y=soundHeight*unit/2;sound.children[1].position.y=(soundHeight-.05)*unit;overview.children[0].visible=false;if(back)back.children[0].visible=false;sound.userData.soundEnabled=getSound?.()??true;
+    const overview=sign({overview:true},'⌖ Overview',lookout,0x52675d);overview.children[0].visible=world===0;
+    const sound=sign({sound:true},(getSound?.()??true)?'Sound on':'Sound off',lookout.clone(),0x53696a),soundHeight=world>0?3.1:2.2;sound.children[0].scale.y=soundHeight/1.1;sound.children[0].position.y=soundHeight*unit/2;sound.children[1].position.y=(soundHeight-.05)*unit;overview.children[0].visible=false;if(back)back.children[0].visible=false;sound.userData.soundEnabled=getSound?.()??true;
     const start=sign({play:true},'▶ START',first.clone().add(new THREE.Vector3(1.5,0,.2).multiplyScalar(unit)),0x42755e);start.children[0].scale.y=.4;start.children[0].position.y=.22*unit;start.children[1].position.y=.4*unit;
     const depth=opaqueDepthLayer([w.root,context.group]);
     return {group,pads,stars,ring,gates,posts,nodes,unit,context,actions,start,overview,sound,depth,badgeLinks};
   }
-  function syncSound(enabled=getSound?.()??true){const text=enabled?'Ton an':'Ton aus';$('sound').textContent=text;$('sound').setAttribute('aria-pressed',String(enabled));for(const held of regionCache.values()){const target=held.visuals.sound;if(target.userData.soundEnabled!==enabled){target.userData.soundEnabled=enabled;target.userData.setLabel(text);}}}
+  function syncSound(enabled=getSound?.()??true){const text=enabled?'Sound on':'Sound off';$('sound').textContent=text;$('sound').setAttribute('aria-pressed',String(enabled));for(const held of regionCache.values()){const target=held.visuals.sound;if(target.userData.soundEnabled!==enabled){target.userData.soundEnabled=enabled;target.userData.setLabel(text);}}}
   function toggleSound(){const enabled=onSound?.();syncSound(typeof enabled==='boolean'?enabled:(getSound?.()??true));}
   function paintNodes() {
     invalidateWayfinding();
@@ -310,24 +319,24 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     const wd=worlds.find(w=>w.index===world);
     $('kicker').textContent=`${title} · ${world===4?'Bonus':`${world+1} / ${worlds.length}`}`;
     $('level-name').textContent=levels[sel]?.name??'';$('level-name').title=levels[sel]?.name??'';
-    $('context').textContent=`${levels[sel]?.name??''} · ${world===4?'Die Sturmbastion':JOURNEYS[config.family][world]}`;
+    $('context').textContent=`${levels[sel]?.name??''} · ${world===4?'The Sturmbastion':JOURNEYS[config.family][world]}`;
     const journeyKey=worlds.map(w=>`${w.index}:${state.worldOpen(w.index)}:${w.levels.reduce((n,l)=>n+state.stars(l.i),0)}`).join('|')+`/${world}`;
-    if($('journey').dataset.key!==journeyKey){$('journey').dataset.key=journeyKey;$('journey').innerHTML=worlds.map(w=>`<button type="button" data-region="${w.index}" aria-current="${world===w.index?'step':'false'}" aria-label="${NAMES[w.index]}${state.worldOpen(w.index)?'':', gesperrt'}" style="--region:${SKY[w.index]}"><span class="gm-ow__regionmark">${state.worldOpen(w.index)?w.index+1:icon('lock',{size:13})}</span><span>${NAMES[w.index]}<small>${w.levels.reduce((n,l)=>n+state.stars(l.i),0)} / ${w.levels.length*3} ★</small></span></button>`).join('');}
+    if($('journey').dataset.key!==journeyKey){$('journey').dataset.key=journeyKey;$('journey').innerHTML=worlds.map(w=>`<button type="button" data-region="${w.index}" aria-current="${world===w.index?'step':'false'}" aria-label="${NAMES[w.index]}${state.worldOpen(w.index)?'':', locked'}" style="--region:${SKY[w.index]}"><span class="gm-ow__regionmark">${state.worldOpen(w.index)?w.index+1:icon('lock',{size:13})}</span><span>${NAMES[w.index]}<small>${w.levels.reduce((n,l)=>n+state.stars(l.i),0)} / ${w.levels.length*3} ★</small></span></button>`).join('');}
     $('world').textContent=NAMES[world];$('world').title=regionIndex===world?(region.layout.title??NAMES[world]):NAMES[world];
     $('stars').textContent=`${levels.reduce((n,_,i)=>n+state.stars(i),0)} / ${levels.length*3}`;
     $('prev').disabled=world===worlds[0].index;$('next').disabled=world===worlds.at(-1).index;
     $('lock').hidden=state.worldOpen(world);$('lock').textContent=state.worldOpen(world)?'':state.need(world);
     const lv=levels[sel],card=$('card');card.hidden=!lv || (lv.world??0)!==world || !state.worldOpen(world);
     if(!card.hidden){const n=wd.levels.findIndex(l=>l.i===sel)+1,st=state.stars(sel),best=state.best(sel),open=state.open(sel);
-      card.innerHTML=`<div class="gm-ow__cardhead"><span class="gm-ow__kicker">${lv.boss?'Boss':`Level ${world+1}-${n}`}</span><strong>${escapeText(lv.name)}</strong></div><div class="gm-ow__cardstars" aria-label="${st} von 3 Sternen">${[0,1,2].map(k=>`<span class="${k<st?'is-on':''}">${icon('star',{size:18})}</span>`).join('')}</div>${best?`<div class="gm-ow__best">Bestwert <span class="fw-num">${best.toLocaleString('de')}</span></div>`:''}<button type="button" class="fw-btn fw-btn--primary gm-ow__play" data-ow="play" ${open?'':'disabled'}>${icon(open?'play':'lock',{size:16})}${open?(st?'Noch einmal spielen':'Spielen'):'Gesperrt'}</button>`;
+      card.innerHTML=`<div class="gm-ow__cardhead"><span class="gm-ow__kicker">${lv.boss?'Boss':`Level ${world+1}-${n}`}</span><strong>${escapeText(lv.name)}</strong></div><div class="gm-ow__cardstars" aria-label="${st} of 3 stars">${[0,1,2].map(k=>`<span class="${k<st?'is-on':''}">${icon('star',{size:18})}</span>`).join('')}</div>${best?`<div class="gm-ow__best">Best <span class="fw-num">${best.toLocaleString('en')}</span></div>`:''}<button type="button" class="fw-btn fw-btn--primary gm-ow__play" data-ow="play" ${open?'':'disabled'}>${icon(open?'play':'lock',{size:16})}${open?(st?'Play again':'Play'):'Locked'}</button>`;
     }
     const listKey=wd.levels.map(l=>`${l.i}:${state.stars(l.i)}:${state.open(l.i)}`).join('|')+`/${sel}`;
-    if($('list').dataset.key!==listKey){$('list').dataset.key=listKey;$('list').innerHTML=wd.levels.map(lv=>`<li><button type="button" data-ow-level="${lv.i}" aria-current="${sel===lv.i?'step':'false'}" ${state.open(lv.i)?'':'disabled'}>${escapeText(lv.name)}<span>${state.open(lv.i)?`${state.stars(lv.i)} / 3 ★`:'Gesperrt'}</span></button></li>`).join('');}
+    if($('list').dataset.key!==listKey){$('list').dataset.key=listKey;$('list').innerHTML=wd.levels.map(lv=>`<li><button type="button" data-ow-level="${lv.i}" aria-current="${sel===lv.i?'step':'false'}" ${state.open(lv.i)?'':'disabled'}>${escapeText(lv.name)}<span>${state.open(lv.i)?`${state.stars(lv.i)} / 3 ★`:'Locked'}</span></button></li>`).join('');}
     syncSound();
   }
   function fit() {
     if(!region)return;
-    span=fitWorldCamera(camera,region,aspect,1.08);
+    span=fitWorldCamera(camera,region,aspect,1.08);if(sea){camera.near=-400;camera.far=900;camera.updateProjectionMatrix();}
     offset.copy(region.cameraPosition).sub(region.cameraTarget);spherical.setFromVector3(offset);
   }
   function placeHero() {
@@ -356,17 +365,21 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
         const cached=regionCache.get(target);reuse=!!cached;next=cached?.region??await library.region(target===4?'sturmbastion':config.family,REGIONS[target]);await ensureActors();if(target===0)await ensureStarters();
         if(request!==serial||destroyed){if(!cached)next.release();return;}
         const hadRegion=!!region;arrivalFrom.copy(region?look:next.cameraTarget);
-        if(visuals){visuals.group.visible=false;visuals.context.group.visible=false;}
+        const reducedNow=motionPreference.matches,leaving=visuals;
+        if(leaving&&!(sea&&hadRegion&&!reducedNow&&regionIndex!==target)){leaving.group.visible=false;leaving.context.group.visible=false;}
+        const travelling=!!(sea&&hadRegion&&!reducedNow&&leaving&&regionIndex!==target);departing=travelling?leaving:null;
         region=next;regionIndex=target;
         if(!cached){
           if(!regionSpacing)regionSpacing=Math.max(region.bounds.getSize(new THREE.Vector3()).x,region.bounds.getSize(new THREE.Vector3()).z)*1.13;
-          const shift=new THREE.Vector3(target*regionSpacing,0,(target%2)*regionSpacing*.08);
+          if(sea&&!horizon){regionSpacing=Math.max(region.bounds.getSize(new THREE.Vector3()).x,region.bounds.getSize(new THREE.Vector3()).z)*4;if(!horizonTimer){const spacing=regionSpacing;horizonTimer=setTimeout(()=>{horizonTimer=0;if(destroyed||horizon)return;horizon=createHorizon({spacing,zs:ARCHIPELAGO_Z.map(f=>f*spacing)});scene.add(horizon.group);shading?.apply(horizon.group,{outline:false});horizon.group.userData.onTrees=()=>{shading?.apply(horizon.group,{outline:false});kick();};kick();},400);}}
+          const shift=new THREE.Vector3(target*regionSpacing,0,sea?ARCHIPELAGO_Z[target]*regionSpacing:(target%2)*regionSpacing*.08);
           region.root.position.add(shift);region.bounds.translate(shift);region.cameraPosition.add(shift);region.cameraTarget.add(shift);for(const v of [...region.nodePositions,...region.route])v.add(shift);
           scene.add(region.root);visuals=makeNodes(region,wd);
         }else{visuals=cached.visuals;visuals.group.visible=true;visuals.context.group.visible=true;}
         if(!hadRegion)arrivalFrom.copy(region.cameraTarget);
         regionCache.delete(target);regionCache.set(target,{region,visuals});
         while(regionCache.size>2){const [index,held]=regionCache.entries().next().value;regionCache.delete(index);releaseVisuals(held.visuals);held.region.release();}
+        travelMs=travelling?2100:850;travelHold=travelling?{context:visuals.context,since:performance.now()}:null;travelDistance=travelling?arrivalFrom.distanceTo(region.cameraTarget):0;
         background();entryAt=performance.now();Object.assign(view,{yaw:0,pitch:0,zoom:1,panX:0,panZ:0,tYaw:0,tPitch:0,tZoom:1,tPanX:0,tPanZ:0});
         const box=region.bounds,size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
         const radius=Math.max(size.x,size.z)*.55;
@@ -456,19 +469,20 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     raf=0;if(!active||destroyed)return;const dt=Math.min(.05,(t-(last||t))/1000);last=t;const time=t/1000,reduced=motionPreference.matches;
     if(region){
       for(const key of ['yaw','pitch','zoom','panX','panZ'])view[key]+=(view['t'+key[0].toUpperCase()+key.slice(1)]-view[key])*(1-Math.exp(-dt*8));
-      look.copy(region.cameraTarget);look.x+=view.panX*region.unitScale;look.z+=view.panZ*region.unitScale;const arrival=reduced?0:Math.max(0,1-(t-entryAt)/850);if(arrival>0)look.lerp(arrivalFrom,arrival*arrival*(3-2*arrival));look.y=travelView?(hero?.root.position.y??region.cameraTarget.y)+(aspect<.9?1.5:.7)*region.unitScale:region.cameraTarget.y;
+      look.copy(region.cameraTarget);look.x+=view.panX*region.unitScale;look.z+=view.panZ*region.unitScale;if(travelHold){if(travelHold.context.state?.ready!==false||t-travelHold.since>900)travelHold=null;else entryAt=t;}
+      const travelLength=reduced?0:travelMs,progress=travelLength?Math.min(1,(t-entryAt)/travelLength):1,arrival=1-progress;if(arrival>0)look.lerp(arrivalFrom,arrival*arrival*(3-2*arrival));if(departing&&progress>=1){departing.group.visible=false;departing.context.group.visible=false;departing=null;}look.y=travelView?(hero?.root.position.y??region.cameraTarget.y)+(aspect<.9?1.5:.7)*region.unitScale:region.cameraTarget.y;
       if(hop&&hero){look.x=hero.root.position.x;look.z=hero.root.position.z;}
       const phi=THREE.MathUtils.clamp(spherical.phi-view.pitch,.22,1.36),theta=spherical.theta+view.yaw;
       offset.setFromSphericalCoords(spherical.radius,phi,theta);camera.position.copy(look).add(offset);camera.lookAt(look);
-      const h=span*.5*view.zoom;camera.left=-h*aspect;camera.right=h*aspect;camera.bottom=-h;camera.top=h;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);placeBadges();
+      let h=span*.5*view.zoom;if(travelDistance&&progress<1){const peak=Math.max(1,travelDistance*.62/aspect/h);h*=1+(peak-1)*Math.sin(Math.PI*progress);}camera.left=-h*aspect;camera.right=h*aspect;camera.bottom=-h;camera.top=h;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);placeBadges();
       if(wayfindingDirty&&!starterPicking&&travelView&&regionIndex===world){
-        const settled=!hop&&t-entryAt>850&&Math.abs(view.zoom-view.tZoom)<.0002&&Math.abs(view.panX-view.tPanX)+Math.abs(view.panZ-view.tPanZ)<.002&&Math.abs(view.yaw-view.tYaw)+Math.abs(view.pitch-view.tPitch)<.002;
+        const settled=!hop&&t-entryAt>travelLength&&Math.abs(view.zoom-view.tZoom)<.0002&&Math.abs(view.panX-view.tPanX)+Math.abs(view.panZ-view.tPanZ)<.002&&Math.abs(view.yaw-view.tYaw)+Math.abs(view.pitch-view.tPitch)<.002;
         advanceWayfinding(settled);
       }
       if(!travelView&&regionIndex===world&&(wayfindingReport?.phase!=='overview'||wayfindingReport.width!==width||wayfindingReport.height!==height)){
         if(wayfindingTask)invalidateWayfinding();wayfindingDirty=false;wayfindingReport={complete:true,phase:'overview',world,selected:sel,width,height};loadingStatus.finish();
       }
-      for(const held of regionCache.values())held.region.update(time,reduced);
+      for(const held of regionCache.values())held.region.update(time,reduced);if(sea){sea.update(reduced?0:time,look);horizon?.update(reduced?0:time);}
       if(hop&&hero){const k=Math.min(1,(t-hop.start)/hop.duration),e=k*k*(3-2*k),d=THREE.MathUtils.lerp(hop.from,hop.to,e);region.pointAtDistance(d,hero.root.position);hero.root.position.y+=(.07+(reduced?0:Math.abs(Math.sin(k*Math.PI*6))*.06))*region.unitScale;region.pointAtDistance(d+Math.sign(hop.to-hop.from)*.04*region.unitScale,ahead);hero.root.rotation.y=Math.atan2(ahead.x-hero.root.position.x,ahead.z-hero.root.position.z);if(companion){companion.root.position.copy(hero.root.position);companion.root.position.x-=.6*region.unitScale;companion.root.rotation.y=hero.root.rotation.y;}renderer.shadowMap.needsUpdate=true;if(k===1){hop=null;placeHero();}}
       if(hop&&hero)placeStarters(hero.root.position);else if(starterPicking){placeStarters();const scale=height/(camera.top-camera.bottom);for(const a of visuals.actions.filter(a=>a.action.starter))a.face.scale.set(85/scale,25/scale,1);wayfindingReport={...wayfindingReport,complete:true,phase:'starter-choice',world,selected:sel,width,height};}
       for(const a of starterActors)if(a.root.visible)a.animate(reduced?0:dt,!!hop,time);
@@ -516,7 +530,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     refresh(){const current=state.current();if(!initialized||current!==lastCurrent){lastCurrent=current;sel=current;setWorld(levels[sel]?.world??0,{keepSel:true});}else{paintNodes();syncDom();placeHero();kick();}},key,
     async refreshHero(){try{await ensureActors();placeHero();placeStarters();invalidateWayfinding();kick();}catch(error){console.error('[games] companion change failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'Your companion could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}},
     get selected(){return sel;},get world(){return world;},get loaded(){return regionIndex===world&&!pending;},get ready(){return pending??Promise.resolve();},
-    destroy(){cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();shading?.dispose();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();renderer.dispose();}
+    destroy(){clearTimeout(horizonTimer);cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();shading?.dispose();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();sea?.dispose();horizon?.release();renderer.dispose();}
   };
 }
 

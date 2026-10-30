@@ -5,6 +5,7 @@ import { THREE as T } from "../three-kit.js";
 import { Batch, mtx, rng } from "./decor.js";
 import { skyMaterial } from "./sky.js";
 import { RoundedBoxGeometry } from "../../../vendor/three-0.170.0/RoundedBoxGeometry.js";
+import { STYLE, masonry, shingles, archShape, hipRoofGeometry, windowSpots } from "./tower-dressing.js";
 
 const BX = (x) => x - 180,
   BY = (y) => 320 - y;
@@ -163,10 +164,14 @@ export function buildTowerScenery({
       "Fossil-vault assets must finish loading before the level starts",
     );
   const W = WORLD[world],
+    S = STYLE[world],
     scene = new T.Scene(),
-    random = rng(97 * world + L.walls.length * 13 + L.pins.length * 7 + 1);
+    seed = 97 * world + L.walls.length * 13 + L.pins.length * 7 + 1,
+    random = rng(seed),
+    variant = (L.walls.length + L.pins.length * 2 + world) % 3;
   const ownedGeometry = new Set(),
     ownedMaterial = new Set(),
+    ownedTexture = new Set(),
     batches = new Map();
   const batch = (key) => {
     if (!batches.has(key)) batches.set(key, new Batch());
@@ -196,8 +201,13 @@ export function buildTowerScenery({
     parent.add(instance);
     scene.add(parent);
   };
-  const material = (color, roughness = 0.9) => {
-    const m = new T.MeshStandardMaterial({ color, roughness });
+  const material = (color, roughness = 0.9, extras = {}) => {
+    const m = new T.MeshStandardMaterial({ color, roughness, ...extras });
+    ownedMaterial.add(m);
+    return m;
+  };
+  const glowMaterial = (color) => {
+    const m = new T.MeshBasicMaterial({ color });
     ownedMaterial.add(m);
     return m;
   };
@@ -205,10 +215,33 @@ export function buildTowerScenery({
     ownedGeometry.add(g);
     return g;
   };
-  const wallMat = material(W.edge),
-    backMat = material(W.inside),
-    groundMat = material(W.ground),
-    cliffMat = material(W.rock);
+  const texture = (t) => {
+    ownedTexture.add(t);
+    return t;
+  };
+  const masonryTex = (kind, base, mortar, sd, repeat) => {
+    const { map, emissive } = masonry(kind, base, mortar, sd);
+    texture(map);
+    if (emissive) texture(emissive);
+    for (const t of [map, emissive])
+      if (t && repeat) {
+        t.wrapS = t.wrapT = T.RepeatWrapping;
+        t.repeat.set(repeat[0], repeat[1]);
+      }
+    return { map, emissive };
+  };
+  const slabMat = material(S.slab, 0.85),
+    lipMat = material(S.lip, 0.8),
+    frameMat = material(S.frame, 0.9),
+    groundMat = material(W.ground);
+  const backTex = masonryTex(S.wall, S.back, S.mortar, seed + 1),
+    pierTex = masonryTex(S.wall, S.pier, S.mortar, seed + 2, [1, 2.2]);
+  const withGlow = (t, k) =>
+    t.emissive
+      ? { emissive: 0xffffff, emissiveMap: t.emissive, emissiveIntensity: k }
+      : {};
+  const backMat = material(0xffffff, 0.95, { map: backTex.map, ...withGlow(backTex, 0.9) });
+  const pierMat = material(0xffffff, 0.95, { map: pierTex.map, ...withGlow(pierTex, 0.7) });
   const box = (x, y, z, w, h, d, mat, round = 0) => {
     const geo = geometry(
       round
@@ -222,7 +255,14 @@ export function buildTowerScenery({
     scene.add(mesh);
     return mesh;
   };
-  scene.background = new T.Color(W.sky.horizon).multiplyScalar(dark ? 0.42 : 1);
+  const glow = (geo, color, x, y, z) => {
+    const m = new T.Mesh(geometry(geo), glowMaterial(color));
+    m.position.set(x, y, z);
+    scene.add(m);
+    return m;
+  };
+  const horizon = new T.Color(W.sky.horizon).multiplyScalar(dark ? 0.42 : 1);
+  scene.background = horizon;
   const hemi = new T.HemisphereLight(
     look.sky,
     look.ground,
@@ -253,54 +293,51 @@ export function buildTowerScenery({
   // A continuous ground excavation, not a floating island or the same map as another game.
   box(0, -336, -250, 2600, 100, 1500, groundMat, 12);
   const rocks = W.channel[0];
-  for (let side of [-1, 1]) {
-    box(side * 255, 5, -115, 172, 662, 106, cliffMat, 12);
-    for (let i = 0; i < 8; i++) {
-      const y = -300 + i * 91;
-      add(
-        rocks,
-        [side * (242 + random() * 18), y, -84 - random() * 12],
-        57 + random() * 17,
-        [0, random() * 2, side * 0.1],
-      );
-      add(
-        "fw_cliff_straight",
-        [side * (355 + i * 12), y - 20, -220],
-        65,
-        [0, (side * Math.PI) / 2, 0],
-        W.rock,
-      );
+
+  // Backdrop with depth: three layers of hills, dunes or peaks that fade into the sky (the renderer adds the fog).
+  const layerColor = (i) =>
+    new T.Color(S.hills[i]).lerp(horizon, i * 0.18).multiplyScalar(dark ? 0.5 : 1);
+  const mound = (x, z, w, h, color) => {
+    const m = new T.Mesh(
+      geometry(new T.SphereGeometry(1, 22, 10, 0, Math.PI * 2, 0, Math.PI / 2)),
+      material(color, 1),
+    );
+    m.scale.set(w, h, w * 0.55);
+    m.position.set(x, -286, z);
+    scene.add(m);
+  };
+  const peak = (x, z, w, h, color, cap) => {
+    const m = new T.Mesh(geometry(new T.ConeGeometry(1, 1, 7, 1)), material(color, 1));
+    m.scale.set(w, h, w * 0.8);
+    m.position.set(x, -286 + h / 2, z);
+    scene.add(m);
+    if (cap) {
+      const c = new T.Mesh(geometry(new T.ConeGeometry(1, 1, 7, 1)), material(cap, 1));
+      c.scale.set(w * 0.36, h * 0.36, w * 0.8 * 0.36);
+      c.position.set(x, -286 + h * 0.82, z);
+      scene.add(c);
     }
-    add("fw_cliff_corner", [side * 268, -323, -70], 45, [
-      0,
-      side > 0 ? Math.PI / 2 : 0,
-      0,
-    ]);
-    for (let i = 0; i < 12; i++) {
-      const y = -290 + i * 50,
-        x = side * (223 + random() * 55);
-      if (W.plant.length)
-        plant(W.plant[i % W.plant.length], [x, y, 16], 18 + random() * 22, [
-          0,
-          random() * 6,
-          0,
-        ]);
-      if (world === 0)
-        add(
-          i % 2 ? "meadow_fern_arching" : "meadow_moss",
-          [x, y, 6],
-          14 + random() * 13,
-          [0, random() * 6, 0],
-        );
+    return m;
+  };
+  const shiftX = (random() - 0.5) * 240;
+  for (let layer = 2; layer >= 0; layer--) {
+    const z = -520 - layer * 520,
+      col = layerColor(layer);
+    for (let i = -4; i <= 4; i++) {
+      const x = i * 330 + shiftX + (random() - 0.5) * 120,
+        w = 260 + random() * 200 + layer * 70,
+        h = 70 + random() * 90 + layer * 60;
+      if (S.peak === "snow")
+        peak(x, z, w * 0.8, h * 1.9, col, layer < 2 ? 0xffffff : 0xf4fbff);
+      else if (S.peak === "mesa" && (i + layer) % 2 === 0)
+        box(x, -286 + h * 0.45, z, w * 0.9, h * 0.9, w * 0.5, material(col, 1), 10);
+      else if (S.peak === "volcano" && i === (layer === 0 ? -1 : layer === 1 ? 2 : 0)) {
+        peak(x, z, w * 1.3, h * 2.6, col);
+        glow(new T.CircleGeometry(w * 0.1, 16), 0xff8a3a, x, -286 + h * 2.6 - 4, z + w * 0.12).scale.y = 0.45;
+        glow(new T.PlaneGeometry(w * 0.05, h * 1.3), 0xff6a1a, x, -286 + h * 1.9, z + w * 0.33);
+      } else mound(x, z, w, h, col);
     }
   }
-  for (let i = 0; i < 10; i++)
-    add(
-      rocks,
-      [(i - 4.5) * 240, -315, -700 - random() * 230],
-      170 + random() * 100,
-      [0, random() * 6, 0],
-    );
   const tree =
     world === 0
       ? "woodland_oak_old"
@@ -310,10 +347,10 @@ export function buildTowerScenery({
           ? "woodland_spruce_tiered"
           : null;
   if (tree)
-    for (let i = 0; i < 7; i++)
+    for (let i = 0; i < 9; i++)
       add(
         tree,
-        [(i - 3) * 250, -290, -520 - random() * 240],
+        [(i - 4) * 230 + shiftX * 0.5 + (random() - 0.5) * 80, -286, -420 - random() * 260],
         95 + random() * 40,
         [0, random() * 6, 0],
       );
@@ -324,47 +361,168 @@ export function buildTowerScenery({
       95,
       [0, random() * 6, 0],
     );
-  // Recessed excavation face and exact puzzle walls. Rounded dressing never changes collision.
+
+  // Side piers: textured masonry in the world's colour, boulders and plants in front.
+  for (let side of [-1, 1]) {
+    box(side * 255, 5, -115, 172, 662, 106, pierMat, 12);
+    box(side * 168, 5, -60, 8, 640, 20, frameMat, 2);
+    for (let i = 0; i < 7; i++) {
+      const y = -290 + i * 98;
+      if ((i + (side > 0 ? 1 : 0) + variant) % (world === 3 ? 2 : 3) === 0) continue;
+      add(
+        rocks,
+        [side * (250 + random() * 22), y, -70 - random() * 14],
+        50 + random() * 16,
+        [0, random() * 2, side * 0.1],
+        S.rockTint,
+      );
+    }
+    add("fw_cliff_corner", [side * 268, -323, -70], 45, [0, side > 0 ? Math.PI / 2 : 0, 0], S.rockTint);
+    for (let i = 0; i < 12; i++) {
+      const y = -290 + i * 50,
+        x = side * (223 + random() * 55);
+      if (W.plant.length)
+        plant(W.plant[i % W.plant.length], [x, y, 16], 18 + random() * 22, [0, random() * 6, 0]);
+      if (world === 0)
+        add(i % 2 ? "meadow_fern_arching" : "meadow_moss", [x, y, 6], 14 + random() * 13, [0, random() * 6, 0]);
+    }
+  }
+  for (let i = 0; i < 6; i++)
+    add(
+      rocks,
+      [(i - 2.5) * 300 + shiftX, -315, -420 - random() * 230],
+      150 + random() * 90,
+      [0, random() * 6, 0],
+      S.rockTint,
+    );
+
+  // Recessed back wall (the world's masonry) and the exact puzzle walls as slabs with a lip.
   box(0, 0, -46, 286, 568, 22, backMat, 7);
-  const seamMat = material(new T.Color(W.rock).multiplyScalar(0.88));
-  for (let y = -265; y < 290; y += 58) box(0, y, -33.6, 269, 1.2, 0.5, seamMat);
+  const seamMat = material(new T.Color(S.mortar).multiplyScalar(0.9));
+  const lips = [];
   for (const [ax, ay, bx, by] of L.walls) {
     const len = Math.hypot(bx - ax, by - ay),
-      angle = -Math.atan2(by - ay, bx - ax);
+      angle = -Math.atan2(by - ay, bx - ax),
+      flat = Math.abs(by - ay) < Math.abs(bx - ax) * 0.8 && len > 28,
+      cx = BX((ax + bx) / 2),
+      cy = BY((ay + by) / 2),
+      sn = Math.sin(angle),
+      cs = Math.cos(angle);
+    // slab body 7 high plus a 5 high lip: the same 12 px collision thickness as before, never changed
     const beam = box(
-      BX((ax + bx) / 2),
-      BY((ay + by) / 2),
+      flat ? cx + sn * 2.5 : cx,
+      flat ? cy - cs * 2.5 : cy,
       0,
       len + 12,
-      12,
+      flat ? 7 : 12,
       64,
-      wallMat,
+      slabMat,
       2,
     );
     beam.rotation.z = angle;
-    // Shallow stone joints and keyed caps, merged once; all remain on the wall itself.
+    if (flat) {
+      const lip = box(cx - sn * 3.5, cy + cs * 3.5, 1, len + 14, 5, 68, lipMat, 2);
+      lip.rotation.z = angle;
+      lips.push([ax, ay, bx, by, len]);
+    }
+    // Shallow stone joints, merged once; all remain on the wall itself.
     for (let k = 25; k < len - 15; k += 38) {
       const u = k / len,
         x = BX(ax + (bx - ax) * u),
         y = BY(ay + (by - ay) * u);
-      const joint = box(x, y, 32.2, 1, 10, 0.6, seamMat);
+      const joint = box(x, y, 32.2, 1, flat ? 6 : 10, 0.6, seamMat);
       joint.rotation.z = angle;
     }
   }
-  // The open top is an excavation gantry with a fossil guild arch in the far wall.
-  box(0, 274, -57, 114, 10, 96, wallMat, 2);
-  add("fw_wall_stone_arch", [0, 279, -65], 30);
-  for (const side of [-1, 1]) {
-    for (let j = 0; j < 5; j++)
-      add("fw_pillar_carved", [side * 155, -287 + j * 112, -18], [14, 43, 17]);
-    add("fw_crates_stack", [side * 239, -286, 45], 33, [0, side * 0.3, 0]);
-    add("fw_barrel_oak", [side * 291, -286, 17], 28, [0, 0.2, 0]);
+  // tufts, flowers or crystals growing out of the lips
+  let tufts = 0;
+  for (const [ax, ay, bx, by, len] of lips) {
+    if (len < 60) continue;
+    for (let k = 20 + random() * 20; k < len - 14 && tufts < 18; k += 46 + random() * 44) {
+      const u = k / len,
+        p = [BX(ax + (bx - ax) * u), BY(ay + (by - ay) * u) + 9, 26 + random() * 12];
+      if (world === 0 && random() < 0.6) add("meadow_grass_short", p, 10 + random() * 6, [0, random() * 6, 0]);
+      else if (W.plant.length) plant(W.plant[tufts % W.plant.length], p, 9 + random() * 6, [0, random() * 6, 0]);
+      tufts++;
+    }
   }
-  add("fw_handcart_oak", [-256, -286, 74], 40, [0, 0.6, 0]);
-  add("fw_tools_garden", [-226, -285, 92], 30, [0, -0.5, 0.1]);
-  add("fw_shelves_oak", [253, -283, -18], 48, [0, -0.2, 0]);
-  add("fw_books_stack", [254, -232, 8], 22);
-  add("fw_petra_raw_fossil", [0, 301, -16], 12, [Math.PI / 2, 0, 0], W.rock);
+  // glowing ember edge on the basalt slabs
+  if (world === 3)
+    for (const [ax, ay, bx, by, len] of lips) {
+      const m = glow(new T.BoxGeometry(len + 6, 1.8, 1), 0xff8a2a, BX((ax + bx) / 2), BY((ay + by) / 2) + 9.5, 34);
+      m.rotation.z = -Math.atan2(by - ay, bx - ax);
+    }
+
+  // Arched windows on the back wall, wherever the level leaves room.
+  const windows = windowSpots(L, random, world === 3 ? 4 : 5);
+  const mullion = material(new T.Color(S.frame).multiplyScalar(0.55));
+  for (const [wx, wy] of windows) {
+    const x = BX(wx),
+      y = BY(wy) - 38,
+      ww = 30,
+      hh = 52;
+    const frame = new T.Mesh(
+      geometry(new T.ExtrudeGeometry(archShape(ww + 10, hh + 7), { depth: 4, bevelEnabled: false })),
+      frameMat,
+    );
+    frame.position.set(x, y - 3, -35);
+    frame.castShadow = true;
+    scene.add(frame);
+    glow(new T.ShapeGeometry(archShape(ww, hh)), S.glass, x, y, -30.6);
+    box(x, y + hh * 0.42, -30, ww, 2, 1.4, mullion).castShadow = false;
+    box(x, y + hh * 0.5 - 4, -30, 2, hh - 8, 1.4, mullion).castShadow = false;
+    box(x, y - 4, -33, ww + 14, 5, 12, slabMat, 1.5);
+  }
+
+  // The roof: a hipped roof with a round window, a finial with a flag and a banner pair.
+  const roofTex = texture(shingles(S.roof, S.roofLip, world === 2, seed + 3));
+  const hip = new T.Mesh(geometry(hipRoofGeometry(158, 52, 86, 46)), material(0xffffff, 0.85, { map: roofTex }));
+  hip.position.set(0, 290, -4);
+  hip.castShadow = true;
+  hip.receiveShadow = true;
+  scene.add(hip);
+  box(0, 286, 0, 328, 8, 112, frameMat, 2);
+  box(0, 281.5, 30, 330, 3, 30, lipMat, 1);
+  for (let i = -7; i <= 7; i++) box(i * 21, 280, 44, 9, 9, 18, slabMat, 2);
+  const roundWin = glow(new T.CircleGeometry(11, 20), S.glass, 0, 308, 35);
+  roundWin.rotation.x = -0.5;
+  const ring = new T.Mesh(geometry(new T.TorusGeometry(12, 2.4, 6, 24)), frameMat);
+  ring.position.set(0, 308, 35.4);
+  ring.rotation.x = -0.5;
+  scene.add(ring);
+  const poleX = variant === 1 ? -70 : variant === 2 ? 70 : 0;
+  box(poleX, 345, -6, 2.4, 52, 2.4, frameMat);
+  const flag = new T.Mesh(geometry(new T.PlaneGeometry(30, 17)), material(S.banner, 0.9, { side: T.DoubleSide }));
+  flag.position.set(poleX + 16, 360, -6);
+  scene.add(flag);
+  for (const side of [-1, 1]) {
+    const bn = new T.Shape(),
+      by0 = 250 - (variant === (side > 0 ? 0 : 1) ? 40 : 0);
+    bn.moveTo(-9, 0);
+    bn.lineTo(9, 0);
+    bn.lineTo(9, -64);
+    bn.lineTo(0, -52);
+    bn.lineTo(-9, -64);
+    bn.closePath();
+    const cloth = new T.Mesh(geometry(new T.ShapeGeometry(bn)), material(S.banner, 0.9, { side: T.DoubleSide }));
+    cloth.position.set(side * 205, by0, -58);
+    cloth.castShadow = true;
+    scene.add(cloth);
+    glow(new T.CircleGeometry(4, 12), S.emblem, side * 205, by0 - 26, -57.5);
+    box(side * 205, by0 + 2, -58, 28, 3, 3, frameMat);
+  }
+
+  // pillars and props at the foot, mirrored in some levels
+  const flip = variant === 1 ? -1 : 1;
+  for (const side of [-1, 1]) {
+    for (let j = 0; j < 5; j++) add("fw_pillar_carved", [side * 155, -287 + j * 112, -18], [14, 43, 17]);
+    add("fw_crates_stack", [side * flip * 239, -286, 45], 33, [0, side * 0.3, 0]);
+    add("fw_barrel_oak", [side * flip * 291, -286, 17], 28, [0, 0.2, 0]);
+  }
+  add("fw_handcart_oak", [-256 * flip, -286, 74], 40, [0, 0.6 * flip, 0]);
+  add("fw_tools_garden", [-226 * flip, -285, 92], 30, [0, -0.5, 0.1]);
+  add("fw_shelves_oak", [253 * flip, -283, -18], 48, [0, -0.2, 0]);
+  add("fw_books_stack", [254 * flip, -232, 8], 22);
   // Excavated fossils and roots are on the recessed face, behind all fluid/characters.
   for (let i = 0; i < 5; i++) {
     add(
@@ -372,41 +530,20 @@ export function buildTowerScenery({
       [(i % 2 ? 1 : -1) * (79 + random() * 25), 250 - i * 112, -31],
       8 + random() * 3,
       [Math.PI / 2, 0, random() * 0.5],
-      new T.Color(W.rock).multiplyScalar(0.75),
+      new T.Color(S.mortar).multiplyScalar(1.4),
     );
     if (world === 0)
-      add(
-        "woodland_ivy_hanging",
-        [(i % 2 ? 1 : -1) * 166, 225 - i * 103, 10],
-        25,
-        [0, i * 0.9, 0],
-      );
+      add("woodland_ivy_hanging", [(i % 2 ? 1 : -1) * 166, 225 - i * 103, 10], 25, [0, i * 0.9, 0]);
     if (world === 2)
-      add(
-        "fw_ice_crystal_cluster",
-        [(i % 2 ? 1 : -1) * 192, -240 + i * 115, 9],
-        24,
-        [0, i, 0],
-      );
+      add("fw_ice_crystal_cluster", [(i % 2 ? 1 : -1) * 192, -240 + i * 115, 9], 24, [0, i, 0]);
     if (world === 3)
-      add(
-        "fw_lava_fissure",
-        [(i % 2 ? 1 : -1) * 200, -270 + i * 105, -14],
-        28,
-        [0, i * 0.7, 0],
-      );
+      add("fw_lava_fissure", [(i % 2 ? 1 : -1) * 200, -270 + i * 105, -14], 28, [0, i * 0.7, 0]);
   }
   const torches = [];
   for (const side of [-1, 1])
     for (const y of [-270, 10, 265]) {
       add("fw_street_light_sporecell", [side * 176, y, 22], 25);
-      torches.push({
-        x: side * 176,
-        y: y + 36,
-        z: 24,
-        size: 8,
-        color: 0xffc47a,
-      });
+      torches.push({ x: side * 176, y: y + 36, z: 24, size: 8, color: S.lamp });
     }
   for (const [key, b] of batches)
     if (!b.empty) {
@@ -424,11 +561,13 @@ export function buildTowerScenery({
     torches,
     ambient: W.ambient,
     textures: [],
+    fogColor: horizon.clone().lerp(new T.Color(W.sky.top), 0.12),
     fit() {},
     dispose() {
       scene.clear();
       for (const g of ownedGeometry) g.dispose();
       for (const m of ownedMaterial) m.dispose();
+      for (const t of ownedTexture) t.dispose();
       sun.shadow.map?.dispose();
     },
   };
