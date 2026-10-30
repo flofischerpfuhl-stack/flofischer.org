@@ -7,7 +7,7 @@ Worker configuration. A change to one hostname must not deploy another one.
 | Hostname | Source | Production |
 | --- | --- | --- |
 | `flofischer.org`, `www`, `seele`, `gehirn` | [`apps/flofischer.org`](apps/flofischer.org) | Cloudflare Worker `flofischer` |
-| `hochzeit.flofischer.org` | [`apps/hochzeit.flofischer.org`](apps/hochzeit.flofischer.org) | Cloudflare Worker `hochzeit-spiele` |
+| ~~`hochzeit.flofischer.org`~~ (archived 2026-10-30, offline) | [`apps/hochzeit.flofischer.org`](apps/hochzeit.flofischer.org) | Cloudflare Worker `hochzeit-spiele` kept with its Durable Object data, no custom domain |
 
 ## Deployment rules
 
@@ -27,7 +27,7 @@ For the main website, the Cloudflare build settings are:
 - Production branch: `main`
 - Included build path: `apps/flofischer.org/*`
 
-For `hochzeit.flofischer.org`, the separate Cloudflare build settings are:
+The wedding show is archived: code, Worker and Durable Object data stay, only the custom domain is removed. To bring it back, restore the `routes` entry in its `wrangler.jsonc`. Its separate Cloudflare build settings are:
 
 - Root directory: `/apps/hochzeit.flofischer.org`
 - Build command: `npm ci && npm test && npm run check:deploy`
