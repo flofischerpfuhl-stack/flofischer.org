@@ -18,7 +18,8 @@ export function mergeStatic(root, own) {
   for (const [material, nodes] of groups) {
     if (nodes.length < 2) continue;
     const geometries = nodes.map(n => { const g = n.geometry.clone(); g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inverse, n.matrixWorld)); return g; });
-    const merged = mergeGeometries(geometries, false);
+    const mixed = geometries.some(g => !g.index) && geometries.some(g => g.index);
+    const merged = mergeGeometries(mixed ? geometries.map(g => g.index ? g.toNonIndexed() : g) : geometries, false);
     for (const g of geometries) g.dispose();
     if (!merged) continue;
     const mesh = new THREE.Mesh(own.geo(merged), material);

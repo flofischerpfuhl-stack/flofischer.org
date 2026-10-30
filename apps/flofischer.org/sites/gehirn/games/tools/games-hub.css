@@ -90,3 +90,16 @@
   .hb-row .hb-btn { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .hb-dots i { transition: none; } }
+
+/* theme switch: the previous frame fades out with a soft radial wipe */
+.hb-wipe { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; --wr: 0px; --wx: 50%; --wy: 42%;
+  -webkit-mask-image: radial-gradient(circle at var(--wx) var(--wy), transparent var(--wr), #000 calc(var(--wr) + 160px)); mask-image: radial-gradient(circle at var(--wx) var(--wy), transparent var(--wr), #000 calc(var(--wr) + 160px)); }
+
+/* the bubble sits beside the character on wide screens: tail points left */
+.hb-bubble.is-side .hb-bubble__tail { bottom: auto; left: -8px; margin: 0; transform: rotate(135deg); }
+
+/* spinner ring on a form button while its model loads */
+.hb-spin { display: none; width: 14px; height: 14px; flex: none; border-radius: 50%; border: 2px solid var(--accent-border); border-top-color: var(--accent-fill); animation: hb-turn .7s linear infinite; }
+.hb-chip.is-loading .hb-spin { display: inline-block; }
+@keyframes hb-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .hb-spin { animation-duration: 2s; } }

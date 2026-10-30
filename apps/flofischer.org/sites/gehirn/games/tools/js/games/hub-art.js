@@ -39,13 +39,15 @@ export function bannerTexture(palette) {
 export function headerTexture(canvas, title, palette) {
   const g = canvas.getContext('2d'), { width: w, height: h } = canvas, dark = palette.dark;
   g.clearRect(0, 0, w, h);
-  g.fillStyle = dark ? '#08090a' : palette['accent-fill']; g.fillRect(0, 0, w, h);
-  const ink = dark ? palette['text-1'] : palette['accent-on'], mark = dark ? palette['accent-fill'] : palette['accent-on'];
+  const shell = palette.shell || palette['accent-fill'];
+  g.fillStyle = dark ? '#161a2c' : shell; g.fillRect(0, 0, w, h);
+  g.lineWidth = h * .07; g.strokeStyle = dark ? shell : 'rgba(255,255,255,.55)'; g.strokeRect(h * .1, h * .1, w - h * .2, h * .8);
+  const ink = dark ? '#ffffff' : '#ffffff', mark = dark ? shell : '#ffffff';
   g.fillStyle = ink; g.textAlign = 'center'; g.textBaseline = 'middle';
   let size = h * .56; g.font = `700 ${size}px ${FONT}`;
   const room = w * .66; const measured = g.measureText(title).width; if (measured > room) { size *= room / measured; g.font = `700 ${size}px ${FONT}`; }
   g.fillText(title, w / 2, h * .54);
-  if (dark) { drawFern(g, w * .085, h * .88, h * .62, mark); drawFern(g, w * .915, h * .88, h * .62, mark); }
+  drawFern(g, w * .085, h * .86, h * .56, mark); drawFern(g, w * .915, h * .86, h * .56, mark);
   return canvas;
 }
 
@@ -54,7 +56,7 @@ export function rugTexture(palette) {
   g.clearRect(0, 0, 1024, 1024);
   const disc = (r, color) => { g.beginPath(); g.arc(c, c, r, 0, Math.PI * 2); g.fillStyle = color; g.fill(); };
   if (dark) {
-    disc(500, '#0c1812'); disc(450, '#101c16');
+    disc(500, '#0f3d2e'); disc(450, '#15533b');
     g.lineWidth = 12; g.strokeStyle = palette['accent-fill']; g.beginPath(); g.arc(c, c, 480, 0, Math.PI * 2); g.stroke();
     g.lineWidth = 4; g.globalAlpha = .6; g.beginPath(); g.arc(c, c, 420, 0, Math.PI * 2); g.stroke(); g.globalAlpha = 1;
     drawFern(g, c, c + 190, 380, palette['accent-fill']);
@@ -83,6 +85,17 @@ export function blobTexture(alpha = .4) {
   const [canvas, g] = makeCanvas(128, 128), grad = g.createRadialGradient(64, 64, 4, 64, 64, 64);
   grad.addColorStop(0, `rgba(20,18,14,${alpha})`); grad.addColorStop(.6, `rgba(20,18,14,${alpha * .45})`); grad.addColorStop(1, 'rgba(20,18,14,0)');
   g.fillStyle = grad; g.fillRect(0, 0, 128, 128);
+  return canvas;
+}
+
+/** Big diamond floor pattern (Animal Crossing / Galaxy style); one texture per theme, both stay resident. */
+export function floorTexture(dark) {
+  const [canvas, g] = makeCanvas(512, 512);
+  const a = dark ? '#1b4546' : '#fff1d8', b = dark ? '#256259' : '#ffd8a8', c = dark ? '#2f8468' : '#fff9ea', line = dark ? 'rgba(130,255,170,.28)' : 'rgba(255,255,255,.85)';
+  g.fillStyle = a; g.fillRect(0, 0, 512, 512);
+  const dia = (k, color) => { g.beginPath(); g.moveTo(256, 256 - 256 * k); g.lineTo(256 + 256 * k, 256); g.lineTo(256, 256 + 256 * k); g.lineTo(256 - 256 * k, 256); g.closePath(); g.fillStyle = color; g.fill(); };
+  dia(1, b); dia(.52, c);
+  g.lineWidth = 5; g.strokeStyle = line; g.beginPath(); g.moveTo(256, 20); g.lineTo(492, 256); g.lineTo(256, 492); g.lineTo(20, 256); g.closePath(); g.stroke();
   return canvas;
 }
 
