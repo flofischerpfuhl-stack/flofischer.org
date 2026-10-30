@@ -9,7 +9,7 @@ import { THREE as T } from '../three-kit.js';
 export const SEA_Y = 0.14;
 const SHORE_RANGE = 12; // metres encoded in the shore texture (white = this far or more)
 
-export function createSea({ x0 = -60, z0 = -70, x1 = 560, z1 = 90, texel = 0.75 } = {}) {
+export function createSea({ x0 = -60, z0 = -70, x1 = 560, z1 = 90, texel = Math.max(0.75, Math.sqrt(((x1 - x0) * (z1 - z0)) / 420000)) } = {}) {
   const w = Math.ceil((x1 - x0) / texel), h = Math.ceil((z1 - z0) / texel);
   const data = new Uint8Array(w * h).fill(255);
   const texture = new T.DataTexture(data, w, h, T.RedFormat, T.UnsignedByteType);
@@ -20,7 +20,19 @@ export function createSea({ x0 = -60, z0 = -70, x1 = 560, z1 = 90, texel = 0.75 
     uLook: { value: new T.Vector3() }, uDark: { value: 0 },
     uShallow: { value: color('#86f2e6') }, uMid: { value: color('#2ab2f2') }, uDeep: { value: color('#1a6ad8') }, uFoam: { value: color('#f4ffff') }, uHaze: { value: color('#cfe6f6') },
   };
-  const materials = [];
+  const materials = [], layers = new Map();
+  function stamp({ tile, tw, th, wx, wz, tileTexel }, cx0 = 0, cz0 = 0, cx1 = w, cz1 = h) {
+    const ix0 = Math.round((wx - x0) / texel), iz0 = Math.round((wz - z0) / texel);
+    for (let j = Math.max(0, cz0 - iz0); j < th * tileTexel / texel; j++) {
+      const dz = iz0 + j, sj = Math.min(th - 1, Math.floor((j * texel) / tileTexel));
+      if (dz < cz0 || dz >= cz1) { if (dz >= cz1) break; continue; }
+      for (let i = Math.max(0, cx0 - ix0); i < tw * tileTexel / texel; i++) {
+        const dx = ix0 + i; if (dx >= cx1) break; if (dx < cx0) continue;
+        const si = Math.min(tw - 1, Math.floor((i * texel) / tileTexel)), v = tile[sj * tw + si];
+        data[dz * w + dx] = Math.min(data[dz * w + dx], v);
+      }
+    }
+  }
   const patch = (shader) => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vSeaPos;').replace('#include <project_vertex>', '#include <project_vertex>\nvSeaPos = (modelMatrix * vec4(transformed, 1.0)).xyz;');
@@ -64,23 +76,17 @@ float seaNoise(vec2 x) { vec2 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0
   mesh.rotation.x = -Math.PI / 2; mesh.position.y = SEA_Y; mesh.frustumCulled = false; mesh.renderOrder = -2; mesh.name = 'Sea';
   return {
     mesh, material, uniforms,
-    /** Writes a tile of shore distances (Uint8, 0 = land, 255 = open sea) at world metres (wx, wz), `texel` wide cells. */
+    /** Writes a tile of shore distances (Uint8, 0 = land, 255 = open sea) at world metres (wx, wz), `texel` wide cells. One layer per tile position; layers combine by minimum. */
     paint(tile, tw, th, wx, wz, tileTexel) {
-      const ix0 = Math.round((wx - x0) / texel), iz0 = Math.round((wz - z0) / texel);
-      for (let j = 0; j < th * tileTexel / texel; j++) {
-        const dz = iz0 + j, sj = Math.min(th - 1, Math.floor((j * texel) / tileTexel));
-        if (dz < 0 || dz >= h) continue;
-        for (let i = 0; i < tw * tileTexel / texel; i++) {
-          const dx = ix0 + i; if (dx < 0 || dx >= w) continue;
-          const si = Math.min(tw - 1, Math.floor((i * texel) / tileTexel)), v = tile[sj * tw + si];
-          data[dz * w + dx] = Math.min(data[dz * w + dx], v);
-        }
-      }
-      texture.needsUpdate = true;
+      layers.set(`${wx}/${wz}`, { tile, tw, th, wx, wz, tileTexel });
+      stamp(layers.get(`${wx}/${wz}`)); texture.needsUpdate = true;
     },
+    /** Removes the layer painted at (wx, wz) and restores what the other layers say in its place. */
     clear(wx, wz, tw, th, tileTexel) {
-      const ix0 = Math.round((wx - x0) / texel), iz0 = Math.round((wz - z0) / texel);
-      for (let j = 0; j < th * tileTexel / texel; j++) { const dz = iz0 + j; if (dz < 0 || dz >= h) continue; for (let i = 0; i < tw * tileTexel / texel; i++) { const dx = ix0 + i; if (dx >= 0 && dx < w) data[dz * w + dx] = 255; } }
+      layers.delete(`${wx}/${wz}`);
+      const ix0 = Math.max(0, Math.round((wx - x0) / texel)), iz0 = Math.max(0, Math.round((wz - z0) / texel)), ix1 = Math.min(w, Math.round((wx - x0) / texel + tw * tileTexel / texel)), iz1 = Math.min(h, Math.round((wz - z0) / texel + th * tileTexel / texel));
+      for (let dz = iz0; dz < iz1; dz++) data.fill(255, dz * w + ix0, dz * w + ix1);
+      for (const layer of layers.values()) stamp(layer, ix0, iz0, ix1, iz1);
       texture.needsUpdate = true;
     },
     setDark(dark) { uniforms.uDark.value = dark ? 1 : 0; },

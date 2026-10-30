@@ -14,7 +14,7 @@ import { SEA_Y } from './sea.js';
 
 const CELL = 0.6, EXTENT = 32, FINE = 0.5, BINS = 96, STEP = 1.5, FLAT_BAND = 5.5, SLICE_MS = 6;
 
-const BIOMES = {
+export const BIOMES = {
   meadow: { top: ['#79c93d', '#62b535'], lip: '#b9ec4c', earth: ['#a06a3a', '#7a4b2b'], sand: '#f2de9c', models: { tree: 'TREE_ROUND', bush: 'BUSH', rock: 'ROCK', extra: ['COTTAGE', 'WINDMILL'] }, trees: 1, treeSize: 1.9 },
   sand: { top: ['#efc66f', '#e2b15c'], lip: '#fde596', earth: ['#bc7440', '#8f512d'], sand: '#f7e5ac', models: { tree: 'PALM', bush: 'CACTUS', rock: 'DESERT_ROCK', extra: ['MESA'] }, trees: 0.45, treeSize: 2.1 },
   snow: { top: ['#f3f9ff', '#dbeaf7'], lip: '#ffffff', earth: ['#8ca9c8', '#6b88aa'], sand: '#eaf4fb', models: { tree: 'PINE_SNOW', bush: 'ICE_CRYSTAL', rock: 'SNOW_ROCK', extra: [] }, trees: 0.9, treeSize: 2.2 },

@@ -2,14 +2,14 @@ import {THREE as T} from './three-kit.js';
 
 /** Fit the playable route, rather than distant decorative landscape bounds,
  * into the usable overview area. All values remain actual world coordinates. */
-export function fitRouteOverview({camera,points,target,width,height,unit,span}){
+export function fitRouteOverview({camera,points,target,width,height,unit,span,topInset=height<=400?76:110,bottomInset=height>400?48:20}){
   const right=new T.Vector3(1,0,0).applyQuaternion(camera.quaternion),up=new T.Vector3(0,1,0).applyQuaternion(camera.quaternion);
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   for(const p of points)for(const x of[-1,1])for(const y of[0,1.8])for(const z of[-1,1]){
     const q=p.clone().add(new T.Vector3(x,y,z).multiplyScalar(unit)).sub(target),rx=q.dot(right),uy=q.dot(up);
     minX=Math.min(minX,rx);maxX=Math.max(maxX,rx);minY=Math.min(minY,uy);maxY=Math.max(maxY,uy);
   }
-  const left=28,rightEdge=width-28,top=height<=400?76:110,bottom=height-(height>400?48:20);
+  const left=28,rightEdge=width-28,top=topInset,bottom=height-bottomInset;
   const viewHeight=Math.max((maxX-minX)*height/(rightEdge-left),(maxY-minY)*height/(bottom-top));
   const rx=(minX+maxX)/2,uy=(minY+maxY)/2-(height/2-(top+bottom)/2)*viewHeight/height;
   const determinant=right.x*up.z-right.z*up.x;

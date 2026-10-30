@@ -197,7 +197,7 @@ export function mountGame(root, game) {
         <button type="button" class="fw-iconbtn gm-hud__btn" data-act="pause" aria-label="Pause" data-tip="Pause (Esc)">${icon('pause', { size: 20 })}</button>
         <button type="button" class="fw-iconbtn gm-hud__btn" data-act="restart" aria-label="Restart level" title="Restart level (R)" data-tip="Restart level (R)">${icon('rotate-ccw', { size: 20 })}</button>
         <button type="button" class="fw-iconbtn gm-hud__btn" data-act="help" aria-label="How to play" data-tip="How to play (H)">${icon('circle-help', { size: 20 })}</button>
-        <button type="button" class="fw-iconbtn gm-hud__btn" data-act="puzzle-hint" aria-label="Owlberts Rätselhinweis" title="Owlberts Rätselhinweis" hidden>?</button>
+        <button type="button" class="fw-iconbtn gm-hud__btn" data-act="puzzle-hint" aria-label="Owlbert’s puzzle hint" title="Owlbert’s puzzle hint" hidden>?</button>
         <div class="gm-hud__status">
         <div class="gm-hud__mid">
           <div class="gm-hud__level" data-ref="level"></div>

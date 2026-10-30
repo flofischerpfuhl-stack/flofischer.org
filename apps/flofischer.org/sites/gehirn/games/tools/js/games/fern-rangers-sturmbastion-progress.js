@@ -35,7 +35,7 @@ export function createRangersProgress(Profile, levels) {
         get stars() { return keys.map((_, i) => star(i)); },
         get best() { return keys.map((_, i) => bestOf(i)); },
         worldOpen: world => world === 4 ? unlocked() : Number.isInteger(world) && world >= 0 && world < 4 && Profile.worldOpen(MAIN_ID, world + 1),
-        need: world => world === 4 ? 'Schließe die Hauptkampagne ab, um Sturmbastion freizuschalten.' : `Besiege den Boss von Welt ${world} und sammle ${Profile.STAR_GATES[world]} Sterne.`,
+        need: world => world === 4 ? 'Finish the main campaign to unlock the Sturmbastion.' : `Besiege den Boss von Welt ${world} und sammle ${Profile.STAR_GATES[world]} Sterne.`,
         finish(index, result) {
             const key = keyOf(index);
             // UI state is not the authority: reject directly invoked locked bonus runs too.

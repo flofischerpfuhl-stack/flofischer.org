@@ -3,6 +3,7 @@ import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLi
 import { RoundedBoxGeometry } from '../../vendor/three-0.170.0/RoundedBoxGeometry.js';
 import { BounceArt, ToyInstances, requiredToys } from './tanks-art.js';
 import { TabletopWorld, TABLETOP_FOLIAGE } from './tanks-tabletop.js';
+import { createShading, shadeFromUrl } from './cel-shading.js';
 import { SMAAPass } from '../../vendor/three-0.170.0/postprocessing/SMAAPass.js';
 import * as Profile from './profile.js';
 import { W, H, T } from './tanks-levels.js';
@@ -10,7 +11,7 @@ import { safeArea, SIDE_MARGIN } from './tanks-touch.js';
 
 const THEMES = [
   { // Fernhaven Meadows: oak blocks on a mown lawn
-    ground: 't-grass', floor: 0x9ccf6a, floorAlt: 0x8cc25c, wall: 0xc9925a, wallMap: 't-wood', crate: 0xb07a45, fog: 0xcfe7f5, sky: 0xd6ecff, sun: 0xfff1d6, hemiG: 0x4f6e2c, exposure: 1.05,
+    ground: 't-grass', floor: 0xa9c985, floorAlt: 0x9bbd78, wall: 0xdcab72, wallMap: 't-wood', crate: 0xb07a45, fog: 0xcfe7f5, sky: 0xd6ecff, sun: 0xfff1d6, hemiG: 0x4f6e2c, exposure: 1.05,
   },
   { // Sunbake Dunes: sandstone blocks, canyon cracks
     ground: 't-sand', floor: 0xecc98c, floorAlt: 0xe2bb7a, wall: 0xd9a45f, wallMap: 't-stone', crate: 0xa86e3a, fog: 0xf3d6a8, sky: 0xffe3c2, sun: 0xffd29a, hemiG: 0x9a6b3a, exposure: 1.05,
@@ -19,7 +20,7 @@ const THEMES = [
     ground: 't-snow', floor: 0xe6eef8, floorAlt: 0xdbe6f3, wall: 0x6fb2e8, wallMap: null, crate: 0x8a6a4a, fog: 0xd8e8f8, sky: 0xe0f0ff, sun: 0xffffff, hemiG: 0xb0c4d8, exposure: 0.96, glossyWall: true,
   },
   { // Ember Isles: basalt blocks, lava pools, vents
-    ground: 't-lavarock', floor: 0x5d4f4f, floorAlt: 0x524444, wall: 0x3b3236, wallMap: 't-stone', crate: 0x5a3a2a, fog: 0x4a2a36, sky: 0xff9a6a, sun: 0xffb27a, hemiG: 0x3a1408, exposure: 1.1, lava: true,
+    ground: 't-lavarock', floor: 0x7d6a72, floorAlt: 0x6f5d66, wall: 0x3b3236, wallMap: 't-stone', crate: 0x5a3a2a, fog: 0x4a2a36, sky: 0xff9a6a, sun: 0xffb27a, hemiG: 0x3a1408, exposure: 1.1, lava: true,
   },
 ];
 
@@ -112,6 +113,7 @@ export class Tanks3D {
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.scene = new THREE.Scene();
     this.env = studioEnvironment(this.renderer);
+    const variant = shadeFromUrl(); this.shading = variant ? createShading(variant, { ambient: .7 }) : null; if (this.shading) this.env.userData.shading = this.shading;
     this.camera = new THREE.PerspectiveCamera(30, 1, 0.5, 200);
     this.w = 1; this.h = 1; this.frame = 0; this.session = null; this.themeKey = null; this.rev = -1; this.portrait = false;
     this.time = 0;
@@ -160,6 +162,8 @@ export class Tanks3D {
     // the world around the arena and the arena floor
     this.ground = new THREE.Mesh(new THREE.PlaneGeometry(140, 140), mat(0xffffff, { roughness: 0.95 }));
     this.ground.rotation.x = -Math.PI / 2; this.ground.position.y = -2.65; this.ground.receiveShadow = true; this.ground.renderOrder=1; s.add(this.ground);
+    this.rug = new THREE.Mesh(new THREE.PlaneGeometry(40, 29), new THREE.MeshStandardMaterial({ roughness: 0.95 }));
+    this.rug.rotation.x = -Math.PI / 2; this.rug.position.y = -2.64; this.rug.receiveShadow = true; this.rug.renderOrder = 1; s.add(this.rug);
     this.floor = new THREE.Mesh(new THREE.PlaneGeometry(W, H), mat(0xffffff, { roughness: 0.9 }));
     this.floor.rotation.x = -Math.PI / 2; this.floor.receiveShadow = true; this.floor.renderOrder=1; s.add(this.floor);
     // blocks (walls and the border ring) and crates: one instanced mesh each
@@ -241,10 +245,10 @@ export class Tanks3D {
     try {
       await art.prepare(session,{onProgress,signal});check();
       const [shell,mine,crate]=await Promise.all(['RUBBER_SHELL','TOURNAMENT_MINE','TIMBER_BREAK_WALL'].map(id=>art.library.template(id,'lo')));
-      onProgress?.({phase:'prepare',stage:'Turniertisch vorbereiten …',done:false});
+      onProgress?.({phase:'prepare',stage:'Setting up the tournament table …',done:false});
       tabletop=this.tabletops.get(session.L.world);
       if(!tabletop){tabletop=await TabletopWorld.create(art.library,session.L.world,this.env);newTable=true;}
-      check();this.clearAssets();art.clearActors();
+      check();this.clearAssets();this.releaseActors();art.clearActors();
       if(newTable)this.tabletops.set(session.L.world,tabletop);
       // Only the current and most recently visited regional table retain GPU scenery.
       this.tabletops.delete(session.L.world);this.tabletops.set(session.L.world,tabletop);
@@ -265,12 +269,18 @@ export class Tanks3D {
         return {x:v.x,y:v.y,z:v.z};
       };
       session.visualMine=tk=>{const actor=this.art.actor(tk,this.scene);actor.pose(tk,session);const node=actor.nodes.get('RearMineSocket');if(!node)return null;const v=node.getWorldPosition(new THREE.Vector3());const t=session.tile(v.x+W/2,v.z+H/2);return t===T.WALL||t===T.CRATE?null:{x:v.x,y:v.y,z:v.z};};
-      for(const tk of session.tanks){const actor=art.actor(tk,this.scene);applyIbl(actor.root,this.env,.7);actor.pose(tk,session);}
+      for(const tk of session.tanks){const actor=art.actor(tk,this.scene);this.lightActor(actor);actor.pose(tk,session);}
       applyIbl(this.scene,this.env,.65);
       this.setTheme(session,false);this.layout(session);this.rev=session.rev;
-      onProgress?.({phase:'prepare',stage:'Turniertisch bereit',done:true});
+      onProgress?.({phase:'prepare',stage:'Tournament table ready',done:true});
     } catch(error) {if(newTable&&this.tabletop!==tabletop)tabletop?.dispose();throw error;}
   }
+
+  lightActor(actor){
+    if(actor.lit)return;actor.lit=true;applyIbl(actor.root,this.env,.7);
+    if(actor.id!=='TOY_GHOST')this.shading?.apply(actor.root,{outline:'skinned',all:true});
+  }
+  releaseActors(){for(const a of this.art.actors.values())this.shading?.release(a.root);}
 
   clearAssets(){
     if(this.session){delete this.session.visualMuzzle;delete this.session.visualMine;}
@@ -283,9 +293,9 @@ export class Tanks3D {
   setTheme(sess, dark) {
     const key = sess.L.world + (dark ? ':d' : '');
     if (key === this.themeKey) return;
-    this.themeKey = key;
+    this.themeKey = key; this.shading?.setDark(!!dark);
     const th = THEMES[sess.L.world];
-    this.ground.material.map = texture(th.ground, { repeat: [28, 28] }); this.ground.material.color.set(0xffffff).multiplyScalar(0.92); this.ground.material.needsUpdate = true;
+    this.roomLook(sess.L.world);
     const fog = new THREE.Color(th.fog); if (dark) fog.multiplyScalar(0.62);
     this.scene.background = fog; this.scene.fog = new THREE.Fog(fog, (this.camDist || 28) * 1.05, (this.camDist || 28) * 2.6);
     const L = this.lights;
@@ -301,6 +311,31 @@ export class Tanks3D {
     this.renderer.shadowMap.needsUpdate = true;
   }
 
+  /** The room around the table: floorboards, a play-mat under the table and its soft contact shadow. */
+  roomLook(world) {
+    const R = [
+      { board: ['#d9b27c', '#cfa670'], seam: '#a9804f', rug: '#79a98a', border: '#f1e6c4', dot: '#92bfa0' },
+      { board: ['#9a6642', '#8f5e3c'], seam: '#6a4228', rug: '#4f9aa0', border: '#f6e3b8', dot: '#6fb4ba' },
+      { board: ['#bccddc', '#b0c3d4'], seam: '#8ea5ba', rug: '#5a82b8', border: '#eaf3fb', dot: '#7fa2d0' },
+      { board: ['#463548', '#3d2e40'], seam: '#2a1d2c', rug: '#6e3552', border: '#e5bc55', dot: '#8a4c6a' },
+    ][world];
+    const room = canvasTex(512, 512, (g, w) => {
+      for (let i = 0; i < 8; i++) { g.fillStyle = R.board[i % 2]; g.fillRect(0, i * 64, w, 64); g.fillStyle = R.seam; g.fillRect(0, i * 64, w, 3); g.fillRect(((i * 3) % 4) * 128 + 40, i * 64, 3, 64); }
+    }, [140 / 20, 140 / 20]);
+    const rug = canvasTex(1024, 760, (g, w, h) => {
+      // soft table shadow first, the mat on top of nothing: the mat is under the shadow
+      g.fillStyle = R.rug; g.fillRect(0, 0, w, h);
+      g.fillStyle = R.dot; for (let y = 40; y < h; y += 80) for (let x = (y / 80) % 2 ? 40 : 0; x < w; x += 80) { g.beginPath(); g.arc(x + 20, y, 7, 0, TAU); g.fill(); }
+      g.strokeStyle = R.border; g.lineWidth = 26; g.strokeRect(34, 34, w - 68, h - 68); g.lineWidth = 6; g.strokeRect(70, 70, w - 140, h - 140);
+      g.filter = 'blur(22px)'; g.fillStyle = 'rgba(15,10,25,.55)';
+      const sx = w / 40, sz = h / 29; g.fillRect(w / 2 - 13.4 * sx, h / 2 - 9.6 * sz + 14, 26.8 * sx, 19.2 * sz); g.filter = 'none';
+    });
+    this.roomTex?.dispose(); this.rugTex?.dispose();
+    this.roomTex = room; this.rugTex = rug;
+    this.ground.material.map = room; this.ground.material.color.set(0xffffff); this.ground.material.needsUpdate = true;
+    this.rug.material.map = rug; this.rug.material.needsUpdate = true;
+  }
+
   /** The static map: blocks, crates, ice, pits, vents (again whenever a crate breaks). */
   layout(sess) {
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), sc = new THREE.Vector3(), c = new THREE.Color();
@@ -308,7 +343,7 @@ export class Tanks3D {
     this.crateBatch.begin();
     const th = THEMES[sess.L.world];
     const rand = ((seed) => () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; })(sess.L.seed % 2147483646 + 1);
-    const wall = (x, y, h = 0.82) => {
+    const wall = (x, y, h = 0.96) => {
       const j = (rand() - 0.5) * 0.06;
       m.compose(p.set(x - W / 2 + 0.5, h / 2, y - H / 2 + 0.5), q.setFromAxisAngle(v3.set(0, 1, 0), j), sc.set(0.98, h, 0.98));
       this.walls.setMatrixAt(nw, m); this.walls.setColorAt(nw, c.set(0xffffff).multiplyScalar(0.9 + rand() * 0.16));
@@ -316,7 +351,7 @@ export class Tanks3D {
       this.wallCaps.setMatrixAt(nw, m); this.wallCaps.setColorAt(nw, c.set(0xffffff));
       nw++;
     };
-    for (let x = -1; x <= W; x++) { wall(x, -1, 1.0); wall(x, H, 0.62); }
+    for (let x = -1; x <= W; x++) { wall(x, -1, 1.1); wall(x, H, 0.7); }
     for (let y = 0; y < H; y++) { wall(-1, y, 0.9); wall(W, y, 0.9); }
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const t = sess.grid[y * W + x], cx = x - W / 2 + 0.5, cz = y - H / 2 + 0.5;
@@ -348,7 +383,6 @@ export class Tanks3D {
     if (world === 0) {
       // a mown lawn: broad stripes, clover speckles
       for (let x = 0; x < W; x += 2) { g.fillStyle = hex(alt); g.fillRect(x * px, 0, px, cv.height); }
-      for (let i = 0; i < 2600; i++) { g.fillStyle = rand() < 0.5 ? 'rgba(40,90,20,.22)' : 'rgba(230,250,170,.22)'; g.fillRect(rand() * cv.width, rand() * cv.height, 2 + rand() * 3, 2 + rand() * 3); }
       for (let i = 0; i < 70; i++) { g.fillStyle = rand() < 0.7 ? 'rgba(255,255,255,.85)' : 'rgba(255,230,120,.9)'; g.beginPath(); g.arc(rand() * cv.width, rand() * cv.height, 2.2, 0, TAU); g.fill(); }
     } else if (world === 1) {
       // packed sand with wind ripples
@@ -369,8 +403,8 @@ export class Tanks3D {
     g.strokeStyle = 'rgba(0,0,0,.05)'; g.lineWidth = 1;
     for (let x = 1; x < W; x++) { g.beginPath(); g.moveTo(x * px, 0); g.lineTo(x * px, cv.height); g.stroke(); }
     for (let y = 1; y < H; y++) { g.beginPath(); g.moveTo(0, y * px); g.lineTo(cv.width, y * px); g.stroke(); }
-    g.filter = 'blur(10px)';
-    g.fillStyle = 'rgba(0,0,0,.34)';
+    g.filter = 'blur(5px)';
+    g.fillStyle = 'rgba(20,10,30,.4)';
     for (let y = -1; y <= H; y++) for (let x = -1; x <= W; x++) {
       const t = x < 0 || y < 0 || x >= W || y >= H ? T.WALL : sess.grid[y * W + x];
       if (t === T.WALL || t === T.CRATE) g.fillRect(x * px - 10, y * px - 6, px + 20, px + 20);
@@ -404,7 +438,8 @@ export class Tanks3D {
       : this.portrait ? { t: 62 + sa.t, b: Math.max(116, h * 0.16) + sa.b, l: 6 + sa.l, r: 6 + sa.r }
         : { t: 8 + sa.t, b: 6 + sa.b, l: SIDE_MARGIN + sa.l, r: SIDE_MARGIN + sa.r };
     const corners = [];
-    for (const x of [-W / 2 - 1, W / 2 + 1]) for (const z of [-H / 2 - 1, H / 2 + 1]) for (const y of [0, 1]) corners.push(new THREE.Vector3(x, y, z));
+    const rimX = compact ? 1 : 2.1, rimZ = compact ? 1 : 2.4; // desktop frames the table slab and a strip of the room
+    for (const x of [-W / 2 - rimX, W / 2 + rimX]) for (const z of [-H / 2 - rimZ, H / 2 + rimZ]) for (const y of [-1.3, 1]) corners.push(new THREE.Vector3(x, y, z));
     this.camera.clearViewOffset();
     const box = { x0: 0, y0: 0, x1: 0, y1: 0 };
     const place = (d) => {
@@ -457,7 +492,7 @@ export class Tanks3D {
   drawTanks(s) {
     this.shadows.begin();this.teamMarks.begin();
     for (const tk of s.tanks) {
-      const actor=this.art.actor(tk,this.scene);if(!actor.lit){applyIbl(actor.root,this.env,.7);actor.lit=true;}actor.pose(tk,s);
+      const actor=this.art.actor(tk,this.scene);this.lightActor(actor);actor.pose(tk,s);
       if(!actor.root.visible)continue;
       const anchor=actor.shadow?.getWorldPosition(v3)||v3.set(tk.x-W/2,0,tk.y-H/2);
       const opacity=tk.def?.ghost&&!s.ghostVisible(tk)?.035:.22;
@@ -538,7 +573,7 @@ export class Tanks3D {
     this.scene.traverse(o=>{if(o.geometry)geos.add(o.geometry);if(o.isInstancedMesh)o.dispose();for(const m of o.material?(Array.isArray(o.material)?o.material:[o.material]):[]){mats.add(m);if(m.map&&m.map!==this.ground.material.map&&m.map!==this.walls.material.map)textures.add(m.map);}});
     for(const g of Object.values(this.geo))if(g?.isBufferGeometry)geos.add(g);
     for(const g of geos)g.dispose();for(const m of mats)m.dispose();for(const t of textures)t.dispose();
-    this.lights.light.shadow.map?.dispose();this.env.dispose();this.postAA?.dispose();this.renderer.dispose();this.scene.clear();
+    this.roomTex?.dispose();this.rugTex?.dispose();this.shading?.dispose();this.lights.light.shadow.map?.dispose();this.env.dispose();this.postAA?.dispose();this.renderer.dispose();this.scene.clear();
   }
 
 }

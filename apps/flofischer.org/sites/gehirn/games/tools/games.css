@@ -591,3 +591,19 @@ html.gm-max-open, html.gm-max-open body { overflow: hidden; }
 /* The region bar is visible again (switching worlds must not depend on finding a 3D signpost); the hint sits above it. */
 .gm-ow__journey ~ .gm-ow__hint {bottom:78px}
 @media(max-width:639px){.gm-ow__journey ~ .gm-ow__hint{bottom:72px}}
+
+/* world map: the island compass replaces the visible region bar (the bar stays in the DOM for screen readers) */
+.gm-ow__compass {position:absolute;left:50%;bottom:44px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:8px;max-width:calc(100% - 24px);z-index:3;pointer-events:none}
+.gm-ow__compass[hidden] {display:none}
+.gm-ow__chip {pointer-events:auto;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:6px 14px;border:1px solid var(--border-subtle);border-radius:var(--radius-pill);background:var(--surface-overlay);color:var(--text-1);font:600 var(--text-xs) var(--font-ui);box-shadow:var(--shadow-2);cursor:pointer;white-space:nowrap}
+.gm-ow__chip:hover {background:var(--surface-hover)}
+.gm-ow__chip.is-locked {color:var(--text-3)}
+.gm-ow__chip--world, .gm-ow__chip--main {border-color:var(--accent-border);background:var(--accent-subtle-bg)}
+.gm-ow--map .gm-ow__journey ~ .gm-ow__hint {bottom:12px}
+@media(max-width:639px){
+ .gm-ow--map .gm-ow__journey ~ .gm-ow__hint {display:none}
+ .gm-ow__compass {bottom:10px;width:calc(100% - 20px);gap:6px}
+ .gm-ow__chip {flex:1 1 0;min-width:0;justify-content:center;padding:6px 8px}
+ .gm-ow__chip span {overflow:hidden;text-overflow:ellipsis}
+}
+@media(max-height:480px) and (min-width:640px){.gm-ow__compass{left:12px;right:auto;bottom:10px;transform:none}}

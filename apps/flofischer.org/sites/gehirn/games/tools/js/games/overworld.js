@@ -9,6 +9,7 @@ import { gradeRegion } from './world/fernhaven-landscape.js';
 import { island, BIOME_OF } from './world/island-terrain.js';
 import { createSea } from './world/sea.js';
 import { createHorizon } from './world/horizon.js';
+import { createArchipelago, layoutFromMap } from './world/archipelago.js';
 import { createWayfindingPlan } from './overworld-wayfinding.js';
 import { fitRouteOverview, separateBadgeCenters } from './overworld-overview.js';
 import { prepareOcclusionGeometries } from './overworld-occlusion.js';
@@ -24,6 +25,14 @@ const MAPS = {
   tanks: { family: 'bounce', hero: 'TOY_HAZEL' },
 };
 const ARCHIPELAGO_Z=[0,.14,-.12,.16,-.08];
+// Fern Rangers world map: islands wind from the lower left to the upper right (screen metres: right, down), the Sturmbastion last
+const MAP_LANDSCAPE=[[-205,45],[-78,92],[40,22],[160,78],[245,-24]].map(([x,y])=>[x*.84,y*.84]),MAP_PORTRAIT=[[-62,185],[62,92],[-62,0],[62,-92],[-8,-190]],ISLAND_R=44,WORLD_PHI=.95,WORLD_THETA=Math.PI/4;
+/** Island centres and sea bounds for a map laid out for a wide or a tall screen (chosen once, when the map is mounted). */
+function archLayout(portrait){
+  const c=layoutFromMap(portrait?MAP_PORTRAIT:MAP_LANDSCAPE,{tilt:.6}),centers=c.map(([x,z])=>[x-c[0][0],z-c[0][1]]),xs=centers.map(p=>p[0]),zs=centers.map(p=>p[1]);
+  return{centers,bounds:{x0:Math.min(...xs)-140,x1:Math.max(...xs)+140,z0:Math.min(...zs)-140,z1:Math.max(...zs)+140}};
+}
+const REVEALED_KEY=id=>`fw:games:${id}:regions-revealed`,ease01=k=>k*k*(3-2*k);
 const SKY = ['#78b4ea','#e3c393','#c5dce9','#b698ab','#a8b2c4'];
 const JOURNEYS={rangers:['Forest trails & outposts','Dunes & caravans','Snow passes & fortresses','Basalt paths & machines'],pip:['The green fossil vault','The sunken archive','The frost gallery','The basalt crown'],momo:['Clearings & Fernlings','Oases & Fernlings','Snowfields & Fernlings','Glowlight & Fernlings'],bounce:['The forest cup','The dune tournament','The winter cup','The crater final']};
 const escapeText = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -96,12 +105,13 @@ function opaqueDepthLayer(roots) {
 export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, onProgress, hero:heroId, getHero, starters = [], onStarter, getSound, onSound, title = '' }) {
   const config = MAPS[gameId];
   if (!config) throw new Error(`No authored world family for ${gameId}`);
-  host.classList.add('gm-ow');
+  host.classList.add('gm-ow');host.classList.toggle('gm-ow--map',config.family==='rangers');
   host.innerHTML = `
     <canvas class="gm-ow__canvas" aria-label="Journey through the 3D world. Arrow keys: next stop. Enter: play. Page up and down: region. Home: overview." tabindex="0"></canvas>
     <div class="gm-ow__top"><div class="gm-ow__world"><span class="gm-ow__kicker" data-ow="kicker"></span><strong data-ow="world"></strong><span class="gm-ow__levelcompact" data-ow="level-name"></span></div><div class="gm-ow__stars">${icon('star',{size:16})}<span class="fw-num" data-ow="stars"></span></div></div>
     <div class="gm-ow__nav gm-ow__sr"><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="prev" aria-label="Previous region">${icon('chevron-left',{size:22})}</button><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="next" aria-label="Next region">${icon('chevron-right',{size:22})}</button></div>
-    <nav class="gm-ow__journey" data-ow="journey" aria-label="Your journey through Fernworld"></nav>
+    <nav class="gm-ow__journey${config.family==='rangers'?' gm-ow__sr':''}" data-ow="journey" aria-label="Your journey through Fernworld"></nav>
+    <nav class="gm-ow__compass" data-ow="compass" aria-label="Islands" hidden></nav>
     <div class="gm-ow__tools gm-ow__sr"><button class="fw-btn fw-btn--sm" data-ow="reset">Overview</button><button class="fw-btn fw-btn--sm" data-ow="sound" aria-pressed="true">Sound on</button><button class="fw-btn fw-btn--sm" data-ow="levels" aria-expanded="false">Choose level</button></div><p class="gm-ow__context" data-ow="context"></p>
     <p class="gm-ow__hint">Tap a stop · start at the glowing gate · drag to look around</p>
     <div class="gm-ow__lock" data-ow="lock" hidden></div>
@@ -112,7 +122,8 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   const renderer = createRenderer(canvas), scene = new THREE.Scene();
   renderer.shadowMap.autoUpdate = false;
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .01, 200);
-  const sea = config.family === 'rangers' ? createSea() : null;
+  const layout = archLayout(innerWidth < innerHeight * .85), ARCH_CENTERS = layout.centers, ARCH_BOUNDS = layout.bounds;
+  const sea = config.family === 'rangers' ? createSea(ARCH_BOUNDS) : null;
   if (sea) scene.add(sea.mesh);
   let horizon = null; // created with the first region, when its spacing is known
   const env = studioEnvironment(renderer), lights = addLights(scene, { dir: [-12, 24, 15], shadowBox: 18, mapSize: 2048, intensity: 2.4, ambient: 1.1 });
@@ -129,7 +140,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     prefetchTimer=setTimeout(()=>{
       if(destroyed||pending)return;const at=worlds.findIndex(w=>w.index===regionIndex);if(at<0)return;
       for(const neighbour of [worlds[at-1],worlds[at+1]]){
-        if(!neighbour||regionCache.has(neighbour.index)||prefetches.has(neighbour.index))continue;
+        if(!neighbour||!state.worldOpen(neighbour.index)||regionCache.has(neighbour.index)||prefetches.has(neighbour.index))continue;
         const controller=new AbortController(),index=neighbour.index;prefetches.set(index,controller);
         library.prefetchRegion(index===4?'sturmbastion':config.family,REGIONS[index],{signal:controller.signal}).catch(()=>{}).finally(()=>{if(prefetches.get(index)===controller)prefetches.delete(index);});
       }
@@ -142,12 +153,13 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   let world = 0, sel = 0, active = false, raf = 0, last = 0, hop = null, drag = null;
   let region = null, regionIndex = -1, visuals = null, serial = 0, pendingIndex = -1, pending = null, destroyed = false, versionMismatch=false;
   let initialized=false,lastCurrent=-1,entryAt=0,entryDirection=1,skyTexture=null,regionSpacing=0,travelMs=850,travelDistance=0,departing=null,travelHold=null,horizonTimer=0;const regionCache=new Map(),arrivalFrom=new THREE.Vector3();
+  let arch=null,worldView=false,worldTarget=0,worldK=0,worldH=40,lastH=0,departH=0,autoTour=false,revealing=false,revealed=null,tourTimer=0,departingIndex=-1,pxScale=10,veilAt=0;const lastLook=new THREE.Vector3(),worldLook=new THREE.Vector3();
   let starterPicking=false,starterPickerVersion=0;let travelView=true, wayfindingDirty=true, wayfindingReport=null, wayfindingTask=null, wayfindingGeneration=0;const canceledWayfinding=[];
   let hero = null, companion = null, span = 30, aspect = 1, width = 1, height = 1;
   const look = new THREE.Vector3(), ahead = new THREE.Vector3(), offset = new THREE.Vector3(), signOffset = new THREE.Vector3(), spherical = new THREE.Spherical();
   const pointers = new Map(), ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
-  const debugView = { renderer, scene, camera, get wayfinding(){return wayfindingReport}, get region() { return region?.definition; },get hero(){return loadedHero},get heroPosition(){return hero?.root.position.toArray()},get choosingStarter(){return starterPicking},get starters(){return starterActors.map(a=>({id:a.id,visible:a.root.visible,position:a.root.position.toArray()}))},get targets(){return visuals?{nodes:visuals.nodes.map(n=>({i:n.lv.i,open:state.open(n.lv.i),position:n.label.position.toArray()})),actions:visuals.actions.filter(a=>a.root.visible).map(a=>({action:a.action,position:a.face.getWorldPosition(new THREE.Vector3()).toArray(),size:a.face.getWorldScale(new THREE.Vector3()).toArray()}))}:{}},get selected(){return sel},get world(){return world},get cachedRegions(){return [...regionCache.keys()]},get islands(){return [...regionCache.entries()].map(([i,h])=>({region:i,...(h.visuals.context.state||{})}))} };
+  const debugView = { renderer, scene, camera, get wayfinding(){return wayfindingReport}, get region() { return region?.definition; },get hero(){return loadedHero},get heroPosition(){return hero?.root.position.toArray()},get choosingStarter(){return starterPicking},get starters(){return starterActors.map(a=>({id:a.id,visible:a.root.visible,position:a.root.position.toArray()}))},get targets(){return visuals?{nodes:visuals.nodes.map(n=>({i:n.lv.i,open:state.open(n.lv.i),position:n.label.position.toArray()})),actions:visuals.actions.filter(a=>a.root.visible).map(a=>({action:a.action,position:a.face.getWorldPosition(new THREE.Vector3()).toArray(),size:a.face.getWorldScale(new THREE.Vector3()).toArray()}))}:{}},get selected(){return sel},get world(){return world},get cachedRegions(){return [...regionCache.keys()]},get archipelago(){return arch?.debug()},get worldView(){return worldView},get worldK(){return worldK},enterWorld:()=>enterWorld(),leaveWorld:()=>leaveWorld(),get islands(){return [...regionCache.entries()].map(([i,h])=>({region:i,...(h.visuals.context.state||{})}))} };
   const themeMedia=matchMedia('(prefers-color-scheme: dark)');
   function background(){
     const dark=document.documentElement.dataset.theme?document.documentElement.dataset.theme==='dark':themeMedia.matches;
@@ -233,9 +245,9 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   }
 
   function pickerVisibility(){
-    for(const a of visuals?.actions??[])a.root.visible=a.action.starter?starterPicking:!starterPicking&&(!a.action.play||state.open(sel));
+    for(const a of visuals?.actions??[])a.root.visible=a.action.starter?starterPicking:!starterPicking&&!worldView&&(!a.action.play||state.open(sel));
     placeHero();placeStarters();
-    host.querySelector('.gm-ow__hint').textContent=starterPicking?'Pick your Fernling right in the scene.':starters.length?'Tap a Fernling to choose · tap a stop to travel':'Tap a stop · start at the glowing gate · drag to look around';
+    host.querySelector('.gm-ow__hint').textContent=starterPicking?'Pick your Fernling right in the scene.':arch?'Tap a stop · start at the glowing gate · tap another island to sail there':starters.length?'Tap a Fernling to choose · tap a stop to travel':'Tap a stop · start at the glowing gate · drag to look around';
   }
   async function openStarterPicker(){
     if(!starters.length||starterPicking)return;const version=++starterPickerVersion;
@@ -332,7 +344,75 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     }
     const listKey=wd.levels.map(l=>`${l.i}:${state.stars(l.i)}:${state.open(l.i)}`).join('|')+`/${sel}`;
     if($('list').dataset.key!==listKey){$('list').dataset.key=listKey;$('list').innerHTML=wd.levels.map(lv=>`<li><button type="button" data-ow-level="${lv.i}" aria-current="${sel===lv.i?'step':'false'}" ${state.open(lv.i)?'':'disabled'}>${escapeText(lv.name)}<span>${state.open(lv.i)?`${state.stars(lv.i)} / 3 ★`:'Locked'}</span></button></li>`).join('');}
-    syncSound();
+    syncArchipelago();syncCompass();syncSound();
+  }
+  function syncArchipelago(){
+    if(!arch)return;
+    for(const w of worlds)arch.setIsland(w.index,{open:state.worldOpen(w.index),revealed:readRevealed().has(w.index),stars:w.levels.reduce((n,l)=>n+state.stars(l.i),0),total:w.levels.length*3});
+    arch.setCurrent(world);
+  }
+  /** Which islands the player has already seen unlocked; an island that is open but not in the set still sits under its clouds. */
+  function readRevealed(){
+    if(revealed)return revealed;
+    let list=null;try{list=JSON.parse(localStorage.getItem(REVEALED_KEY(gameId)));}catch{/* storage may be unavailable */}
+    if(!Array.isArray(list)){
+      // first run with this feature: whatever was already unlocked has been seen, except a fresh, untouched newest island
+      const open=worlds.map(w=>w.index).filter(i=>state.worldOpen(i)),newest=open.at(-1),fresh=newest>0&&worlds.find(w=>w.index===newest).levels.every(l=>!state.stars(l.i));
+      list=open.filter(i=>!(fresh&&i===newest));try{localStorage.setItem(REVEALED_KEY(gameId),JSON.stringify(list));}catch{/* ignore */}
+    }
+    return revealed=new Set(list);
+  }
+  function markRevealed(index){readRevealed().add(index);try{localStorage.setItem(REVEALED_KEY(gameId),JSON.stringify([...revealed]));}catch{/* ignore */}}
+  /** Islands unlocked since the player last looked: pull back to the world view, part their clouds once, fly back. */
+  function playReveals(){
+    if(!arch||revealing||!active||destroyed||pending||regionIndex!==world||starterPicking)return;
+    const fresh=worlds.map(w=>w.index).filter(i=>state.worldOpen(i)&&!readRevealed().has(i));if(!fresh.length)return;
+    const reduced=motionPreference.matches;revealing=true;
+    if(reduced){for(const i of fresh){markRevealed(i);arch.reveal(i,{reduced:true});}syncArchipelago();revealing=false;return;}
+    const wasWorld=worldView;if(!wasWorld)enterWorld(true);let left=fresh.length;
+    tourTimer=setTimeout(()=>{if(destroyed)return;fresh.forEach((i,k)=>setTimeout(()=>{if(destroyed)return;markRevealed(i);arch.reveal(i,{done:()=>{if(--left>0)return;tourTimer=setTimeout(()=>{revealing=false;if(autoTour&&worldView)leaveWorld();playReveals();},800);}});syncArchipelago();},k*450));},wasWorld?200:1100);
+  }
+  function finishVeil(){arch?.unveil(regionIndex,{reduced:motionPreference.matches});}
+  function buildMap(){
+    arch=createArchipelago({islands:ARCH_CENTERS.map(([x,z],i)=>({name:NAMES[i],biome:BIOME_OF[i],x,z,radius:ISLAND_R})),sea,mobile:matchMedia('(max-width:639px)').matches});
+    scene.add(arch.group);shading?.apply(arch.group,{outline:false});
+    horizon=createHorizon({spacing:0,zs:[],centers:ARCH_CENTERS,bounds:ARCH_BOUNDS});scene.add(horizon.group);shading?.apply(horizon.group,{outline:false});horizon.group.userData.onTrees=()=>{shading?.apply(horizon.group,{outline:false});kick();};
+    for(const [index,held] of regionCache)arch.setFull(index,index===regionIndex||(!!departing&&held.visuals===departing));
+    syncArchipelago();pickerVisibility();syncCompass();worldFit();kick();setTimeout(playReveals,300);
+  }
+  function worldFit(){
+    if(!region||!arch)return;
+    const s=new THREE.Spherical(spherical.radius||60,WORLD_PHI,WORLD_THETA),base=camera.clone(),points=[];
+    base.position.copy(region.cameraTarget).add(new THREE.Vector3().setFromSpherical(s));base.lookAt(region.cameraTarget);base.updateMatrixWorld(true);
+    for(const [x,z] of ARCH_CENTERS){for(const [dx,dz] of [[-1,-1],[1,1],[-1,1],[1,-1]])points.push(new THREE.Vector3(x+dx*ISLAND_R*.9,0,z+dz*ISLAND_R*.9));points.push(new THREE.Vector3(x,22,z));}
+    const r=fitRouteOverview({camera:base,points,target:region.cameraTarget,width,height,unit:1,span,topInset:height<=400?60:96,bottomInset:height<=400?64:width<640?150:122});
+    worldLook.set(region.cameraTarget.x+r.panX,region.cameraTarget.y,region.cameraTarget.z+r.panZ);worldH=r.zoom*span*.5;
+  }
+  function enterWorld(auto=false){
+    if(!arch||!region||worldView||destroyed)return;
+    if(starterPicking)closeStarterPicker();
+    invalidateWayfinding();hop=null;worldView=true;travelView=false;autoTour=auto;$('lock').hidden=true;worldFit();worldTarget=1;pickerVisibility();syncDom();kick();
+  }
+  function leaveWorld(){
+    if(!worldView)return;
+    worldView=false;autoTour=false;worldTarget=0;pickerVisibility();focusNode();syncDom();kick();
+  }
+  function pickIsland(e){
+    if(!arch)return -1;const rect=canvas.getBoundingClientRect();ndc.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);ray.setFromCamera(ndc,camera);
+    return arch.pick(ray,{except:worldView?-1:world});
+  }
+  function goIsland(k){
+    if(!worlds.some(w=>w.index===k))return;
+    if(k===world&&regionIndex===world){if(worldView)leaveWorld();return;}
+    setWorld(k);
+  }
+  /** The always-visible way around: both neighbours and the world map (or the way back out of it). */
+  function syncCompass(){
+    const el=$('compass');if(!arch){el.hidden=true;return;}
+    const at=worlds.findIndex(w=>w.index===world),prev=worlds[at-1],next=worlds[at+1],key=`${world}|${worldView}|${worlds.map(w=>state.worldOpen(w.index)?1:0).join('')}`;
+    if(el.dataset.key===key)return;el.dataset.key=key;el.hidden=false;
+    const chip=(w,dir)=>{const locked=!state.worldOpen(w.index);return `<button type="button" class="gm-ow__chip${locked?' is-locked':''}" data-region="${w.index}" aria-label="${dir<0?'Back to':'Sail to'} ${NAMES[w.index]}${locked?', locked':''}">${dir<0?icon('chevron-left',{size:18}):''}${locked?icon('lock',{size:14}):''}<span>${NAMES[w.index]}</span>${dir>0?icon('chevron-right',{size:18}):''}</button>`;};
+    el.innerHTML=worldView?`<button type="button" class="gm-ow__chip gm-ow__chip--main" data-region="${world}" aria-label="Back to ${NAMES[world]}">${icon('chevron-left',{size:18})}<span>Back to ${NAMES[world]}</span></button>`:`${prev?chip(prev,-1):''}<button type="button" class="gm-ow__chip gm-ow__chip--world" data-ow="worldview" aria-label="Show the whole world map">${icon('globe',{size:16})}<span>World map</span></button>${next?chip(next,1):''}`;
   }
   function fit() {
     if(!region)return;
@@ -354,28 +434,31 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     const wd=worlds.find(w=>w.index===world),current=state.current();
     if(!keepSel || (levels[sel]?.world??0)!==world)sel=wd.levels.some(l=>l.i===current)?current:wd.levels[0].i;
     hop=null;syncDom();
-    if(!force&&regionIndex===world){++serial;pendingIndex=-1;pending=null;loadingStatus.finish();paintNodes();placeHero();kick();return Promise.resolve();}
+    if(!force&&regionIndex===world){++serial;pendingIndex=-1;pending=null;loadingStatus.finish();if(worldView)leaveWorld();paintNodes();placeHero();kick();return Promise.resolve();}
     if(!force&&pendingIndex===world&&pending)return pending;
     invalidateWayfinding();cancelPrefetch(world);const request=++serial,target=world;pendingIndex=target;versionMismatch=false;
-    loadingStatus.begin(NAMES[target]);host.classList.toggle('is-travelling',!!region);
+    loadingStatus.begin(NAMES[target]);host.classList.toggle('is-travelling',!!region);veilAt=arch&&regionIndex>=0&&!regionCache.has(target)&&arch.veil(target,{reduced:motionPreference.matches})?performance.now():0;
     if(hero)hero.root.visible=false;if(companion)companion.root.visible=false;for(const a of starterActors)a.root.visible=false;
     pending=(async()=>{
       let next, reuse=false;
       try{
         const cached=regionCache.get(target);reuse=!!cached;next=cached?.region??await library.region(target===4?'sturmbastion':config.family,REGIONS[target]);await ensureActors();if(target===0)await ensureStarters();
-        if(request!==serial||destroyed){if(!cached)next.release();return;}
+        if(veilAt&&performance.now()<veilAt+360)await new Promise(r=>setTimeout(r,veilAt+360-performance.now()));
+        if(request!==serial||destroyed){if(!cached)next.release();arch?.unveil(target,{reduced:true});return;}
         const hadRegion=!!region;arrivalFrom.copy(region?look:next.cameraTarget);
-        const reducedNow=motionPreference.matches,leaving=visuals;
-        if(leaving&&!(sea&&hadRegion&&!reducedNow&&regionIndex!==target)){leaving.group.visible=false;leaving.context.group.visible=false;}
-        const travelling=!!(sea&&hadRegion&&!reducedNow&&leaving&&regionIndex!==target);departing=travelling?leaving:null;
+        const reducedNow=motionPreference.matches,leaving=visuals,leavingIndex=regionIndex;
+        if(leaving&&!(sea&&hadRegion&&!reducedNow&&regionIndex!==target)){leaving.group.visible=false;leaving.context.group.visible=false;arch?.setFull(leavingIndex,false);}
+        const travelling=!!(sea&&hadRegion&&!reducedNow&&leaving&&regionIndex!==target);if(departing&&departing!==leaving){departing.group.visible=false;departing.context.group.visible=false;arch?.setFull(departingIndex,false);}
+        departing=travelling?leaving:null;departingIndex=travelling?leavingIndex:-1;if(travelling){arrivalFrom.copy(lastLook);departH=lastH;}else departH=0;worldView=false;worldTarget=0;worldK=0;autoTour=false;
         region=next;regionIndex=target;
         if(!cached){
           if(!regionSpacing)regionSpacing=Math.max(region.bounds.getSize(new THREE.Vector3()).x,region.bounds.getSize(new THREE.Vector3()).z)*1.13;
-          if(sea&&!horizon){regionSpacing=Math.max(region.bounds.getSize(new THREE.Vector3()).x,region.bounds.getSize(new THREE.Vector3()).z)*4;if(!horizonTimer){const spacing=regionSpacing;horizonTimer=setTimeout(()=>{horizonTimer=0;if(destroyed||horizon)return;horizon=createHorizon({spacing,zs:ARCHIPELAGO_Z.map(f=>f*spacing)});scene.add(horizon.group);shading?.apply(horizon.group,{outline:false});horizon.group.userData.onTrees=()=>{shading?.apply(horizon.group,{outline:false});kick();};kick();},400);}}
-          const shift=new THREE.Vector3(target*regionSpacing,0,sea?ARCHIPELAGO_Z[target]*regionSpacing:(target%2)*regionSpacing*.08);
+          if(sea&&!horizon&&!horizonTimer)horizonTimer=setTimeout(()=>{horizonTimer=0;if(destroyed||horizon)return;buildMap();},400);
+          const shift=sea?new THREE.Vector3(ARCH_CENTERS[target][0],0,ARCH_CENTERS[target][1]):new THREE.Vector3(target*regionSpacing,0,(target%2)*regionSpacing*.08);
           region.root.position.add(shift);region.bounds.translate(shift);region.cameraPosition.add(shift);region.cameraTarget.add(shift);for(const v of [...region.nodePositions,...region.route])v.add(shift);
           scene.add(region.root);visuals=makeNodes(region,wd);
         }else{visuals=cached.visuals;visuals.group.visible=true;visuals.context.group.visible=true;}
+        arch?.setFull(target,true);
         if(!hadRegion)arrivalFrom.copy(region.cameraTarget);
         regionCache.delete(target);regionCache.set(target,{region,visuals});
         while(regionCache.size>2){const [index,held]=regionCache.entries().next().value;regionCache.delete(index);releaseVisuals(held.visuals);held.region.release();}
@@ -385,9 +468,9 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
         const radius=Math.max(size.x,size.z)*.55;
         lights.light.position.copy(center).add(new THREE.Vector3(-radius*.8,radius*1.5,radius));lights.light.target.position.copy(center);lights.light.target.updateMatrixWorld();
         Object.assign(lights.light.shadow.camera,{left:-radius,right:radius,top:radius,bottom:-radius,near:Math.max(.001,radius*.02),far:radius*6});lights.light.shadow.camera.updateProjectionMatrix();
-        applyIbl(region.root,env,.55);if(shading){shading.apply(region.root,{outline:false});shading.apply(visuals.context.group,{outline:false});shading.apply(visuals.group,{outline:false});}fit();paintNodes();placeHero();placeStarters();pickerVisibility();focusNode(true);renderer.shadowMap.needsUpdate=true;
-        host.classList.remove('is-travelling');syncDom();if(state.open(sel))onSelect?.(sel);kick();prefetchNeighbours();
-      }catch(error){if(next&&!reuse&&region!==next)next.release();if(request!==serial||destroyed)return;console.error('[games] map load failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'This region could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}
+        applyIbl(region.root,env,.55);if(shading){shading.apply(region.root,{outline:false});shading.apply(visuals.context.group,{outline:false});shading.apply(visuals.group,{outline:false});}fit();worldFit();paintNodes();placeHero();placeStarters();pickerVisibility();const flightFrom=arrivalFrom.clone();focusNode(true);if(travelling)arrivalFrom.copy(flightFrom);syncArchipelago();renderer.shadowMap.needsUpdate=true;
+        host.classList.remove('is-travelling');syncDom();if(state.open(sel))onSelect?.(sel);kick();prefetchNeighbours();if(!travelHold)finishVeil();setTimeout(playReveals,700);
+      }catch(error){arch?.unveil(target,{reduced:true});if(next&&!reuse&&region!==next)next.release();if(request!==serial||destroyed)return;console.error('[games] map load failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'This region could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}
       finally{if(request===serial){pendingIndex=-1;pending=null;}}
     })();return pending;
   }
@@ -427,8 +510,8 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       if(!task.search){
         const selected=visuals.nodes.find(n=>n.lv.i===sel);if(!selected)return;
         placeStarters();scene.updateMatrixWorld(true);
-        const canvasRect=canvas.getBoundingClientRect(),hudRects=[...host.querySelectorAll('.gm-ow__top,.gm-ow__context')].map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height),hintRect=host.querySelector('.gm-ow__hint').getBoundingClientRect();
-        const topInset=Math.max(8,...hudRects.map(r=>r.bottom-canvasRect.top+8)),bottomInset=hintRect.width&&hintRect.height?Math.max(8,canvasRect.bottom-hintRect.top+8):8;
+        const canvasRect=canvas.getBoundingClientRect(),hudRects=[...host.querySelectorAll('.gm-ow__top,.gm-ow__context')].map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height),bottomRects=[host.querySelector('.gm-ow__hint'),$('compass')].map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height);
+        const topInset=Math.max(8,...hudRects.map(r=>r.bottom-canvasRect.top+8)),bottomInset=bottomRects.length?Math.max(8,...bottomRects.map(r=>canvasRect.bottom-r.top+8)):8;
         task.search=createWayfindingPlan({actions:visuals.actions.filter(a=>a.root.visible),selected:selected.pos,camera:camera.clone(),width,height,unit:region.unitScale,topInset,bottomInset,occluders:[region.root,visuals.context.group],groundOccluders:[region.root],groundFloors:visuals.context.group.children.filter(n=>n.isMesh&&n.visible&&['CircleGeometry','PlaneGeometry'].includes(n.geometry.type)&&!n.material.transparent),groundPath:region.route,fineOccluders:[visuals.gates,visuals.posts],protectedLabels:visuals.nodes.map(n=>n.label),protectedActors:[hero?.root,companion?.root,...starterActors.filter(a=>a.root.visible).map(a=>a.root)].filter(Boolean)});
         wayfindingReport.phase='placement';
       }
@@ -447,15 +530,15 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     const base=camera.clone(),s=spherical.clone();s.phi=THREE.MathUtils.clamp(s.phi,.22,1.36);base.position.copy(region.cameraTarget).add(new THREE.Vector3().setFromSpherical(s));base.lookAt(region.cameraTarget);base.updateMatrixWorld(true);
     return fitRouteOverview({camera:base,points:visuals.nodes.map(n=>n.pos),target:region.cameraTarget,width,height,unit:region.unitScale,span});
   }
-  function resetView(){if(wayfindingTask)invalidateWayfinding();$('lock').hidden=true;travelView=false;const target=overviewTarget();Object.assign(view,{tYaw:0,tPitch:0,tZoom:target.zoom,tPanX:target.panX,tPanZ:target.panZ});}
-  function resize(){invalidateWayfinding();const r=canvas.getBoundingClientRect();width=Math.max(1,r.width);height=Math.max(1,r.height);aspect=width/height;renderer.setPixelRatio(LOW_GPU?.6:Math.min(1.5,devicePixelRatio||1));renderer.setSize(width,height,false);fit();if(travelView)focusNode();else if(region){const target=overviewTarget();Object.assign(view,{tZoom:target.zoom,tPanX:target.panX,tPanZ:target.panZ});}kick();}
+  function resetView(){if(wayfindingTask)invalidateWayfinding();$('lock').hidden=true;if(worldView){worldView=false;worldTarget=0;pickerVisibility();}travelView=false;const target=overviewTarget();Object.assign(view,{tYaw:0,tPitch:0,tZoom:target.zoom,tPanX:target.panX,tPanZ:target.panZ});}
+  function resize(){invalidateWayfinding();const r=canvas.getBoundingClientRect();width=Math.max(1,r.width);height=Math.max(1,r.height);aspect=width/height;renderer.setPixelRatio(LOW_GPU?.6:Math.min(1.5,devicePixelRatio||1));renderer.setSize(width,height,false);fit();worldFit();if(worldView){/* the frame follows worldFit */}else if(travelView)focusNode();else if(region){const target=overviewTarget();Object.assign(view,{tZoom:target.zoom,tPanX:target.panX,tPanZ:target.panZ});}kick();}
   function kick(){if(active&&!raf&&!destroyed){last=0;raf=requestAnimationFrame(frame);}}
   function placeBadges(){
     if(!visuals)return;
     const scale=height/(camera.top-camera.bottom),size=Math.max(.55*region.unitScale,24/scale);
-    for(const n of visuals.nodes){n.label.position.copy(n.pos);n.label.position.y+=1.65*region.unitScale;n.label.scale.setScalar(size);}
+    for(const n of visuals.nodes){n.label.position.copy(n.pos);n.label.position.y+=1.65*region.unitScale;n.label.scale.setScalar(size);n.label.visible=worldK<.5;}
     visuals.badgeLinks.visible=false;
-    if(travelView)return;
+    if(travelView||worldK>.5)return;
     const projected=visuals.nodes.map(n=>{const p=n.label.position.clone().project(camera);return{x:(p.x*.5+.5)*width,y:(-p.y*.5+.5)*height};}),separated=separateBadgeCenters(projected,size*scale),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),vertices=visuals.badgeLinks.geometry.attributes.position;
     let count=0;
     for(let i=0;i<visuals.nodes.length;i++){
@@ -469,14 +552,16 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     raf=0;if(!active||destroyed)return;const dt=Math.min(.05,(t-(last||t))/1000);last=t;const time=t/1000,reduced=motionPreference.matches;
     if(region){
       for(const key of ['yaw','pitch','zoom','panX','panZ'])view[key]+=(view['t'+key[0].toUpperCase()+key.slice(1)]-view[key])*(1-Math.exp(-dt*8));
-      look.copy(region.cameraTarget);look.x+=view.panX*region.unitScale;look.z+=view.panZ*region.unitScale;if(travelHold){if(travelHold.context.state?.ready!==false||t-travelHold.since>900)travelHold=null;else entryAt=t;}
-      const travelLength=reduced?0:travelMs,progress=travelLength?Math.min(1,(t-entryAt)/travelLength):1,arrival=1-progress;if(arrival>0)look.lerp(arrivalFrom,arrival*arrival*(3-2*arrival));if(departing&&progress>=1){departing.group.visible=false;departing.context.group.visible=false;departing=null;}look.y=travelView?(hero?.root.position.y??region.cameraTarget.y)+(aspect<.9?1.5:.7)*region.unitScale:region.cameraTarget.y;
+      worldK+=(worldTarget-worldK)*(reduced?1:1-Math.exp(-dt*3.4));if(Math.abs(worldTarget-worldK)<.003)worldK=worldTarget;
+      look.copy(region.cameraTarget);look.x+=view.panX*region.unitScale;look.z+=view.panZ*region.unitScale;if(travelHold){if(travelHold.context.state?.ready!==false||t-travelHold.since>900){travelHold=null;finishVeil();}else entryAt=t;}
+      const travelLength=reduced?0:travelMs,progress=travelLength?Math.min(1,(t-entryAt)/travelLength):1,arrival=1-progress;if(arrival>0)look.lerp(arrivalFrom,arrival*arrival*(3-2*arrival));if(departing&&progress>=1){departing.group.visible=false;departing.context.group.visible=false;arch?.setFull(departingIndex,false);departing=null;departingIndex=-1;}look.y=travelView?(hero?.root.position.y??region.cameraTarget.y)+(aspect<.9?1.5:.7)*region.unitScale:region.cameraTarget.y;
       if(hop&&hero){look.x=hero.root.position.x;look.z=hero.root.position.z;}
-      const phi=THREE.MathUtils.clamp(spherical.phi-view.pitch,.22,1.36),theta=spherical.theta+view.yaw;
+      const we=ease01(worldK);if(we>0)look.lerp(worldLook,we);
+      const phi0=THREE.MathUtils.clamp(spherical.phi-view.pitch,.22,1.36),theta0=spherical.theta+view.yaw,phi=we>0?THREE.MathUtils.lerp(phi0,WORLD_PHI,we):phi0,theta=we>0?theta0+(((WORLD_THETA-theta0+Math.PI*3)%(Math.PI*2))-Math.PI)*we:theta0;
       offset.setFromSphericalCoords(spherical.radius,phi,theta);camera.position.copy(look).add(offset);camera.lookAt(look);
-      let h=span*.5*view.zoom;if(travelDistance&&progress<1){const peak=Math.max(1,travelDistance*.62/aspect/h);h*=1+(peak-1)*Math.sin(Math.PI*progress);}camera.left=-h*aspect;camera.right=h*aspect;camera.bottom=-h;camera.top=h;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);placeBadges();
+      let h=span*.5*view.zoom;if(departH&&progress<1)h=THREE.MathUtils.lerp(departH,h,ease01(progress));if(travelDistance&&progress<1){const peak=Math.max(1,travelDistance*.62/aspect/h);h*=1+(peak-1)*Math.sin(Math.PI*progress);}if(we>0)h=THREE.MathUtils.lerp(h,worldH,we);lastH=h;lastLook.copy(look);camera.left=-h*aspect;camera.right=h*aspect;camera.bottom=-h;camera.top=h;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);placeBadges();pxScale=height/(camera.top-camera.bottom);arch?.update(time,{pxScale,showCurrent:worldK>.25});
       if(wayfindingDirty&&!starterPicking&&travelView&&regionIndex===world){
-        const settled=!hop&&t-entryAt>travelLength&&Math.abs(view.zoom-view.tZoom)<.0002&&Math.abs(view.panX-view.tPanX)+Math.abs(view.panZ-view.tPanZ)<.002&&Math.abs(view.yaw-view.tYaw)+Math.abs(view.pitch-view.tPitch)<.002;
+        const settled=!hop&&worldK<.01&&t-entryAt>travelLength&&Math.abs(view.zoom-view.tZoom)<.0002&&Math.abs(view.panX-view.tPanX)+Math.abs(view.panZ-view.tPanZ)<.002&&Math.abs(view.yaw-view.tYaw)+Math.abs(view.pitch-view.tPitch)<.002;
         advanceWayfinding(settled);
       }
       if(!travelView&&regionIndex===world&&(wayfindingReport?.phase!=='overview'||wayfindingReport.width!==width||wayfindingReport.height!==height)){
@@ -515,22 +600,22 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   const pinch=()=>{const[a,b]=[...pointers.values()];return{d:Math.hypot(a.x-b.x,a.y-b.y),x:(a.x+b.x)/2,y:(a.y+b.y)/2}};
   const panBy=(dx,dy)=>{const k=span/(region?.unitScale??1)/height*view.zoom;view.tPanX=THREE.MathUtils.clamp(view.tPanX-dx*k,-12,12);view.tPanZ=THREE.MathUtils.clamp(view.tPanZ-dy*k,-12,12);};
   canvas.addEventListener('pointerdown',e=>{try{canvas.setPointerCapture(e.pointerId);}catch{/* synthetic or already released pointer */}pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});drag={x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY,moved:pointers.size>1?99:0,pan:e.button===2||e.shiftKey,pinch:pointers.size===2?pinch():null};});
-  canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId)||!drag)return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){if(wayfindingTask)invalidateWayfinding();const p=pinch();if(drag.pinch){view.tZoom=THREE.MathUtils.clamp(view.tZoom*drag.pinch.d/Math.max(1,p.d),.14,1.7);panBy(p.x-drag.pinch.x,p.y-drag.pinch.y);}drag.pinch=p;return;}const dx=e.clientX-drag.lx,dy=e.clientY-drag.ly;drag.lx=e.clientX;drag.ly=e.clientY;drag.moved=Math.max(drag.moved,Math.hypot(e.clientX-drag.x,e.clientY-drag.y));if(drag.moved<6)return;if(wayfindingTask)invalidateWayfinding();if(drag.pan)panBy(dx,dy);else{view.tYaw-=dx*.006;view.tPitch=THREE.MathUtils.clamp(view.tPitch+dy*.004,-.4,.6);}});
-  canvas.addEventListener('pointerup',e=>{pointers.delete(e.pointerId);if(!drag)return;const moved=drag.moved;if(pointers.size){const remaining=pointers.values().next().value;drag.pinch=null;drag.x=drag.lx=remaining.x;drag.y=drag.ly=remaining.y;drag.moved=99;return;}drag=null;if(moved<8&&state.worldOpen(world)){const i=pick(e);if(i&&typeof i==='object'){if(i.starterMenu){openStarterPicker();}else if(i.starter){closeStarterPicker();onStarter?.(i.starter);}else if(i.sound){toggleSound();}else if(i.overview){if(travelView)resetView();else focusNode();}else if(i.play&&state.open(sel)&&!hop)onPlay(sel);else if(i.region!==undefined){if(state.worldOpen(i.region))setWorld(i.region);else{$('lock').textContent=state.need(i.region);$('lock').hidden=false;}}return;}if(i>=0&&state.open(i)){if(i===sel&&!hop){if(travelView)onPlay(i);else focusNode();}else moveTo(i);}else if(i>=0){sel=i;paintNodes();syncDom();}}});
+  canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId)||!drag||worldView)return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){if(wayfindingTask)invalidateWayfinding();const p=pinch();if(drag.pinch&&arch&&view.tZoom*drag.pinch.d/Math.max(1,p.d)>1.75&&view.tZoom>=1.6){enterWorld();drag.pinch=p;return;}if(drag.pinch){view.tZoom=THREE.MathUtils.clamp(view.tZoom*drag.pinch.d/Math.max(1,p.d),.14,1.7);panBy(p.x-drag.pinch.x,p.y-drag.pinch.y);}drag.pinch=p;return;}const dx=e.clientX-drag.lx,dy=e.clientY-drag.ly;drag.lx=e.clientX;drag.ly=e.clientY;drag.moved=Math.max(drag.moved,Math.hypot(e.clientX-drag.x,e.clientY-drag.y));if(drag.moved<6)return;if(wayfindingTask)invalidateWayfinding();if(drag.pan)panBy(dx,dy);else{view.tYaw-=dx*.006;view.tPitch=THREE.MathUtils.clamp(view.tPitch+dy*.004,-.4,.6);}});
+  canvas.addEventListener('pointerup',e=>{pointers.delete(e.pointerId);if(!drag)return;const moved=drag.moved;if(pointers.size){const remaining=pointers.values().next().value;drag.pinch=null;drag.x=drag.lx=remaining.x;drag.y=drag.ly=remaining.y;drag.moved=99;return;}drag=null;if(moved<8&&worldView){const k=pickIsland(e);if(k>=0)goIsland(k);return;}if(moved<8&&state.worldOpen(world)){const i=pick(e);if(i===-1&&arch){const k=pickIsland(e);if(k>=0){goIsland(k);return;}}if(i&&typeof i==='object'){if(i.starterMenu){openStarterPicker();}else if(i.starter){closeStarterPicker();onStarter?.(i.starter);}else if(i.sound){toggleSound();}else if(i.overview){if(travelView)resetView();else focusNode();}else if(i.play&&state.open(sel)&&!hop)onPlay(sel);else if(i.region!==undefined){if(state.worldOpen(i.region))setWorld(i.region);else{$('lock').textContent=state.need(i.region);$('lock').hidden=false;}}return;}if(i>=0&&state.open(i)){if(i===sel&&!hop){if(travelView)onPlay(i);else focusNode();}else moveTo(i);}else if(i>=0){sel=i;paintNodes();syncDom();}}});
   canvas.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);drag=null;});canvas.addEventListener('contextmenu',e=>e.preventDefault());
-  canvas.addEventListener('wheel',e=>{if(wayfindingTask)invalidateWayfinding();e.preventDefault();view.tZoom=THREE.MathUtils.clamp(view.tZoom*Math.exp(e.deltaY*.0012),.14,1.7);},{passive:false});
+  canvas.addEventListener('wheel',e=>{if(wayfindingTask)invalidateWayfinding();e.preventDefault();if(worldView){if(e.deltaY<0)leaveWorld();return;}if(arch&&e.deltaY>0&&view.tZoom>=1.6){enterWorld();return;}view.tZoom=THREE.MathUtils.clamp(view.tZoom*Math.exp(e.deltaY*.0012),.14,1.7);},{passive:false});
   canvas.addEventListener('dblclick',resetView);canvas.style.touchAction='none';
-  host.addEventListener('click',e=>{const b=e.target.closest('[data-ow],[data-ow-level],[data-region]');if(!b)return;if(b.dataset.region!==undefined){setWorld(Number(b.dataset.region));return;}if(b.dataset.owLevel!==undefined){moveTo(Number(b.dataset.owLevel));$('list').hidden=true;$('levels').setAttribute('aria-expanded','false');return;}const action=b.dataset.ow;if(action==='levels'){$('list').hidden=!$('list').hidden;b.setAttribute('aria-expanded',String(!$('list').hidden));}else if(action==='sound')toggleSound();else if(action==='reset')resetView();else if(action==='prev')setWorld(world-1);else if(action==='next')setWorld(world+1);else if(action==='play'&&state.open(sel)){cancelPrefetch();onPlay(sel);}});
-  function key(e){if(!active||e.target.closest?.('input,textarea,select'))return false;if(starterPicking&&e.key==='Escape'){closeStarterPicker();return true;}if(e.key==='Escape'&&!$('list').hidden){$('list').hidden=true;$('levels').setAttribute('aria-expanded','false');$('levels').focus();return true;}if(e.key==='Home'){resetView();return true;}const open=worlds.find(w=>w.index===world).levels.filter(l=>state.open(l.i)),k=open.findIndex(l=>l.i===sel);if(e.key==='PageDown'||(e.key==='ArrowRight'&&e.shiftKey))setWorld(world+1);else if(e.key==='PageUp'||(e.key==='ArrowLeft'&&e.shiftKey))setWorld(world-1);else if(e.key==='ArrowRight'&&k>=0&&k<open.length-1)moveTo(open[k+1].i);else if(e.key==='ArrowLeft'&&k>0)moveTo(open[k-1].i);else if((e.key==='Enter'||e.key===' ')&&state.open(sel)&&!e.target.closest?.('button'))onPlay(sel);else return false;return true;}
+  host.addEventListener('click',e=>{const b=e.target.closest('[data-ow],[data-ow-level],[data-region]');if(!b)return;if(b.dataset.region!==undefined){setWorld(Number(b.dataset.region));return;}if(b.dataset.owLevel!==undefined){moveTo(Number(b.dataset.owLevel));$('list').hidden=true;$('levels').setAttribute('aria-expanded','false');return;}const action=b.dataset.ow;if(action==='levels'){$('list').hidden=!$('list').hidden;b.setAttribute('aria-expanded',String(!$('list').hidden));}else if(action==='sound')toggleSound();else if(action==='reset')resetView();else if(action==='worldview')worldView?leaveWorld():enterWorld();else if(action==='prev')setWorld(world-1);else if(action==='next')setWorld(world+1);else if(action==='play'&&state.open(sel)){cancelPrefetch();onPlay(sel);}});
+  function key(e){if(!active||e.target.closest?.('input,textarea,select'))return false;if(starterPicking&&e.key==='Escape'){closeStarterPicker();return true;}if(e.key==='Escape'&&!$('list').hidden){$('list').hidden=true;$('levels').setAttribute('aria-expanded','false');$('levels').focus();return true;}if(arch&&(e.key==='w'||e.key==='W')&&!e.ctrlKey&&!e.metaKey){worldView?leaveWorld():enterWorld();return true;}if(worldView&&e.key==='Escape'){leaveWorld();return true;}if(e.key==='Home'){if(worldView)leaveWorld();else resetView();return true;}const open=worlds.find(w=>w.index===world).levels.filter(l=>state.open(l.i)),k=open.findIndex(l=>l.i===sel);if(e.key==='PageDown'||(e.key==='ArrowRight'&&e.shiftKey))setWorld(world+1);else if(e.key==='PageUp'||(e.key==='ArrowLeft'&&e.shiftKey))setWorld(world-1);else if(e.key==='ArrowRight'&&k>=0&&k<open.length-1)moveTo(open[k+1].i);else if(e.key==='ArrowLeft'&&k>0)moveTo(open[k-1].i);else if((e.key==='Enter'||e.key===' ')&&state.open(sel)&&!e.target.closest?.('button'))onPlay(sel);else return false;return true;}
   const observer=new ResizeObserver(()=>{if(active)resize();});observer.observe(canvas);
   return {
     syncSound,
-    activate(){window.__owView=debugView;if(active)return;active=true;resize();if(regionIndex>=0)prefetchNeighbours();if(!initialized){initialized=true;lastCurrent=state.current();sel=lastCurrent;setWorld(levels[sel]?.world??0,{keepSel:true});}else{syncDom();kick();}},
+    activate(){window.__owView=debugView;if(active)return;active=true;resize();if(regionIndex>=0)prefetchNeighbours();if(!initialized){initialized=true;lastCurrent=state.current();sel=lastCurrent;setWorld(levels[sel]?.world??0,{keepSel:true});}else{syncDom();kick();setTimeout(playReveals,500);}},
     deactivate(){cancelPrefetch();if(starterPicking)closeStarterPicker();if(wayfindingTask)invalidateWayfinding();active=false;if(raf)cancelAnimationFrame(raf);raf=0;},
-    refresh(){const current=state.current();if(!initialized||current!==lastCurrent){lastCurrent=current;sel=current;setWorld(levels[sel]?.world??0,{keepSel:true});}else{paintNodes();syncDom();placeHero();kick();}},key,
+    refresh(){const current=state.current();if(!initialized||current!==lastCurrent){lastCurrent=current;sel=current;setWorld(levels[sel]?.world??0,{keepSel:true});}else{paintNodes();syncDom();placeHero();kick();setTimeout(playReveals,500);}},key,
     async refreshHero(){try{await ensureActors();placeHero();placeStarters();invalidateWayfinding();kick();}catch(error){console.error('[games] companion change failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'Your companion could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}},
     get selected(){return sel;},get world(){return world;},get loaded(){return regionIndex===world&&!pending;},get ready(){return pending??Promise.resolve();},
-    destroy(){clearTimeout(horizonTimer);cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();shading?.dispose();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();sea?.dispose();horizon?.release();renderer.dispose();}
+    destroy(){clearTimeout(horizonTimer);clearTimeout(tourTimer);cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();shading?.dispose();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();arch?.dispose();sea?.dispose();horizon?.release();renderer.dispose();}
   };
 }
 
