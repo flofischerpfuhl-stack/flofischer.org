@@ -1,5 +1,6 @@
 /** A continuous expedition through authored Fernworld regions; only its visible chapter owns GPU resources. */
 import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, LOW_GPU } from './three-kit.js';
+import { createShading, shadeFromUrl } from './cel-shading.js';
 import { bindLoadingStatus, loadingBarHTML } from './loading-status.js';
 import { WorldLibrary, fitWorldCamera } from '../../games-assets/fernworld/runtime/world-library.js';
 import { ChannelLibrary } from '../../games-assets/fernworld/runtime/channel-library.js';
@@ -108,6 +109,8 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   renderer.shadowMap.autoUpdate = false;
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .01, 200);
   const env = studioEnvironment(renderer), lights = addLights(scene, { dir: [-12, 24, 15], shadowBox: 18, mapSize: 2048, intensity: 2.4, ambient: 1.1 });
+  // shared Wind Waker cel look, Fern Rangers map only for now (?shade=none turns it off); applyIbl converts through env.userData.shading
+  const shading = config.family === 'rangers' && shadeFromUrl() ? createShading(shadeFromUrl(), { ambient: .7 }) : null; if (shading) env.userData.shading = shading;
   const worlds = [...new Set(levels.map(l => l.world ?? 0))].sort((a,b)=>a-b).map(index => ({ index, levels: levels.map((lv,i)=>({...lv,i})).filter(l=>(l.world??0)===index) }));
   const loadingStatus=bindLoadingStatus(host);
   // Neighbouring regions are fetched as bytes only (low priority) while the player looks at this one,
@@ -142,7 +145,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   function background(){
     const dark=document.documentElement.dataset.theme?document.documentElement.dataset.theme==='dark':themeMedia.matches;
     const c=document.createElement('canvas');c.width=768;c.height=512;const g=c.getContext('2d'),base=new THREE.Color(SKY[world]);
-    if(dark)base.multiplyScalar(.35);const sky=`#${base.getHexString()}`,gradient=g.createLinearGradient(0,0,0,512);gradient.addColorStop(0,dark?'#101b2a':sky);gradient.addColorStop(.6,dark?sky:'#f5efe0');gradient.addColorStop(1,dark?'#19232d':sky);g.fillStyle=gradient;g.fillRect(0,0,768,512);
+    shading?.setDark(dark);if(dark)base.multiplyScalar(.35);const sky=`#${base.getHexString()}`,gradient=g.createLinearGradient(0,0,0,512);gradient.addColorStop(0,dark?'#101b2a':sky);gradient.addColorStop(.6,dark?sky:'#f5efe0');gradient.addColorStop(1,dark?'#19232d':sky);g.fillStyle=gradient;g.fillRect(0,0,768,512);
     const sun=g.createRadialGradient(140,95,5,140,95,150);sun.addColorStop(0,dark?'#d4e7f455':'#fff6ccaa');sun.addColorStop(1,'#ffffff00');g.fillStyle=sun;g.fillRect(0,0,350,280);
     for(let layer=0;layer<3;layer++){g.beginPath();g.moveTo(0,512);for(let x=0;x<=768;x+=24){const wave=Math.sin(x*.009+world*1.9+layer)*26+Math.sin(x*.023+layer*3.1)*11;g.lineTo(x,310+layer*55+wave*(world===2?1.7:1));}g.lineTo(768,512);g.closePath();const ridge=new THREE.Color(['#658d76','#b28754','#8da7c6','#8d6777','#6a7e92'][world]);if(dark)ridge.multiplyScalar(.65);g.fillStyle=`#${ridge.getHexString()}${['26','38','49'][layer]}`;g.fill();}
     skyTexture?.dispose();skyTexture=new THREE.CanvasTexture(c);skyTexture.colorSpace=THREE.SRGBColorSpace;scene.background=skyTexture;kick();
@@ -184,7 +187,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     model.scale.multiplyScalar(targetHeight / bodyHeight);
     model.position.y -= bounds.min.y * targetHeight / bodyHeight;
     placement.visible = false;
-    applyIbl(placement, env, .7);
+    applyIbl(placement, env, .7); shading?.apply(placement, { outline: 'skinned' });
     scene.add(placement);
     return { root: placement, animate, release() {
       mixer?.stopAllAction(); mixer?.uncacheRoot(actor.scene); placement.removeFromParent();
@@ -369,7 +372,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
         const radius=Math.max(size.x,size.z)*.55;
         lights.light.position.copy(center).add(new THREE.Vector3(-radius*.8,radius*1.5,radius));lights.light.target.position.copy(center);lights.light.target.updateMatrixWorld();
         Object.assign(lights.light.shadow.camera,{left:-radius,right:radius,top:radius,bottom:-radius,near:Math.max(.001,radius*.02),far:radius*6});lights.light.shadow.camera.updateProjectionMatrix();
-        applyIbl(region.root,env,.55);fit();paintNodes();placeHero();placeStarters();pickerVisibility();focusNode(true);renderer.shadowMap.needsUpdate=true;
+        applyIbl(region.root,env,.55);if(shading){shading.apply(region.root,{outline:false});shading.apply(visuals.context.group,{outline:false});shading.apply(visuals.group,{outline:false});}fit();paintNodes();placeHero();placeStarters();pickerVisibility();focusNode(true);renderer.shadowMap.needsUpdate=true;
         host.classList.remove('is-travelling');syncDom();if(state.open(sel))onSelect?.(sel);kick();prefetchNeighbours();
       }catch(error){if(next&&!reuse&&region!==next)next.release();if(request!==serial||destroyed)return;console.error('[games] map load failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'This region could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}
       finally{if(request===serial){pendingIndex=-1;pending=null;}}
@@ -513,7 +516,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     refresh(){const current=state.current();if(!initialized||current!==lastCurrent){lastCurrent=current;sel=current;setWorld(levels[sel]?.world??0,{keepSel:true});}else{paintNodes();syncDom();placeHero();kick();}},key,
     async refreshHero(){try{await ensureActors();placeHero();placeStarters();invalidateWayfinding();kick();}catch(error){console.error('[games] companion change failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'Your companion could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}},
     get selected(){return sel;},get world(){return world;},get loaded(){return regionIndex===world&&!pending;},get ready(){return pending??Promise.resolve();},
-    destroy(){cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();renderer.dispose();}
+    destroy(){cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();shading?.dispose();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();renderer.dispose();}
   };
 }
 

@@ -94,6 +94,7 @@ export function applyIbl(root, env, intensity, cheap = new Set()) {
     m.userData.ibl = true;
     if (cheap.has(m) || m.userData.cheapIbl) cheapIbl(m, intensity);
     else reflectiveIbl(m, env, intensity);
+    env?.userData?.shading?.convert(m, o); // cel shading (cel-shading.js) wraps the finished hook chain
   });
 }
 

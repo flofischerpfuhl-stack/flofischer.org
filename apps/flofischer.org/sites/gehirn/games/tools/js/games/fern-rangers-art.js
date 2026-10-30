@@ -140,7 +140,7 @@ export class RangersArt {
         a.action = action.reset().setLoop(T.LoopOnce, 1);
         a.action.clampWhenFinished = true;
         a.action.play();
-    } a.action.enabled = true; a.action.paused = false; a.action.time = loop ? time % clip.duration : Math.min(clip.duration, Math.max(0, time)); a.mixer.update(0); a.scene.updateMatrixWorld(true); }; this.actors.push(a); applyIbl(a.scene, this.env, .55); return a; }
+    } a.action.enabled = true; a.action.paused = false; a.action.time = loop ? time % clip.duration : Math.min(clip.duration, Math.max(0, time)); a.mixer.update(0); a.scene.updateMatrixWorld(true); }; this.actors.push(a); applyIbl(a.scene, this.env, .55); this.env.userData.shading?.apply(a.scene, { outline: 'skinned', all: true }); return a; }
     begin() { this.shadows.begin(); for (const b of this.batches.values())
         b.begin(); for (const c of this.channels.values())
         c.begin(); }
@@ -240,6 +240,6 @@ export class RangersArt {
         a.mixer?.uncacheRoot(a.scene);
         for (const m of a.ownedMaterials)
             m.dispose();
-        a.release();
+        this.env.userData.shading?.release(a.scene); a.release();
     } this.shadows.mesh.removeFromParent(); this.shadows.mesh.geometry.dispose(); this.shadows.mesh.material.map?.dispose(); this.shadows.mesh.material.dispose(); this.library.dispose(); }
 }

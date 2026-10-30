@@ -11,7 +11,7 @@ import { profile, save as saveProfile, game as gameProfile, exportCode, importCo
 import { purchaseUpgrade, acceptJob, claimJob, selectTournamentRing } from './hub-progress.js';
 import { readPalette, siteIsDark } from './hub-theme.js';
 import { createPuffs, createDisc, FORM_COLORS } from './hub-fx.js';
-import { createShading, shadeFromUrl } from './hub-shading.js';
+import { createShading, shadeFromUrl } from './cel-shading.js';
 import { fitPoints, fitWidth, viewDirection, isPortrait, cameraBasis } from './hub-camera.js';
 import { createCabinet, CABINET } from './hub-cabinet.js';
 import { buildRoom, cabinetPose, groundY, ACTOR_SPOTS } from './hub-room.js';
@@ -62,7 +62,7 @@ export function mountHub(host, { onPlay }) {
   let tween = null, cam = { pos: new THREE.Vector3(0, 5, 14), target: new THREE.Vector3(0, 1.6, -2), fov: FOV }, framingKey = '', aspect = 1.6, bubbleSize = [0, 0];
   const timings = { theme: null, swap: null };
   const reduced = () => motionMedia.matches, portrait = () => isPortrait(aspect);
-  const shading = shadeFromUrl() ? createShading(shadeFromUrl()) : null;
+  const shading = shadeFromUrl() ? createShading(shadeFromUrl()) : null; if (shading) env.userData.shading = shading; // default: Wind Waker cel (?shade=none turns it off)
   const wipe = $('.hb-wipe'), wipeCtx = wipe.getContext('2d');
 
   const diagnostics = {
@@ -100,7 +100,7 @@ export function mountHub(host, { onPlay }) {
     for (const c of cabinets) c.retheme(palette);
     if (room && backdrops[dark ? 'dusk' : 'day']) { room.backdropMat.map = backdrops[dark ? 'dusk' : 'day']; }
     for (const a of actors.values()) { a.iblK = dark ? .6 : .8; applyIbl(a.scene, env, a.iblK); a.disc.material.color.set(dark ? '#ffbf6e' : '#fff1b8'); a.disc.material.opacity = dark ? .7 : .6; }
-    shading?.setDark(dark);
+    shading?.setDark(dark, { dim: .3 }); // the hub dims its lights, not its colours, in the dark theme
     host.dataset.hubTheme = dark ? 'dark' : 'light';
   }
   /** Overlay the last frame, re-theme, then fade the overlay out with a soft radial wipe (350 ms). */

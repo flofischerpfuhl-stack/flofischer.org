@@ -47,7 +47,7 @@ export class RangerProps {
         escape.materials = ownMaterials(escape.scene);
         this.scene.add(escape.scene);
         escape.scene.visible = false;
-        applyIbl(escape.scene, this.env, .55);
+        applyIbl(escape.scene, this.env, .55); this.env.userData.shading?.apply(escape.scene, { outline: 'skinned', all: true });
         this.escapePod = escape;
         }
         if (ids.has('TURRET_DROP')&&!this.turretActor)

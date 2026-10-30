@@ -7,6 +7,7 @@ import { RangerSettlements, RangerRoute } from './fern-rangers-scenery.js';
 import { RangerProps } from './fern-rangers-props.js';
 import { Sturmbastion3D } from './fern-rangers-sturmbastion-3d.js';
 import { tuft, windy } from './world/island.js';
+import { createShading, shadeFromUrl } from './cel-shading.js';
 
 import { RangerPanorama } from './fern-rangers-panorama.js';
 import { MeadowScenery, lawnTexture } from './fern-rangers-meadow.js';
@@ -102,6 +103,8 @@ export class FernRangers3D {
     // Real reflections only where they show (figures, gates, barrels); ground, road and props get the same soft
     // environment light from a gradient (three-kit cheapIbl) instead of two cube-map lookups per pixel.
     this.env = studioEnvironment(this.renderer);
+    // shared Wind Waker cel look (cel-shading.js): applyIbl() converts every standard material through env.userData.shading, Lambert scenery via apply()
+    const variant = shadeFromUrl(); this.shading = variant ? createShading(variant, { ambient: .7 }) : null; if (this.shading) this.env.userData.shading = this.shading;
     this.campaignCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 500);
     this.themeName = null;
     this.w = 1; this.h = 1;
@@ -205,7 +208,7 @@ export class FernRangers3D {
   async setTheme(name, dark) {
     const key=name;
     if (key === this.themeName) return;
-    this.themeName = key; this.renderDark = dark;
+    this.themeName = key; this.renderDark = dark; this.shading?.setDark(!!dark);
     const th = THEMES[name] || THEMES.meadow;
     this.th = th;
     for(const bank of this.emberBanks)bank.visible=name==='ember';
@@ -233,6 +236,7 @@ export class FernRangers3D {
     const world = ['meadow', 'dunes', 'frost', 'ember'].indexOf(name);
     this.scene.background = new THREE.Color(th.fog);
     await this.pano.build({library:this.art.library,world:Math.max(0,world),dark,low:LOW_GPU,fog:th.fog,light:th.light}); this.panoDirty = true;
+    if (this.pano.scene) this.shading?.apply(this.pano.scene, { outline: false });
     if (this.loop) { this.scene.remove(this.loop.group, this.loop.static); this.loop.dispose(); }
     this.settlements?.dispose();this.settlements=null;this.meadow?.dispose();this.meadow=null;this.loop=null;
     if (name === 'meadow') {
@@ -252,6 +256,7 @@ export class FernRangers3D {
     if (this.grass) { this.scene.remove(this.grass);this.grass.geometry.dispose();this.grass.material.dispose();this.grass.dispose(); this.grass = null;this.grassMats=false; }
     if (th.grass && !LOW_GPU) this.grass = this.makeGrass(th.grass);
     applyIbl(this.scene, this.env, 0.55);
+    this.shading?.apply(this.campaignScene, { outline: false }); // Lambert scenery (meadow, route, terrain) and anything applyIbl skips
     this.warmedFor = null;
   }
 
@@ -627,7 +632,7 @@ export class FernRangers3D {
   dispose() {
     this.disposed=true;this.prepareEpoch++;this.prepareController?.abort();
     this.pano?.target?.dispose();this.pano?.scene?.traverse(o=>{o.geometry?.dispose();o.material?.dispose?.();});
-    this.native?.dispose();this.art?.dispose();this.bonus?.dispose();this.loop?.dispose();this.settlements?.dispose();
+    this.shading?.dispose();this.native?.dispose();this.art?.dispose();this.bonus?.dispose();this.loop?.dispose();this.settlements?.dispose();
     this.roadside?.dispose(this.campaignScene);this.farProps?.dispose(this.campaignScene);
     const geo=new Set(),mats=new Set(),tex=new Set();this.campaignScene.traverse(o=>{if(o.geometry)geo.add(o.geometry);for(const m of o.material?(Array.isArray(o.material)?o.material:[o.material]):[]){mats.add(m);for(const v of Object.values(m))if(v?.isTexture)tex.add(v);}});
     for(const x of geo)x.dispose();for(const x of mats)x.dispose();for(const x of tex)x.dispose();this.env.dispose();this.renderer.dispose();
