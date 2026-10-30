@@ -53,6 +53,7 @@ export function createCabinet({ THREE, own, game, art, env, palettes }) {
   own.geo(hit.geometry); own.mat(hit.material);
   hit.position.set(0, CABINET.height / 2, .05); hit.userData.cabinet = game.id; root.add(hit);
 
+  for (const m of [body, deckMat, panel, header, bezel, stick, buttonA, buttonB]) m.userData.outline = true; // outline in the shading variants
   mergeStatic(root, own);
 
   function retheme(p) {

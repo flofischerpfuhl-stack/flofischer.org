@@ -11,6 +11,7 @@ import { profile, save as saveProfile, game as gameProfile, exportCode, importCo
 import { purchaseUpgrade, acceptJob, claimJob, selectTournamentRing } from './hub-progress.js';
 import { readPalette, siteIsDark } from './hub-theme.js';
 import { createPuffs, createDisc, FORM_COLORS } from './hub-fx.js';
+import { createShading, shadeFromUrl } from './hub-shading.js';
 import { fitPoints, fitWidth, viewDirection, isPortrait, cameraBasis } from './hub-camera.js';
 import { createCabinet, CABINET } from './hub-cabinet.js';
 import { buildRoom, cabinetPose, groundY, ACTOR_SPOTS } from './hub-room.js';
@@ -61,6 +62,7 @@ export function mountHub(host, { onPlay }) {
   let tween = null, cam = { pos: new THREE.Vector3(0, 5, 14), target: new THREE.Vector3(0, 1.6, -2), fov: FOV }, framingKey = '', aspect = 1.6, bubbleSize = [0, 0];
   const timings = { theme: null, swap: null };
   const reduced = () => motionMedia.matches, portrait = () => isPortrait(aspect);
+  const shading = shadeFromUrl() ? createShading(shadeFromUrl()) : null;
   const wipe = $('.hb-wipe'), wipeCtx = wipe.getContext('2d');
 
   const diagnostics = {
@@ -98,6 +100,7 @@ export function mountHub(host, { onPlay }) {
     for (const c of cabinets) c.retheme(palette);
     if (room && backdrops[dark ? 'dusk' : 'day']) { room.backdropMat.map = backdrops[dark ? 'dusk' : 'day']; }
     for (const a of actors.values()) { a.iblK = dark ? .6 : .8; applyIbl(a.scene, env, a.iblK); a.disc.material.color.set(dark ? '#ffbf6e' : '#fff1b8'); a.disc.material.opacity = dark ? .7 : .6; }
+    shading?.setDark(dark);
     host.dataset.hubTheme = dark ? 'dark' : 'light';
   }
   /** Overlay the last frame, re-theme, then fade the overlay out with a soft radial wipe (350 ms). */
@@ -161,8 +164,10 @@ export function mountHub(host, { onPlay }) {
     const p = cabinetPose(index), yawDeg = -p.yaw * 180 / Math.PI, base = { fovDeg: FOV, aspect };
     if (dialog && actors.has(dialog.id)) return talkFrame(actors.get(dialog.id));
     if (portrait()) {
-      const width = Math.max(2.4, CABINET.height * CABINET.scale / .66 * aspect);
-      return fitWidth([p.x, p.y + 1.5, p.z], width, { ...base, dir: viewDirection(yawDeg * .8, 5), ndcY: .17 });
+      // one cabinet in the upper part and the character standing nearest in front of it, full-body, below: a raised camera frames both
+      const near = ACTOR_IDS.map(id => ACTOR_SPOTS[id]).reduce((m, sp) => Math.abs(sp.x - p.x) < Math.abs(m.x - p.x) ? sp : m);
+      const pts = [...boxPoints(p.x, p.y, p.z, CABINET.width * CABINET.scale / 2 + .1, CABINET.height * CABINET.scale + .1, .6, p.yaw), ...boxPoints(near.x, 0, near.z, .7, near.height + .15, .4)];
+      return fitPoints(pts, { ...base, dir: viewDirection(yawDeg * .4, 20), margin: .94, lift: 0 });
     }
     if (mode === 'focus') {
       return fitPoints(boxPoints(p.x, p.y, p.z, CABINET.width * CABINET.scale / 2 + .45, CABINET.height * CABINET.scale + .15, .6, p.yaw), { ...base, dir: viewDirection(yawDeg * .75, 5), margin: .8, lift: .02 });
@@ -188,15 +193,12 @@ export function mountHub(host, { onPlay }) {
   }
 
   // ───────────── actors ─────────────
+  /** Characters have fixed places in the room; layout never depends on the viewport. Only a dialog shrinks the others. */
   function layoutActors(snap) {
     for (const a of actors.values()) {
       const s = ACTOR_SPOTS[a.id];
-      if (portrait()) {
-        const p = cabinetPose(index), slot = { PROFESSOR_OWLBERT: -.8, PIP_KESSEL: 0, MAYOR_TORTELLINI: .8 }[a.id];
-        { const gx = p.x + slot * Math.cos(p.yaw) + Math.sin(p.yaw) * 2.6, gz = p.z + 2.6 * Math.cos(p.yaw) + (a.id === 'PIP_KESSEL' ? .35 : 0) - slot * Math.sin(p.yaw); a.goal.set(gx, groundY(gx, gz), gz); } a.goalScale = .5; a.baseYaw = a.id === 'PROFESSOR_OWLBERT' ? .25 : a.id === 'MAYOR_TORTELLINI' ? -.25 : 0;
-      } else { a.goal.set(s.x, groundY(s.x, s.z), s.z); a.goalScale = 1; a.baseYaw = s.yaw; }
+      a.goal.set(s.x, groundY(s.x, s.z), s.z); a.goalScale = dialog && dialog.id !== a.id ? .02 : 1; a.baseYaw = s.yaw;
       a.goalYaw = dialog?.id === a.id ? talkYaw(a) : a.baseYaw;
-      if (dialog && dialog.id !== a.id && !portrait()) a.goalScale = .02;
       if (snap) { a.wrapper.position.copy(a.goal); a.wrapper.scale.setScalar(a.goalScale); a.wrapper.rotation.y = a.goalYaw; }
     }
   }
@@ -244,7 +246,7 @@ export function mountHub(host, { onPlay }) {
       if (disposed) { actor.release(); return; }
       const mixer = new THREE.AnimationMixer(actor.scene), clips = setupModel(actor, mixer);
       if (clips.idle) mixer.clipAction(clips.idle).play(); mixer.update(.2);
-      fitModel(actor.scene, a.height, a.k); applyIbl(actor.scene, env, a.iblK);
+      fitModel(actor.scene, a.height, a.k); applyIbl(actor.scene, env, a.iblK); shading?.apply(actor.scene);
       actor.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
       try { await renderer.compileAsync(actor.scene, camera, scene); } catch { /* compile is an optimisation only */ }
       actor.scene.traverse(o => { for (const m of [].concat(o.material ?? [])) for (const key of ['map', 'normalMap', 'emissiveMap', 'roughnessMap', 'metalnessMap']) if (m[key]) renderer.initTexture(m[key]); });
@@ -263,7 +265,7 @@ export function mountHub(host, { onPlay }) {
   function doSwap(a) {
     const n = a.next; if (!n) return; a.next = null;
     const old = { scene: a.scene, mixer: a.mixer, actor: a.actor };
-    a.inner.remove(old.scene); old.mixer.stopAllAction(); old.mixer.uncacheRoot(old.scene); old.actor.release?.();
+    shading?.release(old.scene); a.inner.remove(old.scene); old.mixer.stopAllAction(); old.mixer.uncacheRoot(old.scene); old.actor.release?.();
     a.inner.add(n.scene); a.scene = n.scene; a.mixer = n.mixer; a.actor = n.actor; a.clips = n.clips; a.modelId = n.id;
     n.scene.traverse(o => { if (o.isMesh) o.frustumCulled = true; });
     puffs.burst(new THREE.Vector3(a.wrapper.position.x, a.wrapper.position.y + a.height * a.wrapper.scale.y * .55, a.wrapper.position.z + .15), FORM_COLORS[n.id] ?? '#2fd16a');
@@ -512,6 +514,7 @@ export function mountHub(host, { onPlay }) {
     await document.fonts?.ready; if (disposed) return;
     // both backdrops resident, both theme states compiled before the first frame: a later switch is only uniforms
     await Promise.all([loadBackdrop('day'), loadBackdrop('dusk')]); if (disposed) return;
+    shading?.apply(scene);
     for (const t of owned.textures) renderer.initTexture(t);
     const now = () => siteIsDark(themeMedia);
     applyTheme(!now()); try { await renderer.compileAsync(scene, camera); } catch { /* optional */ }
@@ -533,7 +536,7 @@ export function mountHub(host, { onPlay }) {
     get focus() { return GAMES[index].id; }, get ready() { return prepared; }, boxes: cabinets,
     destroy() {
       loadingStatus.finish(); disposed = true; if (window.__hubView === diagnostics) delete window.__hubView; active = false; cancelAnimationFrame(raf);
-      themeObserver.disconnect(); resizeObserver.disconnect(); themeMedia.removeEventListener('change', theme); unsubscribe(); window.removeEventListener('keydown', onKey);
+      shading?.dispose(); themeObserver.disconnect(); resizeObserver.disconnect(); themeMedia.removeEventListener('change', theme); unsubscribe(); window.removeEventListener('keydown', onKey);
       for (const a of actors.values()) { a.mixer.stopAllAction(); a.mixer.uncacheRoot(a.scene); a.actor.release?.(); if (a.next) a.next.actor.release?.(); }
       library.dispose(); for (const m of owned.materials) m.dispose(); for (const t of owned.textures) t.dispose(); for (const g of owned.geometries) g.dispose();
       env.dispose?.(); renderer.dispose();

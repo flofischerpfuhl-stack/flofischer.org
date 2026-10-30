@@ -88,14 +88,34 @@ export function blobTexture(alpha = .4) {
   return canvas;
 }
 
-/** Big diamond floor pattern (Animal Crossing / Galaxy style); one texture per theme, both stay resident. */
+/**
+ * Floor: a big diamond pattern made of small diamond tiles with grout, a gentle per-tile colour variation and a
+ * soft bevel highlight (painted, low frequency, like a Nintendo interior). One texture per theme.
+ */
 export function floorTexture(dark) {
-  const [canvas, g] = makeCanvas(512, 512);
-  const a = dark ? '#1b4546' : '#fff1d8', b = dark ? '#256259' : '#ffd8a8', c = dark ? '#2f8468' : '#fff9ea', line = dark ? 'rgba(130,255,170,.28)' : 'rgba(255,255,255,.85)';
-  g.fillStyle = a; g.fillRect(0, 0, 512, 512);
-  const dia = (k, color) => { g.beginPath(); g.moveTo(256, 256 - 256 * k); g.lineTo(256 + 256 * k, 256); g.lineTo(256, 256 + 256 * k); g.lineTo(256 - 256 * k, 256); g.closePath(); g.fillStyle = color; g.fill(); };
-  dia(1, b); dia(.52, c);
-  g.lineWidth = 5; g.strokeStyle = line; g.beginPath(); g.moveTo(256, 20); g.lineTo(492, 256); g.lineTo(256, 492); g.lineTo(20, 256); g.closePath(); g.stroke();
+  const S = 1024, [canvas, g] = makeCanvas(S, S);
+  const pal = dark ? { a: [30, 76, 78], b: [40, 106, 94], c: [58, 146, 112], grout: '#0d2829' } : { a: [255, 243, 222], b: [255, 219, 172], c: [255, 250, 236], grout: '#e9cfa6' };
+  g.fillStyle = pal.grout; g.fillRect(0, 0, S, S);
+  const hash = (x, y) => { const v = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return v - Math.floor(v); };
+  const D = 128, r = D - 3; // half-diagonal of a tile, minus the grout
+  for (let j = -1; j <= S / D + 1; j++) for (let i = -1; i <= S / D + 1; i++) {
+    if ((i + j) & 1) continue;
+    const cx = i * D, cy = j * D, mx = ((cx % 512) + 512) % 512, my = ((cy % 512) + 512) % 512, dd = Math.abs(mx - 256) + Math.abs(my - 256);
+    const base = dd < 130 ? pal.c : dd <= 258 ? pal.b : pal.a, jit = 1 + (hash(((i % 8) + 8) % 8, ((j % 8) + 8) % 8) - .5) * .07;
+    const col = base.map(v => Math.max(0, Math.min(255, Math.round(v * jit))));
+    const grad = g.createLinearGradient(cx - r * .6, cy - r * .6, cx + r * .6, cy + r * .6);
+    grad.addColorStop(0, `rgb(${col.map(v => Math.min(255, v + 9)).join(',')})`); grad.addColorStop(1, `rgb(${col.map(v => Math.max(0, v - 9)).join(',')})`);
+    g.beginPath(); g.moveTo(cx, cy - r); g.lineTo(cx + r, cy); g.lineTo(cx, cy + r); g.lineTo(cx - r, cy); g.closePath();
+    g.fillStyle = grad; g.fill();
+  }
+  return canvas;
+}
+
+/** Soft dark vignette for the floor (darker towards the walls and corners); drawn black, opacity set per theme. */
+export function vignetteTexture() {
+  const [canvas, g] = makeCanvas(256, 256), grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  grad.addColorStop(0, 'rgba(8,16,18,0)'); grad.addColorStop(.5, 'rgba(8,16,18,0)'); grad.addColorStop(.8, 'rgba(8,16,18,.45)'); grad.addColorStop(1, 'rgba(8,16,18,.85)');
+  g.fillStyle = grad; g.fillRect(0, 0, 256, 256);
   return canvas;
 }
 

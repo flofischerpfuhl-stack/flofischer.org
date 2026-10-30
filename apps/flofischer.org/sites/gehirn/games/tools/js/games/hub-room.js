@@ -1,8 +1,9 @@
 /** The hub room: diamond-tiled floor, a thick rounded platform with scalloped trim, arched windows with a backdrop, banners, shelves, planters, lights. */
-import { rugTexture, bannerTexture, blobTexture, floorTexture } from './hub-art.js';
+import { rugTexture, bannerTexture, blobTexture, floorTexture, vignetteTexture } from './hub-art.js';
 import { mix } from './hub-theme.js';
 import { mergeStatic } from './hub-merge.js';
 import { createDisc, createHalo, createMotes } from './hub-fx.js';
+import { glowTexture } from './hub-art.js';
 
 export const CAB_STEP = 2.05, CAB_ARC = 8, PLATFORM = { x: 0, z: -3.4, rx: 5.7, rz: 2.95, h: .42 };
 export const cabinetPose = i => { const a = (i - 1.5) * CAB_STEP / CAB_ARC; return { x: CAB_ARC * Math.sin(a), y: PLATFORM.h, z: 3.9 - CAB_ARC * Math.cos(a), yaw: -a }; };
@@ -27,6 +28,11 @@ export function buildRoom({ THREE, own, env, ferns, palettes }) {
   for (const d of [false, true]) { const t = floorTex[d] = tex(floorTexture(d), 8); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(10, 7.5); }
   const floorMat = std({ map: floorTex[false], roughness: .85 });
   const floor = mesh(new THREE.PlaneGeometry(44, 33), floorMat, 0, 0, 2); floor.rotation.x = -Math.PI / 2; floor.name = 'Floor';
+  // baked light on the floor: darker towards the walls and corners, plus a soft glossy sheen under the windows
+  const vigMat = own.mat(new THREE.MeshBasicMaterial({ map: tex(vignetteTexture(), 1), transparent: true, depthWrite: false, toneMapped: false }));
+  const vig = mesh(new THREE.PlaneGeometry(1, 1), vigMat, 0, .004, .6); vig.rotation.x = -Math.PI / 2; vig.scale.set(34, 26, 1); vig.renderOrder = 1;
+  const sheenMat = own.mat(new THREE.MeshBasicMaterial({ map: own.tex(new THREE.CanvasTexture(glowTexture())), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+  const sheen = mesh(new THREE.PlaneGeometry(1, 1), sheenMat, 0, .006, 1.4); sheen.rotation.x = -Math.PI / 2; sheen.scale.set(15, 8, 1); sheen.renderOrder = 1;
 
   // Rug (two textures, swapped)
   const rugTex = {}; for (const d of [false, true]) rugTex[d] = tex(rugTexture(palettes[d]), 8);
@@ -51,7 +57,30 @@ export function buildRoom({ THREE, own, env, ferns, palettes }) {
   const ring = mesh(new THREE.TorusGeometry(3.25, .03, 6, 96), ringMat, 0, .02, 3.4); ring.rotation.x = Math.PI / 2; ring.scale.set(1.4, 1, 1);
 
   // Back wall: three arched bays, mullions, a lintel and the backdrop behind
-  const wallMat = std({ roughness: .75 }), trimMat = std({ roughness: .5 });
+  const wallMat = std({ roughness: .85 }), trimMat = std({ roughness: .5 });
+  // Painted wall in the shader (merged geometry is in room space, so position is world position): wallpaper motif,
+  // wainscot planks with a top rail and baseboard, and baked light (dark at the floor and ceiling, warm lamp pools).
+  const W = { uWall: { value: new THREE.Color() }, uWain: { value: new THREE.Color() }, uTrim: { value: new THREE.Color() }, uMotif: { value: new THREE.Color() }, uLamp: { value: 0 } };
+  wallMat.onBeforeCompile = sh => {
+    Object.assign(sh.uniforms, W);
+    sh.vertexShader = 'varying vec3 vWP;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvWP = position;');
+    sh.fragmentShader = `varying vec3 vWP; uniform vec3 uWall, uWain, uTrim, uMotif; uniform float uLamp;
+float h21(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+vec3 wallPaint(vec3 p) {
+  float h = p.y, u = p.x + p.z;
+  vec2 q = vec2(u, h) / 1.15, f = fract(q) - .5, f2 = fract(q + .5) - .5;
+  vec3 c = mix(uWall, uMotif, (1. - smoothstep(.1, .17, abs(f.x) + abs(f.y))) * .5 + (1. - smoothstep(.035, .07, length(f2))) * .3);
+  float pl = u / .46, edge = smoothstep(.88, 1., abs(fract(pl) - .5) * 2.);
+  vec3 wc = uWain * (1. + (h21(vec2(floor(pl), 3.)) - .5) * .09) * (1. - .2 * edge) * (1. - .08 * smoothstep(1.2, 1.75, h));
+  c = mix(c, wc, 1. - smoothstep(1.72, 1.76, h));
+  c = mix(c, uTrim * (1. + .22 * smoothstep(1.86, 1.9, h)), smoothstep(1.74, 1.76, h) * (1. - smoothstep(1.9, 1.92, h)));
+  c = mix(c, uTrim * .88, 1. - smoothstep(.2, .23, h));
+  c *= mix(.66, 1., smoothstep(0., 2.8, h)) * mix(1., .78, smoothstep(5.6, 7.6, h)) * (1. - .16 * smoothstep(3., 9., abs(p.x)));
+  for (int i = 0; i < 2; i++) { float lx = i == 0 ? -3.9 : 3.9; vec2 d = vec2(p.x - lx, (h - 5.2) * .8); c += vec3(1., .62, .28) * uLamp * .5 * exp(-dot(d, d) / 8.); }
+  return c;
+}
+` + sh.fragmentShader.replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb = wallPaint(vWP);');
+  };
   const bayX = [-4.5, 0, 4.5], pillarX = [-6.75, -2.25, 2.25, 6.75];
   const WH = 7.4, SPRING = 4.55, R = 1.95;
   pillarX.forEach((x, i) => mesh(new THREE.BoxGeometry(i === 0 || i === 3 ? .9 : .6, WH, .7), wallMat, x, WH / 2, WALL_Z));
@@ -124,7 +153,7 @@ export function buildRoom({ THREE, own, env, ferns, palettes }) {
     mesh(new THREE.BoxGeometry(W, H, .06), shelfIn, 0, H / 2, -D / 2, g);
     for (const s of [-1, 1]) mesh(new THREE.BoxGeometry(.1, H, D), shelfMat, s * (W / 2 - .05), H / 2, 0, g);
     for (let r = 0; r <= 3; r++) mesh(new THREE.BoxGeometry(W, .1, D), shelfMat, 0, .05 + r * (H - .1) / 3, 0, g);
-    let seed = Math.round(x * 10) + 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    let seed = Math.abs(Math.round(x * 10)) + 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
     for (let r = 0; r < 3; r++) { let bx = -W / 2 + .2; while (bx < W / 2 - .3) { const w = .09 + rnd() * .1, h = .5 + rnd() * .3; mesh(bookGeo, bookMats[Math.floor(rnd() * bookMats.length)], bx + w / 2, .1 + r * (H - .1) / 3 + h / 2, -.02, g).scale.set(w, h, .34); bx += w + .01; if (rnd() > .86) bx += .25; } }
     for (let k = 0; k < 2; k++) addFern(g, k + 1, .6, H + .12, .1);
     mesh(new THREE.CylinderGeometry(.3, .24, .3, 20), potMat, 0, H + .15, 0, g);
@@ -160,11 +189,13 @@ export function buildRoom({ THREE, own, env, ferns, palettes }) {
 
   mergeStatic(group, own);
 
+  for (const m of [potMat, woodMat, cushionMat, shelfMat, baseMat, lipMat, topMat, beadMat, ...bookMats]) m.userData.outline = true; // main props get an outline in the shading variants
   const rugMatHolder = rugMat, bannerHolder = bannerMat;
   function retheme(p) {
     const dark = p.dark;
     floorMat.map = floorTex[dark]; floorMat.color.set('#ffffff'); floorMat.roughness = dark ? .6 : .85;
-    wallMat.color.set(dark ? '#3b4a8a' : '#fff4de'); trimMat.color.set(dark ? '#f3d59a' : '#ffffff');
+    W.uWall.value.set(dark ? '#25404f' : '#fff3da'); W.uMotif.value.set(dark ? '#2e5262' : '#f3e2bf'); W.uWain.value.set(dark ? '#1b2e3a' : '#c9ecd6'); W.uTrim.value.set(dark ? '#2aa863' : '#2fb86a'); W.uLamp.value = dark ? 1 : 0;
+    trimMat.color.set(dark ? '#f3d59a' : '#ffffff'); vigMat.opacity = dark ? .85 : .5; sheenMat.color.set(dark ? '#7dffc0' : '#fff4d4'); sheenMat.opacity = dark ? .08 : .1;
     baseMat.color.set(dark ? '#f1ead8' : '#ffffff'); topMat.color.set(dark ? '#e9a94a' : '#ffd36b'); lipMat.color.set(dark ? '#fff1d0' : '#ffffff'); beadMat.color.set(dark ? '#3ee47a' : '#22b258');
     bandMat.color.set(dark ? '#2fe06f' : '#1db954'); ringMat.color.set(p['accent-fill']);
     potMat.color.set(dark ? '#ffd9a8' : '#ff9d5c'); cushionMat.color.set(dark ? '#1f9a6a' : '#31c27c'); woodMat.color.set(dark ? '#d9923f' : '#ffc46b'); shelfMat.color.set(dark ? '#e9a94a' : '#ffcf7a'); shelfIn.color.set(dark ? '#3b2a63' : '#fff0cf');
