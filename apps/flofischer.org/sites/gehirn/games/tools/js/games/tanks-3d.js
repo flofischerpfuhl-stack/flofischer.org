@@ -11,16 +11,16 @@ import { safeArea, SIDE_MARGIN } from './tanks-touch.js';
 
 const THEMES = [
   { // Fernhaven Meadows: oak blocks on a mown lawn
-    ground: 't-grass', floor: 0xa9c985, floorAlt: 0x9bbd78, wall: 0xdcab72, wallMap: 't-wood', crate: 0xb07a45, fog: 0xcfe7f5, sky: 0xd6ecff, sun: 0xfff1d6, hemiG: 0x4f6e2c, exposure: 1.05,
+    ground: 't-grass', floor: 0xe2c08a, floorAlt: 0xd8b57c, tintWash: 'rgba(84,200,96,.52)', wall: 0xe0b078, wallMap: 't-wood', crate: 0xb07a45, fog: 0xcfe7f5, sky: 0xd6ecff, sun: 0xfff1d6, hemiG: 0x4f6e2c, exposure: 1.05,
   },
   { // Sunbake Dunes: sandstone blocks, canyon cracks
-    ground: 't-sand', floor: 0xecc98c, floorAlt: 0xe2bb7a, wall: 0xd9a45f, wallMap: 't-stone', crate: 0xa86e3a, fog: 0xf3d6a8, sky: 0xffe3c2, sun: 0xffd29a, hemiG: 0x9a6b3a, exposure: 1.05,
+    ground: 't-sand', floor: 0xeac58a, floorAlt: 0xe0b87c, tintWash: 'rgba(244,190,96,.30)', wall: 0xd9a45f, wallMap: 't-stone', crate: 0xa86e3a, fog: 0xf3d6a8, sky: 0xffe3c2, sun: 0xffd29a, hemiG: 0x9a6b3a, exposure: 1.05,
   },
   { // Frostpeak: ice blocks on packed snow
-    ground: 't-snow', floor: 0xe6eef8, floorAlt: 0xdbe6f3, wall: 0x6fb2e8, wallMap: null, crate: 0x8a6a4a, fog: 0xd8e8f8, sky: 0xe0f0ff, sun: 0xffffff, hemiG: 0xb0c4d8, exposure: 0.96, glossyWall: true,
+    ground: 't-snow', floor: 0xe6ceaa, floorAlt: 0xdcc29c, tintWash: 'rgba(226,241,255,.74)', wall: 0x9cc8ee, wallMap: 't-wood', crate: 0x8a6a4a, fog: 0xd8e8f8, sky: 0xe0f0ff, sun: 0xffffff, hemiG: 0xb0c4d8, exposure: 0.96,
   },
   { // Ember Isles: basalt blocks, lava pools, vents
-    ground: 't-lavarock', floor: 0x7d6a72, floorAlt: 0x6f5d66, wall: 0x3b3236, wallMap: 't-stone', crate: 0x5a3a2a, fog: 0x4a2a36, sky: 0xff9a6a, sun: 0xffb27a, hemiG: 0x3a1408, exposure: 1.1, lava: true,
+    ground: 't-lavarock', floor: 0xb08a7c, floorAlt: 0xa48074, tintWash: 'rgba(84,52,86,.46)', wall: 0x7a5a54, wallMap: 't-wood', crate: 0x5a3a2a, fog: 0x4a2a36, sky: 0xff9a6a, sun: 0xffb27a, hemiG: 0x3a1408, exposure: 1.1, lava: true,
   },
 ];
 
@@ -34,6 +34,14 @@ function canvasTex(w, h, draw, repeat = null) {
   if (repeat) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(...repeat); }
   return t;
 }
+/** One toy-wood grain for every region: pale planks with long fibres, tinted per region by the material colour. */
+let woodCache = null;
+const woodTex = () => woodCache ??= canvasTex(256, 256, (g, w) => {
+  g.fillStyle = '#f6ead6'; g.fillRect(0, 0, w, w);
+  let seed = 5; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 46; i++) { g.strokeStyle = `rgba(150,106,60,${0.1 + r() * 0.14})`; g.lineWidth = 1 + r() * 2; const y = r() * w; g.beginPath(); g.moveTo(0, y); for (let x = 0; x <= w; x += 32) g.lineTo(x, y + Math.sin(x * 0.03 + i) * 3); g.stroke(); }
+  g.fillStyle = 'rgba(120,80,40,.16)'; g.fillRect(0, w - 4, w, 4);
+}, [1, 1]);
 /** Ice tile: pale blue with frosty streaks. */
 const iceTex = () => canvasTex(128, 128, (g, w) => {
   g.fillStyle = '#cfeaf9'; g.fillRect(0, 0, w, w);
@@ -172,6 +180,8 @@ export class Tanks3D {
     this.walls.castShadow = this.walls.receiveShadow = true; s.add(this.walls);
     this.wallCaps = new THREE.InstancedMesh(this.geo.block, mat(0xffffff, { roughness: 0.75 }), maxBlocks);
     this.wallCaps.receiveShadow = true; s.add(this.wallCaps);
+    this.studs = new THREE.InstancedMesh(this.geo.block, mat(0xffffff, { roughness: 0.6 }), maxBlocks);
+    this.studs.castShadow = this.studs.receiveShadow = true; s.add(this.studs);
     // ice, pits / lava, vents
     const flat = new THREE.PlaneGeometry(1, 1); flat.rotateX(-Math.PI / 2);
     this.ice = new THREE.InstancedMesh(flat, mat(0xffffff, { map: iceTex(), roughness: 0.12, metalness: 0.05 }), W * H);
@@ -301,11 +311,12 @@ export class Tanks3D {
     const L = this.lights;
     L.light.color.set(th.sun); L.hemi.color.set(th.sky); L.hemi.groundColor.set(th.hemiG);
     this.renderer.toneMappingExposure = th.exposure * (dark ? 0.88 : 1);
-    this.walls.material.map = th.wallMap ? texture(th.wallMap, { repeat: [1, 1] }) : null;
+    this.walls.material.map = woodTex();
     this.walls.material.color.set(th.wall);
-    this.walls.material.roughness = th.glossyWall ? 0.18 : 0.62; this.walls.material.metalness = th.glossyWall ? 0.1 : 0.02;
+    this.walls.material.roughness = 0.62; this.walls.material.metalness = 0.02;
     this.walls.material.needsUpdate = true;
-    this.wallCaps.material.color.set(th.wall).offsetHSL(0, -0.05, 0.08);
+    this.wallCaps.material.color.set(th.wall).offsetHSL(0, -0.04, 0.1);
+    this.studs.material.color.set(th.wall).offsetHSL(0, -0.04, 0.16);
     this.lavaU.uLava.value = th.lava ? 1 : 0;
     this.rev = -1; // repaint the floor in this world's look
     this.renderer.shadowMap.needsUpdate = true;
@@ -343,16 +354,18 @@ export class Tanks3D {
     this.crateBatch.begin();
     const th = THEMES[sess.L.world];
     const rand = ((seed) => () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; })(sess.L.seed % 2147483646 + 1);
-    const wall = (x, y, h = 0.96) => {
+    const wall = (x, y, h = 1.12) => {
       const j = (rand() - 0.5) * 0.06;
       m.compose(p.set(x - W / 2 + 0.5, h / 2, y - H / 2 + 0.5), q.setFromAxisAngle(v3.set(0, 1, 0), j), sc.set(0.98, h, 0.98));
-      this.walls.setMatrixAt(nw, m); this.walls.setColorAt(nw, c.set(0xffffff).multiplyScalar(0.9 + rand() * 0.16));
-      m.compose(p.set(x - W / 2 + 0.5, h + 0.015, y - H / 2 + 0.5), q, sc.set(0.86, 0.04, 0.86));
+      this.walls.setMatrixAt(nw, m); this.walls.setColorAt(nw, c.set(0xffffff).multiplyScalar(0.86 + rand() * 0.2));
+      m.compose(p.set(x - W / 2 + 0.5, h + 0.04, y - H / 2 + 0.5), q, sc.set(0.84, 0.09, 0.84));
       this.wallCaps.setMatrixAt(nw, m); this.wallCaps.setColorAt(nw, c.set(0xffffff));
+      m.compose(p.set(x - W / 2 + 0.5, h + 0.12, y - H / 2 + 0.5), q, sc.set(0.46, 0.1, 0.46));
+      this.studs.setMatrixAt(nw, m); this.studs.setColorAt(nw, c.set(0xffffff));
       nw++;
     };
-    for (let x = -1; x <= W; x++) { wall(x, -1, 1.1); wall(x, H, 0.7); }
-    for (let y = 0; y < H; y++) { wall(-1, y, 0.9); wall(W, y, 0.9); }
+    for (let x = -1; x <= W; x++) { wall(x, -1, 1.25); wall(x, H, 0.75); }
+    for (let y = 0; y < H; y++) { wall(-1, y, 1.05); wall(W, y, 1.05); }
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const t = sess.grid[y * W + x], cx = x - W / 2 + 0.5, cz = y - H / 2 + 0.5;
       if (t === T.WALL) wall(x, y);
@@ -367,8 +380,8 @@ export class Tanks3D {
         this.pits.setMatrixAt(np++, m);
       }
     }
-    this.walls.count = nw; this.wallCaps.count = nw; this.ice.count = ni; this.pits.count = np;
-    for (const im of [this.walls, this.wallCaps, this.ice, this.pits]) { im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; }
+    this.walls.count = nw; this.wallCaps.count = nw; this.studs.count = nw; this.ice.count = ni; this.pits.count = np;
+    for (const im of [this.walls, this.wallCaps, this.studs, this.ice, this.pits]) { im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; }
     this.crateBatch.end();
     this.pitEdge.needsUpdate = true;
     this.vents.count = sess.vents.length;
@@ -380,34 +393,39 @@ export class Tanks3D {
     const base = new THREE.Color(th.floor), alt = new THREE.Color(th.floorAlt), hex = (c, k = 1) => `rgb(${Math.min(255, c.r * 255 * k) | 0},${Math.min(255, c.g * 255 * k) | 0},${Math.min(255, c.b * 255 * k) | 0})`;
     const world = sess.L.world;
     g.fillStyle = hex(base); g.fillRect(0, 0, cv.width, cv.height);
+    // one toy-wood table for every region: planks with long grain, the region only washes it with its colour and props
+    const plank = px * 1.5;
+    for (let y = 0, i = 0; y < cv.height; y += plank, i++) {
+      g.fillStyle = hex(i % 2 ? alt : base, 0.97 + rand() * 0.06); g.fillRect(0, y, cv.width, plank);
+      g.fillStyle = 'rgba(90,56,26,.3)'; g.fillRect(0, y, cv.width, 2.5);
+      g.fillStyle = 'rgba(90,56,26,.3)'; g.fillRect(((i * 7) % 13 + 2) * px * 1.7, y, 2.5, plank);
+      g.strokeStyle = 'rgba(140,96,50,.16)'; g.lineWidth = 1.5;
+      for (let k = 0; k < 5; k++) { const yy = y + 6 + rand() * (plank - 12); g.beginPath(); g.moveTo(0, yy); for (let x = 0; x <= cv.width; x += 60) g.lineTo(x, yy + Math.sin(x * 0.011 + k + i) * 3); g.stroke(); }
+    }
+    g.fillStyle = th.tintWash; g.fillRect(0, 0, cv.width, cv.height);
     if (world === 0) {
-      // a mown lawn: broad stripes, clover speckles
-      for (let x = 0; x < W; x += 2) { g.fillStyle = hex(alt); g.fillRect(x * px, 0, px, cv.height); }
-      for (let i = 0; i < 70; i++) { g.fillStyle = rand() < 0.7 ? 'rgba(255,255,255,.85)' : 'rgba(255,230,120,.9)'; g.beginPath(); g.arc(rand() * cv.width, rand() * cv.height, 2.2, 0, TAU); g.fill(); }
+      for (let x = 0; x < W; x += 2) { g.fillStyle = 'rgba(190,240,120,.14)'; g.fillRect(x * px, 0, px, cv.height); }
+      for (let i = 0; i < 28; i++) { g.fillStyle = rand() < 0.7 ? 'rgba(255,255,255,.8)' : 'rgba(255,226,110,.85)'; g.beginPath(); g.arc(rand() * cv.width, rand() * cv.height, 2.4, 0, TAU); g.fill(); }
     } else if (world === 1) {
-      // packed sand with wind ripples
-      g.strokeStyle = hex(alt, 0.93); g.lineWidth = 3;
-      for (let y = 6; y < cv.height; y += 14) { g.beginPath(); for (let x = 0; x <= cv.width; x += 16) g.lineTo(x, y + Math.sin(x * 0.02 + y) * 4); g.stroke(); }
-      for (let i = 0; i < 1800; i++) { g.fillStyle = rand() < 0.5 ? 'rgba(150,100,50,.18)' : 'rgba(255,240,200,.25)'; g.fillRect(rand() * cv.width, rand() * cv.height, 2, 2); }
+      g.strokeStyle = 'rgba(120,70,20,.16)'; g.lineWidth = 3;
+      for (let y = 10; y < cv.height; y += 30) { g.beginPath(); for (let x = 0; x <= cv.width; x += 16) g.lineTo(x, y + Math.sin(x * 0.02 + y) * 5); g.stroke(); }
     } else if (world === 2) {
-      // packed snow with blue shadows and sparkle
-      for (let i = 0; i < 160; i++) { const gr = g.createRadialGradient(0, 0, 0, 0, 0, 40); const x = rand() * cv.width, y = rand() * cv.height; g.save(); g.translate(x, y); gr.addColorStop(0, 'rgba(160,190,225,.18)'); gr.addColorStop(1, 'rgba(160,190,225,0)'); g.fillStyle = gr; g.fillRect(-40, -40, 80, 80); g.restore(); }
-      for (let i = 0; i < 900; i++) { g.fillStyle = 'rgba(255,255,255,.9)'; g.fillRect(rand() * cv.width, rand() * cv.height, 1.5, 1.5); }
+      for (let i = 0; i < 70; i++) { const gr = g.createRadialGradient(0, 0, 0, 0, 0, 46); const x = rand() * cv.width, y = rand() * cv.height; g.save(); g.translate(x, y); gr.addColorStop(0, 'rgba(150,185,225,.3)'); gr.addColorStop(1, 'rgba(150,185,225,0)'); g.fillStyle = gr; g.fillRect(-46, -46, 92, 92); g.restore(); }
+      for (let i = 0; i < 400; i++) { g.fillStyle = 'rgba(255,255,255,.9)'; g.fillRect(rand() * cv.width, rand() * cv.height, 1.8, 1.8); }
     } else {
-      // basalt slabs with glowing seams
-      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { g.fillStyle = hex((x * 7 + y * 3) % 3 ? base : alt, 0.92 + rand() * 0.16); g.fillRect(x * px + 2, y * px + 2, px - 4, px - 4); }
-      g.strokeStyle = 'rgba(255,110,30,.35)'; g.lineWidth = 2;
-      for (let i = 0; i < 26; i++) { g.beginPath(); let x = rand() * cv.width, y = rand() * cv.height; g.moveTo(x, y); for (let k = 0; k < 6; k++) { x += (rand() - 0.5) * 40; y += (rand() - 0.5) * 40; g.lineTo(x, y); } g.stroke(); }
+      g.strokeStyle = 'rgba(255,120,50,.28)'; g.lineWidth = 2.5;
+      for (let i = 0; i < 20; i++) { g.beginPath(); let x = rand() * cv.width, y = rand() * cv.height; g.moveTo(x, y); for (let k = 0; k < 6; k++) { x += (rand() - 0.5) * 50; y += (rand() - 0.5) * 50; g.lineTo(x, y); } g.stroke(); }
     }
     // a fine tile grid, so ricochet angles are easy to read
     g.strokeStyle = 'rgba(0,0,0,.05)'; g.lineWidth = 1;
     for (let x = 1; x < W; x++) { g.beginPath(); g.moveTo(x * px, 0); g.lineTo(x * px, cv.height); g.stroke(); }
     for (let y = 1; y < H; y++) { g.beginPath(); g.moveTo(0, y * px); g.lineTo(cv.width, y * px); g.stroke(); }
-    g.filter = 'blur(5px)';
-    g.fillStyle = 'rgba(20,10,30,.4)';
+    g.filter = 'blur(6px)';
+    const solid = (x, y) => { const t = x < 0 || y < 0 || x >= W || y >= H ? T.WALL : sess.grid[y * W + x]; return t === T.WALL || t === T.CRATE; };
     for (let y = -1; y <= H; y++) for (let x = -1; x <= W; x++) {
-      const t = x < 0 || y < 0 || x >= W || y >= H ? T.WALL : sess.grid[y * W + x];
-      if (t === T.WALL || t === T.CRATE) g.fillRect(x * px - 10, y * px - 6, px + 20, px + 20);
+      if (!solid(x, y)) continue;
+      g.fillStyle = 'rgba(40,20,12,.34)'; g.fillRect(x * px + 14, y * px + 10, px + 12, px + 14);
+      g.fillStyle = 'rgba(40,20,12,.3)'; g.fillRect(x * px - 5, y * px - 5, px + 10, px + 10);
     }
     g.filter = 'none';
     if (this.floorTex) this.floorTex.dispose();

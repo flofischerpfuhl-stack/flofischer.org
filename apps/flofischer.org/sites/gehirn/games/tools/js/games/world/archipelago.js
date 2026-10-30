@@ -13,7 +13,7 @@ import { SEA_Y } from './sea.js';
 const ROOT2 = Math.SQRT2;
 
 /** Island centres from screen-style map coordinates (right, down) for a camera that looks along (-1, -, -1) at `tilt` radians of elevation. */
-export function layoutFromMap(points, { tilt = 0.6 } = {}) {
+export function layoutFromMap(points, { tilt = 0.57 } = {}) {
   const k = Math.sin(tilt);
   return points.map(([sx, sy]) => { const d = sy / k; return [(sx + d) / ROOT2, (d - sx) / ROOT2]; });
 }
@@ -49,24 +49,34 @@ export function createArchipelago({ islands, sea = null, mobile = false }) {
     sea?.paint(t.data, t.size, t.size, shore[0], shore[1], t.cell);
     const bank = createCloudBank({ radius: isl.radius * 0.78, seed: i + 1 }); bank.group.position.set(isl.x, 0, isl.z); group.add(bank.group);
     const sprite = new T.Sprite(new T.SpriteMaterial({ depthTest: false, transparent: true })); sprite.renderOrder = 6; sprite.visible = false; sprite.frustumCulled = false; group.add(sprite);
-    sprite.position.set(isl.x + isl.radius * 0.6, 1, isl.z + isl.radius * 0.6);
+    sprite.position.set(isl.x + isl.radius * 0.74, SEA_Y + 0.2, isl.z + isl.radius * 0.74);
     return { ...isl, silhouette, shore, bank, sprite, open: false, revealed: false, stars: 0, total: 0, full: false, veiled: false, parted: false, labelKey: '', texture: null };
   });
   // stepping stones along each hop, one instanced mesh; their colour says whether the next island is open
   const rand = rng(77), stoneGeo = new T.SphereGeometry(1, 8, 5), stones = [], hops = [];
   for (let i = 0; i < entries.length - 1; i++) {
     const a = entries[i], b = entries[i + 1], dx = b.x - a.x, dz = b.z - a.z, len = Math.hypot(dx, dz), ux = dx / len, uz = dz / len;
-    const from = a.radius * 0.93, to = len - b.radius * 0.93, n = Math.max(3, Math.floor((to - from) / 6.5)), bend = (i % 2 ? 1 : -1) * 7;
+    const from = a.radius * 0.9, to = len - b.radius * 0.9, n = Math.max(4, Math.floor((to - from) / 4.2)), bend = (i % 2 ? 1 : -1) * 4;
     const first = stones.length;
     for (let s = 0; s < n; s++) {
       const t = n === 1 ? 0.5 : s / (n - 1), d = from + (to - from) * t, side = Math.sin(t * Math.PI) * bend;
-      stones.push({ x: a.x + ux * d - uz * side, z: a.z + uz * d + ux * side, r: 1.15 + rand() * 0.45 });
+      stones.push({ x: a.x + ux * d - uz * side, z: a.z + uz * d + ux * side, r: 1.5 + rand() * 0.5 });
     }
     hops.push({ first, count: n, to: i + 1 });
   }
   const stoneMesh = new T.InstancedMesh(stoneGeo, new T.MeshLambertMaterial(), Math.max(1, stones.length)); stoneMesh.name = 'RouteStones';
   stones.forEach((s, k) => stoneMesh.setMatrixAt(k, mtx([s.x, SEA_Y + 0.02, s.z], [0, rand() * 6, 0], [s.r * 1.25, 0.34, s.r])));
   stoneMesh.instanceMatrix.needsUpdate = true; stoneMesh.count = stones.length; group.add(stoneMesh);
+  // a buoy beside every other stone: red and white, they bob in the swell
+  const buoyGeo = new T.CylinderGeometry(0.7, 1.0, 1.9, 8, 3), buoyMat = new T.MeshLambertMaterial({ vertexColors: true });
+  const bc = buoyGeo.attributes.position, bcol = new Float32Array(bc.count * 3);
+  for (let k = 0; k < bc.count; k++) { const y = bc.getY(k); const c = new T.Color(y > 0.2 ? '#ff4d3d' : y > -0.35 ? '#fffaf0' : '#ff4d3d'); bcol.set([c.r, c.g, c.b], k * 3); }
+  buoyGeo.setAttribute('color', new T.BufferAttribute(bcol, 3));
+  const buoys = stones.filter((_, k) => k % 2 === 1).map((st, k) => ({ x: st.x + 3.2 * (k % 2 ? 1 : -1), z: st.z - 3.2 * (k % 2 ? 1 : -1) }));
+  const buoyMesh = new T.InstancedMesh(buoyGeo, buoyMat, Math.max(1, buoys.length)); buoyMesh.name = 'RouteBuoys'; buoyMesh.count = buoys.length; buoyMesh.frustumCulled = false;
+  const buoyDummy = new T.Object3D();
+  function bob(time) { buoys.forEach((q, k) => { buoyDummy.position.set(q.x, SEA_Y + 0.5 + Math.sin(time * 1.4 + k * 1.7) * 0.12, q.z); buoyDummy.rotation.set(Math.sin(time + k) * 0.08, 0, Math.cos(time * 0.8 + k) * 0.08); buoyDummy.updateMatrix(); buoyMesh.setMatrixAt(k, buoyDummy.matrix); }); buoyMesh.instanceMatrix.needsUpdate = true; }
+  bob(0); group.add(buoyMesh);
   const sphere = new T.Sphere(), hit = new T.Vector3();
 
   function refreshStones() {
@@ -87,6 +97,8 @@ export function createArchipelago({ islands, sea = null, mobile = false }) {
   refreshStones();
   return {
     group, entries, stoneMesh,
+    /** Resolves once the landmark models of every silhouette are in (the caller restyles `group` then). */
+    ready: Promise.all(entries.map((e) => e.silhouette.ready)),
     centre(i) { return new T.Vector3(entries[i].x, 0, entries[i].z); },
     /** Feed the game state of island i. `revealed` false keeps an open island under its clouds until reveal() runs. */
     setIsland(i, { open, revealed = true, stars = 0, total = 0 }) {
@@ -118,15 +130,16 @@ export function createArchipelago({ islands, sea = null, mobile = false }) {
         if (i === except) continue;
         const e = entries[i];
         if (e.sprite.visible && raycaster.intersectObject(e.sprite, false).length) return i;
-        sphere.set(hit.set(e.x, 5, e.z), e.radius * 0.82);
+        sphere.set(hit.set(e.x, 6, e.z), e.radius * 0.86);
         const p = raycaster.ray.intersectSphere(sphere, new T.Vector3());
         if (p) { const d = raycaster.ray.origin.distanceTo(p); if (d < bestDistance) { bestDistance = d; best = i; } }
       }
       return best;
     },
     /** pxScale: pixels per metre of the orthographic view. showCurrent: also label the island the camera is on. */
-    update(time, { pxScale = 10, showCurrent = false } = {}) {
-      const width = (mobile ? 128 : 160), height = width * 176 / 512;
+    update(time, { pxScale = 10, showCurrent = false, signWidth = 0 } = {}) {
+      bob(time);
+      const width = signWidth ? Math.min(signWidth, mobile ? 96 : 118) : (mobile ? 96 : 118), height = width * 176 / 512;
       for (let i = 0; i < entries.length; i++) {
         const e = entries[i];
         e.sprite.visible = showCurrent || i !== current;
@@ -139,7 +152,7 @@ export function createArchipelago({ islands, sea = null, mobile = false }) {
     debug() { return entries.map((e, i) => ({ i, name: e.name, open: e.open, revealed: e.revealed, silhouette: e.silhouette.group.visible, cloud: e.bank.group.visible && e.bank.covered, parting: e.bank.parting, label: e.sprite.visible, x: e.x, z: e.z })); },
     dispose() {
       for (const e of entries) { e.silhouette.release(); e.bank.dispose(); e.sprite.material.map?.dispose(); e.sprite.material.dispose(); }
-      stoneGeo.dispose(); stoneMesh.material.dispose(); stoneMesh.dispose(); group.removeFromParent();
+      buoyGeo.dispose(); buoyMat.dispose(); buoyMesh.dispose(); stoneGeo.dispose(); stoneMesh.material.dispose(); stoneMesh.dispose(); group.removeFromParent();
     },
   };
 }

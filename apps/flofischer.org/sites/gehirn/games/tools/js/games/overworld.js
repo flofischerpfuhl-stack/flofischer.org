@@ -10,6 +10,7 @@ import { island, BIOME_OF } from './world/island-terrain.js';
 import { createSea } from './world/sea.js';
 import { createHorizon } from './world/horizon.js';
 import { createArchipelago, layoutFromMap } from './world/archipelago.js';
+import { createSkyClouds } from './world/cloud-bank.js';
 import { createWayfindingPlan } from './overworld-wayfinding.js';
 import { fitRouteOverview, separateBadgeCenters } from './overworld-overview.js';
 import { prepareOcclusionGeometries } from './overworld-occlusion.js';
@@ -26,10 +27,10 @@ const MAPS = {
 };
 const ARCHIPELAGO_Z=[0,.14,-.12,.16,-.08];
 // Fern Rangers world map: islands wind from the lower left to the upper right (screen metres: right, down), the Sturmbastion last
-const MAP_LANDSCAPE=[[-205,45],[-78,92],[40,22],[160,78],[245,-24]].map(([x,y])=>[x*.84,y*.84]),MAP_PORTRAIT=[[-62,185],[62,92],[-62,0],[62,-92],[-8,-190]],ISLAND_R=44,WORLD_PHI=.95,WORLD_THETA=Math.PI/4;
+const MAP_LANDSCAPE=[[-126,104],[-62,150],[4,100],[66,52],[128,8]],MAP_WIDE=[[-176,66],[-88,106],[0,70],[88,36],[176,4]],MAP_PORTRAIT=[[-40,165],[40,97],[-40,29],[40,-39],[0,-109]],ISLAND_R=44,WORLD_PHI=1,WORLD_THETA=Math.PI/4,SKY_FRACTION=.21;
 /** Island centres and sea bounds for a map laid out for a wide or a tall screen (chosen once, when the map is mounted). */
-function archLayout(portrait){
-  const c=layoutFromMap(portrait?MAP_PORTRAIT:MAP_LANDSCAPE,{tilt:.6}),centers=c.map(([x,z])=>[x-c[0][0],z-c[0][1]]),xs=centers.map(p=>p[0]),zs=centers.map(p=>p[1]);
+function archLayout(portrait,wide){
+  const c=layoutFromMap(portrait?MAP_PORTRAIT:wide?MAP_WIDE:MAP_LANDSCAPE,{tilt:.57}),centers=c.map(([x,z])=>[x-c[0][0],z-c[0][1]]),xs=centers.map(p=>p[0]),zs=centers.map(p=>p[1]);
   return{centers,bounds:{x0:Math.min(...xs)-140,x1:Math.max(...xs)+140,z0:Math.min(...zs)-140,z1:Math.max(...zs)+140}};
 }
 const REVEALED_KEY=id=>`fw:games:${id}:regions-revealed`,ease01=k=>k*k*(3-2*k);
@@ -122,10 +123,10 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   const renderer = createRenderer(canvas), scene = new THREE.Scene();
   renderer.shadowMap.autoUpdate = false;
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .01, 200);
-  const layout = archLayout(innerWidth < innerHeight * .85), ARCH_CENTERS = layout.centers, ARCH_BOUNDS = layout.bounds;
+  const layout = archLayout(innerWidth < innerHeight * .85, innerWidth > innerHeight * 1.9), ARCH_CENTERS = layout.centers, ARCH_BOUNDS = layout.bounds;
   const sea = config.family === 'rangers' ? createSea(ARCH_BOUNDS) : null;
   if (sea) scene.add(sea.mesh);
-  let horizon = null; // created with the first region, when its spacing is known
+  let horizon = null, skyClouds = null; // created with the first region, when its spacing is known
   const env = studioEnvironment(renderer), lights = addLights(scene, { dir: [-12, 24, 15], shadowBox: 18, mapSize: 2048, intensity: 2.4, ambient: 1.1 });
   // shared Wind Waker cel look, Fern Rangers map only for now (?shade=none turns it off); applyIbl converts through env.userData.shading
   const shading = config.family === 'rangers' && shadeFromUrl() ? createShading(shadeFromUrl(), { ambient: .7 }) : null; if (shading) env.userData.shading = shading;
@@ -376,7 +377,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   function buildMap(){
     arch=createArchipelago({islands:ARCH_CENTERS.map(([x,z],i)=>({name:NAMES[i],biome:BIOME_OF[i],x,z,radius:ISLAND_R})),sea,mobile:matchMedia('(max-width:639px)').matches});
     scene.add(arch.group);shading?.apply(arch.group,{outline:false});
-    horizon=createHorizon({spacing:0,zs:[],centers:ARCH_CENTERS,bounds:ARCH_BOUNDS});scene.add(horizon.group);shading?.apply(horizon.group,{outline:false});horizon.group.userData.onTrees=()=>{shading?.apply(horizon.group,{outline:false});kick();};
+    horizon=createHorizon({spacing:0,zs:[],centers:ARCH_CENTERS,bounds:ARCH_BOUNDS});scene.add(horizon.group);skyClouds=createSkyClouds();scene.add(skyClouds.group);arch.ready.then(()=>{if(destroyed)return;shading?.apply(arch.group,{outline:false});kick();});shading?.apply(horizon.group,{outline:false});horizon.group.userData.onTrees=()=>{shading?.apply(horizon.group,{outline:false});kick();};
     for(const [index,held] of regionCache)arch.setFull(index,index===regionIndex||(!!departing&&held.visuals===departing));
     syncArchipelago();pickerVisibility();syncCompass();worldFit();kick();setTimeout(playReveals,300);
   }
@@ -384,8 +385,8 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     if(!region||!arch)return;
     const s=new THREE.Spherical(spherical.radius||60,WORLD_PHI,WORLD_THETA),base=camera.clone(),points=[];
     base.position.copy(region.cameraTarget).add(new THREE.Vector3().setFromSpherical(s));base.lookAt(region.cameraTarget);base.updateMatrixWorld(true);
-    for(const [x,z] of ARCH_CENTERS){for(const [dx,dz] of [[-1,-1],[1,1],[-1,1],[1,-1]])points.push(new THREE.Vector3(x+dx*ISLAND_R*.9,0,z+dz*ISLAND_R*.9));points.push(new THREE.Vector3(x,22,z));}
-    const r=fitRouteOverview({camera:base,points,target:region.cameraTarget,width,height,unit:1,span,topInset:height<=400?60:96,bottomInset:height<=400?64:width<640?150:122});
+    for(const [x,z] of ARCH_CENTERS){for(const [dx,dz] of [[-1,-1],[1,1],[-1,1],[1,-1]])points.push(new THREE.Vector3(x+dx*ISLAND_R*.9,0,z+dz*ISLAND_R*.9));points.push(new THREE.Vector3(x,34,z));}
+    const r=fitRouteOverview({camera:base,points,target:region.cameraTarget,width,height,unit:1,span,topInset:Math.max(height<=400?60:96,height*SKY_FRACTION),bottomInset:height<=400?64:width<640?150:122});
     worldLook.set(region.cameraTarget.x+r.panX,region.cameraTarget.y,region.cameraTarget.z+r.panZ);worldH=r.zoom*span*.5;
   }
   function enterWorld(auto=false){
@@ -559,7 +560,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       const we=ease01(worldK);if(we>0)look.lerp(worldLook,we);
       const phi0=THREE.MathUtils.clamp(spherical.phi-view.pitch,.22,1.36),theta0=spherical.theta+view.yaw,phi=we>0?THREE.MathUtils.lerp(phi0,WORLD_PHI,we):phi0,theta=we>0?theta0+(((WORLD_THETA-theta0+Math.PI*3)%(Math.PI*2))-Math.PI)*we:theta0;
       offset.setFromSphericalCoords(spherical.radius,phi,theta);camera.position.copy(look).add(offset);camera.lookAt(look);
-      let h=span*.5*view.zoom;if(departH&&progress<1)h=THREE.MathUtils.lerp(departH,h,ease01(progress));if(travelDistance&&progress<1){const peak=Math.max(1,travelDistance*.62/aspect/h);h*=1+(peak-1)*Math.sin(Math.PI*progress);}if(we>0)h=THREE.MathUtils.lerp(h,worldH,we);lastH=h;lastLook.copy(look);camera.left=-h*aspect;camera.right=h*aspect;camera.bottom=-h;camera.top=h;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);placeBadges();pxScale=height/(camera.top-camera.bottom);arch?.update(time,{pxScale,showCurrent:worldK>.25});
+      let h=span*.5*view.zoom;if(departH&&progress<1)h=THREE.MathUtils.lerp(departH,h,ease01(progress));if(travelDistance&&progress<1){const peak=Math.max(1,travelDistance*.62/aspect/h);h*=1+(peak-1)*Math.sin(Math.PI*progress);}if(we>0)h=THREE.MathUtils.lerp(h,worldH,we);lastH=h;lastLook.copy(look);camera.left=-h*aspect;camera.right=h*aspect;camera.bottom=-h;camera.top=h;camera.updateProjectionMatrix();camera.updateMatrixWorld(true);placeBadges();pxScale=height/(camera.top-camera.bottom);arch?.update(time,{pxScale,showCurrent:worldK>.25,signWidth:Math.max(66,Math.min(118,height*.13))});if(sea){const horizonY=h*(1-2*SKY_FRACTION);sea.setSky(THREE.MathUtils.lerp(h*2.5,horizonY,we),h-horizonY,Math.min(1,we*3));skyClouds?.place(camera,h,aspect,reduced?0:time,Math.min(1,we*1.5),1-2*SKY_FRACTION);}
       if(wayfindingDirty&&!starterPicking&&travelView&&regionIndex===world){
         const settled=!hop&&worldK<.01&&t-entryAt>travelLength&&Math.abs(view.zoom-view.tZoom)<.0002&&Math.abs(view.panX-view.tPanX)+Math.abs(view.panZ-view.tPanZ)<.002&&Math.abs(view.yaw-view.tYaw)+Math.abs(view.pitch-view.tPitch)<.002;
         advanceWayfinding(settled);
@@ -615,7 +616,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     refresh(){const current=state.current();if(!initialized||current!==lastCurrent){lastCurrent=current;sel=current;setWorld(levels[sel]?.world??0,{keepSel:true});}else{paintNodes();syncDom();placeHero();kick();setTimeout(playReveals,500);}},key,
     async refreshHero(){try{await ensureActors();placeHero();placeStarters();invalidateWayfinding();kick();}catch(error){console.error('[games] companion change failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'Your companion could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}},
     get selected(){return sel;},get world(){return world;},get loaded(){return regionIndex===world&&!pending;},get ready(){return pending??Promise.resolve();},
-    destroy(){clearTimeout(horizonTimer);clearTimeout(tourTimer);cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();shading?.dispose();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();arch?.dispose();sea?.dispose();horizon?.release();renderer.dispose();}
+    destroy(){clearTimeout(horizonTimer);clearTimeout(tourTimer);cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();shading?.dispose();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();arch?.dispose();sea?.dispose();horizon?.release();skyClouds?.dispose();renderer.dispose();}
   };
 }
 

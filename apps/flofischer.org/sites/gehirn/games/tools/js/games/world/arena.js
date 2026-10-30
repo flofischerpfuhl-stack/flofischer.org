@@ -5,6 +5,7 @@
 import { THREE } from '../three-kit.js';
 import { Batch, mtx, rng, createNoise } from './decor.js';
 import { clipStoneSurface } from './arena-mesh.js';
+import { frillGeometry, paintArenaRings } from './arena-ground.js';
 import { SLAB_PAD, SLAB_PALETTE, slabGeometry, slabGround } from './arena-slab.js';
 import { composeScenery, SCENE_MODELS } from './arena-scenes.js';
 import { BIOMES, PLAZA_RADIUS, ringRadius, pathDistance, gardenCenters } from './arena-layout.js';
@@ -19,7 +20,8 @@ export async function buildArena({world=0,R=22,dark=false,low=false,library}){
  const patch=(x,z,r,color,alpha)=>{const gradient=g.createRadialGradient(px(x),px(z),0,px(x),px(z),r*scale);gradient.addColorStop(0,`rgba(${color},${alpha})`);gradient.addColorStop(1,`rgba(${color},0)`);g.fillStyle=gradient;g.fillRect(px(x-r),px(z-r),r*2*scale,r*2*scale);};
  // Broad soil/ground-cover variation is continuous under the native plants.
  // Fine detail remains in the repeating ground texture, not this 1024px mask.
- for(let k=0;k<180;k++)patch((rand()*2-1)*E,(rand()*2-1)*E,2+rand()*5,k%3?theme.shade:theme.light,.08+rand()*.13);
+ paintArenaRings(g,{world,R,px,scale,plaza:PLAZA_RADIUS});
+ for(let k=0;k<70;k++)patch((rand()*2-1)*E,(rand()*2-1)*E,2+rand()*5,k%3?theme.shade:theme.light,.08+rand()*.13);
  const gardens=gardenCenters(R);
  for(const bed of gardens){patch(bed.x,bed.z,bed.radius*1.8,theme.shade,world===0?.24:.17);patch(bed.x+.35,bed.z-.4,bed.radius,theme.light,.15);}
  // Worn paths: four gently curved routes and a continuous garden circuit.
@@ -70,7 +72,7 @@ export async function buildArena({world=0,R=22,dark=false,low=false,library}){
   place(id,x,0,z,rand()*TAU,size,theme.tint,'groundcover');
  }
  // The slab: playfield disc, lip, layered cliff side and tip; scenery stands on its terrace, on islets and in the cloud sea.
- const S=R+SLAB_PAD,slab=SLAB_PALETTE[world],cloudTint=new THREE.Color(slab.cloud),disc=new THREE.CircleGeometry(1,20).rotateX(-Math.PI/2);
+ const S=R+SLAB_PAD,slab=SLAB_PALETTE[world],cloudTint=new THREE.Color(slab.cloud),disc=frillGeometry();
  const ground=slabGround(S,{seed:world+1}),rim=slabGeometry(world,S,{seed:world+1});
  const batchOf=(x,z)=>{const far=Math.hypot(x,z)>S+1,key=far?'far':Math.floor(x/12)+','+Math.floor(z/12);if(!chunks.has(key))chunks.set(key,{matte:new Batch(),gloss:new Batch(),glow:new Batch()});return chunks.get(key);};
  const sceneModels=new Map(await Promise.all(SCENE_MODELS.filter(id=>!models.has(id)).map(async id=>[id,await library.model(id,'lo')])));for(const [id,parts]of sceneModels)models.set(id,parts);

@@ -5,6 +5,7 @@
 import { createShading, shadeFromUrl } from './cel-shading.js';
 import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, BlobShadows, LOW_GPU } from './three-kit.js';
 import { buildArena, overlayGround } from './world/arena.js';
+import { paintedGround } from './world/arena-ground.js';
 import { KINDS, WEAPONS } from './momo.js';
 import { STARTERS, ENEMY_MODELS, BOSS_MODELS, moveEffect } from './fernling-canon.js';
 import { ChannelLibrary } from '../../games-assets/fernworld/runtime/channel-library.js';
@@ -344,7 +345,7 @@ export class Momo3D {
       for(const kind of kinds){const tiers=this.crowds.get(this.kindModels[KINDS.indexOf(kind)]);if(tiers)for(const t of tiers)t.batch.root.visible=true;}
       this.pedestal.root.visible=!!session.gen;this.pedestal.root.scale.setScalar(1.2);
       const ov=this.overlay;ov.uOver.value=this.arena.overlay;ov.uOverExt.value.set(...this.arena.ext);ov.uGlowMap.value=this.arena.glow;ov.uGlowC.value.setRGB(...(this.arena.glow?[.8,.23,.08]:[0,0,0]));
-      const theme=THEMES[session.L.world];this.ground.material.map=texture(theme.ground,{repeat:[16,16]});await readyTexture(this.ground.material.map);this.ground.material.color.set(theme.tint);this.ground.material.needsUpdate=true;
+      const theme=THEMES[session.L.world];this.ground.material.map=paintedGround(session.L.world);this.ground.material.color.set(0xffffff);this.ground.material.needsUpdate=true;
       this.scene.background=new THREE.Color(theme.fog);this.scene.fog=new THREE.Fog(theme.fog,26,62);this.lights.light.color.set(theme.sun);this.lights.light.intensity=2.4;this.lights.hemi.color.set(theme.sky);this.lights.hemi.groundColor.set(theme.soil);this.lights.hemi.intensity=1.1;this.renderer.toneMappingExposure=1.0;
       this.rim.scale.setScalar(session.R);this.ice.count=session.ice.length;this.ice.visible=this.ice.count>0;session.ice.forEach((p,i)=>{this.M.makeScale(p.r,1,p.r).setPosition(p.x,.015,p.y);this.ice.setMatrixAt(i,this.M)});this.ice.instanceMatrix.needsUpdate=true;
       stage('Preparing light and surfaces …',{phase:'compile'});const compileStarted=performance.now();

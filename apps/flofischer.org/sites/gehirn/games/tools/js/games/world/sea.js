@@ -17,7 +17,7 @@ export function createSea({ x0 = -60, z0 = -70, x1 = 560, z1 = 90, texel = Math.
   const color = (hex) => new T.Color(hex);
   const uniforms = {
     uTime: { value: 0 }, uShore: { value: texture }, uRect: { value: new T.Vector4(x0, z0, 1 / (w * texel), 1 / (h * texel)) },
-    uLook: { value: new T.Vector3() }, uDark: { value: 0 },
+    uLook: { value: new T.Vector3() }, uDark: { value: 0 }, uSky: { value: new T.Vector3(1e5, 1, 0) }, uSkyLow: { value: color('#dcefff') }, uSkyTop: { value: color('#4f9fe6') },
     uShallow: { value: color('#86f2e6') }, uMid: { value: color('#2ab2f2') }, uDeep: { value: color('#1a6ad8') }, uFoam: { value: color('#f4ffff') }, uHaze: { value: color('#cfe6f6') },
   };
   const materials = [], layers = new Map();
@@ -39,7 +39,7 @@ export function createSea({ x0 = -60, z0 = -70, x1 = 560, z1 = 90, texel = Math.
     shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>
 varying vec3 vSeaPos;
 uniform float uTime, uDark; uniform sampler2D uShore; uniform vec4 uRect; uniform vec3 uLook;
-uniform vec3 uShallow, uMid, uDeep, uFoam, uHaze;
+uniform vec3 uShallow, uMid, uDeep, uFoam, uHaze, uSky, uSkyLow, uSkyTop;
 float seaHash(vec2 i) { return fract(sin(dot(i, vec2(127.1, 311.7))) * 43758.5453); }
 float seaNoise(vec2 x) { vec2 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f); return mix(mix(seaHash(i), seaHash(i + vec2(1.0, 0.0)), f.x), mix(seaHash(i + vec2(0.0, 1.0)), seaHash(i + vec2(1.0, 1.0)), f.x), f.y); }`).replace('#include <opaque_fragment>', `{
   vec3 p = vSeaPos;
@@ -60,8 +60,14 @@ float seaNoise(vec2 x) { vec2 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0
   float foam = 1.0 - smoothstep(0.18, 0.5, e);
   float ring = (1.0 - smoothstep(0.05, 0.15, abs(e - 1.55))) * 0.7 * step(0.6, sd) * (1.0 - smoothstep(2.4, 4.0, sd));
   c = mix(c, uFoam, max(foam, ring));
-  float fade = smoothstep(150.0, 480.0, length(p.xz - uLook.xz));
+  float fade = smoothstep(150.0, 480.0, length(p.xz - uLook.xz)) * (1.0 - uSky.z);
   c = mix(c, uHaze, fade);
+  if (uSky.z > 0.0) {
+    float vy = (viewMatrix * vec4(p, 1.0)).y;
+    c = mix(c, uHaze, uSky.z * smoothstep(uSky.x - uSky.y * 0.55, uSky.x, vy) * 0.85);
+    vec3 sky = mix(uSkyLow, uSkyTop, smoothstep(uSky.x, uSky.x + uSky.y, vy));
+    c = mix(c, sky, uSky.z * step(uSky.x, vy));
+  }
   c *= 1.0 - 0.5 * uDark;
   gl_FragColor = vec4(c, 1.0);
 }`);
@@ -89,6 +95,8 @@ float seaNoise(vec2 x) { vec2 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0
       for (const layer of layers.values()) stamp(layer, ix0, iz0, ix1, iz1);
       texture.needsUpdate = true;
     },
+    /** World view: the sea ends at a horizon `h` view-space metres above the look point, with `span` metres of sky above it; on 0..1 fades it in. */
+    setSky(h, span, on) { uniforms.uSky.value.set(h, span, on); },
     setDark(dark) { uniforms.uDark.value = dark ? 1 : 0; },
     update(time, look) { uniforms.uTime.value = time; uniforms.uLook.value.copy(look); mesh.position.x = look.x; mesh.position.z = look.z; },
     dispose() { mesh.geometry.dispose(); for (const m of materials) m.dispose(); texture.dispose(); },
