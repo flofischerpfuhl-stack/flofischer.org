@@ -4,16 +4,12 @@
  * specifier "three" to it with an import map.
  */
 import * as THREE from 'three';
+import { glProbe } from './gl-probe.js';
 
 export { THREE };
 const ASSETS = new URL('../../games-assets/', import.meta.url);
 
-export function webglAvailable() {
-  try {
-    const c = document.createElement('canvas');
-    return !!(window.WebGL2RenderingContext && c.getContext('webgl2')) || !!c.getContext('webgl');
-  } catch { return false; }
-}
+export const webglAvailable = () => glProbe().ok;
 
 /**
  * True when WebGL runs in software (SwiftShader, llvmpipe: no GPU, or a blocked driver). Scenes then drop the
@@ -22,9 +18,7 @@ export function webglAvailable() {
 export const LOW_GPU = (() => {
   try {
     if (new URLSearchParams(location.search).has('lowgpu')) return true;
-    const gl = document.createElement('canvas').getContext('webgl');
-    const info = gl && gl.getExtension('WEBGL_debug_renderer_info');
-    const name = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : '';
+    const name = glProbe().renderer;
     return /swiftshader|llvmpipe|software|basic render/i.test(name);
   } catch { return false; }
 })();
@@ -619,4 +613,24 @@ export function projector(camera, w, h) {
     v.set(x, y, z).project(camera);
     return { x: (v.x + 1) / 2 * w, y: (1 - v.y) / 2 * h, behind: v.z > 1 };
   };
+}
+
+/**
+ * Starts the link of every program `root` needs and resolves when they are all ready, without a blocking getProgramInfoLog
+ * (a first render() would do that synchronously, 1-3 s on a weak GPU). Unlike renderer.compileAsync it tolerates materials that
+ * are disposed while it waits, and it gives up after `timeout` ms so a stuck driver cannot hold a screen.
+ */
+export function compileReady(renderer, root, camera, target = null, timeout = 4000, renderTarget = undefined) {
+  return new Promise((resolve) => {
+    let materials;
+    const previous = renderer.getRenderTarget();
+    try { if (renderTarget) renderer.setRenderTarget(renderTarget); materials = renderer.compile(root, camera, target); } catch { resolve(); return; } finally { if (renderTarget) renderer.setRenderTarget(previous); }
+    const started = performance.now();
+    const poll = () => {
+      let ready = true;
+      for (const m of materials) { const program = renderer.properties.get(m).currentProgram; if (program && !program.isReady()) { ready = false; break; } }
+      if (ready || performance.now() - started > timeout) resolve(); else setTimeout(poll, 16);
+    };
+    poll();
+  });
 }

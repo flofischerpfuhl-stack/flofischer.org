@@ -1,5 +1,5 @@
 /** A continuous expedition through authored Fernworld regions; only its visible chapter owns GPU resources. */
-import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, LOW_GPU } from './three-kit.js';
+import { THREE, createRenderer, addLights, studioEnvironment, applyIbl, LOW_GPU, compileReady } from './three-kit.js';
 import { createShading, shadeFromUrl } from './cel-shading.js';
 import { bindLoadingStatus, loadingBarHTML } from './loading-status.js';
 import { WorldLibrary, fitWorldCamera } from '../../games-assets/fernworld/runtime/world-library.js';
@@ -143,7 +143,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   function prefetchNeighbours(){
     clearTimeout(prefetchTimer);
     prefetchTimer=setTimeout(()=>{
-      if(destroyed||pending)return;const at=worlds.findIndex(w=>w.index===regionIndex);if(at<0)return;
+      if(destroyed||pending||region?.detail==='far')return;const at=worlds.findIndex(w=>w.index===regionIndex);if(at<0)return;
       for(const neighbour of [worlds[at-1],worlds[at+1]]){
         if(!neighbour||!state.worldOpen(neighbour.index)||regionCache.has(neighbour.index)||prefetches.has(neighbour.index))continue;
         const controller=new AbortController(),index=neighbour.index;prefetches.set(index,controller);
@@ -217,16 +217,17 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       else placement.traverse(n => { if (n.isMesh) n.material.dispose(); });
     }};
   }
-  let heroLoad = null, loadedHero = null, requestedHero = null, heroVersion = 0, starterActors = [], starterLoad = null;
+  let companionLoad = null, heroLoad = null, loadedHero = null, requestedHero = null, heroVersion = 0, starterActors = [], starterLoad = null;
   function ensureActors() {
     const wanted=getHero?.()??heroId??config.hero;
     if(hero&&loadedHero===wanted){if(heroLoad&&requestedHero!==wanted){heroVersion++;requestedHero=wanted;heroLoad=null;}return Promise.resolve();}
     if(heroLoad&&requestedHero===wanted)return heroLoad;
     requestedHero=wanted;const request=++heroVersion;
-    const job=Promise.allSettled([makeActor(wanted,1.4),!companion&&config.companion?makeActor(config.companion,.65):Promise.resolve(null)]).then(results=>{
-      const failed=results.find(r=>r.status==='rejected');
-      if(failed||destroyed||request!==heroVersion){for(const r of results)if(r.status==='fulfilled')r.value?.release();if(failed)throw failed.reason;return;}
-      hero?.release();hero=results[0].value;if(results[1].value)companion=results[1].value;loadedHero=wanted;placeHero();
+    // the map is usable with the hero alone; the companion follows without holding the screen back
+    const job=makeActor(wanted,1.4).then(next=>{
+      if(destroyed||request!==heroVersion){next.release();return;}
+      hero?.release();hero=next;loadedHero=wanted;placeHero();
+      if(!companion&&config.companion&&!companionLoad)companionLoad=makeActor(config.companion,.65).then(c=>{if(destroyed){c.release();return;}companion=c;placeHero();invalidateWayfinding();kick();},error=>console.error('[games] companion failed',error)).finally(()=>{companionLoad=null;});
     }).finally(()=>{if(request===heroVersion)heroLoad=null;});
     heroLoad=job;return job;
   }
@@ -275,6 +276,40 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     for (const mesh of [held.pads, held.stars, held.ring, held.gates, held.posts]) { mesh.geometry.dispose(); mesh.material.dispose(); mesh.dispose?.(); }
     if(held===visuals)visuals = null;
   }
+  /** Per-region look that belongs to the model itself; runs on the twin first and again on the full scene. */
+  async function styleRegion(root,index,pause=null){
+    if(config.family!=='rangers')return;
+    if(index===0)await gradeRegion(root,{pause});
+    if(index===0||index===4)root.traverse(m=>{if(m.isMesh&&m.material?.name==='water'){m.material.dispose();m.material=sea.material();}});
+  }
+  const idle=()=>new Promise(resolve=>setTimeout(resolve,0));
+  /** Link the shaders of everything in the scene without holding the main thread (KHR_parallel_shader_compile); a render would do it synchronously. */
+  const precompile=()=>compileReady(renderer,scene,camera);
+  /** The map is usable on the reduced twin; the full model is fetched, prepared off-graph (look, shaders) and swapped in at the same pose. */
+  function upgradeRegion(held){
+    const w=held.region;
+    if(w.detail!=='far')return Promise.resolve();
+    if(held.upgrade)return held.upgrade;
+    const alive=()=>!destroyed&&regionCache.get(held.index)===held;
+    held.upgrade=(async()=>{
+      const full=await w.fetchFull();
+      if(!full||!alive())return;
+      await idle();await styleRegion(full,held.index,idle);if(!alive())return;await idle();
+      applyIbl(full,env,.55);if(shading)shading.apply(full,{outline:false});await idle();
+      await compileReady(renderer,full,camera,scene);
+      if(!alive())return;
+      held.visuals.depth?.release();
+      if(!w.swapFull(full))return;
+      held.visuals.depth=opaqueDepthLayer([w.root,held.visuals.context.group]);
+      if(held.index===regionIndex){renderer.shadowMap.needsUpdate=true;invalidateWayfinding();}
+      kick();
+    })().catch(error=>{
+      if(error?.name==='AbortError'||destroyed)return;
+      held.upgrade=null;console.warn('[games] full region model failed; the reduced model stays',error);
+      if(error.code==='ASSET_VERSION_MISMATCH'&&alive()){versionMismatch=true;loadingStatus.fail('The game was updated. Reload the page.',{action:retryLoad,label:'Reload'});}
+    }).finally(()=>{if(alive()&&held.index===regionIndex)prefetchNeighbours();});
+    return held.upgrade;
+  }
   function makeNodes(w, wd) {
     const unit = w.unitScale, group = new THREE.Group(), nodes = [];
     const pads = new THREE.InstancedMesh(new THREE.CylinderGeometry(.43*unit,.48*unit,.065*unit,24), new THREE.MeshStandardMaterial({color:0xffffff,roughness:.72}), wd.levels.length);
@@ -295,10 +330,9 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       nodes.push({lv,pos:p,label,maps,index:k,distance:w.nodeDistances[k]});
     });
     group.add(pads,stars,ring,gates,posts);scene.add(group);
-    const rangers=config.family==='rangers';if(rangers&&world===0)gradeRegion(w.root);
+    styleRegion(w.root,world);
     // the land around the region belongs to the shared map; this stub only keeps the region's per-visit resources in one place
     const context={group:new THREE.Group(),state:{ready:true},release(){context.group.removeFromParent();}};scene.add(context.group);
-    if(rangers&&(world===0||world===4))w.root.traverse(m=>{if(m.isMesh&&m.material?.name==='water'){m.material.dispose();m.material=sea.material();}});
     const actions=[];
     function sign(action,text,pos,color=0x8e6540) {
       const root=new THREE.Group();root.position.copy(pos);
@@ -447,7 +481,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     pending=(async()=>{
       let next, reuse=false;
       try{
-        const cached=regionCache.get(target);reuse=!!cached;next=cached?.region??await library.region(target===4?'sturmbastion':config.family,REGIONS[target]);await ensureActors();if(target===0)await ensureStarters();
+        const cached=regionCache.get(target);reuse=!!cached;const actorsReady=ensureActors();actorsReady.catch(()=>{});next=cached?.region??await library.region(target===4?'sturmbastion':config.family,REGIONS[target],{progressive:true});await actorsReady;if(target===0)setTimeout(()=>{if(!destroyed)ensureStarters().catch(()=>{});},1500);
         if(veilAt&&performance.now()<veilAt+360)await new Promise(r=>setTimeout(r,veilAt+360-performance.now()));
         if(request!==serial||destroyed){if(!cached)next.release();arch?.unveil(target,{reduced:true});return;}
         const hadRegion=!!region;arrivalFrom.copy(region?look:next.cameraTarget);
@@ -466,7 +500,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
         }else{visuals=cached.visuals;visuals.group.visible=true;visuals.context.group.visible=true;}
         arch?.setFull(target,true);
         if(!hadRegion)arrivalFrom.copy(region.cameraTarget);
-        regionCache.delete(target);regionCache.set(target,{region,visuals});
+        regionCache.delete(target);const held=cached??{region,visuals,index:target,upgrade:null};regionCache.set(target,held);
         while(regionCache.size>2){const [index,held]=regionCache.entries().next().value;regionCache.delete(index);releaseVisuals(held.visuals);held.region.release();}
         travelMs=travelling?2100:850;travelHold=travelling?{context:visuals.context,since:performance.now()}:null;travelDistance=travelling?arrivalFrom.distanceTo(region.cameraTarget):0;
         background();entryAt=performance.now();Object.assign(view,{yaw:0,pitch:0,zoom:1,panX:0,panZ:0,tYaw:0,tPitch:0,tZoom:1,tPanX:0,tPanZ:0});
@@ -475,7 +509,8 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
         lights.light.position.copy(center).add(new THREE.Vector3(-radius*.8,radius*1.5,radius));lights.light.target.position.copy(center);lights.light.target.updateMatrixWorld();
         Object.assign(lights.light.shadow.camera,{left:-radius,right:radius,top:radius,bottom:-radius,near:Math.max(.001,radius*.02),far:radius*6});lights.light.shadow.camera.updateProjectionMatrix();
         applyIbl(region.root,env,.55);if(shading){shading.apply(region.root,{outline:false});shading.apply(visuals.context.group,{outline:false});shading.apply(visuals.group,{outline:false});}fit();worldFit();paintNodes();placeHero();placeStarters();pickerVisibility();const flightFrom=arrivalFrom.clone();focusNode(true);if(travelling)arrivalFrom.copy(flightFrom);syncArchipelago();renderer.shadowMap.needsUpdate=true;
-        host.classList.remove('is-travelling');syncDom();if(!hadRegion)firstVisitHint();if(state.open(sel))onSelect?.(sel);kick();prefetchNeighbours();if(!travelHold)finishVeil();setTimeout(playReveals,700);
+        if(!hadRegion){await precompile();if(request!==serial||destroyed)return;}
+        host.classList.remove('is-travelling');syncDom();if(!hadRegion)firstVisitHint();if(state.open(sel))onSelect?.(sel);kick();upgradeRegion(regionCache.get(target));if(!travelHold)finishVeil();setTimeout(playReveals,700);
       }catch(error){arch?.unveil(target,{reduced:true});if(next&&!reuse&&region!==next)next.release();if(request!==serial||destroyed)return;console.error('[games] map load failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'This region could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}
       finally{if(request===serial){pendingIndex=-1;pending=null;}}
     })();return pending;
@@ -616,7 +651,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     deactivate(){cancelPrefetch();if(starterPicking)closeStarterPicker();if(wayfindingTask)invalidateWayfinding();active=false;if(raf)cancelAnimationFrame(raf);raf=0;},
     refresh(){const current=state.current();if(!initialized||current!==lastCurrent){lastCurrent=current;sel=current;setWorld(levels[sel]?.world??0,{keepSel:true});}else{paintNodes();syncDom();placeHero();kick();setTimeout(playReveals,500);}},key,
     async refreshHero(){try{await ensureActors();placeHero();placeStarters();invalidateWayfinding();kick();}catch(error){console.error('[games] companion change failed',error);versionMismatch=error.code==='ASSET_VERSION_MISMATCH';loadingStatus.fail(versionMismatch?'The game was updated. Reload the page.':'Your companion could not be loaded.',{action:retryLoad,label:versionMismatch?'Reload':'Retry'});}},
-    get selected(){return sel;},get world(){return world;},get loaded(){return regionIndex===world&&!pending;},get ready(){return pending??Promise.resolve();},
+    get selected(){return sel;},get world(){return world;},get interactive(){return regionIndex===world&&!pending;},get loaded(){return regionIndex===world&&!pending&&region?.detail==='full';},get ready(){return pending??Promise.resolve();},get fullyLoaded(){return (pending??Promise.resolve()).then(()=>regionCache.get(regionIndex)?.upgrade);},
     destroy(){clearTimeout(horizonTimer);clearTimeout(tourTimer);cancelPrefetch();wayfindingTask?.prep?.return();wayfindingTask?.search?.return();loadingStatus.finish();shading?.dispose();destroyed=true;serial++;active=false;cancelAnimationFrame(raf);observer.disconnect();themeObserver.disconnect();themeMedia.removeEventListener('change',background);skyTexture?.dispose();for(const held of regionCache.values()){releaseVisuals(held.visuals);held.region.release();}regionCache.clear();heroVersion++;hero?.release();companion?.release();for(const a of starterActors)a.release();library.dispose();actors.dispose();env.dispose();arch?.dispose();sea?.dispose();renderer.dispose();}
   };
 }

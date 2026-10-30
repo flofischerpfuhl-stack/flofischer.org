@@ -140,14 +140,21 @@ export class RangerPanorama {
     }
   }
 
-  /** Render the panorama from `camera` (with a wider horizontal margin) and place the plane to match. */
-  bake(renderer, camera) {
+  /** The off-screen target bake() draws into, for the current drawing buffer size. */
+  targetFor(renderer) {
     const size = renderer.getDrawingBufferSize(new THREE.Vector2());
     const w = Math.min(4096, Math.round(size.x * this.margin)), h = Math.min(4096, size.y);
     if (!this.target || this.target.width !== w || this.target.height !== h) {
       this.target?.dispose();
       this.target = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, generateMipmaps: false });
     }
+    return this.target;
+  }
+
+  /** Render the panorama from `camera` (with a wider horizontal margin) and place the plane to match. */
+  bake(renderer, camera) {
+    this.targetFor(renderer);
+    const h = this.target.height;
     const cam = camera.clone(); cam.aspect = camera.aspect * this.margin; cam.far = 2000; cam.updateProjectionMatrix();
     const tanH = Math.tan((cam.fov * Math.PI) / 360), D = 700, vh = 2 * D * tanH, vw = vh * cam.aspect;
     this.sky.position.copy(cam.position).add(new THREE.Vector3(0, 0, -D).applyQuaternion(cam.quaternion));

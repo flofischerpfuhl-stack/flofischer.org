@@ -6,6 +6,7 @@ import {
   addLights,
   Particles,
   LOW_GPU,
+  compileReady,
 } from "./three-kit.js";
 import { createShading, shadeFromUrl } from "./cel-shading.js";
 import { BOARD_W, BOARD_H } from "./pips-tower.js";
@@ -654,6 +655,19 @@ export class PipsTower3D {
     signal?.throwIfAborted();
     this.ready = true;
     onProgress?.({phase: "prepare", stage: "Schatzkammer bereit", done: true});
+  }
+  /** After prepare(): build the level's scenery and link its programs in parallel, so the first frame finds both done. */
+  async precompile(sess, view) {
+    if (this.level !== sess || !this.ready || this.disposed) return;
+    if (this.sceneryFor !== sess.L || this.dark !== view.dark) {
+      this.buildLevel(sess, view.dark);
+      this.resize(this.w, this.h, this.renderer.getPixelRatio());
+    }
+    // the diorama is baked into a half-float target from its own scene (with distance fog): link those programs too
+    const sc = this.scenery, probe = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType });
+    sc.scene.fog ??= new THREE.Fog(sc.fogColor, this.dist * 1.06, this.dist * 2.8);
+    await Promise.all([compileReady(this.renderer, this.scene, this.camera), compileReady(this.renderer, sc.scene, this.camera, null, 4000, probe)]);
+    probe.dispose();
   }
   releaseLevel() {
     this.scenery?.dispose();

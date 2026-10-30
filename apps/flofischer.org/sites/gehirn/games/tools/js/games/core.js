@@ -26,6 +26,7 @@ import { loadingCacheStats } from '../../games-assets/fernworld/runtime/loading-
 import { loadingBarHTML, bindLoadingStatus } from './loading-status.js';
 import { icon } from '../../../assets/kit/icons.js';
 import * as Profile from './profile.js';
+import { glProbe } from './gl-probe.js';
 import { HELP, TIPS, glyph, introSeen, markIntro, tipSeen, markTip, tipsOn, setTipsOn, tipText } from './games-help.js';
 
 const KEY = 'fw:games:';
@@ -161,18 +162,7 @@ const starsHtml = (n, cls = '') => [0, 1, 2].map((i) => `<span class="gm-star${i
 
 // ─────────────────────────────── host ───────────────────────────────
 const STEP = 1 / 60;
-// asked once per page; the probe's context is released right away (browsers cap the live WebGL contexts)
-let webgl = null;
-const hasWebGL = () => {
-  if (webgl === null) {
-    try {
-      const gl = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl');
-      webgl = !!gl;
-      gl?.getExtension('WEBGL_lose_context')?.loseContext();
-    } catch { webgl = false; }
-  }
-  return webgl;
-};
+const hasWebGL = () => glProbe().ok;
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const isDark = () => {
   const t = document.documentElement.getAttribute('data-theme');
@@ -220,7 +210,7 @@ export function mountGame(root, game) {
           <select data-ref="starter" aria-label="Deinen Fernling wählen">${starters.map(s => `<option value="${s.id}">${s.label}</option>`).join('')}</select>
           <span data-ref="starter-description"></span></label>` : ''}
         <div class="gm-card">
-          ${game.art ? `<img class="gm-art" src="${game.art}" alt="" decoding="async">` : ''}
+          ${game.art ? `<img class="gm-art" src="${game.art}" alt="" decoding="async" loading="lazy">` : ''}
           <header class="gm-menu__head">
             <h2 class="gm-title">${game.title}</h2>
             <p class="gm-tagline">${game.tagline}</p>
@@ -300,6 +290,17 @@ export function mountGame(root, game) {
       if (event.phase === 'download' && event.url && !event.cacheHit) currentLoad.bytes.set(event.url, event.loaded ?? 0);
     }
   }
+  // The renderer's one-off set-up for a world (decoding, baking, shader links) runs while the player is still on the map, so Play finds it done.
+  // It goes through prepareQueue, so a Play pressed meanwhile waits for it instead of repeating it.
+  let warmedWorld = null;
+  function warmUp(i, session, renderer) {
+    const world = game.levels[i].world ?? 0;
+    if (!renderer.prepare || warmedWorld === world) return;
+    warmedWorld = world;
+    const work = prepareQueue.catch(() => {}).then(() => renderer.prepare(session, { background: true })).then(() => renderer.precompile?.(session, view));
+    prepareQueue = work;
+    work.catch((error) => { if (warmedWorld === world) warmedWorld = null; if (error?.name !== 'AbortError') console.warn('[games] background preparation failed', error); });
+  }
   function schedulePrefetch(i) {
     cancelPrefetch();
     if (!active || screen !== 'menu' || !progress.open(i)) return;
@@ -310,9 +311,11 @@ export function mountGame(root, game) {
         await ow?.ready;
         if (controller.signal.aborted || !active || screen !== 'menu') return;
         const renderer = await loadGl();
-        if (controller.signal.aborted || !active || screen !== 'menu' || !renderer?.prefetch) return;
+        if (controller.signal.aborted || !active || screen !== 'menu' || !renderer) return;
         const candidate = game.create(i, { sound, preview: true, starter: selectedStarter, hint: () => false });
-        await renderer.prefetch(candidate, { signal: controller.signal });
+        if (renderer.prefetch) await renderer.prefetch(candidate, { signal: controller.signal });
+        if (controller.signal.aborted || !active || screen !== 'menu') return;
+        warmUp(i, candidate, renderer);
       } catch (error) { if (error.name !== 'AbortError') console.warn('[games] selected level prefetch deferred', error); }
     }, 700);
   }
@@ -512,10 +515,13 @@ export function mountGame(root, game) {
     if (!active || helpOpen) return; // the help card pauses everything; closing it restarts the loop
     const dt = Math.min(0.1, (t - (lastT || t)) / 1000); lastT = t;
     if (screen === 'play') { adapt(dt * 1000); avg('frame', dt * 1000); }
+    // A 60 Hz display delivers 16.4-16.9 ms frames: unsnapped, the accumulator then alternates 1, 0 and 2 simulation steps and
+    // every game without interpolation judders. Within 2.5 % of the step the frame counts as exactly one step (59.94 Hz drifts 0.1 %).
+    const stepDt = Math.abs(dt - STEP) < STEP * 0.025 ? STEP : dt;
     // The level keeps animating behind the result card for a few seconds (confetti, the squad walking on).
     const animate = screen === 'play' || (screen === 'result' && performance.now() - resultAt < 6000);
     if (animate && session) {
-      acc += dt;
+      acc += stepDt;
       let steps = 0;
       const tu = performance.now();
       while (acc >= STEP && steps < 6) { step(); acc -= STEP; steps++; }
@@ -574,10 +580,11 @@ export function mountGame(root, game) {
       const renderer = await loadGl();
       if (request !== levelRequest) return;
       await renderer?.prepare?.(preparing, { signal, onProgress: event => reportProgress(event, request) });
-      if (request === levelRequest) preparedSession = preparing;
+      if (request === levelRequest) await renderer?.precompile?.(preparing, view);
+      if (request === levelRequest) { preparedSession = preparing; warmedWorld = game.levels[i].world ?? 0; }
     });
     prepareQueue = work;
-    try { await work; } catch (error) { if (request === levelRequest) showLoadError(error); return; }
+    try { await work; } catch (error) { warmedWorld = null; if (request === levelRequest) showLoadError(error); return; }
     if (request !== levelRequest) return;
     loadStatus.finish();
     startedAt = performance.now();

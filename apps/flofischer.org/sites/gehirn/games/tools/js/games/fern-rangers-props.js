@@ -20,8 +20,7 @@ export function propClips(template) {
 }
 export class RangerProps {
     constructor(scene, art, env) { this.scene = scene; this.art = art; this.env = env; this.batches = new Map(); this.labels = []; this.labelIndex = 0; this.v = new T.Vector3(); this.q = new T.Quaternion(); this.scale = new T.Vector3(); this.m = new T.Matrix4(); this.temp = new T.Matrix4(); this.fx = []; this.lastTurret = false; this.gateGlass = new T.InstancedMesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .34, depthWrite: false, side: T.DoubleSide, toneMapped: false }), 12); this.gateGlass.frustumCulled = false; this.gateGlass.count = 0; this.gateGlass.renderOrder = 5; scene.add(this.gateGlass); this.gateCount = 0; this.hazard = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshBasicMaterial({ transparent: true, opacity: .65, depthWrite: false }), 96); this.hazard.instanceMatrix.setUsage(T.DynamicDrawUsage); this.hazard.frustumCulled = false; this.scene.add(this.hazard); this.hazardCount = 0; this.color = new T.Color(); }
-    async prepare(s,{onProgress,signal}={}) {
-        const check=()=>signal?.throwIfAborted();check();
+    assetIds(s) {
         const ids = new Set(['LANDING_POD', 'ESCAPE_POD', 'FERNSTONE_GRENADE']);
         for (const e of s.ents) {
             const id = this.id(e);
@@ -33,6 +32,11 @@ export class RangerProps {
         }
         if (s.ents.some(e => e.kind === 'pickup' && e.type === 'turret'))
             ids.add('TURRET_DROP');
+        return ids;
+    }
+    async prepare(s,{onProgress,signal}={}) {
+        const check=()=>signal?.throwIfAborted();check();
+        const ids = this.assetIds(s);
         for (const id of ids) {
             check();if(this.batches.has(id))continue;onProgress?.({phase:'prepare',stage:'Feldausrüstung vorbereiten …',id,done:false});
             const t = await this.art.template(id, 'lo');

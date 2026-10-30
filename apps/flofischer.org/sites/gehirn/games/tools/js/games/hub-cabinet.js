@@ -40,7 +40,9 @@ export function createCabinet({ THREE, own, game, art, env, palettes }) {
   const plate = add(new THREE.PlaneGeometry(W + .1, .44), plateMat, 0, 1.76, .545, upper); plate.name = 'Marquee';
   const halo = createHalo({ THREE, own, color: shell, size: 3.4, opacity: .35 }); halo.position.set(0, 1.76, .75); upper.add(halo);
 
-  const cover = own.tex(new THREE.Texture(art)); cover.colorSpace = THREE.SRGBColorSpace; cover.anisotropy = 4; cover.needsUpdate = true;
+  // without the cover yet (it is fetched after the hub is usable) the screen shows the game's own colour
+  const placeholder = makeCanvas(4, 4)[0]; { const p = placeholder.getContext('2d'); p.fillStyle = game.color; p.fillRect(0, 0, 4, 4); }
+  const cover = own.tex(new THREE.Texture(art ?? placeholder)); cover.colorSpace = THREE.SRGBColorSpace; cover.anisotropy = 4; cover.needsUpdate = true;
   const screenMat = own.mat(new THREE.MeshBasicMaterial({ map: cover, toneMapped: false }));
   const screen = add(new THREE.PlaneGeometry(CABINET.screenWidth, CABINET.screenHeight), screenMat, 0, CABINET.screenY - 1.2, .56, upper);
   screen.rotation.x = -.1; screen.name = `Display_${game.id}`;
@@ -81,5 +83,5 @@ export function createCabinet({ THREE, own, game, art, env, palettes }) {
     const cycle = (t * .18 + anim.sweep) % 1, k = still ? .5 : Math.min(1, cycle * 2.2);
     glassTex.offset.x = -.55 + k * 1.55;
   }
-  return { root, hit, retheme, anchor, screen, update, hover(on) { anim.hoverGoal = on ? 1 : 0; }, bounce() { anim.bounce = 0; }, setDark(d) { root.userData.dark = d; } };
+  return { root, hit, retheme, anchor, screen, update, setArt(image) { cover.dispose(); cover.image = image; cover.needsUpdate = true; }, hover(on) { anim.hoverGoal = on ? 1 : 0; }, bounce() { anim.bounce = 0; }, setDark(d) { root.userData.dark = d; } };
 }

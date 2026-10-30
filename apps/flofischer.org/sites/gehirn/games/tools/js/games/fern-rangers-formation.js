@@ -59,7 +59,14 @@ function baseFormation(s) {
  }
  out.sort((a,b)=>a.i-b.i);const result={half,places:out};formationCache.set(key,result);return result;
 }
-export function warmCampaignFormations(s){for(let n=1;n<=90;n++)baseFormation({n,fullRadius:.35*Math.sqrt(n)+.25,slotTarget:i=>s.slotTarget(i)});}
+/** Fills the cache for every squad size. With `pause` (an async yield) the work is cut into `budget` ms slices so it can run behind a map. */
+export async function warmCampaignFormations(s,{pause=null,budget=6}={}){
+ let sliceStart=performance.now();
+ for(let n=1;n<=90;n++){
+  baseFormation({n,fullRadius:.35*Math.sqrt(n)+.25,slotTarget:i=>s.slotTarget(i)});
+  if(pause&&performance.now()-sliceStart>budget){await pause();sliceStart=performance.now();}
+ }
+}
 export function campaignFormation(s) {
  const squeeze=Math.max(s.squeeze||0,s.formationSqueeze||0),radius=s.fullRadius+(Math.min(s.fullRadius,1.15)-s.fullRadius)*squeeze;
  const base=baseFormation(s),frontLimit=Math.max(.5,Math.min(radius*.75-.12,Math.max(...s.slots.map(p=>p.z)))),shift=frontLimit-.5,half=Math.min(radius,3-Math.abs(s.px)),spread=Math.max(0,half-base.half);

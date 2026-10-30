@@ -11,8 +11,8 @@
     {
       "file": "runtime/asset-library.js",
       "source": "scripts/games-blender/fernworld/runtime/asset-library.js",
-      "bytes": 10920,
-      "sha256": "15a71e32424c26feb61f00130d3df8558dcdf3b646e844cf61817fdebafd98e7"
+      "bytes": 10996,
+      "sha256": "f206d66b6fad842e485b8c0833b95b5e48079b96282c62cbdf5d8e1bda28c647"
     },
     {
       "file": "runtime/channel-library.js",
@@ -23,8 +23,8 @@
     {
       "file": "runtime/world-library.js",
       "source": "scripts/games-blender/fernworld/runtime/world-library.js",
-      "bytes": 7999,
-      "sha256": "51c007dec34f83a7f6402645e08b298662767c5e1a654b00d0b905c36acac4dd"
+      "bytes": 10341,
+      "sha256": "7db29860ed298c90a0da29350b6ae96fb5f0a10cf42bec438344f4df95dcd3f1"
     },
     {
       "file": "runtime/rigid-clips.js",

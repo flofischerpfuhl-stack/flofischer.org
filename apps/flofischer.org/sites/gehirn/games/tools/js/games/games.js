@@ -20,6 +20,8 @@ export function mountGames() {
     current = id;
     if (!LOADERS[id]) return;
     if (!mounted.has(id)) {
+      // the map module and Three.js download while the game module and its DOM are still being set up
+      if (id !== 'arcade') import('./overworld.js').catch(() => {});
       const host = document.querySelector(`.gm-host[data-game="${id}"]`);
       mounted.set(id, LOADERS[id]().then((game) => (game.hub ? game.hub(host, { onPlay: (gid) => { window.location.hash = gid; } }) : mountGame(host, game))).catch((err) => {
         console.error('[games] failed to load', id, err);

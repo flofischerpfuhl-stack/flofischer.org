@@ -4,7 +4,7 @@
  */
 import * as T from 'three';
 import { AssetLibrary, disposeScene } from './asset-library.js';
-import { loadBytes, expectBytes } from './loading-cache.js';
+import { loadBytes, expectBytes, invalidateDownload } from './loading-cache.js';
 
 const finite3 = value => Array.isArray(value) && value.length === 3 && value.every(Number.isFinite);
 
@@ -21,7 +21,20 @@ export class WorldLibrary extends AssetLibrary {
     await loadBytes(url, { signal: this.loadSignal(signal), priority: 'low' });
   }
 
-  async region(familyId, regionKey) {
+  /** The reduced twin (worldmap/<family>/<region>.far.glb, about 7 % of the triangles) as a stand-in scene; null if it is not there. */
+  async _far(familyId, regionKey) {
+    try {
+      const url = new URL(`../worldmap/${familyId}/${regionKey}.far.glb`, this.base);
+      return (await this._gltf(url.href)).scene;
+    } catch (error) {
+      if (error?.name === 'AbortError' || this.disposed) throw error;
+      return null;
+    }
+  }
+
+  /** `progressive`: resolve as soon as the layout and the reduced twin are there. `world.detail` is then 'far' until
+   * `world.fetchFull()` has delivered the full scene and `world.swapFull(scene)` has put it in the twin's place. */
+  async region(familyId, regionKey, { progressive = false } = {}) {
     const catalog = await this.json('environments/catalog.json');
     const family = catalog.families.find(f => f.id === familyId);
     const definition = family?.regions.find(r => r.region === regionKey);
@@ -34,27 +47,33 @@ export class WorldLibrary extends AssetLibrary {
     const unitScale = layout.relativeScale?.recommendedWholeRegionMeterScale ?? 1;
     if (!(unitScale > 0) || !Number.isFinite(unitScale)) throw new Error('Invalid authored world scale');
     expectBytes(new URL(definition.file, this.base), definition.bytes);
-    const data = await this._gltf(definition.file);
     // Water is a single quiet transparent surface, never a second shadow layer.
-    data.scene.traverse(node => {
+    const prepareScene = scene => scene.traverse(node => {
       if (!node.isMesh) return;
       const materials = Array.isArray(node.material) ? node.material : [node.material];
       const transparent = materials.some(material => material.transparent);
       for (const material of materials) if (material.transparent) material.depthWrite = false;
       node.castShadow = !transparent; node.receiveShadow = !transparent;
     });
+    const stub = progressive ? await this._far(familyId, regionKey) : null;
+    // the parsed scene is all that is kept: the 1-3 MB download buffer is not retained once decoded
+    const loadFull = async () => { const data = await this._gltf(definition.file); invalidateDownload(new URL(definition.file, this.base)); return data.scene; };
+    let scene = stub ?? await loadFull();
+    prepareScene(scene);
     const root = new T.Group();
     root.name = `World_${familyId}_${regionKey}`;
     root.scale.setScalar(unitScale);
-    root.add(data.scene);
+    root.add(scene);
     root.updateMatrixWorld(true);
-    let released = false, world;
+    let released = false, world, fullLoad = null;
+    const dropScene = old => { if (this.resources.delete(old)) disposeScene(old); };
     const release = () => {
       if (released) return;
       released = true;
       root.removeFromParent();
       this.actors.delete(world);
-      if (this.resources.delete(data.scene)) disposeScene(data.scene);
+      dropScene(scene);
+      fullLoad?.then(full => full !== scene && dropScene(full), () => {});
     };
     try {
       const vector = p => new T.Vector3().fromArray(p).multiplyScalar(unitScale);
@@ -76,14 +95,17 @@ export class WorldLibrary extends AssetLibrary {
       };
       const nodeDistances = nodePositions.map(nearestDistance);
       if (nodeDistances.some((d, i) => i && d <= nodeDistances[i - 1])) throw new Error('Authored nodes are not in route order');
-      const motion = (layout.motionRecipes ?? []).map(recipe => {
-        const nodes = []; data.scene.traverse(n => { if (n.name === recipe.node) nodes.push(n); });
+      // A stand-in twin may lack a moving part; the full scene must have every one.
+      const bindMotion = (target, strict) => (layout.motionRecipes ?? []).flatMap(recipe => {
+        const nodes = []; target.traverse(n => { if (n.name === recipe.node) nodes.push(n); });
+        if (!strict && !nodes.length) return [];
         if (nodes.length !== 1 || recipe.type !== 'sinusoidalRotation' || !finite3(recipe.axis)
           || !(recipe.periodSeconds > 0) || !Number.isFinite(recipe.amplitudeRadians)) throw new Error('Unsupported world motion recipe');
         const axis = new T.Vector3().fromArray(recipe.axis).normalize();
         if (axis.lengthSq() < .99) throw new Error('Zero world motion axis');
-        return { node: nodes[0], base: nodes[0].quaternion.clone(), axis, recipe, rotation: new T.Quaternion() };
+        return [{ node: nodes[0], base: nodes[0].quaternion.clone(), axis, recipe, rotation: new T.Quaternion() }];
       });
+      let motion = bindMotion(scene, !stub);
       const bounds = new T.Box3().setFromObject(root);
       const sourceSpan = layout.cameraOrthographicSpan ?? layout.cameraOrthoScale ?? layout.cameraOrthographicScale ?? layout.cameraProjection?.verticalSize ?? 0;
       world = {
@@ -91,6 +113,22 @@ export class WorldLibrary extends AssetLibrary {
         unitScale, bounds, routeLength: distances.at(-1), release,
         cameraPosition: vector(layout.cameraPosition), cameraTarget: vector(layout.cameraTarget),
         minimumCameraSpan: sourceSpan * unitScale,
+        get scene() { return scene; },
+        get detail() { return scene === stub ? 'far' : 'full'; },
+        /** Downloads and parses the full scene without touching the graph; resolves null when it is already showing. */
+        fetchFull() {
+          if (scene !== stub) return Promise.resolve(null);
+          fullLoad ??= loadFull().then(full => { prepareScene(full); return full; }, error => { fullLoad = null; throw error; });
+          return fullLoad;
+        },
+        /** Replaces the twin by the (prepared) full scene in one step; same bounds, same pose, nothing else moves. */
+        swapFull(full) {
+          if (released || scene !== stub || !full) return false;
+          const next = bindMotion(full, true), old = scene;
+          root.add(full); root.remove(old); scene = full; motion = next; root.updateMatrixWorld(true);
+          dropScene(old);
+          return true;
+        },
         pointAtDistance(distance, target = new T.Vector3()) {
           const d = T.MathUtils.clamp(distance, 0, distances.at(-1));
           let low = 0, high = distances.length - 1;

@@ -104,10 +104,19 @@ const FRAG_BODY = `{
 
 /** Averaged normals per position, so the hull has no cracks at hard edges. */
 function smoothNormals(geometry) {
-  const pos = geometry.attributes.position, nor = geometry.attributes.normal, acc = new Map(), keyOf = i => `${pos.getX(i).toFixed(4)}|${pos.getY(i).toFixed(4)}|${pos.getZ(i).toFixed(4)}`;
-  for (let i = 0; i < pos.count; i++) { const k = keyOf(i); let a = acc.get(k); if (!a) acc.set(k, a = [0, 0, 0]); a[0] += nor.getX(i); a[1] += nor.getY(i); a[2] += nor.getZ(i); }
-  const out = new Float32Array(pos.count * 3);
-  for (let i = 0; i < pos.count; i++) { const a = acc.get(keyOf(i)), l = Math.hypot(a[0], a[1], a[2]) || 1; out[i * 3] = a[0] / l; out[i * 3 + 1] = a[1] / l; out[i * 3 + 2] = a[2] / l; }
+  const pos = geometry.attributes.position, nor = geometry.attributes.normal, n = pos.count;
+  // vertices at the same position (to 1e-4) share one slot; an open-addressing table over the quantised coordinates replaces string keys
+  const q = new Int32Array(n * 3), size = 1 << Math.ceil(Math.log2(Math.max(4, n * 2))), table = new Int32Array(size).fill(-1), slot = new Int32Array(n), sum = new Float64Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const x = Math.round(pos.getX(i) * 1e4), y = Math.round(pos.getY(i) * 1e4), z = Math.round(pos.getZ(i) * 1e4);
+    q[i * 3] = x; q[i * 3 + 1] = y; q[i * 3 + 2] = z;
+    let h = (Math.imul(x, 73856093) ^ Math.imul(y, 19349663) ^ Math.imul(z, 83492791)) & (size - 1), found = -1;
+    while (table[h] !== -1) { const j = table[h]; if (q[j * 3] === x && q[j * 3 + 1] === y && q[j * 3 + 2] === z) { found = j; break; } h = (h + 1) & (size - 1); }
+    if (found < 0) { table[h] = i; found = i; }
+    slot[i] = found; sum[found * 3] += nor.getX(i); sum[found * 3 + 1] += nor.getY(i); sum[found * 3 + 2] += nor.getZ(i);
+  }
+  const out = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { const o = slot[i] * 3, l = Math.hypot(sum[o], sum[o + 1], sum[o + 2]) || 1; out[i * 3] = sum[o] / l; out[i * 3 + 1] = sum[o + 1] / l; out[i * 3 + 2] = sum[o + 2] / l; }
   return new THREE.BufferAttribute(out, 3);
 }
 

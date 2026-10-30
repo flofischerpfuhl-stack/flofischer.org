@@ -1,6 +1,6 @@
 /** Fern Rangers: authored campaign and Sturmbastion assets, bounded motion
  * batches, native sockets and shared WebGL context. Gameplay stays in sessions. */
-import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, TextPlane, projector, LOW_GPU } from './three-kit.js';
+import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, TextPlane, projector, LOW_GPU, compileReady } from './three-kit.js';
 import { LIVE_TROOP_HEIGHT, TROOP_PROFILES, warmCampaignFormations, campaignFormation, nearestMuzzle, shotSegment } from './fern-rangers-formation.js';
 import { RangersArt, ENEMY_ASSET, BOSS_ASSET } from './fern-rangers-art.js';
 import { RangerSettlements, RangerRoute } from './fern-rangers-scenery.js';
@@ -300,9 +300,11 @@ export class FernRangers3D {
     const signal=options.signal?AbortSignal.any([options.signal,controller.signal]):controller.signal;
     const job=this.preparing.catch(()=>{}).then(()=>this.prepareLevel(s,{...options,signal},epoch));this.preparing=job.catch(()=>{});return job;
   }
-  async prepareLevel(s,{onProgress,signal}={},epoch) {
+  async prepareLevel(s,{onProgress,signal,background=false}={},epoch) {
     const started=performance.now(),check=()=>{signal?.throwIfAborted();if(this.disposed||epoch!==this.prepareEpoch)throw new DOMException('Rangers preparation superseded','AbortError');};
     const stage=name=>{check();onProgress?.({phase:'prepare',stage:name,done:false});};check();
+    // behind the map every step hands the main thread back first, so panning and tapping stay smooth
+    const pause=background?()=>new Promise(resolve=>setTimeout(resolve,0)):null,rest=async()=>{if(pause){await pause();check();}};
     if(this.prepared===s){onProgress?.({phase:'prepare',stage:'Trupp bereit',done:true,cache:'session'});return;}
     this.prepared=null;
     try {
@@ -317,16 +319,19 @@ export class FernRangers3D {
       this.art.library.setProgressListener(onProgress,signal);this.resetCampaignVisuals();
       const before=this.art.batches.size+this.art.channels.size+this.art.actors.length;
       const types=new Set(s.ents.filter(e=>e.kind==='enemy'&&e.type!=='boss').map(e=>e.type));if(s.boss)types.add(BOSSES[s.boss.boss].minion);if(types.has('blorb'))types.add('zorbling');
-      stage('Legionäre und Bewegungen vorbereiten …');await this.art.prepareTroops();check();warmCampaignFormations(s);
-      for(const type of types){stage('Automaten vorbereiten …');await this.art.batch(ENEMY_ASSET[type],320,'far');check();await this.art.batch(ENEMY_ASSET[type],320,'lo');check();}
+      this.prefetchAssets(s,types);
+      stage('Legionäre und Bewegungen vorbereiten …');await this.art.prepareTroops();check();await rest();await warmCampaignFormations(s,{pause});check();
+      for(const type of types){stage('Automaten vorbereiten …');await this.art.batch(ENEMY_ASSET[type],320,'far');check();await rest();await this.art.batch(ENEMY_ASSET[type],320,'lo');check();await rest();}
       if(types.has('blorb')){await this.art.prepareHulkSockets();check();}
-      stage('Tore und Ausrüstung vorbereiten …');await this.native.prepare(s,{onProgress,signal});check();
+      stage('Tore und Ausrüstung vorbereiten …');await this.native.prepare(s,{onProgress,signal});check();await rest();
       if(s.boss){const id=BOSS_ASSET[s.boss.boss];if(this.bossActorId!==id){this.bossActor=await this.art.actor(id,'lo');this.bossActorId=id;}check();}
       else if(this.bossActor)this.bossActor.scene.visible=false;
-      stage('Marschroute und Horizont vorbereiten …');await this.setTheme(s.themeName,!!this.renderDark);check();
+      stage('Marschroute und Horizont vorbereiten …');await this.setTheme(s.themeName,!!this.renderDark);check();await rest();
       const grown=this.art.batches.size+this.art.channels.size+this.art.actors.length!==before;
-      this.prepared=s;this.render(s,{dark:!!this.renderDark,reduced:true});check();
-      let compile=0;if(!this.campaignCompiled||grown){onProgress?.({phase:'compile',done:false});const t=performance.now();await this.renderer.compileAsync(this.campaignScene,this.campaignCamera);check();compile=performance.now()-t;onProgress?.({phase:'compile',done:true,milliseconds:compile});this.campaignCompiled=true;}
+      this.prepared=s;
+      // link the programs in parallel first; the first render() then finds them ready instead of blocking on each one
+      let compile=0;if(!this.campaignCompiled||grown){onProgress?.({phase:'compile',done:false});const t=performance.now();await Promise.all([compileReady(this.renderer,this.campaignScene,this.campaignCamera),this.pano?.scene?compileReady(this.renderer,this.pano.scene,this.campaignCamera,null,4000,this.pano.targetFor(this.renderer)):null]);check();compile=performance.now()-t;onProgress?.({phase:'compile',done:true,milliseconds:compile});this.campaignCompiled=true;}
+      this.render(s,{dark:!!this.renderDark,reduced:true});check();
       this.prepareMetrics={milliseconds:performance.now()-started,mode:'campaign',region:this.regionKey,reused,compiled:compile,batches:this.art.batches.size,channels:this.art.channels.size,actors:this.art.actors.length,templates:this.art.templates.size};
       onProgress?.({phase:'prepare',stage:'Trupp bereit',done:true,cache:reused?'region':'cold'});
     } catch(error) {
@@ -334,6 +339,16 @@ export class FernRangers3D {
       if(s.mode==='sturmbastion'){this.bonus?.dispose();this.bonus=null;}else this.clearCampaign();
       throw error;
     } finally {this.art?.library.setProgressListener(null);this.bonus?.art.library.setProgressListener(null);}
+  }
+  /** Start every download the level needs at once; the serial set-up below then finds the cached promises instead of waiting on one file at a time. */
+  prefetchAssets(s,types) {
+    const lib=this.art.library,warm=load=>{try{load()?.catch?.(()=>{});}catch{/* the serial set-up below reports a real failure */}};
+    for(const id of ['CAPTAIN_HAZEL','HUMAN_LEGIONARY','HALFGROWN_LEGIONARY','GIANT_LEGIONARY'])warm(()=>lib.model(id,'lo'));
+    warm(()=>lib.template('DUCK_LEGIONARY','lo'));
+    for(const type of types)for(const lod of ['far','lo'])warm(()=>lib.template(ENEMY_ASSET[type],lod));
+    if(types.has('blorb'))warm(()=>lib.template('HULK','lo'));
+    if(s.boss)warm(()=>lib.template(BOSS_ASSET[s.boss.boss],'lo'));
+    warm(()=>{for(const id of this.native.assetIds(s))warm(()=>lib.template(id,'lo'));});
   }
   resetCampaignVisuals() {
     this.art.reset();this.native.reset();this.finishFor=null;this.finishUp=null;this.troopPlaces=[];

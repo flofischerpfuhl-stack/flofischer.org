@@ -1,5 +1,5 @@
 /** Bounce Brigade: authored remote-controlled toys on a Concordia tournament tabletop. */
-import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, LOW_GPU } from './three-kit.js';
+import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, LOW_GPU, compileReady } from './three-kit.js';
 import { RoundedBoxGeometry } from '../../vendor/three-0.170.0/RoundedBoxGeometry.js';
 import { BounceArt, ToyInstances, requiredToys } from './tanks-art.js';
 import { TabletopWorld, TABLETOP_FOLIAGE } from './tanks-tabletop.js';
@@ -282,6 +282,8 @@ export class Tanks3D {
       for(const tk of session.tanks){const actor=art.actor(tk,this.scene);this.lightActor(actor);actor.pose(tk,session);}
       applyIbl(this.scene,this.env,.65);
       this.setTheme(session,false);this.layout(session);this.rev=session.rev;
+      // link every program now, in parallel, so the first frame does not block on them one by one
+      await compileReady(this.renderer,this.scene,this.camera,null,4000,this.postAA?.mainColorTarget);check();
       onProgress?.({phase:'prepare',stage:'Tournament table ready',done:true});
     } catch(error) {if(newTable&&this.tabletop!==tabletop)tabletop?.dispose();throw error;}
   }

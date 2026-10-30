@@ -55,7 +55,7 @@ export function mountHub(host, { onPlay }) {
   const own = { geo: g => (owned.geometries.add(g), g), mat: m => (owned.materials.add(m), m), tex: t => (owned.textures.add(t), t) };
   const themeMedia = matchMedia('(prefers-color-scheme: dark)'), motionMedia = matchMedia('(prefers-reduced-motion: reduce)');
 
-  let active = false, disposed = false, ready = false, raf = 0, last = 0, clock = 0, pixelRatio = 1, pixelRatioSet = false, slow = { sum: 0, n: 0, skip: 120 };
+  let active = false, disposed = false, ready = false, complete = false, raf = 0, last = 0, clock = 0, pixelRatio = 1, pixelRatioSet = false, slow = { sum: 0, n: 0, skip: 120 };
   const palettes = { false: null, true: null }; let applied = null, palette = readPalette(themeMedia);
   let mode = 'overview', index = 0, dialog = null /* {id, topic} */, formIndex = Math.max(0, FORMS.findIndex(f => f[0] === profile().cosmetics.equipped['pip-form'])), pendingForm = -1, restoreFocus = null, saveStatus = '';
   let room = null, puffs = null; const cabinets = [], actors = new Map(); const backdrops = {};
@@ -67,7 +67,7 @@ export function mountHub(host, { onPlay }) {
 
   const diagnostics = {
     renderer, scene, camera,
-    get ready() { return ready; }, get moving() { return !!tween || [...actors.values()].some(a => Math.abs(a.wrapper.scale.x - a.goalScale) > .02 || a.wrapper.position.distanceTo(a.goal) > .02); }, get overview() { return mode === 'overview' && !portrait() && !dialog; },
+    get interactive() { return ready; }, get ready() { return complete; }, get moving() { return !!tween || [...actors.values()].some(a => Math.abs(a.wrapper.scale.x - a.goalScale) > .02 || a.wrapper.position.distanceTo(a.goal) > .02); }, get overview() { return mode === 'overview' && !portrait() && !dialog; },
     get focus() { return GAMES[index].id; }, get focused() { return mode === 'focus' || portrait(); }, get cabinetCount() { return cabinets.length; },
     get sourceScene() { return scene; }, get dialog() { return dialog ? { ...dialog } : null; }, get form() { return FORMS[formIndex][0]; }, get palette() { return palette; },
     get formBusy() { return !!actors.get('PIP_KESSEL')?.fx || pendingForm >= 0; }, get timings() { return timings; }, get wiping() { return !wipe.hidden; },
@@ -494,9 +494,12 @@ export function mountHub(host, { onPlay }) {
   async function prepare() {
     loadingStatus.update({ phase: 'prepare', stage: 'Setting up Fernhaven …' });
     const dark = siteIsDark(themeMedia);
-    const [fernModels, arts] = await Promise.all([
+    // usable first: the room, the focused cabinet's cover and the current backdrop. The other covers, the characters
+    // and the other backdrop follow in the background (settle() below) and appear as they arrive.
+    const lead = index, coverOf = g => loadImage(new URL(`covers/${g.cover}.webp`, ASSETS).href, `Cover ${g.id}`);
+    const [fernModels, leadArt] = await Promise.all([
       Promise.all(FERNS.map(id => library.model(id, 'lo'))),
-      Promise.all(GAMES.map(g => loadImage(new URL(`covers/${g.cover}.webp`, ASSETS).href, `Cover ${g.id}`))),
+      coverOf(GAMES[lead]),
       loadBackdrop(dark ? 'dusk' : 'day'),
     ]);
     if (disposed) return;
@@ -505,23 +508,37 @@ export function mountHub(host, { onPlay }) {
     room = buildRoom({ THREE, own, env, ferns, palettes }); scene.add(room.group);
     puffs = createPuffs({ THREE, own, scene });
     GAMES.forEach((g, i) => {
-      const c = createCabinet({ THREE, own, game: g, art: arts[i], env, palettes }), p = cabinetPose(i);
+      const c = createCabinet({ THREE, own, game: g, art: i === lead ? leadArt : null, env, palettes }), p = cabinetPose(i);
       c.root.position.set(p.x, p.y, p.z); c.root.userData.baseY = p.y; c.root.rotation.y = p.yaw; scene.add(c.root); cabinets.push(c);
     });
-    await Promise.all(ACTOR_IDS.map(loadActor));
-    if (disposed) return;
     loadingStatus.update({ phase: 'prepare', stage: 'Lighting …' });
     await document.fonts?.ready; if (disposed) return;
-    // both backdrops resident, both theme states compiled before the first frame: a later switch is only uniforms
-    await Promise.all([loadBackdrop('day'), loadBackdrop('dusk')]); if (disposed) return;
     shading?.apply(scene);
     for (const t of owned.textures) renderer.initTexture(t);
     const now = () => siteIsDark(themeMedia);
-    applyTheme(!now()); try { await renderer.compileAsync(scene, camera); } catch { /* optional */ }
     applyTheme(now()); try { await renderer.compileAsync(scene, camera); } catch { /* optional */ }
     if (applied !== now()) applyTheme(now());
     ready = true; framingKey = ''; syncCamera({ snap: true }); layoutActors(true); syncUi(); applyCamera();
     loadingStatus.finish();
+    settle(lead, coverOf).then(() => { complete = true; }, error => { if (!disposed) console.error('[hub] late assets', error); complete = true; });
+  }
+  /** Everything the first frame did not wait for: the other covers, the other backdrop and the three characters. */
+  async function settle(lead, coverOf) {
+    const jobs = GAMES.map((g, i) => i === lead ? null : coverOf(g).then(image => { if (!disposed) cabinets[i]?.setArt(image); }));
+    jobs.push(loadBackdrop(siteIsDark(themeMedia) ? 'day' : 'dusk').then(() => { if (!disposed) applyTheme(applied); }));
+    for (const id of ACTOR_IDS) jobs.push(arrive(id));
+    const results = await Promise.allSettled(jobs);
+    for (const r of results) if (r.status === 'rejected' && !disposed && r.reason?.name !== 'AbortError') console.error('[hub] late asset failed', r.reason);
+  }
+  /** A character shows up after the hub is usable: styled like the rest, shaders linked, then it grows into its spot. */
+  async function arrive(id) {
+    await loadActor(id); const a = actors.get(id); if (disposed || !a) return;
+    shading?.apply(a.wrapper); shading?.apply(a.disc);
+    applyTheme(applied);
+    try { await renderer.compileAsync(a.wrapper, camera, scene); } catch { /* optional */ }
+    if (disposed) return;
+    a.wrapper.scale.setScalar(reduced() ? 1 : .02); layoutActors(reduced());
+    syncUi();
   }
   const prepared = prepare().catch(error => {
     if (disposed) return; console.error('[hub]', error); const stale = error.code === 'ASSET_VERSION_MISMATCH';

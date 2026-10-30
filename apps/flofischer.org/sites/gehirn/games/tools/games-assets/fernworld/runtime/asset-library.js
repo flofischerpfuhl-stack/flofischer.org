@@ -82,7 +82,12 @@ export class AssetLibrary {
     return this.jsonCache.get(file);
   }
 
+  /** One small file per asset (defs/<ID>.json, built by package-defs.py); the big catalogs are the fallback for a library without shards. */
   async definition(id) {
+    try {
+      const shard = await this.json(`defs/${id}.json`);
+      return { entry: shard.entry, definition: shard.definition, catalog: { motionLibraries: shard.motionLibraries ?? [] } };
+    } catch (error) { if (error?.name === 'AbortError' || this.disposed || error?.code === 'ASSET_VERSION_MISMATCH') throw error; }
     const selection = await this.json('selected-assets.json');
     const entry = selection.assets.find(asset => asset.id === id);
     if (!entry) throw new Error(`Unknown selected Fernworld asset: ${id}`);
@@ -212,12 +217,7 @@ export class AssetLibrary {
       const id=typeof item === 'string'?item:item.id;
       // Prefetch has an independent subscriber signal, even while a prepare runs.
       const options={signal:this.loadSignal(signal),onProgress};
-      const selection=await loadJSON(new URL('selected-assets.json',this.base),options);
-      const entry=selection.assets.find(asset=>asset.id===id);
-      if(!entry)throw new Error(`Unknown selected Fernworld asset: ${id}`);
-      const catalog=await loadJSON(new URL(entry.catalog,this.base),options);
-      const definition=catalog.assets.find(asset=>asset.id===id);
-      if(!definition)throw new Error(`Missing selected definition: ${id}`);
+      const {entry,definition}=await this.definition(id);
       const lod = item.lod ?? definition.defaultLod ?? entry.defaultLod;
       const file = entry.pipeline === 'channel-mesh-v1' ? entry.files[`${lod === 'shadow' ? 'sh' : lod}.json`]
         : definition.lods?.[lod]?.file ?? definition.file;

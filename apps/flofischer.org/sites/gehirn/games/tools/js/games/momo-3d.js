@@ -12,6 +12,7 @@ import { ChannelLibrary } from '../../games-assets/fernworld/runtime/channel-lib
 import { bakeCrowd, BakedCrowd } from '../../games-assets/fernworld/runtime/baked-crowd.js';
 import { createEffectPool, createEffectInstances } from '../../games-assets/fernworld/effects.js';
 import { PLAYER_SCALE, ENEMY_SCALE, WILD_RATIO } from './momo-scale.js';
+import { bipedAnimations } from './momo-gait.js';
 import { followHeading, wrappedAngle, strideTime, releaseTime, castClip, castTrack, FREED_BREAK, FREED_ESCAPE } from './momo-motion.js';
 import { SMAAPass } from '../../vendor/three-0.170.0/postprocessing/SMAAPass.js';
 import { OutputPass } from '../../vendor/three-0.170.0/postprocessing/OutputPass.js';
@@ -300,7 +301,7 @@ export class Momo3D {
     if(this.assetWorld!==session.L.world){this.clearAssets();this.assetWorld=session.L.world;}
     if(!this.library){this.library=new ChannelLibrary();this.actors=[];this.actorCache=new Map();this.crowds=new Map();this.atlases=[];this.arenaCache=new Map();this.indexCacheStats=[];}
     this.library.setProgressListener(onProgress,signal);this.session=null;
-    for(const a of this.actors){a.root.visible=false;a.mixer.stopAllAction();a.current=null;delete a.visualFace;delete a.gait;delete a.aimOffset;}
+    for(const a of this.actors){a.root.visible=false;a.mixer.stopAllAction();a.current=null;delete a.visualFace;delete a.gait;delete a.turnRate;delete a.turnClock;delete a.aimOffset;}
     for(const tiers of this.crowds.values())for(const t of tiers){t.n=0;t.batch.root.visible=false;}
     for(const arena of this.arenaCache.values())arena.group.removeFromParent();
     const stage=(name,extra={})=>{if(signal?.aborted)throw new DOMException('Loading cancelled','AbortError');onProgress?.({phase:'prepare',stage:name,done:false,...extra});};
@@ -320,7 +321,7 @@ export class Momo3D {
         stage('Preparing moves …');
         const tiers=[];this.crowds.set(id,tiers);
         for(const lod of ['crowd','far']){
-          const source=await this.library.create(id,lod),fly=id==='GUSTGLIDER';
+          const source=await this.library.create(id,lod),fly=id==='GUSTGLIDER';source.animations=bipedAnimations(source.scene,source.animations,id);
           // Yield between expensive authored atlas builds so Back/cancel and real stage text can paint.
           await new Promise(resolve=>setTimeout(resolve,0));stage('Preparing moves …',{phase:'bake'});const bakeStarted=performance.now();
           const clips=fly?['Idle_Glide','Flap','Dive_Attack','Hit_Recover','Freed']:['Idle','Locomotion','Attack_Cast','Hit_Recover','Freed'];
@@ -354,7 +355,7 @@ export class Momo3D {
   }
   async actor(id,lod,outline=false){
     const key=`${id}:${lod}`;if(this.actorCache.has(key))return this.actorCache.get(key);
-    const a=await this.library.create(id,lod);a.root=new THREE.Group();a.root.name=id;a.root.add(a.scene);this.scene.add(a.root);a.root.visible=false;
+    const a=await this.library.create(id,lod);a.animations=bipedAnimations(a.scene,a.animations,id);a.root=new THREE.Group();a.root.name=id;a.root.add(a.scene);this.scene.add(a.root);a.root.visible=false;
     a.mixer=new THREE.AnimationMixer(a.scene);a.actions=new Map(a.animations.map(c=>[c.name,a.mixer.clipAction(c)]));a.current=null;
     a.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;}});applyIbl(a.scene,this.env,.55);if(outline)this.shading?.apply(a.scene,{outline:'skinned',all:true});this.actors.push(a);this.actorCache.set(key,a);return a;
   }
@@ -377,12 +378,21 @@ export class Momo3D {
     const reach=Math.hypot(this.camPos.x,this.camPos.z),lean=Math.min(1,Math.max(0,(reach-(s.R-9))/8));this.lean=(this.lean??0)+(lean-(this.lean??0))*.06;const push=this.lean*this.lean*(3-2*this.lean)*(2.2+1.6*Math.max(0,this.camPos.z)/Math.max(1,reach))/Math.max(1,reach);
     const shake=s.shake>0&&!view.reduced?s.shake*.35:0,sx=(Math.random()-.5)*shake+this.camPos.x*push,sz=(Math.random()-.5)*shake+this.camPos.z*push,d=this.camDist*(1+.16*this.lean);
     this.scene.fog.near=d+4;this.scene.fog.far=d+34;this.camera.position.set(this.camPos.x+sx,Math.sin(this.tilt)*d,this.camPos.z+Math.cos(this.tilt)*d+sz);this.camera.lookAt(this.camPos.x+sx,0,this.camPos.z+sz);this.camera.updateMatrixWorld();
-    const light=this.lights.light;light.position.set(this.camPos.x-6,14,this.camPos.z+8);light.target.position.set(this.camPos.x,0,this.camPos.z);
+    const light=this.lights.light,sh=this.shadowSnap(light,this.camPos.x,this.camPos.z);light.position.set(sh.x-6,14,sh.z+8);light.target.position.set(sh.x,0,sh.z);
     const dawn=s.result?.won?Math.min(1,(s.time-s.resultAt)/2):0;this.renderer.toneMappingExposure=1+.1*dawn;this.lights.light.color.set(THEMES[s.L.world].sun).lerp(DAWN,dawn*.35);
     this.motionDt=dt;this.drawPlayer(s,view);this.drawCrowds(s);this.drawBoss(s);this.drawMoves(s);this.drawGround(s);this.drawFx(s);
     this.sparks.mesh.visible=this.sparks.n>0;this.dust.mesh.visible=this.dust.n>0;
     for(let i=0;i<s.fxEvents.n;i++){const f=s.fxEvents.items[i];if(s.time-f.time>.25)continue;this.P.set(f.x,.08,f.y);this.delta.set(Math.sin(f.direction),0,Math.cos(f.direction));this.effects.emit(f.id,this.P,this.delta,f.scale);}s.fxEvents.n=0;this.effects.update(dt);
-    if(this.frame++%2===0)this.renderer.shadowMap.needsUpdate=true;if(this.postAA)this.postAA.render(this.renderer,this.scene,this.camera);else this.renderer.render(this.scene,this.camera);
+    this.renderer.shadowMap.needsUpdate=true;if(this.postAA)this.postAA.render(this.renderer,this.scene,this.camera);else this.renderer.render(this.scene,this.camera);
+  }
+  // The shadow frustum follows the camera in whole shadow texels, so the map does not swim, and it is redrawn every frame so the shadow keeps the interpolated pose.
+  shadowSnap(light,x,z){
+    const c=light.shadow.camera,texel=(c.right-c.left)/light.shadow.mapSize.x,dx=-6,dy=14,dz=8,len=Math.hypot(dx,dy,dz);
+    // light-space axes on the ground plane: right = (dz,0,-dx)/n, up = right x forward projected
+    const rn=Math.hypot(dz,dx),rx=dz/rn,rz=-dx/rn,ux=-dx*dy/(len*rn),uz=-dz*dy/(len*rn);
+    const r=x*rx+z*rz,u=x*ux+z*uz,sr=Math.round(r/texel)*texel,su=Math.round(u/texel)*texel;
+    const d=(sr-r),e=(su-u),m=rx*uz-rz*ux;
+    return {x:x+(d*uz-e*rz)/m,z:z+(e*rx-d*ux)/m};
   }
   blendPose(a,layers){
     for(const action of a.actions.values())action.setEffectiveWeight(0);
@@ -411,13 +421,16 @@ export class Momo3D {
       if(next){const foe=s.nearest(s.x,s.y,12);if(foe||next.id==='mines'){slot=next.id;clock=releaseTime(s.model,slot)*(1-next.t/.16);attack=true;predictive=true;target=foe?Math.atan2(foe.x-s.x,foe.y-s.y):s.face;}}
     }
     const travel=Math.hypot(s.vx,s.vy),heading=travel>.35?Math.atan2(s.vx,s.vy):attack?target:s.face;
-    a.visualFace=followHeading(a.visualFace??s.face,heading,dt,travel>.35?9:7);a.root.rotation.y=a.visualFace;
+    const faced=a.visualFace??s.face;a.visualFace=followHeading(faced,heading,dt,travel>.35?9:7);a.root.rotation.y=a.visualFace;
+    // Standing turns step on the spot (TurnStep) instead of sliding the feet round.
+    const turn=Math.abs(wrappedAngle(a.visualFace-faced)),turnRate=dt>0?turn/dt:0;a.turnRate=(a.turnRate??0)+(turnRate-(a.turnRate??0))*(1-Math.exp(-dt*14));a.turnClock=(a.turnClock??0)+turn/1.3*.8;
     a.gait=(a.gait??0)+(Math.min(1,s.moving*3)-(a.gait??0))*(1-Math.exp(-dt*16));
     const walkClip=a.actions.get('Locomotion').getClip(),walk=strideTime(s.model,this.iwalk,walkClip.duration),gait=a.gait;
     if(s.result&&!s.result.won)this.blendPose(a,[['Hit_Recover',Math.min(.62,s.time-s.resultAt),1,false]]);
     else{
       const envelope=attack?Math.min(1,Math.max(0,clock/releaseTime(s.model,slot)),predictive?1:Math.max(0,(.42-age)/.14)):0;
-      this.blendPose(a,[['Idle',s.t,1-gait],['Locomotion',walk,gait],...(attack?[[castClip(slot)+'_Upper',clock,envelope*.82,false]]:[])]);
+      const stepWeight=a.actions.has('TurnStep')&&!attack?Math.min(1,a.turnRate/1.5)*(1-gait):0;
+      this.blendPose(a,[['Idle',s.t,1-gait-stepWeight],['Locomotion',walk,gait],...(stepWeight>0?[['TurnStep',a.turnClock,stepWeight]]:[]),...(attack?[[castClip(slot)+'_Upper',clock,envelope*.82,false]]:[])]);
       // Gentle head tracking follows the separate shot direction without turning
       // the entire running body backwards or resetting its contact phase.
       const head=a.scene.getObjectByName('head');if(head&&attack){a.aimOffset=followHeading(a.aimOffset??0,Math.max(-.55,Math.min(.55,wrappedAngle(target-a.visualFace))),dt,4);head.quaternion.multiply(this.Q.setFromAxisAngle(UP,a.aimOffset));}

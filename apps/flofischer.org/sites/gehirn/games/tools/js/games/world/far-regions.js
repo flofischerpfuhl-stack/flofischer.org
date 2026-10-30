@@ -6,6 +6,7 @@
 import { THREE as T } from '../three-kit.js';
 import { GLTFLoader } from '../../../games-assets/fernworld/vendor/GLTFLoader.js';
 import { MeshoptDecoder } from '../../../games-assets/fernworld/vendor/meshopt_decoder.module.js';
+import { loadBytes } from '../../../games-assets/fernworld/runtime/loading-cache.js';
 
 const BASE = new URL('../../../games-assets/worldmap/', import.meta.url);
 let loader = null;
@@ -14,7 +15,7 @@ let loader = null;
 export async function loadFarRegion(family, key) {
   loader ??= new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   try {
-    const data = await loader.loadAsync(new URL(`${family}/${key}.far.glb`, BASE).href), root = new T.Group();
+    const url = new URL(`${family}/${key}.far.glb`, BASE), data = await loader.parseAsync(await loadBytes(url), new URL('.', url).href), root = new T.Group();
     root.name = `Far_${family}_${key}`; root.add(data.scene);
     root.traverse((n) => { if (n.isMesh) { n.castShadow = false; n.receiveShadow = false; n.userData.owFar = true; } });
     return root;
