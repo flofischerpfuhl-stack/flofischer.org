@@ -2,6 +2,7 @@
  * Simulation owns every damage body. Crowds use fixed baked-pose instance batches.
  * SMAA replaces low-DPR MSAA; high-DPR displays keep the existing direct path.
  */
+import { createShading, shadeFromUrl } from './cel-shading.js';
 import { THREE, studioEnvironment, applyIbl, createRenderer, texture, mat, addLights, Particles, BlobShadows, LOW_GPU } from './three-kit.js';
 import { buildArena, overlayGround } from './world/arena.js';
 import { KINDS, WEAPONS } from './momo.js';
@@ -254,12 +255,12 @@ function crowdDepthPrepass(batch) {
 export class Momo3D {
   constructor(canvas) {
     this.renderer=createRenderer(canvas,{antialias:false});this.postAA=!window.__noAA&&(window.devicePixelRatio||1)<1.5?new MomoPostAA():null;this.renderer.info.autoReset=false;this.renderer.shadowMap.autoUpdate=false;this.renderer.shadowMap.type=THREE.PCFShadowMap;
-    this.scene=new THREE.Scene();this.env=studioEnvironment(this.renderer);this.camera=new THREE.PerspectiveCamera(36,1,.5,220);
+    this.scene=new THREE.Scene();this.env=studioEnvironment(this.renderer);const variant=shadeFromUrl();this.shading=variant?createShading(variant,{ambient:.7}):null;if(this.shading)this.env.userData.shading=this.shading;this.camera=new THREE.PerspectiveCamera(36,1,.5,220);
     this.w=1;this.h=1;this.frame=0;this.camDist=23;this.tilt=.98;this.camPos=new THREE.Vector3();this.camInit=false;this.disposed=false;
     this.M=new THREE.Matrix4();this.P=new THREE.Vector3();this.Q=new THREE.Quaternion();this.S=new THREE.Vector3();this.E=new THREE.Euler();this.delta=new THREE.Vector3();this.other=new THREE.Vector3();
     this.crowdFrustum=new THREE.Frustum();this.crowdProjection=new THREE.Matrix4();this.crowdSphere=new THREE.Sphere();
     this.owned=new THREE.Group();this.scene.add(this.owned);const root=this.owned;
-    this.ground=new THREE.Mesh(new THREE.PlaneGeometry(160,160),mat(0xffffff,{roughness:.95}));this.ground.material.userData.cheapIbl=true;this.ground.rotation.x=-Math.PI/2;this.ground.position.y=-.012;this.ground.receiveShadow=true;this.ground.renderOrder=1;root.add(this.ground);
+    this.ground=new THREE.Mesh(new THREE.PlaneGeometry(160,160).rotateX(-Math.PI/2),mat(0xffffff,{roughness:.95}));this.ground.material.userData.cheapIbl=true;this.ground.position.y=-.012;this.ground.receiveShadow=true;this.ground.renderOrder=1;root.add(this.ground);
     this.lights=addLights(this.scene,{shadowBox:15,mapSize:2048,dir:[-6,14,8]});this.lights.light.shadow.camera.far=60;
     this.rim=new THREE.Mesh(new THREE.RingGeometry(.993,1.007,128),new THREE.MeshBasicMaterial({color:0xb8d4bc,transparent:true,opacity:.5,depthWrite:false}));this.rim.rotation.x=-Math.PI/2;this.rim.position.y=.025;root.add(this.rim);
     this.blobs=new BlobShadows(root,355,.3);
@@ -302,26 +303,26 @@ export class Momo3D {
     for(const a of this.actors){a.root.visible=false;a.mixer.stopAllAction();a.current=null;delete a.visualFace;delete a.gait;delete a.aimOffset;}
     for(const tiers of this.crowds.values())for(const t of tiers){t.n=0;t.batch.root.visible=false;}
     for(const arena of this.arenaCache.values())arena.group.removeFromParent();
-    const stage=(name,extra={})=>{if(signal?.aborted)throw new DOMException('Laden abgebrochen','AbortError');onProgress?.({phase:'prepare',stage:name,done:false,...extra});};
-    stage('Fernlinge vorbereiten …');
+    const stage=(name,extra={})=>{if(signal?.aborted)throw new DOMException('Loading cancelled','AbortError');onProgress?.({phase:'prepare',stage:name,done:false,...extra});};
+    stage('Preparing Fernlings …');
     this.primary.clear();this.effects.clear();this.captureStamp=null;this.captureAnchor=new THREE.Vector3();this.camInit=false;this.lastTime=session.time;this.lastBossAttack=-1;
     try{
       const line=STARTERS[session.starter].models;
-      this.players=await Promise.all(line.map(id=>this.actor(id,'hero')));
+      this.players=await Promise.all(line.map(id=>this.actor(id,'hero',true)));
       for(const a of this.players)for(const name of ['Attack_Cast','Attack_Sweep','GroundPulse']){if(a.actions.has(name+'_Upper'))continue;const clip=a.actions.get(name).getClip().clone();clip.name=name+'_Upper';clip.tracks=clip.tracks.filter(t=>castTrack(t.name));a.actions.set(clip.name,a.mixer.clipAction(clip));}
-      this.pedestal=await this.actor('KEEPER_PEDESTAL','lo');
+      this.pedestal=await this.actor('KEEPER_PEDESTAL','lo',true);
       const kinds=new Set(Object.keys(session.L.mix));
       const summons={tank:['klonkbot'],drill:['zipper'],walker:['blorb','spitter'],mothership:['buzzbot','zorbling']}[session.L.boss]||[];
       for(const k of summons)kinds.add(k);if(session.L.world>=2)kinds.add('zorbling');
       this.kindModels=ENEMY_MODELS[session.L.world];
       for(const kind of kinds){
         const id=this.kindModels[KINDS.indexOf(kind)];if(this.crowds.has(id))continue;
-        stage('Bewegungen vorbereiten …');
+        stage('Preparing moves …');
         const tiers=[];this.crowds.set(id,tiers);
         for(const lod of ['crowd','far']){
           const source=await this.library.create(id,lod),fly=id==='GUSTGLIDER';
           // Yield between expensive authored atlas builds so Back/cancel and real stage text can paint.
-          await new Promise(resolve=>setTimeout(resolve,0));stage('Bewegungen vorbereiten …',{phase:'bake'});const bakeStarted=performance.now();
+          await new Promise(resolve=>setTimeout(resolve,0));stage('Preparing moves …',{phase:'bake'});const bakeStarted=performance.now();
           const clips=fly?['Idle_Glide','Flap','Dive_Attack','Hit_Recover','Freed']:['Idle','Locomotion','Attack_Cast','Hit_Recover','Freed'];
           // Baking gets an exclusive plain actor; only its resulting batch gets IBL.
           const atlas=bakeCrowd(source,{fps:24,clipNames:clips}),batch=new BakedCrowd(atlas,350);
@@ -330,15 +331,15 @@ export class Momo3D {
           applyIbl(batch.root,this.env,.55);this.scene.add(batch.root);tiers.push({batch,n:0});onProgress?.({phase:'bake',done:true,milliseconds:performance.now()-bakeStarted,id,lod});
         }
       }
-      stage('Arena vorbereiten …');
-      this.bossActor=session.L.boss?await this.actor(BOSS_MODELS[session.L.boss],'lo'):null;
-      this.serpent=session.L.boss==='drill'?await this.actor('MORWEN_SAND_SERPENT','lo'):null;
+      stage('Preparing the arena …');
+      this.bossActor=session.L.boss?await this.actor(BOSS_MODELS[session.L.boss],'lo',true):null;
+      this.serpent=session.L.boss==='drill'?await this.actor('MORWEN_SAND_SERPENT','lo',true):null;
       const arenaKey=`${session.R}:${LOW_GPU}`;
       let arena=this.arenaCache.get(arenaKey);
-      if(!arena){arena=await buildArena({world:session.L.world,R:session.R,low:LOW_GPU,library:this.library});applyIbl(arena.group,this.env,.55);}
+      if(!arena){arena=await buildArena({world:session.L.world,R:session.R,low:LOW_GPU,library:this.library});applyIbl(arena.group,this.env,.55);this.shading?.apply(arena.group,{outline:false,ink:true});}
       this.arenaCache.delete(arenaKey);this.arenaCache.set(arenaKey,arena);
       while(this.arenaCache.size>2){const key=this.arenaCache.keys().next().value;this.arenaCache.get(key).dispose();this.arenaCache.delete(key);}
-      this.arena=arena;this.scene.add(arena.group);
+      this.arena=arena;this.scene.add(arena.group);this.ground.geometry=arena.ground;
       // Cached batches outside this level remain hidden and have no stale instances.
       for(const kind of kinds){const tiers=this.crowds.get(this.kindModels[KINDS.indexOf(kind)]);if(tiers)for(const t of tiers)t.batch.root.visible=true;}
       this.pedestal.root.visible=!!session.gen;this.pedestal.root.scale.setScalar(1.2);
@@ -346,16 +347,16 @@ export class Momo3D {
       const theme=THEMES[session.L.world];this.ground.material.map=texture(theme.ground,{repeat:[16,16]});await readyTexture(this.ground.material.map);this.ground.material.color.set(theme.tint);this.ground.material.needsUpdate=true;
       this.scene.background=new THREE.Color(theme.fog);this.scene.fog=new THREE.Fog(theme.fog,26,62);this.lights.light.color.set(theme.sun);this.lights.light.intensity=2.4;this.lights.hemi.color.set(theme.sky);this.lights.hemi.groundColor.set(theme.soil);this.lights.hemi.intensity=1.1;this.renderer.toneMappingExposure=1.0;
       this.rim.scale.setScalar(session.R);this.ice.count=session.ice.length;this.ice.visible=this.ice.count>0;session.ice.forEach((p,i)=>{this.M.makeScale(p.r,1,p.r).setPosition(p.x,.015,p.y);this.ice.setMatrixAt(i,this.M)});this.ice.instanceMatrix.needsUpdate=true;
-      stage('Licht und Oberflächen vorbereiten …',{phase:'compile'});const compileStarted=performance.now();
+      stage('Preparing light and surfaces …',{phase:'compile'});const compileStarted=performance.now();
       this.session=session;this.renderer.shadowMap.needsUpdate=true;
       this.render(session,{dark:false,reduced:true});if(this.postAA)this.renderer.setRenderTarget(this.postAA.mainColorTarget);await this.renderer.compileAsync(this.scene,this.camera);this.renderer.setRenderTarget(null);onProgress?.({phase:'compile',done:true,milliseconds:performance.now()-compileStarted});this.library.setProgressListener(null);this.prepareMetrics={milliseconds:performance.now()-prepareStarted,cachedActors:this.actors.length,cachedCrowds:this.crowds.size,cachedArenas:this.arenaCache.size,aa:this.postAA?.mode??'DPR-native-no-MSAA'};
     }catch(error){this.clearAssets();throw error;}
   }
-  async actor(id,lod){
+  async actor(id,lod,outline=false){
     const key=`${id}:${lod}`;if(this.actorCache.has(key))return this.actorCache.get(key);
     const a=await this.library.create(id,lod);a.root=new THREE.Group();a.root.name=id;a.root.add(a.scene);this.scene.add(a.root);a.root.visible=false;
     a.mixer=new THREE.AnimationMixer(a.scene);a.actions=new Map(a.animations.map(c=>[c.name,a.mixer.clipAction(c)]));a.current=null;
-    a.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;}});applyIbl(a.scene,this.env,.55);this.actors.push(a);this.actorCache.set(key,a);return a;
+    a.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;}});applyIbl(a.scene,this.env,.55);if(outline)this.shading?.apply(a.scene,{outline:'skinned',all:true});this.actors.push(a);this.actorCache.set(key,a);return a;
   }
   pose(a,name,time,loop=true){
     const action=a.actions.get(name);if(!action)throw Error(`Missing animation ${a.id}/${name}`);
@@ -368,7 +369,9 @@ export class Momo3D {
     this.renderer.info.reset();
     const dt=s.choice?0:Math.min(.1,Math.max(0,s.time-this.lastTime));this.lastTime=s.time;
     const tx=s.x+s.vx*.25,tz=s.y+s.vy*.2-.6;if(!this.camInit){this.camPos.set(tx,0,tz);this.camInit=true;}this.camPos.x+=(tx-this.camPos.x)*.12;this.camPos.z+=(tz-this.camPos.z)*.12;
-    const shake=s.shake>0&&!view.reduced?s.shake*.35:0,sx=(Math.random()-.5)*shake,sz=(Math.random()-.5)*shake,d=this.camDist;
+    // near the rim the camera leans outward and pulls back a little, so the lip, cliff side and islets of the slab frame the field
+    const reach=Math.hypot(this.camPos.x,this.camPos.z),lean=Math.min(1,Math.max(0,(reach-(s.R-9))/8));this.lean=(this.lean??0)+(lean-(this.lean??0))*.06;const push=this.lean*this.lean*(3-2*this.lean)*(2.2+1.6*Math.max(0,this.camPos.z)/Math.max(1,reach))/Math.max(1,reach);
+    const shake=s.shake>0&&!view.reduced?s.shake*.35:0,sx=(Math.random()-.5)*shake+this.camPos.x*push,sz=(Math.random()-.5)*shake+this.camPos.z*push,d=this.camDist*(1+.16*this.lean);
     this.scene.fog.near=d+4;this.scene.fog.far=d+34;this.camera.position.set(this.camPos.x+sx,Math.sin(this.tilt)*d,this.camPos.z+Math.cos(this.tilt)*d+sz);this.camera.lookAt(this.camPos.x+sx,0,this.camPos.z+sz);this.camera.updateMatrixWorld();
     const light=this.lights.light;light.position.set(this.camPos.x-6,14,this.camPos.z+8);light.target.position.set(this.camPos.x,0,this.camPos.z);
     const dawn=s.result?.won?Math.min(1,(s.time-s.resultAt)/2):0;this.renderer.toneMappingExposure=1+.1*dawn;this.lights.light.color.set(THEMES[s.L.world].sun).lerp(DAWN,dawn*.35);
@@ -550,7 +553,7 @@ export class Momo3D {
   dispose(){
     if(this.disposed)return;this.disposed=true;this.clearAssets();this.primary.dispose();this.effects.dispose();
     const geometries=new Set(),materials=new Set(),textures=new Set();this.owned.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.isInstancedMesh)o.dispose();for(const m of o.material?(Array.isArray(o.material)?o.material:[o.material]):[]){materials.add(m);if(m.map&&o!==this.ground)textures.add(m.map);}});
-    for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of textures)t.dispose();this.postAA?.dispose();this.env.dispose();this.lights.light.shadow.map?.dispose();this.renderer.dispose();
+    for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of textures)t.dispose();this.postAA?.dispose();this.shading?.dispose();this.env.dispose();this.lights.light.shadow.map?.dispose();this.renderer.dispose();
   }
 }
 const UP=new THREE.Vector3(0,1,0);

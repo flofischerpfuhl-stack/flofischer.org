@@ -40,31 +40,31 @@ export const BOSSES = {
 
 // Weapon stats per level (index 0 … 4), index 5 is the evolution.
 export const WEAPONS = {
-  blaster: { name: 'Ember Shot', color: '#38bdf8', desc: ['Trifft den nächsten verzauberten Fernling', 'Mehr Stärke', '+1 Geschoss', 'Geschosse durchdringen einen Gegner', '+1 Geschoss, schneller'],
+  blaster: { name: 'Ember Shot', color: '#38bdf8', desc: ['Hits the nearest enchanted Fernling', 'More power', '+1 shot', 'Shots pierce one enemy', '+1 shot, faster'],
     cd: [0.62, 0.58, 0.54, 0.5, 0.45, 0.26], n: [1, 1, 2, 2, 3, 4], dmg: [6, 7.5, 7.5, 8.5, 9.5, 11], pierce: [0, 0, 0, 1, 1, 2] },
-  drones: { name: 'Ember Ring', color: '#a3e635', desc: ['Eine Naturkraft kreist um deinen Fernling', '+1 Begleiter', 'Größere Umlaufbahn, mehr Stärke', '+1 Begleiter', '+1 Begleiter, schneller'],
+  drones: { name: 'Ember Ring', color: '#a3e635', desc: ['A nature spark circles your Fernling', '+1 orbiter', 'Wider orbit, more power', '+1 orbiter', '+1 orbiter, faster'],
     n: [1, 2, 2, 3, 4, 6], dmg: [4, 4.5, 5.5, 6, 7, 10], rad: [1.8, 1.8, 2.1, 2.2, 2.3, 2.7], spd: [2.6, 2.6, 2.9, 3.1, 3.4, 4.0] },
-  wrench: { name: 'Tail Flare', color: '#f59e0b', desc: ['Ein Naturbogen kehrt zu dir zurück', 'Mehr Stärke und Reichweite', '+1 Naturbogen', 'Größere Naturbögen', '+1 Naturbogen'],
+  wrench: { name: 'Tail Flare', color: '#f59e0b', desc: ['An arc of nature returns to you', 'More power and range', '+1 arc', 'Larger arcs', '+1 arc'],
     cd: [2.1, 1.95, 1.85, 1.7, 1.55, 1.15], n: [1, 1, 2, 2, 3, 3], dmg: [10, 12.5, 13, 15, 17, 28], range: [5.5, 6.2, 6.2, 6.8, 7.2, 8], size: [0.55, 0.6, 0.62, 0.78, 0.82, 1.3] },
-  zap: { name: 'Leaping Flame', color: '#c084fc', desc: ['Springt zwischen nahen Gegnern weiter', '+1 Sprung', 'Mehr Stärke', '+1 Sprung, schneller', '+2 Sprünge'],
+  zap: { name: 'Leaping Flame', color: '#c084fc', desc: ['Jumps on between nearby enemies', '+1 jump', 'More power', '+1 jump, faster', '+2 jumps'],
     cd: [1.9, 1.8, 1.7, 1.5, 1.35, 0.8], jumps: [2, 3, 3, 4, 6, 8], dmg: [8, 9, 11.5, 12.5, 14, 20], bolts: [1, 1, 1, 1, 1, 2] },
-  mines: { name: 'Cinder Traps', color: '#f472b6', desc: ['Hinterlässt eine Falle aus eigener Naturkraft', 'Größerer Wirkungsbereich', 'Mehr Stärke', 'Mehr Fallen', 'Schneller und größer'],
+  mines: { name: 'Cinder Traps', color: '#f472b6', desc: ['Leaves a trap of your own nature', 'Larger blast area', 'More power', 'More traps', 'Faster and larger'],
     cd: [2.0, 1.9, 1.8, 1.6, 1.4, 1.1], dmg: [16, 18, 23, 25, 30, 42], rad: [1.7, 2.0, 2.0, 2.2, 2.5, 3.1], max: [4, 5, 5, 7, 8, 10] },
 };
 export const PASSIVES = {
-  boots: { name: 'Quick Paws', color: '#22d3ee', desc: '+8 % Lauftempo' },
-  magnet: { name: 'Keen Nose', color: '#60a5fa', desc: '+40 % Sammelradius' },
-  armour: { name: 'Thick Hide', color: '#94a3b8', desc: '−8 % erlittener Schaden' },
-  snacks: { name: 'Deep Rest', color: '#fb7185', desc: '+0,4 Leben pro Sekunde' },
-  overclock: { name: 'Ruhiger Atem', color: '#facc15', desc: '−7 % Wartezeit zwischen Moves' },
+  boots: { name: 'Quick Paws', color: '#22d3ee', desc: '+8% run speed' },
+  magnet: { name: 'Keen Nose', color: '#60a5fa', desc: '+40% pickup radius' },
+  armour: { name: 'Thick Hide', color: '#94a3b8', desc: '−8% damage taken' },
+  snacks: { name: 'Deep Rest', color: '#fb7185', desc: '+0.4 health per second' },
+  overclock: { name: 'Steady Breath', color: '#facc15', desc: '−7% wait between moves' },
 };
 /** Evolutions: weapon (maxed) + partner passive (maxed). */
 export const EVOLUTIONS = {
-  blaster: { with: 'overclock', name: 'Firestorm', desc: 'Ein schneller Fächer durchdringender Geschosse' },
-  drones: { with: 'magnet', name: 'Ember Crown', desc: 'Sechs Naturkräfte ziehen zusätzlich Funken an' },
-  wrench: { with: 'armour', name: 'Tail Flare · Combo', desc: 'Drei große zurückkehrende Naturbögen' },
-  zap: { with: 'boots', name: 'Leaping Flame · Combo', desc: 'Zwei Ketten mit je acht Sprüngen' },
-  mines: { with: 'snacks', name: 'Cinder Traps · Combo', desc: 'Große Fallen verlangsamen Gegner' },
+  blaster: { with: 'overclock', name: 'Firestorm', desc: 'A fast fan of piercing shots' },
+  drones: { with: 'magnet', name: 'Ember Crown', desc: 'Six nature sparks also pull in sparks' },
+  wrench: { with: 'armour', name: 'Tail Flare · Combo', desc: 'Three large returning arcs' },
+  zap: { with: 'boots', name: 'Leaping Flame · Combo', desc: 'Two chains of eight jumps each' },
+  mines: { with: 'snacks', name: 'Cinder Traps · Combo', desc: 'Large traps slow enemies' },
 };
 const MAX_WEAPONS = 4, MAX_PASSIVES = 4;
 /** Sparks needed for the next level. */
@@ -206,9 +206,9 @@ export class MomoSession {
     rest.sort((a, b) => b.worth - a.worth);
     while (cards.length < 3 && rest.length) cards.push(rest.shift());
     if (cards.length > 3) cards.length = 3;
-    if (!cards.length) cards.push({ type: 'heal', id: 'heal', name: 'Erholung', desc: '+30 Leben und +250 Punkte', color: '#4ade80', lv: 0 });
+    if (!cards.length) cards.push({ type: 'heal', id: 'heal', name: 'Rest', desc: '+30 health and +250 points', color: '#4ade80', lv: 0 });
     const offer = fossilOffer(this, { seed: this.L.seed, level: this.level, offerIndex: this.offerIndex++ });
-    if (offer && cards.length && cards[cards.length - 1].type !== 'evo') cards[cards.length - 1] = { ...offer, name: moveName(makeWeapon(offer.nature, offer.slot)), desc: 'Fossilkraft: genau ein fremder Move bis Levelende.', color: NATURE_COLORS[offer.nature], lv: 1 };
+    if (offer && cards.length && cards[cards.length - 1].type !== 'evo') cards[cards.length - 1] = { ...offer, name: moveName(makeWeapon(offer.nature, offer.slot)), desc: 'Fossil power: exactly one foreign move until the level ends.', color: NATURE_COLORS[offer.nature], lv: 1 };
     return cards;
   }
   openChoice(reason) {
@@ -234,7 +234,7 @@ export class MomoSession {
   }
 
   // ── input ──
-  inputHint(mode){return this.index===0&&mode==='touch'?'Ziehe mit einem Finger, um deinen Fernling zu bewegen. Er greift selbst an.':this.hint;}
+  inputHint(mode){return this.index===0&&mode==='touch'?'Drag with one finger to move your Fernling. It attacks on its own.':this.hint;}
   cancelInput() {
     this.keys = { u: false, d: false, l: false, r: false };
     this.stick = null; this.mouse = null;
@@ -450,7 +450,7 @@ export class MomoSession {
         const a = gap + 0.55 + (i / n) * (TAU - 1.1);
         this.spawnEnemy(kind, this.x + Math.cos(a) * 13, this.y + Math.sin(a) * 13, false);
       }
-      this.say('HEX-SCHAR!', 1.2, '#fca5a5');
+      this.say('HEX SWARM!', 1.2, '#fca5a5');
     }
     if (L.goal === 'elites' && this.elitesSpawned < L.elites) {
       this.eliteT -= dt;
@@ -460,7 +460,7 @@ export class MomoSession {
         let kind = this.pickKind(); if (kind === 'zipper' || kind === 'buzzbot') kind = 'klonkbot';
         this.spawnEnemy(kind, this.x + Math.cos(a) * 14, this.y + Math.sin(a) * 14, true);
         this.elitesSpawned++;
-        this.say('STARKER HEX ERSCHEINT', 1.4, '#fde047');
+        this.say('STRONG HEX APPEARS', 1.4, '#fde047');
       }
     }
     if (this.bossDue && !this.boss) {
@@ -545,7 +545,7 @@ export class MomoSession {
       // reached the generator: stop and hit it
       if (toGen && dist < GEN_R + e.r + 0.15) {
         vx = 0; vy = 0;
-        if (e.atk <= 0) { e.atk = 1; gen.hp -= e.dmg * 0.3; gen.flash = 1; this.sound.play('hurt', 220); if (this.t - gen.warned > 6) { gen.warned = this.t; this.say('ARCHIV UNTER ANGRIFF', 1.4, '#fca5a5'); } }
+        if (e.atk <= 0) { e.atk = 1; gen.hp -= e.dmg * 0.3; gen.flash = 1; this.sound.play('hurt', 220); if (this.t - gen.warned > 6) { gen.warned = this.t; this.say('ARCHIVE UNDER ATTACK', 1.4, '#fca5a5'); } }
       }
       // separation from neighbours (soft, heavier ones push harder)
       const n = this.near(e.x, e.y, e.r);
@@ -589,7 +589,7 @@ export class MomoSession {
     const L = this.L, kind = L.boss;
     b.st += dt;
     b.phase += dt * 2.4;
-    if (!b.phase2 && b.hp < b.maxHp * 0.5) { b.phase2 = true; this.say('DER HEX VERSTÄRKT SICH!', 1.4, '#f87171'); this.shake = Math.max(this.shake, 0.5); }
+    if (!b.phase2 && b.hp < b.maxHp * 0.5) { b.phase2 = true; this.say('THE HEX GROWS STRONGER!', 1.4, '#f87171'); this.shake = Math.max(this.shake, 0.5); }
     const p2 = b.phase2;
     const dx = this.x - b.x, dy = this.y - b.y, dist = Math.hypot(dx, dy) || 0.001;
     // summons
@@ -850,7 +850,7 @@ export class MomoSession {
         e.shield -= dmg;
         this.spray(fx, fy, 0.7, 0xfde68a, 3, 2.2);
         this.sound.play('hit', 80);
-        if (e.shield <= 0) { this.popup('NATURSCHUTZ GEBROCHEN', e.x, e.y, 1.9, '#fdba74', 0.7); this.spray(e.x, e.y, 0.8, 0xf97316, 14, 3); }
+        if (e.shield <= 0) { this.popup('NATURE SHIELD BROKEN', e.x, e.y, 1.9, '#fdba74', 0.7); this.spray(e.x, e.y, 0.8, 0xf97316, 14, 3); }
         return true;
       }
     }
@@ -872,7 +872,7 @@ export class MomoSession {
     if (e.elite) {
       this.elitesKilled++;
       this.dropGem(e.x, e.y, 3, 0);
-      this.popup('BEFREIT!', e.x, e.y, 2.2, '#fde047', 1);
+      this.popup('FREED!', e.x, e.y, 2.2, '#fde047', 1);
       this.ring(e.x, e.y, 2.5, 0xfde047, 0.6);
       this.shake = Math.max(this.shake, 0.4);
     } else {
@@ -902,7 +902,7 @@ export class MomoSession {
     this.shake = 1.4;
     b.defeatedAt = this.time; this.effect(this.L.boss === 'tank' ? 'robot_break' : 'hex_break', b.x, b.y, b.face, 2);
     if (this.L.boss === 'tank') for (let k = 0; k < 4; k++) this.boom(b.x + Math.cos(k * 1.7) * 1.2, b.y + Math.sin(k * 1.7) * 1.2, 3.2, k % 2 ? 0xfacc15 : 0xf97316);
-    this.popup(this.L.boss === 'tank' ? 'GOLEM GEBANNT' : 'HEX GELÖST', b.x, b.y, 4, '#fde047', 1.4);
+    this.popup(this.L.boss === 'tank' ? 'GOLEM FREED' : 'HEX BROKEN', b.x, b.y, 4, '#fde047', 1.4);
     this.sound.play('boom');
     for (let k = 0; k < 12; k++) this.dropGem(b.x + Math.cos(k) * 1.5, b.y + Math.sin(k) * 1.5, 0, 5);
   }
@@ -1026,15 +1026,15 @@ export class MomoSession {
   // ── goal ──
   goalText(short = false) {
     const L = this.L;
-    if (L.goal === 'survive') return short ? `HALTE DURCH ${fmtTime(L.time)}` : `HALTE DURCH  ${fmtTime(L.time - this.t)}`;
-    if (L.goal === 'defend') return short ? 'SCHÜTZE DAS ARCHIV' : `ARCHIVSCHUTZ  ${fmtTime(L.time - this.t)}`;
-    if (L.goal === 'elites') return short ? `BEFREIE ${L.elites} ELITEN` : `ELITEN  ${this.elitesKilled} / ${L.elites}`;
+    if (L.goal === 'survive') return short ? `SURVIVE ${fmtTime(L.time)}` : `SURVIVE  ${fmtTime(L.time - this.t)}`;
+    if (L.goal === 'defend') return short ? 'GUARD THE ARCHIVE' : `ARCHIVE  ${fmtTime(L.time - this.t)}`;
+    if (L.goal === 'elites') return short ? `FREE ${L.elites} ELITES` : `ELITES  ${this.elitesKilled} / ${L.elites}`;
     return BOSSES[L.boss].name;
   }
   checkGoal() {
     const L = this.L;
-    if (this.hp <= 0) { this.hp = 0; this.lose('Dein Fernling braucht eine Pause'); return; }
-    if (this.gen && this.gen.hp <= 0) { this.gen.hp = 0; this.boom(this.gen.x, this.gen.y, 3, 0xf97316); this.lose('Das Archiv wurde überrannt'); return; }
+    if (this.hp <= 0) { this.hp = 0; this.lose('Your Fernling needs a rest'); return; }
+    if (this.gen && this.gen.hp <= 0) { this.gen.hp = 0; this.boom(this.gen.x, this.gen.y, 3, 0xf97316); this.lose('The archive was overrun'); return; }
     const done = L.goal === 'survive' || L.goal === 'defend' ? this.t >= L.time
       : L.goal === 'elites' ? this.elitesKilled >= L.elites
         : this.boss && this.boss.dead;
@@ -1047,13 +1047,13 @@ export class MomoSession {
     if (L.goal === 'defend') {
       const gs = this.gen.hp / this.gen.max;
       stars = gs >= 0.5 ? (hpShare >= 0.4 ? 3 : 2) : 1;
-      why = `Archiv ${Math.round(gs * 100)} %, Leben ${Math.round(hpShare * 100)} % (★★ Archiv 50 %, ★★★ zusätzlich Leben 40 %).`;
+      why = `Archive ${Math.round(gs * 100)}%, health ${Math.round(hpShare * 100)}% (2 stars: archive 50%, 3 stars: also health 40%).`;
     } else if (L.goal === 'survive') {
       stars = hpShare >= 0.4 ? (killShare >= 0.7 ? 3 : 2) : 1;
-      why = `Leben ${Math.round(hpShare * 100)} %, ${Math.round(killShare * 100)} % der Schar befreit (★★ Leben 40 %, ★★★ zusätzlich 70 % befreit).`;
+      why = `Health ${Math.round(hpShare * 100)}%, ${Math.round(killShare * 100)}% of the horde freed (2 stars: health 40%, 3 stars: also 70% freed).`;
     } else {
       stars = hpShare >= 0.4 ? (this.t <= L.par ? 3 : 2) : 1;
-      why = `Leben ${Math.round(hpShare * 100)} %, ${fmtTime(this.t)} (★★ Leben 40 %, ★★★ zusätzlich unter ${fmtTime(L.par)}).`;
+      why = `Health ${Math.round(hpShare * 100)}%, ${fmtTime(this.t)} (2 stars: health 40%, 3 stars: also under ${fmtTime(L.par)}).`;
     }
     this.score += 500 + Math.round(this.hp * 5) + (this.gen ? Math.round(this.gen.hp * 3) : 0);
     this.resultAt = this.time; this.settlementSeconds = this.L.boss === 'drill' ? 5.2 : this.L.boss === 'mothership' ? 4.6 : 3.3;
@@ -1067,14 +1067,14 @@ export class MomoSession {
     }}
     this.compactEnemies();
     this.foeShots.n = 0; this.haz.n = 0; this.shots.n = 0; this.mines.n = 0; this.bolts.n = 0;
-    this.say('MORGENLICHT!', 2.5, '#fde047');
+    this.say('DAYBREAK!', 2.5, '#fde047');
     this.effect('xp_sparks', this.x, this.y, 0, 1.4);
   }
   lose(reason) {
     this.resultAt = this.time; this.settlementSeconds = 1.4;
     this.result = { won: false, stars: 0, score: this.score, reason, stats: { kills: this.kills } };
     this.shake = 1;
-    this.say(reason === 'Das Archiv wurde überrannt' ? 'ARCHIV VERLOREN' : 'ERSCHÖPFT', 2.5, '#f87171');
+    this.say(reason === 'The archive was overrun' ? 'ARCHIVE LOST' : 'EXHAUSTED', 2.5, '#f87171');
   }
 
   // ── effects ──
@@ -1235,7 +1235,7 @@ export class MomoSession {
       if (this.gen) {
         const q = this.proj(this.gen.x, this.gen.y, 2.9);
         this.bar(g, q.x, q.y, 70, 8, this.gen.hp / this.gen.max, '#38bdf8');
-        if (this.genRepair && this.gen.hp < this.gen.max) label(g, 'SCHUTZ ERNEUERT', q.x, q.y - 14, 11, '#bae6fd', 'rgba(0,0,0,.6)');
+        if (this.genRepair && this.gen.hp < this.gen.max) label(g, 'SHIELD RENEWED', q.x, q.y - 14, 11, '#bae6fd', 'rgba(0,0,0,.6)');
         this.edgeArrow(g, w, h, q.x, q.y + 30, '#38bdf8');
       }
       for (let i = 0; i < this.en.n; i++) {
@@ -1309,7 +1309,12 @@ export class MomoSession {
     g.strokeStyle = '#a3e635'; g.lineWidth = 2.5; g.stroke();
     label(g, 'LV', 26, y - 3, 8, '#a3e635', 'rgba(0,0,0,0)', 800);
     label(g, String(this.level), 26, y + 7, 13, '#fff', 'rgba(0,0,0,.4)', 900);
-    label(g, this.model.replaceAll('_', ' ') + (this.stage < 2 ? ' · Entwicklung ab Level ' + (this.stage ? 10 : 5) : ' · Hochform'), w / 2, 121, 11, NATURE_COLORS[this.nature], 'rgba(0,0,0,.65)');
+    // readable on any ground: white text on a dark pill, the nature colour only as a dot
+    const sub = this.model.replaceAll('_', ' ') + (this.stage < 2 ? ' · evolves at level ' + (this.stage ? 10 : 5) : ' · final form');
+    g.font = '700 12px Geist, Inter, system-ui, sans-serif'; const subW = g.measureText(sub).width + 30;
+    g.fillStyle = 'rgba(8,12,22,.74)'; roundRect(g, w / 2 - subW / 2, 110, subW, 22, 11); g.fill();
+    g.fillStyle = NATURE_COLORS[this.nature]; g.beginPath(); g.arc(w / 2 - subW / 2 + 12, 121, 4, 0, TAU); g.fill();
+    label(g, sub, w / 2 + 6, 121, 12, '#fff', 'rgba(0,0,0,0)', 700);
     // goal line
     const L = this.L;
     if (L.goal === 'boss' && this.boss && !this.boss.dead) {
@@ -1318,7 +1323,7 @@ export class MomoSession {
       g.fillStyle = this.boss.phase2 ? '#f97316' : '#ef4444'; roundRect(g, bx, by, Math.max(0, bw * this.boss.hp / this.boss.maxHp), 14, 6); g.fill();
       label(g, BOSSES[L.boss].name, w / 2, by + 7, 11, '#fff', 'rgba(0,0,0,.7)');
     } else {
-      const text = this.result ? (this.result.won ? 'DIE ABTEI IST SICHER' : 'ZEIT ZUM AUSRUHEN') : L.goal === 'boss' ? `BOSS IN ${fmtTime(BOSS_AT - this.t)}` : this.goalText();
+      const text = this.result ? (this.result.won ? 'THE ABBEY IS SAFE' : 'TIME TO REST') : L.goal === 'boss' ? `BOSS IN ${fmtTime(BOSS_AT - this.t)}` : this.goalText();
       label(g, text, w / 2, 96, 15, '#fff', 'rgba(0,0,0,.65)', 800);
     }
   }
@@ -1335,8 +1340,8 @@ export class MomoSession {
     g.fillStyle = `rgba(4,6,12,${0.55 * a})`; g.fillRect(0, 0, w, h);
     const n = ch.cards.length;
     const {stack:narrow,compact,cw,ch:chh,gap,x:x0,y:y0}=choiceLayout(w,h,n);
-    const heading=ch.reason==='workshop'?'WERKSTATT-HILFE':ch.reason==='chest'?'BEFREIUNG':ch.reason==='kit'?'STARTVORRAT':`LEVEL ${this.level}`;
-    const title=`${heading} — WÄHLE EINE KARTE`,titleSize=compact||w<360?15:narrow?18:24;
+    const heading=ch.reason==='workshop'?'WORKSHOP HELP':ch.reason==='chest'?'FREEING':ch.reason==='kit'?'STARTER KIT':`LEVEL ${this.level}`;
+    const title=`${heading} — PICK A CARD`,titleSize=compact||w<360?15:narrow?18:24;
     label(g,title,w/2,y0-24,fitLabel(g,title,titleSize,w-24,900),'#fde047','rgba(0,0,0,.7)',900);
     const rects = this.cardRects = this.cardRects || [];
     rects.length = n;
@@ -1350,10 +1355,10 @@ export class MomoSession {
       const sel = view.keyboard && ch.sel === i;
       g.fillStyle = c.type === 'evo' ? '#2a1d05' : '#0f172a'; roundRect(g, x, y, cw, chh, 14); g.fill();
       g.lineWidth = sel ? 4 : 2.5; g.strokeStyle = c.type === 'evo' ? '#fde047' : sel ? '#ffffff' : c.color; g.stroke();
-      const tag = c.type === 'fossil' ? 'FOSSIL · BIS LEVELENDE' : c.type === 'evo' ? 'COMBO' : c.type === 'heal' ? 'SNACK' : c.lv === 1 ? 'NEW' : `LEVEL ${c.lv}`;
+      const tag = c.type === 'fossil' ? 'FOSSIL · THIS LEVEL' : c.type === 'evo' ? 'COMBO' : c.type === 'heal' ? 'SNACK' : c.lv === 1 ? 'NEW' : `LEVEL ${c.lv}`;
       if (compact) {
         g.fillStyle='rgba(255,255,255,.07)';g.beginPath();g.arc(x+cw/2,y+27,21,0,TAU);g.fill();
-        drawIcon(g,c.nature||c.id,x+cw/2,y+27,15,c.color);
+        drawIcon(g,cardIcon(c),x+cw/2,y+27,15,c.color);
         label(g,tag,x+cw/2,y+57,11,c.type==='evo'?'#fde047':c.color,'rgba(0,0,0,0)',800);
         g.textAlign='center';g.textBaseline='alphabetic';g.font='800 15px Geist, Inter, system-ui, sans-serif';g.fillStyle='#fff';
         wrap(g,c.name,x+cw/2,y+79,cw-20,17,2);
@@ -1362,7 +1367,7 @@ export class MomoSession {
         if(view.keyboard)label(g,String(i+1),x+cw-14,y+16,11,'#94a3b8','rgba(0,0,0,0)',800);
       } else if (narrow) {
         g.fillStyle = 'rgba(255,255,255,.07)'; g.beginPath(); g.arc(x + 46, y + chh / 2, 30, 0, TAU); g.fill();
-        drawIcon(g, c.nature || c.id, x + 46, y + chh / 2, 17, c.color);
+        drawIcon(g, cardIcon(c), x + 46, y + chh / 2, 17, c.color);
         g.textAlign = 'left'; g.textBaseline = 'alphabetic';
         g.font = '800 11px Geist, Inter, system-ui, sans-serif'; g.fillStyle = c.type === 'evo' ? '#fde047' : c.color; g.fillText(tag, x + 88, y + 28);
         g.font = `800 ${fitLabel(g,c.name,17,cw-100,800)}px Geist, Inter, system-ui, sans-serif`; g.fillStyle = '#fff'; g.fillText(c.name, x + 88, y + 50);
@@ -1370,7 +1375,7 @@ export class MomoSession {
         if (view.keyboard) label(g, String(i + 1), x + cw - 18, y + 18, 12, '#94a3b8', 'rgba(0,0,0,0)', 800);
       } else {
         g.fillStyle = 'rgba(255,255,255,.07)'; g.beginPath(); g.arc(x + cw / 2, y + 74, 44, 0, TAU); g.fill();
-        drawIcon(g, c.nature || c.id, x + cw / 2, y + 74, 25, c.color);
+        drawIcon(g, cardIcon(c), x + cw / 2, y + 74, 25, c.color);
         label(g, tag, x + cw / 2, y + 140, 12, c.type === 'evo' ? '#fde047' : c.color, 'rgba(0,0,0,0)', 800);
         label(g, c.name, x + cw / 2, y + 164, 19, '#fff', 'rgba(0,0,0,0)', 800);
         g.font = '500 14px Geist, Inter, system-ui, sans-serif'; g.fillStyle = '#cbd5e1'; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
@@ -1383,6 +1388,8 @@ export class MomoSession {
   }
 }
 
+/** Card glyph: the move or passive itself (a fossil shows the foreign move), never just the nature flame. */
+function cardIcon(c) { return c.type === 'fossil' ? c.slot : c.id; }
 const PASSIVE_IDS = Object.keys(PASSIVES);
 const DRONE_FIELDS = ['droneCd0','droneCd1','droneCd2','droneCd3'];
 function chip(g, x, y, id, lv, evo, color) {
@@ -1444,10 +1451,10 @@ export function drawIcon(g, id, x, y, r, color) {
 export const momo = {
   id: 'momo',
   title: 'Fernling-Arena',
-  starters: Object.values(STARTERS).map(s => ({ id: s.id, label: s.label, description: ({ ember: 'Feuer und Wärme · entwickelt sich zu Coalbear und Emberward', green: 'Samen und Ranken · entwickelt sich zu Moorgrim und Groveprince', tide: 'Blasen und Wellen · entwickelt sich zu Spraycount und Tideduke' })[s.nature] })),
+  starters: Object.values(STARTERS).map(s => ({ id: s.id, label: s.label, description: ({ ember: 'Fire and warmth · evolves into Coalbear and Emberward', green: 'Seeds and vines · evolves into Moorgrim and Groveprince', tide: 'Bubbles and waves · evolves into Spraycount and Tideduke' })[s.nature] })),
   defaultStarter: 'glimmo',
-  tagline: 'Wähle deinen Fernling, entwickle seine Naturkräfte und halte bis zum Morgen durch. Brich den Bann der verzauberten Schar.',
-  howTo: 'Bewege deinen Fernling per Touch, gedrückter Maustaste oder WASD/Pfeiltasten. Er greift selbst an. Bei einem Levelaufstieg wählst du mit 1–3 eine Karte. Entwicklung auf Level 5 und 10. Seltene Fossilkarten geben einen fremden Move bis Levelende. Esc pausiert, R startet neu.',
+  tagline: 'Pick your Fernling, grow its nature powers and hold out until daybreak. Break the hex on the enchanted horde.',
+  howTo: 'Move your Fernling by touch, mouse drag or WASD/arrow keys. It attacks on its own. On a level-up pick a card with 1–3. Evolution at level 5 and 10. Rare fossil cards lend you a foreign move until the level ends. Esc pauses, R restarts.',
   levels: LEVELS,
   hero: 'GLIMMO',
   art: new URL('../../games-assets/covers/cover-momo.webp', import.meta.url).href,

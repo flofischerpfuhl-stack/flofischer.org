@@ -7,6 +7,7 @@ import {
   Particles,
   LOW_GPU,
 } from "./three-kit.js";
+import { createShading, shadeFromUrl } from "./cel-shading.js";
 import { BOARD_W, BOARD_H } from "./pips-tower.js";
 import { Baker } from "./world/decor.js";
 import {
@@ -69,12 +70,43 @@ const LOOKS = [
   },
 ];
 
+/** Saturated cel gold for the instanced Groschen: flat colour, a warm emissive floor so the shaded side stays golden,
+ *  and a screen-aligned hard glint (light crescent and dot upper left, dark crescent and inner ring) drawn after tone
+ *  mapping, so it holds for every coin however it tumbles. */
+function coinMaterial() {
+  const m = new THREE.MeshStandardMaterial({ color: 0xf9ad0b, roughness: 0.7, metalness: 0, emissive: 0x5a3000, emissiveIntensity: 0.26 });
+  m.onBeforeCompile = (sh) => {
+    sh.vertexShader = sh.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vCoinC; varying vec3 vCoinV; varying float vCoinR;")
+      .replace("#include <begin_vertex>", `#include <begin_vertex>
+        mat4 coinMV = modelViewMatrix * instanceMatrix;
+        vCoinC = (coinMV * vec4(0., 0., 0., 1.)).xyz; vCoinV = (coinMV * vec4(position, 1.)).xyz; vCoinR = 5.5 * length(coinMV[0].xyz);`);
+    sh.fragmentShader = sh.fragmentShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vCoinC; varying vec3 vCoinV; varying float vCoinR;")
+      .replace("#include <dithering_fragment>", `{
+        vec2 cq = (vCoinV.xy - vCoinC.xy) / vCoinR; float cr = length(cq); vec2 cd = cq / max(cr, .001);
+        float arcL = step(.7, dot(cd, vec2(-.707, .707))) * step(.5, cr) * step(cr, .88);
+        float dotH = step(length(cq - vec2(-.28, .4)), .13);
+        float arcD = step(.55, dot(cd, vec2(.707, -.707))) * step(.74, cr) * step(cr, 1.);
+        vec3 gc = mix(gl_FragColor.rgb, gl_FragColor.rgb * vec3(.72, .42, .3), arcD);
+        gc = mix(gc, vec3(1., .98, .8), max(arcL, dotH));
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, gc, step(.5, normal.z));
+      }
+      #include <dithering_fragment>`);
+  };
+  m.customProgramCacheKey = () => "tower-coin";
+  return m;
+}
+
 export class PipsTower3D {
   constructor(canvas) {
     this.renderer = createRenderer(canvas);
     this.scene = new THREE.Scene();
     this.scene.environment = studioEnvironment(this.renderer);
     this.scene.environmentIntensity = 0.8;
+    // shared Wind Waker cel look (cel-shading.js); ?shade=none keeps the old look
+    const variant = shadeFromUrl();
+    this.shading = variant ? createShading(variant, { ambient: 0.6 }) : null;
     this.camera = new THREE.PerspectiveCamera(28, 1, 10, 6000);
     this.w = 1;
     this.h = 1;
@@ -190,6 +222,7 @@ export class PipsTower3D {
       mesh.receiveShadow = false;
       s.add(mesh);
       this.parts[id] = mesh;
+      if (id !== "gem") this.shading?.convert(m, mesh);
     }
     this.parts.gas.renderOrder = 2;
     this.flapGuide = new THREE.InstancedMesh(
@@ -221,6 +254,21 @@ export class PipsTower3D {
     );
     this.controlHalo.visible = false;
     s.add(this.controlHalo);
+    // four-point sparkle that twinkles on single coins (one instanced draw, no extra lights)
+    const starShape = new THREE.Shape();
+    for (let i = 0; i < 8; i++) {
+      const a = (i * Math.PI) / 4, r = i % 2 ? 0.2 : 1;
+      starShape[i ? "lineTo" : "moveTo"](Math.sin(a) * r, Math.cos(a) * r);
+    }
+    this.sparkle = new THREE.InstancedMesh(
+      ownG(new THREE.ShapeGeometry(starShape)),
+      ownM(new THREE.MeshBasicMaterial({ color: 0xfffbe0, toneMapped: false, depthWrite: false, transparent: true })),
+      64,
+    );
+    this.sparkle.count = 0;
+    this.sparkle.frustumCulled = false;
+    this.sparkle.renderOrder = 4;
+    s.add(this.sparkle);
     this.fx = new Particles(s, 700);
     this.glow = new Particles(
       s,
@@ -300,6 +348,10 @@ export class PipsTower3D {
       type: "star_arc",
     }));
     this.reactionSlot = 0;
+  }
+  /** Cel shading hook: converts the lit materials under `root` and adds outline hulls (call after every material tweak). */
+  cel(root, opts) {
+    this.shading?.apply(root, opts);
   }
   prepare(sess, options = {}) {
     this.preparing = this.preparing
@@ -423,6 +475,15 @@ export class PipsTower3D {
         m.emissiveIntensity = 0.35;
         m.roughness = 0.38;
       }
+      // a bright, thicker shaft stands out against every wall colour (visual only; the collider is the pin's segment)
+      for (const m of a.material((_, o) => o.name === "ShaftStretch_Mesh")) {
+        m.vertexColors = false;
+        m.color.set(0xf6f8ff);
+        m.emissive.set(0x6f7f9f);
+        m.emissiveIntensity = 0.3;
+        m.roughness = 0.45;
+      }
+      named(a.handle.scene, "ShaftStretch").scale.set(1.35, 1.35, 1);
       const inset = pinTransform(a.root, p);
       this.pinActors.push(a);
       const b = await make("PIN_SOCKET");
@@ -579,13 +640,12 @@ export class PipsTower3D {
       g.scale(47, 47, 47);
       this.geometry.add(g);
       this.parts.gem.geometry = g;
-      this.parts.gem.material = src.material.clone();
-      this.parts.gem.material.color.set(0xffffff);
-      this.parts.gem.material.emissive.set(0x5a3305);
-      this.parts.gem.material.emissiveIntensity = 0.12;
+      this.parts.gem.material = coinMaterial();
       this.materials.add(this.parts.gem.material);
+      this.shading?.convert(this.parts.gem.material, this.parts.gem);
       this.nativeGem = true;
     }
+    for (const a of this.actors) this.cel(a.root, { outline: "skinned", all: true });
     this.deadParts = new Uint8Array(Math.max(520, sess.parts.length));
     for (const r of this.reactions) r.start = -99;
     this.effects.clear();
@@ -599,7 +659,10 @@ export class PipsTower3D {
     this.scenery?.dispose();
     this.scenery = null;
     this.stage?.removeFromParent();
-    for (const actor of this.actors) actor.dispose();
+    for (const actor of this.actors) {
+      this.shading?.release(actor.root);
+      actor.dispose();
+    }
     this.actors = [];
     this.level = null;
     this.ready = false;
@@ -621,6 +684,8 @@ export class PipsTower3D {
       look,
       prepared: this.prepared,
     });
+    this.shading?.setDark(dark, { dim: 0.88 });
+    this.cel(this.scenery.scene, { outline: false });
     this.sceneryFor = L;
     this.sceneryDark = dark;
     this.bakeDirty = true;
@@ -697,7 +762,7 @@ export class PipsTower3D {
       Math.min(1, sess.collected / Math.max(1, sess.need));
     this.drawGuides(sess);
     this.drawCharacters(sess, view);
-    this.drawParticles(sess);
+    this.drawParticles(sess, view);
     this.drawFx(sess);
     this.drawReactions(sess);
     this.drawAmbient(sess, view);
@@ -946,6 +1011,8 @@ export class PipsTower3D {
         ? 1.5
         : 2;
     sc.fit(this.camera, size.y * ss);
+    // distance haze: the tower (z = 0) stays clear, the backdrop layers fade into the sky
+    sc.scene.fog = new THREE.Fog(sc.fogColor, this.dist * 1.06, this.dist * 2.8);
     this.baker.bake(this.renderer, sc.scene, this.camera, ss);
     // the bake's shadow map is only needed while baking
     sc.scene.traverse((o) => {
@@ -991,7 +1058,7 @@ export class PipsTower3D {
     return { s, ox, oy };
   }
 
-  drawParticles(sess) {
+  drawParticles(sess, view) {
     const counts = {
       water: 0,
       lava: 0,
@@ -1003,6 +1070,7 @@ export class PipsTower3D {
     };
     const meshes = this.parts;
     const { m4, q, e, v, sc } = this;
+    let sparks = 0;
     for (let i = 0; i < sess.parts.length; i++) {
       const p = sess.parts[i];
       if (p.dead) continue;
@@ -1042,6 +1110,16 @@ export class PipsTower3D {
         sc.set(k, k, k),
       );
       mesh.setMatrixAt(n, m4);
+      // a coin catches the light now and then: a quick 4-point glint in front of it
+      if (p.t === "gem" && sparks < 64 && !view?.reduced) {
+        const period = 2.2 + (((i * 37) % 11) / 11) * 1.8,
+          ph = (sess.t / period + i * 0.618034) % 1;
+        if (ph < 0.13) {
+          const k = Math.sin((ph / 0.13) * Math.PI) * PR * 2.5;
+          m4.compose(v.set(BX(p.x) + PR * 0.3, BY(p.y) + PR * 0.35, z + 12), q.identity(), sc.set(k, k, 1));
+          this.sparkle.setMatrixAt(sparks++, m4);
+        }
+      }
     }
     // Reuse the same native coin batch for collection; coins visibly enter the chest.
     for (const c of sess.coins) {
@@ -1054,6 +1132,9 @@ export class PipsTower3D {
         q, sc.setScalar(1 - f * 0.45));
       meshes.gem.setMatrixAt(n, m4);
     }
+    this.sparkle.count = sparks;
+    this.sparkle.visible = sparks > 0;
+    this.sparkle.instanceMatrix.needsUpdate = sparks > 0;
     for (const [t, mesh] of Object.entries(meshes)) {
       mesh.count = Math.min(counts[t], mesh.instanceMatrix.count);
       mesh.visible = mesh.count > 0;
@@ -1106,12 +1187,6 @@ export class PipsTower3D {
       const x = BX(c.x) + (target.x - BX(c.x)) * q,
         y = BY(c.y) + (target.y + 12 - BY(c.y)) * q + Math.sin(q * Math.PI) * 30;
       gl.add(x, y, 25, PR * (0.8 - q * 0.4), 0xffce62);
-    }
-    for (let i = 0, n = 0; i < sess.parts.length && n < 16; i++) {
-      const p = sess.parts[i];
-      if (p.dead || p.t !== "gem") continue;
-      const pulse = Math.sin(sess.t * 2.1 + i * 2.4);
-      if (pulse > 0.96) { fx.add(BX(p.x) + 3, BY(p.y) + 3, 18, 0.6 + (pulse - 0.96) * 25, 0xfff5c4, sess.t); n++; }
     }
     // lava glow
     for (let i = 0; i < sess.parts.length; i += 3) {
@@ -1262,6 +1337,7 @@ export class PipsTower3D {
     }
     for (const g of this.geometry) g.dispose();
     for (const m of this.materials) m.dispose();
+    this.shading?.dispose();
     this.lights.light.shadow.map?.dispose();
     this.scene.environment?.dispose();
     this.library.dispose();

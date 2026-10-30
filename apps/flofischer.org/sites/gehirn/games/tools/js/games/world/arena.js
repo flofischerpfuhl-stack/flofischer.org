@@ -5,6 +5,8 @@
 import { THREE } from '../three-kit.js';
 import { Batch, mtx, rng, createNoise } from './decor.js';
 import { clipStoneSurface } from './arena-mesh.js';
+import { SLAB_PAD, SLAB_PALETTE, slabGeometry, slabGround } from './arena-slab.js';
+import { composeScenery, SCENE_MODELS } from './arena-scenes.js';
 import { BIOMES, PLAZA_RADIUS, ringRadius, pathDistance, gardenCenters } from './arena-layout.js';
 
 const SIZE=1024,TAU=Math.PI*2;
@@ -67,23 +69,24 @@ export async function buildArena({world=0,R=22,dark=false,low=false,library}){
   const type=k%9===0?3:k%4===0?2:k%3===0?1:0,id=theme.plants[type];const modelBounds=new THREE.Box3();for(const part of models.get(id))modelBounds.union(part.geometry.boundingBox??(part.geometry.computeBoundingBox(),part.geometry.boundingBox));const height=modelBounds.max.y-modelBounds.min.y,desired=type===3?.25:type===2?.24:.16+rand()*.09,size=Math.min(1.05,desired/Math.max(.01,height));
   place(id,x,0,z,rand()*TAU,size,theme.tint,'groundcover');
  }
- // Canopies, large rock groups and abbey architecture frame the actual arena
- // boundary. Never put these misleading, non-colliding obstacles on the field.
- for(let k=0;k<target-inner;k++){
-  const section=k%12,a=section/12*TAU+(Math.floor(k/12)%2?.09:-.07),r=R+3.8+(Math.floor(k/12)%3)*1.4,foreground=Math.sin(a)>.25,type=foreground?0:k%3,id=theme.edge[type],size=(type===1?1.2:.8)+rand()*.2;
-  place(id,Math.cos(a)*r,0,Math.sin(a)*r,-a+rand()*.3,size,world===2&&k%3===0?0xe0edf5:0xffffff,'border');
- }
- for(const side of [-1,1])for(let k=-3;k<=3;k++){
-  const x=side*(R+2.9),z=k*4.4,angle=side*Math.PI/2;place('fw_wall_stone_arch',x,0,z,angle,1.35);place('fw_roof_gentle',x,3.7,z,angle,[1.8,1.1,1.35]);if(k%2===0)place('fw_pillar_carved',x-side*.7,0,z,0,.95);
- }
- for(let k=-3;k<=3;k++)if(Math.abs(k)>1){place('fw_wall_stone_arch',k*4.4,0,-R-2.9,0,1.35);place('fw_roof_ridge',k*4.4,3.7,-R-2.9,0,1.35);}
- for(let k=0;k<20;k++){const a=k/20*TAU;if(Math.abs(Math.sin(a))>.90)continue;const x=Math.cos(a)*(R+1.2),z=Math.sin(a)*(R+1.2);place('fw_railing_stone',x,0,z,-a+Math.PI/2,.95);if(k%3===0)place('fw_street_light_sporecell',x,0,z,-a,.85);}
- for(const side of [-1,1])place('fw_bench_oak',side*5,0,-R-1.5,0,1.15);
+ // The slab: playfield disc, lip, layered cliff side and tip; scenery stands on its terrace, on islets and in the cloud sea.
+ const S=R+SLAB_PAD,slab=SLAB_PALETTE[world],cloudTint=new THREE.Color(slab.cloud),disc=new THREE.CircleGeometry(1,20).rotateX(-Math.PI/2);
+ const ground=slabGround(S,{seed:world+1}),rim=slabGeometry(world,S,{seed:world+1});
+ const batchOf=(x,z)=>{const far=Math.hypot(x,z)>S+1,key=far?'far':Math.floor(x/12)+','+Math.floor(z/12);if(!chunks.has(key))chunks.set(key,{matte:new Batch(),gloss:new Batch(),glow:new Batch()});return chunks.get(key);};
+ const sceneModels=new Map(await Promise.all(SCENE_MODELS.filter(id=>!models.has(id)).map(async id=>[id,await library.model(id,'lo')])));for(const [id,parts]of sceneModels)models.set(id,parts);
+ const scene={R,S,rand,seed:world+1,cloudTint,
+  place:(id,x,y,z,angle,size,tint=0xffffff)=>{const chunk=batchOf(x,z),matrix=mtx([x,y,z],[0,angle,0],size),colour=tint instanceof THREE.Color?tint:new THREE.Color(tint);for(const part of models.get(id))chunk[part.mat].add(part.geometry,matrix,colour);placements.push({id,x,y,z,size,role:'border'});},
+  patch:(x,y,z,radius,colour)=>batchOf(x,z).matte.add(disc,mtx([x,y+.012,z],[0,rand()*6.28,0],[radius,1,radius*(.85+rand()*.3)]),colour),
+  cover:(x,y,z,count,spread,size)=>{for(let k=0;k<count;k++){const a=rand()*TAU,d=Math.sqrt(rand())*spread,type=k%3,id=theme.plants[type],part=models.get(id);const box=new THREE.Box3();for(const p of part)box.union(p.geometry.boundingBox??(p.geometry.computeBoundingBox(),p.geometry.boundingBox));scene.place(id,x+Math.cos(a)*d,y,z+Math.sin(a)*d,rand()*TAU,Math.min(1.4,Math.max(.15,.2*size)/Math.max(.02,box.max.y-box.min.y)),theme.tint);}},
+  islet:(isle)=>{const g=slabGeometry(world,isle.radius,{seed:isle.seed,segments:36,cap:true});batchOf(isle.x,isle.z).matte.add(g,mtx([isle.x,isle.y,isle.z]));g.dispose();}};
+ composeScenery(world,scene);
  const materials={matte:new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85}),gloss:new THREE.MeshStandardMaterial({vertexColors:true,roughness:.35,metalness:.08}),glow:new THREE.MeshBasicMaterial({vertexColors:true,toneMapped:false})};
  for(const material of Object.values(materials))material.userData.cheapIbl=true;
  for(const chunk of chunks.values())for(const [kind,batch]of Object.entries(chunk))if(!batch.empty){const mesh=new THREE.Mesh(batch.geometry(),materials[kind]);mesh.receiveShadow=true;group.add(mesh);}
+ const rimMesh=new THREE.Mesh(rim,materials.matte);rimMesh.receiveShadow=true;group.add(rimMesh);
+ disc.dispose();
  group.userData.arenaArt={world,name:theme.name,plazaRadius:PLAZA_RADIUS,playableRadius:R-.6,placements,groundcoverHeightLimit:.34};
- return{group,overlay,glow,torches:[],ext:[-E,-E,1/(2*E)],dispose(){group.removeFromParent();group.traverse(o=>o.geometry?.dispose());for(const material of Object.values(materials))material.dispose();leafMaterial.dispose();overlay.dispose();}};
+ return{group,overlay,glow,ground,torches:[],ext:[-E,-E,1/(2*E)],dispose(){group.removeFromParent();group.traverse(o=>o.geometry?.dispose());ground.dispose();for(const material of Object.values(materials))material.dispose();leafMaterial.dispose();overlay.dispose();}};
 }
 
 /**
