@@ -50,7 +50,8 @@ function cap(radius, height, wobble, phase, amount = 0.13) {
  * shoreTile is a square Uint8 grid of shore distances for the sea (0 land, 255 open water), cell metres wide, centred on the island.
  * ready resolves when the landmark models are in the group (the caller restyles the group then).
  */
-export function createIslandSilhouette({ biome = 'meadow', radius = 36, seed = 1 } = {}) {
+export function createIslandSilhouette({ biome = 'meadow', radius = 36, seed = 1, kind = 'island', level = 0, bottom = -23 } = {}) {
+  if (kind === 'playset') return playsetSilhouette({ biome, radius, seed });
   const B = BIOMES[biome] ?? BIOMES.meadow, rand = rng(seed * 53 + 9), noise = createNoise(seed + 3);
   const wobble = (x, y) => noise.fbm2(x, y, 2), patch = createNoise(seed + 41);
   const group = new T.Group(); group.name = `Silhouette_${biome}`;
@@ -69,7 +70,11 @@ export function createIslandSilhouette({ biome = 'meadow', radius = 36, seed = 1
   };
   const back = rand() * 6.28 + Math.PI * 1.25, bx = Math.cos(back) * radius * 0.22, bz = Math.sin(back) * radius * 0.22;
   const baseTop = 3.4, midTop = 7.2, crownTop = 10.4;
-  earth.add(cliff(radius, 1.8, wobble, 0.2, { flare: 1.02, amount: 0.09 }), mtx([0, SEA_Y - 0.6, 0]), col(B.sand));
+  if (kind === 'island') earth.add(cliff(radius, 1.8, wobble, 0.2, { flare: 1.02, amount: 0.09 }), mtx([0, SEA_Y - 0.6, 0]), col(B.sand));
+  else { // rock hanging below a terrace or a floating island, down to the clouds
+    const depth = Math.max(8, kind === 'terrace' ? level + 9 : -3.2 - bottom + SEA_Y);
+    earth.add(cliff(radius * 0.84, depth, wobble, 1.3, { flare: kind === 'terrace' ? 0.55 : 0.1, amount: 0.2 }), mtx([0, -3.2 - depth / 2, 0]), col(B.earth[0]), rockLine(-3.2 - depth, -3.2));
+  }
   tier(radius * 0.84, -3.2, baseTop, 0, 0, 0.9);
   tier(radius * 0.52, baseTop - 0.3, midTop, bx, bz, 2.1);
   const crown = biome === 'basalt' || biome === 'sand' ? null : [bx * 1.5, bz * 1.5];
@@ -84,6 +89,8 @@ export function createIslandSilhouette({ biome = 'meadow', radius = 36, seed = 1
     }
   }
   if (biome === 'stone') fortress(part, top, radius, col);
+  if (kind === 'terrace') crags(part, biome, top, radius, col, rand);
+  if (kind === 'floating') arenaRing(part, top, radius, col, rand);
   const geometries = [], materials = [];
   for (const [batch, name] of [[earth, 'SilhouetteEarth'], [grass, 'SilhouetteGrass'], [props, 'SilhouetteProps']]) {
     if (batch.empty) continue;
@@ -91,7 +98,7 @@ export function createIslandSilhouette({ biome = 'meadow', radius = 36, seed = 1
     const mesh = new T.Mesh(g, m); mesh.name = name; group.add(mesh);
   }
   // landmark and scatter models, merged per model into instanced meshes once they have loaded
-  const kit = KIT[biome] ?? KIT.meadow, jobs = [], spot = (min, max) => {
+  const kit = kind === 'island' ? KIT[biome] ?? KIT.meadow : { landmark: [], scatter: null }, jobs = [], spot = (min, max) => {
     for (let n = 0; n < 30; n++) {
       const a = rand() * 6.28, d = (min + (max - min) * Math.sqrt(rand())) * radius, x = Math.cos(a) * d, z = Math.sin(a) * d;
       if (Math.hypot(x - top[0], z - top[2]) > radius * 0.2 || n > 24) return [x, heightAt(x, z), z];
@@ -115,8 +122,8 @@ export function createIslandSilhouette({ biome = 'meadow', radius = 36, seed = 1
   const instances = [];
   const ready = Promise.all(jobs.map(([name]) => loadModel(name, 'lo'))).then((models) => {
     if (group.userData.released) return;
-    jobs.forEach(([, list], k) => {
-      const g = modelInstances(models[k], list);
+    jobs.forEach(([name, list], k) => {
+      const g = modelInstances(models[k], list, name === 'VOLCANO' ? { tints: list.map(() => new T.Color(2.1, 1.8, 2.3)) } : {});
       g.traverse((o) => { if (o.isMesh && o.material?.isMeshStandardMaterial) { const old = o.material; o.material = new T.MeshLambertMaterial({ vertexColors: true }); old.dispose(); } if (o.material) materials.push(o.material); });
       instances.push(g); group.add(g);
     });
@@ -131,6 +138,45 @@ export function createIslandSilhouette({ biome = 'meadow', radius = 36, seed = 1
     group, radius, landRadius, ready, shoreTile: { data: tile, size: n, cell, half },
     release() { group.userData.released = true; group.removeFromParent(); for (const g of instances) g.traverse((o) => o.isInstancedMesh && o.dispose()); for (const g of geometries) g.dispose(); for (const m of materials) m.dispose(); },
   };
+}
+
+/** Pip's terraces: a few grey spires and boulders on the high ground, white-capped where it is cold. */
+function crags(part, biome, top, radius, col, rand) {
+  const cold = biome === 'crag-frost', dark = biome === 'crag-basalt', rock = col(dark ? '#4a4a60' : cold ? '#8d9eb2' : '#8c9196');
+  for (let k = 0; k < 5; k++) {
+    const a = rand() * 6.28, d = radius * (0.1 + rand() * 0.3), h = 6 + rand() * 9, r = radius * (0.05 + rand() * 0.05), cone = new T.ConeGeometry(r, h, 7, 2); cone.translate(0, h / 2, 0);
+    part(cone, mtx([top[0] + Math.cos(a) * d, top[1] - 0.3, top[2] + Math.sin(a) * d], [0, rand() * 6, 0]), rock, (i, x, y, z, nx, ny, nz, c) => { const t = (y - top[1]) / h; if (cold && t > 0.55) c.set('#f7fbff'); else c.multiplyScalar(0.88 + 0.22 * Math.max(0, ny)); });
+  }
+}
+
+/** Fernling-Arena's islands: a ring of pillars around a glowing crystal on a tiled disc. */
+function arenaRing(part, top, radius, col, rand) {
+  const tile = col('#efe6d0'), pillar = col('#f6efe0'), gem = col('#7ee6ff'), disc = new T.CylinderGeometry(radius * 0.3, radius * 0.32, 0.9, 20), post = new T.CylinderGeometry(1, 1.15, 1, 8), crystal = new T.OctahedronGeometry(1);
+  part(disc, mtx([top[0], top[1] + 0.2, top[2]]), tile);
+  for (let k = 0; k < 8; k++) { const a = (k / 8) * 6.2832, h = 5 + rand() * 2.5; part(post, mtx([top[0] + Math.cos(a) * radius * 0.26, top[1] + h / 2, top[2] + Math.sin(a) * radius * 0.26], [0, 0, 0], [1.3, h, 1.3]), pillar); }
+  part(crystal, mtx([top[0], top[1] + 7, top[2]], [0, 0.5, 0], [2.6, 4.6, 2.6]), gem);
+}
+
+/** A play set: a thick board in the biome colour on a wooden base, a rim, and a few toys (blocks, a drum, a cone tree). Primitives only. */
+function playsetSilhouette({ biome, radius, seed }) {
+  const B = BIOMES[biome] ?? BIOMES.meadow, rand = rng(seed * 53 + 9), group = new T.Group(); group.name = `Silhouette_playset_${biome}`;
+  const batch = new Batch(), col = (hex, k = 1) => new T.Color(hex).multiplyScalar(k), w = radius * 0.98, d = radius * 0.82, box = new T.BoxGeometry(1, 1, 1), cyl = new T.CylinderGeometry(1, 1, 1, 14), cone = new T.ConeGeometry(1, 1, 10);
+  batch.add(box, mtx([0, 0.7, 0], [0, 0, 0], [w * 1.04, 3.2, d * 1.04]), col('#8a5a30'));
+  batch.add(box, mtx([0, 2.5, 0], [0, 0, 0], [w, 0.9, d]), col(B.top[0]));
+  for (const [x, z, sx, sz] of [[0, -d / 2, w, 1.2], [0, d / 2, w, 1.2], [-w / 2, 0, 1.2, d], [w / 2, 0, 1.2, d]]) batch.add(box, mtx([x, 3.4, z], [0, 0, 0], [sx, 1.8, sz]), col('#efe2bd'));
+  const primary = ['#e8504a', '#f2b632', '#3f8fe0', '#58b65a'];
+  for (let k = 0; k < 3; k++) batch.add(box, mtx([-w * 0.2 + (rand() - 0.5) * 2, 5 + k * 3.6, -d * 0.12], [0, 0.25 * k + rand() * 0.3, 0], [6 - k * 0.9, 3.6, 6 - k * 0.9]), col(primary[(k + seed) % 4]));
+  batch.add(cyl, mtx([w * 0.22, 5.2, d * 0.1], [0, 0, 0], [3.6, 5, 3.6]), col(primary[(seed + 1) % 4]));
+  batch.add(cyl, mtx([w * 0.22, 7.8, d * 0.1], [0, 0, 0], [3.9, 0.8, 3.9]), col('#fff4d6'));
+  for (let k = 0; k < 3; k++) { const x = w * (0.0 + 0.14 * k), z = d * (0.28 - 0.06 * k); batch.add(cyl, mtx([x, 4.4, z], [0, 0, 0], [0.5, 2, 0.5]), col('#8a5a30')); batch.add(cone, mtx([x, 6.8, z], [0, 0, 0], [2, 3.6, 2]), col(biome === 'snow' ? '#e8f2f8' : biome === 'basalt' ? '#7a4a5a' : biome === 'sand' ? '#e8b868' : '#58a84a')); }
+  const g = batch.geometry(), m = new T.MeshLambertMaterial({ vertexColors: true }), mesh = new T.Mesh(g, m); mesh.name = 'SilhouetteSet'; group.add(mesh);
+  // the shore tile is a soft rounded-rectangle shadow on the floor around the board
+  const cell = 2, half = Math.ceil((radius + 14) / cell), n = half * 2, tile = new Uint8Array(n * n), landRadius = radius * 0.86;
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+    const x = (i - half + 0.5) * cell, z = (j - half + 0.5) * cell, qx = Math.max(0, Math.abs(x) - w * 0.5), qz = Math.max(0, Math.abs(z) - d * 0.5), dist = Math.hypot(qx, qz);
+    tile[j * n + i] = Math.abs(x) <= w * 0.5 && Math.abs(z) <= d * 0.5 ? 0 : Math.min(255, Math.round((dist / 12) * 255));
+  }
+  return { group, radius, landRadius, ready: Promise.resolve(), shoreTile: { data: tile, size: n, cell, half }, release() { group.userData.released = true; group.removeFromParent(); g.dispose(); m.dispose(); } };
 }
 
 /** The Sturmbastion: keep, four round towers with pointed roofs, a curtain wall and a banner, in vertex colours. */

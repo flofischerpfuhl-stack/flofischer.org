@@ -22,6 +22,15 @@ export const BIOMES = {
   stone: { top: ['#6fa268', '#5d9060'], lip: '#aedc8a', earth: ['#6e7f90', '#566474'], sand: '#d5dcd6', models: { tree: 'PINE_SNOW', bush: 'BUSH', rock: 'ROCK', extra: [] }, trees: 0.5, treeSize: 2 },
 };
 export const BIOME_OF = ['meadow', 'sand', 'snow', 'basalt', 'stone'];
+// the other worlds: bare mountain terraces (Pip), floating arena islands without the landmark models (Momo)
+const crag = (top, lip, earth, sand, tree = 'PINE_SNOW', trees = 0.35) => ({ top, lip, earth, sand, models: { tree, bush: 'ROCK', rock: 'ROCK', extra: [] }, trees, treeSize: 1.8 });
+Object.assign(BIOMES, {
+  'crag-moss': crag(['#79a35f', '#68935a'], '#b3cf84', ['#8a8f93', '#6c7378'], '#b9b49c', 'PINE_SNOW', 0.5),
+  'crag-sand': crag(['#d6b676', '#c8a266'], '#eed39c', ['#a58963', '#876c4c'], '#e7d3a1', 'PALM', 0.25),
+  'crag-frost': crag(['#e8f0f6', '#d2dfe9'], '#ffffff', ['#8e9fb2', '#6f8196'], '#eaf4fb', 'PINE_SNOW', 0.45),
+  'crag-basalt': crag(['#5f6076', '#505168'], '#9a9bb4', ['#3b3b4d', '#2b2b3a'], '#6e6a80', 'ROCK', 0.2),
+});
+for (const key of ['meadow', 'sand', 'snow', 'basalt']) BIOMES[`sky-${key}`] = { ...BIOMES[key], models: { ...BIOMES[key].models, extra: [] } };
 
 const modelCache = new Map();
 const model = (name) => { if (!modelCache.has(name)) modelCache.set(name, loadModel(name, 'lo')); return modelCache.get(name); };
@@ -106,13 +115,13 @@ function* distanceField(seed, nx, nz) {
 
 /**
  * world: the loaded region. opts: biome (key of BIOMES), harbour (the region's water at its edge is the sea: carve a channel),
- * sea (createSea result, receives the shore distances), seed, onChange, dressing (URL of precomputed trees and bushes inside the region).
+ * sea (createSea result, receives the shore distances), lift (metres the whole island sits above the sea), beach, drop (depth of the rim wall in metres), keel ({ slope, depth, floor }: rock hanging underneath), seed, onChange, dressing (URL of precomputed trees and bushes inside the region).
  * Returns { group, ready, release, heightAt, info }.
  */
-export function island(world, { biome = 'meadow', harbour = false, sea = null, seed = 7, onChange = null, instancedLambert = true, dressing = null } = {}) {
+export function island(world, { biome = 'meadow', harbour = false, sea = null, seed = 7, onChange = null, instancedLambert = true, dressing = null, lift = 0, beach = true, drop = 1, keel = null } = {}) {
   const B = BIOMES[biome], u = world.unitScale, center = world.bounds.getCenter(new T.Vector3()), half = world.bounds.getSize(new T.Vector3()).multiplyScalar(0.5 / u);
   const group = new T.Group(); group.name = `Island_${biome}`; group.position.set(center.x, 0, center.z); group.scale.setScalar(u);
-  const hx = half.x, hz = half.z, geometries = [], materials = [], instances = [], seaY = SEA_Y / u;
+  const hx = half.x, hz = half.z, geometries = [], materials = [], instances = [], seaY = (SEA_Y + lift) / u;
   const noise = createNoise(seed), rand = rng(seed * 31 + 5);
   let released = false, grid = null;
   const away = world.cameraPosition.clone().sub(world.cameraTarget).setY(0).normalize().multiplyScalar(-1);
@@ -176,14 +185,14 @@ export function island(world, { biome = 'meadow', harbour = false, sea = null, s
         }
         const d = outer.dist[k], s = outer.src[k], b = binOf(px(s % nx), pz(Math.floor(s / nx)));
         const bias = biasAt(x, z), R = Math.max(9.5, 13 + 6 * noise.fbm2(x * 0.045 + 11, z * 0.045, 3) + 3 * bias);
-        if (d >= R) { H[k] = seaY - 1; continue; }
+        if (d >= R) { H[k] = seaY - drop; continue; }
         if (mouth[b]) { H[k] = seaY - 0.7; kk[k] = 0; continue; }
         const e = smoothstep(FLAT_BAND - 1, R * 0.85, d + noise.fbm2(x * 0.06 + 40, z * 0.06, 2) * 3.5) * (-0.6 + 2.8 * (0.5 + 0.5 * bias)) + noise.fbm2(x * 0.035 + 3, z * 0.035, 3) * 1.8 * smoothstep(4, 9, d) + noise.fbm2(x * 0.22, z * 0.22, 2) * 0.28 * smoothstep(5, 8, d);
         const level = Math.max(0, Math.min(2, Math.floor(e)));
         kk[k] = level;
         let h = binH[b] + STEP * level + (level < 2 ? 0.16 * (e - Math.floor(e)) : 0.12) * smoothstep(3, 8, d);
-        const beach = level === 0 ? smoothstep(R - 3.4, R - 0.5, d) : 0;
-        sandW[k] = beach; h = h + (seaY + 0.03 - h) * beach;
+        const shoreK = beach && lift === 0 && level === 0 ? smoothstep(R - 3.4, R - 0.5, d) : 0;
+        sandW[k] = shoreK; h = h + (seaY + 0.03 - h) * shoreK;
         H[k] = h;
       }
     }
@@ -223,7 +232,7 @@ export function island(world, { biome = 'meadow', harbour = false, sea = null, s
       if (over()) yield;
       for (let i = 0; i < nx - 1; i++) {
         const a = j * nx + i, b = a + 1, d = a + nx, e = d + 1;
-        if (Math.max(H[a], H[b], H[d], H[e]) < seaY - 0.02) continue;
+        if (Math.max(H[a], H[b], H[d], H[e]) < seaY - (drop > 1 ? drop - 0.02 : 0.02)) continue;
         idx.push(a, d, b, b, d, e);
       }
     }
@@ -240,6 +249,7 @@ export function island(world, { biome = 'meadow', harbour = false, sea = null, s
     const mat = new T.MeshLambertMaterial({ vertexColors: true }); materials.push(mat);
     const terrain = new T.Mesh(g, mat); terrain.name = 'IslandTerrain'; terrain.receiveShadow = true; group.add(terrain);
     yield;
+    if (keel) yield* underside({ keel, nx, nz, px, pz, H, inside, binH, binOf, seaY });
     // shore distances for the sea (metres to the nearest dry cell, 0 on land)
     const land = new Uint8Array(N); for (let k = 0; k < N; k++) land[k] = H[k] > seaY + 0.01 ? 1 : 0;
     const shore = yield* distanceField(land, nx, nz), tile = new Uint8Array(N);
@@ -252,6 +262,43 @@ export function island(world, { biome = 'meadow', harbour = false, sea = null, s
     yield* dress({ extra, B, nx, nz, px, pz, gx0, gz0, H, kk, outer, inside, mouth, binOf });
     state.ready = true; state.ms = performance.now() - t0; state.builds++;
     onChange?.();
+  }
+
+  /** Rock hanging under the island (Pip's terraces and Momo's floating islands): the bottom is the top minus a thickness that grows inwards from the rim. */
+  function* underside({ keel, nx, nz, px, pz, H, inside, binH, binOf, seaY }) {
+    const N = nx * nz, stride = 2, land = new Uint8Array(N), seed = new Uint8Array(N);
+    for (let k = 0; k < N; k++) { land[k] = H[k] > seaY + 0.01 || inside[k] ? 1 : 0; seed[k] = land[k] ? 0 : 1; }
+    const field = yield* distanceField(seed, nx, nz), floor = (SEA_Y + keel.floor) / u, start = drop + 0.3;
+    const top = (k) => (inside[k] ? binH[binOf(px(k % nx), pz(Math.floor(k / nx)))] - 0.1 : H[k]);
+    const cols = Math.floor((nx - 1) / stride) + 1, rows = Math.floor((nz - 1) / stride) + 1, bottom = new Float32Array(cols * rows).fill(NaN);
+    const rock = [new T.Color(B.earth[0]), new T.Color(B.earth[1])], colors = new Float32Array(cols * rows * 3), pos = new Float32Array(cols * rows * 3), tint = new T.Color();
+    for (let r = 0; r < rows; r++) {
+      if (over()) yield;
+      for (let c = 0; c < cols; c++) {
+        const k = r * stride * nx + c * stride; if (!land[k]) continue;
+        const x = px(c * stride), z = pz(r * stride), wob = 1 + 0.3 * noise.fbm2(x * 0.09 + 5, z * 0.09, 2), y0 = top(k), thick = start + Math.min(keel.depth, field.dist[k] * keel.slope * wob), y = Math.max(floor, y0 - thick), v = r * cols + c;
+        bottom[v] = y; pos[v * 3] = x; pos[v * 3 + 1] = y; pos[v * 3 + 2] = z;
+        const t = Math.min(1, (y0 - y) / Math.max(6, keel.depth)), band = 0.9 + 0.12 * Math.sign(Math.sin(y * 1.2 + noise.fbm2(x * 0.1, z * 0.1, 2) * 3));
+        tint.copy(rock[0]).lerp(rock[1], Math.min(1, t * 1.3)).multiplyScalar(band * (1.06 - 0.22 * t)); colors.set([tint.r, tint.g, tint.b], v * 3);
+      }
+    }
+    const idx = [], nor = new Float32Array(cols * rows * 3), cell = CELL * stride;
+    for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+      const a = r * cols + c, b = a + 1, d = a + cols, e = d + 1;
+      if (Number.isNaN(bottom[a]) || Number.isNaN(bottom[b]) || Number.isNaN(bottom[d]) || Number.isNaN(bottom[e])) continue;
+      idx.push(a, b, d, b, e, d);
+    }
+    const get = (v, fallback) => (Number.isNaN(bottom[v]) ? fallback : bottom[v]);
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const v = r * cols + c; if (Number.isNaN(bottom[v])) continue;
+      const y = bottom[v], fx = (get(v + (c < cols - 1 ? 1 : 0), y) - get(v - (c ? 1 : 0), y)) / (2 * cell), fz = (get(v + (r < rows - 1 ? cols : 0), y) - get(v - (r ? cols : 0), y)) / (2 * cell), l = Math.hypot(fx, 1, fz);
+      nor[v * 3] = fx / l; nor[v * 3 + 1] = -1 / l; nor[v * 3 + 2] = fz / l;
+    }
+    const g = new T.BufferGeometry(); geometries.push(g);
+    g.setAttribute('position', new T.BufferAttribute(pos, 3)); g.setAttribute('color', new T.BufferAttribute(colors, 3)); g.setAttribute('normal', new T.BufferAttribute(nor, 3)); g.setIndex(idx);
+    const mat = new T.MeshLambertMaterial({ vertexColors: true }); materials.push(mat);
+    const mesh = new T.Mesh(g, mat); mesh.name = 'IslandUnderside'; group.add(mesh);
+    yield;
   }
 
   function heightAt(x, z) {

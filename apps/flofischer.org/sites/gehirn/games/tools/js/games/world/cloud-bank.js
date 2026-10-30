@@ -23,7 +23,7 @@ export function puffGeometry(seed = 1, scale = [1, 1, 1]) {
 }
 
 let shadowTexture = null;
-function shadowTex() {
+export function shadowTex() {
   if (shadowTexture) return shadowTexture;
   const n = 32, data = new Uint8Array(n * n * 4);
   for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
@@ -34,13 +34,14 @@ function shadowTex() {
 }
 
 /** radius: island radius in scene metres. The bank covers the island and rises about half a radius above the sea. */
-export function createCloudBank({ radius = 20, seed = 1, puffs = 16, baseY = 0 } = {}) {
+export function createCloudBank({ radius = 20, seed = 1, puffs = 16, baseY = 0, shadowY = SEA_Y + 0.25, tint = null } = {}) {
   const rand = rng(seed * 97 + 13), group = new T.Group(); group.name = 'CloudBank';
   const geometry = puffGeometry(seed);
   const material = new T.MeshBasicMaterial({ vertexColors: true, toneMapped: false, fog: false, transparent: true, depthWrite: false });
+  if (tint) material.color.set(tint);
   const mesh = new T.InstancedMesh(geometry, material, puffs); mesh.frustumCulled = false; mesh.renderOrder = 3; group.add(mesh);
   const shadowMaterial = new T.MeshBasicMaterial({ map: shadowTex(), transparent: true, depthWrite: false, toneMapped: false, fog: false });
-  const shadow = new T.Mesh(new T.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), shadowMaterial); shadow.position.y = SEA_Y + 0.25 - baseY; shadow.renderOrder = -1; shadow.frustumCulled = false; group.add(shadow);
+  const shadow = new T.Mesh(new T.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), shadowMaterial); shadow.position.y = shadowY; shadow.renderOrder = -1; shadow.frustumCulled = false; group.add(shadow);
   const items = [];
   for (let i = 0; i < puffs; i++) {
     const ring = i < 3 ? 0.12 : i < 10 ? 0.5 : 0.82, a = (i / puffs) * 6.2832 * 2.3 + rand() * 0.8;
@@ -48,9 +49,7 @@ export function createCloudBank({ radius = 20, seed = 1, puffs = 16, baseY = 0 }
     items.push({ a, ring: ring * (0.85 + rand() * 0.3), s, y: baseY + radius * (0.1 + (i < 10 ? 0.24 : 0.08) * rand()), yaw: rand() * 3, drift: 0.7 + rand() * 0.6, bob: rand() * 6.28 });
   }
   const dummy = new T.Object3D();
-  let progress = 0, parting = false, partStart = 0, onDone = null, cover = 1, dirty = true, duration = 2300, formStart = -2, formMs = 0;
-  function layout(time) {
-    const open = ease(Math.min(1, progress)), fade = 1 - smoothstep(0.5, 1, progress);
+  function layout(time, { open, fade, cover }) {
     material.opacity = Math.max(0, Math.min(1, cover)) * fade; shadowMaterial.opacity = material.opacity * 0.9; shadow.scale.setScalar(radius * (2.5 + open * 2));
     for (let i = 0; i < puffs; i++) {
       const it = items[i], r = radius * it.ring * (1 + open * 1.5 * it.drift), bob = Math.sin(time * 0.6 + it.bob) * radius * 0.015;
@@ -61,37 +60,47 @@ export function createCloudBank({ radius = 20, seed = 1, puffs = 16, baseY = 0 }
       dummy.scale.set(it.s * 1.25 * k, it.s * k, it.s * 1.1 * k);
       dummy.updateMatrix(); mesh.setMatrixAt(i, dummy.matrix);
     }
-    mesh.instanceMatrix.needsUpdate = true; dirty = false;
+    mesh.instanceMatrix.needsUpdate = true;
   }
-  layout(0);
+  const control = coverController(group, layout);
+  return Object.assign(control, { mesh, dispose() { group.removeFromParent(); geometry.dispose(); material.dispose(); mesh.dispose(); shadow.geometry.dispose(); shadowMaterial.dispose(); } });
+}
+
+/**
+ * The opening, closing and veil state machine shared by every kind of cover (cloud bank, toy dust sheet).
+ * layout(time, { open, fade, cover }) draws the current state: open 0..1 is how far the cover has parted, fade its opacity factor, cover how closed it is.
+ */
+export function coverController(group, layout) {
+  let progress = 0, parting = false, partStart = 0, onDone = null, cover = 1, dirty = true, duration = 2300, formStart = -2, formMs = 0;
+  const draw = (time) => { layout(time, { open: ease(Math.min(1, progress)), fade: 1 - smoothstep(0.5, 1, progress), cover }); dirty = false; };
+  draw(0);
   return {
-    group, mesh,
+    group,
     get covered() { return cover > 0 && progress < 1; },
     get parting() { return parting; },
     setCover(value) { formStart = -2; cover = value; if (value > 0) { progress = 0; parting = false; } group.visible = value > 0; dirty = true; },
-    /** Opens the bank; onDone runs once when the island is clear. A cut (reduced motion) passes duration 0. */
+    /** Opens the cover; onDone runs once when the island is clear. A cut (reduced motion) passes duration 0. */
     part(done = null, ms = 2300) {
       duration = ms; onDone = done;
       if (!ms) { progress = 1; cover = 0; parting = false; group.visible = false; onDone?.(); onDone = null; return; }
       parting = true; partStart = -1; group.visible = true;
     },
-    /** Closes the bank again over `ms` (a veil while a region swaps in behind it). */
+    /** Closes the cover again over `ms` (a veil while a region swaps in behind it). */
     form(ms = 350) { parting = false; progress = 0; onDone = null; formMs = ms; formStart = -1; cover = 0.001; group.visible = true; dirty = true; },
     update(time) {
       if (formStart !== -2) {
         if (formStart === -1) formStart = time;
         cover = formMs ? Math.max(0.001, Math.min(1, (time - formStart) * 1000 / formMs)) : 1;
         if (cover >= 1) formStart = -2;
-        layout(time);
+        draw(time);
       } else if (parting) {
         if (partStart < 0) partStart = time;
         progress = Math.min(1, (time - partStart) * 1000 / duration);
         if (progress >= 1) { parting = false; cover = 0; group.visible = false; onDone?.(); onDone = null; }
-        layout(time);
-      } else if (group.visible && cover > 0) layout(time);
-      else if (dirty) layout(time);
+        draw(time);
+      } else if (group.visible && cover > 0) draw(time);
+      else if (dirty) draw(time);
     },
-    dispose() { group.removeFromParent(); geometry.dispose(); material.dispose(); mesh.dispose(); shadow.geometry.dispose(); shadowMaterial.dispose(); },
   };
 }
 

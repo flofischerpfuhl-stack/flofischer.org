@@ -6,84 +6,71 @@
  */
 import { THREE as T } from '../three-kit.js';
 import { createIslandSilhouette } from './island-silhouette.js';
-import { createCloudBank } from './cloud-bank.js';
-import { Batch, mtx, rng } from './decor.js';
+import { createCloudBank, shadowTex } from './cloud-bank.js';
+import { createToyCover } from './toy-cover.js';
+import { createLinks } from './route-links.js';
+import { createMountain } from './mountain.js';
+import { STYLES } from './world-styles.js';
 import { SEA_Y } from './sea.js';
 
 const ROOT2 = Math.SQRT2;
 
-/** Island centres from screen-style map coordinates (right, down) for a camera that looks along (-1, -, -1) at `tilt` radians of elevation. */
-export function layoutFromMap(points, { tilt = 0.57 } = {}) {
-  const k = Math.sin(tilt);
-  return points.map(([sx, sy]) => { const d = sy / k; return [(sx + d) / ROOT2, (d - sx) / ROOT2]; });
+/**
+ * Island centres from screen-style map coordinates (right, down) for a camera that looks along (-1, -, -1) at `tilt` radians of elevation.
+ * elevations: metres each island sits above the sea; the point then names where its top appears on screen, so a terrace higher up lands farther back.
+ */
+export function layoutFromMap(points, { tilt = 0.57, elevations = null } = {}) {
+  const k = Math.sin(tilt), lift = Math.cos(tilt);
+  return points.map(([sx, sy], i) => { const d = (sy + (elevations?.[i] ?? 0) * lift) / k; return [(sx + d) / ROOT2, (d - sx) / ROOT2]; });
 }
 
-function signTexture(name, line, { locked, here }) {
+function signTexture(name, line, { locked, here, look }) {
   const c = document.createElement('canvas'); c.width = 512; c.height = 176;
-  const g = c.getContext('2d'), board = locked ? '#5f7384' : '#8e6540', rim = here ? '#ffd23f' : locked ? '#c9d7e3' : '#e3c985';
-  g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.roundRect(14, 42, 488, 132, 26); g.fill();
-  g.fillStyle = board; g.beginPath(); g.roundRect(8, 34, 488, 132, 26); g.fill();
+  const g = c.getContext('2d'), board = locked ? look.locked : look.board, rim = here ? '#ffd23f' : locked ? look.lockedRim : look.rim, round = look.shape === 'block' ? 14 : look.shape === 'slate' ? 10 : 26;
+  g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.roundRect(14, 42, 488, 132, round); g.fill();
+  g.fillStyle = board; g.beginPath(); g.roundRect(8, 34, 488, 132, round); g.fill();
   g.lineWidth = here ? 12 : 8; g.strokeStyle = rim; g.stroke();
   g.fillStyle = board; g.beginPath(); g.moveTo(228, 38); g.lineTo(284, 38); g.lineTo(256, 2); g.closePath(); g.fill();
-  g.fillStyle = '#fff6d8'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  if (look.shape === 'block') { g.fillStyle = rim; for (const [x, y] of [[40, 66], [464, 66], [40, 134], [464, 134]]) { g.beginPath(); g.arc(x, y, 9, 0, Math.PI * 2); g.fill(); } }
+  if (look.shape === 'slate') { g.fillStyle = rim; for (const [x, y] of [[30, 54], [474, 54], [30, 146], [474, 146]]) { g.beginPath(); g.arc(x, y, 5, 0, Math.PI * 2); g.fill(); } }
+  if (look.shape === 'crystal') { g.fillStyle = rim; for (const x of [34, 478]) { g.beginPath(); g.moveTo(x, 70); g.lineTo(x + 9, 100); g.lineTo(x, 130); g.lineTo(x - 9, 100); g.closePath(); g.fill(); } }
+  g.fillStyle = look.text; g.textAlign = 'center'; g.textBaseline = 'middle';
   let x = 252;
   if (locked) { // padlock
     g.font = '800 58px system-ui, sans-serif'; const w = Math.min(400, g.measureText(name).width), lx = 252 - (w + 52) / 2; x = lx + 52 + w / 2;
-    g.fillRect(lx, 80, 34, 28); g.lineWidth = 6; g.strokeStyle = '#fff6d8'; g.beginPath(); g.arc(lx + 17, 80, 10, Math.PI, 0); g.stroke();
+    g.fillRect(lx, 80, 34, 28); g.lineWidth = 6; g.strokeStyle = look.text; g.beginPath(); g.arc(lx + 17, 80, 10, Math.PI, 0); g.stroke();
   }
   g.font = '800 58px system-ui, sans-serif'; g.fillText(name, x, 80, 440);
-  g.font = '700 38px system-ui, sans-serif'; g.fillStyle = locked ? '#dbe6ef' : '#ffe38a'; g.fillText(line, 252, 130, 440);
+  g.font = '700 38px system-ui, sans-serif'; g.fillStyle = locked ? '#dbe6ef' : look.sub; g.fillText(line, 252, 130, 440);
   const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; return t;
 }
 
 /**
- * islands: [{ name, biome, x, z, radius }]. sea: createSea() result (receives the silhouettes' shore distances) or null.
- * Returns the controller; add `group` to the scene.
+ * islands: [{ name, biome, x, z, radius, level }] (level: metres above the sea). sea: createSea() result (receives the silhouettes' shore distances) or null.
+ * style: one entry of STYLES. Returns the controller; add `group` to the scene.
  */
-export function createArchipelago({ islands, sea = null, mobile = false }) {
+export function createArchipelago({ islands, sea = null, mobile = false, style = STYLES.rangers }) {
   const group = new T.Group(); group.name = 'Archipelago';
+  const seaTop = SEA_Y + (style.sea?.level ?? 0), shores = style.ground === 'island' || style.ground === 'playset', hover = style.ground === 'floating' || style.ground === 'terrace';
+  const blobMaterial = hover ? new T.MeshBasicMaterial({ map: shadowTex(), transparent: true, depthWrite: false, toneMapped: false, fog: false, opacity: 0.6 }) : null, blobGeometry = hover ? new T.PlaneGeometry(1, 1).rotateX(-Math.PI / 2) : null;
   const entries = islands.map((isl, i) => {
-    const silhouette = createIslandSilhouette({ biome: isl.biome, radius: isl.radius * 0.88, seed: i + 2 });
-    silhouette.group.position.set(isl.x, 0, isl.z); group.add(silhouette.group);
+    const level = isl.level ?? 0;
+    const silhouette = createIslandSilhouette({ biome: isl.biome, radius: isl.radius * 0.88, seed: i + 2, kind: style.silhouette, level, bottom: (style.sea?.level ?? 0) - 4 });
+    silhouette.group.position.set(isl.x, level, isl.z); group.add(silhouette.group);
     const t = silhouette.shoreTile, shore = [isl.x - t.half * t.cell, isl.z - t.half * t.cell];
-    sea?.paint(t.data, t.size, t.size, shore[0], shore[1], t.cell);
-    const bank = createCloudBank({ radius: isl.radius * 0.78, seed: i + 1 }); bank.group.position.set(isl.x, 0, isl.z); group.add(bank.group);
+    if (shores) sea?.paint(t.data, t.size, t.size, shore[0], shore[1], t.cell);
+    const bank = style.cover === 'dust' ? createToyCover({ radius: isl.radius * 0.78, seed: i + 1, level: 0, shadowY: seaTop + 0.25 }) : createCloudBank({ radius: isl.radius * 0.78, seed: i + 1, baseY: level, shadowY: seaTop + 0.25, tint: style.coverTint });
+    bank.group.position.set(isl.x, 0, isl.z); group.add(bank.group);
+    if (blobMaterial) { const blob = new T.Mesh(blobGeometry, blobMaterial); blob.position.set(isl.x, seaTop + 0.22, isl.z); blob.scale.setScalar(isl.radius * 2.7); blob.renderOrder = -1; blob.frustumCulled = false; group.add(blob); }
     const sprite = new T.Sprite(new T.SpriteMaterial({ depthTest: false, transparent: true })); sprite.renderOrder = 6; sprite.visible = false; sprite.frustumCulled = false; group.add(sprite);
-    sprite.position.set(isl.x + isl.radius * 0.74, SEA_Y + 0.2, isl.z + isl.radius * 0.74);
-    return { ...isl, silhouette, shore, bank, sprite, open: false, revealed: false, stars: 0, total: 0, full: false, veiled: false, parted: false, labelKey: '', texture: null };
+    sprite.position.set(isl.x + isl.radius * 0.74, SEA_Y + level + 0.2, isl.z + isl.radius * 0.74);
+    return { ...isl, level, silhouette, shore, bank, sprite, open: false, revealed: false, stars: 0, total: 0, full: false, veiled: false, parted: false, labelKey: '', texture: null };
   });
-  // stepping stones along each hop, one instanced mesh; their colour says whether the next island is open
-  const rand = rng(77), stoneGeo = new T.SphereGeometry(1, 8, 5), stones = [], hops = [];
-  for (let i = 0; i < entries.length - 1; i++) {
-    const a = entries[i], b = entries[i + 1], dx = b.x - a.x, dz = b.z - a.z, len = Math.hypot(dx, dz), ux = dx / len, uz = dz / len;
-    const from = a.radius * 0.9, to = len - b.radius * 0.9, n = Math.max(4, Math.floor((to - from) / 4.2)), bend = (i % 2 ? 1 : -1) * 4;
-    const first = stones.length;
-    for (let s = 0; s < n; s++) {
-      const t = n === 1 ? 0.5 : s / (n - 1), d = from + (to - from) * t, side = Math.sin(t * Math.PI) * bend;
-      stones.push({ x: a.x + ux * d - uz * side, z: a.z + uz * d + ux * side, r: 1.5 + rand() * 0.5 });
-    }
-    hops.push({ first, count: n, to: i + 1 });
-  }
-  const stoneMesh = new T.InstancedMesh(stoneGeo, new T.MeshLambertMaterial(), Math.max(1, stones.length)); stoneMesh.name = 'RouteStones';
-  stones.forEach((s, k) => stoneMesh.setMatrixAt(k, mtx([s.x, SEA_Y + 0.02, s.z], [0, rand() * 6, 0], [s.r * 1.25, 0.34, s.r])));
-  stoneMesh.instanceMatrix.needsUpdate = true; stoneMesh.count = stones.length; group.add(stoneMesh);
-  // a buoy beside every other stone: red and white, they bob in the swell
-  const buoyGeo = new T.CylinderGeometry(0.7, 1.0, 1.9, 8, 3), buoyMat = new T.MeshLambertMaterial({ vertexColors: true });
-  const bc = buoyGeo.attributes.position, bcol = new Float32Array(bc.count * 3);
-  for (let k = 0; k < bc.count; k++) { const y = bc.getY(k); const c = new T.Color(y > 0.2 ? '#ff4d3d' : y > -0.35 ? '#fffaf0' : '#ff4d3d'); bcol.set([c.r, c.g, c.b], k * 3); }
-  buoyGeo.setAttribute('color', new T.BufferAttribute(bcol, 3));
-  const buoys = stones.filter((_, k) => k % 2 === 1).map((st, k) => ({ x: st.x + 3.2 * (k % 2 ? 1 : -1), z: st.z - 3.2 * (k % 2 ? 1 : -1) }));
-  const buoyMesh = new T.InstancedMesh(buoyGeo, buoyMat, Math.max(1, buoys.length)); buoyMesh.name = 'RouteBuoys'; buoyMesh.count = buoys.length; buoyMesh.frustumCulled = false;
-  const buoyDummy = new T.Object3D();
-  function bob(time) { buoys.forEach((q, k) => { buoyDummy.position.set(q.x, SEA_Y + 0.5 + Math.sin(time * 1.4 + k * 1.7) * 0.12, q.z); buoyDummy.rotation.set(Math.sin(time + k) * 0.08, 0, Math.cos(time * 0.8 + k) * 0.08); buoyDummy.updateMatrix(); buoyMesh.setMatrixAt(k, buoyDummy.matrix); }); buoyMesh.instanceMatrix.needsUpdate = true; }
-  bob(0); group.add(buoyMesh);
+  const links = createLinks({ entries, kind: style.link }); group.add(links.group);
+  const mountain = style.mountain ? createMountain({ entries }) : null; if (mountain) group.add(mountain.group);
   const sphere = new T.Sphere(), hit = new T.Vector3();
 
-  function refreshStones() {
-    const c = new T.Color();
-    for (const h of hops) for (let s = 0; s < h.count; s++) stoneMesh.setColorAt(h.first + s, c.set(entries[h.to].open && entries[h.to].revealed ? '#f1dd9c' : '#b9ccdb'));
-    if (stoneMesh.instanceColor) stoneMesh.instanceColor.needsUpdate = true;
-  }
+  const refreshStones = () => links.refresh((h) => entries[h + 1].open && entries[h + 1].revealed);
   function visibility(e) {
     e.silhouette.group.visible = e.open && e.revealed && !e.full;
     e.sprite.visible = true;
@@ -91,12 +78,12 @@ export function createArchipelago({ islands, sea = null, mobile = false }) {
   function label(e, here) {
     const locked = !e.open, line = locked ? 'Locked' : `★ ${e.stars} / ${e.total}`, key = `${e.name}|${line}|${locked}|${here}`;
     if (key === e.labelKey) return;
-    e.labelKey = key; e.texture?.dispose(); e.texture = signTexture(e.name, line, { locked, here }); e.sprite.material.map = e.texture; e.sprite.material.needsUpdate = true;
+    e.labelKey = key; e.texture?.dispose(); e.texture = signTexture(e.name, line, { locked, here, look: style.sign }); e.sprite.material.map = e.texture; e.sprite.material.needsUpdate = true;
   }
   let current = -1;
   refreshStones();
   return {
-    group, entries, stoneMesh,
+    group, entries, stoneMesh: links.meshes[0], links,
     /** Resolves once the landmark models of every silhouette are in (the caller restyles `group` then). */
     ready: Promise.all(entries.map((e) => e.silhouette.ready)),
     centre(i) { return new T.Vector3(entries[i].x, 0, entries[i].z); },
@@ -130,7 +117,7 @@ export function createArchipelago({ islands, sea = null, mobile = false }) {
         if (i === except) continue;
         const e = entries[i];
         if (e.sprite.visible && raycaster.intersectObject(e.sprite, false).length) return i;
-        sphere.set(hit.set(e.x, 6, e.z), e.radius * 0.86);
+        sphere.set(hit.set(e.x, e.level + 6, e.z), e.radius * 0.86);
         const p = raycaster.ray.intersectSphere(sphere, new T.Vector3());
         if (p) { const d = raycaster.ray.origin.distanceTo(p); if (d < bestDistance) { bestDistance = d; best = i; } }
       }
@@ -138,7 +125,7 @@ export function createArchipelago({ islands, sea = null, mobile = false }) {
     },
     /** pxScale: pixels per metre of the orthographic view. showCurrent: also label the island the camera is on. */
     update(time, { pxScale = 10, showCurrent = false, signWidth = 0 } = {}) {
-      bob(time);
+      links.update(time);
       const width = signWidth ? Math.min(signWidth, mobile ? 96 : 118) : (mobile ? 96 : 118), height = width * 176 / 512;
       for (let i = 0; i < entries.length; i++) {
         const e = entries[i];
@@ -149,10 +136,10 @@ export function createArchipelago({ islands, sea = null, mobile = false }) {
         e.bank.group.visible = e.bank.covered && (i !== current || showCurrent || e.veiled || e.bank.parting);
       }
     },
-    debug() { return entries.map((e, i) => ({ i, name: e.name, open: e.open, revealed: e.revealed, silhouette: e.silhouette.group.visible, cloud: e.bank.group.visible && e.bank.covered, parting: e.bank.parting, label: e.sprite.visible, x: e.x, z: e.z })); },
+    debug() { return entries.map((e, i) => ({ i, name: e.name, open: e.open, revealed: e.revealed, silhouette: e.silhouette.group.visible, cloud: e.bank.group.visible && e.bank.covered, parting: e.bank.parting, label: e.sprite.visible, x: e.x, z: e.z, level: e.level })); },
     dispose() {
       for (const e of entries) { e.silhouette.release(); e.bank.dispose(); e.sprite.material.map?.dispose(); e.sprite.material.dispose(); }
-      buoyGeo.dispose(); buoyMat.dispose(); buoyMesh.dispose(); stoneGeo.dispose(); stoneMesh.material.dispose(); stoneMesh.dispose(); group.removeFromParent();
+      links.dispose(); mountain?.dispose(); blobMaterial?.dispose(); blobGeometry?.dispose(); group.removeFromParent();
     },
   };
 }

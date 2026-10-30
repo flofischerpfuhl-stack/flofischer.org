@@ -4,9 +4,11 @@ import { createShading, shadeFromUrl } from './cel-shading.js';
 import { bindLoadingStatus, loadingBarHTML } from './loading-status.js';
 import { WorldLibrary, fitWorldCamera } from '../../games-assets/fernworld/runtime/world-library.js';
 import { ChannelLibrary } from '../../games-assets/fernworld/runtime/channel-library.js';
-import { landscape } from './world/overworld-landscape.js';
 import { gradeRegion } from './world/fernhaven-landscape.js';
-import { island, BIOME_OF } from './world/island-terrain.js';
+import { island } from './world/island-terrain.js';
+import { playset } from './world/playset.js';
+import { paintBackdrop } from './world/backdrops.js';
+import { styleOf } from './world/world-styles.js';
 import { createSea } from './world/sea.js';
 import { createHorizon } from './world/horizon.js';
 import { createArchipelago, layoutFromMap } from './world/archipelago.js';
@@ -25,16 +27,21 @@ const MAPS = {
   momo: { family: 'momo', hero: 'GLIMMO' },
   tanks: { family: 'bounce', hero: 'TOY_HAZEL' },
 };
-const ARCHIPELAGO_Z=[0,.14,-.12,.16,-.08];
-// Fern Rangers world map: islands wind from the lower left to the upper right (screen metres: right, down), the Sturmbastion last
-const MAP_LANDSCAPE=[[-126,104],[-62,150],[4,100],[66,52],[128,8]],MAP_WIDE=[[-176,66],[-88,106],[0,70],[88,36],[176,4]],MAP_PORTRAIT=[[-40,165],[40,97],[-40,29],[40,-39],[0,-109]],ISLAND_R=44,WORLD_PHI=1,WORLD_THETA=Math.PI/4,SKY_FRACTION=.21;
-/** Island centres and sea bounds for a map laid out for a wide or a tall screen (chosen once, when the map is mounted). */
-function archLayout(portrait,wide){
-  const c=layoutFromMap(portrait?MAP_PORTRAIT:wide?MAP_WIDE:MAP_LANDSCAPE,{tilt:.57}),centers=c.map(([x,z])=>[x-c[0][0],z-c[0][1]]),xs=centers.map(p=>p[0]),zs=centers.map(p=>p[1]);
-  return{centers,bounds:{x0:Math.min(...xs)-140,x1:Math.max(...xs)+140,z0:Math.min(...zs)-140,z1:Math.max(...zs)+140}};
+const WORLD_PHI=1,WORLD_THETA=Math.PI/4,SKY_FRACTION=.21;
+/** Island centres, heights and sea bounds for a map laid out for a wide or a tall screen (chosen once, when the map is mounted). */
+function archLayout(style,portrait,wide){
+  const c=layoutFromMap(portrait?style.map.portrait:wide?style.map.wide:style.map.landscape,{tilt:.57,elevations:style.elevations}),centers=c.map(([x,z])=>[x-c[0][0],z-c[0][1]]),xs=centers.map(p=>p[0]),zs=centers.map(p=>p[1]);
+  return{centers,levels:centers.map((_,i)=>style.elevations?.[i]??0),bounds:{x0:Math.min(...xs)-140,x1:Math.max(...xs)+140,z0:Math.min(...zs)-140,z1:Math.max(...zs)+140}};
+}
+/** The authored regions of some games are modelled in toy scale (Bounce Brigade: 1:20); the map wants them at the size of the others, so scale the loaded region up in place. */
+function normaliseScale(w){
+  const k=1/w.unitScale;if(Math.abs(k-1)<1e-6)return;
+  w.root.scale.multiplyScalar(k);w.root.updateMatrixWorld(true);w.bounds.min.multiplyScalar(k);w.bounds.max.multiplyScalar(k);
+  for(const v of [...w.nodePositions,...w.route,w.cameraPosition,w.cameraTarget])v.multiplyScalar(k);
+  w.nodeDistances=w.nodeDistances.map(d=>d*k);w.routeLength*=k;w.minimumCameraSpan*=k;
+  const at=w.pointAtDistance;w.pointAtDistance=(d,t)=>at(d/k,t);w.unitScale=1;
 }
 const REVEALED_KEY=id=>`fw:games:${id}:regions-revealed`,ease01=k=>k*k*(3-2*k);
-const SKY = ['#78b4ea','#e3c393','#c5dce9','#b698ab','#a8b2c4'];
 const JOURNEYS={rangers:['Forest trails & outposts','Dunes & caravans','Snow passes & fortresses','Basalt paths & machines'],pip:['The green fossil vault','The sunken archive','The frost gallery','The basalt crown'],momo:['Clearings & Fernlings','Oases & Fernlings','Snowfields & Fernlings','Glowlight & Fernlings'],bounce:['The forest cup','The dune tournament','The winter cup','The crater final']};
 const escapeText = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -106,12 +113,12 @@ function opaqueDepthLayer(roots) {
 export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, onProgress, hero:heroId, getHero, starters = [], onStarter, getSound, onSound, title = '' }) {
   const config = MAPS[gameId];
   if (!config) throw new Error(`No authored world family for ${gameId}`);
-  host.classList.add('gm-ow');host.classList.toggle('gm-ow--map',config.family==='rangers');
+  host.classList.add('gm-ow');host.classList.add('gm-ow--map');
   host.innerHTML = `
     <canvas class="gm-ow__canvas" aria-label="Journey through the 3D world. Arrow keys: next stop. Enter: play. Page up and down: region. Home: overview." tabindex="0"></canvas>
     <div class="gm-ow__top"><div class="gm-ow__world"><span class="gm-ow__kicker" data-ow="kicker"></span><strong data-ow="world"></strong><span class="gm-ow__levelcompact" data-ow="level-name"></span></div><div class="gm-ow__stars">${icon('star',{size:16})}<span class="fw-num" data-ow="stars"></span></div></div>
     <div class="gm-ow__nav gm-ow__sr"><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="prev" aria-label="Previous region">${icon('chevron-left',{size:22})}</button><button type="button" class="fw-iconbtn gm-hud__btn" data-ow="next" aria-label="Next region">${icon('chevron-right',{size:22})}</button></div>
-    <nav class="gm-ow__journey${config.family==='rangers'?' gm-ow__sr':''}" data-ow="journey" aria-label="Your journey through Fernworld"></nav>
+    <nav class="gm-ow__journey gm-ow__sr" data-ow="journey" aria-label="Your journey through Fernworld"></nav>
     <nav class="gm-ow__compass" data-ow="compass" aria-label="Islands" hidden></nav>
     <div class="gm-ow__tools gm-ow__sr"><button class="fw-btn fw-btn--sm" data-ow="reset">Overview</button><button class="fw-btn fw-btn--sm" data-ow="sound" aria-pressed="true">Sound on</button><button class="fw-btn fw-btn--sm" data-ow="levels" aria-expanded="false">Choose level</button></div><p class="gm-ow__context" data-ow="context"></p>
     <p class="gm-ow__hint">Tap a stop · start at the glowing gate · drag to look around</p>
@@ -123,13 +130,14 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   const renderer = createRenderer(canvas), scene = new THREE.Scene();
   renderer.shadowMap.autoUpdate = false;
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .01, 200);
-  const layout = archLayout(innerWidth < innerHeight * .85, innerWidth > innerHeight * 1.9), ARCH_CENTERS = layout.centers, ARCH_BOUNDS = layout.bounds;
-  const sea = config.family === 'rangers' ? createSea(ARCH_BOUNDS) : null;
-  if (sea) scene.add(sea.mesh);
+  const style = styleOf(config.family), ISLAND_R = style.radius, layout = archLayout(style, innerWidth < innerHeight * .85, innerWidth > innerHeight * 1.9), ARCH_CENTERS = layout.centers, ARCH_LEVELS = layout.levels, ARCH_BOUNDS = layout.bounds;
+  const rugAt = ARCH_CENTERS.reduce((m, c) => [m[0] + c[0] / ARCH_CENTERS.length, m[1] + c[1] / ARCH_CENTERS.length], [0, 0]), rugR = Math.max(...ARCH_CENTERS.map(c => Math.hypot(c[0] - rugAt[0], c[1] - rugAt[1]))) + 70;
+  const sea = createSea({ ...ARCH_BOUNDS, flavour: style.sea.flavour, palette: style.sea.palette, level: style.sea.level, rug: { x: rugAt[0], z: rugAt[1], rx: 1 / rugR, rz: 1 / rugR, a: '#b5504c', b: '#f3dfb0' } });
+  scene.add(sea.mesh);
   let horizon = null, skyClouds = null; // created with the first region, when its spacing is known
   const env = studioEnvironment(renderer), lights = addLights(scene, { dir: [-12, 24, 15], shadowBox: 18, mapSize: 2048, intensity: 2.4, ambient: 1.1 });
-  // shared Wind Waker cel look, Fern Rangers map only for now (?shade=none turns it off); applyIbl converts through env.userData.shading
-  const shading = config.family === 'rangers' && shadeFromUrl() ? createShading(shadeFromUrl(), { ambient: .7 }) : null; if (shading) env.userData.shading = shading;
+  // shared Wind Waker cel look on every world map (?shade=none turns it off); applyIbl converts through env.userData.shading
+  const shading = shadeFromUrl() ? createShading(shadeFromUrl(), { ambient: .7 }) : null; if (shading) env.userData.shading = shading;
   const worlds = [...new Set(levels.map(l => l.world ?? 0))].sort((a,b)=>a-b).map(index => ({ index, levels: levels.map((lv,i)=>({...lv,i})).filter(l=>(l.world??0)===index) }));
   const loadingStatus=bindLoadingStatus(host);
   // Neighbouring regions are fetched as bytes only (low priority) while the player looks at this one,
@@ -160,14 +168,12 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   const look = new THREE.Vector3(), ahead = new THREE.Vector3(), offset = new THREE.Vector3(), signOffset = new THREE.Vector3(), spherical = new THREE.Spherical();
   const pointers = new Map(), ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
-  const debugView = { renderer, scene, camera, get wayfinding(){return wayfindingReport}, get region() { return region?.definition; },get hero(){return loadedHero},get heroPosition(){return hero?.root.position.toArray()},get choosingStarter(){return starterPicking},get starters(){return starterActors.map(a=>({id:a.id,visible:a.root.visible,position:a.root.position.toArray()}))},get targets(){return visuals?{nodes:visuals.nodes.map(n=>({i:n.lv.i,open:state.open(n.lv.i),position:n.label.position.toArray()})),actions:visuals.actions.filter(a=>a.root.visible).map(a=>({action:a.action,position:a.face.getWorldPosition(new THREE.Vector3()).toArray(),size:a.face.getWorldScale(new THREE.Vector3()).toArray()}))}:{}},get selected(){return sel},get world(){return world},get cachedRegions(){return [...regionCache.keys()]},get archipelago(){return arch?.debug()},get worldView(){return worldView},get worldK(){return worldK},enterWorld:()=>enterWorld(),leaveWorld:()=>leaveWorld(),get islands(){return [...regionCache.entries()].map(([i,h])=>({region:i,...(h.visuals.context.state||{})}))} };
+  const debugView = { renderer, scene, camera, get wayfinding(){return wayfindingReport}, get region() { return region?.definition; },get regionBox(){return region&&{unit:region.unitScale,min:region.bounds.min.toArray(),max:region.bounds.max.toArray(),camera:region.cameraPosition.toArray(),target:region.cameraTarget.toArray()}},get hero(){return loadedHero},get heroPosition(){return hero?.root.position.toArray()},get choosingStarter(){return starterPicking},get starters(){return starterActors.map(a=>({id:a.id,visible:a.root.visible,position:a.root.position.toArray()}))},get targets(){return visuals?{nodes:visuals.nodes.map(n=>({i:n.lv.i,open:state.open(n.lv.i),position:n.label.position.toArray()})),actions:visuals.actions.filter(a=>a.root.visible).map(a=>({action:a.action,position:a.face.getWorldPosition(new THREE.Vector3()).toArray(),size:a.face.getWorldScale(new THREE.Vector3()).toArray()}))}:{}},get selected(){return sel},get world(){return world},get cachedRegions(){return [...regionCache.keys()]},get archipelago(){return arch?.debug()},get worldView(){return worldView},get worldK(){return worldK},enterWorld:()=>enterWorld(),leaveWorld:()=>leaveWorld(),get islands(){return [...regionCache.entries()].map(([i,h])=>({region:i,...(h.visuals.context.state||{})}))} };
   const themeMedia=matchMedia('(prefers-color-scheme: dark)');
   function background(){
     const dark=document.documentElement.dataset.theme?document.documentElement.dataset.theme==='dark':themeMedia.matches;
-    const c=document.createElement('canvas');c.width=768;c.height=512;const g=c.getContext('2d'),base=new THREE.Color(SKY[world]);
-    shading?.setDark(dark);sea?.setDark(dark);if(dark)base.multiplyScalar(.35);const sky=`#${base.getHexString()}`,gradient=g.createLinearGradient(0,0,0,512);gradient.addColorStop(0,dark?'#101b2a':sky);gradient.addColorStop(.6,dark?sky:'#f5efe0');gradient.addColorStop(1,dark?'#19232d':sky);g.fillStyle=gradient;g.fillRect(0,0,768,512);
-    const sun=g.createRadialGradient(140,95,5,140,95,150);sun.addColorStop(0,dark?'#d4e7f455':'#fff6ccaa');sun.addColorStop(1,'#ffffff00');g.fillStyle=sun;g.fillRect(0,0,350,280);
-    for(let layer=0;layer<3;layer++){g.beginPath();g.moveTo(0,512);for(let x=0;x<=768;x+=24){const wave=Math.sin(x*.009+world*1.9+layer)*26+Math.sin(x*.023+layer*3.1)*11;g.lineTo(x,310+layer*55+wave*(world===2?1.7:1));}g.lineTo(768,512);g.closePath();const ridge=new THREE.Color(['#658d76','#b28754','#8da7c6','#8d6777','#6a7e92'][world]);if(dark)ridge.multiplyScalar(.65);g.fillStyle=`#${ridge.getHexString()}${['26','38','49'][layer]}`;g.fill();}
+    const c=document.createElement('canvas');c.width=768;c.height=512;const g=c.getContext('2d');
+    shading?.setDark(dark);sea?.setDark(dark);paintBackdrop(g,style.backdrop,{world,dark,sky:style.sky[world]??style.sky[0],horizon:SKY_FRACTION});
     skyTexture?.dispose();skyTexture=new THREE.CanvasTexture(c);skyTexture.colorSpace=THREE.SRGBColorSpace;scene.background=skyTexture;kick();
   }
   const themeObserver=new MutationObserver(background);themeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});themeMedia.addEventListener('change',background);background();
@@ -248,7 +254,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   function pickerVisibility(){
     for(const a of visuals?.actions??[])a.root.visible=a.action.starter?starterPicking:!starterPicking&&!worldView&&(!a.action.play||state.open(sel));
     placeHero();placeStarters();
-    host.querySelector('.gm-ow__hint').textContent=starterPicking?'Pick your Fernling right in the scene.':arch?'Tap a stop · start at the glowing gate · tap another island to sail there':starters.length?'Tap a Fernling to choose · tap a stop to travel':'Tap a stop · start at the glowing gate · drag to look around';
+    host.querySelector('.gm-ow__hint').textContent=starterPicking?'Pick your Fernling right in the scene.':arch?style.hint:starters.length?'Tap a Fernling to choose · tap a stop to travel':'Tap a stop · start at the glowing gate · drag to look around';
   }
   async function openStarterPicker(){
     if(!starters.length||starterPicking)return;const version=++starterPickerVersion;
@@ -289,9 +295,14 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
       nodes.push({lv,pos:p,label,maps,index:k,distance:w.nodeDistances[k]});
     });
     const badgeLinks=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xd9cba0,transparent:true,opacity:.85}));badgeLinks.geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(nodes.length*6),3));badgeLinks.geometry.setDrawRange(0,0);badgeLinks.frustumCulled=false;badgeLinks.userData.owOwned=true;group.add(pads,stars,ring,gates,posts,badgeLinks);scene.add(group);
-    const archipelago=config.family==='rangers';if(archipelago&&world===0)gradeRegion(w.root);
-    const context=archipelago?island(w,{biome:BIOME_OF[world],harbour:world===0||world===4,sea,dressing:world===0?new URL('../../games-assets/fernworld/environments/rangers/viridis.dressing.json',import.meta.url).href:null,seed:world+3,onChange:()=>{shading?.apply(context.group,{outline:false});wayfindingDirty=true;kick();}}):landscape(w,world===4?'rangers':config.family,world);scene.add(context.group);applyIbl(context.group,env,.55);
-    if(archipelago&&(world===0||world===4))w.root.traverse(m=>{if(m.isMesh&&m.material?.name==='water'){m.material.dispose();m.material=sea.material();}});
+    const rangers=config.family==='rangers';if(rangers&&world===0)gradeRegion(w.root);
+    const lift=ARCH_LEVELS[world]??0,onChange=()=>{shading?.apply(context.group,{outline:false});wayfindingDirty=true;kick();},biome=style.biomes[world];
+    const context=style.ground==='playset'?playset(w,{biome,seed:world+3,sea,onChange}):island(w,
+      style.ground==='terrace'?{biome,lift,beach:false,drop:3,keel:{slope:.6,depth:lift+16,floor:-2.5},seed:world+3,onChange}
+      :style.ground==='floating'?{biome:`sky-${biome}`,beach:false,drop:2.5,keel:{slope:1.2,depth:26,floor:style.sea.level-4},seed:world+3,onChange}
+      :{biome,harbour:!!style.harbour?.[world],sea,dressing:rangers&&world===0?new URL('../../games-assets/fernworld/environments/rangers/viridis.dressing.json',import.meta.url).href:null,seed:world+3,onChange});
+    scene.add(context.group);applyIbl(context.group,env,.55);
+    if(rangers&&(world===0||world===4))w.root.traverse(m=>{if(m.isMesh&&m.material?.name==='water'){m.material.dispose();m.material=sea.material();}});
     const actions=[];
     function sign(action,text,pos,color=0x8e6540) {
       const root=new THREE.Group();root.position.copy(pos);
@@ -334,7 +345,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     $('level-name').textContent=levels[sel]?.name??'';$('level-name').title=levels[sel]?.name??'';
     $('context').textContent=`${levels[sel]?.name??''} · ${world===4?'The Sturmbastion':JOURNEYS[config.family][world]}`;
     const journeyKey=worlds.map(w=>`${w.index}:${state.worldOpen(w.index)}:${w.levels.reduce((n,l)=>n+state.stars(l.i),0)}`).join('|')+`/${world}`;
-    if($('journey').dataset.key!==journeyKey){$('journey').dataset.key=journeyKey;$('journey').innerHTML=worlds.map(w=>`<button type="button" data-region="${w.index}" aria-current="${world===w.index?'step':'false'}" aria-label="${NAMES[w.index]}${state.worldOpen(w.index)?'':', locked'}" style="--region:${SKY[w.index]}"><span class="gm-ow__regionmark">${state.worldOpen(w.index)?w.index+1:icon('lock',{size:13})}</span><span>${NAMES[w.index]}<small>${w.levels.reduce((n,l)=>n+state.stars(l.i),0)} / ${w.levels.length*3} ★</small></span></button>`).join('');}
+    if($('journey').dataset.key!==journeyKey){$('journey').dataset.key=journeyKey;$('journey').innerHTML=worlds.map(w=>`<button type="button" data-region="${w.index}" aria-current="${world===w.index?'step':'false'}" aria-label="${NAMES[w.index]}${state.worldOpen(w.index)?'':', locked'}" style="--region:${style.sky[w.index]??style.sky[0]}"><span class="gm-ow__regionmark">${state.worldOpen(w.index)?w.index+1:icon('lock',{size:13})}</span><span>${NAMES[w.index]}<small>${w.levels.reduce((n,l)=>n+state.stars(l.i),0)} / ${w.levels.length*3} ★</small></span></button>`).join('');}
     $('world').textContent=NAMES[world];$('world').title=regionIndex===world?(region.layout.title??NAMES[world]):NAMES[world];
     $('stars').textContent=`${levels.reduce((n,_,i)=>n+state.stars(i),0)} / ${levels.length*3}`;
     $('prev').disabled=world===worlds[0].index;$('next').disabled=world===worlds.at(-1).index;
@@ -375,9 +386,9 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
   }
   function finishVeil(){arch?.unveil(regionIndex,{reduced:motionPreference.matches});}
   function buildMap(){
-    arch=createArchipelago({islands:ARCH_CENTERS.map(([x,z],i)=>({name:NAMES[i],biome:BIOME_OF[i],x,z,radius:ISLAND_R})),sea,mobile:matchMedia('(max-width:639px)').matches});
+    arch=createArchipelago({islands:ARCH_CENTERS.map(([x,z],i)=>({name:NAMES[i],biome:style.biomes[i],x,z,radius:ISLAND_R,level:ARCH_LEVELS[i]})),sea,style,mobile:matchMedia('(max-width:639px)').matches});
     scene.add(arch.group);shading?.apply(arch.group,{outline:false});
-    horizon=createHorizon({spacing:0,zs:[],centers:ARCH_CENTERS,bounds:ARCH_BOUNDS});scene.add(horizon.group);skyClouds=createSkyClouds();scene.add(skyClouds.group);arch.ready.then(()=>{if(destroyed)return;shading?.apply(arch.group,{outline:false});kick();});shading?.apply(horizon.group,{outline:false});horizon.group.userData.onTrees=()=>{shading?.apply(horizon.group,{outline:false});kick();};
+    horizon=createHorizon({spacing:0,zs:[],centers:ARCH_CENTERS,bounds:ARCH_BOUNDS,kind:style.horizon,level:style.sea.level});scene.add(horizon.group);if(style.skyClouds){skyClouds=createSkyClouds();scene.add(skyClouds.group);}arch.ready.then(()=>{if(destroyed)return;shading?.apply(arch.group,{outline:false});kick();});shading?.apply(horizon.group,{outline:false});horizon.group.userData.onTrees=()=>{shading?.apply(horizon.group,{outline:false});kick();};
     for(const [index,held] of regionCache)arch.setFull(index,index===regionIndex||(!!departing&&held.visuals===departing));
     syncArchipelago();pickerVisibility();syncCompass();worldFit();kick();setTimeout(playReveals,300);
   }
@@ -385,7 +396,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     if(!region||!arch)return;
     const s=new THREE.Spherical(spherical.radius||60,WORLD_PHI,WORLD_THETA),base=camera.clone(),points=[];
     base.position.copy(region.cameraTarget).add(new THREE.Vector3().setFromSpherical(s));base.lookAt(region.cameraTarget);base.updateMatrixWorld(true);
-    for(const [x,z] of ARCH_CENTERS){for(const [dx,dz] of [[-1,-1],[1,1],[-1,1],[1,-1]])points.push(new THREE.Vector3(x+dx*ISLAND_R*.9,0,z+dz*ISLAND_R*.9));points.push(new THREE.Vector3(x,34,z));}
+    ARCH_CENTERS.forEach(([x,z],i)=>{const y=ARCH_LEVELS[i];for(const [dx,dz] of [[-1,-1],[1,1],[-1,1],[1,-1]])points.push(new THREE.Vector3(x+dx*ISLAND_R*.9,style.ground==='floating'?y-10:y,z+dz*ISLAND_R*.9));points.push(new THREE.Vector3(x,y+34,z));});
     const r=fitRouteOverview({camera:base,points,target:region.cameraTarget,width,height,unit:1,span,topInset:Math.max(height<=400?60:96,height*SKY_FRACTION),bottomInset:height<=400?64:width<640?150:122});
     worldLook.set(region.cameraTarget.x+r.panX,region.cameraTarget.y,region.cameraTarget.z+r.panZ);worldH=r.zoom*span*.5;
   }
@@ -412,7 +423,7 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
     const el=$('compass');if(!arch){el.hidden=true;return;}
     const at=worlds.findIndex(w=>w.index===world),prev=worlds[at-1],next=worlds[at+1],key=`${world}|${worldView}|${worlds.map(w=>state.worldOpen(w.index)?1:0).join('')}`;
     if(el.dataset.key===key)return;el.dataset.key=key;el.hidden=false;
-    const chip=(w,dir)=>{const locked=!state.worldOpen(w.index);return `<button type="button" class="gm-ow__chip${locked?' is-locked':''}" data-region="${w.index}" aria-label="${dir<0?'Back to':'Sail to'} ${NAMES[w.index]}${locked?', locked':''}">${dir<0?icon('chevron-left',{size:18}):''}${locked?icon('lock',{size:14}):''}<span>${NAMES[w.index]}</span>${dir>0?icon('chevron-right',{size:18}):''}</button>`;};
+    const chip=(w,dir)=>{const locked=!state.worldOpen(w.index);return `<button type="button" class="gm-ow__chip${locked?' is-locked':''}" data-region="${w.index}" aria-label="${dir<0?'Back to':style.verb} ${NAMES[w.index]}${locked?', locked':''}">${dir<0?icon('chevron-left',{size:18}):''}${locked?icon('lock',{size:14}):''}<span>${NAMES[w.index]}</span>${dir>0?icon('chevron-right',{size:18}):''}</button>`;};
     el.innerHTML=worldView?`<button type="button" class="gm-ow__chip gm-ow__chip--main" data-region="${world}" aria-label="Back to ${NAMES[world]}">${icon('chevron-left',{size:18})}<span>Back to ${NAMES[world]}</span></button>`:`${prev?chip(prev,-1):''}<button type="button" class="gm-ow__chip gm-ow__chip--world" data-ow="worldview" aria-label="Show the whole world map">${icon('globe',{size:16})}<span>World map</span></button>${next?chip(next,1):''}`;
   }
   function fit() {
@@ -453,9 +464,10 @@ export function mountOverworld(host, { gameId, levels, state, onPlay, onSelect, 
         departing=travelling?leaving:null;departingIndex=travelling?leavingIndex:-1;if(travelling){arrivalFrom.copy(lastLook);departH=lastH;}else departH=0;worldView=false;worldTarget=0;worldK=0;autoTour=false;
         region=next;regionIndex=target;
         if(!cached){
+          normaliseScale(region);
           if(!regionSpacing)regionSpacing=Math.max(region.bounds.getSize(new THREE.Vector3()).x,region.bounds.getSize(new THREE.Vector3()).z)*1.13;
           if(sea&&!horizon&&!horizonTimer)horizonTimer=setTimeout(()=>{horizonTimer=0;if(destroyed||horizon)return;buildMap();},400);
-          const shift=sea?new THREE.Vector3(ARCH_CENTERS[target][0],0,ARCH_CENTERS[target][1]):new THREE.Vector3(target*regionSpacing,0,(target%2)*regionSpacing*.08);
+          const shift=new THREE.Vector3(ARCH_CENTERS[target][0],ARCH_LEVELS[target],ARCH_CENTERS[target][1]);
           region.root.position.add(shift);region.bounds.translate(shift);region.cameraPosition.add(shift);region.cameraTarget.add(shift);for(const v of [...region.nodePositions,...region.route])v.add(shift);
           scene.add(region.root);visuals=makeNodes(region,wd);
         }else{visuals=cached.visuals;visuals.group.visible=true;visuals.context.group.visible=true;}

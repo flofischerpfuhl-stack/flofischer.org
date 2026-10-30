@@ -1,8 +1,8 @@
 {
-  "sourceCommit": "08a2d968c8d995780b6951fb11609d2b93b2e75f",
-  "packagedAt": "2026-10-30T14:50:19.912090+00:00",
-  "files": 2437,
-  "bytes": 191585565,
+  "sourceCommit": "ceab5f9aff52e55a4a5040b4acd966b38e38553a",
+  "packagedAt": "2026-10-30T15:13:57.096604+00:00",
+  "files": 2442,
+  "bytes": 191626650,
   "games": 4,
   "campaignLevels": 176,
   "bonusLevels": 11,
@@ -13,6 +13,6 @@
     "originalBytes": 94042712,
     "gzipBytes": 45549567
   },
-  "assetVersion": "e33165eb84c63e6ae65638aef0afddeea8f909a780f265566ea73bbd41a1b586",
-  "runtimeSha256": "23ce4ee7bad52e54dfab8c11099c9df501d6d1c89236bbac70c0e2d015ed5fd5"
+  "assetVersion": "aa3aeb374ffc0260af0dd16944ed7d5f2349921657d762573a4d8b5ad057b439",
+  "runtimeSha256": "a50bb21604cb80a9279c4473efaffa8b55f825b46fb625e6079abc8ffa73b62e"
 }
