@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Properties-Panel neu</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/ui.css">
+<link rel="stylesheet" href="assets/mock.css">
+<style>
+  .ptabs { display: flex; align-items: center; gap: 8px; padding: 8px 8px 0 12px; }
+  .ptabs .oo-ui-segmented { flex: 1; }
+  .lockstrip { display: flex; align-items: center; gap: 8px; margin: 0 12px 4px 16px; }
+  .lockstrip .oo-ui-status { flex: 1; }
+  .align6 { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 2px; padding: 2px; border: 1px solid var(--pdf-border); border-radius: 8px; }
+  .align6 .oo-ui-button { width: 100% !important; --_h: calc(var(--pdf-ui-control-h) - 6px); }
+  .align8 { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  .empty-hint { display: grid; gap: 8px; color: var(--pdf-muted); font-size: 12px; line-height: 17px; }
+  .empty-hint p { margin: 0; }
+  .layers { padding: 4px; }
+  .layers .oo-ui-menu-item .acts { display: flex; gap: 2px; color: var(--pdf-muted); }
+  .multi-note { color: var(--pdf-muted); font-size: 12px; }
+  .stage.is-phone .nb-sheet .nb-objhead { padding: 4px 12px 8px 16px; }
+  .stage.is-phone .ptabs { padding: 0 8px 4px 12px; }
+  .stage.is-phone .nb-section { padding: 12px 16px; }
+  .stage.is-phone .nb-lrow { grid-template-columns: 88px minmax(0, 1fr); }
+  .nb-field-err { margin-top: -4px; }
+</style>
+</head>
+<body>
+<script src="assets/icons.js"></script>
+<script src="assets/mock.js"></script>
+<template id="notes">
+  <h2>Worum es geht</h2>
+  <p>Heute (Bild 1): acht gleich gewichtete Icons ohne Gruppe, B/I/U/S als vier große Knöpfe in 2 × 2, jede Zahl mit eigenem Label darüber (viel Luft, wenig Inhalt), Farbe als schwarzer Balken, ungerundete Werte (300.946°, 456.064), „Rotate 90°“ als eigene Zeile, Einheit versteckt.</p>
+  <div class="cols">
+    <div class="card is-rec"><h3>Variante A – Inspector <span class="tag">Empfehlung</span></h3>
+      <ul><li>Dicht wie Figma/Framer: Zahlenfelder tragen ihr Kürzel im Feld (X, Y, B, H, °), zwei pro Zeile; Seitenverhältnis-Schloss zwischen B und H.</li>
+      <li>Kopf: Name, Typ · Seite, nur drei Aktionen (sichtbar, sperren, …); Duplizieren/Löschen/Anordnen im …-Menü und per Tastatur.</li>
+      <li>Stil als eine Toggle-Gruppe B I U S neben der Größe, Farbe mit Hex-Wert, Deckkraft als Regler + Feld, Ausrichten als eine 6er-Leiste.</li>
+      <li>Werte gerundet angezeigt (2 Nachkommastellen, Winkel 1), voll genau gespeichert.</li></ul></div>
+    <div class="card"><h3>Variante B – Formular</h3>
+      <ul><li>Label links (80 px), Bedienelement rechts: jede Zeile erklärt sich selbst; Abschnitte klappen auf und zeigen zugeklappt eine Zusammenfassung („Schrift · Arial 16 pt“).</li>
+      <li>Ruhiger für Gelegenheitsnutzer, aber ~30 % mehr Höhe; Position &amp; Größe standardmäßig zu.</li></ul></div>
+  </div>
+  <h2>Zustände</h2>
+  <ul><li><b>Mehrfachauswahl:</b> gleiche Werte stehen da, verschiedene zeigen „Mixed“ (kursiv grau), Farbwahl gemischt schraffiert; Ausrichten bekommt Verteilen dazu; Text-Inhalt entfällt.</li>
+  <li><b>Gesperrt:</b> Chip „Gesperrt“ mit Entsperren oben, alle Felder deaktiviert aber lesbar; Rahmen auf der Seite ohne Griffe.</li>
+  <li><b>Lädt:</b> Skelett-Zeilen in Endhöhe (nichts springt), Schriftliste mit Spinner im Select.</li>
+  <li><b>Fehler:</b> rot am Feld, Meldung direkt darunter; der alte Wert bleibt auf der Seite, bis eine gültige Zahl kommt.</li>
+  <li><b>Leer:</b> Seite statt Leere: Format, Maßstab, Drehung und der Hinweis auf Alt+Klick.</li></ul>
+  <p class="muted">Probier: Objekte auf dem Plan anklicken (Shift = dazu), B/I/U, Drehung, Deckkraft-Regler, Schloss, Abschnitte (B) auf- und zuklappen, Tab „Ebenen“.</p>
+  <h2>Fehlende Bausteine</h2>
+  <ul><li><b>NumberField mit Präfix im Feld</b> (X/Y/B/H/°; Ziehen am Präfix ändert den Wert wie in Figma).</li>
+  <li><b>ToggleGroup</b> (Mehrfachwahl im Segmented-Look: B I U S).</li>
+  <li><b>PanelSection</b> (Titel, Zusammenfassung, Aktion rechts, aufklappbar) und <b>ObjectHeader</b>.</li>
+  <li><b>Slider</b>, <b>Textarea</b>, <b>Skeleton</b>; <b>Tabs</b> können Segmented sein.</li></ul>
+</template>
+<script>
+const { B, icon, esc, cx, $, $$ } = Mock;
+const PT_MM = 0.352778;
+const OBJ = [
+  { id: 'r1', name: 'Neubau', type: 'rect', w: 120, h: 70, cx: 300, cy: 215, rot: -5, fill: 'hatch', stroke: '#111111', sw: 1.5, fillHex: '#e4e4e7', opacity: 1 },
+  { id: 't1', name: 'Neubau Garage', type: 'text', text: 'Neubau Garage', size: 16, cx: 250, cy: 372, rot: -35, fill: '#111111', bold: false, italic: false, underline: false, strike: false, align: 'left', opacity: 1 },
+  { id: 't2', name: 'Carport', type: 'text', text: 'Carport', size: 14, cx: 380, cy: 360, rot: -35, fill: '#111111', bold: false, italic: false, underline: false, strike: false, align: 'left', opacity: 1 },
+];
+const byId = id => OBJ.find(o => o.id === id);
+const P = { tab: 'props', unit: 'mm', keep: true, collapsed: { pos: true }, sheet: 'half', sizeErr: null, sel: ['t1'] };
+let C;
+const STATE_SEL = { text: ['t1'], shape: ['r1'], multi: ['t1', 't2'], locked: ['t1'], loading: ['t1'], error: ['t1'], empty: [] };
+
+const r2 = n => { const v = Math.round(n * 100) / 100; return String(v); };
+const deg = a => { let d = ((a % 360) + 540) % 360 - 180; return String(Math.round(d * 10) / 10).replace('-', '−'); };
+const u = n => P.unit === 'mm' ? n * PT_MM : n;
+function geo(o) { const b = Mock.localBox(o); return { x: u(o.cx + b.x0), y: u(o.cy + b.y0), w: u(b.x1 - b.x0), h: u(b.y1 - b.y0) }; }
+const same = (arr, f) => arr.every(o => f(o) === f(arr[0])) ? f(arr[0]) : null;
+
+function view(ctx) {
+  if (!ctx.phone) return Mock.view(1.25, -40, 60);
+  const sel = P.sel.map(byId);
+  const canvasH = ctx.H - 56, sheetH = P.sheet === 'full' ? ctx.H - 70 : Math.round(ctx.H * 0.56);
+  const band = { x0: 0, x1: ctx.W, y0: 72, y1: canvasH - sheetH - 8 };
+  return sel.length ? Mock.fitView(sel, 0.95, band) : Mock.view(0.95, -150, 40);
+}
+
+/* ── Panel pieces ─────────────────────────────────────────────────────────────────────────── */
+function section(key, title, body, o = {}) {
+  const coll = o.collapsible, closed = coll && P.collapsed[key];
+  return `<section class="${cx('nb-section', coll && 'is-collapsible', closed && 'is-collapsed')}" data-sec="${key}">
+    <div class="nb-section-head"${coll ? ` data-act="toggle" data-key="${key}" role="button" tabindex="0" aria-expanded="${!closed}"` : ''}>${coll ? icon('chevron-down', 'nb-chev') : ''}<h4>${esc(title)}</h4>${o.sum && (closed || o.sumAlways) ? `<span class="nb-sum">${esc(o.sum)}</span>` : ''}${o.action || ''}</div>
+    <div class="nb-section-body">${body}</div></section>`;
+}
+const styleSeg = (o, dis) => B.seg({ label: 'Schriftstil', multi: true, disabled: dis, value: o ? ['bold', 'italic', 'underline', 'strike'].filter(k => o[k]) : [], options: [
+  { value: 'bold', label: 'Fett', icon: 'bold', iconOnly: true, title: 'Fett (Strg+B)' }, { value: 'italic', label: 'Kursiv', icon: 'italic', iconOnly: true, title: 'Kursiv (Strg+I)' },
+  { value: 'underline', label: 'Unterstrichen', icon: 'underline', iconOnly: true }, { value: 'strike', label: 'Durchgestrichen', icon: 'strikethrough', iconOnly: true }], attrs: { 'data-f': 'style' } });
+const alignSeg = (v, dis) => B.seg({ label: 'Textausrichtung', value: v, disabled: dis, options: [
+  { value: 'left', label: 'Links', icon: 'align-left', iconOnly: true }, { value: 'center', label: 'Mitte', icon: 'align-center', iconOnly: true },
+  { value: 'right', label: 'Rechts', icon: 'align-right', iconOnly: true }, { value: 'justify', label: 'Blocksatz', icon: 'align-justify', iconOnly: true }], attrs: { 'data-f': 'talign' } });
+const fontSel = (dis, loading, mixed) => B.select({ label: 'Schrift', labelPos: 'hidden', value: 'arial', disabled: dis || loading, loading, mixed, options: [
+  { value: 'arial', label: loading ? 'Schriften laden …' : 'Arial (aus der PDF)' }, { value: 'helv', label: 'Helvetica' }, { value: 'inter', label: 'Inter' }, { value: 'times', label: 'Times New Roman' }] });
+const alignObjs = (multi, dis) => `<div class="${cx('align6', multi && 'align8')}" role="group" aria-label="Ausrichten">${[
+  ['objects-align-left', 'Links ausrichten'], ['objects-align-center', 'Horizontal zentrieren'], ['objects-align-right', 'Rechts ausrichten'],
+  ['objects-align-top', 'Oben ausrichten'], ['objects-align-middle', 'Vertikal zentrieren'], ['objects-align-bottom', 'Unten ausrichten'],
+  ...(multi ? [['objects-distribute-horizontal', 'Horizontal verteilen'], ['objects-distribute-vertical', 'Vertikal verteilen']] : [])]
+  .map(([i, l]) => B.ibtn(i, l, { disabled: dis })).join('')}</div>`;
+const unitSel = dis => `<span style="width:72px">${B.select({ label: 'Einheit', labelPos: 'hidden', value: P.unit, size: 'sm', disabled: dis, options: [{ value: 'mm', label: 'mm' }, { value: 'pt', label: 'pt' }], attrs: { 'data-f': 'unit' }, bare: true })}</span>`;
+
+function header(sel, st) {
+  if (st === 'loading') return `<div class="nb-objhead"><span class="tile">${icon('type')}</span><span style="display:grid;gap:6px"><span class="nb-skel is-text" style="width:70%"></span><span class="nb-skel is-text" style="width:40%;height:10px"></span></span><span class="acts">${B.ibtn('eye', 'Ausblenden', { disabled: true })}${B.ibtn('lock', 'Sperren', { disabled: true })}${B.ibtn('ellipsis', 'Mehr', { disabled: true })}</span></div>`;
+  if (!sel.length) return `<div class="nb-objhead"><span class="tile">${icon('file')}</span><span style="min-width:0"><div class="name">Seite 1</div><div class="meta">A3 quer · 420 × 297 mm</div></span><span class="acts">${B.ibtn('rotate-ccw', 'Seite nach links drehen')}${B.ibtn('rotate-cw', 'Seite nach rechts drehen')}</span></div>`;
+  const locked = st === 'locked';
+  const name = sel.length > 1 ? `${sel.length} Objekte` : sel[0].name;
+  const types = sel.length > 1 ? (same(sel, o => o.type) ? `${sel.length} ${Mock.typeLabel[sel[0].type]}e` : 'Gemischt') : Mock.typeLabel[sel[0].type];
+  return `<div class="nb-objhead"><span class="tile">${icon(sel.length > 1 ? 'boxes' : Mock.typeIcon[sel[0].type])}</span><span style="min-width:0"><div class="name" title="${esc(name)}">${esc(name)}</div><div class="meta">${types} · Seite 1</div></span>
+    <span class="acts">${B.ibtn('eye', 'Ausblenden', { shortcut: 'Strg+Shift+H' })}${B.ibtn(locked ? 'lock' : 'unlock', locked ? 'Entsperren' : 'Sperren', { pressed: locked, attrs: { 'data-act': 'lock' }, shortcut: 'Strg+Shift+L' })}${B.ibtn('ellipsis', 'Mehr: Duplizieren, Anordnen, Löschen', { attrs: { 'data-act': 'more' } })}</span></div>
+    ${locked ? `<div class="lockstrip">${B.status('Gesperrt', { tone: 'info', icon: 'lock', title: 'Gesperrt: nichts verschiebt oder ändert sich aus Versehen' })}${B.btn('Entsperren', { size: 'sm', attrs: { 'data-act': 'lock' } })}</div>` : ''}`;
+}
+
+function bodyA(sel, st) {
+  const dis = st === 'locked';
+  if (st === 'loading') return [1, 2, 3].map(i => section('l' + i, ['Text', 'Schrift', 'Position & Größe'][i - 1], `<span class="nb-skel" style="height:${i === 1 ? 56 : 32}px"></span><div class="nb-row"><span class="nb-skel"></span><span class="nb-skel"></span></div>`)).join('');
+  if (!sel.length) return section('page', 'Seite', `<div class="nb-row">${B.num({ label: 'Breite', prefix: 'B', value: '420', unit: 'mm', disabled: true })}${B.num({ label: 'Höhe', prefix: 'H', value: '297', unit: 'mm', disabled: true })}</div>
+      <div class="nb-row is-wide-first">${B.num({ label: 'Maßstab', prefix: '1:', value: '500', title: 'Maßstab aus der Datei' })}${B.ibtn('ruler', 'Kalibrieren …', { variant: 'secondary' })}</div>`)
+    + section('hint', 'Auswählen', `<div class="empty-hint"><p>Klicke ein Objekt auf der Seite an. <span class="nb-kbd">Shift</span>+Klick nimmt weitere dazu.</p><p><span class="nb-kbd">Alt</span>+Klick wählt das Objekt darunter, wenn mehrere übereinander liegen.</p></div>`);
+  const t = sel.filter(o => o.type === 'text'), sh = sel.filter(o => o.type !== 'text');
+  const one = sel.length === 1 ? sel[0] : null;
+  const g = sel.map(geo);
+  const mixedNum = (f) => { const v = same(g.map((x, i) => ({ v: r2(f(x)) })), o => o.v); return v; };
+  let out = '';
+  if (t.length && one) out += section('text', 'Text', `<textarea class="nb-textarea" rows="2" data-f="text"${dis ? ' disabled' : ''} aria-label="Text">${esc(one.text)}</textarea>
+      <div class="nb-row is-wide-first">${alignSeg(one.align, dis)}${B.ibtn('wrap-text', 'In einem Rahmen umbrechen', { variant: 'secondary', disabled: dis })}</div>`);
+  if (t.length) {
+    const sizeMixed = same(t, o => o.size) == null;
+    out += section('font', 'Schrift', `${fontSel(dis, false)}
+      <div class="nb-row is-wide-first">${B.num({ label: 'Schriftgröße', labelPos: 'hidden', value: sizeMixed ? '' : (P.sizeErr ?? t[0].size), mixed: sizeMixed, unit: 'pt', disabled: dis, error: P.sizeErr != null ? 'x' : null, attrs: { 'data-f': 'size' } })}${styleSeg(t.length === 1 ? t[0] : null, dis)}</div>
+      ${P.sizeErr != null ? '<span class="oo-ui-field-error nb-field-err" role="alert">Größe von 1 bis 500 pt eingeben.</span>' : ''}
+      ${B.color({ label: 'Textfarbe', hex: t[0].fill, showValue: true, disabled: dis, cls: 'is-block', attrs: { style: 'width:100%!important' } })}`);
+  }
+  if (sh.length) out += section('fill', 'Füllung & Kontur', `<div class="nb-row">${B.color({ label: 'Füllung', hex: sh[0].fillHex, showValue: true, disabled: dis, attrs: { style: 'width:100%!important' } })}${B.color({ label: 'Kontur', hex: sh[0].stroke, showValue: true, disabled: dis, attrs: { style: 'width:100%!important' } })}</div>
+      <div class="nb-row">${B.num({ label: 'Strichstärke', prefix: ' ', prefixIcon: 'minus', value: sh[0].sw, unit: 'pt', disabled: dis })}${B.select({ label: 'Strichart', labelPos: 'hidden', value: 'solid', disabled: dis, options: [{ value: 'solid', label: 'Linie' }, { value: 'dash', label: 'Strichlinie' }] })}</div>`);
+  const op = same(sel, o => o.opacity);
+  out += section('look', 'Erscheinung', `<div class="nb-row is-wide-first"><input type="range" class="nb-slider" min="0" max="100" value="${op == null ? 50 : Math.round(op * 100)}" style="--_p:${op == null ? 50 : Math.round(op * 100)}%" aria-label="Deckkraft" data-f="opacity"${dis ? ' disabled' : ''}>
+      <span style="width:84px">${B.num({ label: 'Deckkraft', labelPos: 'hidden', value: op == null ? '' : Math.round(op * 100), mixed: op == null, unit: '%', disabled: dis, attrs: { 'data-f': 'opacityN' }, bare: true })}</span></div>`);
+  const rot = same(sel, o => Math.round((o.rot || 0) * 10));
+  out += section('pos', 'Position & Größe', `<div class="nb-row">${B.num({ label: 'X (von links)', prefix: 'X', value: mixedNum(x => x.x), mixed: mixedNum(x => x.x) == null, disabled: dis, attrs: { 'data-f': 'x' } })}${B.num({ label: 'Y (von oben)', prefix: 'Y', value: mixedNum(x => x.y), mixed: mixedNum(x => x.y) == null, disabled: dis, attrs: { 'data-f': 'y' } })}</div>
+      <div class="nb-row is-3">${B.num({ label: 'Breite', prefix: 'B', value: mixedNum(x => x.w), mixed: mixedNum(x => x.w) == null, disabled: dis })}${B.num({ label: 'Höhe', prefix: 'H', value: mixedNum(x => x.h), mixed: mixedNum(x => x.h) == null, disabled: dis })}${B.ibtn(P.keep ? 'link-2' : 'unlink-2', 'Seitenverhältnis beibehalten', { pressed: P.keep, disabled: dis, attrs: { 'data-act': 'keep' } })}</div>
+      <div class="nb-row is-3" style="grid-template-columns:minmax(0,1fr) auto auto">${B.num({ label: 'Drehung', prefix: '°', prefixIcon: 'rotate-cw', value: rot == null ? '' : deg(sel[0].rot) + '°', mixed: rot == null, disabled: dis, attrs: { 'data-f': 'rot' } })}${B.ibtn('rotate-ccw', 'Um 90° nach links drehen', { variant: 'secondary', disabled: dis, attrs: { 'data-act': 'r-90' } })}${B.ibtn('rotate-cw', 'Um 90° nach rechts drehen', { variant: 'secondary', disabled: dis, attrs: { 'data-act': 'r90' } })}</div>`,
+    { action: unitSel(dis) });
+  out += section('align', sel.length > 1 ? 'Ausrichten & verteilen' : 'Ausrichten', alignObjs(sel.length > 1, dis), { action: `<span class="nb-sum">${sel.length > 1 ? 'an Auswahl' : 'an Seite'}</span>` });
+  return out;
+}
+
+function lrow(label, cell) { return `<div class="nb-lrow"><span class="lbl">${label === '…' ? '<span class="nb-skel is-text" style="width:56px"></span>' : esc(label)}</span><div class="nb-cell">${cell}</div></div>`; }
+function bodyB(sel, st) {
+  const dis = st === 'locked';
+  if (st === 'loading') return [1, 2, 3].map(i => section('l' + i, ['Text', 'Schrift', 'Erscheinung'][i - 1], lrow('…', '<span class="nb-skel" style="flex:1"></span>') + lrow('…', '<span class="nb-skel" style="flex:1"></span>'))).join('');
+  if (!sel.length) return section('page', 'Seite', lrow('Format', '<span>A3 quer · 420 × 297 mm</span>') + lrow('Maßstab', B.num({ label: 'Maßstab', labelPos: 'hidden', value: '500', unit: '', bare: true }) + B.btn('Kalibrieren', { icon: 'ruler', variant: 'quiet' })))
+    + section('hint', 'Auswählen', `<div class="empty-hint"><p>Klicke ein Objekt an; <span class="nb-kbd">Shift</span>+Klick nimmt weitere dazu, <span class="nb-kbd">Alt</span>+Klick wählt das darunterliegende.</p></div>`);
+  const t = sel.filter(o => o.type === 'text'), sh = sel.filter(o => o.type !== 'text');
+  const one = sel.length === 1 ? sel[0] : null;
+  const g = sel.map(geo);
+  const mixedNum = f => same(g, x => r2(f(x)));
+  let out = '';
+  if (t.length && one) out += section('text', 'Text', `<textarea class="nb-textarea" rows="2" data-f="text"${dis ? ' disabled' : ''} aria-label="Text">${esc(one.text)}</textarea>
+      ${lrow('Ausrichtung', alignSeg(one.align, dis))}${lrow('Umbruch', `<label class="oo-ui-switch${dis ? ' is-disabled' : ''}"><input type="checkbox" role="switch" class="oo-ui-switch-input"${dis ? ' disabled' : ''}><span class="oo-ui-switch-track" aria-hidden="true"><span class="oo-ui-switch-thumb"></span></span><span class="oo-ui-switch-label">Im Rahmen</span></label>`)}`,
+    { collapsible: true, sum: one.text });
+  if (t.length) {
+    const sizeMixed = same(t, o => o.size) == null;
+    out += section('font', 'Schrift', lrow('Schrift', fontSel(dis)) + lrow('Größe', `<span style="width:110px">${B.num({ label: 'Größe', labelPos: 'hidden', value: sizeMixed ? '' : (P.sizeErr ?? t[0].size), mixed: sizeMixed, unit: 'pt', disabled: dis, error: P.sizeErr != null ? 'x' : null, attrs: { 'data-f': 'size' }, bare: true })}</span>`)
+      + (P.sizeErr != null ? lrow('', '<span class="oo-ui-field-error" role="alert">Größe von 1 bis 500 pt eingeben.</span>') : '')
+      + lrow('Stil', styleSeg(t.length === 1 ? t[0] : null, dis)) + lrow('Farbe', B.color({ label: 'Textfarbe', hex: t[0].fill, showValue: true, disabled: dis })),
+    { collapsible: true, sum: `Arial ${sizeMixed ? 'Mixed' : t[0].size + ' pt'}` });
+  }
+  if (sh.length) out += section('fill', 'Füllung & Kontur', lrow('Füllung', B.color({ label: 'Füllung', hex: sh[0].fillHex, showValue: true, disabled: dis })) + lrow('Kontur', B.color({ label: 'Kontur', hex: sh[0].stroke, showValue: true, disabled: dis }) + `<span style="width:96px">${B.num({ label: 'Strichstärke', labelPos: 'hidden', value: sh[0].sw, unit: 'pt', disabled: dis, bare: true })}</span>`), { collapsible: true, sum: 'Grau · 1.5 pt' });
+  const op = same(sel, o => o.opacity);
+  out += section('look', 'Erscheinung', lrow('Deckkraft', `<input type="range" class="nb-slider" min="0" max="100" value="${op == null ? 50 : Math.round(op * 100)}" style="--_p:${op == null ? 50 : Math.round(op * 100)}%;flex:1" aria-label="Deckkraft" data-f="opacity"${dis ? ' disabled' : ''}><span style="width:84px;flex:none">${B.num({ label: 'Deckkraft', labelPos: 'hidden', value: op == null ? '' : Math.round(op * 100), mixed: op == null, unit: '%', disabled: dis, bare: true, attrs: { 'data-f': 'opacityN' } })}</span>`),
+    { collapsible: true, sum: op == null ? 'Mixed' : Math.round(op * 100) + ' %' });
+  const rot = same(sel, o => Math.round((o.rot || 0) * 10));
+  out += section('pos', 'Position & Größe',
+    lrow('Einheit', unitSel(dis))
+    + lrow('Position', B.num({ label: 'X', labelPos: 'hidden', prefix: 'X', value: mixedNum(x => x.x), mixed: mixedNum(x => x.x) == null, disabled: dis, bare: true, attrs: { 'data-f': 'x' } }) + B.num({ label: 'Y', prefix: 'Y', value: mixedNum(x => x.y), mixed: mixedNum(x => x.y) == null, disabled: dis, bare: true, attrs: { 'data-f': 'y' } }))
+    + lrow('Größe', B.num({ label: 'Breite', prefix: 'B', value: mixedNum(x => x.w), mixed: mixedNum(x => x.w) == null, disabled: dis, bare: true }) + B.num({ label: 'Höhe', prefix: 'H', value: mixedNum(x => x.h), mixed: mixedNum(x => x.h) == null, disabled: dis, bare: true }))
+    + lrow('', B.check('Seitenverhältnis beibehalten', { checked: P.keep, disabled: dis }))
+    + lrow('Drehung', `<span style="flex:1">${B.num({ label: 'Drehung', labelPos: 'hidden', value: rot == null ? '' : deg(sel[0].rot), mixed: rot == null, unit: '°', disabled: dis, bare: true, attrs: { 'data-f': 'rot' } })}</span>${B.ibtn('rotate-ccw', 'Um 90° nach links', { variant: 'secondary', disabled: dis, attrs: { 'data-act': 'r-90' } })}${B.ibtn('rotate-cw', 'Um 90° nach rechts', { variant: 'secondary', disabled: dis, attrs: { 'data-act': 'r90' } })}`)
+    + lrow('Ausrichten', alignObjs(false, dis).replace('class="align6"', 'class="align6" style="flex:1"')),
+    { collapsible: true, sum: rot == null ? 'Mixed' : `${r2(g[0].x)}, ${r2(g[0].y)} mm · ${deg(sel[0].rot)}°` });
+  return out;
+}
+
+function layersList() {
+  return `<div class="layers oo-ui-menu" role="listbox" aria-label="Ebenen">${[...OBJ].reverse().map(o => `<button type="button" class="${cx('oo-ui-menu-item nb-objrow', P.sel.includes(o.id) && 'is-current')}" data-pick="${o.id}"><span class="oo-ui-menu-lead">${icon(Mock.typeIcon[o.type])}</span><span><span class="t">${esc(o.name)}</span><span class="s">${Mock.typeLabel[o.type]}</span></span><span class="acts">${icon('eye')}</span></button>`).join('')}</div>`;
+}
+
+function panel(ctx) {
+  const st = ctx.state;
+  const sel = P.sel.map(byId);
+  const tabs = `<div class="ptabs">${B.seg({ label: 'Panel', value: P.tab, options: [{ value: 'props', label: 'Eigenschaften' }, { value: 'layers', label: 'Ebenen' }], attrs: { 'data-f': 'tab' } })}${B.ibtn('x', 'Panel schließen', { shortcut: 'Esc' })}</div>`;
+  const body = P.tab === 'layers' ? layersList() : header(sel, st) + `<div class="ed-panel-scroll">${(ctx.variant === 'a' ? bodyA : bodyB)(sel, st)}</div>`;
+  if (!ctx.phone) return `<aside class="ed-panel" aria-label="Eigenschaften">${tabs}${body}</aside>`;
+  const h = P.sheet === 'full' ? ctx.H - 70 : Math.round(ctx.H * 0.56);
+  return `<aside class="nb-sheet" style="height:${h}px" aria-label="Eigenschaften"><div class="nb-sheet-grab" data-act="sheet" role="button" aria-label="Sheet größer/kleiner"></div>${tabs}${body}</aside>`;
+}
+
+function render(ctx) {
+  C = ctx;
+  if (ctx._last !== ctx.state) { P.sel = [...STATE_SEL[ctx.state]]; P.sizeErr = ctx.state === 'error' ? '0' : null; ctx._last = ctx.state; }
+  const v = view(ctx);
+  const ch = Mock.chrome(ctx, { tool: 'edit', properties: true, zoom: ctx.phone ? '95%' : '125%', noBottom: false });
+  const sel = P.sel.map(byId);
+  const world = `<svg class="world" aria-hidden="true"><g transform="translate(${v.ox} ${v.oy}) scale(${v.z})">${Mock.plan('q')}${OBJ.map(o => Mock.renderObj(o, 'q')).join('')}</g></svg>`;
+  const ov = `<svg class="overlay">${ctx.state === 'loading' ? '' : Mock.selOverlay(sel, v, { phone: ctx.phone, locked: ctx.state === 'locked' })}</svg>`;
+  ctx.stage.innerHTML = ch.head + `<div class="ed-canvas">${world}${ov}${ch.islands}${panel(ctx)}</div>`;
+  bind(ctx, v);
+}
+
+function bind(ctx, v) {
+  const st = ctx.stage;
+  st.onclick = e => {
+    const pick = e.target.closest('[data-pick]');
+    if (pick) { P.sel = [pick.dataset.pick]; return render(ctx); }
+    const segBtn = e.target.closest('[data-f] .oo-ui-segment');
+    if (segBtn) {
+      const f = segBtn.parentElement.dataset.f, val = segBtn.dataset.v;
+      if (f === 'tab') { P.tab = val; return render(ctx); }
+      if (ctx.state === 'locked') return;
+      const sel = P.sel.map(byId).filter(o => o.type === 'text');
+      if (f === 'style') { const on = !sel.every(o => o[val]); sel.forEach(o => o[val] = on); }
+      if (f === 'talign') sel.forEach(o => o.align = val);
+      return render(ctx);
+    }
+    const t = e.target.closest('[data-act]');
+    if (!t) return;
+    const a = t.dataset.act;
+    if (a === 'toggle') { P.collapsed[t.dataset.key] = !P.collapsed[t.dataset.key]; return render(ctx); }
+    if (a === 'lock') return ctx.setState(ctx.state === 'locked' ? 'text' : 'locked');
+    if (a === 'keep') { P.keep = !P.keep; return render(ctx); }
+    if (a === 'r90' || a === 'r-90') { P.sel.map(byId).forEach(o => o.rot = (o.rot || 0) + (a === 'r90' ? 90 : -90)); return render(ctx); }
+    if (a === 'sheet') { P.sheet = P.sheet === 'full' ? 'half' : 'full'; return render(ctx); }
+  };
+  st.oninput = e => {
+    const f = e.target.dataset.f;
+    if (f === 'opacity') {
+      const val = +e.target.value; P.sel.map(byId).forEach(o => o.opacity = val / 100);
+      e.target.style.setProperty('--_p', val + '%');
+      const n = $('[data-f="opacityN"]', st); if (n) { n.value = val; n.classList.remove('is-mixed'); }
+      const w = $('svg.world', st); const g = w.firstElementChild;
+      g.innerHTML = Mock.plan('q') + OBJ.map(o => Mock.renderObj(o, 'q')).join('');
+    }
+    if (f === 'text') { const o = byId(P.sel[0]); o.text = e.target.value; o.name = e.target.value.split('\n')[0].slice(0, 40) || 'Text'; }
+  };
+  st.onchange = e => {
+    const f = e.target.dataset.f;
+    const sel = P.sel.map(byId);
+    const num = parseFloat(String(e.target.value).replace(',', '.').replace('−', '-'));
+    if (f === 'unit') { P.unit = e.target.value; return render(ctx); }
+    if (f === 'size') { if (!(num >= 1 && num <= 500)) { P.sizeErr = e.target.value; return render(ctx); } P.sizeErr = null; sel.forEach(o => { if (o.type === 'text') o.size = num; }); if (ctx.state === 'error') return ctx.setState('text'); return render(ctx); }
+    if (f === 'rot' && !isNaN(num)) { sel.forEach(o => o.rot = num); return render(ctx); }
+    if ((f === 'x' || f === 'y') && !isNaN(num)) { sel.forEach(o => { const b = Mock.localBox(o); const val = P.unit === 'mm' ? num / PT_MM : num; if (f === 'x') o.cx = val - b.x0; else o.cy = val - b.y0; }); return render(ctx); }
+    if (f === 'opacityN' && !isNaN(num)) { sel.forEach(o => o.opacity = Math.max(0, Math.min(100, num)) / 100); return render(ctx); }
+    if (e.target.type === 'color') { const lab = e.target.getAttribute('aria-label'); sel.forEach(o => { if (lab === 'Textfarbe') o.fill = e.target.value; if (lab === 'Füllung') o.fillHex = e.target.value; if (lab === 'Kontur') o.stroke = e.target.value; }); return render(ctx); }
+    if (f === 'text') return render(ctx);
+  };
+  const canvas = $('.ed-canvas', st);
+  canvas.onpointerdown = e => {
+    if (e.target.closest('.island, .ed-panel, .nb-sheet')) return;
+    const wp = v.w(Mock.localPoint(ctx, canvas, e));
+    const hits = Mock.objectsAt(OBJ, wp, ctx.phone ? 12 : 5, v);
+    const o = hits[0];
+    if (!o) { return ctx.setState('empty'); }
+    if (e.shiftKey && P.sel.length) { if (!P.sel.includes(o.id)) P.sel.push(o.id); C._last = 'multi'; C.state = P.sel.length > 1 ? 'multi' : C.state; const s = $('[data-mk="state"]'); if (s) s.value = C.state; return ctx.sync(); }
+    const stName = o.type === 'text' ? 'text' : 'shape';
+    if (C.state === stName) { P.sel = [o.id]; return render(ctx); }
+    ctx.setState(stName); P.sel = [o.id]; render(ctx);
+  };
+}
+
+Mock.page({
+  title: 'Properties-Panel neu', ids: 'PDF-A18',
+  variants: {
+    a: { name: 'A – Inspector (Empfehlung):', why: 'dicht wie Figma: Kürzel im Feld (X, Y, B, H, °), zwei Werte pro Zeile, Stil als eine Toggle-Gruppe, Kopf mit nur drei Aktionen.' },
+    b: { name: 'B – Formular:', why: 'Label links, Bedienelement rechts, Abschnitte klappen auf und zeigen zugeklappt eine Zusammenfassung.' },
+  },
+  states: [
+    { v: 'text', label: 'Text ausgewählt' }, { v: 'shape', label: 'Form ausgewählt' }, { v: 'multi', label: 'Mehrfachauswahl (Mixed)' },
+    { v: 'locked', label: 'Gesperrt' }, { v: 'loading', label: 'Lädt' }, { v: 'error', label: 'Fehler im Feld' }, { v: 'empty', label: 'Nichts ausgewählt' },
+  ],
+  devices: [{ v: 'desktop', label: 'Desktop' }, { v: 'phone', label: 'Handy' }, { v: 'phone320', label: '320' }],
+  render,
+});
+</script>
+</body>
+</html>

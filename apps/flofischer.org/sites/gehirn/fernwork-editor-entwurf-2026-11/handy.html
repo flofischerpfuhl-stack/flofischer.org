@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Handy: Auswahl, Leiste, Drawer</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/ui.css">
+<link rel="stylesheet" href="assets/mock.css">
+<style>
+  /* nb: ContextCard – one surface for "what is selected" + its quick tools; grows into the Properties sheet. */
+  .ccard { position: absolute; z-index: 30; left: var(--ed-inset); right: var(--ed-inset); display: flex; flex-direction: column; border: 1px solid var(--pdf-border); border-radius: 16px; background: var(--pdf-panel); box-shadow: 0 10px 28px var(--pdf-shadow); transition: height 220ms cubic-bezier(.2,.8,.2,1), bottom 220ms cubic-bezier(.2,.8,.2,1); overflow: hidden; }
+  .ccard.is-sheet { left: 0; right: 0; bottom: 0 !important; border-radius: 16px 16px 0 0; border-bottom: 0; box-shadow: 0 -10px 32px var(--pdf-shadow); }
+  .cc-head { display: flex; align-items: center; gap: 4px; min-height: 52px; padding: 4px 4px 4px 12px; }
+  .cc-head .nm { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; font-weight: 600; font-size: 14px; }
+  .cc-head .nm span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cc-head .nm .oo-ui-icon { color: var(--pdf-accent-strong); }
+  .cc-stack { display: inline-flex; align-items: center; gap: 0; height: 44px; border: 1px solid var(--pdf-border); border-radius: 10px; flex: none; }
+  .cc-stack .oo-ui-button { --_h: 42px; }
+  .cc-stack .cnt { min-width: 36px; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--pdf-muted); font-size: 13px; }
+  .cc-row { display: flex; align-items: center; gap: 4px; min-height: 52px; padding: 0 4px 4px; border-top: 1px solid var(--pdf-border); padding-top: 4px; overflow-x: auto; scrollbar-width: none; }
+  .cc-row::-webkit-scrollbar { display: none; }
+  .cc-row .sep { flex: none; width: 1px; align-self: stretch; margin: 8px 2px; background: var(--pdf-border); }
+  .cc-row .oo-ui-color { --_h: 44px; }
+  .cc-row .drill-l { font-size: 13px; font-weight: 600; white-space: nowrap; padding: 0 4px; }
+  .cc-body { flex: 1 1 auto; overflow: auto; border-top: 1px solid var(--pdf-border); }
+  .grab { display: grid; place-items: center; height: 16px; cursor: grab; touch-action: none; }
+  .grab::before { content: ""; width: 36px; height: 4px; border-radius: 2px; background: var(--pdf-border-strong); }
+  .topbar2 { position: absolute; z-index: 30; left: var(--ed-inset); right: var(--ed-inset); top: calc(var(--ed-inset) + var(--ed-island-h) + 8px); }
+  .topbar2 .oo-ui-bar { width: 100%; }
+  .kbd { position: absolute; z-index: 45; left: 0; right: 0; bottom: 0; height: 280px; background: #d1d5db; display: grid; grid-template-rows: repeat(4, 1fr); gap: 8px; padding: 10px 4px 24px; }
+  html[data-theme="dark"] .kbd { background: #2a2a2e; }
+  .kbd div { display: flex; gap: 5px; justify-content: center; }
+  .kbd span { flex: 0 1 34px; border-radius: 5px; background: #fff; box-shadow: 0 1px 0 rgba(0,0,0,.3); display: grid; place-items: center; font-size: 15px; color: #111; }
+  html[data-theme="dark"] .kbd span { background: #5b5b60; color: #fff; }
+  .kbd .wide { flex-basis: 180px; }
+  .old-sheet { position: absolute; z-index: 30; left: 8px; right: 8px; bottom: 0; height: 52%; border: 1px solid var(--pdf-border); border-radius: 16px 16px 0 0; background: var(--pdf-panel); box-shadow: 0 -10px 28px var(--pdf-shadow); padding: 12px 16px; }
+  .old-op { position: absolute; z-index: 31; left: 8px; right: 8px; height: 60px; border: 1px solid var(--pdf-border); border-radius: 12px; background: var(--pdf-panel); box-shadow: 0 10px 28px var(--pdf-shadow); display: flex; align-items: center; gap: 12px; padding: 0 16px; }
+  .old-next { position: absolute; z-index: 29; left: 24px; }
+  .bad { position: absolute; z-index: 60; padding: 2px 8px; border-radius: 6px; background: #dc2626; color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; }
+  .badring { position: absolute; z-index: 59; border: 2px dashed #dc2626; border-radius: 12px; pointer-events: none; }
+</style>
+</head>
+<body>
+<script src="assets/icons.js"></script>
+<script src="assets/mock.js"></script>
+<template id="notes">
+  <h2>Worum es geht</h2>
+  <p>Heute (Zustand „Heute“): Mit einer Auswahl stapeln sich unten Drawer und Deckkraft-Leiste übereinander und verdecken „nächstes Objekt an dieser Stelle“. Drei Schichten (Mini-Leiste, Unter-Leiste, Drawer) teilen sich denselben Platz, ohne voneinander zu wissen.</p>
+  <h2>Regel für beide Varianten</h2>
+  <ul><li><b>Ein Platz, ein Ding:</b> Unter-Einstellungen (Deckkraft, Farbe, Strich) ersetzen die Werkzeugzeile an Ort und Stelle (‹ zurück), statt eine zweite Leiste darüberzulegen.</li>
+  <li><b>Auswahl bleibt sichtbar:</b> Öffnet sich etwas, schiebt der Editor die Seite so, dass die Auswahl im freien Band dazwischen steht.</li>
+  <li><b>Durchschalten gehört zur Auswahl:</b> „2 / 3 ↑ ↓“ steht im Kopf derselben Fläche, nie auf dem Plan unter einem Drawer.</li></ul>
+  <div class="cols">
+    <div class="card is-rec"><h3>Variante A – Eine Karte unten <span class="tag">Empfehlung</span></h3>
+      <ul><li>Eine Fläche über der unteren Insel: Kopf (Name, Stapel ↑ ↓, Eigenschaften ˄) und darunter die Werkzeugzeile. Hochziehen macht genau diese Fläche zum Eigenschaften-Sheet (halb, voll) – der Kopf mit dem Durchschalten bleibt oben am Sheet.</li>
+      <li>Daumennah, und weil es nur eine Fläche ist, kann sich nichts überdecken. Beim Tippen dockt die Karte über der Tastatur.</li></ul></div>
+    <div class="card"><h3>Variante B – Kontext oben, Sheet unten</h3>
+      <ul><li>Werkzeugzeile mit Durchschalten oben unter der Insel (wie die Werkzeug-Leisten am Desktop), Eigenschaften als Sheet von unten.</li>
+      <li>Gleiches Bild wie Desktop und unten bleibt Platz zum Schieben; aber die häufigen Knöpfe sind weit vom Daumen und Auswahl und Leiste liegen oft weit auseinander.</li></ul></div>
+  </div>
+  <p class="muted">Probier: Objekte antippen (GA, Garage, Stellplatz liegen übereinander), ↑ ↓, Deckkraft, den Griff der Karte antippen oder ziehen, „Text bearbeiten“.</p>
+  <h2>Fehlende Bausteine</h2>
+  <ul><li><b>ContextCard / BottomSheet mit Rasthöhen</b> (peek, halb, voll; Kopf bleibt; Tastatur-Dock).</li>
+  <li><b>Drill-in-Zeile</b> (‹ Titel + Bedienelement) für Leisten.</li><li><b>StackSwitcher kompakt</b> (↑ n / m ↓).</li></ul>
+</template>
+<script>
+const { B, icon, esc, cx, $ } = Mock;
+const OBJ = [
+  { id: 'a2', name: 'Stellplatz', type: 'area', cx: 330, cy: 250, rot: -6, fill: 'rgba(250,204,21,.35)', stroke: '#a16207', sw: 1.2, opacity: 1, pts: [{ x: -80, y: -50 }, { x: 80, y: -50 }, { x: 80, y: 50 }, { x: -80, y: 50 }] },
+  { id: 'r2', name: 'Garage', type: 'rect', cx: 330, cy: 250, w: 90, h: 56, rot: -6, fill: 'hatch', stroke: '#111111', sw: 1.5, opacity: 1 },
+  { id: 't2', name: 'GA', type: 'text', text: 'GA', size: 18, bold: true, cx: 330, cy: 250, rot: -6, opacity: 1, fill: '#111111' },
+];
+const byId = id => OBJ.find(o => o.id === id);
+const S = { stack: ['t2', 'r2', 'a2'], idx: 1, mode: 'peek', drill: null };
+let C;
+const sel = () => byId(S.stack[S.idx]);
+const P = { x: 332, y: 251 };
+
+function geom(ctx) {
+  const canvasH = ctx.H - 56, isl = 56 + 8 + 8; // bottom island + inset + gap
+  const kb = ctx.state === 'kbd' ? 280 : 0;
+  let cardH = 0, cardBottom = 0;
+  if (ctx.variant === 'a') {
+    if (S.mode === 'peek') { cardH = 52 + 57; cardBottom = kb ? kb + 8 : isl; }
+    else { cardH = S.mode === 'full' ? canvasH - 8 : Math.round(canvasH * 0.6); cardBottom = 0; }
+  } else {
+    cardH = S.mode === 'peek' ? 0 : (S.mode === 'full' ? canvasH - 8 : Math.round(canvasH * 0.6));
+  }
+  const top = ctx.variant === 'b' ? 8 + 56 + 8 + 56 + 8 : 8 + 56 + 8;
+  const bottom = ctx.variant === 'a' ? canvasH - cardBottom - cardH - 8 : canvasH - Math.max(cardH, kb ? kb : isl) - 8;
+  return { canvasH, cardH, cardBottom, band: { x0: 0, x1: ctx.W, y0: top, y1: Math.max(top + 60, bottom) } };
+}
+
+function toolRow(ctx) {
+  const o = sel();
+  if (S.drill === 'opacity') {
+    const v = Math.round(o.opacity * 100);
+    return `${B.ibtn('chevron-left', 'Zurück', { attrs: { 'data-act': 'back' } })}<span class="drill-l">Deckkraft</span><input type="range" class="nb-slider" min="0" max="100" value="${v}" style="--_p:${v}%;flex:1;min-width:80px" data-f="opacity" aria-label="Deckkraft"><span style="width:76px;flex:none">${B.num({ label: 'Deckkraft', labelPos: 'hidden', value: v, unit: '%', bare: true, attrs: { 'data-f': 'opacityN' } })}</span>`;
+  }
+  const op = B.btn(Math.round(o.opacity * 100) + ' %', { variant: 'quiet', icon: 'droplet', attrs: { 'data-act': 'opacity', title: 'Deckkraft' } });
+  if (o.type === 'text') return `${ctx.state === 'kbd' ? B.btn('Fertig', { variant: 'primary', icon: 'check', attrs: { 'data-act': 'done' } }) : B.btn('Text bearbeiten', { variant: 'quiet', icon: 'pencil', attrs: { 'data-act': 'edit' } })}<span class="sep"></span>${B.ibtn('bold', 'Fett', { pressed: true })}${B.btn('18', { variant: 'quiet', iconEnd: 'chevron-down' })}${B.color({ label: 'Textfarbe', hex: o.fill })}<span class="sep"></span>${op}`;
+  return `${B.color({ label: 'Füllung', hex: o.type === 'rect' ? '#e4e4e7' : '#facc15' })}${B.color({ label: 'Kontur', hex: o.stroke })}${B.btn(o.sw + ' pt', { variant: 'quiet', icon: 'minus' })}<span class="sep"></span>${op}${B.ibtn('copy', 'Duplizieren')}${B.ibtn('trash-2', 'Löschen')}`;
+}
+
+function stackCtl() {
+  return `<span class="cc-stack" role="group" aria-label="Objekte an dieser Stelle">${B.ibtn('arrow-up', 'Objekt darüber', { disabled: S.idx === 0, attrs: { 'data-act': 'up' } })}<span class="cnt">${S.idx + 1}/${S.stack.length}</span>${B.ibtn('arrow-down', 'Objekt darunter', { disabled: S.idx === S.stack.length - 1, attrs: { 'data-act': 'down' } })}</span>`;
+}
+
+function propsBody() {
+  const o = sel();
+  const rows = [
+    ['Position', `${B.num({ label: 'X', prefix: 'X', value: '116.42', bare: true })}${B.num({ label: 'Y', prefix: 'Y', value: '88.05', bare: true })}`],
+    ['Größe', `${B.num({ label: 'Breite', prefix: 'B', value: o.type === 'text' ? '7.9' : '31.75', bare: true })}${B.num({ label: 'Höhe', prefix: 'H', value: o.type === 'text' ? '7.94' : '19.76', bare: true })}`],
+    ['Drehung', `${B.num({ label: 'Drehung', prefix: '°', prefixIcon: 'rotate-cw', value: '−6°', bare: true })}${B.ibtn('rotate-cw', 'Um 90° drehen', { variant: 'secondary' })}`],
+  ];
+  return `<section class="nb-section"><div class="nb-section-head"><h4>Erscheinung</h4></div><div class="nb-section-body"><div class="nb-row is-wide-first"><input type="range" class="nb-slider" min="0" max="100" value="${Math.round(o.opacity * 100)}" style="--_p:${Math.round(o.opacity * 100)}%" data-f="opacity" aria-label="Deckkraft"><span style="width:84px">${B.num({ label: 'Deckkraft', labelPos: 'hidden', value: Math.round(o.opacity * 100), unit: '%', bare: true, attrs: { 'data-f': 'opacityN' } })}</span></div></div></section>
+    <section class="nb-section"><div class="nb-section-head"><h4>Position &amp; Größe</h4><span class="nb-sum">mm</span></div><div class="nb-section-body">${rows.map(r => `<div class="nb-row">${r[1]}</div>`).join('')}</div></section>
+    <section class="nb-section"><div class="nb-section-head"><h4>Ausrichten</h4></div><div class="nb-section-body"><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:2px">${['objects-align-left', 'objects-align-center', 'objects-align-right', 'objects-align-top', 'objects-align-middle', 'objects-align-bottom'].map(i => B.ibtn(i, 'Ausrichten')).join('')}</div></div></section>`;
+}
+
+function cardA(ctx, g) {
+  const o = sel();
+  const head = `<div class="cc-head"><span class="nm">${icon(Mock.typeIcon[o.type])}<span>${esc(o.type === 'text' ? '„' + o.text + '“' : o.name)}</span></span>${S.stack.length > 1 ? stackCtl() : ''}${B.ibtn(S.mode === 'peek' ? 'chevron-up' : 'chevron-down', S.mode === 'peek' ? 'Eigenschaften öffnen' : 'Eigenschaften schließen', { attrs: { 'data-act': 'sheet' } })}</div>`;
+  const sheet = S.mode !== 'peek';
+  return `<div class="${cx('ccard', sheet && 'is-sheet')}" style="height:${g.cardH}px;bottom:${g.cardBottom}px" role="region" aria-label="Auswahl">
+    <div class="grab" data-act="grab" role="button" aria-label="Karte größer/kleiner"></div>${head}
+    ${sheet ? `<div class="cc-row">${toolRow(ctx)}</div><div class="cc-body nb-sheet-body">${propsBody()}</div>` : `<div class="cc-row">${toolRow(ctx)}</div>`}</div>`;
+}
+
+function barB(ctx) {
+  const o = sel();
+  const body = S.drill === 'opacity'
+    ? `<div class="oo-ui-bar-groups">${toolRow(ctx)}</div><div class="oo-ui-bar-end">${B.ibtn('check', 'Fertig', { attrs: { 'data-act': 'back' } })}</div>`
+    : `<div class="oo-ui-bar-groups">${S.stack.length > 1 ? `<div class="oo-ui-bar-group">${stackCtl()}</div><span class="oo-ui-bar-divider"></span>` : ''}<div class="oo-ui-bar-group">${toolRow(ctx)}</div></div><div class="oo-ui-bar-end">${B.ibtn('panel-right', 'Eigenschaften', { pressed: S.mode !== 'peek', attrs: { 'data-act': 'sheet' } })}</div>`;
+  return `<div class="topbar2"><div class="oo-ui-bar" role="toolbar" aria-label="Auswahl">${body}</div></div>`;
+}
+function sheetB(ctx, g) {
+  if (S.mode === 'peek') return '';
+  const o = sel();
+  return `<aside class="nb-sheet" style="height:${g.cardH}px"><div class="nb-sheet-grab" data-act="grab"></div><div class="cc-head"><span class="nm">${icon(Mock.typeIcon[o.type])}<span>${esc(o.type === 'text' ? '„' + o.text + '“' : o.name)}</span></span>${B.ibtn('x', 'Schließen', { attrs: { 'data-act': 'sheet' } })}</div><div class="nb-sheet-body" style="border-top:1px solid var(--pdf-border)">${propsBody()}</div></aside>`;
+}
+
+function today(ctx, v) {
+  const canvasH = ctx.H - 56;
+  const sh = Math.round(canvasH * 0.52);
+  const opTop = canvasH - sh - 30;
+  return `<div class="old-next" style="top:${opTop - 14}px">${B.btn('Next object at this point', { icon: 'layers-stack' })}</div>
+    <div class="old-sheet" style="height:${sh}px">${B.seg({ label: 'Tabs', value: 'p', options: [{ value: 'p', label: 'Properties' }, { value: 'l', label: 'Layers' }] })}<div style="margin-top:12px;display:grid;gap:12px">${B.num({ label: 'Width', value: '31.75', unit: 'mm' })}${B.num({ label: 'Height', value: '19.76', unit: 'mm' })}</div></div>
+    <div class="old-op" style="top:${opTop}px"><b style="font-size:13px">Opacity</b><input type="range" class="nb-slider" value="80" style="--_p:80%;flex:1"><span>80 %</span></div>
+    <div class="badring" style="left:16px;right:16px;top:${opTop - 20}px;height:96px"></div>
+    <div class="bad" style="left:20px;top:${opTop - 44}px">Heute: Leiste über Drawer, „Next object“ verdeckt</div>`;
+}
+
+function kbd() { return `<div class="kbd" aria-hidden="true">${['QWERTZUIOPÜ', 'ASDFGHJKLÖÄ', 'YXCVBNM'].map(r => `<div>${[...r].map(k => `<span>${k}</span>`).join('')}</div>`).join('')}<div><span>123</span><span class="wide">Leerzeichen</span><span>↵</span></div></div>`; }
+
+function render(ctx) {
+  C = ctx;
+  if (ctx._last !== ctx.state + ctx.variant) {
+    S.drill = ctx.state === 'opacity' ? 'opacity' : null;
+    S.mode = { half: 'half', full: 'full' }[ctx.state] || 'peek';
+    S.idx = ctx.state === 'stack' ? 2 : (ctx.state === 'kbd' ? 0 : 1);
+    if (ctx.state === 'opacity') byId(S.stack[S.idx]).opacity = 0.8;
+    ctx._last = ctx.state + ctx.variant;
+  }
+  const g = geom(ctx);
+  const v = ctx.state === 'today' ? Mock.view(1.25, 195 - P.x * 1.25, 150 - P.y * 1.25) : Mock.fitView([sel()], 1.25, g.band);
+  const ch = Mock.chrome(ctx, { tool: 'edit', zoom: '125%', noBottom: ctx.state === 'kbd' });
+  const world = `<svg class="world" aria-hidden="true"><g transform="translate(${v.ox} ${v.oy}) scale(${v.z})">${Mock.plan('d')}${OBJ.map(o => Mock.renderObj(o, 'd')).join('')}</g></svg>`;
+  const ov = `<svg class="overlay">${Mock.selOverlay([sel()], v, { phone: true })}</svg>`;
+  let ui = '';
+  if (ctx.state === 'today') ui = today(ctx, v);
+  else if (ctx.variant === 'a') ui = cardA(ctx, g);
+  else ui = barB(ctx) + sheetB(ctx, g);
+  ctx.stage.innerHTML = ch.head + `<div class="ed-canvas">${world}${ov}${ch.islands}${ui}${ctx.state === 'kbd' ? kbd() : ''}</div>`;
+  bind(ctx, v);
+}
+
+function bind(ctx, v) {
+  const st = ctx.stage, canvas = $('.ed-canvas', st);
+  st.onclick = e => {
+    const t = e.target.closest('[data-act]'); if (!t) return;
+    const a = t.dataset.act;
+    if (a === 'up') S.idx = Math.max(0, S.idx - 1);
+    if (a === 'down') S.idx = Math.min(S.stack.length - 1, S.idx + 1);
+    if (a === 'opacity') S.drill = 'opacity';
+    if (a === 'back') S.drill = null;
+    if (a === 'sheet') S.mode = S.mode === 'peek' ? 'half' : 'peek';
+    if (a === 'grab') S.mode = { peek: 'half', half: 'full', full: 'peek' }[S.mode];
+    if (a === 'edit') { S.idx = 0; return ctx.setState('kbd'); }
+    if (a === 'done') { ctx.setState('sel'); S.idx = 0; return render(ctx); }
+    if ((a === 'up' || a === 'down') && sel().type !== 'text' && ctx.state === 'kbd') return ctx.setState('sel');
+    render(ctx);
+  };
+  st.oninput = e => {
+    if (e.target.dataset.f === 'opacity') { sel().opacity = e.target.value / 100; e.target.style.setProperty('--_p', e.target.value + '%'); const n = $('[data-f="opacityN"]', st); if (n) n.value = e.target.value; $('svg.world g', st).innerHTML = Mock.plan('d') + OBJ.map(o => Mock.renderObj(o, 'd')).join(''); }
+  };
+  canvas.onpointerdown = e => {
+    if (e.target.closest('.island, .ccard, .topbar2, .nb-sheet, .kbd, .old-sheet, .old-op, .old-next')) return;
+    const wp = v.w(Mock.localPoint(ctx, canvas, e));
+    const hits = Mock.objectsAt(OBJ, wp, 12, v).map(o => o.id);
+    if (!hits.length) return;
+    S.stack = hits; S.idx = 0; S.drill = null; render(ctx);
+  };
+  // Drag the grabber: snap to peek / half / full.
+  const grab = $('[data-act="grab"]', st);
+  if (grab) grab.onpointerdown = e => {
+    e.preventDefault(); const y0 = e.clientY, m0 = S.mode; let moved = false;
+    const mv = ev => { if (Math.abs(ev.clientY - y0) > 12) moved = true; };
+    const up = ev => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); if (!moved) return; const dy = (ev.clientY - y0) / ctx.scale; const order = ['peek', 'half', 'full']; let i = order.indexOf(m0) + (dy < -60 ? 1 : dy > 60 ? -1 : 0); S.mode = order[Math.max(0, Math.min(2, i))]; render(ctx); };
+    window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+  };
+}
+
+Mock.page({
+  title: 'Handy: Auswahl, Leiste, Drawer', ids: 'PDF-F14',
+  variants: {
+    a: { name: 'A – Eine Karte unten (Empfehlung):', why: 'Name, Durchschalten und Werkzeugzeile auf einer Fläche über der Insel; hochziehen macht daraus das Eigenschaften-Sheet. Nichts kann sich überdecken.' },
+    b: { name: 'B – Kontext oben, Sheet unten:', why: 'Werkzeugzeile mit Durchschalten oben unter der Insel (wie Desktop), Eigenschaften als Sheet von unten.' },
+  },
+  states: [
+    { v: 'sel', label: 'Auswahl (Stapel 2 / 3)' }, { v: 'opacity', label: 'Deckkraft (Drill-in)' }, { v: 'stack', label: 'Durchgeschaltet 3 / 3' },
+    { v: 'half', label: 'Eigenschaften halb' }, { v: 'full', label: 'Eigenschaften voll' }, { v: 'kbd', label: 'Text bearbeiten (Tastatur)' }, { v: 'today', label: 'Heute (zum Vergleich)' },
+  ],
+  devices: [{ v: 'phone', label: 'Handy' }, { v: 'phone320', label: '320' }],
+  defaultDevice: 'phone',
+  render,
+});
+</script>
+</body>
+</html>

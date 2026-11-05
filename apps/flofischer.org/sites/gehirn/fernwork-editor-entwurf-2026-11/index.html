@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Editor-Entwürfe November</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/ui.css">
+<link rel="stylesheet" href="assets/mock.css">
+<script>
+  (function () { let t = null; try { t = localStorage.getItem('fwmock.theme'); } catch {}
+    document.documentElement.dataset.theme = t === 'dark' || t === 'light' ? t : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); })();
+</script>
+<style>
+  .ix-top { display: flex; align-items: flex-start; gap: 12px; }
+  .ix-top > div { flex: 1; }
+  .ix-card .ab { display: grid; gap: 6px; font-size: 12px; line-height: 17px; color: var(--pdf-muted); }
+  .ix-card .ab b { color: var(--pdf-text); font-weight: 600; }
+  .ix-sec .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .ix-sec .box { padding: 12px 16px; border: 1px solid var(--pdf-border); border-radius: 12px; background: var(--pdf-panel); font-size: 13px; }
+  .ix-sec .box ul { margin: 4px 0; padding-left: 18px; }
+</style>
+</head>
+<body>
+<main class="ix">
+  <div class="ix-top">
+    <div>
+      <h1>Fernwork PDF-Editor · Entwürfe Welle 2</h1>
+      <p class="lead">Fünf klickbare Entwürfe, je zwei Varianten, Desktop und Handy, hell und dunkel. Gebaut aus den Bausteinen in <code>pdf-editor/ui/</code> (CSS kopiert); was fehlt, ist als neuer Baustein markiert. Plan synthetisch. Oben in jedem Entwurf: Variante, Zustand, Gerät – der Link merkt sich die Auswahl.</p>
+    </div>
+    <button type="button" class="oo-ui-button is-icon is-quiet is-md" aria-label="Hell / dunkel" title="Hell / dunkel" id="theme"></button>
+  </div>
+  <div class="ix-grid">
+    <a class="ix-card" href="messen.html">
+      <span class="k">PDF-F18 · F12 · A20</span><h2>Messen-Leiste und Kalibrieren</h2>
+      <p>Die Distance-Leiste aus Bausteinen; Kalibrieren als Korrekturfaktor („1 : 500 · ×1.002“), sitzt in der Leiste statt an der Linie.</p>
+      <div class="ab"><span><b>A Offen:</b> alles in der Leiste, Kalibrieren verwandelt die Leiste in 2 Schritte.</span><span><b>B Kompakt:</b> Maßstab-Knopf mit Zustand, Popover für Maßstab/Einheit/Kalibrieren.</span></div>
+      <div class="rec">Empfehlung: <b>B</b> – zeigt den Zustand, passt auch bei 320 px in eine Zeile.</div>
+    </a>
+    <a class="ix-card" href="properties.html">
+      <span class="k">PDF-A18</span><h2>Properties-Panel neu</h2>
+      <p>Text, Schrift, Größe/Farbe, Erscheinung, Position &amp; Größe, Drehung, Ausrichten; Mixed, gesperrt, lädt, Fehler, leer.</p>
+      <div class="ab"><span><b>A Inspector:</b> dicht wie Figma, Kürzel im Feld, zwei Werte pro Zeile.</span><span><b>B Formular:</b> Label links, aufklappbare Abschnitte mit Zusammenfassung.</span></div>
+      <div class="rec">Empfehlung: <b>A</b> – halb so hoch, keine Wiederholung von Labels.</div>
+    </a>
+    <a class="ix-card" href="auswahl.html">
+      <span class="k">PDF-A16</span><h2>Auswahlrahmen folgt der Form</h2>
+      <p>Gedrehte Objekte mit gedrehtem Rahmen, Pfade mit eigenem Umriss, Hover-Umriss vor dem Klick; Vergleich mit heute.</p>
+      <div class="ab"><span><b>A Gedrehter Rahmen:</b> Rahmen und Griffe drehen mit, Pfade zusätzlich mit Umriss.</span><span><b>B Umriss zuerst:</b> Pfade zeigen Knoten, zweiter Klick schaltet auf den Rahmen.</span></div>
+      <div class="rec">Empfehlung: <b>A</b> – ein Modell für alles, kein versteckter Modus.</div>
+    </a>
+    <a class="ix-card" href="stapel.html">
+      <span class="k">PDF-A17</span><h2>Übereinanderliegende Objekte</h2>
+      <p>Fünf Objekte an einer Stelle: durchschalten, Liste, Umriss-Vorschau, Alt+Klick; Touch.</p>
+      <div class="ab"><span><b>A Stapel-Chip:</b> „1 / 5“ mit ↑ ↓ neben der Auswahl, Liste per Klick, Alt zeigt das nächste.</span><span><b>B Liste am Zeiger:</b> Rechtsklick/langes Drücken, Alt+Klick mit Hinweis.</span></div>
+      <div class="rec">Empfehlung: <b>A</b> – sichtbar, gleich auf Desktop und Handy.</div>
+    </a>
+    <a class="ix-card" href="handy.html">
+      <span class="k">PDF-F14</span><h2>Handy: Auswahl, Leiste, Drawer</h2>
+      <p>Auswahl, Mini-Leiste/Deckkraft und Durchschalten verdecken sich nie; mit „Heute“ zum Vergleich und Tastatur-Zustand.</p>
+      <div class="ab"><span><b>A Eine Karte unten:</b> Name, ↑ ↓ und Werkzeuge auf einer Fläche, wird hochgezogen zum Sheet.</span><span><b>B Kontext oben:</b> Werkzeugzeile oben wie am Desktop, Sheet unten.</span></div>
+      <div class="rec">Empfehlung: <b>A</b> – daumennah, nur eine Fläche.</div>
+    </a>
+  </div>
+
+  <section class="ix-sec">
+    <h2>Gemeinsame Regeln aller Entwürfe</h2>
+    <div class="cols">
+      <div class="box"><ul>
+        <li>Eine Höhe pro Zeile: 36 px in Leisten, 32 px in Panels, 44 px auf Touch.</li>
+        <li>Zustände als Chip (Warnung gelb, Erfolg grün, Info neutral-grün), nie als loser Text.</li>
+        <li>Unter-Einstellungen ersetzen die Zeile (Drill-in), statt eine zweite Leiste darüberzulegen.</li>
+        <li>Was sich öffnet, schiebt die Seite so, dass die Auswahl sichtbar bleibt.</li>
+      </ul></div>
+      <div class="box"><ul>
+        <li>Grün-Umriss mit weißem Saum für Auswahl und Hover, gestrichelt für „das kommt als Nächstes“.</li>
+        <li>Zahlen gerundet anzeigen (mm 2, Grad 1 Nachkommastelle), genau speichern; Dezimalpunkt überall.</li>
+        <li>Inter überall, auch in Zahlenfeldern und Platzhaltern.</li>
+        <li><kbd class="nb-kbd">Esc</kbd> schließt Leiste/Popover/Modus, Enter bestätigt.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="ix-sec">
+    <h2>Fehlende Bausteine (Vorschlag für <code>pdf-editor/ui/</code>)</h2>
+    <div class="box"><ul>
+      <li><b>NumberField mit Präfix</b> im Feld (X, Y, B, H, °; Ziehen am Präfix ändert den Wert).</li>
+      <li><b>ToggleGroup</b> – Mehrfachwahl im Segmented-Look (B I U S).</li>
+      <li><b>PanelSection</b> (Titel, Zusammenfassung, Aktion, aufklappbar) und <b>ObjectHeader</b> (Kachel, Name, Typ · Seite, drei Aktionen).</li>
+      <li><b>Popover mit Kopf und Fuß</b> (Titel, Inhalt, Aktionen) und <b>BottomSheet / ContextCard</b> mit Rasthöhen und Tastatur-Dock.</li>
+      <li><b>StackSwitcher</b> (↑ n / m ↓ mit Liste) und <b>Menu-Zeile mit Unterzeile</b> plus Abschnittstitel; <b>Kontextmenü am Punkt</b>.</li>
+      <li><b>Slider</b>, <b>Textarea</b>, <b>Skeleton</b>, <b>HUD-Chip</b> am Zeiger, Status-Chip mit Schritt-Nummer und mit ✕.</li>
+      <li>Button-Zustand „offen“ (<code>aria-expanded</code>): ruhige Füllung statt Akzent, damit ein Popover-Knopf nicht wie ein Modus aussieht.</li>
+      <li>Overlay-Tokens für Auswahl/Hover/Griffe (Desktop- und Touch-Größen).</li>
+    </ul></div>
+  </section>
+</main>
+<script src="assets/icons.js"></script>
+<script src="assets/mock.js"></script>
+<script>
+  const btn = document.getElementById('theme');
+  const paint = () => { btn.innerHTML = Mock.icon(document.documentElement.dataset.theme === 'dark' ? 'sun' : 'moon'); };
+  btn.onclick = () => { const n = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; Mock.store.set('theme', n); paint(); };
+  paint();
+</script>
+</body>
+</html>

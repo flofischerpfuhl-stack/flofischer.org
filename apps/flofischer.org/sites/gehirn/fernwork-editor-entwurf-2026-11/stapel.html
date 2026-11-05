@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Übereinanderliegende Objekte</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/ui.css">
+<link rel="stylesheet" href="assets/mock.css">
+<style>
+  .nb-stack { position: absolute; z-index: 24; }
+  .nb-stack .lbl .oo-ui-button-label { display: inline-flex; gap: 6px; align-items: center; }
+  .oo-ui-popover.stack-pop { position: absolute; z-index: 26; width: 260px; }
+  .stack-pop .hd { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 4px; color: var(--pdf-muted); font-size: 11px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; }
+  .stack-pop .hd .nb-kbd { text-transform: none; letter-spacing: 0; font-weight: 500; }
+  .nb-objrow .z { color: var(--pdf-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .altchip { position: absolute; z-index: 24; padding: 2px 8px; border-radius: 6px; background: var(--pdf-text); color: var(--pdf-panel); font-size: 11px; font-weight: 600; line-height: 18px; white-space: nowrap; pointer-events: none; }
+  .ptr { position: absolute; z-index: 23; width: 18px; height: 18px; color: var(--pdf-text); pointer-events: none; filter: drop-shadow(0 1px 1px rgba(255,255,255,.9)); }
+  .ptr svg { width: 18px; height: 18px; }
+  .press { position: absolute; z-index: 23; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; border: 2px solid var(--pdf-accent-strong); background: color-mix(in srgb, var(--pdf-accent-strong) 18%, transparent); pointer-events: none; }
+  .nb-sheet .hd2 { display: flex; align-items: center; gap: 8px; padding: 0 12px 8px 16px; }
+  .nb-sheet .hd2 h3 { flex: 1; margin: 0; font-size: 15px; font-weight: 600; }
+  .nb-sheet .oo-ui-menu { padding: 0 8px 16px; }
+</style>
+</head>
+<body>
+<script src="assets/icons.js"></script>
+<script src="assets/mock.js"></script>
+<template id="notes">
+  <h2>Worum es geht</h2>
+  <p>Auf Lageplänen liegen an einer Stelle oft fünf Dinge übereinander: Beschriftung, Gebäude, Fläche, Leitungsrecht, darunter das Planbild. Heute trifft ein Klick immer das oberste, und es gibt keinen guten Weg zum darunterliegenden (am Handy verdecken Drawer und Deckkraft-Leiste zusätzlich die Bedienung).</p>
+  <div class="cols">
+    <div class="card is-rec"><h3>Variante A – Stapel-Chip <span class="tag">Empfehlung</span></h3>
+      <ul><li>Liegen unter dem Klickpunkt mehrere Objekte, erscheint neben der Auswahl ein Chip „Text GA · 1 / 5“ mit ↑ ↓ (darüber/darunter). Ein Klick auf den Namen öffnet die Liste aller Objekte an dieser Stelle; Zeigen auf eine Zeile zeigt den Umriss auf dem Plan.</li>
+      <li><kbd>Alt</kbd>+Klick schaltet weiter nach unten, <kbd>Alt</kbd>+<kbd>Shift</kbd>+Klick nach oben; solange <kbd>Alt</kbd> gedrückt ist, zeigt ein gestrichelter Umriss, was der nächste Klick trifft.</li>
+      <li>Gleich am Handy: der Chip hat 44-px-Pfeile und sitzt über der Mini-Leiste (siehe Handy-Drawer), nie darunter.</li>
+      <li>Ist nur ein Objekt unter dem Punkt, gibt es keinen Chip.</li></ul></div>
+    <div class="card"><h3>Variante B – Liste am Zeiger</h3>
+      <ul><li>Nichts Zusätzliches im Bild. Rechtsklick öffnet oben im Kontextmenü „Objekte hier (5)“ mit Umriss-Vorschau; <kbd>Alt</kbd>+Klick schaltet durch, ein kurzer Hinweis unten zeigt „Garage · 2 von 5“.</li>
+      <li>Touch: lange drücken öffnet die Liste als Sheet. Sauberer, aber schwer zu entdecken – genau das Problem von heute.</li></ul></div>
+  </div>
+  <h2>Weitere Regeln</h2>
+  <ul><li>Breadcrumb: Der Properties-Kopf zeigt bei einem Stapel „Garage · 2 von 5“ unter dem Namen (gleiche Quelle wie der Chip).</li>
+  <li>Das Planbild/der Scan ganz unten ist gesperrt-wählbar (grau „Bild · gesperrt“), damit ein Klick daneben nicht den ganzen Plan verschiebt.</li>
+  <li>Tastatur in der Liste: ↑/↓ wechseln, Enter wählt, Esc schließt.</li></ul>
+  <h2>Fehlende Bausteine</h2>
+  <ul><li><b>StackSwitcher</b> (Chip mit ↑ ↓ und Liste).</li><li><b>Menu-Zeile mit zweiter Zeile</b> (Name + Typ) und <b>Menu-Abschnittstitel</b>.</li><li><b>Kontextmenü am Zeiger</b> (AnchoredPopover an einem Punkt statt an einem Element).</li></ul>
+</template>
+<script>
+const { B, icon, esc, cx, $ } = Mock;
+const OBJ = [
+  { id: 'img', name: 'Planbild (Scan)', type: 'image', cx: 500, cy: 350, w: 1000, h: 700, rot: 0, locked: true },
+  { id: 'a2', name: 'Stellplatzfläche', type: 'area', cx: 330, cy: 250, rot: -6, fill: 'rgba(250,204,21,.35)', stroke: '#a16207', sw: 1.2, pts: [{ x: -80, y: -50 }, { x: 80, y: -50 }, { x: 80, y: 50 }, { x: -80, y: 50 }] },
+  { id: 'r2', name: 'Garage', type: 'rect', cx: 330, cy: 250, w: 90, h: 56, rot: -6, fill: 'hatch', stroke: '#111', sw: 1.5 },
+  { id: 'l2', name: 'Leitungsrecht', type: 'line', cx: 330, cy: 250, rot: 32, stroke: '#2563eb', sw: 2.5, dash: '12 5', pts: [{ x: -140, y: 0 }, { x: 140, y: 0 }] },
+  { id: 't2', name: 'GA', type: 'text', text: 'GA', size: 18, bold: true, cx: 330, cy: 250, rot: -6 },
+];
+const byId = id => OBJ.find(o => o.id === id);
+const P0 = { x: 332, y: 251 };
+const S = { pt: P0, stack: [], idx: 0, list: false, alt: false, hoverRow: null, toast: false, press: false, ctxAt: null };
+let C;
+
+function stackAt(v, wp) { return Mock.objectsAt(OBJ, wp, 6, v).map(o => o.id); }
+function view(ctx) {
+  if (!ctx.phone) return Mock.view(1.6, -10, -130);
+  return Mock.view(1.25, 195 - P0.x * 1.25, 230 - P0.y * 1.25);
+}
+const cur = () => S.stack[S.idx];
+
+function initState(ctx, v) {
+  S.stack = stackAt(v, P0); S.pt = P0; S.list = false; S.alt = false; S.toast = false; S.press = false; S.ctxAt = null; S.hoverRow = null;
+  S.idx = 0;
+  if (ctx.state === 'cycled') { S.idx = 2; S.toast = ctx.variant === 'b'; }
+  if (ctx.state === 'list') { S.list = true; if (ctx.variant === 'b') S.ctxAt = v.s(P0); }
+  if (ctx.state === 'alt') S.alt = true;
+  if (ctx.state === 'list' && ctx.phone && ctx.variant === 'b') S.press = true;
+}
+
+function rowsHTML() {
+  return S.stack.map((id, i) => {
+    const o = byId(id);
+    return `<button type="button" role="menuitemradio" aria-checked="${i === S.idx}" class="${cx('oo-ui-menu-item nb-objrow', i === S.idx && 'is-current')}" data-row="${i}"><span class="${cx('oo-ui-menu-lead', i === S.idx && 'is-check')}">${icon(i === S.idx ? 'check' : Mock.typeIcon[o.type])}</span><span><span class="t">${esc(o.type === 'text' ? `„${o.text}“` : o.name)}</span><span class="s">${Mock.typeLabel[o.type]}${o.locked ? ' · gesperrt' : ''}</span></span><span class="z">${i === 0 ? 'oben' : i === S.stack.length - 1 ? 'unten' : ''}</span></button>`;
+  }).join('');
+}
+
+function chipA(ctx, v) {
+  if (S.stack.length < 2) return '';
+  const o = byId(cur());
+  const cs = Mock.corners(o).map(v.s);
+  const yMax = Math.max(...cs.map(p => p.y)), xMin = Math.min(...cs.map(p => p.x));
+  let left = Math.max(8, Math.min(ctx.W - (ctx.phone ? 310 : 300), (o.type === 'image' ? v.s(S.pt).x - 40 : xMin)));
+  let top = o.type === 'image' ? v.s(S.pt).y + 24 : yMax + 14;
+  top = Math.min(top, ctx.H - 56 - (ctx.phone ? 150 : 130));
+  const name = o.type === 'text' ? `„${o.text}“` : o.name;
+  return `<div class="nb-stack" role="group" aria-label="Objekte an dieser Stelle" style="left:${left}px;top:${top}px" data-chip>
+    ${B.ibtn('arrow-up', 'Objekt darüber', { disabled: S.idx === 0, attrs: { 'data-act': 'up' }, shortcut: 'Alt+Shift+Klick' })}
+    ${B.btn(`${icon(Mock.typeIcon[o.type])}<span style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${esc(name)}</span><span class="count">${S.idx + 1} / ${S.stack.length}</span>`, { html: true, variant: 'quiet', iconEnd: 'chevron-down', cls: 'lbl', attrs: { 'data-act': 'list', 'aria-expanded': String(S.list), title: 'Alle Objekte an dieser Stelle' } })}
+    ${B.ibtn('arrow-down', 'Objekt darunter', { disabled: S.idx === S.stack.length - 1, attrs: { 'data-act': 'down' }, shortcut: 'Alt+Klick' })}</div>`;
+}
+
+function listA(ctx) {
+  if (!S.list || ctx.variant !== 'a') return '';
+  return `<div class="oo-ui-popover is-static is-menu stack-pop" data-pop role="menu"><div class="hd"><span>An dieser Stelle (${S.stack.length})</span><span class="nb-kbd">Alt+Klick</span></div><div class="oo-ui-menu">${rowsHTML()}</div></div>`;
+}
+
+function ctxMenuB(ctx) {
+  if (ctx.variant !== 'b' || !S.list) return '';
+  if (ctx.phone) {
+    return `<aside class="nb-sheet" style="height:${Math.min(ctx.H - 160, 420)}px" aria-label="Objekte hier"><div class="nb-sheet-grab"></div><div class="hd2"><h3>Objekte hier (${S.stack.length})</h3>${B.ibtn('x', 'Schließen', { attrs: { 'data-act': 'closelist' } })}</div><div class="nb-sheet-body"><div class="oo-ui-menu">${rowsHTML()}</div></div></aside>`;
+  }
+  const at = S.ctxAt || { x: 300, y: 300 };
+  return `<div class="oo-ui-popover is-static is-menu stack-pop" data-pop role="menu" style="left:${at.x + 4}px;top:${at.y + 4}px;width:250px"><div class="hd"><span>Objekte hier (${S.stack.length})</span></div><div class="oo-ui-menu">${rowsHTML()}
+    <div class="oo-ui-menu-separator"></div>${B.menuItem('Ausschneiden', { icon: 'scissors', kbd: 'Strg+X' })}${B.menuItem('Kopieren', { icon: 'copy', kbd: 'Strg+C' })}${B.menuItem('Nach vorne', { icon: 'arrow-up-to-line', kbd: ']' })}${B.menuItem('Nach hinten', { icon: 'arrow-down-to-line', kbd: '[' })}<div class="oo-ui-menu-separator"></div>${B.menuItem('Löschen', { icon: 'trash-2', danger: true, kbd: 'Entf' })}</div></div>`;
+}
+
+function overlay(ctx, v) {
+  let out = '';
+  const sel = S.stack.length ? [byId(cur())] : [];
+  if (S.hoverRow != null && S.stack[S.hoverRow] && S.hoverRow !== S.idx) out += Mock.hoverOverlay(byId(S.stack[S.hoverRow]), v, 'ov-next');
+  if (S.alt && S.stack.length > 1) out += Mock.hoverOverlay(byId(S.stack[(S.idx + 1) % S.stack.length]), v, 'ov-next');
+  const o = sel[0];
+  if (o) out += Mock.selOverlay([o], v, { phone: ctx.phone, style: o.type === 'line' ? 'shape' : 'obb', locked: !!o.locked });
+  const p = v.s(S.pt);
+  if (S.stack.length > 1 && !ctx.phone) out += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--pdf-accent-strong)" stroke="#fff" stroke-width="1.5"/>`;
+  return out;
+}
+
+function render(ctx) {
+  C = ctx;
+  const v = view(ctx);
+  if (ctx._last !== ctx.state + ctx.variant + ctx.device) { initState(ctx, v); ctx._last = ctx.state + ctx.variant + ctx.device; }
+  const ch = Mock.chrome(ctx, { tool: 'edit', zoom: ctx.phone ? '125%' : '160%' });
+  const world = `<svg class="world" aria-hidden="true"><g transform="translate(${v.ox} ${v.oy}) scale(${v.z})">${Mock.plan('k')}${OBJ.map(o => Mock.renderObj(o, 'k')).join('')}</g></svg>`;
+  const p = v.s(S.pt);
+  const n = S.stack.length > 1 ? byId(S.stack[(S.idx + 1) % S.stack.length]) : null;
+  const altChip = S.alt && n && !ctx.phone ? `<div class="altchip" style="left:${p.x + 18}px;top:${p.y + 18}px">Alt+Klick: ${esc(n.type === 'text' ? '„' + n.text + '“' : n.name)}</div>` : '';
+  const ptr = !ctx.phone && ['alt', 'top', 'cycled'].includes(ctx.state) && !S.list ? `<span class="ptr" style="left:${p.x - 3}px;top:${p.y - 2}px">${icon('mouse-pointer')}</span>` : '';
+  const toast = S.toast && ctx.variant === 'b' && S.stack.length > 1 ? `<div class="nb-toast" style="bottom:${ctx.phone ? 76 : 72}px">${esc(byId(cur()).name)} · ${S.idx + 1} von ${S.stack.length} <span class="nb-kbd">Alt+Klick</span> nächstes</div>` : '';
+  const press = S.press ? `<span class="press" style="left:${p.x}px;top:${p.y}px"></span>` : '';
+  ctx.stage.innerHTML = ch.head + `<div class="ed-canvas" tabindex="0">${world}<svg class="overlay">${overlay(ctx, v)}</svg>${ch.islands}${ctx.variant === 'a' ? chipA(ctx, v) : ''}${listA(ctx)}${ctxMenuB(ctx)}${altChip}${ptr}${toast}${press}</div>`;
+  placeList(ctx);
+  bind(ctx, v);
+}
+
+function placeList(ctx) {
+  const pop = $('.stack-pop', ctx.stage), chip = $('[data-chip]', ctx.stage);
+  if (pop && ctx.variant === 'b') {
+    // Context menu at the pointer: flips up and left so it stays inside the canvas and above the bottom islands.
+    const at = S.ctxAt || { x: 300, y: 300 }, h = pop.offsetHeight, w = pop.offsetWidth, maxY = (ctx.H - 56) - 72;
+    pop.style.top = (at.y + 4 + h > maxY ? Math.max(68, at.y - 4 - h) : at.y + 4) + 'px';
+    pop.style.left = (at.x + 4 + w > ctx.W - 8 ? at.x - 4 - w : at.x + 4) + 'px';
+    return;
+  }
+  if (!pop || !chip || ctx.variant !== 'a') return;
+  const canvas = $('.ed-canvas', ctx.stage).getBoundingClientRect(), r = chip.getBoundingClientRect();
+  let top = (r.bottom - canvas.top) / ctx.scale + 6;
+  const h = pop.offsetHeight;
+  if (top + h > (ctx.H - 56) - 8) top = (r.top - canvas.top) / ctx.scale - h - 6;
+  pop.style.left = Math.min((r.left - canvas.left) / ctx.scale, ctx.W - 270) + 'px'; pop.style.top = top + 'px';
+}
+
+function bind(ctx, v) {
+  const st = ctx.stage, canvas = $('.ed-canvas', st);
+  let pressT = null;
+  st.onclick = e => {
+    const row = e.target.closest('[data-row]');
+    if (row) { S.idx = +row.dataset.row; S.list = false; S.hoverRow = null; return render(ctx); }
+    const t = e.target.closest('[data-act]'); if (!t) return;
+    const a = t.dataset.act;
+    if (a === 'up') { S.idx = Math.max(0, S.idx - 1); }
+    if (a === 'down') { S.idx = Math.min(S.stack.length - 1, S.idx + 1); }
+    if (a === 'list') S.list = !S.list;
+    if (a === 'closelist') S.list = false;
+    render(ctx);
+  };
+  st.onpointerover = e => { const row = e.target.closest('[data-row]'); const i = row ? +row.dataset.row : null; if (i !== S.hoverRow) { S.hoverRow = i; $('svg.overlay', canvas).innerHTML = overlay(ctx, v); } };
+  canvas.oncontextmenu = e => {
+    if (ctx.variant !== 'b' || e.target.closest('.island, [data-pop]')) return;
+    e.preventDefault();
+    const lp = Mock.localPoint(ctx, canvas, e), wp = v.w(lp);
+    S.stack = stackAt(v, wp); S.pt = wp; S.idx = 0; S.list = S.stack.length > 0; S.ctxAt = lp; S.toast = false; render(ctx);
+  };
+  canvas.onpointerdown = e => {
+    if (e.button === 2 || e.target.closest('.island, [data-pop], [data-chip], .nb-sheet')) return;
+    canvas.focus({ preventScroll: true });
+    const lp = Mock.localPoint(ctx, canvas, e), wp = v.w(lp);
+    if (S.list) { S.list = false; }
+    const stack = stackAt(v, wp);
+    const samePlace = Math.hypot(wp.x - S.pt.x, wp.y - S.pt.y) * v.z < 8;
+    if (e.altKey && samePlace && S.stack.length > 1) {
+      S.idx = e.shiftKey ? (S.idx - 1 + S.stack.length) % S.stack.length : (S.idx + 1) % S.stack.length; S.toast = true;
+    } else { S.stack = stack.length && !byId(stack[0]).locked ? stack : []; S.pt = wp; S.idx = 0; S.toast = false; }
+    if (e.pointerType === 'touch' && ctx.variant === 'b') {
+      pressT = setTimeout(() => { S.press = true; S.list = S.stack.length > 0; render(ctx); }, 500);
+    }
+    S.press = false;
+    render(ctx);
+  };
+  canvas.onpointerup = () => clearTimeout(pressT);
+  const altKey = down => e => { if (e.key === 'Alt') { e.preventDefault(); if (S.alt !== down) { S.alt = down; render(ctx); } } };
+  window.onkeydown = e => {
+    altKey(true)(e);
+    if (e.key === 'Escape' && S.list) { S.list = false; render(ctx); }
+    if (S.list && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); S.idx = (S.idx + (e.key === 'ArrowDown' ? 1 : -1) + S.stack.length) % S.stack.length; render(ctx); }
+  };
+  window.onkeyup = altKey(false);
+  window.onblur = () => { if (S.alt) { S.alt = false; render(ctx); } };
+}
+
+Mock.page({
+  title: 'Übereinanderliegende Objekte durchschalten', ids: 'PDF-A17',
+  variants: {
+    a: { name: 'A – Stapel-Chip (Empfehlung):', why: 'liegen mehrere Objekte unter dem Klick, zeigt ein Chip „1 / 5“ mit ↑ ↓ und Liste; Alt+Klick schaltet weiter, Alt zeigt vorher, was kommt.' },
+    b: { name: 'B – Liste am Zeiger:', why: 'kein Zusatz im Bild; Rechtsklick (Touch: lange drücken) listet die Objekte hier, Alt+Klick schaltet mit kurzem Hinweis.' },
+  },
+  states: [
+    { v: 'top', label: 'Klick: oberstes gewählt' }, { v: 'cycled', label: 'Durchgeschaltet (3 / 5)' }, { v: 'list', label: 'Liste offen' },
+    { v: 'alt', label: 'Alt gehalten: Vorschau' },
+  ],
+  devices: [{ v: 'desktop', label: 'Desktop' }, { v: 'phone', label: 'Handy' }],
+  render,
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1000 @@
+/* ==========================================================================================================
+ * PDF editor building blocks (src/pdf-editor/ui/). build.mjs appends this file to oo-pdf-tools.css.
+ *
+ * Skinning: colours come from the editor's --pdf-* theme tokens (light/dark, a product's skin); sizes, spacing,
+ * radii and type from the --pdf-ui-* tokens below. A product changes the look through these tokens only.
+ *
+ * Why `!important` on the base rule of each block: the old theme styles raw elements by their container
+ * (`.oo-pdf-drawer-panel input:not(…)` has specificity 0,6,1; `.oo-pdf-control-group button` sets width: 100%). A
+ * block must look the same wherever it sits, so its base rule wins with !important, and every state (hover, pressed,
+ * disabled, invalid) only changes the block's private custom properties (--_bg, --_fg, --_border, --_h …), which no
+ * old rule touches.
+ *
+ * Gallery hooks: [data-ui-force~="hover|focus"] shows a state statically in the gallery (ui/gallery/).
+ * ========================================================================================================== */
+
+:root {
+  /* Spacing scale: everything between and inside blocks is one of these. */
+  --pdf-ui-space-1: 4px;
+  --pdf-ui-space-2: 8px;
+  --pdf-ui-space-3: 12px;
+  --pdf-ui-space-4: 16px;
+  --pdf-ui-space-5: 24px;
+  /* Radii: checkbox, controls, surfaces (bars, popovers, dialogs, banners). */
+  --pdf-ui-radius-xs: 4px;
+  --pdf-ui-radius: 8px;
+  --pdf-ui-radius-lg: 12px;
+  /* Heights: one control height per row. 32 px in panels and dialogs; 36 px in bars and banners that float next to the
+     islands (the island buttons' height). A bar is its controls plus the island inset, so bars and islands are one
+     height. Touch screens: 44 px everywhere. */
+  --pdf-ui-control-h: 32px;
+  --pdf-ui-bar-control-h: 36px;
+  --pdf-ui-bar-inset: 5px;
+  --pdf-ui-control-h-sm: 28px;
+  --pdf-ui-control-h-lg: 40px;
+  --pdf-ui-split-arrow: 24px;
+  --pdf-ui-check: 16px;
+  --pdf-ui-icon: 16px;
+  /* Type */
+  --pdf-ui-text: 12px;
+  --pdf-ui-text-body: 13px;
+  --pdf-ui-text-title: 15px;
+  --pdf-ui-input-text: 13px;
+  --pdf-ui-weight: 700;
+  --pdf-ui-weight-label: 500;
+  --pdf-ui-number-font: inherit;
+  /* Danger actions are filled red in both themes. */
+  --pdf-ui-danger-fill: #dc2626;
+  --pdf-ui-danger-on: #ffffff;
+  /* Layers */
+  --pdf-ui-z-popover: 20000;
+}
+
+/* Native parts (select lists, colour picker) open in the editor's theme. */
+:is(body.oo-pdf-workbench-route, .oo-pdf-shell) :is(.oo-ui-input-native, .oo-ui-color-native) { color-scheme: dark; }
+html[data-theme="light"] :is(body.oo-pdf-workbench-route, .oo-pdf-shell) :is(.oo-ui-input-native, .oo-ui-color-native) { color-scheme: light; }
+
+@media (pointer: coarse) {
+  :root {
+    --pdf-ui-control-h: 44px;
+    --pdf-ui-bar-control-h: 44px;
+    --pdf-ui-control-h-sm: 44px;
+    --pdf-ui-control-h-lg: 44px;
+    --pdf-ui-split-arrow: 44px;
+    --pdf-ui-check: 20px;
+    --pdf-ui-text: 13px;
+    /* 16 px keeps iOS from zooming into a focused field. */
+    --pdf-ui-input-text: 16px;
+    --pdf-ui-text-body: 14px;
+  }
+}
+
+/* ── Icon, spinner ─────────────────────────────────────────────────────────────────────────────────────── */
+
+.oo-ui-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--pdf-ui-icon);
+  height: var(--pdf-ui-icon);
+}
+
+.oo-ui-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.oo-ui-spinner {
+  display: inline-block;
+  flex: none;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  /* Arc and ring in the text colour of where it sits: visible on every button and background. */
+  border: 2px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: oo-ui-spin 0.8s linear infinite;
+}
+
+@keyframes oo-ui-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Button, IconButton, ToggleButton, SplitButton ─────────────────────────────────────────────────────── */
+
+.oo-ui-button {
+  --_h: var(--pdf-ui-control-h);
+  --_pad: var(--pdf-ui-space-3);
+  --_bg: var(--pdf-panel-2);
+  --_fg: var(--pdf-text);
+  --_border: var(--pdf-border);
+  --_opacity: 1;
+  position: relative !important;
+  display: inline-flex !important;
+  flex: 0 0 auto;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+  width: auto !important;
+  min-width: var(--_h) !important;
+  max-width: 100%;
+  height: var(--_h) !important;
+  min-height: var(--_h) !important;
+  margin: 0 !important;
+  padding: 0 var(--_pad) !important;
+  border: 1px solid var(--_border) !important;
+  border-radius: var(--pdf-ui-radius) !important;
+  background: var(--_bg) !important;
+  box-shadow: none !important;
+  color: var(--_fg) !important;
+  opacity: var(--_opacity) !important;
+  font-family: inherit !important;
+  font-size: var(--pdf-ui-text) !important;
+  font-weight: var(--pdf-ui-weight) !important;
+  line-height: 1 !important;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap !important;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.oo-ui-button.is-sm { --_h: var(--pdf-ui-control-h-sm); --_pad: 10px; }
+.oo-ui-button.is-lg { --_h: var(--pdf-ui-control-h-lg); --_pad: var(--pdf-ui-space-4); }
+.oo-ui-button.is-icon { --_pad: 0px; width: var(--_h) !important; }
+.oo-ui-button.is-block { width: 100% !important; }
+
+.oo-ui-button-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.oo-ui-button.is-quiet { --_bg: transparent; --_border: transparent; }
+.oo-ui-button.is-primary { --_bg: var(--pdf-accent); --_border: var(--pdf-accent); --_fg: var(--pdf-accent-contrast); }
+.oo-ui-button.is-danger { --_bg: var(--pdf-ui-danger-fill); --_border: var(--pdf-ui-danger-fill); --_fg: var(--pdf-ui-danger-on); }
+
+.oo-ui-button:is(:hover, [data-ui-force~="hover"]):not(:disabled) { --_bg: var(--pdf-hover-strong); }
+.oo-ui-button.is-quiet:is(:hover, [data-ui-force~="hover"]):not(:disabled) { --_bg: var(--pdf-hover); }
+.oo-ui-button.is-primary:is(:hover, [data-ui-force~="hover"]):not(:disabled) {
+  --_bg: color-mix(in srgb, var(--pdf-accent) 86%, var(--pdf-text));
+  --_border: var(--_bg);
+}
+.oo-ui-button.is-danger:is(:hover, [data-ui-force~="hover"]):not(:disabled) {
+  --_bg: color-mix(in srgb, var(--pdf-ui-danger-fill) 84%, #000);
+  --_border: var(--_bg);
+}
+
+/* A pressed toggle (and a split button whose mode is on) is the accent, like every active tool of the editor. */
+.oo-ui-button.is-pressed,
+.oo-ui-button.is-pressed:is(:hover, [data-ui-force~="hover"]):not(:disabled) {
+  --_bg: var(--pdf-accent);
+  --_border: var(--pdf-accent);
+  --_fg: var(--pdf-accent-contrast);
+}
+
+.oo-ui-button:disabled { --_opacity: 0.45; cursor: not-allowed; }
+.oo-ui-button.is-busy { --_opacity: 0.8; cursor: progress; }
+
+.oo-ui-button:is(:focus-visible, [data-ui-force~="focus"]) {
+  outline: 2px solid var(--pdf-accent) !important;
+  outline-offset: 1px !important;
+}
+
+.oo-ui-split {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.oo-ui-split > .oo-ui-split-main {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+.oo-ui-split > .oo-ui-split-toggle {
+  --_pad: 0px;
+  width: var(--pdf-ui-split-arrow) !important;
+  min-width: var(--pdf-ui-split-arrow) !important;
+  margin-left: -1px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.oo-ui-split > .oo-ui-split-toggle .oo-ui-icon { width: 14px; height: 14px; }
+
+/* The seam between the two parts. */
+.oo-ui-split > .oo-ui-split-toggle::before {
+  content: "";
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  left: -1px;
+  width: 1px;
+  background: var(--pdf-border-strong);
+}
+
+.oo-ui-split > .oo-ui-split-toggle.is-pressed::before {
+  background: color-mix(in srgb, var(--pdf-accent-contrast) 40%, var(--pdf-accent));
+}
+
+/* ── Field frame (NumberField, Select), labels and errors ──────────────────────────────────────────────── */
+
+.oo-ui-field {
+  display: grid;
+  align-content: start;
+  gap: var(--pdf-ui-space-1);
+  min-width: 0;
+}
+
+.oo-ui-field.is-label-start {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--pdf-ui-space-2);
+}
+
+.oo-ui-field-label {
+  display: block !important;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  color: var(--pdf-muted) !important;
+  font-size: var(--pdf-ui-text) !important;
+  font-weight: var(--pdf-ui-weight-label) !important;
+  line-height: 16px !important;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.oo-ui-field-error {
+  color: var(--pdf-danger-text);
+  font-size: var(--pdf-ui-text);
+  line-height: 16px;
+}
+
+.oo-ui-input {
+  --_h: var(--pdf-ui-control-h);
+  --_border: var(--pdf-border);
+  --_ring: transparent;
+  --_opacity: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  min-width: 0;
+  height: var(--_h);
+  padding: 0 10px;
+  border: 1px solid var(--_border);
+  border-radius: var(--pdf-ui-radius);
+  outline: 2px solid var(--_ring);
+  outline-offset: 0;
+  background: var(--pdf-input-bg);
+  color: var(--pdf-text);
+  opacity: var(--_opacity);
+  font-size: var(--pdf-ui-input-text);
+}
+
+.oo-ui-input.is-sm { --_h: var(--pdf-ui-control-h-sm); }
+.oo-ui-input:hover { --_border: var(--pdf-border-strong); }
+.oo-ui-input:is(:focus-within, :has([data-ui-force~="focus"])) {
+  --_border: var(--pdf-accent);
+  --_ring: color-mix(in srgb, var(--pdf-accent) 45%, transparent);
+}
+.oo-ui-input.is-invalid { --_border: var(--pdf-danger-text); }
+.oo-ui-input.is-invalid:focus-within { --_ring: color-mix(in srgb, var(--pdf-danger-text) 40%, transparent); }
+.oo-ui-input.is-disabled { --_opacity: 0.45; --_border: var(--pdf-border); cursor: not-allowed; }
+
+.oo-ui-input-native {
+  flex: 1 1 auto !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: 400 !important;
+  line-height: normal !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.oo-ui-input-native::placeholder { color: var(--pdf-muted); opacity: 1; }
+.oo-ui-input-native:disabled { cursor: not-allowed; }
+
+.oo-ui-input-native[data-ui-number] {
+  font-family: var(--pdf-ui-number-font) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.oo-ui-input-unit {
+  flex: none;
+  color: var(--pdf-muted);
+  font-size: var(--pdf-ui-text);
+  pointer-events: none;
+}
+
+.oo-ui-input.is-select { padding: 0; }
+
+.oo-ui-input.is-select .oo-ui-input-native {
+  /* 2 px more than the overlay leaves, so rounding never ends the widest option in "…". */
+  padding: 0 32px 0 10px !important;
+  color: transparent !important;
+  cursor: pointer;
+}
+
+/* The chosen label, drawn over the transparent select so a long name ends in "…". */
+.oo-ui-select-value {
+  position: absolute;
+  left: 10px;
+  right: 30px;
+  overflow: hidden;
+  color: var(--pdf-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.oo-ui-select-value.is-placeholder { color: var(--pdf-muted); }
+
+.oo-ui-input.is-select .oo-ui-input-native option {
+  background: var(--pdf-panel);
+  color: var(--pdf-text);
+}
+
+.oo-ui-select-chevron {
+  position: absolute;
+  right: 9px;
+  color: var(--pdf-muted);
+  pointer-events: none;
+}
+
+.oo-ui-field.is-width-xs .oo-ui-input { width: 64px; }
+.oo-ui-field.is-width-sm .oo-ui-input { width: 88px; }
+.oo-ui-field.is-width-md .oo-ui-input { width: 140px; }
+.oo-ui-field.is-width-lg .oo-ui-input { width: 200px; }
+.oo-ui-field.is-width-full { width: 100%; }
+
+/* ── Checkbox, Switch ──────────────────────────────────────────────────────────────────────────────────── */
+
+.oo-ui-check,
+.oo-ui-switch {
+  --_opacity: 1;
+  --_line: 18px;
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: var(--pdf-ui-check) minmax(0, 1fr) !important;
+  /* The box sits on the first line of a long label, not in the middle of the paragraph. */
+  align-items: start !important;
+  justify-content: start;
+  gap: var(--pdf-ui-space-2) !important;
+  box-sizing: border-box;
+  width: fit-content !important;
+  max-width: 100%;
+  min-height: var(--pdf-ui-control-h) !important;
+  margin: 0 !important;
+  padding: calc((var(--pdf-ui-control-h) - var(--_line)) / 2) 0 !important;
+  color: var(--pdf-text) !important;
+  opacity: var(--_opacity) !important;
+  font-size: var(--pdf-ui-text-body) !important;
+  font-weight: 400 !important;
+  line-height: var(--_line) !important;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.oo-ui-check-box,
+.oo-ui-switch-track { margin-top: calc((var(--_line) - var(--pdf-ui-check)) / 2); }
+
+.oo-ui-switch { grid-template-columns: calc(var(--pdf-ui-check) * 1.75) minmax(0, 1fr) !important; }
+
+.oo-ui-check.is-disabled,
+.oo-ui-switch.is-disabled { --_opacity: 0.45; cursor: not-allowed; }
+
+.oo-ui-check-input,
+.oo-ui-switch-input {
+  position: absolute !important;
+  top: calc((var(--pdf-ui-control-h) - var(--pdf-ui-check)) / 2) !important;
+  left: 0 !important;
+  width: var(--pdf-ui-check) !important;
+  height: var(--pdf-ui-check) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 0 !important;
+  cursor: inherit;
+}
+
+.oo-ui-switch-input { width: calc(var(--pdf-ui-check) * 1.75) !important; }
+
+.oo-ui-check-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--pdf-ui-check);
+  height: var(--pdf-ui-check);
+  border: 1px solid var(--pdf-border-strong);
+  border-radius: var(--pdf-ui-radius-xs);
+  background: var(--pdf-input-bg);
+  color: transparent;
+  pointer-events: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.oo-ui-check-box .oo-ui-icon { width: calc(var(--pdf-ui-check) - 4px); height: calc(var(--pdf-ui-check) - 4px); }
+.oo-ui-check-box .oo-ui-icon svg { stroke-width: 3; }
+
+.oo-ui-check-input:is(:checked, :indeterminate) + .oo-ui-check-box {
+  border-color: var(--pdf-accent);
+  background: var(--pdf-accent);
+  color: var(--pdf-accent-contrast);
+}
+
+.oo-ui-check:not(.is-disabled):is(:hover, :has([data-ui-force~="hover"])) .oo-ui-check-box { border-color: var(--pdf-accent); }
+.oo-ui-check.is-invalid .oo-ui-check-box { border-color: var(--pdf-danger-text); }
+
+.oo-ui-check-input:is(:focus-visible, [data-ui-force~="focus"]) + .oo-ui-check-box,
+.oo-ui-switch-input:is(:focus-visible, [data-ui-force~="focus"]) + .oo-ui-switch-track {
+  outline: 2px solid var(--pdf-accent);
+  outline-offset: 1px;
+}
+
+.oo-ui-check-label,
+.oo-ui-switch-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.oo-ui-switch-track {
+  position: relative;
+  box-sizing: border-box;
+  width: calc(var(--pdf-ui-check) * 1.75);
+  height: var(--pdf-ui-check);
+  border: 1px solid var(--pdf-border-strong);
+  border-radius: 999px;
+  background: var(--pdf-hover-strong);
+  pointer-events: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.oo-ui-switch-thumb {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: calc(var(--pdf-ui-check) - 4px);
+  height: calc(var(--pdf-ui-check) - 4px);
+  border-radius: 50%;
+  /* White with a light shadow in both themes: an off switch must not look like a radio button. */
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  transition: transform 120ms ease;
+}
+
+.oo-ui-switch-input:checked + .oo-ui-switch-track { border-color: var(--pdf-accent); background: var(--pdf-accent); }
+.oo-ui-switch-input:checked + .oo-ui-switch-track .oo-ui-switch-thumb {
+  transform: translateX(calc(var(--pdf-ui-check) * 0.75));
+}
+
+/* ── Segmented ─────────────────────────────────────────────────────────────────────────────────────────── */
+
+.oo-ui-segmented {
+  --_h: var(--pdf-ui-control-h);
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+  gap: 2px;
+  box-sizing: border-box;
+  height: var(--_h);
+  max-width: 100%;
+  padding: 2px;
+  border: 1px solid var(--pdf-border);
+  border-radius: var(--pdf-ui-radius);
+  background: var(--pdf-input-bg);
+}
+
+.oo-ui-segmented.is-sm { --_h: var(--pdf-ui-control-h-sm); }
+.oo-ui-segmented.is-disabled { opacity: 0.45; }
+
+.oo-ui-segment {
+  --_bg: transparent;
+  --_fg: var(--pdf-muted);
+  display: inline-flex !important;
+  flex: 1 1 auto;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+  width: auto !important;
+  min-width: calc(var(--_h) - 6px) !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 10px !important;
+  border: 0 !important;
+  border-radius: calc(var(--pdf-ui-radius) - 2px) !important;
+  background: var(--_bg) !important;
+  box-shadow: none !important;
+  color: var(--_fg) !important;
+  font-family: inherit !important;
+  font-size: var(--pdf-ui-text) !important;
+  font-weight: var(--pdf-ui-weight) !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  cursor: pointer;
+}
+
+.oo-ui-segment.is-icon { padding: 0 !important; }
+.oo-ui-segment:is(:hover, [data-ui-force~="hover"]):not(:disabled):not(.is-checked) { --_bg: var(--pdf-hover); --_fg: var(--pdf-text); }
+.oo-ui-segment.is-checked { --_bg: var(--pdf-accent); --_fg: var(--pdf-accent-contrast); }
+.oo-ui-segment:disabled { cursor: not-allowed; }
+.oo-ui-segment:is(:focus-visible, [data-ui-force~="focus"]) { outline: 2px solid var(--pdf-accent) !important; outline-offset: 1px !important; }
+
+/* ── ColorWell ─────────────────────────────────────────────────────────────────────────────────────────── */
+
+.oo-ui-color {
+  --_h: var(--pdf-ui-control-h);
+  --_border: var(--pdf-border);
+  --_opacity: 1;
+  position: relative !important;
+  display: inline-flex !important;
+  flex: 0 0 auto;
+  align-items: center !important;
+  justify-content: center;
+  gap: var(--pdf-ui-space-2) !important;
+  box-sizing: border-box !important;
+  width: var(--_h) !important;
+  min-width: var(--_h) !important;
+  height: var(--_h) !important;
+  min-height: var(--_h) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid var(--_border) !important;
+  border-radius: var(--pdf-ui-radius) !important;
+  background: var(--pdf-input-bg) !important;
+  color: var(--pdf-text) !important;
+  opacity: var(--_opacity) !important;
+  font-size: var(--pdf-ui-text) !important;
+  font-weight: var(--pdf-ui-weight-label) !important;
+  cursor: pointer;
+}
+
+.oo-ui-color.is-sm { --_h: var(--pdf-ui-control-h-sm); }
+.oo-ui-color.has-value { width: auto !important; padding: 0 10px 0 5px !important; justify-content: flex-start; }
+.oo-ui-color:is(:hover, [data-ui-force~="hover"]) { --_border: var(--pdf-border-strong); }
+.oo-ui-color:is(:focus-within, :has([data-ui-force~="focus"])) { --_border: var(--pdf-accent); }
+.oo-ui-color.is-disabled { --_opacity: 0.45; cursor: not-allowed; }
+
+.oo-ui-color-swatch {
+  --oo-ui-swatch: transparent;
+  flex: none;
+  box-sizing: border-box;
+  width: calc(var(--_h) - 12px);
+  max-width: 22px;
+  height: calc(var(--_h) - 12px);
+  max-height: 22px;
+  border: 1px solid var(--pdf-border-strong);
+  border-radius: var(--pdf-ui-radius-xs);
+  background: var(--oo-ui-swatch);
+  pointer-events: none;
+}
+
+.oo-ui-color.is-mixed .oo-ui-color-swatch {
+  background: linear-gradient(135deg, var(--pdf-input-bg) 44%, var(--pdf-muted) 44% 56%, var(--pdf-input-bg) 56%);
+}
+
+.oo-ui-color-value {
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.oo-ui-color-native {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  cursor: inherit;
+}
+
+/* ── ToolOptionsBar ────────────────────────────────────────────────────────────────────────────────────── */
+
+.oo-ui-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--pdf-ui-space-1);
+  box-sizing: border-box;
+  max-width: 100%;
+  --pdf-ui-control-h: var(--pdf-ui-bar-control-h);
+  height: calc(var(--pdf-ui-bar-control-h) + 2 * var(--pdf-ui-bar-inset) + 2px);
+  padding: var(--pdf-ui-bar-inset);
+  border: 1px solid var(--pdf-border);
+  border-radius: var(--pdf-ui-radius-lg);
+  background: var(--pdf-panel);
+  box-shadow: 0 10px 28px var(--pdf-shadow);
+  color: var(--pdf-text);
+  font-size: var(--pdf-ui-text-body);
+}
+
+/* One height for everything in a bar, whatever size a caller asked for (PDF-F18). */
+.oo-ui-bar :is(.oo-ui-button, .oo-ui-input, .oo-ui-segmented, .oo-ui-color, .oo-ui-status) { --_h: var(--pdf-ui-bar-control-h); }
+.oo-ui-bar .oo-ui-field.is-label-top { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: var(--pdf-ui-space-2); }
+.oo-ui-bar .oo-ui-field { flex: none; }
+.oo-ui-bar .oo-ui-field:not([class*="is-width-"]) .oo-ui-input:not(.is-select) { width: 88px; }
+.oo-ui-bar .oo-ui-field-error { display: none; }
+
+.oo-ui-bar-groups {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--pdf-ui-space-2);
+  min-width: 0;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--pdf-ui-space-1);
+  scrollbar-width: none;
+}
+
+/* Groups that do not fit scroll; the side with more content fades out instead of cutting a control in half. */
+.oo-ui-bar-groups[data-overflow-end] { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent); }
+.oo-ui-bar-groups[data-overflow-start] { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 56px), transparent); }
+.oo-ui-bar-groups[data-overflow-start][data-overflow-end] {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 56px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 56px), transparent);
+}
+
+.oo-ui-bar-groups::-webkit-scrollbar { display: none; }
+
+.oo-ui-bar-group {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--pdf-ui-space-1);
+  scroll-snap-align: start;
+}
+
+.oo-ui-bar-group-label {
+  padding: 0 var(--pdf-ui-space-1);
+  color: var(--pdf-muted);
+  font-size: var(--pdf-ui-text);
+  font-weight: var(--pdf-ui-weight-label);
+  white-space: nowrap;
+}
+
+.oo-ui-bar-divider {
+  flex: none;
+  align-self: stretch;
+  width: 1px;
+  margin: 6px 0;
+  background: var(--pdf-border);
+}
+
+.oo-ui-bar-end {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--pdf-ui-space-1);
+  padding-left: var(--pdf-ui-space-1);
+  border-left: 1px solid var(--pdf-border);
+}
+
+.oo-ui-status {
+  --_h: var(--pdf-ui-control-h);
+  --_bg: transparent;
+  --_fg: var(--pdf-text);
+  --_border: var(--pdf-border);
+  display: inline-flex !important;
+  flex: none;
+  align-items: center !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+  height: var(--_h) !important;
+  min-height: var(--_h) !important;
+  max-width: 100%;
+  margin: 0 !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--_border) !important;
+  border-radius: var(--pdf-ui-radius) !important;
+  background: var(--_bg) !important;
+  box-shadow: none !important;
+  color: var(--_fg) !important;
+  font-family: inherit !important;
+  font-size: var(--pdf-ui-text) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.oo-ui-status-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.oo-ui-status.is-info { --_bg: var(--pdf-selected); --_fg: var(--pdf-text); --_border: transparent; }
+.oo-ui-status.is-success { --_bg: var(--pdf-selected); --_fg: var(--pdf-accent-strong); --_border: transparent; }
+.oo-ui-status.is-warning { --_bg: var(--pdf-warning-bg); --_fg: var(--pdf-warning-text); --_border: var(--pdf-warning-border); }
+.oo-ui-status.is-danger { --_bg: var(--pdf-danger-bg); --_fg: var(--pdf-danger-text); --_border: var(--pdf-danger-border); }
+.oo-ui-status.is-action { cursor: pointer; }
+.oo-ui-status.is-action:is(:hover, [data-ui-force~="hover"]) { --_border: currentColor; }
+.oo-ui-status.is-action:focus-visible { outline: 2px solid var(--pdf-accent) !important; outline-offset: 1px !important; }
+
+/* ── AnchoredPopover, Menu ─────────────────────────────────────────────────────────────────────────────── */
+
+.oo-ui-popover {
+  position: fixed;
+  z-index: var(--pdf-ui-z-popover);
+  box-sizing: border-box;
+  min-width: 160px;
+  padding: var(--pdf-ui-space-3);
+  overflow: auto;
+  border: 1px solid var(--pdf-border);
+  border-radius: var(--pdf-ui-radius-lg);
+  background: var(--pdf-panel);
+  box-shadow: 0 12px 32px var(--pdf-shadow-strong);
+  color: var(--pdf-text);
+  font-size: var(--pdf-ui-text-body);
+  line-height: 18px;
+}
+
+.oo-ui-popover.is-static { position: relative; z-index: auto; display: inline-block; }
+.oo-ui-popover.is-menu { padding: var(--pdf-ui-space-1); }
+
+.oo-ui-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.oo-ui-menu-item {
+  --_bg: transparent;
+  --_fg: var(--pdf-text);
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--pdf-ui-space-2) !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: var(--pdf-ui-control-h) !important;
+  min-height: var(--pdf-ui-control-h) !important;
+  margin: 0 !important;
+  padding: 0 var(--pdf-ui-space-3) 0 var(--pdf-ui-space-2) !important;
+  border: 0 !important;
+  border-radius: calc(var(--pdf-ui-radius-lg) - 4px) !important;
+  background: var(--_bg) !important;
+  box-shadow: none !important;
+  color: var(--_fg) !important;
+  font-family: inherit !important;
+  font-size: var(--pdf-ui-text-body) !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+  cursor: pointer;
+}
+
+.oo-ui-menu-item:is(:hover, :focus-visible, [data-ui-force~="hover"]):not(:disabled) { --_bg: var(--pdf-hover); outline: none; }
+.oo-ui-menu-item.is-danger { --_fg: var(--pdf-danger-text); }
+.oo-ui-menu-item:disabled { opacity: 0.45; cursor: not-allowed; }
+.oo-ui-menu-lead { display: inline-flex; flex: none; width: var(--pdf-ui-icon); color: var(--pdf-muted); }
+.oo-ui-menu-lead.is-check { color: var(--pdf-accent-strong); }
+.oo-ui-menu-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.oo-ui-menu-separator { height: 1px; margin: var(--pdf-ui-space-1) var(--pdf-ui-space-2); background: var(--pdf-border); }
+
+/* ── Dialog ────────────────────────────────────────────────────────────────────────────────────────────── */
+
+.oo-ui-dialog {
+  box-sizing: border-box;
+  max-width: calc(100vw - 2 * var(--pdf-ui-space-2));
+  max-height: calc(100dvh - 2 * var(--pdf-ui-space-2));
+  margin: auto;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  color: var(--pdf-text);
+}
+
+.oo-ui-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  background: var(--pdf-modal-overlay, rgba(0, 0, 0, 0.5));
+}
+
+.oo-ui-dialog-surface {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(440px, calc(100vw - 2 * var(--pdf-ui-space-2)));
+  max-height: calc(100dvh - 2 * var(--pdf-ui-space-2));
+  overflow: hidden;
+  border: 1px solid var(--pdf-border);
+  border-radius: var(--pdf-ui-radius-lg);
+  background: var(--pdf-panel);
+  box-shadow: 0 24px 64px var(--pdf-shadow-strong);
+  color: var(--pdf-text);
+  font-size: var(--pdf-ui-text-body);
+  line-height: 18px;
+  text-align: left;
+}
+
+.oo-ui-dialog-surface.is-sm { width: min(360px, calc(100vw - 2 * var(--pdf-ui-space-2))); }
+.oo-ui-dialog-surface.is-lg { width: min(640px, calc(100vw - 2 * var(--pdf-ui-space-2))); }
+
+.oo-ui-dialog-head {
+  display: flex;
+  align-items: center;
+  gap: var(--pdf-ui-space-2);
+  padding: var(--pdf-ui-space-2) var(--pdf-ui-space-2) 0 var(--pdf-ui-space-4);
+}
+
+.oo-ui-dialog-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--pdf-text);
+  font-size: var(--pdf-ui-text-title);
+  font-weight: 600;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.oo-ui-dialog-description {
+  margin: 0;
+  padding: var(--pdf-ui-space-1) var(--pdf-ui-space-4) 0;
+  color: var(--pdf-muted);
+}
+
+.oo-ui-dialog-description + .oo-ui-dialog-actions { margin-top: var(--pdf-ui-space-4); }
+
+.oo-ui-dialog-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--pdf-ui-space-3);
+  min-height: 0;
+  padding: var(--pdf-ui-space-3) var(--pdf-ui-space-4) var(--pdf-ui-space-4);
+  overflow: auto;
+}
+
+.oo-ui-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--pdf-ui-space-2);
+  padding: var(--pdf-ui-space-3) var(--pdf-ui-space-4);
+  border-top: 1px solid var(--pdf-border);
+  background: var(--pdf-panel-2);
+}
+
+/* ── ProgressBanner ────────────────────────────────────────────────────────────────────────────────────── */
+
+.oo-ui-banner {
+  --pdf-ui-control-h: var(--pdf-ui-bar-control-h);
+  box-sizing: border-box;
+  /* A fixed preferred width (the layout below queries it); narrower hosts shrink it. */
+  width: 560px;
+  max-width: 100%;
+  padding: var(--pdf-ui-bar-inset) var(--pdf-ui-bar-inset) var(--pdf-ui-bar-inset) var(--pdf-ui-space-3);
+  border: 1px solid var(--pdf-border);
+  border-radius: var(--pdf-ui-radius-lg);
+  background: var(--pdf-panel);
+  box-shadow: 0 10px 28px var(--pdf-shadow);
+  color: var(--pdf-text);
+  font-size: var(--pdf-ui-text-body);
+  line-height: 18px;
+  container-type: inline-size;
+}
+
+.oo-ui-banner.is-warning { border-color: var(--pdf-warning-border); }
+.oo-ui-banner.is-danger { border-color: var(--pdf-danger-border); }
+
+/* Icon, text (takes the room, at least 200 px), bar (fixed 120 px), percent (fixed), Cancel. */
+.oo-ui-banner-inner {
+  display: grid;
+  grid-template-columns: var(--pdf-ui-icon) minmax(200px, 1fr) 120px 4ch auto;
+  grid-template-areas: "icon text bar percent action";
+  align-items: center;
+  column-gap: var(--pdf-ui-space-3);
+  row-gap: var(--pdf-ui-space-1);
+  min-height: var(--pdf-ui-bar-control-h);
+}
+
+/* Narrow (phones): the text on its own row above the bar. */
+@container (max-width: 459px) {
+  .oo-ui-banner-inner {
+    grid-template-columns: var(--pdf-ui-icon) minmax(0, 1fr) 4ch auto;
+    grid-template-areas: "icon text text text" ". bar percent action";
+  }
+}
+
+.oo-ui-banner-icon {
+  display: inline-flex;
+  grid-area: icon;
+  align-items: center;
+  justify-content: center;
+  color: var(--pdf-accent);
+}
+
+.oo-ui-banner-icon .oo-ui-spinner { width: var(--pdf-ui-icon); height: var(--pdf-ui-icon); }
+
+.oo-ui-banner-text {
+  display: flex;
+  grid-area: text;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.oo-ui-banner-label,
+.oo-ui-banner-detail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.oo-ui-banner-label { font-weight: 600; }
+.oo-ui-banner-detail { color: var(--pdf-muted); font-size: var(--pdf-ui-text); line-height: 16px; }
+
+/* A warning is read, not skimmed: it wraps instead of ending in "…". */
+.oo-ui-banner:is(.is-warning, .is-danger) :is(.oo-ui-banner-label, .oo-ui-banner-detail) { white-space: normal; overflow-wrap: anywhere; }
+
+.oo-ui-progress {
+  position: relative;
+  grid-area: bar;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--pdf-spinner-track);
+}
+
+.oo-ui-progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: inherit;
+  background: var(--pdf-accent);
+}
+
+.oo-ui-progress.is-indeterminate .oo-ui-progress-fill {
+  width: 40%;
+  animation: oo-ui-progress-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes oo-ui-progress-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+.oo-ui-banner-percent {
+  grid-area: percent;
+  color: var(--pdf-muted);
+  font-size: var(--pdf-ui-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.oo-ui-banner-action { display: flex; grid-area: action; }
+
+@media (prefers-reduced-motion: reduce) {
+  .oo-ui-spinner,
+  .oo-ui-progress.is-indeterminate .oo-ui-progress-fill { animation-duration: 2.4s; }
+}

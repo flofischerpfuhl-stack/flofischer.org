@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Auswahlrahmen folgt der Form</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/ui.css">
+<link rel="stylesheet" href="assets/mock.css">
+<style>
+  .ed-canvas { cursor: default; }
+  .ed-canvas.is-over { cursor: move; }
+  .modechip { position: absolute; z-index: 22; }
+  .legend { position: absolute; z-index: 22; right: 12px; top: 72px; display: grid; gap: 4px; padding: 8px 12px; border: 1px solid var(--pdf-border); border-radius: 12px; background: var(--pdf-panel); box-shadow: 0 10px 28px var(--pdf-shadow); font-size: 12px; color: var(--pdf-muted); max-width: 260px; }
+  .legend b { color: var(--pdf-text); font-weight: 600; }
+  .stage.is-phone .legend { display: none; }
+</style>
+</head>
+<body>
+<script src="assets/icons.js"></script>
+<script src="assets/mock.js"></script>
+<template id="notes">
+  <h2>Worum es geht</h2>
+  <p>Heute zeigt ein gedrehter Pfad ein achsparalleles Rechteck um alles herum (Zustand „Heute“): man sieht nicht, welches Objekt gemeint ist, und bei schrägen Leitungen deckt der Rahmen halbe Nachbarflächen ab.</p>
+  <div class="cols">
+    <div class="card is-rec"><h3>Variante A – Gedrehter Rahmen <span class="tag">Empfehlung</span></h3>
+      <ul><li>Der Rahmen dreht mit dem Objekt (wie Figma/Framer); Eck-Griffe sind mitgedrehte Quadrate, der Dreh-Griff sitzt über der Oberkante des Objekts, nicht über der Seite.</li>
+      <li>Pfade und Flächen zeigen zusätzlich ihren eigenen Umriss in Grün mit weißem Saum (auf jedem Planhintergrund lesbar), der Rahmen ist dann gestrichelt.</li>
+      <li>Linien zeigen nur ihre zwei Endpunkte. Mehrere Objekte: jedes mit Umriss, ein Gruppenrahmen (gedreht, wenn alle denselben Winkel haben).</li></ul></div>
+    <div class="card"><h3>Variante B – Umriss zuerst</h3>
+      <ul><li>Pfade zeigen nur Umriss und Knotenpunkte (direkt bearbeiten); erst ein zweiter Klick schaltet auf den gedrehten Rahmen zum Skalieren/Drehen (wie Inkscape).</li>
+      <li>Weniger Überlagerung auf dichten Plänen, aber ein verborgener Modus – am Handy schwer zu entdecken.</li></ul></div>
+  </div>
+  <h2>Verhalten</h2>
+  <ul><li><b>Hover-Umriss:</b> unter dem Zeiger zeigt jedes Objekt seine echte Form (1.5 px), nie ein Rechteck. So sieht man vor dem Klick, was man trifft.</li>
+  <li><b>Drehen:</b> am Dreh-Griff ziehen; ein Chip zeigt den Winkel, <kbd>Shift</kbd> rastet auf 15°.</li>
+  <li><b>Tastatur:</b> <kbd>Tab</kbd> nächstes Objekt, <kbd>Esc</kbd> Auswahl aufheben, Pfeiltasten verschieben (1 pt, mit <kbd>Shift</kbd> 10 pt).</li>
+  <li><b>Gesperrt:</b> Rahmen ohne Griffe, nur Eckpunkte.</li>
+  <li><b>Handy:</b> runde Griffe 14 px mit 44-px-Trefferfläche, Dreh-Griff mit Symbol weiter außen, damit der Finger das Objekt nicht verdeckt.</li></ul>
+  <h2>Fehlende Bausteine</h2>
+  <ul><li>Kein UI-Baustein: das ist das Auswahl-Overlay (Welle 3, Agent 3b). Vorschlag: eine Overlay-Sprache als Tokens (<code>--pdf-select-stroke</code>, Halo, Griffgrößen Desktop/Touch), damit Messen, Auswahl und Hover gleich aussehen.</li>
+  <li><b>HUD-Chip</b> am Zeiger (Winkel, Maße beim Ziehen).</li></ul>
+</template>
+<script>
+const { B, icon, esc, cx, $ } = Mock;
+const OBJ = [
+  { id: 'r1', name: 'Neubau', type: 'rect', w: 120, h: 70, cx: 310, cy: 205, rot: -12, fill: 'hatch', stroke: '#111', sw: 1.5 },
+  { id: 't1', name: 'Zufahrt Rampe', type: 'text', text: 'Zufahrt Rampe', size: 18, cx: 255, cy: 335, rot: -59 },
+  { id: 'p1', name: 'Leitung', type: 'path', cx: 640, cy: 250, rot: 28, stroke: '#2563eb', sw: 3, dash: '10 5', pts: [{ x: -110, y: -40 }, { x: 0, y: -40 }, { x: 20, y: 30 }, { x: 110, y: 30 }] },
+  { id: 'a1', name: 'Stellplatz', type: 'area', cx: 410, cy: 330, rot: -35, fill: 'rgba(250,204,21,.35)', stroke: '#a16207', sw: 1.2, pts: [{ x: -45, y: -22 }, { x: 45, y: -22 }, { x: 45, y: 22 }, { x: -45, y: 22 }] },
+  { id: 'l1', name: 'Grenze', type: 'line', cx: 760, cy: 470, rot: -40, stroke: '#dc2626', sw: 2.5, pts: [{ x: -90, y: 0 }, { x: 90, y: 0 }] },
+];
+const byId = id => OBJ.find(o => o.id === id);
+const STATE_SEL = { path: ['p1'], text: ['t1'], rect: ['r1'], area: ['a1'], multi: ['t1', 'a1'], hover: [], rotating: ['p1'], locked: ['p1'], today: ['p1'] };
+const S = { sel: ['p1'], hover: null, pathMode: 'points', drag: null, hud: null };
+let C;
+
+function view(ctx) {
+  if (!ctx.phone) return Mock.view(1.15, 40, 0);
+  const sel = S.sel.map(byId);
+  const band = { x0: 0, x1: ctx.W, y0: 80, y1: ctx.H - 56 - 80 };
+  return Mock.fitView(sel.length ? sel : [byId('p1')], 0.9, band);
+}
+
+function overlay(ctx, v) {
+  const sel = S.sel.map(byId);
+  let out = '';
+  if (S.hover && !S.sel.includes(S.hover)) out += Mock.hoverOverlay(byId(S.hover), v);
+  const st = ctx.state;
+  if (st === 'today') return out + Mock.selOverlay(sel, v, { phone: ctx.phone, style: 'aabb' });
+  const style = ctx.variant === 'b' && S.pathMode === 'points' ? 'shape' : 'obb';
+  let sty = style;
+  if (sel.length === 1 && sel[0].type === 'line') sty = 'shape';
+  out += Mock.selOverlay(sel, v, { phone: ctx.phone, style: sty, locked: st === 'locked' });
+  return out;
+}
+
+function render(ctx) {
+  C = ctx;
+  if (ctx._last !== ctx.state) { S.sel = [...STATE_SEL[ctx.state]]; S.hover = ctx.state === 'hover' ? 'p1' : null; S.pathMode = 'points'; S.hud = ctx.state === 'rotating' ? { text: '28.0°' } : null; ctx._last = ctx.state; }
+  const v = view(ctx);
+  const ch = Mock.chrome(ctx, { tool: 'edit', zoom: ctx.phone ? '90%' : '115%' });
+  const world = `<svg class="world" aria-hidden="true"><g transform="translate(${v.ox} ${v.oy}) scale(${v.z})">${Mock.plan('s')}${OBJ.map(o => Mock.renderObj(o, 's')).join('')}</g></svg>`;
+  let hud = '';
+  const sel = S.sel.map(byId);
+  if (S.hud && sel.length) {
+    const cs = Mock.corners(sel[0]).map(v.s); const t = Mock.mid(cs[0], cs[1]);
+    hud = `<div class="nb-hud" style="left:${(S.hud.x ?? t.x + 18)}px;top:${(S.hud.y ?? t.y - 40)}px">${esc(S.hud.text || '')}</div>`;
+  }
+  const isPath = sel.length === 1 && (sel[0].type === 'path');
+  const modeChip = ctx.variant === 'b' && isPath && ctx.state !== 'today' ? (() => {
+    const cs = Mock.corners(sel[0]).map(v.s); const ys = cs.map(p => p.y), xs = cs.map(p => p.x);
+    return `<div class="modechip" style="left:${Math.min(...xs)}px;top:${Math.max(...ys) + 16}px">${B.seg({ label: 'Bearbeiten', size: 'sm', value: S.pathMode, options: [{ value: 'points', label: 'Punkte' }, { value: 'frame', label: 'Rahmen' }], attrs: { 'data-f': 'mode' } })}</div>`;
+  })() : '';
+  const legend = `<div class="legend"><b>${ctx.state === 'today' ? 'Heute' : ctx.variant === 'a' ? 'Variante A' : 'Variante B'}</b>${ctx.state === 'today' ? 'Achsparalleles Rechteck um den gedrehten Pfad – deckt Nachbarn ab.' : 'Zeige auf Objekte (Hover-Umriss), klicke, ziehe am Dreh-Griff. Shift = 15°-Raster, Tab = nächstes.'}</div>`;
+  ctx.stage.innerHTML = ch.head + `<div class="ed-canvas" tabindex="0" aria-label="Seite 1">${world}<svg class="overlay">${overlay(ctx, v)}</svg>${ch.islands}${hud}${modeChip}${ctx.phone ? '' : legend}</div>`;
+  bind(ctx, v);
+}
+
+function bind(ctx, v) {
+  const canvas = $('.ed-canvas', ctx.stage);
+  const drawOverlay = () => { $('svg.overlay', canvas).innerHTML = overlay(ctx, v); };
+  canvas.onpointermove = e => {
+    const p = Mock.localPoint(ctx, canvas, e), wp = v.w(p);
+    if (S.drag) {
+      const d = S.drag, sel = S.sel.map(byId);
+      if (d.kind === 'rot') {
+        const c = v.s({ x: d.c.x, y: d.c.y });
+        let a = Math.atan2(p.y - c.y, p.x - c.x) * 180 / Math.PI + 90;
+        let delta = a - d.a0;
+        sel.forEach((o, i) => { let r = d.r0[i] + delta; if (e.shiftKey) r = Math.round(r / 15) * 15; o.rot = r; });
+        const r = sel[0].rot; S.hud = { text: (Math.round((((r % 360) + 540) % 360 - 180) * 10) / 10).toFixed(1) + '°', x: p.x + 16, y: p.y + 12 };
+      } else if (d.kind === 'move') {
+        sel.forEach((o, i) => { o.cx = d.o0[i].x + (wp.x - d.w0.x); o.cy = d.o0[i].y + (wp.y - d.w0.y); });
+        S.hud = { text: `Δ ${((wp.x - d.w0.x) * 0.3528).toFixed(1)}, ${((wp.y - d.w0.y) * 0.3528).toFixed(1)} mm`, x: p.x + 16, y: p.y + 12 };
+      }
+      d.moved = true;
+      return render(ctx);
+    }
+    const hit = Mock.objectsAt(OBJ, wp, 6, v)[0];
+    const id = hit ? hit.id : null;
+    canvas.classList.toggle('is-over', !!id);
+    if (id !== S.hover) { S.hover = id; drawOverlay(); }
+  };
+  canvas.onpointerleave = () => { if (!S.drag && S.hover) { S.hover = null; drawOverlay(); } };
+  canvas.onpointerdown = e => {
+    if (e.target.closest('.island, .modechip, .legend')) return;
+    canvas.focus({ preventScroll: true });
+    const h = e.target.closest('[data-h]');
+    const p = Mock.localPoint(ctx, canvas, e), wp = v.w(p);
+    const sel = S.sel.map(byId);
+    if (h && h.dataset.h === 'rot' && sel.length) {
+      const pts = sel.flatMap(o => Mock.corners(o));
+      const c = { x: pts.reduce((s, q) => s + q.x, 0) / pts.length, y: pts.reduce((s, q) => s + q.y, 0) / pts.length };
+      const cs = v.s(c);
+      S.drag = { kind: 'rot', c, a0: Math.atan2(p.y - cs.y, p.x - cs.x) * 180 / Math.PI + 90, r0: sel.map(o => o.rot || 0) };
+      canvas.setPointerCapture(e.pointerId); return;
+    }
+    if (h) return;
+    const hit = Mock.objectsAt(OBJ, wp, ctx.phone ? 14 : 6, v)[0];
+    if (!hit) { S.sel = []; S.hud = null; return render(ctx); }
+    if (e.shiftKey) { S.sel = S.sel.includes(hit.id) ? S.sel.filter(x => x !== hit.id) : [...S.sel, hit.id]; return render(ctx); }
+    if (ctx.variant === 'b' && S.sel.length === 1 && S.sel[0] === hit.id && hit.type === 'path') { S.pendingToggle = true; }
+    else { S.sel = [hit.id]; S.pathMode = 'points'; S.pendingToggle = false; }
+    const s2 = S.sel.map(byId);
+    S.drag = { kind: 'move', w0: wp, o0: s2.map(o => ({ x: o.cx, y: o.cy })) };
+    canvas.setPointerCapture(e.pointerId);
+    render(ctx);
+  };
+  canvas.onpointerup = () => {
+    const d = S.drag; S.drag = null;
+    if (d && !d.moved && S.pendingToggle) { S.pathMode = S.pathMode === 'points' ? 'frame' : 'points'; }
+    S.pendingToggle = false;
+    if (d && d.moved) { S.hud = null; }
+    render(ctx);
+  };
+  canvas.onkeydown = e => {
+    if (e.key === 'Escape') { S.sel = []; render(ctx); }
+    if (e.key === 'Tab') { e.preventDefault(); const i = OBJ.findIndex(o => o.id === S.sel[0]); S.sel = [OBJ[(i + (e.shiftKey ? OBJ.length - 1 : 1)) % OBJ.length].id]; render(ctx); $('.ed-canvas', ctx.stage).focus(); }
+    if (e.key.startsWith('Arrow') && S.sel.length) { e.preventDefault(); const st = e.shiftKey ? 10 : 1; S.sel.map(byId).forEach(o => { o.cx += e.key === 'ArrowLeft' ? -st : e.key === 'ArrowRight' ? st : 0; o.cy += e.key === 'ArrowUp' ? -st : e.key === 'ArrowDown' ? st : 0; }); render(ctx); $('.ed-canvas', ctx.stage).focus(); }
+  };
+  ctx.stage.onclick = e => {
+    const sb = e.target.closest('[data-f="mode"] .oo-ui-segment');
+    if (sb) { S.pathMode = sb.dataset.v; render(ctx); }
+  };
+}
+
+Mock.page({
+  title: 'Auswahlrahmen folgt der Form', ids: 'PDF-A16',
+  variants: {
+    a: { name: 'A – Gedrehter Rahmen (Empfehlung):', why: 'Rahmen und Griffe drehen mit dem Objekt; Pfade zeigen zusätzlich ihren Umriss; Linien nur Endpunkte.' },
+    b: { name: 'B – Umriss zuerst:', why: 'Pfade zeigen Umriss und Knoten; ein zweiter Klick (oder der Schalter) wechselt auf den gedrehten Rahmen.' },
+  },
+  states: [
+    { v: 'path', label: 'Gedrehter Pfad' }, { v: 'text', label: 'Gedrehter Text' }, { v: 'rect', label: 'Gedrehtes Rechteck' }, { v: 'area', label: 'Gedrehte Fläche' },
+    { v: 'multi', label: 'Mehrere Objekte' }, { v: 'hover', label: 'Hover über Pfad' }, { v: 'rotating', label: 'Beim Drehen' }, { v: 'locked', label: 'Gesperrt' }, { v: 'today', label: 'Heute (zum Vergleich)' },
+  ],
+  devices: [{ v: 'desktop', label: 'Desktop' }, { v: 'phone', label: 'Handy' }],
+  render,
+});
+</script>
+</body>
+</html>

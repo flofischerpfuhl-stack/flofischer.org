@@ -1,0 +1,308 @@
+/* Mockup scaffolding + editor chrome + proposed building blocks (prefix nb- = "neuer Baustein", Vorschlag).
+   Colours only from --pdf-* tokens (tokens.css); sizes from --pdf-ui-* (ui.css). Page content (the plan) is
+   paper and keeps its own colours. */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  min-height: 100dvh;
+  background: var(--pdf-bg);
+  color: var(--pdf-text);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+a { color: var(--pdf-accent-strong); }
+button { font-family: inherit; }
+
+/* ── Mockup header (not part of the editor) ─────────────────────────────────────────────── */
+.mk-top {
+  position: sticky; top: 0; z-index: 50000;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--pdf-border);
+  background: var(--pdf-panel);
+}
+.mk-top .mk-title { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 auto; }
+.mk-top .mk-title b { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mk-top .mk-title .mk-id { color: var(--pdf-muted); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.mk-top .mk-ctrls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mk-top .oo-ui-select-wrap { width: 200px; }
+.mk-why {
+  display: flex; gap: 8px; align-items: baseline;
+  padding: 8px 16px; border-bottom: 1px solid var(--pdf-border);
+  background: var(--pdf-panel-2); color: var(--pdf-muted); font-size: 12px; line-height: 16px;
+}
+.mk-why b { color: var(--pdf-text); font-weight: 600; white-space: nowrap; }
+@media (max-width: 700px) {
+  .mk-top { padding: 6px 8px; gap: 6px; --pdf-ui-control-h: 36px; --pdf-ui-input-text: 15px; --pdf-ui-text: 12px; }
+  .mk-why span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .mk-why.is-open span { display: block; }
+  .mk-why b { white-space: normal; flex: none; max-width: 40%; }
+  .mk-top .mk-title { flex-basis: 100%; }
+  .mk-top .mk-ctrls { width: 100%; }
+  .mk-top .oo-ui-select-wrap { flex: 1 1 120px; width: auto; }
+  .mk-why { padding: 8px; }
+}
+
+.mk-main { display: flex; justify-content: center; padding: 16px; }
+.mk-main.is-phone-real { padding: 0; }
+.mk-notes { max-width: 1000px; margin: 0 auto; padding: 8px 16px 48px; font-size: 13px; line-height: 20px; }
+.mk-notes h2 { margin: 24px 0 8px; font-size: 15px; font-weight: 600; }
+.mk-notes h3 { margin: 16px 0 4px; font-size: 13px; font-weight: 600; }
+.mk-notes p, .mk-notes li { color: var(--pdf-text); }
+.mk-notes .muted { color: var(--pdf-muted); }
+.mk-notes .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.mk-notes .card { padding: 12px 16px; border: 1px solid var(--pdf-border); border-radius: 12px; background: var(--pdf-panel); }
+.mk-notes .card.is-rec { border-color: var(--pdf-accent); box-shadow: inset 0 0 0 1px var(--pdf-accent); }
+.mk-notes .tag { display: inline-block; padding: 0 6px; border-radius: 4px; background: var(--pdf-selected); color: var(--pdf-accent-strong); font-size: 11px; font-weight: 600; }
+.mk-notes kbd, .nb-kbd { padding: 0 4px; border: 1px solid var(--pdf-border-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--pdf-panel-2); font: 500 11px/16px "Inter", sans-serif; }
+.mk-notes ul { padding-left: 18px; margin: 4px 0; }
+
+/* ── Stage: the editor in a fixed logical size ──────────────────────────────────────────────── */
+.stage-wrap { position: relative; flex: none; }
+.stage {
+  position: absolute; top: 0; left: 0;
+  overflow: hidden;
+  transform-origin: 0 0;
+  background: var(--pdf-bg);
+  border: 1px solid var(--pdf-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px var(--pdf-shadow);
+  -webkit-user-select: none; user-select: none;
+  touch-action: none;
+}
+.stage.is-desktop {
+  width: 1280px; height: 780px;
+  --pdf-ui-control-h: 32px; --pdf-ui-bar-control-h: 36px; --pdf-ui-control-h-sm: 28px; --pdf-ui-control-h-lg: 40px;
+  --pdf-ui-split-arrow: 24px; --pdf-ui-check: 16px; --pdf-ui-text: 12px; --pdf-ui-input-text: 13px; --pdf-ui-text-body: 13px;
+  --ed-island-h: 48px; --ed-inset: 12px;
+}
+/* The phone stage always uses the touch sizes of ui.css (pointer: coarse), also when viewed with a mouse. */
+.stage.is-phone {
+  width: 390px; height: 800px; border-radius: 28px;
+  --pdf-ui-control-h: 44px; --pdf-ui-bar-control-h: 44px; --pdf-ui-control-h-sm: 44px; --pdf-ui-control-h-lg: 44px;
+  --pdf-ui-split-arrow: 44px; --pdf-ui-check: 20px; --pdf-ui-text: 13px; --pdf-ui-input-text: 16px; --pdf-ui-text-body: 14px;
+  --ed-island-h: 56px; --ed-inset: 8px;
+}
+.stage.is-phone.is-real { border: 0; border-radius: 0; box-shadow: none; }
+
+/* App header (Fernwork site bar above the editor) */
+.ed-head {
+  position: absolute; inset: 0 0 auto 0; height: 56px; z-index: 5;
+  display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  border-bottom: 1px solid var(--pdf-border); background: var(--pdf-panel);
+}
+.ed-head .logo { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; }
+.ed-head .logo svg { width: 22px; height: 22px; color: var(--pdf-accent); }
+.ed-head .crumb { color: var(--pdf-muted); }
+.ed-head .crumb b { color: var(--pdf-text); font-weight: 500; }
+.ed-head .search { flex: 0 1 460px; margin: 0 auto; display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px;
+  border: 1px solid var(--pdf-border); border-radius: 8px; background: var(--pdf-panel-2); color: var(--pdf-muted); }
+.ed-head .search .k { margin-left: auto; font-size: 11px; border: 1px solid var(--pdf-border); border-radius: 4px; padding: 0 4px; }
+.ed-head .icons { display: flex; gap: 4px; margin-left: auto; color: var(--pdf-muted); }
+.stage.is-phone .ed-head { padding: 0 12px; }
+.stage.is-phone .ed-head .search { display: none; }
+
+/* Canvas */
+.ed-canvas {
+  position: absolute; inset: 56px 0 0 0; overflow: hidden;
+  background: repeating-conic-gradient(var(--pdf-checker-tile) 0 25%, var(--pdf-checker-bg) 0 50%) 0 0 / 24px 24px;
+}
+.ed-canvas svg.world, .ed-canvas svg.overlay { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ed-canvas svg.overlay { pointer-events: none; }
+.ed-canvas svg.overlay .hit { pointer-events: all; }
+.ed-canvas.is-tool-cross { cursor: crosshair; }
+
+/* Islands (copied look of .oo-pdf-topbar / .oo-pdf-toolbar) */
+.island {
+  position: absolute; z-index: 20;
+  display: flex; align-items: center; gap: 4px;
+  height: var(--ed-island-h); padding: 5px;
+  border: 1px solid var(--pdf-border); border-radius: 12px;
+  background: var(--pdf-panel); box-shadow: 0 10px 28px var(--pdf-shadow);
+}
+.island .sep { align-self: stretch; width: 1px; margin: 6px 2px; background: var(--pdf-border); }
+.island .oo-ui-button { --_h: calc(var(--ed-island-h) - 12px); }
+.island .file { font-size: 15px !important; font-weight: 700 !important; }
+.stage.is-phone .island .file { flex: 1 1 auto; min-width: 0 !important; }
+.stage.is-phone .island.top { gap: 6px; }
+.island.tl { top: var(--ed-inset); left: var(--ed-inset); }
+.island.tr { top: var(--ed-inset); right: var(--ed-inset); }
+.island.bl { bottom: var(--ed-inset); left: var(--ed-inset); }
+.island.bc { bottom: var(--ed-inset); left: 50%; transform: translateX(-50%); }
+.island.br { bottom: var(--ed-inset); right: var(--ed-inset); }
+.stage.is-phone .island.top { top: var(--ed-inset); left: var(--ed-inset); right: var(--ed-inset); justify-content: space-between; }
+.stage.is-phone .island.bottom { bottom: var(--ed-inset); left: var(--ed-inset); right: var(--ed-inset); justify-content: space-between; }
+.stage.is-phone .island .oo-ui-button { --_h: 44px; }
+.island .zoom { min-width: 64px !important; }
+
+/* Floating panel on the right (Properties / Layers), flush with the top-right island */
+.ed-panel {
+  position: absolute; z-index: 15; top: calc(var(--ed-inset) + var(--ed-island-h) + 8px); right: var(--ed-inset);
+  width: 300px; max-height: calc(100% - var(--ed-island-h) - 2 * var(--ed-inset) - 8px - 60px);
+  display: flex; flex-direction: column;
+  border: 1px solid var(--pdf-border); border-radius: 12px; background: var(--pdf-panel);
+  box-shadow: 0 10px 28px var(--pdf-shadow); overflow: hidden;
+}
+.ed-panel-scroll { overflow: auto; flex: 1 1 auto; scrollbar-width: thin; }
+
+/* Options bar position (under the top-left island) */
+.ed-optbar { position: absolute; z-index: 18; top: calc(var(--ed-inset) + var(--ed-island-h) + 8px); left: var(--ed-inset); max-width: calc(100% - 2 * var(--ed-inset)); }
+.stage.is-phone .ed-optbar { right: var(--ed-inset); }
+.stage.is-phone .ed-optbar .oo-ui-bar { width: 100%; }
+
+/* Overlay vocabulary (selection, hover, handles) */
+.ov-frame { fill: none; stroke: var(--pdf-accent-strong); stroke-width: 1.5; }
+.ov-frame.is-old { stroke-width: 1.5; }
+.ov-outline { fill: none; stroke: var(--pdf-accent-strong); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.ov-outline-halo { fill: none; stroke: #fff; stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; opacity: 0.85; }
+.ov-hover { fill: none; stroke: var(--pdf-accent-strong); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.ov-next { fill: none; stroke: var(--pdf-accent-strong); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.ov-fill { fill: color-mix(in srgb, var(--pdf-accent-strong) 12%, transparent); stroke: none; }
+.ov-handle { fill: #fff; stroke: var(--pdf-accent-strong); stroke-width: 1.5; }
+.ov-handle.is-vertex { fill: var(--pdf-accent-strong); stroke: #fff; }
+.ov-rot { fill: #fff; stroke: var(--pdf-accent-strong); stroke-width: 1.5; }
+.ov-stem { stroke: var(--pdf-accent-strong); stroke-width: 1.5; }
+.ov-dim { fill: none; stroke: var(--pdf-muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.ov-group { fill: none; stroke: var(--pdf-accent-strong); stroke-width: 1; stroke-dasharray: 5 4; }
+.ov-cal { stroke: #2563eb; stroke-width: 2; }
+.ov-cal-end { fill: #fff; stroke: #2563eb; stroke-width: 2; }
+
+/* ── Proposed building blocks (nb-) ─────────────────────────────────────────────────────────── */
+
+/* nb: NumberField with a leading label or icon inside the frame (X, Y, B, H, °). The label is the accessible name. */
+.oo-ui-input .nb-prefix { flex: none; min-width: 12px; color: var(--pdf-muted); font-size: var(--pdf-ui-text); font-weight: 600; cursor: ew-resize; }
+.oo-ui-input .nb-prefix .oo-ui-icon { width: 14px; height: 14px; }
+.oo-ui-input .oo-ui-input-native.is-mixed::placeholder { font-style: italic; }
+
+/* nb: PanelSection – a titled block in a side panel, optional summary and action on the right. */
+.nb-section { padding: 12px 16px; border-top: 1px solid var(--pdf-border); }
+.nb-section:first-child { border-top: 0; }
+.nb-section-head { display: flex; align-items: center; gap: 8px; min-height: 24px; margin-bottom: 8px; }
+.nb-section-head h4 { flex: 1 1 auto; margin: 0; font-size: 12px; font-weight: 600; line-height: 16px; color: var(--pdf-text); }
+.nb-section-head .nb-sum { color: var(--pdf-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.nb-section-head .oo-ui-button { --_h: 24px; }
+.nb-section-head .oo-ui-button .oo-ui-icon { width: 14px; height: 14px; }
+.nb-section.is-collapsible .nb-section-head { cursor: pointer; margin: -4px -8px 4px; padding: 4px 8px; border-radius: 8px; }
+.nb-section.is-collapsible .nb-section-head:hover { background: var(--pdf-hover); }
+.nb-section.is-collapsible .nb-chev { transition: transform 120ms ease; color: var(--pdf-muted); }
+.nb-section.is-collapsed .nb-chev { transform: rotate(-90deg); }
+.nb-section.is-collapsed .nb-section-head { margin-bottom: -4px; }
+.nb-section.is-collapsed .nb-section-body { display: none; }
+.nb-section-body { display: grid; gap: 8px; }
+.nb-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; align-items: center; }
+.nb-row.is-3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; }
+.nb-row.is-wide-first { grid-template-columns: minmax(0, 1fr) auto; }
+.nb-row > .oo-ui-field, .nb-row > .oo-ui-input { min-width: 0; }
+.nb-lrow { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 8px; align-items: center; min-height: var(--pdf-ui-control-h); }
+.nb-lrow > label, .nb-lrow > .lbl { color: var(--pdf-muted); font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nb-lrow .nb-cell { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.nb-lrow .nb-cell > * { min-width: 0; }
+
+/* nb: Textarea in the field frame */
+.nb-textarea { display: block; width: 100%; min-height: 64px; resize: vertical; padding: 8px 10px; border: 1px solid var(--pdf-border); border-radius: 8px;
+  background: var(--pdf-input-bg); color: var(--pdf-text); font: 400 var(--pdf-ui-input-text)/1.4 "Inter", sans-serif; outline: none; }
+.nb-textarea:hover { border-color: var(--pdf-border-strong); }
+.nb-textarea:focus { border-color: var(--pdf-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pdf-accent) 45%, transparent); }
+.nb-textarea:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* nb: Slider (opacity) with the value field next to it */
+.nb-slider { -webkit-appearance: none; appearance: none; width: 100%; height: var(--pdf-ui-control-h); margin: 0; background: transparent; cursor: pointer; }
+.nb-slider::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--pdf-accent) var(--_p, 100%), var(--pdf-spinner-track) var(--_p, 100%)); }
+.nb-slider::-moz-range-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--pdf-accent) var(--_p, 100%), var(--pdf-spinner-track) var(--_p, 100%)); }
+.nb-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4); border: 0; }
+.nb-slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4); border: 0; }
+.stage.is-phone .nb-slider::-webkit-slider-thumb { width: 24px; height: 24px; margin-top: -10px; }
+.nb-slider:disabled { opacity: 0.45; cursor: not-allowed; }
+.nb-slider:focus-visible { outline: 2px solid var(--pdf-accent); outline-offset: 2px; border-radius: 4px; }
+
+/* nb: Skeleton (loading rows keep the final height: nothing jumps when values arrive) */
+.nb-skel { display: block; height: var(--pdf-ui-control-h); border-radius: 8px; background: linear-gradient(90deg, var(--pdf-hover) 0%, var(--pdf-hover-strong) 50%, var(--pdf-hover) 100%) 0 0 / 200% 100%; animation: nb-skel 1.2s linear infinite; }
+.nb-skel.is-text { height: 12px; width: 60%; border-radius: 4px; }
+@keyframes nb-skel { to { background-position: -200% 0; } }
+
+/* nb: Object header (icon tile, name, meta, quick toggles) */
+.nb-objhead { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px 12px 12px 16px; }
+.nb-objhead .tile { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; background: var(--pdf-selected); color: var(--pdf-accent-strong); }
+.nb-objhead .name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nb-objhead .meta { color: var(--pdf-muted); font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nb-objhead .acts { display: flex; gap: 2px; }
+
+/* nb: StackSwitcher – "2 / 4 · Fläche" with previous/next, opens the list of objects under the point */
+.nb-stack {
+  display: inline-flex; align-items: center; gap: 2px; height: var(--pdf-ui-bar-control-h); padding: 3px;
+  border: 1px solid var(--pdf-border); border-radius: 12px; background: var(--pdf-panel); box-shadow: 0 8px 24px var(--pdf-shadow);
+  color: var(--pdf-text); white-space: nowrap;
+}
+.nb-stack .oo-ui-button { --_h: calc(var(--pdf-ui-bar-control-h) - 8px); }
+.stage.is-phone .nb-stack { height: 52px; padding: 4px; }
+.stage.is-phone .nb-stack .oo-ui-button { --_h: 44px; }
+.nb-stack .lbl { display: inline-flex; align-items: center; gap: 6px; max-width: 200px; }
+.nb-stack .count { color: var(--pdf-muted); font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* nb: HUD chip next to the pointer (angle, size while dragging) */
+.nb-hud { position: absolute; z-index: 30; padding: 2px 6px; border-radius: 4px; background: var(--pdf-text); color: var(--pdf-panel); font-size: 11px; font-weight: 600; line-height: 16px; font-variant-numeric: tabular-nums; pointer-events: none; white-space: nowrap; }
+
+/* nb: BottomSheet (phone) with grabber and snap points */
+.nb-sheet {
+  position: absolute; z-index: 40; left: 0; right: 0; bottom: 0;
+  display: flex; flex-direction: column;
+  border: 1px solid var(--pdf-border); border-bottom: 0; border-radius: 16px 16px 0 0;
+  background: var(--pdf-panel); box-shadow: 0 -10px 32px var(--pdf-shadow);
+  transition: height 220ms cubic-bezier(.2,.8,.2,1);
+}
+.nb-sheet-grab { flex: none; display: grid; place-items: center; height: 24px; cursor: grab; touch-action: none; }
+.nb-sheet-grab::before { content: ""; width: 40px; height: 4px; border-radius: 2px; background: var(--pdf-border-strong); }
+.nb-sheet-body { flex: 1 1 auto; overflow: auto; overscroll-behavior: contain; }
+
+/* nb: Menu row with a secondary line (object lists) */
+.nb-objrow { display: grid !important; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 8px; height: auto !important; min-height: var(--pdf-ui-control-h) !important; padding: 6px 8px !important; text-align: left; }
+.nb-objrow .t { display: block; font-size: var(--pdf-ui-text-body); font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
+.nb-objrow .s { display: block; color: var(--pdf-muted); font-size: 11px; font-weight: 400; line-height: 14px; }
+.nb-objrow.is-current { --_bg: var(--pdf-selected) !important; }
+.nb-objrow .oo-ui-menu-lead { align-self: center; }
+.oo-ui-menu-item .nb-kbd { margin-left: auto; color: var(--pdf-muted); }
+
+/* Tooltip-ish hint pill (ephemeral, bottom of canvas) */
+.nb-toast { position: absolute; z-index: 35; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px;
+  border-radius: 12px; background: var(--pdf-text); color: var(--pdf-panel); font-size: 12px; font-weight: 500; white-space: nowrap; box-shadow: 0 8px 24px var(--pdf-shadow); }
+.nb-toast .nb-kbd { background: transparent; color: inherit; border-color: color-mix(in srgb, var(--pdf-panel) 50%, transparent); }
+
+.is-hidden { display: none !important; }
+.vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Index page */
+.ix { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+.ix h1 { margin: 0 0 4px; font-size: 22px; line-height: 28px; font-weight: 700; }
+.ix .lead { margin: 0 0 24px; color: var(--pdf-muted); font-size: 14px; line-height: 20px; }
+.ix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.ix-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--pdf-border); border-radius: 12px; background: var(--pdf-panel); color: var(--pdf-text); text-decoration: none; transition: border-color 120ms ease, transform 120ms ease; }
+.ix-card:hover { border-color: var(--pdf-accent); }
+.ix-card:focus-visible { outline: 2px solid var(--pdf-accent); outline-offset: 2px; }
+.ix-card .k { display: flex; gap: 8px; align-items: center; color: var(--pdf-muted); font-size: 12px; font-weight: 600; }
+.ix-card h2 { margin: 0; font-size: 16px; line-height: 22px; font-weight: 600; }
+.ix-card p { margin: 0; color: var(--pdf-muted); font-size: 13px; line-height: 19px; }
+.ix-card .rec { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--pdf-border); font-size: 12px; }
+.ix-card .rec b { color: var(--pdf-accent-strong); }
+.ix-sec { margin-top: 32px; }
+.ix-sec h2 { font-size: 15px; margin: 0 0 8px; }
+.ix-sec li { margin: 4px 0; line-height: 20px; }
+
+/* nb (state of Button): a button that opens a popover or menu shows "open" as a quiet fill, not the accent of a mode. */
+.oo-ui-button[aria-expanded="true"]:not(.is-primary) { --_bg: var(--pdf-hover-strong); --_border: var(--pdf-border-strong); }
+.oo-ui-status.is-action[aria-expanded="true"] { --_border: currentColor; }
+
+/* Scroll hint on panels and sheets: the side with more content fades out. */
+:is(.ed-panel-scroll, .nb-sheet-body)[data-more-end] { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent); }
+:is(.ed-panel-scroll, .nb-sheet-body)[data-more-start] { -webkit-mask-image: linear-gradient(to top, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(to top, #000 calc(100% - 24px), transparent); }
+:is(.ed-panel-scroll, .nb-sheet-body)[data-more-start][data-more-end] { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 24px, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(to bottom, transparent, #000 24px, #000 calc(100% - 32px), transparent); }
+
+.cc-row[data-overflow-end] { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); }
+.cc-row[data-overflow-start] { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); }
+.cc-row[data-overflow-start][data-overflow-end] { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); }
+
+/* Notes: code names in Inter, not monospace (no monospace anywhere). */
+code { padding: 0 4px; border-radius: 4px; background: var(--pdf-hover); font: 500 0.92em/1.4 "Inter", sans-serif; }

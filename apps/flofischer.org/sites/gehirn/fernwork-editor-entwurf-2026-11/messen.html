@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Messen-Leiste und Kalibrieren</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/ui.css">
+<link rel="stylesheet" href="assets/mock.css">
+<style>
+  .oo-ui-popover.pop { position: absolute; z-index: 25; width: 320px; padding: 0; }
+  .pop .ph { display: flex; align-items: center; gap: 8px; padding: 12px 12px 0 16px; }
+  .pop .ph h3 { flex: 1; margin: 0; font-size: 13px; font-weight: 600; }
+  .pop .pb { display: grid; gap: 12px; padding: 12px 16px 16px; }
+  .pop .pf { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--pdf-border); background: var(--pdf-panel-2); border-radius: 0 0 12px 12px; }
+  .pop .sub { color: var(--pdf-muted); font-size: 12px; line-height: 16px; margin: 0; }
+  .pop .kv { display: flex; align-items: center; gap: 8px; min-height: var(--pdf-ui-control-h); }
+  .pop .kv .k { color: var(--pdf-muted); font-size: 12px; font-weight: 500; width: 88px; flex: none; }
+  .pop .kv .v { flex: 1; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .pop .sect { padding-top: 12px; border-top: 1px solid var(--pdf-border); display: grid; gap: 8px; }
+  .pop .sect h4 { margin: 0; font-size: 12px; font-weight: 600; }
+  .stepnum { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--pdf-accent); color: var(--pdf-accent-contrast); font-size: 11px; font-weight: 700; }
+  .scale-btn .oo-ui-button-label b { font-weight: 700; }
+  .scale-btn .oo-ui-button-label span { color: var(--pdf-muted); font-weight: 600; }
+  .stage.is-phone .pop { left: 0 !important; right: 0; bottom: 0; top: auto !important; width: auto; border-radius: 16px 16px 0 0; }
+  .stage.is-phone .pop .pf { border-radius: 0; padding-bottom: 16px; }
+  .reopen { position: absolute; z-index: 18; }
+  .oo-ui-popover.menu-pop { position: absolute; z-index: 26; width: 240px; }
+</style>
+</head>
+<body>
+<script src="assets/icons.js"></script>
+<script src="assets/mock.js"></script>
+<template id="notes">
+  <h2>Worum es geht</h2>
+  <p>Heute (Florians Bild 10): „Scale not set (measures 1:1 in mm)“ als loser Text, Felder unterschiedlich hoch, Monospace-Platzhalter, „Set“ und „CSV“ je in eigenem Rahmen, Farbe und Anzahl ohne Gruppe. Der Kalibrier-Dialog hängt an der Linie und wandert beim Zoomen (Bilder 5–7). Entscheidung F12: Kalibrieren sitzt in der Leiste. A20: Kalibrieren ist ein interner Korrekturfaktor, der Maßstab selbst geht in die Datei.</p>
+  <div class="cols">
+    <div class="card"><h3>Variante A – Offen</h3>
+      <ul><li>Alles sichtbar: Maßstab 1 : [500], Einheit, Korrektur-Chip „×1.002“ mit Zurücksetzen, Kalibrieren, Farbe/Strich, Anzahl + CSV.</li>
+      <li>Kalibrieren verwandelt die Leiste selbst (gleiche Stelle, gleiche Höhe): Schritt 1 „Strecke ziehen“, Schritt 2 „Gemessen … · Wirklich [ ] m · Übernehmen“. Esc bricht ab.</li>
+      <li>Stark am Desktop, am Handy scrollen die Gruppen (Schließen und Übernehmen bleiben stehen).</li></ul></div>
+    <div class="card is-rec"><h3>Variante B – Kompakt <span class="tag">Empfehlung</span></h3>
+      <ul><li>Ein Maßstab-Knopf zeigt immer den Zustand („1 : 500 · ×1.002“ oder gelb „Kein Maßstab“); dahinter ein Popover mit Maßstab, Einheit und Kalibrierung.</li>
+      <li>Kalibrieren läuft im selben Popover, das an der Leiste angedockt bleibt; am Handy wird es ein flaches Bottom-Sheet, der Plan bleibt frei.</li>
+      <li>Leiste passt auch bei 320 px in eine Zeile: Maßstab, Farbe, Strich, Anzahl, Schließen. Anzahl öffnet ein Menü (CSV, kopieren, alle löschen).</li></ul>
+      <p class="muted">Warum: Den Maßstab stellt man einmal pro Plan ein, gemessen wird hundertmal. Die Leiste zeigt den Zustand, nicht die Eingabe.</p></div>
+  </div>
+  <h2>Zustände und Verhalten</h2>
+  <ul>
+    <li>Kein Maßstab: gelber Chip (Warnung, nicht „deaktiviert“-grau), misst 1:1. Maßstab gesetzt, kalibriert: grüner Faktor-Chip mit Zurücksetzen. Abweichung über 3 %: Warnung mit Angebot „Maßstab 1 : 560 setzen“ statt eines Korrekturfaktors.</li>
+    <li>Kalibrieren: Strecke auf dem Plan ziehen (im Mockup echt ziehbar), dann Länge eingeben. Enter übernimmt, Esc bricht ab, Länge ≤ 0 zeigt den Fehler direkt am Feld (Chip in der Leiste, weil die Leiste keine Fehlerzeile hat).</li>
+    <li>Messungen im Plan rechnen live mit Maßstab × Faktor; probiere 1 : 500 → 1 : 1000.</li>
+    <li>Alle Bedienelemente einer Zeile 36 px (Touch 44 px), Einheit steht einmal (Feld-Suffix), Dezimalpunkt einheitlich, Inter statt Monospace.</li>
+  </ul>
+  <h2>Fehlende Bausteine</h2>
+  <ul><li><b>Popover mit Kopf/Fuß</b> (Titel, Inhalt, Aktionen) – heute nur PopoverSurface/Menu; am Handy als <b>BottomSheet</b>.</li>
+  <li><b>ToolOptionsStatus mit Schließen-x</b> (Faktor-Chip „×1.002 ✕“) – heute nur Chip oder Knopf.</li>
+  <li><b>Schritt-Anzeige</b> im Status-Chip (Nummer 1/2).</li></ul>
+</template>
+<script>
+const { B, icon, esc, cx, $, $$ } = Mock;
+const S = { scale: 500, factor: 1.002, calibratedFrom: '36.505', unit: 'm', color: '#dc2626', sw: 1.5, closed: false, popOpen: false, menuOpen: false,
+  meas: [ { a: { x: 182, y: 480 }, b: { x: 462, y: 440 } }, { a: { x: 640, y: 365 }, b: { x: 822, y: 345 } }, { a: { x: 520, y: 500 }, b: { x: 470, y: 30 } } ],
+  cal: null, calVal: '', drag: null };
+const UNITS = { m: { f: 1, d: 2, l: 'Meter (m)' }, cm: { f: 100, d: 1, l: 'Zentimeter (cm)' }, mm: { f: 1000, d: 0, l: 'Millimeter (mm)' }, ft: { f: 3.28084, d: 2, l: 'Fuß (ft)' } };
+const PT_MM = 0.352778;
+function meters(a, b, withFactor = true) {
+  const d = Math.hypot(b.x - a.x, b.y - a.y);
+  const sc = ctxState() === 'none' ? 1 : S.scale;
+  return d * PT_MM * sc / 1000 * (withFactor && hasFactor() ? S.factor : 1);
+}
+const fmt = (m, u = S.unit) => (m * UNITS[u].f).toFixed(UNITS[u].d) + ' ' + u;
+let C;
+const ctxState = () => C.state;
+const hasFactor = () => C.state !== 'none' && Math.abs(S.factor - 1) > 1e-9;
+const calibrating = () => ['cal1', 'cal2', 'calerr'].includes(C.state);
+
+function stateDefaults(s) {
+  if (s === 'set' && Math.abs(S.factor - 1) < 1e-9) { S.factor = 1.002; S.calibratedFrom = '36.505'; }
+  if (s === 'plain' || s === 'none') S.factor = 1;
+  if (s === 'cal2' && !S.cal) S.cal = { a: { x: 560, y: 120 }, b: { x: 560, y: 240 } };
+  if (s === 'cal2' && !S.calVal) S.calVal = '';
+  if (s === 'calerr') { S.cal = S.cal || { a: { x: 560, y: 120 }, b: { x: 560, y: 240 } }; S.calVal = '24'; }
+  if (s === 'cal1') { S.cal = null; S.calVal = ''; }
+  if (s === 'menu') S.menuOpen = true;
+}
+
+function view(ctx) {
+  if (!ctx.phone) return Mock.view(0.86, 210, 112);
+  const z = 0.62; return Mock.view(z, -150, 150);
+}
+
+function scaleLabel() {
+  if (C.state === 'none') return null;
+  return `<b>1 : ${S.scale}</b>${hasFactor() ? ` <span>· ×${S.factor.toFixed(3)}</span>` : ''}`;
+}
+
+function calInfo() {
+  const raw = S.cal ? meters(S.cal.a, S.cal.b, false) : 0;
+  const val = parseFloat(String(S.calVal).replace(',', '.'));
+  const valid = val > 0;
+  const f = valid ? val / raw : null;
+  return { raw, val, valid, f, dev: f ? Math.abs(f - 1) : 0 };
+}
+
+function barA(ctx) {
+  if (calibrating()) {
+    if (C.state === 'cal1') {
+      return B.bar({ label: 'Kalibrieren', closeLabel: 'Kalibrieren abbrechen', groups: [
+        B.group('Schritt', B.status('<span class="stepnum">1</span> Ziehe auf dem Plan eine Strecke, deren Länge du kennst', { tone: 'info', html: true })),
+      ] });
+    }
+    const ci = calInfo();
+    const err = C.state === 'calerr' || (S.calVal !== '' && !ci.valid);
+    return B.bar({ label: 'Kalibrieren', closeLabel: 'Kalibrieren abbrechen', confirm: 'Übernehmen', confirmDisabled: !ci.valid, groups: [
+      B.group('Schritt', B.status('<span class="stepnum">2</span> Gemessen ' + fmt(ci.raw), { tone: 'info', html: true })),
+      B.group('Wirkliche Länge', B.num({ label: 'Wirklich', labelPos: 'start', value: S.calVal, unit: S.unit, width: 'sm', error: err && !ci.valid ? 'x' : null, attrs: { 'data-f': 'calval', autofocus: true } })
+        + (ci.valid ? (ci.dev > 0.03 ? B.status(`Weicht ${(ci.dev * 100).toFixed(0)} % ab – Maßstab 1 : ${Math.round(S.scale * ci.f / 10) * 10} setzen?`, { tone: 'warning', icon: 'triangle-alert', action: true, attrs: { 'data-act': 'setscale' } })
+          : B.status('Korrektur ×' + ci.f.toFixed(3), { tone: 'success', icon: 'check' }))
+          : (S.calVal !== '' ? B.status('Länge größer 0 eingeben', { tone: 'danger', icon: 'circle-x' }) : '')))
+    ] });
+  }
+  const none = C.state === 'none';
+  return B.bar({ label: 'Distance', groups: [
+    B.group('Maßstab', B.num({ label: 'Maßstab 1 :', labelPos: 'start', value: none ? '' : S.scale, width: 'xs', attrs: { 'data-f': 'scale' } })
+      + B.select({ label: 'Einheit', labelPos: 'hidden', value: S.unit, options: Object.entries(UNITS).map(([v, u]) => ({ value: v, label: v === 'm' ? 'Meter' : u.l.split(' ')[0] })), attrs: { 'data-f': 'unit' }, width: 'sm' })
+      + (none ? B.status('Misst 1 : 1', { tone: 'warning', icon: 'triangle-alert', title: 'Kein Maßstab gesetzt: Strecken werden 1 : 1 in Papiermaß gemessen.' }) : '')
+      + (hasFactor() ? `<span style="display:inline-flex">${B.status('×' + S.factor.toFixed(3), { tone: 'success', icon: 'check', title: `Kalibriert aus ${S.calibratedFrom} m`, cls: '' })}${B.ibtn('rotate-ccw', 'Kalibrierung zurücksetzen', { attrs: { 'data-act': 'reset' } })}</span>` : '')
+      + B.btn('Kalibrieren', { icon: 'ruler', variant: 'quiet', attrs: { 'data-act': 'calibrate' } })),
+    B.group('Darstellung', B.color({ label: 'Farbe', hex: S.color }) + B.num({ label: 'Strichstärke', labelPos: 'hidden', value: S.sw, unit: 'pt', width: 'xs', prefix: '', attrs: { 'data-f': 'sw' } })),
+    B.group('Messungen', B.btn(`${S.meas.length} Messungen`, { variant: 'quiet', iconEnd: 'chevron-down', attrs: { 'data-act': 'menu', 'aria-expanded': String(S.menuOpen) } }) + B.ibtn('download', 'Als CSV exportieren', { attrs: { 'data-act': 'csv' } })),
+  ] });
+}
+
+function barB(ctx) {
+  const none = C.state === 'none';
+  const scaleBtn = none
+    ? B.status('Kein Maßstab', { tone: 'warning', icon: 'triangle-alert', iconEnd: 'chevron-down', action: true, attrs: { 'data-act': 'pop', 'aria-expanded': String(S.popOpen) }, title: 'Misst 1 : 1. Maßstab setzen oder kalibrieren' })
+    : B.btn(scaleLabel(), { html: true, icon: 'ruler', iconEnd: 'chevron-down', cls: 'scale-btn', variant: 'quiet', attrs: { 'data-act': 'pop', 'aria-expanded': String(S.popOpen || calibrating()) } });
+  return B.bar({ label: 'Distance', groups: [
+    B.group('Maßstab', scaleBtn),
+    B.group('Darstellung', B.color({ label: 'Farbe', hex: S.color }) + B.num({ label: 'Strichstärke', labelPos: 'hidden', value: S.sw, unit: 'pt', width: 'xs', attrs: { 'data-f': 'sw' } })),
+    B.group('Messungen', B.btn(ctx.phone ? String(S.meas.length) : `${S.meas.length} Messungen`, { variant: 'quiet', icon: ctx.phone ? 'list' : null, iconEnd: 'chevron-down', attrs: { 'data-act': 'menu', 'aria-expanded': String(S.menuOpen), title: `${S.meas.length} Messungen` } })),
+  ] });
+}
+
+function popB(ctx) {
+  const open = S.popOpen || calibrating();
+  if (!open) return '';
+  let head, body, foot = '';
+  if (C.state === 'cal1') {
+    head = 'Kalibrieren · Schritt 1 von 2';
+    body = `<p class="sub" style="color:var(--pdf-text);font-size:13px;line-height:18px">Ziehe auf dem Plan eine Strecke, deren Länge du kennst – z. B. eine Bemaßung oder eine Grenze.</p>${ctx.phone ? '' : '<p class="sub">Tipp: Am Anfang und Ende rastet die Linie an Punkten ein.</p>'}`;
+    foot = B.btn('Abbrechen', { attrs: { 'data-act': 'cancelcal' } });
+  } else if (calibrating()) {
+    const ci = calInfo();
+    head = 'Kalibrieren · Schritt 2 von 2';
+    const err = S.calVal !== '' && !ci.valid ? 'Länge größer 0 eingeben.' : null;
+    body = `<div class="kv"><span class="k">Gemessen</span><span class="v">${fmt(ci.raw)}</span>${B.btn('Neu ziehen', { variant: 'quiet', size: 'sm', icon: 'rotate-ccw', attrs: { 'data-act': 'redraw' } })}</div>
+      ${B.num({ label: 'Wirkliche Länge', value: S.calVal, unit: S.unit, error: err, attrs: { 'data-f': 'calval', autofocus: true } })}
+      ${ci.valid ? (ci.dev > 0.03
+        ? B.status(`Weicht ${(ci.dev * 100).toFixed(0)} % ab. Eher Maßstab 1 : ${Math.round(S.scale * ci.f / 10) * 10}?`, { tone: 'warning', icon: 'triangle-alert' })
+          + B.btn(`Maßstab 1 : ${Math.round(S.scale * ci.f / 10) * 10} setzen`, { block: true, attrs: { 'data-act': 'setscale' } })
+        : B.status('Korrektur ×' + ci.f.toFixed(3) + ' auf 1 : ' + S.scale, { tone: 'success', icon: 'check' })) : ''}`;
+    foot = B.btn('Abbrechen', { attrs: { 'data-act': 'cancelcal' } }) + B.btn('Übernehmen', { variant: 'primary', disabled: !ci.valid, attrs: { 'data-act': 'confirm' } });
+  } else {
+    const none = C.state === 'none';
+    head = 'Maßstab';
+    body = `<div class="nb-row" style="grid-template-columns:auto minmax(0,1fr)">${B.num({ label: '1 :', labelPos: 'start', value: none ? '' : S.scale, width: 'sm', attrs: { 'data-f': 'scale', 'aria-label': 'Maßstab 1 zu' } })}
+      ${B.select({ label: 'Einheit', labelPos: 'hidden', value: S.unit, options: Object.entries(UNITS).map(([v, u]) => ({ value: v, label: u.l })), attrs: { 'data-f': 'unit' } })}</div>
+      ${none ? B.status('Ohne Maßstab misst das Werkzeug 1 : 1 in Papiermaß.', { tone: 'warning', icon: 'triangle-alert' }) : '<p class="sub">Steht in der Datei – andere Programme sehen ihn auch.</p>'}
+      <div class="sect"><h4>Kalibrierung</h4>
+      ${hasFactor() ? `<div class="kv"><span class="k">Korrektur</span><span class="v">×${S.factor.toFixed(3)}</span>${B.btn('Zurücksetzen', { variant: 'quiet', size: 'sm', attrs: { 'data-act': 'reset' } })}</div><p class="sub">Aus einer Strecke von ${S.calibratedFrom} m. Gleicht Papierverzug aus und bleibt nur in diesem Dokument.</p>`
+        : '<p class="sub">Gleicht Verzug aus (Scan, Druck): eine bekannte Strecke ziehen und ihre Länge eingeben.</p>'}
+      ${B.btn(hasFactor() ? 'Neu kalibrieren' : 'Kalibrieren', { icon: 'ruler', block: true, attrs: { 'data-act': 'calibrate' } })}</div>`;
+  }
+  return `<div class="oo-ui-popover is-static pop" role="dialog" aria-label="${esc(head)}" data-pop><div class="ph"><h3>${esc(head)}</h3>${B.ibtn('x', 'Schließen', { size: 'sm', shortcut: 'Esc', attrs: { 'data-act': calibrating() ? 'cancelcal' : 'popclose' } })}</div><div class="pb">${body}</div>${foot ? `<div class="pf">${foot}</div>` : ''}</div>`;
+}
+
+function menu() {
+  if (!S.menuOpen) return '';
+  return `<div class="oo-ui-popover is-static is-menu menu-pop" data-menu><div class="oo-ui-menu" role="menu">
+    ${B.menuItem('Als CSV exportieren', { icon: 'download', attrs: { 'data-act': 'csv' } })}${B.menuItem('In Zwischenablage kopieren', { icon: 'copy' })}
+    <div class="oo-ui-menu-separator"></div>${B.menuItem('Messungen ausblenden', { icon: 'eye-off' })}${B.menuItem('Alle Messungen löschen', { icon: 'trash-2', danger: true, attrs: { 'data-act': 'clear' } })}</div></div>`;
+}
+
+function worldSVG(ctx, v) {
+  const lines = S.meas.map(m => {
+    const a = v.s(m.a), b = v.s(m.b);
+    const ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+    const up = ang > 90 || ang < -90 ? ang + 180 : ang;
+    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    const t = fmt(meters(m.a, m.b));
+    return `<g><line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${S.color}" stroke-width="${S.sw * 1.2}"/>
+      ${[a, b].map(p => `<circle cx="${p.x}" cy="${p.y}" r="3" fill="${S.color}"/>`).join('')}
+      <g transform="translate(${mx} ${my}) rotate(${up})"><rect x="-34" y="-20" width="68" height="16" rx="3" fill="#fff" stroke="${S.color}" stroke-width="1"/><text y="-8" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="${S.color}">${t}</text></g></g>`;
+  }).join('');
+  let cal = '';
+  const c = S.drag || S.cal;
+  if (c && calibrating()) {
+    const a = v.s(c.a), b = v.s(c.b);
+    cal = `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="ov-cal" stroke-dasharray="6 4"/>${[a, b].map(p => `<circle cx="${p.x}" cy="${p.y}" r="5" class="ov-cal-end"/>`).join('')}
+      <g transform="translate(${(a.x + b.x) / 2 + 10} ${(a.y + b.y) / 2})"><rect x="0" y="-10" width="76" height="20" rx="4" fill="#2563eb"/><text x="38" y="4" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#fff">${fmt(meters(c.a, c.b, false))}</text></g>`;
+  }
+  return `<svg class="world" aria-hidden="true"><g transform="translate(${v.ox} ${v.oy}) scale(${v.z})"><rect x="4" y="6" width="${Mock.PAGE.w}" height="${Mock.PAGE.h}" fill="rgba(0,0,0,.12)"/>${Mock.plan('m')}</g>${lines}${cal}</svg>`;
+}
+
+function render(ctx) {
+  C = ctx;
+  stateDefaults(ctx.state);
+  if (!['menu'].includes(ctx.state) && ctx._last !== ctx.state) S.menuOpen = ctx.state === 'menu';
+  if (ctx._last !== ctx.state && !calibrating() && ctx.state !== 'menu') S.popOpen = false;
+  ctx._last = ctx.state;
+  const v = view(ctx);
+  const ch = Mock.chrome(ctx, { tool: 'measure', zoom: ctx.phone ? '62%' : '86%' });
+  const bar = S.closed ? '' : (ctx.variant === 'a' ? barA(ctx) : barB(ctx));
+  ctx.stage.innerHTML = ch.head + `<div class="ed-canvas ${calibrating() || !S.closed ? 'is-tool-cross' : ''}">${worldSVG(ctx, v)}${ch.islands}
+    <div class="ed-optbar">${bar}</div>${ctx.variant === 'b' && !S.closed ? popB(ctx) : ''}${menu()}
+    ${S.closed ? `<div class="nb-toast" style="bottom:${ctx.phone ? 76 : 72}px">Distance geschlossen ${B.btn('Wieder öffnen', { size: 'sm', variant: 'quiet', attrs: { 'data-act': 'reopen' }, cls: '' })}</div>` : ''}
+    ${C.state === 'cal1' && !S.closed && ctx.variant === 'a' ? `<div class="nb-toast" style="bottom:${ctx.phone ? 76 : 72}px">${icon('mouse-pointer')} Ziehen: Anfang und Ende der bekannten Strecke <span class="nb-kbd">Esc</span></div>` : ''}</div>`;
+  place(ctx);
+  bind(ctx, v);
+  const af = $('[autofocus]', ctx.stage); if (af && !ctx.phone) { af.focus(); af.select?.(); }
+}
+
+function place(ctx) {
+  const canvas = $('.ed-canvas', ctx.stage);
+  const cr = canvas.getBoundingClientRect();
+  const rel = el => { const r = el.getBoundingClientRect(); return { x: (r.left - cr.left) / ctx.scale, y: (r.top - cr.top) / ctx.scale, w: r.width / ctx.scale, h: r.height / ctx.scale }; };
+  const pop = $('[data-pop]', ctx.stage);
+  const anchor = $('[data-act="pop"]', ctx.stage) || $('.oo-ui-bar', ctx.stage);
+  if (pop && anchor && !ctx.phone) { const a = rel(anchor); pop.style.left = Math.max(12, a.x) + 'px'; pop.style.top = a.y + a.h + 10 + 'px'; }
+  const m = $('[data-menu]', ctx.stage), ma = $('[data-act="menu"]', ctx.stage);
+  if (m && ma) { const a = rel(ma); const left = Math.min(a.x, ctx.W - 252); m.style.left = left + 'px'; m.style.top = a.y + a.h + 10 + 'px'; }
+}
+
+function bind(ctx, v) {
+  const st = ctx.stage;
+  st.onclick = e => {
+    const t = e.target.closest('[data-act]');
+    if (!t) { if (S.menuOpen && !e.target.closest('[data-menu]')) { S.menuOpen = false; if (C.state === 'menu') return ctx.setState('set'); render(ctx); } return; }
+    const a = t.dataset.act;
+    if (a === 'close') { if (calibrating()) return cancelCal(); S.closed = true; S.popOpen = false; return render(ctx); }
+    if (a === 'reopen') { S.closed = false; return render(ctx); }
+    if (a === 'calibrate') { S.popOpen = true; return ctx.setState('cal1'); }
+    if (a === 'cancelcal') return cancelCal();
+    if (a === 'redraw') return ctx.setState('cal1');
+    if (a === 'confirm') { const ci = calInfo(); if (!ci.valid) return; S.factor = ci.f; S.calibratedFrom = String(S.calVal); S.cal = null; S.popOpen = ctx.variant === 'b'; return ctx.setState('set'); }
+    if (a === 'setscale') { const ci = calInfo(); S.scale = Math.round(S.scale * ci.f / 10) * 10; S.factor = 1; S.cal = null; return ctx.setState('plain'); }
+    if (a === 'reset') { S.factor = 1; return ctx.setState('plain'); }
+    if (a === 'pop') { S.popOpen = !S.popOpen; S.menuOpen = false; return render(ctx); }
+    if (a === 'popclose') { S.popOpen = false; return render(ctx); }
+    if (a === 'menu') { S.menuOpen = !S.menuOpen; S.popOpen = false; return render(ctx); }
+    if (a === 'clear') { S.meas = []; S.menuOpen = false; return ctx.setState(C.state === 'menu' ? 'set' : C.state); }
+    if (a === 'csv') { S.menuOpen = false; render(ctx); }
+  };
+  st.onkeydown = e => {
+    if (e.key === 'Escape') { e.preventDefault(); if (calibrating()) return cancelCal(); if (S.menuOpen || S.popOpen) { S.menuOpen = S.popOpen = false; return render(ctx); } S.closed = true; return render(ctx); }
+    if (e.key === 'Enter' && e.target.dataset.f === 'calval') { S.calVal = e.target.value; $('[data-act="confirm"]', st)?.click(); }
+  };
+  st.oninput = e => {
+    const f = e.target.dataset.f;
+    if (f === 'calval') { S.calVal = e.target.value; const pos = e.target.selectionStart; render(ctx); const n = $('[data-f="calval"]', st); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }
+  };
+  st.onchange = e => {
+    const f = e.target.dataset.f;
+    if (f === 'unit') { S.unit = e.target.value; render(ctx); }
+    if (f === 'scale') { const n = parseFloat(e.target.value.replace(',', '.')); if (n > 0) { S.scale = n; if (C.state === 'none') return ctx.setState('plain'); } render(ctx); }
+    if (f === 'sw') { const n = parseFloat(e.target.value.replace(',', '.')); if (n > 0) S.sw = n; render(ctx); }
+    if (e.target.type === 'color') { S.color = e.target.value; render(ctx); }
+  };
+  const canvas = $('.ed-canvas', st);
+  canvas.onpointerdown = e => {
+    if (e.target.closest('.island, .oo-ui-bar, [data-pop], [data-menu], .nb-toast') || S.closed) return;
+    const p = v.w(Mock.localPoint(ctx, canvas, e));
+    S.drag = { a: p, b: p, cal: calibrating() };
+    canvas.setPointerCapture(e.pointerId);
+  };
+  canvas.onpointermove = e => {
+    if (!S.drag) return;
+    S.drag.b = v.w(Mock.localPoint(ctx, canvas, e));
+    const svg = $('svg.world', canvas); svg.outerHTML = worldSVG(ctx, v);
+    if (!S.drag.cal) {
+      const tmp = $('svg.world', canvas); const a = v.s(S.drag.a), b = v.s(S.drag.b);
+      tmp.insertAdjacentHTML('beforeend', `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${S.color}" stroke-width="2" stroke-dasharray="4 3"/>`);
+    }
+  };
+  canvas.onpointerup = () => {
+    const d = S.drag; S.drag = null;
+    if (!d) return;
+    const len = Math.hypot(d.b.x - d.a.x, d.b.y - d.a.y);
+    if (len < 8) return render(ctx);
+    if (d.cal) { S.cal = { a: d.a, b: d.b }; S.calVal = ''; return ctx.setState('cal2'); }
+    S.meas.push({ a: d.a, b: d.b }); render(ctx);
+  };
+}
+function cancelCal() { S.cal = null; S.calVal = ''; S.popOpen = false; C.setState(S.factor !== 1 ? 'set' : 'plain'); }
+
+Mock.page({
+  title: 'Messen-Leiste und Kalibrieren', ids: 'PDF-F18 · F12 · A20',
+  variants: {
+    a: { name: 'A – Offen:', why: 'alle Einstellungen in der Leiste; Kalibrieren verwandelt die Leiste in zwei Schritte (Strecke ziehen, Länge eingeben).' },
+    b: { name: 'B – Kompakt (Empfehlung):', why: 'ein Maßstab-Knopf zeigt den Zustand „1 : 500 · ×1.002“; Maßstab, Einheit und Kalibrieren im angedockten Popover, am Handy als flaches Sheet.' },
+  },
+  states: [
+    { v: 'set', label: 'Maßstab + Kalibrierung' }, { v: 'plain', label: 'Maßstab, nicht kalibriert' }, { v: 'none', label: 'Kein Maßstab' },
+    { v: 'cal1', label: 'Kalibrieren 1: Strecke ziehen' }, { v: 'cal2', label: 'Kalibrieren 2: Länge eingeben' }, { v: 'calerr', label: 'Kalibrieren: große Abweichung' },
+    { v: 'menu', label: 'Messungen-Menü offen' },
+  ],
+  devices: [{ v: 'desktop', label: 'Desktop' }, { v: 'phone', label: 'Handy' }, { v: 'phone320', label: '320' }],
+  render,
+});
+</script>
+</body>
+</html>

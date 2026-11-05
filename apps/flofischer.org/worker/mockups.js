@@ -10,6 +10,7 @@ export const MOCKUPS = new Set([
   "builder", // HimmelCAD Builder UI redesign (builder-ui-lab)
   "win", // one-time Windows PC remote-access setup page (SSH + Tailscale)
   "games", // Fernworld Games test build: Fern Rangers, Pip's Tower, Fernling-Arena and Bounce Brigade
+  "fernwork-editor-entwurf-2026-11", // Fernwork PDF editor design drafts, wave 2 (measure bar, properties, selection, stacks, phone drawer)
 ]);
 
 export function mockupName(pathname) {
