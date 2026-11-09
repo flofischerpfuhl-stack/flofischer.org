@@ -1,0 +1,186 @@
+.root {
+  height: var(--hc-size-titlebar);
+  /* Equal outer columns keep the project label at the window centre, not the centre of the leftover space. */
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) minmax(0, auto) minmax(max-content, 1fr);
+  align-items: stretch;
+  background: var(--hc-bg-void);
+  color: var(--hc-fg-default);
+  -webkit-app-region: drag;
+  user-select: none;
+  flex-shrink: 0;
+  font-size: 12px;
+  position: relative;
+}
+
+.left,
+.center,
+.right {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.left {
+  gap: 8px;
+  padding: 0 12px;
+  flex-shrink: 0;
+}
+
+.center {
+  justify-content: center;
+  min-width: 0;
+  padding: 0 16px;
+}
+
+.right {
+  justify-content: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* The right column is now wide; only its controls opt out of window dragging. */
+.right > * {
+  -webkit-app-region: no-drag;
+}
+
+.logo {
+  display: block;
+}
+
+.wordmark,
+.product,
+.project {
+  /* Trim each text box to cap height and baseline, so centring aligns the letters themselves
+     (the three fonts/sizes otherwise sit up to 2 px apart). */
+  text-box: trim-both cap alphabetic;
+  line-height: 1;
+}
+
+.wordmark {
+  font-family: var(--hc-font-display);
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  color: var(--hc-fg-strong);
+  /* The wordmark font reports a slightly short cap height; this restores its optical centre. */
+  translate: 0 0.6px;
+}
+
+.product,
+.project {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--hc-fg-muted);
+}
+
+.product {
+  position: relative;
+  margin-left: 4px;
+  padding-left: 10px;
+}
+
+/* Divider with its own height (the trimmed text box is only cap-height tall). */
+.product::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 16px;
+  border-left: 1px solid var(--hc-border-default);
+  transform: translateY(-50%);
+}
+
+.project {
+  /* Symmetric room for accents (Ä) above the trimmed cap height; the centre stays the same. */
+  padding-block: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60vw;
+}
+
+.controls {
+  display: flex;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.control {
+  width: 46px;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hc-fg-muted);
+  background: transparent;
+  border: none;
+  transition:
+    background var(--hc-motion-fast),
+    color var(--hc-motion-fast);
+}
+
+.control:hover {
+  background: var(--hc-hover-bg);
+  color: var(--hc-fg-default);
+}
+
+.close:hover {
+  background: var(--hc-error);
+  color: #ffffff;
+}
+
+.projectHover {
+  -webkit-app-region: no-drag;
+  cursor: default;
+  outline: none;
+}
+
+.projectHover:hover,
+.projectHover:focus-visible {
+  color: var(--hc-fg-default);
+}
+
+.pathCard {
+  position: fixed;
+  z-index: var(--hc-z-popover);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(720px, calc(100vw - 24px));
+  padding: 6px 6px 6px 12px;
+  border: 1px solid var(--hc-border-default);
+  border-radius: var(--hc-radius-md);
+  background: var(--hc-bg-island);
+  box-shadow: var(--hc-shadow-chip);
+  color: var(--hc-fg-default);
+  -webkit-app-region: no-drag;
+}
+
+.pathText {
+  overflow: hidden;
+  font-family: var(--hc-font-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pathCopy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--hc-fg-muted);
+  cursor: pointer;
+}
+
+.pathCopy:hover {
+  background: var(--hc-hover-bg);
+  color: var(--hc-fg-strong);
+}

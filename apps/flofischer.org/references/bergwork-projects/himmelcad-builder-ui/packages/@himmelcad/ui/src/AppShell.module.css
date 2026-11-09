@@ -1,0 +1,81 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--hc-bg-void);
+  color: var(--hc-fg-default);
+}
+
+.titleBarSlot {
+  flex-shrink: 0;
+}
+
+.ribbonSlot {
+  flex-shrink: 0;
+}
+
+.workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--hc-pad-workspace);
+  padding-top: 0;
+  gap: var(--hc-gap-island);
+  background: var(--hc-bg-void);
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  gap: var(--hc-gap-island);
+}
+
+.island {
+  background: var(--hc-bg-island);
+  border: 1px solid var(--hc-border-default);
+  border-radius: var(--hc-radius-island);
+  box-shadow: var(--hc-shadow-island);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.leftPanel,
+.rightPanel {
+  flex-shrink: 0;
+  min-width: var(--hc-size-panel-min);
+}
+
+.center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: var(--hc-gap-island);
+}
+
+.viewport {
+  flex: 1;
+  position: relative;
+  background: var(--hc-bg-island);
+  min-height: 0;
+}
+
+.floatingTabsHost {
+  overflow: visible;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.bottomPanel {
+  flex-shrink: 0;
+}
+
+.statusBarSlot {
+  flex-shrink: 0;
+}

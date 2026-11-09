@@ -1,0 +1,174 @@
+/* Picks by type and result lists (proposal 2026-11-07). Tokens only. */
+/* The picks span the slot grid's columns (they are its only child). */
+.ui-slots > .ui-picks {
+  grid-column: 1 / -1;
+}
+.ui-picks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--ui-slot-gap);
+  width: var(--ui-picks-w);
+}
+/* The popup grows to the four picks side by side. */
+.ui-menu.is-wide:has(.ui-picks) {
+  width: auto;
+}
+.ui-pick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-xs);
+  min-width: 0;
+}
+.ui-pick-caption {
+  padding-left: var(--ui-space-2xs);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+}
+.ui-pick-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2xs);
+  min-width: 0;
+}
+.ui-pick-button {
+  flex: 1;
+  min-width: 0;
+  padding-left: 0;
+}
+.ui-pick-button.is-searching {
+  border-color: var(--ui-line-active);
+}
+.ui-pick-text {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--ui-field-pad-x);
+  border: 0;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: text;
+}
+.ui-pick-code {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+}
+.ui-pick-name {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-pick-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--ui-field-pad-x);
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+}
+.ui-pick-input::placeholder {
+  color: var(--ui-fg-tertiary);
+}
+.ui-pick-more {
+  padding: 0;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 0 var(--ui-radius-field) var(--ui-radius-field) 0;
+  background: transparent;
+  cursor: pointer;
+}
+.ui-pick-more:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-pick-more > svg {
+  transition: rotate var(--ui-motion-twisty);
+}
+.ui-pick-more > svg.is-open {
+  rotate: 90deg;
+}
+.ui-pick-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-control-h);
+  height: var(--ui-control-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+}
+.ui-pick-icon:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+
+/* ---- Result lists: rows like a menu's, anywhere ------------------------------------------------ */
+.ui-results {
+  display: flex;
+  flex-direction: column;
+  max-height: var(--ui-menu-long-max-h);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.ui-results-row {
+  display: flex;
+  flex: none;
+  /* The code on the name's baseline. */
+  align-items: baseline;
+  padding-top: calc((var(--ui-menu-row-h) - 1lh) / 2);
+  gap: var(--ui-space-s);
+  height: var(--ui-menu-row-h);
+  padding: 0 var(--ui-menu-item-pad-end) 0 var(--ui-menu-item-pad-start);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-results-row:hover,
+.ui-results-row:focus-visible {
+  background: var(--ui-state-hover);
+  outline: none;
+}
+.ui-results-code {
+  flex: none;
+  min-width: var(--ui-menu-code-w);
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-caption);
+}
+.ui-results-name {
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-results-note {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+}
+.ui-results-empty {
+  padding: var(--ui-space-s) var(--ui-menu-item-pad-start);
+  color: var(--ui-fg-tertiary);
+}

@@ -1,0 +1,328 @@
+/* Lists as tables (lab .lab-layers, .lab-el, .lab-layers-tools, .lab-layers-list, .lab-layer-*,
+ * .lab-el-*, .lab-typefilter; owner 2026-11-06). Only the list scrolls, under its fixed toolbar —
+ * the scrollbar starts below the toolbar's line („warum geht die Scrollbar bis oben hin?") and is a
+ * column of its own at the right, outside every column. Column lines run the list's full height
+ * (Photoshop's visibility column, Finder's list view) and stay put while it scrolls; menus never
+ * get vertical lines. Rows span the panel: hover and selection take the whole row. */
+.ui-list-pane {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--ui-space-xs);
+  min-height: 0;
+}
+
+/* The toolbar: a zone of its own; its buttons end where the rows' state column ends. */
+.ui-list-toolbar {
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--ui-space-2xs);
+  padding: var(--ui-space-s) var(--ui-space-m) var(--ui-space-xs) var(--ui-space-s);
+  border-bottom: var(--ui-stroke) solid var(--ui-line-control);
+  background: var(--ui-bg-chrome);
+}
+.ui-list-toolbar-gap {
+  flex: 1;
+}
+.ui-list-toolbar:has(> .ui-filter) > .ui-list-toolbar-gap {
+  display: none;
+}
+
+/* The type filter: a control-grey field in place of the scroll jumps. */
+.ui-filter {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--ui-prop-gap);
+  min-width: 0;
+  height: var(--ui-control-h);
+  margin-right: var(--ui-space-xs);
+  padding: 0 var(--ui-space-xs) 0 var(--ui-space-s);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+}
+.ui-filter:focus-within {
+  box-shadow: inset 0 0 0 var(--ui-stroke) var(--ui-line-active);
+}
+.ui-filter-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font: inherit;
+}
+.ui-filter-input::placeholder {
+  color: var(--ui-fg-tertiary);
+}
+.ui-filter-input:focus-visible {
+  outline: 0;
+}
+.ui-filter button {
+  display: grid;
+  place-items: center;
+  width: var(--ui-copy);
+  height: var(--ui-copy);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+}
+.ui-filter button:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+
+/* The list: it alone scrolls; the scrollbar lane exists only while it scrolls (a column of its
+ * own, so the state glyph stays centred — owner 2026-11-06). The lines hang on the content
+ * (attachment local): full scroll height, positioned without the lane. */
+.ui-list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  padding: var(--ui-space-xs) 0 var(--ui-space-m);
+  overflow-y: auto;
+  outline: none;
+  border-radius: var(--ui-radius-small);
+  scrollbar-gutter: auto;
+  background: linear-gradient(var(--ui-line-control), var(--ui-line-control)) no-repeat right
+    var(--ui-list-state-line-x) top 0 / var(--ui-stroke) 100%;
+  background-attachment: local;
+}
+.ui-list.has-play {
+  background:
+    linear-gradient(var(--ui-line-control), var(--ui-line-control)) no-repeat left
+      var(--ui-list-play-line-x) top 0 / var(--ui-stroke) 100%,
+    linear-gradient(var(--ui-line-control), var(--ui-line-control)) no-repeat right
+      var(--ui-list-state-line-x) top 0 / var(--ui-stroke) 100%;
+  background-attachment: local;
+}
+/* Dragged over its empty space: the list is the drop target. */
+.ui-list.is-drop {
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-state-hover);
+  box-shadow: inset 0 0 0 var(--ui-stroke) var(--ui-fg-secondary);
+}
+
+/* A row: 32 px; the panel's 8 px inset is inside it, so hover and selection reach both edges. */
+.ui-list-row {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-list-row-gap);
+  height: var(--ui-list-row-h);
+  padding: 0 var(--ui-space-2xs) 0 var(--ui-space-s);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  cursor: default;
+  user-select: none;
+}
+.ui-list-row:hover {
+  background: var(--ui-state-hover);
+}
+.ui-list-row.is-selected,
+.ui-list-row.is-selected:hover {
+  background: var(--ui-state-selected);
+}
+/* Keyboard cursor (only while the list has keyboard focus) and a right-click target outside the
+ * selection (VS Code): a thin neutral frame. */
+.ui-list.is-keyboard:focus .ui-list-row.is-focus,
+.ui-list-row.is-context {
+  box-shadow: inset 0 0 0 var(--ui-stroke) var(--ui-fg-secondary);
+}
+.ui-list-row.is-dim :is(.ui-list-name, .ui-list-icon) {
+  opacity: var(--ui-dim);
+}
+.ui-list-row.is-ref {
+  cursor: pointer;
+}
+.ui-list-row.is-ref .ui-list-name {
+  color: var(--ui-fg-secondary);
+  font-style: italic;
+}
+.ui-list-row.is-empty .ui-list-name {
+  color: var(--ui-fg-tertiary);
+}
+/* Drag & drop: the target folder and everything in it (VS Code). */
+.ui-list-row.is-drop {
+  background: var(--ui-state-selected);
+  box-shadow: inset 0 0 0 var(--ui-stroke) var(--ui-fg-secondary);
+}
+.ui-list-row.is-drop-zone {
+  background: var(--ui-state-hover);
+}
+
+/* ▶ the current entry: shown on row hover; bright when current; framed when fixed. Its column runs
+ * from the panel's edge to its line (8 + 24), the ▶ centred there. */
+.ui-list-play,
+.ui-list-play-slot {
+  flex: none;
+  width: var(--ui-list-play);
+  margin-right: var(--ui-list-play-gap);
+}
+.ui-list-play {
+  display: grid;
+  place-items: center;
+  height: var(--ui-list-play-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+}
+.ui-list-row:hover .ui-list-play {
+  color: var(--ui-fg-tertiary);
+}
+.ui-list-play.is-current,
+.ui-list-row:hover .ui-list-play.is-current {
+  color: var(--ui-fg-primary);
+}
+.ui-list-play.is-fixed {
+  box-shadow: inset 0 0 0 var(--ui-list-glyph-stroke) currentColor;
+}
+
+/* Tree rows: the disclosure (indented 10 px per level) and the entry's icon. */
+.ui-list-twisty {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-list-play);
+}
+.ui-list-twisty button {
+  display: grid;
+  place-items: center;
+  width: var(--ui-list-play);
+  height: var(--ui-list-twisty-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+  cursor: pointer;
+}
+.ui-list-twisty button:hover {
+  color: var(--ui-fg-primary);
+}
+.ui-list-twisty svg {
+  transition: rotate var(--ui-motion-twisty);
+}
+.ui-list-twisty svg.is-open {
+  rotate: 90deg;
+}
+.ui-list-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-list-icon);
+  color: var(--ui-fg-secondary);
+}
+
+/* The name: trimmed to cap height and baseline (optical centring); the padding keeps room for
+ * descenders inside the clip. */
+.ui-list-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding-block: var(--ui-space-xs);
+  color: var(--ui-fg-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+/* A bulk rename: the other rows show the name being typed. */
+.ui-list-name.is-preview {
+  color: var(--ui-fg-secondary);
+  font-style: italic;
+}
+/* Rename in place: the same text position as the name (the margin takes padding and border). */
+.ui-list-rename {
+  flex: 1;
+  min-width: 0;
+  height: var(--ui-list-rename-h);
+  margin: 0 0 0 calc(-1 * (var(--ui-space-xs) + var(--ui-stroke)));
+  padding: 0 var(--ui-space-xs);
+  border: var(--ui-stroke) solid var(--ui-line-active);
+  border-radius: var(--ui-radius-inner);
+  outline: 0;
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-primary);
+  font: inherit;
+  line-height: calc(var(--ui-list-rename-h) - 2 * var(--ui-stroke));
+}
+.ui-list-rename:focus-visible {
+  outline: 0;
+}
+/* A reference or an outdated result after the name. */
+.ui-list-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  color: var(--ui-fg-tertiary);
+}
+.ui-list-mark.is-spaced {
+  margin-right: var(--ui-space-2xs);
+}
+
+/* The state column: the glyph centred between its line and the list's end. */
+.ui-list-state,
+.ui-list-state-slot {
+  flex: none;
+  width: var(--ui-list-state);
+}
+.ui-list-state {
+  display: grid;
+  place-items: center;
+  height: var(--ui-list-state);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  cursor: pointer;
+}
+.ui-list-state:hover {
+  background: var(--ui-state-hover);
+}
+.ui-list-state:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+/* The one check glyph: the frame always, its line is the level (owner 2026-11-06). */
+.ui-state-glyph {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--ui-list-glyph);
+  height: var(--ui-list-glyph);
+  border: var(--ui-list-glyph-stroke) solid var(--ui-line-strong);
+  border-radius: var(--ui-radius-inner);
+  color: var(--ui-fg-primary);
+}
+.ui-state-glyph.is-clickable {
+  border-style: dashed;
+  border-color: currentColor;
+}
+.ui-state-glyph.is-editable {
+  border-color: currentColor;
+}
+.ui-state-glyph.is-pale {
+  opacity: var(--ui-dim-pale);
+}
+
+.ui-list-empty {
+  padding: var(--ui-space-l) var(--ui-space-s);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}

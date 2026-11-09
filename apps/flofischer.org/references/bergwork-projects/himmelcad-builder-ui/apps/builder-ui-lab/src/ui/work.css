@@ -1,0 +1,786 @@
+/* Work windows (proposal 2026-11-06, design/create-surface; Work.tsx). Tokens only. A window with
+ * its own view between a settings column and a result column; the app places it (it fills its
+ * place). Grammar of the side panels and Properties: 28 px rows 4 px apart, 32 px heads, labels
+ * secondary, values primary, digits mono on one x, greyscale states; red only for what is open,
+ * blue for running work and the selection, yellow for what is being worked on. */
+
+.ui-work {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-template-columns:
+    calc(var(--ui-panel-w) + var(--ui-space-2xl) + var(--ui-space-s)) minmax(0, 1fr)
+    calc(var(--ui-panel-w) + var(--ui-space-2xl) + var(--ui-space-xl));
+  grid-template-rows: calc(var(--ui-section-head-h) + var(--ui-space-m)) minmax(0, 1fr) calc(
+      var(--ui-control-h) + 2 * var(--ui-space-m)
+    );
+  grid-template-areas:
+    'head head head'
+    'side stage issues'
+    'foot foot foot';
+  overflow: hidden;
+  animation: ui-rise var(--ui-motion-hover) ease-out;
+}
+
+/* ---- Head: the name is the one strong text; the tools at its end ---------------------------- */
+.ui-work-head {
+  grid-area: head;
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-l);
+  border-bottom: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-work-head-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  color: var(--ui-fg-secondary);
+}
+.ui-work-head-icon > svg {
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+.ui-work-title,
+.ui-work-rename {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-work-title {
+  padding-block: var(--ui-space-xs);
+  text-box: trim-both cap alphabetic;
+}
+.ui-work-rename {
+  width: calc(var(--ui-panel-w) - var(--ui-space-2xl));
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-xs);
+  margin-left: calc(-1 * var(--ui-space-xs) - var(--ui-stroke));
+  border: var(--ui-stroke) solid var(--ui-line-active);
+  border-radius: var(--ui-radius-field);
+  outline: none;
+  background: var(--ui-bg-control);
+}
+.ui-work-state {
+  flex: 1;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+.ui-work-tools {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-2xs);
+}
+.ui-tool-divider {
+  flex: none;
+  width: var(--ui-stroke);
+  height: var(--ui-icon);
+  margin: 0 var(--ui-space-xs);
+  background: var(--ui-line-control);
+}
+
+/* ---- Columns --------------------------------------------------------------------------------- */
+.ui-work-pane.is-left {
+  grid-area: side;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--ui-space-xs) var(--ui-space-s);
+  border-right: var(--ui-stroke) solid var(--ui-line-control);
+  scrollbar-gutter: stable;
+}
+.ui-work-pane.is-right {
+  grid-area: issues;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-work-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--ui-space-xs) var(--ui-space-s);
+  scrollbar-gutter: stable;
+}
+.ui-pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--ui-section-head-h);
+  margin-top: var(--ui-space-xs);
+  padding: 0 0 0 var(--ui-space-m);
+}
+.ui-pane-rows + .ui-pane-head {
+  height: calc(var(--ui-section-head-h) + var(--ui-space-xs));
+  margin-top: var(--ui-space-s);
+  padding-top: var(--ui-space-xs);
+  border-top: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-pane-head h3 {
+  margin: 0;
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+  font-weight: var(--ui-weight-strong);
+  text-box: trim-both cap alphabetic;
+}
+.ui-pane-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-row-gap);
+}
+.ui-pane-control {
+  padding: 0 var(--ui-space-xs) 0 var(--ui-space-s);
+}
+.ui-pane-control > .ui-segmented {
+  width: 100%;
+}
+.ui-work-count {
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ---- Source rows: twisty · icon · name · mark · count · role ---------------------------------- */
+.ui-source {
+  display: grid;
+  grid-template-columns:
+    var(--ui-prop-indent) var(--ui-icon) minmax(0, 1fr) auto auto
+    calc(var(--ui-prop-label-w) + var(--ui-space-2xl) + var(--ui-space-l));
+  align-items: center;
+  column-gap: var(--ui-space-s);
+  height: var(--ui-control-h);
+  padding-right: var(--ui-space-xs);
+  border-radius: var(--ui-radius-field);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+}
+.ui-source:hover {
+  background: var(--ui-state-hover);
+}
+.ui-source.is-selected {
+  background: var(--ui-state-selected);
+}
+.ui-source.is-child {
+  grid-template-columns:
+    var(--ui-prop-indent) calc(var(--ui-icon) + var(--ui-prop-indent)) minmax(0, 1fr) auto auto
+    calc(var(--ui-prop-label-w) + var(--ui-space-2xl) + var(--ui-space-l));
+}
+.ui-source.is-child .ui-source-icon {
+  padding-left: var(--ui-prop-indent);
+}
+.ui-source.is-child .ui-source-name {
+  color: var(--ui-fg-secondary);
+}
+.ui-source-twisty-slot {
+  display: grid;
+  place-items: center;
+}
+.ui-source-twisty {
+  display: grid;
+  place-items: center;
+  width: var(--ui-prop-indent);
+  height: var(--ui-control-h);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ui-fg-tertiary);
+  cursor: pointer;
+}
+.ui-source-twisty:hover {
+  color: var(--ui-fg-primary);
+}
+.ui-source-twisty svg,
+.ui-issue-twisty {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+  transition: rotate var(--ui-motion-twisty);
+}
+.ui-source-twisty svg.is-open,
+.ui-issue-twisty.is-open {
+  rotate: 90deg;
+}
+.ui-source-icon {
+  display: grid;
+  place-items: center;
+  color: var(--ui-fg-secondary);
+}
+.ui-source-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-source-mark {
+  display: flex;
+}
+
+/* ---- Role field: Properties' SelectField with the role's glyph and the `>` segment ----------- */
+.ui-role {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: 0;
+  height: var(--ui-control-h);
+  padding: 0 0 0 var(--ui-field-pad-x);
+  border: var(--ui-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+}
+button.ui-role {
+  cursor: pointer;
+}
+button.ui-role:hover {
+  border-color: var(--ui-line-control);
+}
+.ui-role[aria-expanded='true'] {
+  border-color: var(--ui-fg-secondary);
+}
+.ui-role:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset);
+}
+.ui-role.is-fixed {
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+}
+.ui-role-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-icon);
+  color: var(--ui-fg-secondary);
+}
+.ui-role.is-fixed .ui-role-icon {
+  color: var(--ui-fg-tertiary);
+}
+.ui-role-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The start value reads quieter than a value set on purpose. */
+.ui-role.is-start .ui-role-value,
+.ui-role.is-start .ui-role-icon {
+  color: var(--ui-fg-secondary);
+}
+/* From elsewhere (the specification): a dashed frame (the frame convention: dashed = automatic). */
+.ui-role.is-auto {
+  border-style: dashed;
+  border-color: var(--ui-line-strong);
+}
+.ui-role.is-auto:hover {
+  border-color: var(--ui-fg-tertiary);
+}
+.ui-role.is-missing .ui-role-value {
+  color: var(--ui-color-red);
+}
+.ui-role-more {
+  display: grid;
+  flex: none;
+  place-items: center;
+  align-self: stretch;
+  width: var(--ui-field-more-w);
+  border-left: var(--ui-stroke) solid var(--ui-line-control);
+  color: var(--ui-fg-tertiary);
+}
+.ui-role:hover .ui-role-more,
+.ui-role[aria-expanded='true'] .ui-role-more {
+  color: var(--ui-fg-primary);
+}
+
+/* ---- Crop rows on the source rows' grid ------------------------------------------------------- */
+.ui-crop {
+  display: grid;
+  grid-template-columns: var(--ui-prop-indent) var(--ui-icon) minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: var(--ui-space-s);
+  height: var(--ui-control-h);
+  padding-right: var(--ui-space-xs);
+  border: var(--ui-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+  font-size: var(--ui-text-body);
+}
+.ui-crop.is-drawing {
+  grid-template-columns: var(--ui-prop-indent) var(--ui-icon) minmax(0, 1fr) auto;
+  padding-right: var(--ui-space-s);
+  border-color: var(--ui-line-active);
+}
+.ui-crop-prompt {
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+}
+
+/* ---- The window's own view -------------------------------------------------------------------- */
+.ui-work-stage {
+  position: relative;
+  grid-area: stage;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--ui-bg-view);
+}
+.ui-work-stage > :not(.ui-surface) {
+  position: absolute;
+  inset: 0;
+}
+.ui-view-tools {
+  position: absolute;
+  top: var(--ui-space-s);
+  left: var(--ui-space-s);
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2xs);
+  padding: var(--ui-space-2xs);
+  box-shadow: none;
+}
+.ui-view-tools > .ui-segmented {
+  width: calc(var(--ui-segmented-row-w) - var(--ui-space-l));
+}
+.ui-view-readout {
+  position: absolute;
+  bottom: var(--ui-space-s);
+  left: var(--ui-space-s);
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-s);
+  box-shadow: none;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ui-busy-dots {
+  display: inline-flex;
+  flex: none;
+  gap: var(--ui-space-2xs);
+}
+.ui-busy-dots > i {
+  width: var(--ui-busy-dot);
+  height: var(--ui-busy-dot);
+  border-radius: var(--ui-radius-dot);
+  background: var(--ui-color-blue);
+  animation: ui-busy-dot var(--ui-motion-dots) ease-in-out infinite;
+}
+.ui-busy-dots > i:nth-child(2) {
+  animation-delay: calc(var(--ui-motion-dots) / 6);
+}
+.ui-busy-dots > i:nth-child(3) {
+  animation-delay: calc(var(--ui-motion-dots) / 3);
+}
+@keyframes ui-busy-dot {
+  0%,
+  60%,
+  100% {
+    opacity: var(--ui-dim-pale);
+  }
+  30% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-busy-dots > i {
+    animation: none;
+  }
+}
+
+/* ---- Right column: the head, issues by class, quick fixes ------------------------------------- */
+/* The choice, the plan's frame and the quick fixes share the column's inset (8 px). */
+.ui-pane-tabs {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: calc(var(--ui-section-head-h) + var(--ui-space-s));
+  padding: var(--ui-space-xs) var(--ui-space-s) 0;
+}
+.ui-pane-tabs-choice > .ui-segmented {
+  width: var(--ui-segmented-row-w);
+}
+.ui-pane-tabs-count.is-open .ui-count {
+  color: var(--ui-color-red);
+}
+.ui-pane-tabs-tools {
+  margin-left: auto;
+}
+.ui-issue-group + .ui-issue-group {
+  margin-top: var(--ui-space-xs);
+  padding-top: var(--ui-space-xs);
+  border-top: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-issue-head {
+  display: grid;
+  grid-template-columns: var(--ui-icon) var(--ui-icon) minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--ui-space-s);
+  width: 100%;
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-xs);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: none;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-issue-head:hover {
+  background: var(--ui-state-hover);
+}
+.ui-issue-group.is-done .ui-issue-title {
+  color: var(--ui-fg-secondary);
+  font-weight: var(--ui-weight-regular);
+}
+.ui-issue-head .ui-work-count {
+  font-weight: var(--ui-weight-regular);
+}
+.ui-issue-group:not(.is-done) .ui-issue-head .ui-work-count {
+  color: var(--ui-color-red);
+}
+.ui-issue-dot {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-icon);
+  color: var(--ui-fg-secondary);
+}
+.ui-issue-dot > i,
+.ui-work-dot {
+  display: inline-block;
+  width: var(--ui-busy-dot);
+  height: var(--ui-busy-dot);
+  border-radius: var(--ui-radius-dot);
+  background: var(--ui-color-red);
+}
+/* The places start on the class title's x. */
+.ui-issue-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  padding-left: calc(var(--ui-space-xs) + 2 * var(--ui-icon) + var(--ui-space-s));
+}
+.ui-issue-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--ui-space-s);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-s);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: none;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-issue-item:hover {
+  background: var(--ui-state-hover);
+}
+.ui-issue-item.is-focus {
+  background: var(--ui-state-selected);
+}
+.ui-issue-item.is-fixed .ui-issue-item-label {
+  color: var(--ui-fg-secondary);
+}
+.ui-issue-item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-issue-item-detail {
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ui-issue-item.is-fixed .ui-issue-item-detail {
+  font-family: var(--ui-font);
+}
+.ui-more-row {
+  height: var(--ui-control-h);
+  padding: var(--ui-space-xs) var(--ui-space-s);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: none;
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-more-row:hover:not(:disabled) {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-more-row:disabled {
+  cursor: default;
+}
+
+/* A rule for the whole class: the one check glyph, its name, a value, how many. */
+.ui-issue-rule {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: var(--ui-space-s);
+  height: var(--ui-control-h);
+  padding-right: var(--ui-space-s);
+  border-radius: var(--ui-radius-field);
+}
+.ui-issue-rule:hover {
+  background: var(--ui-state-hover);
+}
+.ui-issue-rule-check {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: 0;
+  height: var(--ui-control-h);
+  padding: 0 0 0 var(--ui-space-s);
+  border: 0;
+  background: none;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-issue-rule-check:focus-visible {
+  border-radius: var(--ui-radius-field);
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-issue-rule-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-issue-rule-value {
+  display: flex;
+}
+.ui-issue-rule.is-on .ui-work-count {
+  color: var(--ui-fg-primary);
+}
+.ui-number-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  height: calc(var(--ui-control-h) - var(--ui-space-xs));
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-xs);
+  border: var(--ui-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+}
+.ui-number-cell:hover {
+  border-color: var(--ui-line-control);
+}
+.ui-number-cell:focus-within {
+  border-color: var(--ui-line-active);
+}
+.ui-number-cell input {
+  width: calc(var(--ui-space-2xl) + var(--ui-space-s));
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.ui-number-cell-unit {
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+}
+
+/* Quick fixes for the place in focus, pinned under the issues; the fixes on the title's x. */
+.ui-quick-fixes {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  padding: var(--ui-space-s) var(--ui-space-s) var(--ui-space-m);
+  border-top: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-quick-fixes-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-2xs) 0 var(--ui-space-s);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+}
+.ui-quick-fixes-head > svg {
+  flex: none;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+.ui-quick-fixes-title {
+  overflow: hidden;
+  color: var(--ui-fg-primary);
+  font-weight: var(--ui-weight-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-quick-fixes-detail {
+  margin-left: auto;
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  white-space: nowrap;
+}
+.ui-quick-fix {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  column-gap: var(--ui-space-xs);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-2xs) 0 calc(2 * var(--ui-space-s) + var(--ui-icon));
+  border-radius: var(--ui-radius-field);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+}
+.ui-quick-fix:hover {
+  background: var(--ui-state-hover);
+}
+.ui-quick-fix-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-quick-fix-hint {
+  margin-right: var(--ui-space-xs);
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+.ui-quick-fix-do {
+  min-width: calc(var(--ui-space-2xl) + var(--ui-space-l));
+  height: calc(var(--ui-control-h) - var(--ui-space-xs));
+  padding: 0 var(--ui-space-s);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-button);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ui-quick-fix-do:hover:not(:disabled) {
+  border-color: var(--ui-fg-secondary);
+}
+.ui-quick-fix-do:disabled {
+  color: var(--ui-fg-disabled);
+  cursor: default;
+}
+
+/* The plan: its frame on the column's 8 px inset, numbered steps, how many each resolves. */
+.ui-plan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  margin: 0 var(--ui-space-xs) var(--ui-space-s);
+  padding: var(--ui-space-xs) var(--ui-space-xs) var(--ui-space-s);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+}
+.ui-plan-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: calc(var(--ui-control-h) + var(--ui-space-xs));
+  padding: 0 0 0 var(--ui-space-s);
+}
+.ui-plan-title {
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-plan-sub {
+  flex: 1;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+.ui-plan-head .ui-button {
+  margin-top: 0;
+}
+.ui-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+}
+.ui-plan-step {
+  display: grid;
+  grid-template-columns: var(--ui-count) minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--ui-space-s);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-xs);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: none;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-plan-step:hover {
+  background: var(--ui-state-hover);
+}
+.ui-plan-step-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Foot: the state at the left, Discard and Create (what Enter does) at the right --------- */
+.ui-work-foot {
+  grid-area: foot;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--ui-space-m) 0 var(--ui-space-l);
+  border-top: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-work-foot-state {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+}
+.ui-work-foot-buttons {
+  display: grid;
+  grid-template-columns: auto calc(var(--ui-panel-w) / 2);
+  gap: var(--ui-space-s);
+}
+.ui-work-foot-buttons .ui-button.is-primary {
+  margin-top: 0;
+}

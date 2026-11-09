@@ -1,0 +1,633 @@
+/* Fields. Two layouts, one rule (owner 2026-11-01 / 2026-11-06): in the function panel the field
+ * holds its label (InlineField); in Properties the label stands in the label column (TextField,
+ * SelectField). Every field with choices ends in a `>` segment behind a full-height divider
+ * (Trimble Access). Fields are calm: a quiet fill, no frame; the frame shows on hover, a neutral
+ * frame on focus or while the field takes the typing. */
+
+/* ---- Properties: TextField, SelectField (lab .lab-prop-field) ------------------------------- */
+.ui-field {
+  flex: 1;
+  min-width: 0;
+  height: var(--ui-prop-field-h);
+  padding: 0 var(--ui-field-pad-x);
+  border: var(--ui-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+  outline: none;
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+}
+.ui-field.is-mono {
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+.ui-field:hover:not(:disabled) {
+  border-color: var(--ui-line-control);
+}
+/* The field that takes the typing — focused, its menu open, or a value being picked in the view
+ * (the frame stays while the focus is in the view) — has the active line, everywhere and also
+ * while hovered (owner 2026-11-06: „überall die aktive Linie … Hover überschreibt den Fokus
+ * nicht mehr"). */
+.ui-field:is(:focus, [aria-expanded='true'], .is-picking),
+.ui-field:is(:focus, [aria-expanded='true'], .is-picking):hover {
+  border-color: var(--ui-line-active);
+}
+/* An auxiliary point's name: italic, so it never passes for a survey point number (2026-10-24). */
+.ui-field.is-italic {
+  font-style: italic;
+}
+/* Unavailable: the fill stays, the text dims (an input's text by colour, a select's parts by
+ * opacity). */
+.ui-field:disabled {
+  color: var(--ui-fg-disabled);
+  cursor: default;
+}
+.ui-field.is-select:disabled {
+  color: var(--ui-fg-primary);
+}
+.ui-field.is-select:disabled > .ui-field-value,
+.ui-field.is-select:disabled > .ui-field-more > * {
+  opacity: var(--ui-dim);
+}
+.ui-field::placeholder {
+  color: var(--ui-fg-tertiary);
+  /* A placeholder is a word (None, Mixed, Free), in the UI font also in a number field. */
+  font-family: var(--ui-font);
+  font-style: italic;
+}
+.ui-field.is-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-prop-gap);
+  padding-right: 0;
+  text-align: left;
+  cursor: pointer;
+}
+.ui-field-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-field-value.is-mixed {
+  color: var(--ui-fg-tertiary);
+  font-style: italic;
+}
+.ui-field-value > .ui-menu-code {
+  margin-right: var(--ui-space-s);
+}
+/* The `>` segment of a field with choices. */
+.ui-field-more {
+  display: grid;
+  flex: none;
+  place-items: center;
+  align-self: stretch;
+  width: var(--ui-field-more-w);
+  border-left: var(--ui-stroke) solid var(--ui-line-control);
+  color: var(--ui-fg-tertiary);
+}
+.ui-field.is-select:hover .ui-field-more,
+.ui-field.is-select[aria-expanded='true'] .ui-field-more {
+  color: var(--ui-fg-primary);
+}
+/* A `>` that leads elsewhere (SelectField `more`): its own button over the segment. */
+.ui-field-wrap {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+.ui-field-more-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--ui-field-more-w);
+  padding: 0;
+  border: 0;
+  border-radius: 0 var(--ui-radius-field) var(--ui-radius-field) 0;
+  background: transparent;
+  cursor: pointer;
+}
+.ui-field-more-button:hover:not(:disabled) {
+  background: var(--ui-state-hover);
+}
+.ui-field-wrap:has(> .ui-field-more-button:hover:not(:disabled)) .ui-field-more {
+  color: var(--ui-fg-primary);
+}
+.ui-field-more-button:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-line-active);
+  outline-offset: calc(-1 * var(--ui-stroke));
+}
+.ui-field-more-button:disabled {
+  cursor: default;
+}
+
+/* ---- Function panel: the column of fields (lab .lab-flow-main) ------------------------------ */
+.ui-fields {
+  /* A grid of one column per row, except the text rows: they share the fields' label column
+   * (subgrid), as wide as this panel's longest label — values start on one x by construction and
+   * get all the room there is (round 5: „values float", „values cut although there is room"). */
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) var(--ui-field-more-slot);
+  align-content: start;
+  row-gap: var(--ui-row-gap);
+  /* Fields start at the twisties' x, their text on Properties' label x. */
+  padding: 0 var(--ui-space-xs) var(--ui-space-m) var(--ui-fields-inset-left);
+}
+/* The step and its quiet actions: a zone above the values. */
+.ui-fields-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-s);
+  height: var(--ui-section-head-h);
+  /* The divider as wide as the fields, the step on the labels' x (round 5: „title 9 px further
+   * in", „divider wider than the fields"). */
+  margin: 0 0 var(--ui-space-xs);
+  padding: 0 0 0 calc(var(--ui-field-label-inset) + var(--ui-stroke));
+  border-bottom: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-fields-title {
+  overflow: hidden;
+  margin: 0;
+  padding-block: var(--ui-space-xs);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+.ui-fields-tools {
+  display: flex;
+  flex: none;
+  gap: var(--ui-space-2xs);
+}
+
+/* ---- InlineField: label · lock slot · digits · unit slot · `>` slot (lab .lab-flow-value) ---- */
+.ui-inline-field {
+  display: grid;
+  grid-template-columns:
+    auto var(--ui-field-lock-slot) minmax(0, 1fr) var(--ui-field-unit-slot)
+    var(--ui-field-more-slot);
+  align-items: center;
+  min-width: 0;
+  height: var(--ui-control-h);
+  border: var(--ui-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+  cursor: text;
+}
+.ui-inline-field:hover:not(.is-disabled) {
+  border-color: var(--ui-line-control);
+}
+.ui-inline-field.is-active,
+.ui-inline-field.is-active:hover {
+  border-color: var(--ui-line-active);
+}
+.ui-inline-field.is-disabled,
+.ui-inline-field.is-choice {
+  cursor: default;
+}
+.ui-inline-label {
+  padding-left: var(--ui-field-label-inset);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+.ui-inline-lock-slot {
+  display: grid;
+  place-items: center;
+}
+.ui-inline-lock {
+  display: grid;
+  place-items: center;
+  width: var(--ui-field-lock-w);
+  height: var(--ui-field-lock-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  cursor: pointer;
+}
+.ui-inline-lock:hover {
+  background: var(--ui-state-hover);
+}
+.ui-inline-input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  /* A live value follows the cursor: readable, but quieter than a typed one. */
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.ui-inline-field.is-locked .ui-inline-input {
+  color: var(--ui-fg-primary);
+  font-weight: var(--ui-weight-strong);
+}
+/* Red = an error, also for a typed (locked) value. The lab's rule loses to its locked colour
+ * (UI-LIBRARY.md › Open points); here it outranks it. */
+.ui-inline-field .ui-inline-input.is-invalid {
+  color: var(--ui-color-red);
+}
+.ui-inline-input::placeholder {
+  color: var(--ui-fg-tertiary);
+}
+.ui-inline-input:disabled {
+  cursor: default;
+}
+.ui-inline-field.is-disabled
+  :is(.ui-inline-label, .ui-inline-input, .ui-inline-unit, .ui-inline-lock, .ui-inline-more) {
+  opacity: var(--ui-dim);
+}
+/* A value being picked in the view: the field says what to click. */
+.ui-inline-field .ui-inline-input.is-picking {
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-weight: var(--ui-weight-regular);
+  cursor: default;
+}
+.ui-inline-unit {
+  padding-left: var(--ui-space-xs);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+  text-box: trim-both cap alphabetic;
+}
+.ui-inline-more-slot {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  border-left: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-inline-more-slot:empty {
+  border-left-color: transparent;
+}
+.ui-inline-more {
+  display: grid;
+  place-items: center;
+  width: var(--ui-field-more-button);
+  height: var(--ui-field-more-button);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+  cursor: pointer;
+}
+.ui-inline-more:hover,
+.ui-inline-more[aria-expanded='true'] {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-inline-more:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+/* A choice that is not a number reads like a value. */
+.ui-inline-choice {
+  overflow: hidden;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-dense);
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-inline-choice.is-muted {
+  color: var(--ui-fg-secondary);
+}
+/* A computed value on the fields' grid: its digits end where theirs do (lab .lab-flow-read). */
+.ui-inline-read {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) var(--ui-field-unit-slot);
+  align-items: center;
+  min-height: var(--ui-control-h);
+  padding: 0 var(--ui-read-end-inset) 0 var(--ui-read-label-inset);
+}
+.ui-inline-read .ui-inline-unit {
+  padding-block: var(--ui-space-xs);
+}
+.ui-inline-read-value {
+  overflow: hidden;
+  padding-block: var(--ui-space-xs);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+
+/* ---- Segmented: two or three options, the height of a field (lab .lab-flow-toggle) ---------- */
+.ui-segmented {
+  display: flex;
+  flex: 1;
+  gap: var(--ui-space-2xs);
+  min-width: 0;
+  height: var(--ui-control-h);
+  padding: var(--ui-space-2xs);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+}
+.ui-segmented.is-icons {
+  flex: none;
+}
+.ui-segmented > button {
+  flex: 1;
+  min-width: 0;
+  padding: 0 var(--ui-segment-pad-x);
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ui-segmented.is-icons > button {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-control-h);
+  padding: 0;
+}
+.ui-segmented:where(:not([aria-disabled='true'])) > button:hover {
+  color: var(--ui-fg-primary);
+}
+.ui-segmented > button.is-on {
+  background: var(--ui-bg-thumb);
+  color: var(--ui-fg-primary);
+  box-shadow: var(--ui-shadow-chip);
+}
+/* Unavailable: the track and the chosen thumb stay, the labels dim. */
+.ui-segmented[aria-disabled='true'] > button {
+  cursor: default;
+}
+.ui-segmented[aria-disabled='true'] > button > * {
+  opacity: var(--ui-dim);
+}
+/* A labelled Segmented in a PropertyRow keeps its 132 px (lab .lab-flow-main .lab-flow-toggle). */
+.ui-fields .ui-prop-row .ui-segmented:not(.is-icons) {
+  flex: none;
+  width: var(--ui-segmented-row-w);
+  background: transparent;
+}
+/* Rows in the fields column: a choice reads like the fields (label inside one calm surface);
+ * read-only text ends where the digits end, before the unit and `>` slots. */
+.ui-fields .ui-prop-row {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--ui-space-m);
+  min-height: var(--ui-control-h);
+  padding-left: var(--ui-fields-head-inset);
+}
+.ui-fields .ui-prop-row:not(:has(.ui-read)) {
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+}
+.ui-fields .ui-prop-row .ui-read {
+  padding-right: var(--ui-fields-read-end);
+  font-size: var(--ui-text-dense);
+  text-align: right;
+}
+/* The choice that decides which fields exist: on top, without a label. */
+.ui-fields-modes {
+  display: flex;
+  gap: var(--ui-prop-gap);
+  margin-bottom: var(--ui-space-xs);
+}
+.ui-fields .ui-prop-control {
+  justify-content: flex-end;
+  padding-right: 0;
+}
+.ui-fields .ui-field.is-select {
+  justify-content: flex-end;
+  background: transparent;
+  font-size: var(--ui-text-dense);
+}
+
+/* PickerField without a value: the placeholder, quiet (proposal 2026-11-06). */
+.ui-field-value.is-placeholder {
+  color: var(--ui-fg-tertiary);
+}
+
+/* ---- Text rows (proposal 2026-11-06, import/export round 5): a label column of one width, so
+ * every text value starts on one x; the `>` slot ends every row on one x. Labels 12 secondary,
+ * values 13 primary. A choice and a check are fields (control grey); plain values are text. ---- */
+.ui-inline-row {
+  display: grid;
+  grid-template-columns: var(--ui-inline-row-label-w) minmax(0, 1fr) var(--ui-field-more-slot);
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--ui-control-h);
+  padding: 0;
+  border: var(--ui-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  text-align: left;
+}
+.ui-fields > * {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.ui-fields > .ui-inline-row {
+  grid-template-columns: subgrid;
+}
+/* A condition row of the selection manager (Query): still a whole grey row until the library-wide
+ * pass moves it to label plus field. */
+.ui-inline-row.is-select {
+  background: var(--ui-bg-control);
+}
+.ui-inline-row.is-select:hover {
+  border-color: var(--ui-line-control);
+}
+/* A row whose value is a field: no frame of its own above and below (the field is the height). */
+.ui-inline-row.has-field {
+  border-block-width: 0;
+}
+/* The editable value's field: value and `>` on the panel's value and slot columns. Its text sits on
+ * the values' x like plain values; the field reaches into the gap before it. */
+.ui-inline-row-field {
+  display: grid;
+  grid-column: 2 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: var(--ui-control-h);
+  margin-left: calc(-1 * (var(--ui-space-s) + var(--ui-stroke)));
+  padding-left: var(--ui-space-s);
+  border: var(--ui-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+}
+.ui-inline-row-field:hover {
+  border-color: var(--ui-line-control);
+}
+/* A plain value has no `>`: it takes the slot's room too. */
+.ui-inline-row.is-info > .ui-inline-row-value {
+  grid-column: 2 / -1;
+}
+.ui-inline-row-field > .ui-inline-row-value {
+  cursor: pointer;
+}
+/* A check box: the framed check on the labels' x, its label beside it (13 primary), no field. */
+.ui-inline-check {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--ui-field-more-slot);
+  align-items: center;
+  width: 100%;
+  min-height: var(--ui-control-h);
+  padding: 0 0 0 var(--ui-field-label-inset);
+  /* Transparent, so its check sits where the fields' `>` slots and the lists' checks are. */
+  border: var(--ui-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-inline-check:hover:not(:disabled) .ui-check {
+  border-color: var(--ui-fg-secondary);
+}
+.ui-inline-check:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-inline-check:disabled {
+  cursor: default;
+}
+.ui-inline-check:disabled > * {
+  opacity: var(--ui-dim);
+}
+/* The panel's buttons in one row: the other way, then what Enter does. */
+.ui-fields-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--ui-space-s);
+  margin-top: var(--ui-button-primary-gap);
+}
+.ui-fields-actions > .ui-button {
+  width: 100%;
+  min-width: 0;
+  margin-top: 0;
+}
+.ui-inline-row-label {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  /* Room for the field that reaches into the gap (its padding and frame), then the gap. */
+  padding-right: calc(var(--ui-space-m) + var(--ui-space-s) + var(--ui-stroke));
+  padding-left: var(--ui-field-label-inset);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ui-inline-row-value {
+  overflow: hidden;
+  padding-right: var(--ui-space-s);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ui-inline-row-value.is-muted {
+  color: var(--ui-fg-secondary);
+}
+/* A path is cut at its start, so its end (the folder or file name) stays: right-to-left overflow,
+ * the path itself an isolated left-to-right run. */
+.ui-inline-row-value.is-path {
+  direction: rtl;
+  text-align: left;
+}
+.ui-inline-check-slot {
+  display: grid;
+  place-items: center;
+}
+/* One of several: the rows on the fields' grid, the name on the values' x (no label column — the
+ * list is the value), quiet text at the end, the framed check in the `>` slot. */
+.ui-inline-options {
+  display: flex;
+  flex-direction: column;
+  padding: var(--ui-space-2xs) 0;
+  border: var(--ui-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+}
+.ui-inline-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto var(--ui-field-more-slot);
+  align-items: center;
+  height: var(--ui-control-h);
+  padding: 0 0 0 var(--ui-field-label-inset);
+  border: 0;
+  background: transparent;
+  font-family: var(--ui-font);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-inline-option:hover:not(:disabled) {
+  background: var(--ui-state-hover);
+}
+.ui-inline-option:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-inline-option:disabled {
+  cursor: default;
+}
+.ui-inline-option:disabled > * {
+  opacity: var(--ui-dim);
+}
+.ui-inline-option-hint {
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+/* A notice: its mark on the labels' x, the text after it across the panel, neutral (no colour). */
+.ui-inline-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ui-space-s);
+  padding: var(--ui-space-xs) var(--ui-space-s) var(--ui-space-xs)
+    calc(var(--ui-field-label-inset) + var(--ui-stroke));
+  color: var(--ui-fg-primary);
+}
+.ui-inline-notice > svg {
+  flex: none;
+  /* On the text's first line. */
+  margin-top: calc((var(--ui-text-body) * var(--ui-leading-value) - var(--ui-icon)) / 2);
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+.ui-inline-notice-text {
+  min-width: 0;
+  font-size: var(--ui-text-body);
+  line-height: var(--ui-leading-value);
+}
+
+/* ResourceField: the entry's code before its name. */
+.ui-resource-code {
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+}

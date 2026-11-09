@@ -1,0 +1,1701 @@
+/* Chat (proposal 2026-11-06, design/chats; UI-LIBRARY.md › Proposed: chat). A tab of the right
+ * panel: the head on the function panel's grid (title at the Fields title's x), the log scrolls,
+ * the dock stays. Messages and steps start at the title's x; answers are Properties rows. */
+.ui-panel-body:has(> .ui-chat) {
+  overflow: hidden;
+}
+.ui-chat {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--ui-space-xs) var(--ui-space-xs) 0;
+}
+
+/* ---- Head ---------------------------------------------------------------------------------- */
+.ui-chat-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-section-head-h);
+  margin: 0 calc(-1 * var(--ui-space-xs)) 0 calc(-1 * var(--ui-fields-inset-left));
+  padding: 0 var(--ui-space-xs) 0 var(--ui-fields-head-inset);
+  border-bottom: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-chat-title {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+  text-align: left;
+}
+.ui-chat-title > span {
+  overflow: hidden;
+  padding-block: var(--ui-space-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+.ui-chat-title.is-menu {
+  height: var(--ui-chat-action-h);
+  margin-left: calc(-1 * var(--ui-space-xs));
+  padding: 0 var(--ui-space-xs);
+  border-radius: var(--ui-radius-field);
+  cursor: pointer;
+}
+.ui-chat-title.is-menu > svg {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+}
+.ui-chat-title.is-menu:hover,
+.ui-chat-title.is-menu[aria-expanded='true'] {
+  background: var(--ui-state-hover);
+}
+.ui-chat-title.is-menu:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+}
+.ui-chat-meta {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+.ui-chat-tools {
+  display: flex;
+  flex: none;
+  gap: var(--ui-space-2xs);
+  margin-left: auto;
+}
+
+/* ---- Log ----------------------------------------------------------------------------------- */
+.ui-chat-log {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--ui-space-s);
+  min-height: 0;
+  margin-right: calc(-1 * var(--ui-space-xs));
+  padding: var(--ui-space-m) var(--ui-space-xs) var(--ui-space-m) 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+/* Messages: 13 px at 1.5 leading; the user's on control grey at the right, the agent's plain. */
+.ui-chat-msg {
+  display: flex;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  line-height: var(--ui-leading-chat);
+  overflow-wrap: anywhere;
+}
+.ui-chat-msg.is-agent {
+  padding: 0 var(--ui-space-xs) 0 var(--ui-space-s);
+}
+.ui-chat-msg.is-user {
+  justify-content: flex-end;
+  padding-left: var(--ui-chat-indent);
+}
+.ui-chat-msg.is-user .ui-chat-text {
+  padding: var(--ui-space-xs) var(--ui-space-s);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-bg-control);
+}
+.ui-chat-text > p {
+  margin: 0;
+}
+.ui-chat-text > p + p {
+  margin-top: var(--ui-space-xs);
+}
+.ui-chat-text strong {
+  font-weight: var(--ui-weight-strong);
+}
+
+/* A mention: the element's icon and name on the thumb grey, 20 px. */
+.ui-chat-mention {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  height: var(--ui-chat-mention-h);
+  vertical-align: bottom;
+  border-radius: var(--ui-radius-inner);
+  background: var(--ui-bg-thumb);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-dense);
+  line-height: var(--ui-chat-mention-h);
+}
+.ui-chat-mention button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--ui-space-xs);
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.ui-chat-mention-main > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-chat-mention-main > svg {
+  flex: none;
+  width: var(--ui-chat-mention-icon);
+  height: var(--ui-chat-mention-icon);
+  color: var(--ui-fg-secondary);
+}
+.ui-chat-mention .ui-chat-mention-remove {
+  padding: 0 var(--ui-space-2xs);
+  color: var(--ui-fg-tertiary);
+}
+.ui-chat-mention button:hover {
+  background: var(--ui-state-hover);
+}
+.ui-chat-mention.is-stale {
+  color: var(--ui-fg-secondary);
+}
+.ui-chat-mention.is-removed {
+  color: var(--ui-fg-tertiary);
+  text-decoration: line-through;
+}
+
+/* ---- Steps: function rows (icon · name · what it made · state) ------------------------------- */
+.ui-chat-steps {
+  display: flex;
+  flex-direction: column;
+}
+.ui-chat-steps-body {
+  display: flex;
+  flex-direction: column;
+}
+.ui-chat-step {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  width: 100%;
+  min-height: var(--ui-control-h);
+  padding: 0 var(--ui-space-xs);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+}
+.ui-chat-step:not(:disabled) {
+  cursor: pointer;
+}
+.ui-chat-step:not(:disabled):hover {
+  background: var(--ui-state-hover);
+}
+.ui-chat-step:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-chat-step.is-group {
+  color: var(--ui-fg-secondary);
+}
+.ui-chat-step.is-group .ui-twisty {
+  margin: 0 var(--ui-space-2xs) 0 var(--ui-space-2xs);
+}
+.ui-chat-steps-body .ui-chat-step {
+  padding-left: calc(var(--ui-space-xs) + var(--ui-space-l) + var(--ui-space-2xs));
+}
+.ui-chat-step-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+  color: var(--ui-fg-secondary);
+}
+.ui-chat-step-icon > svg {
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+.ui-chat-step-label {
+  display: flex;
+  flex: 1;
+  gap: var(--ui-space-xs);
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ui-chat-step-label > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ui-chat-step-label > span:first-child {
+  flex: none;
+}
+.ui-chat-step-value {
+  min-width: 0;
+  color: var(--ui-fg-secondary);
+}
+.ui-chat-step-count {
+  color: var(--ui-fg-secondary);
+}
+.ui-chat-step.is-group .ui-chat-step-value::before {
+  content: '· ';
+}
+.ui-chat-step.is-running .ui-chat-step-icon,
+.ui-chat-step.is-running .ui-chat-step-label > span:first-child {
+  color: var(--ui-fg-primary);
+}
+.ui-chat-error {
+  padding: 0 var(--ui-space-xs) var(--ui-space-xs)
+    calc(var(--ui-space-xs) + var(--ui-icon) + var(--ui-space-s));
+  color: var(--ui-color-red);
+  font-size: var(--ui-text-dense);
+  line-height: var(--ui-leading-chat);
+}
+
+/* The state slot at a row's end: done a quiet check, running blue dots, failed red, waiting a
+ * neutral dot (the user is asked). */
+.ui-chat-state {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+  color: var(--ui-fg-tertiary);
+}
+.ui-chat-state.is-failed {
+  color: var(--ui-color-red);
+}
+.ui-chat-wait {
+  display: inline-block;
+  flex: none;
+  width: var(--ui-busy-dot);
+  height: var(--ui-busy-dot);
+  border-radius: var(--ui-radius-dot);
+  background: var(--ui-fg-primary);
+}
+.ui-chat-dots {
+  display: inline-flex;
+  flex: none;
+  gap: var(--ui-space-2xs);
+}
+.ui-chat-dots > i {
+  width: var(--ui-chat-dot);
+  height: var(--ui-chat-dot);
+  border-radius: var(--ui-radius-dot);
+  background: var(--ui-color-blue);
+  animation: ui-chat-dot var(--ui-motion-dots) ease-in-out infinite;
+}
+.ui-chat-dots > i:nth-child(2) {
+  animation-delay: calc(var(--ui-motion-dots) / 6);
+}
+.ui-chat-dots > i:nth-child(3) {
+  animation-delay: calc(var(--ui-motion-dots) / 3);
+}
+@keyframes ui-chat-dot {
+  0%,
+  60%,
+  100% {
+    opacity: var(--ui-dim-pale);
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+/* Running work and the end of a turn: one quiet line each. */
+.ui-chat-working,
+.ui-chat-turn-end {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-height: var(--ui-control-h);
+  padding: 0 var(--ui-space-xs) 0 var(--ui-space-s);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+}
+.ui-chat-turn-end {
+  border-top: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-chat-actions {
+  display: flex;
+  gap: var(--ui-space-2xs);
+  margin-left: auto;
+}
+.ui-chat-action {
+  height: var(--ui-chat-action-h);
+  padding: 0 var(--ui-space-s);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  cursor: pointer;
+}
+.ui-chat-action:hover:not(:disabled) {
+  background: var(--ui-state-hover);
+}
+.ui-chat-action:disabled {
+  color: var(--ui-fg-tertiary);
+  cursor: default;
+}
+.ui-chat-action:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+}
+
+/* ---- Cards: an approval, a pick, a preview ------------------------------------------------- */
+.ui-chat-card {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--ui-space-s);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-bg-chrome);
+}
+.ui-chat-card.is-waiting {
+  border-color: var(--ui-line-strong);
+}
+.ui-chat-card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-section-head-h);
+  padding: 0 var(--ui-space-m) 0 var(--ui-space-s);
+}
+.ui-chat-card-title {
+  flex: 1;
+  overflow: hidden;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-chat-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  padding: 0 var(--ui-space-s);
+}
+.ui-chat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ui-space-s);
+  padding: var(--ui-space-s) var(--ui-space-s) 0;
+}
+.ui-chat-row {
+  display: grid;
+  grid-template-columns: var(--ui-chat-row-label) minmax(0, 1fr);
+  gap: var(--ui-prop-gap);
+  align-items: baseline;
+  min-height: var(--ui-chat-action-h);
+  padding: var(--ui-space-2xs) 0 var(--ui-space-2xs) var(--ui-space-xs);
+}
+.ui-chat-row-label {
+  overflow: hidden;
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-chat-row-value {
+  min-width: 0;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  line-height: var(--ui-leading-value);
+  overflow-wrap: anywhere;
+}
+.ui-chat-row-value.is-mono {
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+.ui-chat-row-value.is-muted {
+  color: var(--ui-fg-tertiary);
+}
+
+.ui-chat-card .ui-chat-choices {
+  margin-left: 0;
+}
+.ui-chat-letter {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-chat-letter);
+  height: var(--ui-chat-letter);
+  border-radius: var(--ui-radius-inner);
+  background: var(--ui-color-yellow);
+  color: var(--ui-bg-chrome);
+  font-size: var(--ui-text-caption);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-chat-answer .ui-prop-control {
+  align-items: center;
+}
+.ui-chat-answer .ui-read {
+  flex: 1;
+}
+.ui-chat-change {
+  position: absolute;
+  top: 50%;
+  right: var(--ui-copy-inset);
+  display: grid;
+  place-items: center;
+  width: var(--ui-copy);
+  height: var(--ui-copy);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-chrome);
+  color: var(--ui-fg-tertiary);
+  opacity: 0;
+  translate: 0 -50%;
+  cursor: pointer;
+}
+.ui-chat-answer:hover .ui-chat-change,
+.ui-chat-change:focus-visible {
+  opacity: 1;
+}
+.ui-chat-change:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+
+.ui-chat-role {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-2xs);
+  width: 100%;
+  min-height: var(--ui-control-h);
+  padding: 0 var(--ui-space-xs) 0 var(--ui-space-s);
+  border: 0;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  font-weight: var(--ui-weight-strong);
+  cursor: pointer;
+}
+.ui-chat-role > svg {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+}
+.ui-chat-role.is-ignored {
+  color: var(--ui-fg-tertiary);
+  font-weight: var(--ui-weight-regular);
+}
+.ui-chat-role:hover,
+.ui-chat-role[aria-expanded='true'] {
+  background: var(--ui-state-hover);
+}
+
+/* ---- Dock and composer ---------------------------------------------------------------------- */
+.ui-chat-dock {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--ui-space-s);
+  padding: 0 0 var(--ui-space-s);
+}
+.ui-chat-dock > .ui-button.is-primary {
+  margin-top: 0;
+}
+.ui-composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-xs);
+  padding: var(--ui-space-s) var(--ui-space-xs) var(--ui-space-xs);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-bg-control);
+}
+.ui-composer:focus-within {
+  border-color: var(--ui-line-strong);
+}
+.ui-composer-mentions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-xs);
+  padding: 0 var(--ui-space-xs);
+}
+.ui-composer-input {
+  min-height: var(--ui-chat-input-min);
+  max-height: var(--ui-chat-input-max);
+  padding: 0 var(--ui-space-xs);
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  line-height: var(--ui-leading-chat);
+  resize: none;
+  field-sizing: content;
+}
+.ui-composer-input::placeholder {
+  color: var(--ui-fg-tertiary);
+}
+.ui-composer-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2xs);
+}
+.ui-composer-spacer {
+  flex: 1;
+}
+.ui-composer-chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  height: var(--ui-tool-button);
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-xs);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  cursor: pointer;
+}
+.ui-composer-chip.is-icon {
+  justify-content: center;
+  width: var(--ui-tool-button);
+  padding: 0;
+}
+.ui-composer-chip > svg {
+  flex: none;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+.ui-composer-chip:hover,
+.ui-composer-chip[aria-expanded='true'] {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-composer-chip:focus-visible,
+.ui-composer-send:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+}
+.ui-composer-send {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-tool-button);
+  height: var(--ui-tool-button);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-fg-primary);
+  color: var(--ui-bg-chrome);
+  cursor: pointer;
+}
+.ui-composer-send:disabled {
+  background: var(--ui-bg-thumb);
+  color: var(--ui-fg-tertiary);
+  cursor: default;
+}
+
+/* ---- The import chat: bubbles, chips, metrics, grid, footer (the existing PhotoLab/Builder
+ * import chat in the lab's tokens; owner 2026-11-06) ------------------------------------------- */
+.ui-chat-bubble-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-xs);
+}
+.ui-chat-bubble-row.is-user {
+  align-items: flex-end;
+}
+.ui-chat-bubble-line {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--ui-space-s);
+}
+.ui-chat-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-chat-avatar);
+  height: var(--ui-chat-avatar);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-dot);
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-secondary);
+}
+.ui-chat-bubble {
+  position: relative;
+  max-width: calc(100% - var(--ui-chat-indent));
+  padding: var(--ui-space-s) var(--ui-space-m);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  line-height: var(--ui-leading-value);
+}
+.ui-chat-bubble.is-system {
+  border-radius: var(--ui-radius-title) var(--ui-radius-title) var(--ui-radius-title)
+    var(--ui-radius-inner);
+  background: var(--ui-bg-control);
+}
+.ui-chat-bubble.is-user {
+  border-color: var(--ui-line-strong);
+  border-radius: var(--ui-radius-title) var(--ui-radius-title) var(--ui-radius-inner)
+    var(--ui-radius-title);
+  background: var(--ui-bg-thumb);
+}
+/* The tails (PhotoLab): a small turned square at the bubble's foot. */
+.ui-chat-bubble.is-system::before,
+.ui-chat-bubble.is-user::after {
+  position: absolute;
+  bottom: var(--ui-space-xs);
+  width: var(--ui-chat-tail);
+  height: var(--ui-chat-tail);
+  content: '';
+  rotate: 45deg;
+}
+.ui-chat-bubble.is-system::before {
+  left: calc(var(--ui-chat-tail) / -2);
+  border-bottom: var(--ui-stroke) solid var(--ui-line-control);
+  border-left: var(--ui-stroke) solid var(--ui-line-control);
+  background: var(--ui-bg-control);
+}
+.ui-chat-bubble.is-user::after {
+  right: calc(var(--ui-chat-tail) / -2);
+  border-top: var(--ui-stroke) solid var(--ui-line-strong);
+  border-right: var(--ui-stroke) solid var(--ui-line-strong);
+  background: var(--ui-bg-thumb);
+}
+.ui-chat-bubble strong {
+  display: block;
+  font-weight: var(--ui-weight-strong);
+}
+.ui-chat-bubble small {
+  display: block;
+  margin-top: var(--ui-space-2xs);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+}
+.ui-chat-bubble.is-error,
+.ui-chat-bubble.is-error::before {
+  border-color: var(--ui-color-red);
+}
+.ui-chat-bubble.is-error strong {
+  color: var(--ui-color-red);
+}
+.ui-chat-revert {
+  display: grid;
+  place-items: center;
+  width: var(--ui-chat-letter);
+  height: var(--ui-chat-letter);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+  cursor: pointer;
+}
+.ui-chat-bubble-row.is-system > .ui-chat-revert {
+  margin-left: calc(var(--ui-chat-avatar) + var(--ui-space-s));
+}
+.ui-chat-revert:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-chat-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-xs);
+  margin-left: calc(var(--ui-chat-avatar) + var(--ui-space-s));
+}
+.ui-chat-chip {
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-m);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-button);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ui-chat-chip.is-primary {
+  border-color: var(--ui-line-strong);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-chat-chip:hover:not(:disabled) {
+  border-color: var(--ui-fg-secondary);
+}
+.ui-chat-chip:disabled {
+  color: var(--ui-fg-tertiary);
+  cursor: default;
+}
+.ui-chat-chip.is-chosen {
+  border-color: var(--ui-line-strong);
+  background: var(--ui-bg-thumb);
+  color: var(--ui-fg-primary);
+}
+.ui-chat-chip:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset);
+}
+.ui-chat-card.is-inset {
+  margin-left: calc(var(--ui-chat-avatar) + var(--ui-space-s));
+  background: var(--ui-bg-chrome);
+}
+.ui-chat-card .ui-chat-chips {
+  margin-left: 0;
+}
+.ui-chat-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ui-space-xs);
+}
+.ui-chat-metric {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ui-space-s);
+  min-width: 0;
+  padding: var(--ui-space-xs) var(--ui-space-s);
+  border: var(--ui-stroke) solid var(--ui-line-separator);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+  font-size: var(--ui-text-dense);
+}
+.ui-chat-metric > span {
+  color: var(--ui-fg-secondary);
+}
+.ui-chat-metric > strong {
+  overflow: hidden;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font-mono);
+  font-weight: var(--ui-weight-regular);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-chat-grid {
+  overflow: auto;
+  border: var(--ui-stroke) solid var(--ui-line-separator);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+}
+.ui-chat-grid table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-caption);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ui-chat-grid th,
+.ui-chat-grid td {
+  height: var(--ui-chat-action-h);
+  padding: 0 var(--ui-space-xs);
+  border-bottom: var(--ui-stroke) solid var(--ui-line-separator);
+  color: var(--ui-fg-secondary);
+  text-align: right;
+}
+.ui-chat-grid th {
+  padding: 0;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-chat-grid th:not(:has(button)) {
+  padding: 0 var(--ui-space-xs);
+}
+.ui-chat-grid th:first-child,
+.ui-chat-grid td:first-child {
+  text-align: left;
+}
+.ui-chat-grid tr:last-child td {
+  border-bottom: 0;
+}
+.ui-chat-grid tr.is-current td {
+  color: var(--ui-fg-primary);
+  background: var(--ui-state-selected);
+}
+.ui-chat-grid td.is-invalid {
+  color: var(--ui-color-red);
+}
+.ui-chat-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  margin: 0 calc(-1 * var(--ui-space-xs));
+  padding: var(--ui-space-m) var(--ui-space-m) var(--ui-space-xs);
+  border-top: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-chat-footer-status {
+  flex: 1;
+  overflow: hidden;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-chat-footer > .ui-button.is-primary {
+  width: auto;
+  margin-top: 0;
+  border-color: var(--ui-line-strong);
+  font-weight: var(--ui-weight-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-chat-dots > i {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* A picture in a card (proposal 2026-11-06). */
+.ui-chat-thumb {
+  display: block;
+  width: var(--ui-chat-thumb-w);
+  height: auto;
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-field);
+}
+.ui-chat-avatar > svg {
+  width: var(--ui-chat-mention-icon);
+  height: var(--ui-chat-mention-icon);
+}
+
+/* ---- Round 2 (2026-11-06): rename in the head, the agent's own window ------------------------- */
+.ui-chat-title.is-renamable {
+  cursor: default;
+}
+.ui-chat-title.is-editing {
+  flex: 1;
+  min-width: 0;
+}
+.ui-chat-title.is-editing > input {
+  width: 100%;
+  font-weight: var(--ui-weight-strong);
+}
+.ui-chat-ws {
+  display: grid;
+  flex: 1;
+  grid-template-columns: var(--ui-chat-ws-side-w) minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+}
+.ui-chat-ws-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  min-height: 0;
+  padding: var(--ui-space-s);
+  overflow-y: auto;
+  border-right: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-chat-ws-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.ui-chat-ws-main > .ui-chat-head {
+  margin: 0;
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-l);
+}
+.ui-chat-ws-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+.ui-chat-ws-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-l);
+  max-width: var(--ui-chat-ws-column-w);
+  margin: 0 auto;
+  padding: var(--ui-space-l) var(--ui-space-l);
+}
+.ui-chat-ws-dock > .ui-chat-ws-column {
+  padding-top: var(--ui-space-xs);
+}
+/* The log fades out above the composer (t3code), so nothing runs into its frame. */
+.ui-chat-ws-dock::before {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: var(--ui-space-xl);
+  background: linear-gradient(transparent, var(--ui-bg-chrome));
+  content: '';
+  pointer-events: none;
+}
+.ui-chat-ws-aside {
+  display: flex;
+  flex-direction: column;
+  width: var(--ui-chat-ws-aside-w);
+  min-height: 0;
+  overflow-y: auto;
+  border-left: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-nav-section {
+  padding: var(--ui-space-m) var(--ui-space-s) var(--ui-space-2xs);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-nav-item {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-s);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-nav-item > svg {
+  flex: none;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+.ui-nav-item:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-nav-item.is-active {
+  background: var(--ui-state-selected);
+  color: var(--ui-fg-primary);
+}
+.ui-nav-item:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-nav-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-nav-meta {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+}
+.ui-chat-code {
+  overflow: hidden;
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-bg-control);
+}
+.ui-chat-code-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-m);
+  border-bottom: var(--ui-stroke) solid var(--ui-line-separator);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+}
+.ui-chat-code-head .ui-copy {
+  opacity: 1;
+}
+.ui-chat-code pre {
+  margin: 0;
+  padding: var(--ui-space-s) var(--ui-space-m);
+  overflow-x: auto;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  line-height: var(--ui-leading-chat);
+}
+.ui-chat-image {
+  margin: 0;
+  overflow: hidden;
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+}
+/* An HTML reply (t3code's visual replies): the page itself, framed like a picture, its tools on
+ * hover at the top right, its name under it; expanded, it fills the conversation. */
+.ui-chat-embed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-xs);
+  margin: 0;
+}
+.ui-chat-embed-frame {
+  position: relative;
+  overflow: hidden;
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+}
+.ui-chat-embed iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: var(--ui-bg-control);
+}
+.ui-chat-embed-tools {
+  position: absolute;
+  top: var(--ui-space-s);
+  right: var(--ui-space-s);
+  display: flex;
+  gap: var(--ui-space-2xs);
+  padding: var(--ui-space-2xs);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-bg-chrome);
+  opacity: 0;
+}
+.ui-chat-embed-frame:hover .ui-chat-embed-tools,
+.ui-chat-embed-tools:focus-within,
+.ui-chat-embed.is-full .ui-chat-embed-tools {
+  opacity: 1;
+}
+.ui-chat-embed-tool {
+  display: grid;
+  place-items: center;
+  width: var(--ui-chat-action-h);
+  height: var(--ui-chat-action-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+}
+.ui-chat-embed-tool:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-chat-embed-tool:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+}
+.ui-chat-embed-caption {
+  display: flex;
+  gap: var(--ui-space-s);
+  padding: 0 var(--ui-space-2xs);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+}
+.ui-chat-embed-kind::before {
+  content: '· ';
+}
+/* Expanded: over the whole conversation, head included, its page inset on the grid. */
+.ui-chat-embed.is-full {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  padding: var(--ui-chat-embed-full-inset) var(--ui-chat-embed-full-inset) 0;
+  background: var(--ui-bg-chrome);
+}
+.ui-chat-embed.is-full .ui-chat-embed-frame {
+  flex: 1;
+}
+.ui-chat-embed.is-full iframe {
+  height: 100%;
+}
+.ui-chat-embed.is-full .ui-chat-embed-caption {
+  padding: 0 var(--ui-space-2xs) var(--ui-space-s);
+}
+.ui-chat-image img {
+  display: block;
+  width: 100%;
+}
+.ui-chat-image figcaption {
+  padding: var(--ui-space-xs) var(--ui-space-m);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+}
+.ui-chat-text h4 {
+  margin: var(--ui-space-s) 0 var(--ui-space-2xs);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-chat-text ul {
+  margin: var(--ui-space-2xs) 0;
+  padding-left: var(--ui-space-l);
+}
+.ui-chat-text code {
+  padding: 0 var(--ui-space-2xs);
+  border-radius: var(--ui-radius-inner);
+  background: var(--ui-bg-control);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+}
+.ui-nav-spacer {
+  flex: 1;
+}
+
+/* ---- Choices: an answer per row (agent pick, import operation, workflows). Restored 2026-11-06:
+ * the round-2 cut of the question rows took their styles along. ---------------------------- */
+.ui-chat-choices {
+  display: flex;
+  flex-direction: column;
+  padding: var(--ui-menu-pad);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+}
+.ui-chat-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-menu-row-h);
+  padding: 0 var(--ui-menu-item-pad-end) 0 var(--ui-menu-item-pad-start);
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-chat-choice:hover:not(:disabled),
+.ui-chat-choice:focus-visible {
+  outline: none;
+  background: var(--ui-state-hover);
+}
+.ui-chat-choice:disabled {
+  color: var(--ui-fg-tertiary);
+  cursor: default;
+}
+.ui-chat-choice-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-chat-choice-hint {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+
+/* The function panel's format list (Export): the choices sit on the fields' column. */
+.ui-fields > .ui-chat-choices {
+  margin: var(--ui-space-2xs) 0;
+}
+
+/* ---- Agent window, round 6 (proposal 2026-11-07, not decided): t3code's timeline parts ------- */
+/* The breadcrumb before the session's name (project / session). */
+.ui-chat-context {
+  display: inline-flex;
+  flex: none;
+  gap: var(--ui-space-s);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-body);
+}
+/* A step and its details chevron share one line; rows without details keep the chevron's slot,
+ * so every state glyph stands on one x. */
+.ui-chat-step-line {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2xs);
+}
+.ui-chat-step-line > .ui-chat-step {
+  flex: 1;
+  min-width: 0;
+}
+.ui-chat-step-more {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-chat-step-more);
+  height: var(--ui-chat-action-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+}
+button.ui-chat-step-more {
+  cursor: pointer;
+}
+button.ui-chat-step-more:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+button.ui-chat-step-more:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+}
+.ui-chat-step-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  margin: var(--ui-space-2xs) calc(var(--ui-chat-step-more) + var(--ui-space-2xs)) var(--ui-space-s)
+    calc(var(--ui-space-xs) + var(--ui-icon) + var(--ui-space-s));
+  padding: var(--ui-space-s) var(--ui-space-m);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-bg-control);
+}
+.ui-chat-step-command {
+  margin: var(--ui-space-xs) 0 0;
+  overflow-x: auto;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  line-height: var(--ui-leading-chat);
+}
+
+/* The work of a turn, folded: „Worked for 0:42 › 3 functions · 2 created". */
+.ui-chat-worklog {
+  display: flex;
+  flex-direction: column;
+}
+.ui-chat-worklog-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  width: 100%;
+  min-height: var(--ui-control-h);
+  padding: 0 var(--ui-space-xs);
+  border: 0;
+  border-bottom: var(--ui-stroke) solid var(--ui-line-separator);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  cursor: pointer;
+}
+.ui-chat-worklog-head:hover {
+  color: var(--ui-fg-primary);
+}
+.ui-chat-worklog-head:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-chat-worklog-summary {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ui-fg-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-chat-worklog-summary::before {
+  content: '· ';
+}
+.ui-chat-worklog-body {
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--ui-space-xs);
+}
+.ui-chat-thought {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ui-space-s);
+  width: 100%;
+  min-height: var(--ui-control-h);
+  padding: var(--ui-space-xs) calc(var(--ui-chat-step-more) + var(--ui-space-2xs))
+    var(--ui-space-xs) var(--ui-space-xs);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  line-height: var(--ui-leading-chat);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-chat-thought:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-secondary);
+}
+.ui-chat-thought:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-chat-thought > .ui-chat-step-icon {
+  margin-top: var(--ui-space-2xs);
+  color: var(--ui-fg-tertiary);
+}
+.ui-chat-thought-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-chat-thought.is-open .ui-chat-thought-text {
+  white-space: normal;
+}
+
+/* A table the agent wrote: head strong, a line between rows, numbers right in mono, Copy below. */
+.ui-chat-table {
+  display: flex;
+  flex-direction: column;
+}
+.ui-chat-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--ui-text-body);
+}
+.ui-chat-table th,
+.ui-chat-table td {
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-m) 0 0;
+  border-bottom: var(--ui-stroke) solid var(--ui-line-separator);
+  color: var(--ui-fg-primary);
+  text-align: left;
+  white-space: nowrap;
+}
+.ui-chat-table th {
+  border-bottom-color: var(--ui-line-control);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-chat-table :is(th, td).is-num {
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.ui-chat-table th.is-num {
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+}
+.ui-chat-table :is(th, td):last-child {
+  padding-right: 0;
+}
+.ui-chat-table-foot {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  height: var(--ui-chat-action-h);
+}
+.ui-chat-table-foot .ui-copy,
+.ui-chat-meta-line .ui-copy {
+  position: static;
+  opacity: 1;
+  translate: none;
+}
+/* The wide column has one left edge (t3code): texts, the work log's head, tables, frames and the
+ * meta line start on it; rows that fill on hover (steps, thoughts) keep their padding outside it,
+ * so their icons stand on it too. */
+.ui-chat-ws-column > .ui-chat-msg.is-agent {
+  padding: 0;
+}
+.ui-chat-ws-column .ui-chat-worklog-head {
+  padding-left: 0;
+}
+.ui-chat-ws-column .ui-chat-worklog-body {
+  margin-left: calc(-1 * var(--ui-space-xs));
+}
+/* One rhythm in the wide column (owner 2026-11-07: „ich seh hier irgendwie voll Inkonsistenz von
+ * Abständen"; t3code nightly: a gap between every block, more before a new turn, the meta line
+ * close under its answer): 16 between blocks, 24 before the user's next message, 8 to the meta
+ * line. The user's message is a rounded bubble at the right, as in t3code. */
+.ui-chat-ws-column > .ui-chat-msg.is-user:not(:first-child) {
+  margin-top: var(--ui-space-s);
+}
+.ui-chat-ws-column > .ui-chat-msg.is-user + .ui-chat-worklog {
+  margin-top: var(--ui-space-s);
+}
+.ui-chat-ws-column > .ui-chat-meta-line {
+  margin-top: calc(-1 * var(--ui-space-s));
+}
+.ui-chat-ws-column > .ui-chat-msg.is-user .ui-chat-text,
+.ui-chat-ws-column > .ui-chat-msg.is-user .ui-chat-queued {
+  padding: var(--ui-space-s) var(--ui-space-m);
+  border-radius: var(--ui-radius-large);
+}
+.ui-chat-ws-column > .ui-chat-msg.is-user {
+  padding-left: calc(var(--ui-chat-ws-column-w) / 5);
+}
+.ui-chat-ws-column .ui-chat-worklog-head {
+  min-height: var(--ui-section-head-h);
+}
+.ui-chat-ws-column .ui-chat-step-detail {
+  margin-top: var(--ui-space-xs);
+  margin-bottom: var(--ui-space-s);
+}
+
+/* Under a turn's answer: Copy, the time, the model. */
+.ui-chat-meta-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-m);
+  height: var(--ui-chat-action-h);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+
+/* What a turn changed: a head with the count and its actions, a row per element. */
+.ui-chat-changes {
+  display: flex;
+  flex-direction: column;
+  padding: var(--ui-space-2xs) var(--ui-space-xs) var(--ui-space-xs);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+}
+.ui-chat-changes-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-height: var(--ui-control-h);
+  padding: 0 0 0 var(--ui-space-xs);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+}
+.ui-chat-change-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-xs);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+}
+.ui-chat-change-row:not(:disabled) {
+  cursor: pointer;
+}
+.ui-chat-change-row:not(:disabled):hover {
+  background: var(--ui-state-hover);
+}
+.ui-chat-change-row:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-chat-change-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-chat-change-kind {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+.ui-chat-changes.is-undone .ui-chat-change-name {
+  color: var(--ui-fg-tertiary);
+  text-decoration: line-through;
+}
+
+/* A queued message: the user's, dashed, with its tools. */
+.ui-chat-queued {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  padding: var(--ui-space-xs) var(--ui-space-xs) var(--ui-space-2xs) var(--ui-space-s);
+  border: var(--ui-stroke) dashed var(--ui-line-strong);
+  border-radius: var(--ui-radius-small);
+}
+.ui-chat-queued-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2xs);
+}
+.ui-chat-queued-tag {
+  margin-right: auto;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+}
+.ui-chat-queued-tool {
+  display: grid;
+  place-items: center;
+  width: var(--ui-chat-action-h);
+  height: var(--ui-chat-action-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+}
+.ui-chat-queued-tool:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-chat-queued-tool:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+}
+
+/* ---- The composer, round 6: the prompt on top, notes under it ------------------------------- */
+.ui-composer-wrap {
+  display: flex;
+  flex-direction: column;
+}
+.ui-composer-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-xs);
+  margin: 0 var(--ui-composer-prompt-inset) calc(-1 * var(--ui-stroke));
+  padding: var(--ui-space-m) var(--ui-space-m) var(--ui-space-s);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-bottom: 0;
+  border-radius: var(--ui-radius-small) var(--ui-radius-small) 0 0;
+  background: var(--ui-bg-chrome);
+}
+.ui-composer-prompt-topic {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-composer-prompt-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+}
+.ui-composer-prompt-title {
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+  line-height: var(--ui-leading-chat);
+}
+.ui-composer-prompt-head > .ui-composer-prompt-title {
+  flex: 1;
+}
+.ui-composer-prompt-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  padding: var(--ui-space-xs) 0;
+}
+.ui-composer-prompt-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ui-space-s);
+}
+.ui-composer-options {
+  display: flex;
+  flex-direction: column;
+  margin: var(--ui-space-2xs) calc(-1 * var(--ui-space-s)) 0;
+}
+.ui-composer-option {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-height: var(--ui-section-head-h);
+  padding: var(--ui-space-xs) var(--ui-space-s);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-composer-option:hover,
+.ui-composer-option.is-chosen {
+  background: var(--ui-state-hover);
+}
+.ui-composer-option:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-composer-option-key {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-chat-letter);
+  height: var(--ui-chat-letter);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-inner);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-caption);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-composer-option-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.ui-composer-option-text > small {
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+.ui-composer-chip-detail {
+  color: var(--ui-fg-tertiary);
+}
+
+/* ---- The window: an empty session's question, Scroll to end ---------------------------------- */
+.ui-chat-ws-main {
+  position: relative;
+}
+.ui-chat-ws-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  padding-bottom: var(--ui-space-2xl);
+}
+.ui-chat-ws-empty > .ui-chat-ws-column {
+  width: 100%;
+}
+.ui-chat-ws-hero {
+  margin: 0;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-title);
+  font-weight: var(--ui-weight-strong);
+  text-align: center;
+}
+.ui-chat-ws-hero-context {
+  margin: calc(-1 * var(--ui-space-s)) 0 var(--ui-space-s);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-body);
+  text-align: center;
+}
+.ui-chat-ws-dock {
+  position: relative;
+}
+.ui-chat-to-end {
+  position: absolute;
+  bottom: calc(100% + var(--ui-space-s));
+  left: 50%;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  height: var(--ui-chat-action-h);
+  padding: 0 var(--ui-space-m) 0 var(--ui-space-s);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-chrome);
+  box-shadow: var(--ui-shadow-chip);
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  transform: translateX(-50%);
+  cursor: pointer;
+}
+.ui-chat-to-end:hover {
+  color: var(--ui-fg-primary);
+}
+.ui-chat-to-end:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+}

@@ -1,0 +1,898 @@
+/* Library window (proposal 2026-11-06, design/specifications — not approved yet): the
+ * specification manager as the library of nested resources. Tokens only (UI-LIBRARY rule 3). */
+/* Proposed library components (Proposed.tsx): tokens only, as src/ui requires. The two sizes
+ * that have no token yet are named here and would become tokens: the dialog's head and its
+ * widest size. */
+
+/* ---- Dialog: between the top row and the status bar, as tall as the side panels ------------ */
+.ui-lib-dialog {
+  position: absolute;
+  z-index: var(--ui-z-floating);
+  top: var(--ui-library-top);
+  bottom: var(--ui-library-bottom);
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-rows: var(--ui-library-head-h) minmax(0, 1fr);
+  width: min(var(--ui-library-max-w), calc(100% - 2 * var(--ui-gap)));
+  margin-inline: auto;
+  overflow: hidden;
+  animation: ui-rise var(--ui-motion-menu) var(--ui-ease);
+}
+/* Opened from the company manager (a window of its own): over the app's windows. */
+.ui-lib-dialog.is-front {
+  z-index: calc(var(--ui-z-window) + 21);
+}
+.ui-lib-dialog-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-l);
+  border-bottom: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-lib-dialog-title {
+  margin: 0 var(--ui-space-xs) 0 0;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-title);
+  font-weight: var(--ui-weight-strong);
+  text-box: trim-both cap alphabetic;
+}
+.ui-lib-dialog-gap {
+  flex: 1;
+}
+.ui-lib-dialog-sep {
+  width: var(--ui-stroke);
+  height: var(--ui-space-l);
+  margin: 0 var(--ui-space-xs);
+  background: var(--ui-line-control);
+}
+
+/* ---- NavItem: a sidebar row ---------------------------------------------------------------- */
+.ui-lib-nav-item {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-list-row-h);
+  padding: 0 var(--ui-space-s);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-lib-nav-item:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-lib-nav-item.is-selected,
+.ui-lib-nav-item.is-selected:hover {
+  background: var(--ui-state-selected);
+  color: var(--ui-fg-primary);
+}
+.ui-lib-nav-item:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-lib-nav-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-icon);
+  color: var(--ui-fg-secondary);
+}
+.ui-lib-nav-item.is-selected .ui-lib-nav-icon {
+  color: var(--ui-fg-primary);
+}
+.ui-lib-nav-code {
+  flex: none;
+  width: var(--ui-icon);
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  text-align: center;
+}
+.ui-lib-nav-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- SearchField: stays in its toolbar ----------------------------------------------------- */
+.ui-lib-search {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: 0;
+  height: var(--ui-toolbar-button);
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-m);
+  border: var(--ui-stroke) solid transparent;
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-tertiary);
+}
+.ui-lib-search:hover {
+  border-color: var(--ui-line-control);
+}
+.ui-lib-search:focus-within {
+  border-color: var(--ui-line-active);
+}
+.ui-lib-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+}
+.ui-lib-search input::placeholder {
+  color: var(--ui-fg-tertiary);
+}
+.ui-lib-search input::selection {
+  background: var(--ui-text-selection);
+}
+.ui-lib-search kbd {
+  padding: var(--ui-space-2xs) var(--ui-space-xs);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-inner);
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-caption);
+  line-height: 1;
+}
+.ui-lib-search button {
+  display: grid;
+  place-items: center;
+  width: var(--ui-space-xl);
+  height: var(--ui-space-xl);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+  cursor: pointer;
+}
+.ui-lib-search button:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+
+/* ---- SourceRow: where a value comes from (Webflow, in greys) ------------------------------- */
+/* Inherited: the value is quiet; the label stays as it is and names the source in its tooltip. */
+.ui-lib-source-row.is-inherited :is(.ui-field, .ui-read, .ui-lib-colour-text) {
+  color: var(--ui-fg-secondary);
+}
+.ui-lib-source-row.is-inherited .ui-segmented .is-on {
+  color: var(--ui-fg-secondary);
+}
+/* Own while a parent exists: the label sits on a chip, its text where the plain label's is. */
+.ui-lib-own-label {
+  justify-self: start;
+  max-width: 100%;
+  margin-left: calc(-1 * var(--ui-space-xs) - var(--ui-space-2xs));
+  padding: var(--ui-space-xs) calc(var(--ui-space-xs) + var(--ui-space-2xs));
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: var(--ui-bg-on);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  cursor: pointer;
+}
+.ui-lib-own-label:hover,
+.ui-lib-own-label[aria-expanded='true'] {
+  box-shadow: inset 0 0 0 var(--ui-stroke) var(--ui-line-strong);
+}
+.ui-lib-own-label > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-box: trim-both cap alphabetic;
+}
+
+/* ---- OpenButton: like Copy, floating over the value's end on row hover ---------------------- */
+.ui-lib-open {
+  position: absolute;
+  top: 50%;
+  right: var(--ui-copy-inset);
+  display: grid;
+  place-items: center;
+  width: var(--ui-copy);
+  height: var(--ui-copy);
+  padding: 0;
+  border: var(--ui-stroke) solid var(--ui-line-separator);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-chrome);
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+  opacity: 0;
+  translate: 0 -50%;
+}
+.ui-prop-row:hover .ui-lib-open,
+.ui-lib-open:focus-visible {
+  opacity: 1;
+}
+.ui-lib-open:hover {
+  border-color: var(--ui-line-control);
+  color: var(--ui-fg-primary);
+}
+.ui-prop-control:has(.ui-field-more) .ui-lib-open {
+  right: calc(var(--ui-field-more-w) + var(--ui-copy-inset));
+}
+
+/* ---- KindRail: the side panels' rail inside the window -------------------------------------- */
+.ui-lib-rail {
+  height: 100%;
+}
+
+/* A filter chip inside the search (from „Used by"): its × removes it, Backspace too. */
+.ui-lib-token {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-2xs);
+  height: var(--ui-space-xl);
+  padding: 0 var(--ui-space-2xs) 0 var(--ui-space-s);
+  border-radius: var(--ui-radius-inner);
+  background: var(--ui-bg-on);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-dense);
+  white-space: nowrap;
+}
+.ui-lib-token > span {
+  text-box: trim-both cap alphabetic;
+}
+.ui-lib-search .ui-lib-token button {
+  width: var(--ui-space-l);
+  height: var(--ui-space-l);
+}
+.ui-lib-dialog-head {
+  user-select: none;
+}
+
+/* ---- Dialog: moved or sized it keeps its box; edges and corners size it --------------------- */
+.ui-lib-dialog.is-placed {
+  right: auto;
+  bottom: auto;
+  margin: 0;
+}
+.ui-lib-dialog-edge {
+  position: absolute;
+  z-index: 2;
+  touch-action: none;
+}
+.ui-lib-dialog-edge.is-n,
+.ui-lib-dialog-edge.is-s {
+  right: var(--ui-space-m);
+  left: var(--ui-space-m);
+  height: var(--ui-space-xs);
+  cursor: ns-resize;
+}
+.ui-lib-dialog-edge.is-n {
+  top: 0;
+}
+.ui-lib-dialog-edge.is-s {
+  bottom: 0;
+}
+.ui-lib-dialog-edge.is-e,
+.ui-lib-dialog-edge.is-w {
+  top: var(--ui-space-m);
+  bottom: var(--ui-space-m);
+  width: var(--ui-space-xs);
+  cursor: ew-resize;
+}
+.ui-lib-dialog-edge.is-e {
+  right: 0;
+}
+.ui-lib-dialog-edge.is-w {
+  left: 0;
+}
+.ui-lib-dialog-edge:is(.is-ne, .is-se, .is-sw, .is-nw) {
+  width: var(--ui-space-m);
+  height: var(--ui-space-m);
+}
+.ui-lib-dialog-edge.is-ne {
+  top: 0;
+  right: 0;
+  cursor: nesw-resize;
+}
+.ui-lib-dialog-edge.is-sw {
+  bottom: 0;
+  left: 0;
+  cursor: nesw-resize;
+}
+.ui-lib-dialog-edge.is-se {
+  right: 0;
+  bottom: 0;
+  cursor: nwse-resize;
+}
+.ui-lib-dialog-edge.is-nw {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+
+/* ---- ImageValue: a field's height, the thumbnail where a colour field has its swatch ----------- */
+.ui-lib-image {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: 0;
+  height: var(--ui-prop-field-h);
+  padding: 0 var(--ui-field-pad-x) 0 var(--ui-space-2xs);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-lib-image:hover {
+  box-shadow: inset 0 0 0 var(--ui-stroke) var(--ui-line-control);
+}
+.ui-lib-image-thumb {
+  flex: none;
+  width: calc((var(--ui-prop-field-h) - 2 * var(--ui-space-2xs)) * 1.5);
+  height: calc(var(--ui-prop-field-h) - 2 * var(--ui-space-2xs));
+  border-radius: var(--ui-radius-inner);
+}
+.ui-lib-image-name {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Catalogue chip in the head ------------------------------------------------------------- */
+.ui-lib-catalog {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-s);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  cursor: pointer;
+}
+.ui-lib-catalog:hover,
+.ui-lib-catalog[aria-expanded='true'] {
+  background: var(--ui-state-hover);
+}
+.ui-lib-catalog > span {
+  text-box: trim-both cap alphabetic;
+}
+.ui-lib-catalog-scope {
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+.ui-lib-catalog > svg {
+  color: var(--ui-fg-tertiary);
+}
+
+/* ---- Sidebar ------------------------------------------------------------------------------- */
+.ui-lib-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  padding: var(--ui-space-s);
+  overflow: auto;
+  border-right: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-lib-nav-section {
+  padding: var(--ui-space-l) var(--ui-space-s) var(--ui-space-s);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+  font-weight: var(--ui-weight-strong);
+}
+
+/* ---- Table --------------------------------------------------------------------------------- */
+.ui-lib-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  border-right: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-lib-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  padding: var(--ui-space-s) var(--ui-space-s) var(--ui-space-xs);
+}
+.ui-lib-table {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+.ui-lib-tbody {
+  flex: 1;
+  min-height: 0;
+  padding: 0 var(--ui-space-s) var(--ui-space-s);
+  overflow: auto;
+  outline: none;
+  scrollbar-gutter: stable;
+}
+.ui-lib-thead,
+.ui-lib-row {
+  display: grid;
+  grid-template-columns: var(--ui-library-columns);
+  align-items: center;
+  column-gap: var(--ui-space-s);
+}
+.ui-lib-thead {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-xs);
+  border-bottom: var(--ui-stroke) solid var(--ui-line-separator);
+  margin-bottom: var(--ui-space-xs);
+  background: var(--ui-bg-chrome);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+  font-weight: var(--ui-weight-strong);
+}
+/* ▶ the drawing specification (the current layer's ▶): shown on hover, bright when current. */
+.ui-lib-row:hover .ui-list-play {
+  color: var(--ui-fg-tertiary);
+}
+.ui-lib-row:hover .ui-list-play.is-current {
+  color: var(--ui-fg-primary);
+}
+.ui-lib-row {
+  height: var(--ui-list-row-h);
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-xs);
+  border-radius: var(--ui-radius-field);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  cursor: default;
+  user-select: none;
+}
+.ui-lib-row:hover {
+  background: var(--ui-state-hover);
+}
+.ui-lib-row.is-selected,
+.ui-lib-row.is-selected:hover {
+  background: var(--ui-state-selected);
+}
+.ui-lib-tbody:focus-visible .ui-lib-row.is-selected,
+.ui-lib-row.is-menu {
+  box-shadow: inset 0 0 0 var(--ui-stroke) var(--ui-fg-secondary);
+}
+.ui-lib-cell-code,
+.ui-lib-cell-name {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.ui-lib-cell-name {
+  gap: var(--ui-space-s);
+}
+.ui-lib-code {
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+.ui-lib-name {
+  overflow: hidden;
+  color: var(--ui-fg-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-lib-row.is-context :is(.ui-lib-name, .ui-lib-code) {
+  color: var(--ui-fg-tertiary);
+}
+.ui-lib-row.is-context :is(.ui-lib-cell-look, .ui-lib-cell-text) {
+  visibility: hidden;
+}
+.ui-lib-row-note {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+.ui-lib-cell-look {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+}
+/* Inherited from the parent: pale — where a child differs is what stands out. */
+.ui-lib-cell-look.is-inherited {
+  opacity: var(--ui-dim-pale);
+}
+.ui-lib-cell-text {
+  overflow: hidden;
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-lib-cell-text.is-inherited {
+  color: var(--ui-fg-tertiary);
+}
+.ui-lib-cell-text.is-mono {
+  font-family: var(--ui-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.ui-lib-mark {
+  border-radius: var(--ui-radius-inner);
+  background: var(--ui-text-selection);
+  color: inherit;
+}
+.ui-lib-row .ui-list-rename {
+  flex: 1;
+}
+.ui-lib-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ui-space-m);
+  padding: var(--ui-space-l) var(--ui-space-s);
+  color: var(--ui-fg-secondary);
+}
+
+/* ---- Inspector: Properties for a specification --------------------------------------------- */
+.ui-lib-inspector {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-width: 0;
+}
+.ui-lib-inspector-scroll {
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+.ui-lib-inspector-foot {
+  display: flex;
+  padding: var(--ui-space-s) var(--ui-space-m) var(--ui-space-m);
+  border-top: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-lib-inspector-empty,
+.ui-lib-multi {
+  padding: var(--ui-space-l);
+  color: var(--ui-fg-secondary);
+}
+.ui-lib-preview {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  height: calc(4 * var(--ui-space-2xl));
+  margin: var(--ui-space-m) var(--ui-space-s) var(--ui-space-xs) var(--ui-space-m);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-bg-view);
+}
+.ui-lib-preview-art {
+  display: grid;
+  place-items: center;
+  height: calc(var(--ui-space-2xl) + var(--ui-space-xl));
+}
+.ui-lib-preview figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-space-s);
+  margin: 0;
+}
+.ui-lib-preview figcaption {
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+}
+
+/* A count that leads to its elements sits where the other values start. */
+.ui-lib-inspector .ui-read.is-link {
+  padding: var(--ui-space-xs) var(--ui-space-s);
+}
+
+/* ---- The library's other kinds (LibraryBrowser) -------------------------------------------- */
+.ui-lib-nav-title {
+  padding: var(--ui-space-s) var(--ui-space-s) var(--ui-space-s);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-lib-thead > span.is-center {
+  text-align: center;
+}
+.ui-lib-bound {
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+.ui-lib-bound {
+  color: var(--ui-fg-tertiary);
+}
+.ui-lib-preview.is-single {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-space-s);
+}
+.ui-lib-preview-note {
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-caption);
+}
+.ui-lib-preview-art {
+  color: var(--ui-fg-tertiary);
+}
+
+/* ---- The two dividers: drag to size the sidebar and the properties --------------------------- */
+.ui-lib-split {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  width: 0;
+}
+.ui-lib-split.is-nav {
+  left: calc(var(--ui-rail-w) + var(--ui-library-nav-w));
+}
+.ui-lib-split.is-inspector {
+  right: var(--ui-library-inspector-w);
+}
+.ui-lib-split .ui-panel-resize {
+  top: 0;
+  bottom: 0;
+}
+
+/* ---- Text and label samples in the table ------------------------------------------------------ */
+.ui-lib-text-sample {
+  font-size: var(--ui-text-body);
+  line-height: 1;
+}
+.ui-lib-label-sample {
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--ui-fg-secondary);
+  /* What a label shows is text in the UI font, like every name (only codes are mono). */
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-lib-none {
+  color: var(--ui-fg-tertiary);
+}
+
+/* ---- The search's other kinds: a chip each, a click goes there with the same words ----------- */
+.ui-lib-elsewhere {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  padding: 0 var(--ui-space-s) var(--ui-space-s) var(--ui-space-m);
+}
+.ui-lib-elsewhere-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  height: var(--ui-space-xl);
+  padding: 0 var(--ui-space-s);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  cursor: pointer;
+}
+.ui-lib-elsewhere-chip:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-lib-elsewhere-chip > span {
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+}
+
+.ui-lib-preview-text {
+  font-size: calc(var(--ui-text-title) * 2);
+  line-height: 1;
+}
+.ui-lib-preview-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-caption);
+}
+
+/* ---- TagField: tags in a field; their text where a field's text starts, on its centre line ---- */
+.ui-lib-tags {
+  height: auto;
+  min-height: var(--ui-prop-field-h);
+  /* With the tag's own padding, its text starts where a field's text starts. */
+  padding-left: calc(var(--ui-field-pad-x) - var(--ui-space-xs));
+  cursor: default;
+}
+.ui-lib-tag-list {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  min-width: 0;
+  /* One line of tags is a field's height. */
+  padding: calc((var(--ui-prop-field-h) - var(--ui-library-tag-h)) / 2 - var(--ui-stroke)) 0;
+}
+.ui-lib-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2xs);
+  height: var(--ui-library-tag-h);
+  padding: 0 var(--ui-space-2xs) 0 var(--ui-space-xs);
+  border-radius: var(--ui-radius-inner);
+  background: var(--ui-bg-on);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-dense);
+  white-space: nowrap;
+}
+.ui-lib-tag-name {
+  text-box: trim-both cap alphabetic;
+}
+.ui-lib-tag-remove {
+  display: grid;
+  place-items: center;
+  width: var(--ui-library-tag-x);
+  height: var(--ui-library-tag-x);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+  cursor: pointer;
+}
+.ui-lib-tag-remove:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-lib-tag-empty {
+  padding-left: var(--ui-space-xs);
+  color: var(--ui-fg-tertiary);
+}
+.ui-lib-tag-add {
+  border: 0;
+  border-left: var(--ui-stroke) solid var(--ui-line-control);
+  background: transparent;
+  cursor: pointer;
+}
+
+/* ---- Rows: + on hover for a child, the table's last row + New, a name's tree depth ------------ */
+.ui-lib-row-add {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-library-tag-h);
+  height: var(--ui-library-tag-h);
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+}
+.ui-lib-row:hover .ui-lib-row-add {
+  color: var(--ui-fg-tertiary);
+}
+.ui-lib-row .ui-lib-row-add:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-lib-new-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: var(--ui-list-row-h);
+  /* A row's padding, so its slots fall on the rows' ▶ and twisty. */
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-xs);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-lib-new-row.is-plain {
+  gap: var(--ui-space-s);
+}
+.ui-lib-new-row > .ui-list-play-slot {
+  display: grid;
+  place-items: center;
+}
+.ui-lib-new-row:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-lib-new-row > span {
+  text-box: trim-both cap alphabetic;
+}
+.ui-lib-cell-name {
+  padding-left: calc(var(--ui-library-depth) * var(--ui-space-l));
+}
+/* No sideways scrolling in a table: its name and text columns give way. */
+.ui-lib-tbody {
+  overflow-x: hidden;
+}
+
+/* ---- The window's body: rail · sidebar · table · inspector ------------------------------------ */
+.ui-lib-body {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--ui-rail-w) var(--ui-library-nav-w) minmax(0, 1fr) var(
+      --ui-library-inspector-w
+    );
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+}
+
+/* A sidebar entry's lead: a group's code (or the empty slot of one without) in the icon's column,
+   so every name starts on one x. */
+.ui-lib-nav-lead {
+  flex: none;
+  width: var(--ui-icon);
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* New … beside the search: a named button, + before its name. */
+.ui-lib-new {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  /* The search's height: one toolbar line. */
+  height: var(--ui-toolbar-button);
+}
+.ui-lib-new > span {
+  text-box: trim-both cap alphabetic;
+}
+
+/* A heading's right edge sizes its column (double-click: back to its width). */
+.ui-lib-thead > span {
+  position: relative;
+}
+.ui-lib-col-resize {
+  position: absolute;
+  top: var(--ui-space-xs);
+  right: calc(-1 * var(--ui-space-s) / 2 - var(--ui-space-2xs));
+  bottom: var(--ui-space-xs);
+  width: var(--ui-space-s);
+  cursor: col-resize;
+}
+.ui-lib-col-resize::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--ui-stroke);
+  background: transparent;
+}
+.ui-lib-thead:hover .ui-lib-col-resize::after {
+  background: var(--ui-line-control);
+}
+.ui-lib-col-resize:hover::after {
+  background: var(--ui-fg-secondary);
+}

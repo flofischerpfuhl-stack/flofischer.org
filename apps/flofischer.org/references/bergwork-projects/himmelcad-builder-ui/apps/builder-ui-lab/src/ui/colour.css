@@ -1,0 +1,193 @@
+/* Colours (proposal 2026-11-07): a swatch, the colour field, the picker with its wheel. Tokens
+ * only; the hues of the ring and the square are the content and come with the component. */
+.ui-colour-swatch {
+  flex: none;
+  width: var(--ui-colour-swatch);
+  height: var(--ui-colour-swatch);
+  border-radius: var(--ui-radius-inner);
+  box-shadow: inset 0 0 0 var(--ui-stroke) var(--ui-line-control);
+}
+.ui-colour-swatch.is-none {
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - var(--ui-stroke)),
+    var(--ui-fg-tertiary) 50%,
+    transparent calc(50% + var(--ui-stroke))
+  );
+}
+.ui-colour-field .ui-field-value {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: 0;
+}
+.ui-colour-text {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-colour-text.is-mono {
+  font-family: var(--ui-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.ui-colour-text.is-placeholder {
+  color: var(--ui-fg-tertiary);
+  font-style: italic;
+}
+.ui-colour-code {
+  margin-right: var(--ui-space-s);
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- The picker: the hue ring around the saturation/brightness square, hex and R G B below ---- */
+.ui-colour-scrim {
+  position: fixed;
+  z-index: calc(var(--ui-z-popover) + 2);
+  inset: 0;
+}
+.ui-colour-popover {
+  position: fixed;
+  z-index: calc(var(--ui-z-popover) + 2);
+  padding: var(--ui-space-m);
+}
+.ui-colour-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ui-space-m);
+  width: calc(var(--ui-colour-wheel) + 2 * var(--ui-space-l));
+}
+.ui-colour-wheel {
+  position: relative;
+  width: var(--ui-colour-wheel);
+  height: var(--ui-colour-wheel);
+  border-radius: 50%;
+  cursor: crosshair;
+  touch-action: none;
+}
+/* The ring's inside: the popover's own ground, the square on it. */
+.ui-colour-wheel::before {
+  content: '';
+  position: absolute;
+  inset: var(--ui-colour-ring);
+  border-radius: 50%;
+  background: var(--ui-bg-popover);
+}
+.ui-colour-ring-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ui-colour-ring-mark::after {
+  content: '';
+  position: absolute;
+  top: calc((var(--ui-colour-ring) - var(--ui-colour-mark)) / 2);
+  left: calc(50% - var(--ui-colour-mark) / 2);
+  width: var(--ui-colour-mark);
+  height: var(--ui-colour-mark);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 calc(2 * var(--ui-stroke)) var(--ui-fg-primary),
+    0 0 0 calc(3 * var(--ui-stroke)) var(--ui-bg-popover);
+}
+/* The square fits inside the ring: its diagonal is the inner diameter. */
+.ui-colour-square {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(
+    (var(--ui-colour-wheel) - 2 * var(--ui-colour-ring) - 2 * var(--ui-space-s)) * 0.7071
+  );
+  height: calc(
+    (var(--ui-colour-wheel) - 2 * var(--ui-colour-ring) - 2 * var(--ui-space-s)) * 0.7071
+  );
+  border-radius: var(--ui-radius-inner);
+  translate: -50% -50%;
+}
+.ui-colour-square-mark {
+  position: absolute;
+  width: var(--ui-colour-mark);
+  height: var(--ui-colour-mark);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 calc(2 * var(--ui-stroke)) var(--ui-fg-primary),
+    0 0 0 calc(3 * var(--ui-stroke)) var(--ui-bg-popover);
+  translate: -50% -50%;
+  pointer-events: none;
+}
+.ui-colour-values {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--ui-space-xs);
+  width: 100%;
+}
+.ui-colour-channel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  min-width: 0;
+}
+.ui-colour-channel > span {
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+}
+
+/* Values start on the left, numbers too (owner 2026-11-07, S11). */
+.ui-colour-channel > input {
+  width: 100%;
+  min-width: 0;
+}
+.ui-colour-actions {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+/* In a section the picker starts on the labels' x (S6: the wheel and Hex · RGB like General). */
+.ui-section-body > .ui-colour-picker {
+  align-items: flex-start;
+  width: auto;
+  padding: 0 var(--ui-space-xs) 0 var(--ui-prop-label-inset);
+}
+/* The dropdown's preview: the colour large, its code and name, hex and RGB. */
+.ui-colour-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  padding: var(--ui-space-xs) var(--ui-space-s) var(--ui-space-s);
+}
+.ui-colour-preview-swatch {
+  flex: none;
+  width: calc(var(--ui-control-h) * 1.5);
+  height: var(--ui-control-h);
+  border-radius: var(--ui-radius-field);
+  box-shadow: inset 0 0 0 var(--ui-stroke) var(--ui-line-control);
+}
+.ui-colour-preview-swatch.is-none {
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - var(--ui-stroke)),
+    var(--ui-fg-tertiary) 50%,
+    transparent calc(50% + var(--ui-stroke))
+  );
+}
+.ui-colour-preview-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  min-width: 0;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+}
+.ui-colour-preview-text > span {
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-caption);
+}
+.ui-colour-row {
+  display: contents;
+}

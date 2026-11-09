@@ -1,0 +1,404 @@
+/* Sections and property rows (lab properties.css: .lab-prop-groups, .lab-prop-group, .lab-prop-row).
+ * A section is a 32 px head and its rows 4 px apart, 12 px below; sections are divided by a line.
+ * Nested groups indent 18 px per level and their label column narrows by the same amount, so every
+ * value starts at one x. */
+.ui-sections {
+  /* One label column for the whole panel, as wide as its longest label (as the function panel's
+   * Fields): every value starts on one x and no label is cut, while the values keep their
+   * minimum (coordinator round 4: „Total length …", „Beschreibun…"). Sections, their bodies and
+   * rows pass the two columns on (subgrid); a nested row's indent counts into the column. */
+  display: grid;
+  grid-template-columns: fit-content(calc(100% - var(--ui-prop-value-min))) minmax(0, 1fr);
+  align-content: start;
+  column-gap: var(--ui-prop-gap);
+  padding: var(--ui-space-xs) var(--ui-space-xs) var(--ui-space-m);
+}
+.ui-sections > *,
+.ui-sections > .ui-section:not(.ui-fields) > *,
+.ui-sections > .ui-section:not(.ui-fields) > .ui-section-body > *,
+.ui-sections > .ui-section:not(.ui-fields) > .ui-section-body > .ui-section > *,
+.ui-sections > .ui-section:not(.ui-fields) > .ui-section-body > .ui-section > .ui-section-body > *,
+.ui-sections
+  > .ui-section:not(.ui-fields)
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > *,
+.ui-sections
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > * {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+/* The chain that passes the columns on: a section in Sections, its body, a nested section in it
+ * (two levels deep). Only direct children take part, so a row or section wrapped in anything else
+ * (Fields, a wrapper) keeps Properties' own columns instead of breaking. */
+.ui-sections > .ui-section:not(.ui-fields),
+.ui-sections > .ui-section:not(.ui-fields) > .ui-section-body,
+.ui-sections > .ui-section:not(.ui-fields) > .ui-section-body > .ui-section,
+.ui-sections > .ui-section:not(.ui-fields) > .ui-section-body > .ui-section > .ui-section-body,
+.ui-sections
+  > .ui-section:not(.ui-fields)
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-section,
+.ui-sections
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body {
+  display: grid;
+  grid-template-columns: subgrid;
+  align-content: start;
+}
+.ui-section.is-top + .ui-section.is-top {
+  border-top: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-section-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  width: 100%;
+  height: var(--ui-section-head-h);
+  padding: 0 var(--ui-space-xs);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  font-weight: var(--ui-weight-strong);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-section-head:hover,
+.ui-section-sub:hover {
+  color: var(--ui-fg-primary);
+}
+.ui-section-head > span {
+  text-box: trim-both cap alphabetic;
+}
+.ui-section-head:focus-visible,
+.ui-section-sub:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-twisty {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+  transition: rotate var(--ui-motion-twisty);
+}
+.ui-twisty.is-open {
+  rotate: 90deg;
+}
+.ui-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-row-gap);
+  row-gap: var(--ui-row-gap);
+  padding: 0 0 var(--ui-space-m);
+}
+/* A nested group's rows keep the row gap to its head too (owner 2026-11-06: „da passt doch der
+ * Abstand noch nicht" — the first row touched the head). */
+.ui-section.is-nested > .ui-section-body {
+  padding: var(--ui-row-gap) 0 0;
+}
+/* A nested group's head: a row with a twisty where its parent's label starts. */
+.ui-section-sub {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  min-width: 0;
+  height: var(--ui-control-h);
+  margin-left: calc(-1 * var(--ui-prop-indent));
+  padding: 0 var(--ui-space-xs) 0 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-section-sub > span {
+  overflow: hidden;
+  padding-block: var(--ui-space-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+
+/* PropertyRow: label column · control (Properties). */
+.ui-prop-row {
+  --ui-prop-shift: calc(var(--ui-prop-depth, 0) * var(--ui-prop-indent));
+  display: grid;
+  grid-template-columns: calc(var(--ui-prop-label-w) - var(--ui-prop-shift)) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--ui-prop-gap);
+  min-height: var(--ui-prop-row-min-h);
+  padding-left: calc(var(--ui-prop-label-inset) + var(--ui-prop-shift));
+}
+.ui-sections > .ui-section:not(.ui-fields) > .ui-prop-row:not(.has-head),
+.ui-sections > .ui-section:not(.ui-fields) > .ui-section-body > .ui-prop-row:not(.has-head),
+.ui-sections
+  > .ui-section:not(.ui-fields)
+  > .ui-section-body
+  > .ui-section
+  > .ui-prop-row:not(.has-head),
+.ui-sections
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-prop-row:not(.has-head),
+.ui-sections
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-prop-row:not(.has-head),
+.ui-sections
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-prop-row:not(.has-head) {
+  grid-template-columns: subgrid;
+}
+/* The label column never narrower than Properties' own, so short labels keep the usual x. */
+.ui-sections > .ui-section:not(.ui-fields) > .ui-prop-row:not(.has-head) > span.ui-prop-label,
+.ui-sections
+  > .ui-section:not(.ui-fields)
+  > .ui-section-body
+  > .ui-prop-row:not(.has-head)
+  > span.ui-prop-label,
+.ui-sections
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-prop-row:not(.has-head)
+  > span.ui-prop-label,
+.ui-sections
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-prop-row:not(.has-head)
+  > span.ui-prop-label,
+.ui-sections
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-prop-row:not(.has-head)
+  > span.ui-prop-label,
+.ui-sections
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-prop-row:not(.has-head)
+  > span.ui-prop-label {
+  min-width: calc(var(--ui-prop-label-w) - var(--ui-prop-shift));
+}
+.ui-prop-label {
+  overflow: hidden;
+  padding-block: var(--ui-space-xs);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+.ui-prop-control {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  padding-right: var(--ui-space-xs);
+}
+.ui-prop-row:hover .ui-copy,
+.ui-inline-read:hover .ui-copy {
+  opacity: 1;
+}
+/* Copy sits before the `>` segment of a field with choices, not over it. */
+.ui-prop-control:has(.ui-field-more) .ui-copy {
+  right: calc(var(--ui-field-more-w) + var(--ui-copy-inset));
+}
+
+/* ReadValue: a computed value is plain text, never a field. Text wraps; numbers stay on one line. */
+.ui-read {
+  min-width: 0;
+  padding: var(--ui-space-xs) var(--ui-space-s);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  line-height: var(--ui-leading-value);
+  overflow-wrap: anywhere;
+}
+/* A list wraps between its items only. */
+.ui-read.is-list > span {
+  white-space: nowrap;
+}
+.ui-read.is-nowrap,
+.ui-read.is-path {
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* A path is cut at its start, so its end (the folder or file name) stays. */
+.ui-read.is-path {
+  direction: rtl;
+  text-align: left;
+}
+.ui-read.is-mono {
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+.ui-read.is-muted {
+  color: var(--ui-fg-tertiary);
+}
+/* A closed nested group's summary (a count) is a caption. */
+.ui-section-sub + .ui-prop-control .ui-read.is-mono {
+  font-size: var(--ui-text-caption);
+}
+/* A nested group whose head is a field (a vertex's point name): the twisty, then the field. */
+.ui-prop-row.has-head {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--ui-space-2xs);
+}
+.ui-prop-row.has-head .ui-section-sub {
+  justify-content: center;
+  width: var(--ui-prop-indent);
+  padding: 0;
+}
+.ui-read.is-italic,
+.ui-read .is-italic {
+  font-style: italic;
+}
+/* A value that leads to its element („Part of": the line's name; a click selects it). */
+/* A link keeps the value's padding: its text starts on the x of every other value. */
+.ui-read.is-link {
+  border: 0;
+  background: none;
+  color: var(--ui-fg-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ui-read.is-link:hover {
+  text-decoration: underline;
+}
+/* A section's actions under its rows. */
+.ui-prop-actions {
+  display: flex;
+  /* Buttons that do not fit the values' column go to the next line, never past the panel. */
+  flex-wrap: wrap;
+  gap: var(--ui-space-s);
+  padding: var(--ui-space-xs) 0 0
+    calc(var(--ui-prop-label-inset) + var(--ui-prop-label-w) + var(--ui-prop-gap));
+}
+/* In a panel's Sections: in the values' column. */
+.ui-sections > .ui-section:not(.ui-fields) > .ui-section-body > .ui-prop-actions,
+.ui-sections
+  > .ui-section:not(.ui-fields)
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-prop-actions,
+.ui-sections
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-section
+  > .ui-section-body
+  > .ui-prop-actions {
+  grid-column: 2;
+  padding-left: 0;
+}
+
+/* A top-level head with its check at the end (proposal 2026-11-06, library window): the check
+ * column where menus and lists have theirs; off, the section is closed and its title quiet. */
+.ui-section-head-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  /* The control's end and the field's frame: the check's centre is the chevrons' centre. */
+  padding-right: calc(var(--ui-space-xs) + var(--ui-stroke));
+}
+.ui-section-head-row > .ui-section-head {
+  flex: 1;
+  min-width: 0;
+}
+.ui-section-head:disabled {
+  cursor: default;
+}
+.ui-section.is-off .ui-section-head {
+  color: var(--ui-fg-tertiary);
+}
+.ui-section.is-off .ui-twisty {
+  opacity: 0;
+}
+.ui-section-check {
+  display: grid;
+  flex: none;
+  place-items: center;
+  /* The width of a field's > segment: the check stands in the column of the rows' chevrons. */
+  width: var(--ui-field-more-w);
+  height: var(--ui-control-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  cursor: pointer;
+}
+.ui-section-check:hover {
+  background: var(--ui-state-hover);
+}
+.ui-section-check:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+
+/* A check right behind a row's label (PropertyRow `check`). */
+.ui-prop-label-check {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: 0;
+}
+.ui-prop-check {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-field-more-w);
+  height: var(--ui-control-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  cursor: pointer;
+}
+.ui-prop-check:hover:not(:disabled) {
+  background: var(--ui-state-hover);
+}
+.ui-prop-check:disabled {
+  cursor: default;
+}

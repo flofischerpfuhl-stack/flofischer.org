@@ -1,0 +1,537 @@
+/* Menu: one menu row for every menu in the app — status bar, context menus, list filters, field
+ * menus, dropdowns (owner 2026-10-20/22; lab .lab-menu, .lab-menu-item). Rows 28 (44 on touch),
+ * 13 px, a reserved 16 px check column at the row's end, hover inset inside 4 px menu padding.
+ * Width from the content, at most 280 px. No title row, no vertical lines. */
+.ui-menu {
+  position: fixed;
+  z-index: calc(var(--ui-z-popover) + 1);
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: var(--ui-menu-max-w);
+  padding: var(--ui-menu-pad);
+  animation: ui-rise var(--ui-motion-menu) var(--ui-ease);
+}
+.ui-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  width: 100%;
+  height: var(--ui-menu-row-h);
+  padding: 0 var(--ui-menu-item-pad-end) 0 var(--ui-menu-item-pad-start);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-regular);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ui-menu-item:hover:not(:disabled),
+.ui-menu-item.is-highlighted {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-menu-item:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-menu-item:disabled {
+  cursor: default;
+}
+.ui-menu-item:disabled > * {
+  opacity: var(--ui-dim);
+}
+.ui-menu-label {
+  flex: 1;
+  min-width: 0;
+  /* A name too long for the menu's width is cut with „…" (its full text as tooltip), never drawn
+   * over the hint behind it; descenders stay (clip only sideways). */
+  overflow-x: clip;
+  overflow-y: visible;
+  text-overflow: ellipsis;
+  text-box: trim-both cap alphabetic;
+}
+/* Icons only when they carry meaning, in their own aligned column. */
+.ui-menu-item > svg {
+  flex: none;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+/* One text column per menu, whether a row has an icon or not (rules by construction): when any of
+ * a menu's own rows has one, the others leave its column empty. A submenu decides for itself. */
+.ui-menu:has(
+  > .ui-menu-item > svg:first-child,
+  > [role='group'] > .ui-menu-item > svg:first-child,
+  > .ui-menu-scroll > .ui-menu-item > svg:first-child,
+  > .ui-menu-sub-anchor > .ui-menu-item > svg:first-child
+) {
+  --ui-menu-icon-col: calc(var(--ui-icon) + var(--ui-space-s));
+}
+.ui-menu {
+  --ui-menu-icon-col: 0px;
+}
+:is(.ui-menu, .ui-menu > [role='group'], .ui-menu > .ui-menu-scroll, .ui-menu > .ui-menu-sub-anchor)
+  > .ui-menu-item:not(:has(> svg:first-child)) {
+  padding-left: calc(var(--ui-menu-item-pad-start) + var(--ui-menu-icon-col));
+}
+/* At least 16 px between the label and the trailing column (check, key). */
+.ui-menu-item > :is(.ui-check, kbd, .ui-state-glyph) {
+  margin-left: var(--ui-space-s);
+}
+/* The four-level glyph in a menu row: 18 px on the check column's centre (it overhangs the 16 px
+ * column by 1 px each side, as in the lab). */
+.ui-menu-item > .ui-state-glyph {
+  width: var(--ui-menu-glyph);
+  height: var(--ui-menu-glyph);
+  margin: 0 calc(-1 * (var(--ui-menu-glyph) - var(--ui-menu-check)) / 2);
+}
+/* A state that lies ahead (a redo step). */
+.ui-menu-item.is-muted {
+  color: var(--ui-fg-secondary);
+}
+.ui-menu-item > kbd {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+}
+/* Quiet text at the row's end (a recent value's unit). */
+.ui-menu-hint {
+  flex: none;
+  margin-left: auto;
+  padding-left: var(--ui-space-l);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+/* The trailing check column: the one check glyph's first two levels — a pale frame, with a check
+ * when chosen — for every choice, on/off and one of several (owner 2026-11-06). */
+.ui-check {
+  display: grid;
+  flex: none;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--ui-menu-check);
+  height: var(--ui-menu-check);
+  border: var(--ui-list-glyph-stroke) solid var(--ui-line-strong);
+  border-radius: var(--ui-radius-inner);
+  color: var(--ui-fg-primary);
+}
+.ui-check.is-pale {
+  opacity: var(--ui-dim-pale);
+}
+/* A group heading: what the checks below mean. */
+.ui-menu-section {
+  padding: var(--ui-space-s) var(--ui-space-s) var(--ui-space-2xs);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-caption);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-menu-divider {
+  flex: none;
+  height: var(--ui-stroke);
+  margin: var(--ui-space-xs) var(--ui-menu-divider-inset);
+  background: var(--ui-line-separator);
+}
+/* Long dropdowns (more than ten entries): a search field on top, about eight rows, scrolling. */
+.ui-menu-search {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-prop-gap);
+  height: var(--ui-control-h);
+  margin-bottom: var(--ui-space-xs);
+  padding: 0 var(--ui-space-s);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-tertiary);
+}
+.ui-menu-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+}
+.ui-menu-scroll {
+  /* Rows end in an ellipsis; a long list never scrolls sideways (owner 2026-11-06: „unnötig
+     horizontal Scrollbar"). */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.ui-menu-scroll.is-compact {
+  max-height: calc(var(--ui-menu-compact-rows) * var(--ui-menu-row-h));
+}
+.ui-menu-empty {
+  padding: var(--ui-prop-gap) var(--ui-space-s);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+/* Specification codes: their own quiet column before the name. */
+.ui-menu-code {
+  flex: none;
+  min-width: var(--ui-menu-code-w);
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-caption);
+  font-variant-numeric: tabular-nums;
+  /* Centred on its cap height like the label, so the code stands on the name's line. */
+  text-box: trim-both cap alphabetic;
+}
+/* Attached to its status item (not portalled): 8 px above it — a menu belongs to its item, half
+ * the gap between independent surfaces. */
+.ui-menu.is-attached {
+  position: absolute;
+  left: 0;
+  max-height: var(--ui-menu-attached-max-h);
+  overflow: visible;
+}
+.ui-menu.is-attached.is-above {
+  bottom: calc(100% + var(--ui-menu-attach-gap));
+}
+.ui-menu.is-attached.is-below {
+  top: calc(100% + var(--ui-menu-attach-gap));
+}
+/* Submenus: beside their row, the last row level with it, flipped left at the window edge; the gap
+ * to the row belongs to the submenu for the pointer (no hover gap, owner 2026-11-06). */
+.ui-menu-more {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+}
+/* The chevron's size. */
+.ui-menu-item > svg.ui-menu-more {
+  width: var(--ui-menu-more);
+  height: var(--ui-menu-more);
+}
+/* A submenu row with a check: its › stands just before the check, in that row only. */
+.ui-menu-item > .ui-menu-more.is-before-check {
+  margin-left: var(--ui-space-s);
+}
+.ui-menu-item > .ui-menu-more.is-before-check + .ui-check {
+  margin-left: var(--ui-space-xs);
+}
+.ui-menu-sub-anchor {
+  position: relative;
+}
+.ui-menu.ui-menu-sub {
+  position: absolute;
+  /* Its first item on its row's line; useSubmenu slides it up when the window's bottom needs. */
+  top: var(--ui-sub-align);
+  z-index: 1;
+}
+.ui-menu-sub.is-right {
+  left: calc(100% + var(--ui-sub-gap));
+}
+.ui-menu-sub.is-left {
+  right: calc(100% + var(--ui-sub-gap));
+}
+.ui-menu-sub::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--ui-sub-bridge);
+}
+.ui-menu-sub.is-right::after {
+  right: 100%;
+}
+.ui-menu-sub.is-left::after {
+  left: 100%;
+}
+/* Attached menus line up with their trigger at its start, centre or end. */
+.ui-menu.is-attached.is-align-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+.ui-menu.is-attached.is-align-end {
+  left: auto;
+  right: 0;
+}
+/* A grid of tiles (the specification slots). */
+.ui-menu.is-wide {
+  width: var(--ui-menu-wide);
+  max-width: none;
+}
+/* A long list: about twelve rows, then it scrolls. */
+.ui-menu-scroll.is-long {
+  max-height: var(--ui-menu-long-max-h);
+}
+/* Vertical tabs beside the list (History), like the side panels' rail. */
+.ui-menu-tabbed {
+  display: flex;
+  gap: var(--ui-space-xs);
+}
+.ui-menu-tabbed > .ui-menu-scroll {
+  flex: 1;
+  min-width: 0;
+}
+.ui-menu-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  padding-right: var(--ui-space-xs);
+  border-right: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-menu-tab {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--ui-menu-row-h);
+  height: var(--ui-menu-row-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+}
+.ui-menu-tab:hover:where(:not(:disabled)) {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-menu-tab.is-on {
+  background: var(--ui-bg-on);
+  color: var(--ui-fg-primary);
+}
+.ui-menu-tab:disabled {
+  cursor: default;
+}
+.ui-menu-tab:disabled > * {
+  opacity: var(--ui-dim);
+}
+/* Rename a row in place: the same text position, a thin neutral frame. */
+.ui-menu-item.is-renaming {
+  cursor: default;
+}
+.ui-menu-rename {
+  flex: 1;
+  min-width: 0;
+  height: var(--ui-list-rename-h);
+  margin: 0 calc(-1 * (var(--ui-space-xs) + var(--ui-stroke)));
+  padding: 0 var(--ui-space-xs);
+  border: var(--ui-stroke) solid var(--ui-line-active);
+  border-radius: var(--ui-radius-inner);
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-primary);
+  font: inherit;
+  font-size: var(--ui-text-body);
+  outline: none;
+}
+/* Specification slots: numbered tiles, four per row; the pencil assigns one. */
+.ui-slots {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--ui-slot-gap);
+}
+.ui-slot {
+  position: relative;
+  border: var(--ui-stroke) solid var(--ui-line-separator);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-bg-control);
+}
+.ui-slot.is-on {
+  border-color: var(--ui-fg-secondary);
+  background: var(--ui-bg-on);
+}
+.ui-slot > button:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ui-slot-pad);
+  width: 100%;
+  height: var(--ui-slot-h);
+  padding: var(--ui-slot-pad);
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-caption);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-slot > button:hover {
+  background: var(--ui-state-hover);
+}
+.ui-slot-number {
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-caption);
+}
+.ui-slot.is-on .ui-slot-number {
+  color: var(--ui-fg-primary);
+}
+.ui-slot-edit {
+  position: absolute;
+  top: var(--ui-slot-edit-inset);
+  right: var(--ui-slot-edit-inset);
+  display: grid;
+  place-items: center;
+  width: var(--ui-slot-edit);
+  height: var(--ui-slot-edit);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+}
+.ui-slot-assignment {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: var(--ui-space-s);
+  padding-top: var(--ui-slot-assign-pad);
+  border-top: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-slot-assignment > .ui-menu-section {
+  grid-column: 1 / -1;
+}
+
+/* MenuOption (proposal 2026-11-06): a picker row with a second line — name and code, what it
+ * covers underneath (Fernwork's CRS picker in the menu row's grammar). */
+.ui-menu-item.is-option {
+  height: auto;
+  min-height: var(--ui-menu-row-h);
+  padding-block: var(--ui-space-xs);
+}
+.ui-menu-option {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  min-width: 0;
+}
+.ui-menu-option-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ui-space-s);
+}
+/* Cut with an ellipsis, so the line box keeps its descenders (trimmed to the cap height, „only"
+ * and „project" lost their y and j under the clip; found 2026-11-07). */
+.ui-menu-option-line > .ui-menu-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-box: normal;
+}
+.ui-menu-option-code {
+  flex: none;
+  margin-left: auto;
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-caption);
+  font-variant-numeric: tabular-nums;
+}
+.ui-menu-option-hint {
+  overflow: hidden;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+  text-overflow: ellipsis;
+}
+
+/* Tiles with a search above them (proposal 2026-11-06): one spacing between search, its results
+ * and the tiles — the tiles' own. */
+.ui-slots-searched {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-slot-gap);
+}
+.ui-slots-searched > .ui-menu-search {
+  margin-bottom: 0;
+}
+
+/* The slot grid's foot: its pages at the start, the split button (Take over · Set) at the end. */
+.ui-slots-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-s);
+}
+.ui-slots-pages {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-caption);
+}
+.ui-slots-page {
+  display: grid;
+  place-items: center;
+  width: var(--ui-control-h);
+  height: var(--ui-control-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+}
+.ui-slots-page:hover:not(:disabled) {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-slots-page:disabled {
+  opacity: var(--ui-dim);
+  cursor: default;
+}
+/* Two buttons as one: the inner corners square, one line between them. */
+.ui-slots-split {
+  display: inline-flex;
+}
+.ui-slots-split > .ui-button:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.ui-slots-split > .ui-button + .ui-button {
+  margin-left: calc(-1 * var(--ui-stroke));
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* A slot standing for a type names it in the UI font; a slot's label keeps to two lines. */
+.ui-slot-number.is-name {
+  font-family: var(--ui-font);
+}
+.ui-slot-label {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.ui-slots-start {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+}
+
+/* A foot button's options (right-click on Take over · Set, the grid's size): above it. */
+.ui-slots-foot {
+  position: relative;
+}
+.ui-slots-options {
+  position: absolute;
+  z-index: 2;
+  bottom: calc(100% + var(--ui-space-xs));
+  left: 0;
+  min-width: calc(var(--ui-space-2xl) * 6);
+  padding: var(--ui-menu-pad);
+}
+.ui-slots-options.is-end {
+  right: 0;
+  left: auto;
+}
+.ui-slots-page.is-open {
+  background: var(--ui-bg-on);
+  color: var(--ui-fg-primary);
+}
+.ui-slots-results > .ui-menu-item {
+  padding-left: calc(var(--ui-menu-item-pad-start) + var(--ui-menu-icon-col));
+}

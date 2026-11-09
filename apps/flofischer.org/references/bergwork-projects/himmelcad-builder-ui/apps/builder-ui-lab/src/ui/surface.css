@@ -1,0 +1,42 @@
+/* Surface: every floating surface over the view (lab .lab-island). */
+.ui-surface {
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-bg-chrome);
+  box-shadow: var(--ui-shadow);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+}
+/* Function bar and side panels (owner 2026-11-06: 24 and 20 were too much). */
+.ui-surface.is-large {
+  border-radius: var(--ui-radius-large);
+}
+/* Title pills: 12 px, no shadow (owner 2026-11-06: „wenn ja weg damit"). */
+.ui-surface.is-title {
+  border-radius: var(--ui-radius-title);
+  box-shadow: none;
+}
+/* Status group pills: as tall as the title pills and with their radius (test 2026-11-06). */
+.ui-surface.is-status {
+  border-radius: var(--ui-radius-title);
+  background: var(--ui-bg-pill);
+  box-shadow: none;
+}
+/* Menus, dropdowns and popovers float over panels and the view. */
+.ui-surface.is-popover {
+  background: var(--ui-bg-popover);
+}
+
+@keyframes ui-rise {
+  from {
+    opacity: 0;
+    translate: 0 var(--ui-rise);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-surface {
+    animation: none;
+  }
+}

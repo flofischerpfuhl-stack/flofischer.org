@@ -1,0 +1,49 @@
+.root {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--hc-size-statusbar);
+  padding: 0 12px;
+  background: var(--hc-bg-void);
+  color: var(--hc-fg-muted);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.side {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+/* When the window is narrow the left side shrinks (low-priority items first, then the end is
+   clipped) instead of running into the right side. */
+.side:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.side:last-child {
+  flex: none;
+  margin-left: 14px;
+}
+
+.item {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* Low-priority items give up their width first. */
+.itemLow {
+  flex: 0 1 auto;
+  min-width: 24px;
+  overflow: hidden;
+}
+
+.item:hover {
+  color: var(--hc-fg-default);
+}

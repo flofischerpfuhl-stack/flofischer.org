@@ -1,0 +1,498 @@
+/* Start screen (proposal 2026-11-06, round 2 on 2026-11-07 — UI-LIBRARY.md › Proposed: start
+ * screen; not decided by the owner). „Minecraft Splash Screen meets himmelcad.com Website Design":
+ * Minecraft's drifting picture, wordmark, beating splash, world list and button row, drawn in the
+ * website's language — cream, paper, ink and the website blue, 2 px ink borders, hard offset
+ * shadows, heavy uppercase mono labels, the display face. Everything opaque, everything square
+ * (`:root[data-screen='start']` in tokens.css). */
+.ui-start {
+  /* Sizes follow the screen, not the browser viewport (the lab's window may sit inset in it). */
+  container: ui-start / inline-size;
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  justify-items: center;
+  overflow: hidden;
+  background: var(--ui-start-ink);
+  color: var(--ui-start-cream);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-start-text);
+  outline: none;
+  user-select: none;
+}
+
+/* The picture: cover, drifting slowly to one side and back (Minecraft turns its panorama). */
+.ui-start-image {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-position: center 40%;
+  background-size: cover;
+  animation: ui-start-drift var(--ui-motion-drift) ease-in-out infinite alternate;
+  scale: var(--ui-start-drift-scale);
+}
+@keyframes ui-start-drift {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: var(--ui-start-drift-x) 0;
+  }
+}
+
+.ui-start-controls {
+  position: absolute;
+  z-index: 1;
+  top: var(--ui-gap);
+  right: var(--ui-gap);
+}
+
+/* ---- Title: the wordmark, the band under it with the product tag and the splash ------------- */
+.ui-start-head {
+  padding: var(--ui-start-head-pad-top) var(--ui-space-xl) var(--ui-space-l);
+}
+@container ui-start (max-width: 760px) {
+  .ui-start-head {
+    padding-top: var(--ui-start-head-pad-top-narrow);
+  }
+}
+.ui-start-title {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: var(--ui-start-wordmark);
+  font-weight: var(--ui-weight-regular);
+}
+/* The website's wordmark: cream, an ink outline under the fill, a hard ink shadow. */
+.ui-start-wordmark {
+  color: var(--ui-start-cream);
+  font-family: var(--ui-font-display);
+  line-height: var(--ui-start-wordmark-leading);
+  text-shadow: var(--ui-start-wordmark-shadow);
+  white-space: nowrap;
+  -webkit-text-stroke: var(--ui-start-wordmark-stroke) var(--ui-start-ink);
+  paint-order: stroke fill;
+}
+.ui-start-band {
+  position: relative;
+  height: var(--ui-start-band);
+}
+/* The product as the website's preview note: ink, a cream border, a hard blue shadow, a little
+ * tilted. */
+.ui-start-product {
+  position: absolute;
+  top: var(--ui-space-m);
+  left: 0;
+  padding: var(--ui-space-xs) var(--ui-space-s);
+  border: var(--ui-start-border) solid var(--ui-start-cream);
+  background: var(--ui-start-ink);
+  box-shadow: var(--ui-start-shadow-blue);
+  color: var(--ui-start-cream);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-start-product);
+  font-weight: var(--ui-start-weight-heavy);
+  letter-spacing: var(--ui-tracking-product);
+  line-height: 1;
+  text-transform: uppercase;
+  rotate: var(--ui-start-product-turn);
+}
+/* The splash: from the band's middle it rises right towards the wordmark's end; its foot stays in
+ * the band, its top under the wordmark (ui-check `start` measures every line). It beats like
+ * Minecraft's, about its centre, only ever smaller than its resting size. */
+.ui-start-splash {
+  position: absolute;
+  bottom: var(--ui-start-splash-lift);
+  left: var(--ui-start-splash-x);
+  font-size: var(--ui-start-splash);
+  line-height: 1;
+  rotate: var(--ui-start-splash-turn);
+  transform-origin: left bottom;
+  pointer-events: none;
+}
+.ui-start-splash > span {
+  display: block;
+  color: var(--ui-start-cream);
+  font-family: var(--ui-font-display);
+  letter-spacing: var(--ui-tracking-wordmark);
+  text-shadow: var(--ui-start-splash-shadow);
+  white-space: nowrap;
+  -webkit-text-stroke: var(--ui-start-splash-stroke) var(--ui-start-ink);
+  paint-order: stroke fill;
+  animation: ui-start-beat var(--ui-motion-splash) infinite;
+}
+@keyframes ui-start-beat {
+  0% {
+    scale: 1;
+    animation-timing-function: ease-out;
+  }
+  50% {
+    scale: var(--ui-start-splash-beat);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* ---- The centre column: the list (or a page), the buttons below ----------------------------- */
+.ui-start-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-l);
+  width: min(var(--ui-start-column), calc(100% - 2 * var(--ui-space-xl)));
+  min-height: 0;
+  padding-bottom: var(--ui-space-l);
+}
+/* A card: paper, a 2 px ink border, the hard ink shadow (the website's product cards). */
+.ui-start-list,
+.ui-start-page {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  border: var(--ui-start-border) solid var(--ui-start-ink);
+  background: var(--ui-start-paper);
+  box-shadow: var(--ui-start-shadow);
+  color: var(--ui-start-ink);
+}
+.ui-start-list-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-start-head-h);
+  padding: 0 var(--ui-space-l);
+  border-bottom: var(--ui-start-border) solid var(--ui-start-ink);
+}
+/* The website's kicker: small, heavy, uppercase. */
+.ui-start-list-title {
+  font-size: var(--ui-start-label);
+  font-weight: var(--ui-start-weight-heavy);
+  letter-spacing: var(--ui-start-tracking);
+  text-transform: uppercase;
+}
+/* The count as the website's status tag. */
+.ui-start-list-meta {
+  margin-left: auto;
+  padding: var(--ui-space-2xs) var(--ui-space-s);
+  background: var(--ui-start-ink);
+  color: var(--ui-start-cream);
+  font-size: var(--ui-start-label);
+  font-weight: var(--ui-start-weight-heavy);
+}
+.ui-start-list-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-row-gap);
+  min-height: 0;
+  padding: var(--ui-space-s);
+  overflow-y: auto;
+  outline: none;
+}
+.ui-start-list-empty {
+  padding: var(--ui-space-xl);
+  color: var(--ui-start-ink-soft);
+  text-align: center;
+}
+
+/* One project: thumbnail, three lines, actions. Hover cream; selected the website blue, framed in
+ * ink (Minecraft frames the selected world) — the frame is where the keys are. */
+.ui-start-project {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-m);
+  height: var(--ui-start-row-h);
+  padding: 0 var(--ui-start-row-pad);
+  border: var(--ui-start-border) solid transparent;
+  cursor: default;
+}
+.ui-start-project:hover {
+  background: var(--ui-start-paper-hover);
+}
+.ui-start-project.is-selected {
+  border-color: var(--ui-start-ink);
+  background: var(--ui-start-blue);
+}
+.ui-start-thumb {
+  position: relative;
+  display: block;
+  flex: none;
+  box-sizing: border-box;
+  width: var(--ui-start-thumb-w);
+  height: var(--ui-start-thumb-h);
+  overflow: hidden;
+  border: var(--ui-stroke) solid var(--ui-start-ink);
+  background: var(--ui-start-cream);
+  cursor: pointer;
+}
+.ui-start-thumb > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui-start-thumb-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--ui-start-ink-soft);
+  color: var(--ui-start-cream);
+  opacity: 0;
+  transition: opacity var(--ui-motion-hover);
+}
+.ui-start-thumb-play > svg {
+  width: var(--ui-start-play);
+  height: var(--ui-start-play);
+}
+.ui-start-project:hover .ui-start-thumb-play {
+  opacity: 1;
+}
+/* Not found: the empty thumbnail keeps its search glyph. */
+.ui-start-project.is-missing .ui-start-thumb-play {
+  background: transparent;
+  color: var(--ui-start-ink-soft);
+  opacity: 1;
+}
+.ui-start-project.is-missing:hover .ui-start-thumb-play {
+  color: var(--ui-start-ink);
+}
+.ui-start-project-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  min-width: 0;
+}
+.ui-start-project-text > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-start-project-name {
+  font-weight: var(--ui-start-weight-bold);
+}
+.ui-start-project-folder,
+.ui-start-project-opened {
+  color: var(--ui-start-ink-soft);
+  font-size: var(--ui-start-label);
+}
+.ui-start-project.is-missing :is(.ui-start-project-name, .ui-start-project-folder) {
+  opacity: var(--ui-dim);
+}
+.ui-start-project-missing {
+  color: var(--ui-color-red);
+  font-weight: var(--ui-start-weight-bold);
+}
+.ui-start-project.is-selected .ui-start-project-missing {
+  color: var(--ui-start-ink);
+}
+.ui-start-project-actions {
+  display: flex;
+  flex: none;
+  gap: var(--ui-space-2xs);
+  opacity: 0;
+}
+.ui-start-project:hover .ui-start-project-actions,
+.ui-start-project.is-selected .ui-start-project-actions,
+.ui-start-project-actions:focus-within {
+  opacity: 1;
+}
+.ui-start-project.is-selected .ui-start-project-actions {
+  color: var(--ui-start-ink);
+}
+
+/* ---- Buttons: the website's — opaque, 2 px border, hard shadow; hover lifts, press sinks ----- */
+.ui-start-buttons {
+  display: flex;
+  flex: none;
+  gap: var(--ui-space-l);
+}
+.ui-start-page .ui-start-buttons {
+  padding: 0 var(--ui-space-l) var(--ui-space-l);
+}
+.ui-start-button {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-start-button-h);
+  padding: 0 var(--ui-space-l);
+  border: var(--ui-start-border) solid var(--ui-start-ink);
+  box-shadow: var(--ui-start-shadow);
+  color: var(--ui-start-ink);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-start-text);
+  font-weight: var(--ui-start-weight-heavy);
+  letter-spacing: var(--ui-start-tracking);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    box-shadow var(--ui-motion-start),
+    translate var(--ui-motion-start);
+}
+.ui-start-button.is-blue {
+  background: var(--ui-start-blue);
+}
+.ui-start-button.is-cream {
+  background: var(--ui-start-cream);
+}
+.ui-start-button.is-dark {
+  border-color: var(--ui-start-cream);
+  background: var(--ui-start-ink);
+  box-shadow: var(--ui-start-shadow-dark);
+  color: var(--ui-start-cream);
+}
+.ui-start-button.is-square {
+  flex: none;
+  width: var(--ui-start-button-h);
+  padding: 0;
+}
+.ui-start-button > svg {
+  flex: none;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+.ui-start-button:hover:not(:disabled),
+.ui-start-button[aria-expanded='true'] {
+  box-shadow: var(--ui-start-shadow-hover);
+  translate: var(--ui-start-lift) var(--ui-start-lift);
+}
+.ui-start-button.is-dark:hover:not(:disabled),
+.ui-start-button.is-dark[aria-expanded='true'] {
+  box-shadow: var(--ui-start-shadow-dark-hover);
+}
+.ui-start-button:active:not(:disabled) {
+  box-shadow: none;
+  translate: var(--ui-start-press) var(--ui-start-press);
+}
+.ui-start-button:focus-visible {
+  outline: var(--ui-start-border) solid currentColor;
+  outline-offset: var(--ui-focus-offset);
+}
+.ui-start-button:disabled {
+  cursor: default;
+}
+.ui-start-button:disabled > * {
+  opacity: var(--ui-dim);
+}
+
+/* ---- A page in the column (New project): the form between heading and buttons -------------- */
+.ui-start-page-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-row-gap);
+  padding: var(--ui-space-m) var(--ui-space-l) var(--ui-space-l) 0;
+}
+
+/* ---- The foot line ---------------------------------------------------------------------------- */
+.ui-start-foot {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 var(--ui-space-l) var(--ui-space-m);
+  color: var(--ui-start-cream);
+  font-size: var(--ui-start-label);
+  font-weight: var(--ui-start-weight-bold);
+}
+/* Readable on any picture: the website's small ink slab. */
+.ui-start-foot > span:not(:empty) {
+  padding: var(--ui-space-2xs) var(--ui-space-s);
+  background: var(--ui-start-ink);
+}
+
+/* ---- Popout (account and company): a card at its button ----------------------------------- */
+.ui-start-popout {
+  position: fixed;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: var(--ui-start-popout-w);
+  border: var(--ui-start-border) solid var(--ui-start-ink);
+  background: var(--ui-start-paper);
+  box-shadow: var(--ui-start-shadow);
+  color: var(--ui-start-ink);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-start-text);
+  outline: none;
+  animation: ui-rise var(--ui-motion-menu) var(--ui-ease);
+}
+.ui-start-popout-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-start-head-h);
+  padding: 0 var(--ui-space-xs) 0 var(--ui-space-l);
+  border-bottom: var(--ui-start-border) solid var(--ui-start-ink);
+}
+.ui-start-popout-title {
+  white-space: nowrap;
+  font-size: var(--ui-start-label);
+  font-weight: var(--ui-start-weight-heavy);
+  letter-spacing: var(--ui-start-tracking);
+  text-transform: uppercase;
+}
+.ui-start-tag {
+  margin-right: auto;
+  padding: var(--ui-space-2xs) var(--ui-space-s);
+  background: var(--ui-start-blue);
+  color: var(--ui-start-ink);
+  font-size: var(--ui-text-caption);
+  font-weight: var(--ui-start-weight-heavy);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.ui-start-popout-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-m);
+  padding: var(--ui-space-l);
+}
+.ui-start-popout-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-m);
+}
+.ui-start-popout-icon {
+  display: grid;
+  flex: none;
+  box-sizing: border-box;
+  place-items: center;
+  width: var(--ui-toolbar-button);
+  height: var(--ui-toolbar-button);
+  border: var(--ui-start-border) solid var(--ui-start-ink);
+  background: var(--ui-start-cream);
+  color: var(--ui-start-ink);
+}
+.ui-start-popout-icon > svg {
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+.ui-start-popout-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  min-width: 0;
+}
+.ui-start-popout-name {
+  font-weight: var(--ui-start-weight-bold);
+}
+.ui-start-popout-detail {
+  color: var(--ui-start-ink-soft);
+  font-size: var(--ui-start-label);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-start-image,
+  .ui-start-splash > span,
+  .ui-start-popout {
+    animation: none;
+  }
+  .ui-start-button {
+    transition: none;
+  }
+}

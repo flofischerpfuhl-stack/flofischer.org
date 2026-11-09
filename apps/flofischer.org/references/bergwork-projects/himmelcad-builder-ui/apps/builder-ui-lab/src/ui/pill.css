@@ -1,0 +1,332 @@
+/* ---- Title pills (lab .lab-title-pill; owner 2026-11-06: „splitte mal die Titlebar auf in 3
+ * Pillen auf einer Ebene"): brand, project, window buttons; 36 px, radius 12, no shadow. ------- */
+.ui-title-pill {
+  display: flex;
+  align-items: center;
+  height: var(--ui-title-h);
+  padding: var(--ui-title-pad);
+  user-select: none;
+}
+.ui-title-pill.is-brand {
+  gap: var(--ui-space-s);
+  padding: 0 var(--ui-title-pad-end) 0 var(--ui-title-pad-start);
+  -webkit-app-region: drag;
+}
+.ui-title-pill.is-project {
+  max-width: var(--ui-title-max-w);
+  padding: 0 var(--ui-title-pad-end);
+  -webkit-app-region: drag;
+}
+.ui-title-pill.is-controls {
+  gap: var(--ui-space-2xs);
+  -webkit-app-region: no-drag;
+}
+.ui-title-logo {
+  flex: none;
+  width: var(--ui-title-logo);
+  height: var(--ui-title-logo);
+  object-fit: contain;
+}
+.ui-title-wordmark {
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font-display);
+  font-size: var(--ui-text-wordmark);
+  letter-spacing: var(--ui-tracking-wordmark);
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+  /* Same centre as the product name, measured on the owner's real window (Wayland, 1.2×). */
+  translate: 0 var(--ui-wordmark-nudge);
+}
+.ui-title-product {
+  margin-left: var(--ui-space-xs);
+  padding-left: var(--ui-title-product-gap);
+  border-left: var(--ui-stroke) solid var(--ui-line-control);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-caption);
+  letter-spacing: var(--ui-tracking-product);
+  line-height: var(--ui-leading-caption);
+}
+.ui-title-name {
+  overflow: hidden;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+  -webkit-app-region: no-drag;
+}
+.ui-title-button {
+  display: grid;
+  place-items: center;
+  width: var(--ui-title-button-w);
+  height: 100%;
+  padding: 0;
+  border: 0;
+  /* Concentric with the pill (its border and padding). */
+  border-radius: max(0px, calc(var(--ui-radius-title) - var(--ui-stroke) - var(--ui-title-pad)));
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+}
+.ui-title-button:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-title-button:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+
+/* ---- Status group pills (lab .lab-dock-status; owner 2026-11-06: „nicht jedes Ding einzeln,
+ * sondern jede Gruppe einzeln"): a button group — items fill the pill edge to edge, a 1 px stroke
+ * between two items, hover the white overlay, „on" fills its segment. As tall as the title pills,
+ * and so their type (13 px labels, 12 px counts); icons 16 px. ---------------------------------- */
+.ui-status-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--ui-stroke);
+  min-width: 0;
+  height: var(--ui-status-h);
+  padding: 0;
+  /* It floats over the view: it takes the pointer even where its row does not. */
+  pointer-events: auto;
+}
+.ui-status-group.is-grow {
+  flex: 1 1 0;
+}
+.ui-status-group.is-tight {
+  gap: 0;
+}
+/* An attached menu is a child of its group or anchor, not a segment: no stroke, its own place. */
+.ui-status-group > :not(.ui-menu) + :not(.ui-menu) {
+  position: relative;
+}
+.ui-status-group > :not(.ui-menu) + :not(.ui-menu)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(-1 * var(--ui-stroke));
+  width: var(--ui-stroke);
+  background: var(--ui-line-control);
+  pointer-events: none;
+}
+.ui-status-item {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-status-item-gap);
+  min-width: 0;
+  height: calc(var(--ui-status-h) - 2 * var(--ui-stroke));
+  padding: 0 var(--ui-status-item-pad-x);
+  border: var(--ui-stroke) solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-regular);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--ui-motion-hover),
+    color var(--ui-motion-hover);
+}
+/* Holds an item and its attached menu. */
+.ui-status-anchor {
+  position: relative;
+  flex: none;
+  min-width: 0;
+}
+/* The ends follow the pill's rounding. */
+.ui-status-group > .ui-status-item:first-child,
+.ui-status-group > .ui-status-anchor:first-child > .ui-status-item {
+  border-top-left-radius: max(0px, calc(var(--ui-radius-title) - var(--ui-stroke)));
+  border-bottom-left-radius: max(0px, calc(var(--ui-radius-title) - var(--ui-stroke)));
+}
+.ui-status-group > .ui-status-item:last-child,
+.ui-status-group > .ui-status-anchor:last-child > .ui-status-item {
+  border-top-right-radius: max(0px, calc(var(--ui-radius-title) - var(--ui-stroke)));
+  border-bottom-right-radius: max(0px, calc(var(--ui-radius-title) - var(--ui-stroke)));
+}
+.ui-status-item.is-icon {
+  width: calc(var(--ui-status-h) - 2 * var(--ui-stroke));
+  padding: 0;
+}
+.ui-status-item.has-value {
+  width: var(--ui-status-value-w);
+}
+/* The narrowest windows: every item without text 26 px; the icon stays centred. */
+.ui-status-item.is-narrow {
+  width: var(--ui-status-item-narrow);
+  min-width: var(--ui-status-item-narrow);
+}
+.ui-status-item > svg {
+  flex: none;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+  stroke-width: var(--ui-status-icon-stroke);
+}
+/* A short value in place of an icon (2D / 2.5D / 3D): one width for every value. */
+.ui-status-text {
+  min-width: var(--ui-status-text-min);
+  text-align: center;
+}
+.ui-status-item > span:not(.ui-count) {
+  text-box: trim-both cap alphabetic;
+}
+/* No hover on a disabled item; `:where` keeps the specificity, so „on" still wins over hover. */
+.ui-status-item:hover:where(:not(:disabled)) {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-status-item.is-on {
+  background: var(--ui-bg-on);
+  color: var(--ui-fg-primary);
+}
+/* Unavailable: the item keeps its surface (readable over the scene), only its content dims
+ * (owner 2026-10-22: „warum sind undo redo als einziges durchsichtig?"). */
+.ui-status-item:disabled {
+  cursor: default;
+}
+.ui-status-item:disabled > * {
+  opacity: var(--ui-dim);
+}
+.ui-status-item:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset);
+}
+/* A value (view name, specification): fixed width, cut with "…", full text in the tooltip. */
+.ui-status-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding-block: var(--ui-space-xs);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- CountBadge: how many things a multi-choice item has on — 0 included, two digits wide, so
+ * the item never changes size (owner 2026-10-22). The box decides the centring (measured). ---- */
+.ui-count {
+  display: block;
+  flex: none;
+  box-sizing: border-box;
+  min-width: var(--ui-count);
+  height: var(--ui-count);
+  padding: var(--ui-count-pad-top) var(--ui-count-pad-x) 0;
+  border-radius: var(--ui-radius-inner);
+  background: var(--ui-bg-thumb);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--ui-leading-count);
+  text-align: center;
+  text-box: none;
+}
+.ui-status-busy {
+  position: absolute;
+  top: calc(var(--ui-busy-inset) - var(--ui-stroke));
+  right: var(--ui-busy-inset);
+  width: var(--ui-busy-dot);
+  height: var(--ui-busy-dot);
+  border-radius: var(--ui-radius-dot);
+  background: var(--ui-color-blue);
+}
+
+/* ---- Readouts (lab .lab-cursor-coordinates, .lab-cursor-snap): text in a status group, not a
+ * button — no hover, no fill; fixed widths so the bar never jumps (owner 2026-10-22). Every text
+ * in the bar shares one baseline with the labels (owner 2026-11-06: „in drei Pillen nebeneinander
+ * mindestens zwei unterschiedliche vertikale Alignments"): at 13 px the mono digits, trimmed like
+ * the labels, need no offset. ---------------------------------------------------------------- */
+.ui-coordinates,
+.ui-snap-readout {
+  flex: none;
+  box-sizing: border-box;
+  min-width: 0;
+  height: calc(var(--ui-status-h) - 2 * var(--ui-stroke));
+  padding: 0 var(--ui-space-s);
+  border: var(--ui-stroke) solid transparent;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  white-space: nowrap;
+}
+.ui-coordinates {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: var(--ui-space-s);
+  font-family: var(--ui-font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ui-tracking-coord);
+}
+.ui-coordinates > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-coord-axis-gap);
+  min-width: 0;
+  text-box: trim-both cap alphabetic;
+}
+.ui-coordinates b {
+  color: var(--ui-fg-tertiary);
+  font-weight: var(--ui-weight-regular);
+}
+/* The data's longest value plus one spare digit (the cursor may leave the data); no letter
+ * spacing, which made "1ch" per character too narrow (owner 2026-10-22). */
+.ui-coordinates > span > span {
+  flex: none;
+  width: calc((var(--ui-coord-ch) + 1) * 1ch);
+  min-width: 0;
+  overflow: hidden;
+  letter-spacing: 0;
+  text-align: right;
+  text-overflow: clip;
+}
+.ui-snap-readout {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-status-item-gap);
+  font-family: var(--ui-font);
+}
+.ui-snap-readout.is-full {
+  width: var(--ui-snap-w);
+}
+.ui-snap-readout.is-short {
+  width: var(--ui-snap-w-short);
+}
+.ui-snap-readout > svg {
+  flex: none;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+  color: var(--ui-fg-secondary);
+}
+.ui-snap-readout > span {
+  flex: none;
+  text-box: trim-both cap alphabetic;
+}
+/* The kind stays whole; only the element's name ends in "…". */
+.ui-snap-readout > .ui-snap-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  /* Room inside the clip for ascenders and descenders of the trimmed text (owner 2026-11-06:
+   * „hier wird doch Text oben und unten abgeschnitten"). */
+  padding-block: var(--ui-space-xs);
+  color: var(--ui-fg-secondary);
+  text-overflow: ellipsis;
+}
+.ui-snap-readout.is-none,
+.ui-snap-readout.is-none > svg {
+  color: var(--ui-fg-tertiary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-status-item {
+    transition: none;
+  }
+}

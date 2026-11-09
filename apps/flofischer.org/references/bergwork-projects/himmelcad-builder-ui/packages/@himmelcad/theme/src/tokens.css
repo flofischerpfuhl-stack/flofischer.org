@@ -1,0 +1,235 @@
+/**
+ * HimmelCAD design tokens — Dark Islands + Light Dashboard.
+ * UI must read tokens; never hardcode hex in components.
+ *
+ * Selection rules:
+ *   - Neutral press/active = grey elevation change (no blue wash)
+ *   - Accent selection = solid 1px accent border only (no soft fill, no gradient)
+ *   - Accent filled = solid accent bg + on-accent text (buttons, primary actions)
+ *   - Status colors only for success / warning / error (filled or border variants)
+ *   - Status text = the matching *-fg token (info text uses --hc-info-fg)
+ */
+
+:root,
+.hc-theme-dark {
+  color-scheme: dark;
+
+  /* Background layers */
+  --hc-bg-void: #101114;
+  --hc-bg-island: #1a1c20;
+  --hc-bg-island-hi: #1f2226;
+  --hc-bg-island-lo: #15171a;
+  --hc-bg-overlay: rgba(8, 9, 11, 0.72);
+  --hc-bg-chip: #15171a;
+  --hc-bg-input: #101114;
+  --hc-bg-table: #1a1c20;
+  --hc-bg-table-row-alt: #17191d;
+
+  /* Legacy aliases */
+  --hc-bg-base: var(--hc-bg-void);
+  --hc-bg-panel: var(--hc-bg-island);
+  --hc-bg-elevated: var(--hc-bg-island-hi);
+  --hc-bg-sunken: var(--hc-bg-island-lo);
+
+  /* Foreground */
+  --hc-fg-default: #c9ccd2;
+  --hc-fg-strong: #f0f1f3;
+  /*
+   * WCAG AA secondary text, measured with sRGB relative luminance against the
+   * least-contrasting neutral surfaces used by the shared shell:
+   * dark muted #969aa2 = 5.30:1 and subtle #8c9098 = 4.67:1 on #25272b;
+   * light muted #555c68 = 5.90:1 and subtle #656c77 = 4.64:1 on #eef0f3.
+   */
+  --hc-fg-muted: #969aa2;
+  --hc-fg-subtle: #8c9098;
+  --hc-fg-inverse: #0e0f12;
+  --hc-fg-on-accent: #ffffff;
+
+  /* Borders */
+  --hc-border-subtle: rgba(255, 255, 255, 0.05);
+  --hc-border-default: rgba(255, 255, 255, 0.1);
+  --hc-border-strong: rgba(255, 255, 255, 0.18);
+  --hc-border-accent: var(--hc-accent-base);
+
+  /* Single accent blue — use sparingly */
+  --hc-accent-base: #1597f2;
+  --hc-accent-hover: #2ea6f7;
+  --hc-accent-aa-fill: #0876bd;
+  --hc-accent-on: #ffffff;
+  /* Deprecated soft wash — keep alias mapped to transparent so old callers break visibly less hard */
+  --hc-accent-soft: transparent;
+
+  /* Interaction (neutral) */
+  --hc-hover-bg: rgba(255, 255, 255, 0.05);
+  --hc-press-bg: rgba(255, 255, 255, 0.09);
+  --hc-active-bg: rgba(255, 255, 255, 0.07);
+  --hc-selection-bg: var(--hc-press-bg);
+  --hc-selection-border: var(--hc-border-strong);
+  --hc-selection-accent-border: var(--hc-accent-base);
+  --hc-focus-ring: var(--hc-accent-base);
+
+  /* Viewport semantic geometry — always paired with shape/direction cues. */
+  --hc-geometry-selection: #ff9f1c;
+  --hc-geometry-selection-halo: #101114;
+  --hc-geometry-support: #43b9ff;
+  --hc-geometry-support-halo: #101114;
+  --hc-geometry-hover: #f0f1f3;
+  --hc-geometry-active-preview: #ffd166;
+  --hc-geometry-reticle: #f0f1f3;
+  --hc-geometry-prohibited: #f75464;
+  /*
+   * CAD body-edge "ink" — crisp dark silhouette/edge lines on body
+   * surfaces, independent of body appearance color and of the app theme
+   * (Shapr3D-style light bodies with dark edges reads correctly in both
+   * Dark Islands and the light dashboard).
+   */
+  --hc-geometry-edge-ink: #14161a;
+
+  /* Status — solid only, no gradients */
+  --hc-success: #73b00a;
+  --hc-success-fg: #d6f08a;
+  --hc-warning: #e8a33e;
+  --hc-warning-fg: #ffe0a8;
+  --hc-error: #f75464;
+  --hc-error-fg: #ffc0c6;
+  --hc-info: var(--hc-accent-base);
+  --hc-info-fg: #1597f2;
+  --hc-debug: #7a7e85;
+
+  /* Typography */
+  --hc-font-ui: 'Inter', 'InterDisplay', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --hc-font-mono:
+    'JetBrains Mono', 'JetBrainsMono', 'Fira Code', 'Cascadia Mono', Menlo, Consolas, monospace;
+  --hc-font-display: 'HC Wordmark', 'Inter', system-ui, sans-serif;
+  --hc-font-display-3d: 'HC Wordmark Display', 'HC Wordmark', 'Inter', system-ui, sans-serif;
+
+  /* Sizes */
+  --hc-size-titlebar: 36px;
+  --hc-size-ribbon-tabs: 30px;
+  --hc-size-ribbon-body: 84px;
+  --hc-size-ribbon-collapsed: 0px;
+  --hc-size-statusbar: 24px;
+  --hc-size-panel-min: 0px;
+  --hc-size-panel-default: 280px;
+  --hc-size-tab: 26px;
+  --hc-size-chip-h: 28px;
+  --hc-size-control-h: 28px;
+
+  /* Shared stacking order. Keep feature CSS on these semantic layers. */
+  --hc-z-content: 0;
+  --hc-z-sticky: 10;
+  --hc-z-floating: 1000;
+  --hc-z-popover: 1100;
+  --hc-z-modal: 2000;
+  --hc-z-toast: 3000;
+  /* A menu or list the user just opened sits above notices (a toast never covers it). */
+  --hc-z-menu: 3100;
+  --hc-z-tooltip: 4000;
+
+  /* Spatial axes: color plus glyph/shape cues are required by SE-D18. */
+  --hc-axis-x: #ff6670;
+  --hc-axis-y: #88d04f;
+  --hc-axis-z: #55a7ff;
+  --hc-axis-hover-outline: #ffffff;
+  --hc-axis-active-outline: #ffd166;
+
+  /* Island geometry */
+  --hc-radius-sm: 4px;
+  --hc-radius-md: 6px;
+  --hc-radius-lg: 10px;
+  --hc-radius-island: 10px;
+  --hc-radius-chip: 6px;
+  --hc-gap-island: 4px;
+  --hc-pad-workspace: 4px;
+
+  /* Shared control and panel spacing scale. */
+  --hc-space-1: 4px;
+  --hc-space-2: 8px;
+  --hc-space-3: 12px;
+
+  /* Shadows — elevation only; perimeter ring is a real border where needed */
+  --hc-shadow-island: 0 1px 2px rgba(0, 0, 0, 0.55);
+  --hc-shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --hc-shadow-chip: 0 1px 2px rgba(0, 0, 0, 0.45);
+
+  /* Motion */
+  --hc-motion-fast: 90ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  --hc-motion-base: 160ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  --hc-motion-slow: 280ms cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+/* Light mode — Cloudflare-dashboard inspired: light void, white islands, purple→blue accent mapped to our single blue */
+.hc-theme-light {
+  color-scheme: light;
+
+  --hc-bg-void: #f1f2f5;
+  --hc-bg-island: #ffffff;
+  --hc-bg-island-hi: #f7f8fa;
+  --hc-bg-island-lo: #eef0f3;
+  --hc-bg-overlay: rgba(15, 17, 22, 0.4);
+  --hc-bg-chip: #ffffff;
+  --hc-bg-input: #ffffff;
+  --hc-bg-table: #ffffff;
+  --hc-bg-table-row-alt: #f7f8fa;
+
+  --hc-bg-base: var(--hc-bg-void);
+  --hc-bg-panel: var(--hc-bg-island);
+  --hc-bg-elevated: var(--hc-bg-island-hi);
+  --hc-bg-sunken: var(--hc-bg-island-lo);
+
+  --hc-fg-default: #2f333a;
+  --hc-fg-strong: #0f1115;
+  --hc-fg-muted: #555c68;
+  --hc-fg-subtle: #656c77;
+  --hc-fg-inverse: #ffffff;
+  --hc-fg-on-accent: #ffffff;
+
+  --hc-border-subtle: rgba(15, 17, 22, 0.06);
+  --hc-border-default: rgba(15, 17, 22, 0.12);
+  --hc-border-strong: rgba(15, 17, 22, 0.2);
+  --hc-border-accent: var(--hc-accent-base);
+
+  --hc-accent-base: #1597f2;
+  --hc-accent-hover: #0d7fd1;
+  --hc-accent-aa-fill: #0876bd;
+  --hc-accent-on: #ffffff;
+  --hc-accent-soft: transparent;
+
+  --hc-hover-bg: rgba(15, 17, 22, 0.04);
+  --hc-press-bg: rgba(15, 17, 22, 0.08);
+  --hc-active-bg: rgba(15, 17, 22, 0.06);
+  --hc-selection-bg: var(--hc-press-bg);
+  --hc-selection-border: var(--hc-border-strong);
+  --hc-selection-accent-border: var(--hc-accent-base);
+  --hc-focus-ring: var(--hc-accent-base);
+
+  --hc-geometry-selection: #c65d00;
+  --hc-geometry-selection-halo: #ffffff;
+  --hc-geometry-support: #006fae;
+  --hc-geometry-support-halo: #ffffff;
+  --hc-geometry-hover: #2f333a;
+  --hc-geometry-active-preview: #7a5200;
+  --hc-geometry-reticle: #0f1115;
+  --hc-geometry-prohibited: #d63b4a;
+  --hc-geometry-edge-ink: #14161a;
+
+  --hc-success: #3d8b0a;
+  --hc-success-fg: #1f4a05;
+  --hc-warning: #c67a12;
+  --hc-warning-fg: #5c3600;
+  --hc-error: #d63b4a;
+  --hc-error-fg: #5c1018;
+  --hc-info: var(--hc-accent-base);
+  --hc-info-fg: #0b5fa8;
+  --hc-debug: #6b7280;
+
+  --hc-axis-x: #a91f2e;
+  --hc-axis-y: #3d741d;
+  --hc-axis-z: #1769aa;
+  --hc-axis-hover-outline: #0f1115;
+  --hc-axis-active-outline: #6f4b00;
+
+  --hc-shadow-island: 0 1px 2px rgba(15, 17, 22, 0.06);
+  --hc-shadow-popover: 0 12px 32px rgba(15, 17, 22, 0.12);
+  --hc-shadow-chip: 0 1px 2px rgba(15, 17, 22, 0.08);
+}

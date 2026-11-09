@@ -1,0 +1,54 @@
+/* ---- JobProgress (lab .lab-job): a running job in its Properties tab. Its Cancel keeps the lab's
+ * own look (32 px, no border), unlike Button (UI-LIBRARY.md › Open points). ----------------- */
+.ui-job {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-job-gap);
+  padding: var(--ui-job-pad-y) var(--ui-space-xs);
+}
+.ui-job-file {
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-job-stage {
+  display: flex;
+  justify-content: space-between;
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+.ui-job-track {
+  height: var(--ui-job-track);
+  overflow: hidden;
+  border-radius: var(--ui-radius-track);
+  background: var(--ui-bg-control);
+}
+.ui-job-fill {
+  height: 100%;
+  border-radius: var(--ui-radius-track);
+  background: var(--ui-color-blue);
+  transition: width var(--ui-motion-progress) linear;
+}
+.ui-job-cancel {
+  align-self: flex-start;
+  height: var(--ui-job-cancel-h);
+  padding: 0 var(--ui-job-cancel-pad-x);
+  border: 0;
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-primary);
+  cursor: pointer;
+}
+.ui-job-cancel:hover {
+  background: var(--ui-bg-on);
+}
+.ui-job-cancel:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-job-fill {
+    transition: none;
+  }
+}

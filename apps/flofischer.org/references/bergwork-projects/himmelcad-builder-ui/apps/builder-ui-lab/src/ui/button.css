@@ -1,0 +1,147 @@
+/* Button (lab .lab-prop-button, .lab-flow-primary): neutral, the menu row's height, a chip
+ * frame. The primary button is what Enter does — full width under the values it uses, still
+ * neutral (owner 2026-11-01: the blue Finish button did what Esc does). */
+.ui-button {
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-button-pad-x);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-button);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-regular);
+  /* A button's name never wraps. */
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ui-button:hover:where(:not(:disabled)) {
+  border-color: var(--ui-fg-secondary);
+}
+.ui-button.is-primary {
+  width: 100%;
+  margin-top: var(--ui-button-primary-gap);
+}
+/* Unavailable: fill and frame stay, the label dims; no hover. */
+.ui-button:disabled {
+  cursor: default;
+}
+.ui-button:disabled > * {
+  opacity: var(--ui-dim);
+}
+.ui-button:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset);
+}
+
+/* IconButton. `tool`: a quiet action in a panel head (28, lab .lab-flow-tool). `toolbar`: a list
+ * toolbar button (36, lab .lab-layers-tools .lab-icon-button). */
+.ui-icon-button {
+  display: grid;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.ui-icon-button.is-tool {
+  width: var(--ui-tool-button);
+  height: var(--ui-tool-button);
+  border-radius: var(--ui-radius-field);
+  color: var(--ui-fg-secondary);
+}
+.ui-icon-button.is-small {
+  width: var(--ui-small-button);
+  height: var(--ui-small-button);
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-fg-primary);
+  transition: background var(--ui-motion-fast);
+}
+.ui-icon-button.is-bar {
+  flex: none;
+  width: var(--ui-bar-button);
+  height: var(--ui-bar-button);
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-fg-secondary);
+  transition: background var(--ui-motion-fast);
+}
+.ui-icon-button.is-toolbar {
+  width: var(--ui-toolbar-button);
+  height: var(--ui-toolbar-button);
+  border-radius: var(--ui-radius-small);
+  color: var(--ui-fg-primary);
+  transition: background var(--ui-motion-fast);
+}
+.ui-icon-button:hover:not(:disabled) {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-icon-button.is-on {
+  background: var(--ui-bg-on);
+  color: var(--ui-fg-primary);
+}
+/* Unavailable: every size the same — the icon dims, a fill (on) stays. */
+.ui-icon-button:disabled {
+  cursor: default;
+}
+.ui-icon-button:disabled > * {
+  opacity: var(--ui-dim);
+}
+.ui-icon-button:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset);
+}
+
+/* Copy: floats over the end of the value while its row is hovered (GitHub, VS Code) — no column
+ * of its own (owner 2026-10-22). It brings the panel's fill so the text below does not show. */
+.ui-copy {
+  position: absolute;
+  top: 50%;
+  right: var(--ui-copy-inset);
+  display: grid;
+  place-items: center;
+  width: var(--ui-copy);
+  height: var(--ui-copy);
+  padding: 0;
+  border: var(--ui-stroke) solid var(--ui-line-separator);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-chrome);
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+  opacity: 0;
+  translate: 0 -50%;
+}
+.ui-copy:hover {
+  border-color: var(--ui-line-control);
+  color: var(--ui-fg-primary);
+}
+.ui-copy:focus-visible {
+  opacity: 1;
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+/* A menu it opened: filled like a button that is on (lab .lab-icon-button.is-active). */
+.ui-icon-button.is-open {
+  background: var(--ui-bg-on);
+  color: var(--ui-fg-primary);
+}
+/* The frame convention inside a toolbar button (lab .lab-pin): no frame off, dashed automatic,
+ * solid on. */
+.ui-icon-frame {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--ui-rail-frame);
+  height: var(--ui-rail-frame);
+  border: var(--ui-rail-frame-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+}
+.ui-icon-frame.is-dashed {
+  border-style: dashed;
+  border-color: currentColor;
+}
+.ui-icon-frame.is-solid {
+  border-color: currentColor;
+  color: var(--ui-fg-primary);
+}

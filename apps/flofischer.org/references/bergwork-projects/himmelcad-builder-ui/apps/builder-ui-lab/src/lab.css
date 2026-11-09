@@ -1,0 +1,430 @@
+/* Builder UI lab — floating islands over a full-bleed viewport.
+ * Reads the shared HimmelCAD tokens; lab-only values are named --lab-*. */
+
+/* Greyscale hierarchy, dark (owner 2026-11-06: „ich will die jetzige Titlebar-Grau als
+ * Darkmode-Default-Background für den View. und die UI-Elemente sollen dafür viel dunkler werden …
+ * die Default-Schriftfarbe … weißer"). As VS Code Dark Modern: the chrome is darker than the
+ * content. Five surfaces, one per role — nothing else picks its own grey:
+ *   chrome   panels, title bar, status bar, toolbar (every floating surface)
+ *   control  fields, toggle tracks, chips — one step lighter than the chrome they sit on
+ *   view     the viewport only
+ *   popover  menus, tooltips, lists over everything: the chrome's grey, lifted by border and shadow
+ *   thumb    the chosen option of a toggle
+ * States are white overlays, so they read the same on every surface: hover and selected row. The
+ * field that takes the typing has the neutral active line.
+ * Colour (owner 2026-11-06): states of the UI are greyscale only, and there are three colours, each
+ * with one meaning — „nicht zu viele", the busy dot „das gleiche Blau wie eine selected Line":
+ *   blue    selected (geometry, auxiliary points, the selection box) and work that is running
+ *           (busy dots, progress) — Trimble Access blue
+ *   yellow  the element being worked on — Trimble yellow
+ *   red     an error (input that does not resolve)
+ * Text has three steps (contrast on the chrome): primary 16.7:1 for values, items, names and titles;
+ * secondary 9.2:1 for labels and section headings; tertiary 5.3:1 for units, placeholders, keys;
+ * disabled content is its own colour at 0.45 (owner 2026-11-06).
+ * Type scale: 11 px captions (menu sections, counts), 12 px dense panel content and status bar,
+ * 13 px menus, list rows, buttons and panel titles (600), 15 px dialog titles; weights 400 and 600. */
+/* The scale is the UI library's (src/ui/tokens.css); these names are its aliases until the lab's
+ * stylesheets are replaced by library components (UI-LIBRARY.md › Migration plan). */
+:root,
+.hc-theme-dark {
+  --lab-bg-chrome: var(--ui-bg-chrome);
+  --lab-bg-control: var(--ui-bg-control);
+  --lab-bg-view: var(--ui-bg-view);
+  /* Menus and dropdowns are as dark as the function bar and side panels (owner 2026-11-06);
+   * their border and shadow lift them off. */
+  --lab-bg-popover: var(--lab-bg-chrome);
+  --lab-bg-thumb: var(--ui-bg-thumb);
+  --lab-state-hover: var(--ui-state-hover);
+  --lab-fg-primary: var(--ui-fg-primary);
+  --lab-fg-secondary: var(--ui-fg-secondary);
+  --lab-fg-tertiary: var(--ui-fg-tertiary);
+  --lab-line-separator: var(--ui-line-separator);
+  --lab-line-control: var(--ui-line-control);
+  --lab-line-strong: var(--ui-line-strong);
+  /* The frame of the field that takes the typing, and keyboard focus: neutral, never accent. */
+  --lab-line-active: var(--ui-line-active);
+  --lab-text-caption: var(--ui-text-caption);
+  --lab-text-dense: var(--ui-text-dense);
+  --lab-text-body: var(--ui-text-body);
+  --lab-text-title: var(--ui-text-title);
+  /* Spacing on the grid 2/4/8/12/16 (24, 32) (owner 2026-11-06; after Fluent 2 and Carbon — no
+   * published Figma UI3 values were found). A control is 28 px; rows of controls are 4 px apart
+   * (32 px pitch); a section is a 32 px head, 8 px above its content, 12 px below. */
+  --lab-space-2xs: var(--ui-space-2xs);
+  --lab-space-xs: var(--ui-space-xs);
+  --lab-space-s: var(--ui-space-s);
+  --lab-space-m: var(--ui-space-m);
+  --lab-space-l: var(--ui-space-l);
+  --lab-space-xl: var(--ui-space-xl);
+  --lab-space-2xl: var(--ui-space-2xl);
+  --lab-control-h: var(--ui-control-h);
+  --lab-row-gap: var(--lab-space-xs);
+  --lab-section-head-h: var(--ui-section-head-h);
+  /* The brand's display face in the title pill (not body text). */
+  --lab-text-wordmark: var(--ui-text-wordmark);
+  /* The shared names read the scale (to move into @himmelcad/theme once settled). */
+  --hc-fg-strong: var(--lab-fg-primary);
+  --hc-fg-default: var(--lab-fg-primary);
+  --hc-fg-muted: var(--lab-fg-secondary);
+  --hc-fg-subtle: var(--lab-fg-tertiary);
+  --hc-hover-bg: var(--lab-state-hover);
+  --hc-border-subtle: var(--lab-line-separator);
+  --hc-border-default: var(--lab-line-control);
+  --hc-border-strong: var(--lab-line-strong);
+  --hc-bg-island: var(--lab-bg-chrome);
+  --hc-bg-chip: var(--lab-bg-control);
+  --hc-bg-input: var(--lab-bg-control);
+  --lab-surface: var(--lab-bg-chrome);
+  --lab-surface-sunken: var(--lab-bg-control);
+  --lab-surface-raised: var(--lab-bg-thumb);
+  --lab-shadow: var(--ui-shadow);
+  /* Two radii for floating surfaces (owner 2026-11-06, after 24 and 20): large — function bar,
+   * title pills, side panels — 16 px; small — status pills, menus, popovers — unchanged at 8 px
+   * (chip 6 + 2). Controls take the library's steps (inner = outer minus the inset). */
+  --lab-radius-large: var(--ui-radius-large);
+  --lab-radius-title: var(--ui-radius-title);
+  --lab-radius: calc(var(--hc-radius-chip, 6px) + 2px);
+  --lab-gap: var(--ui-gap);
+  --lab-window-radius: 16px;
+  /* Behind the view: its grey (the WebGL clear color). */
+  --lab-window-canvas: var(--lab-bg-view);
+  --lab-desktop-surface: var(--hc-bg-void);
+  /* The three colours (above); the same in both themes except red, which needs contrast. */
+  --lab-color-blue: var(--ui-color-blue);
+  --lab-color-yellow: var(--ui-color-yellow);
+  --lab-color-red: var(--ui-color-red);
+  /* Trimble Access display, 1:1 (owner 2026-10-24): job geometry white in dark mode (black in
+   * light), selection and auxiliary points blue, the element being worked on Trimble yellow. */
+  --lab-geometry-line: #e8eaee;
+  --lab-geometry-point: #e8eaee;
+  --lab-geometry-selection: var(--lab-color-blue);
+  --lab-geometry-support: var(--lab-color-blue);
+  --lab-geometry-active: var(--lab-color-yellow);
+  --lab-geometry-inverse: #ffffff;
+  --lab-geometry-label: #ffffff;
+  /* Angle snap guide (owner 2026-10-25: „dünne halbtransparente graue Halbgerade"). */
+  --lab-geometry-guide: rgba(160, 166, 176, 0.55);
+}
+
+.hc-theme-light {
+  /* Light keeps its values for now (owner 2026-11-06 asked for the dark mode). */
+  --lab-bg-popover: var(--hc-bg-island);
+  --lab-line-active: rgba(15, 17, 22, 0.45);
+  --lab-color-red: #d92d20;
+  --lab-text-caption: 11px;
+  --lab-text-dense: 12px;
+  --lab-text-body: 13px;
+  --lab-text-title: 15px;
+  --lab-text-wordmark: 18px;
+  /* Match the light WebGL clear color behind the lower title-bar arcs. */
+  --lab-window-canvas: #e2e5ea;
+  --lab-desktop-surface: #cfd3db;
+  --lab-surface: #f1f2f5;
+  --lab-surface-sunken: #e4e6ea;
+  --lab-surface-raised: #ffffff;
+  --lab-shadow: 0 10px 28px rgba(15, 17, 22, 0.14), 0 1px 2px rgba(15, 17, 22, 0.1);
+  --lab-geometry-line: #000000;
+  --lab-geometry-point: #000000;
+  --lab-geometry-label: #000000;
+  --lab-geometry-guide: rgba(90, 96, 108, 0.5);
+}
+
+html,
+body,
+#hc-root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  /* Browser-only desktop surround makes the mock window silhouette visible. */
+  box-sizing: border-box;
+  padding: clamp(12px, 3vw, 36px);
+  background: var(--lab-desktop-surface);
+  color: var(--hc-fg-default);
+  font-family: var(--hc-font-ui);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.lab-root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--hc-border-default);
+  border-radius: var(--lab-window-radius);
+  background: var(--lab-window-canvas);
+  box-shadow: var(--lab-shadow);
+}
+
+/* Own window: the mock fills it; the window manager draws the outer edge. */
+.lab-windowed body {
+  padding: 0;
+  background: var(--lab-window-canvas);
+}
+
+.lab-windowed .lab-root {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ---- Title pills (TitlePills.tsx; owner 2026-11-06): the library's pills on the function bar's
+ * row and of its height — brand left, project and window buttons right, top-aligned with the
+ * function bar („vertically oben aligned mit der CAD-Leiste"). Only their place is the app's. --- */
+.lab-title-start,
+.lab-title-end {
+  position: absolute;
+  z-index: var(--hc-z-floating);
+  top: var(--lab-gap);
+  display: flex;
+  gap: 8px;
+}
+.lab-title-start {
+  left: var(--lab-gap);
+}
+.lab-title-end {
+  right: var(--lab-gap);
+}
+
+/* The start screen's place (proposal 2026-11-06, ProjectStart.tsx): the whole window, over the
+ * workspace (which is inert meanwhile) and under menus and tooltips. */
+.lab-start {
+  position: absolute;
+  z-index: calc(var(--hc-z-floating) + 60);
+  inset: 0;
+}
+
+/* A work window's place (the surface window): between the top row and the status bar, over the
+ * panels (it was .sw-window's own position before it moved into the library). */
+.lab-work {
+  position: absolute;
+  top: calc(var(--lab-top-bar-bottom, 72px) + var(--lab-gap));
+  right: var(--lab-gap);
+  bottom: calc(2 * var(--lab-gap) + var(--lab-dock-h));
+  left: var(--lab-gap);
+  z-index: calc(var(--hc-z-floating) + 1);
+}
+
+.lab-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---- Viewport ------------------------------------------------------------ */
+.lab-viewport {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  user-select: none;
+}
+.lab-label-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.lab-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  outline: none;
+}
+
+/* Keyboard focus ring for controls; text fields show their own calm frame instead (Properties:
+ * „a neutral frame on focus") — a text field matches :focus-visible on every click. */
+button:focus-visible,
+input:is([type='checkbox'], [type='radio']):focus-visible {
+  /* Neutral, like every UI state (the theme's ring is the accent: a fourth colour). */
+  outline: 1px solid var(--lab-line-active);
+  outline-offset: 1px;
+}
+
+/* ---- Top bar ------------------------------------------------------------- */
+.lab-top {
+  position: absolute;
+  top: var(--lab-gap);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: var(--hc-z-floating);
+}
+
+/* ---- Function-first ribbon ------------------------------------------------ */
+.lab-function-top {
+  width: max-content;
+  /* Clear of the title pills on both sides (the wider side counts, the bar stays centred). */
+  max-width: calc(100% - 2 * var(--lab-title-reserve, 0px) - 4 * var(--lab-gap));
+  align-items: stretch;
+}
+
+@media (max-width: 700px) {
+  .lab-function-top {
+    max-width: calc(100% - 16px);
+  }
+}
+
+/* ---- Side panels (grow upwards from the bottom buttons) ------------------ */
+.lab-side {
+  position: absolute;
+  top: var(--lab-gap);
+  bottom: calc(2 * var(--lab-gap) + var(--lab-dock-h));
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  overflow: hidden;
+  z-index: var(--hc-z-floating);
+  clip-path: inset(100% 0 0 0 round var(--lab-radius-large));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    clip-path var(--hc-motion-slow),
+    opacity var(--hc-motion-base);
+}
+
+.lab-side.is-open {
+  clip-path: inset(0 0 0 0 round var(--lab-radius-large));
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lab-side-left {
+  left: var(--lab-gap);
+}
+
+.lab-side-right {
+  right: var(--lab-gap);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* While a function draws, the cursor is a crosshair. */
+.lab-viewport.is-drawing,
+.lab-viewport.is-drawing canvas {
+  cursor: crosshair;
+}
+
+/* Over a vertex that can be dragged (labViewportEngine grip): the move cursor (RIB Civil). */
+.lab-viewport.is-grip,
+.lab-viewport.is-grip canvas {
+  cursor: move;
+}
+
+/* Corner style (owner 2026-10-24: „wir lassen beides als Option"): round by default, sharp as a
+ * choice in the appearance menu. Every radius goes to 0; status dots stay dots. */
+/* On every element: the theme classes on body redefine the radius tokens below :root. */
+:root[data-corners='sharp'],
+:root[data-corners='sharp'] * {
+  --lab-radius: 0px;
+  --lab-radius-large: 0px;
+  --lab-radius-title: 0px;
+  --lab-window-radius: 0px;
+  --hc-radius-sm: 0px;
+  --hc-radius-md: 0px;
+  --hc-radius-lg: 0px;
+  --hc-radius-island: 0px;
+  --hc-radius-chip: 0px;
+}
+:root[data-corners='sharp']
+  :is(*, *::before, *::after):not(.ui-toolbar-dot, .ui-status-busy, .ui-panel-busy) {
+  border-radius: 0 !important;
+}
+/* The start screen is square to the window's edge (proposal, owner: „gerne eckig"): the mock
+ * window's own corners too, whatever the corner setting. */
+:root[data-screen='start'] .lab-root {
+  --lab-window-radius: 0px;
+}
+
+/* Text selection (owner 2026-10-24: not the browser's default blue): a calm neutral highlight in
+ * the app's own colours, readable in both themes. The text colour resolves per element. */
+:root,
+.hc-theme-dark {
+  --lab-text-selection-bg: rgba(255, 255, 255, 0.22);
+}
+.hc-theme-light {
+  --lab-text-selection-bg: rgba(20, 24, 32, 0.16);
+}
+::selection {
+  background: var(--lab-text-selection-bg);
+  color: var(--hc-fg-strong);
+}
+
+/* Snap cursor (owner 2026-10-24: „wenn man über einen Snap hovert, egal in welchem Zustand"): a
+ * crosshair with a square at its centre, white with a dark edge so it reads on every background.
+ * Over a draggable vertex the move cursor wins. */
+.lab-viewport.is-snap,
+.lab-viewport.is-snap canvas {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cg fill='none' stroke='%23000' stroke-width='3'%3E%3Cpath d='M12 1v8M12 15v8M1 12h8M15 12h8'/%3E%3Crect x='8.5' y='8.5' width='7' height='7'/%3E%3C/g%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.2'%3E%3Cpath d='M12 1v8M12 15v8M1 12h8M15 12h8'/%3E%3Crect x='8.5' y='8.5' width='7' height='7'/%3E%3C/g%3E%3C/svg%3E")
+      12 12,
+    crosshair;
+}
+/* What it snaps to sets the glyph at the cursor's centre (owner 2026-10-24: „der Cursor muss sich
+ * ändern basierend auf dem, an was es einrastet"), as AutoCAD's markers: square = end point or
+ * vertex, triangle = midpoint, circle with × = survey point (node), dots = point cloud. */
+.lab-viewport.is-snap[data-snap='end'],
+.lab-viewport.is-snap[data-snap='end'] canvas {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cg fill='none' stroke='%23000' stroke-width='3'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7'/%3E%3Crect x='8.5' y='8.5' width='7' height='7'/%3E%3C/g%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.2'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7'/%3E%3Crect x='8.5' y='8.5' width='7' height='7'/%3E%3C/g%3E%3C/svg%3E")
+      12 12,
+    crosshair;
+}
+.lab-viewport.is-snap[data-snap='mid'],
+.lab-viewport.is-snap[data-snap='mid'] canvas {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cg fill='none' stroke='%23000' stroke-width='3'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7'/%3E%3Cpath d='M12 7.8 16.4 15.4H7.6Z'/%3E%3C/g%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.2'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7'/%3E%3Cpath d='M12 7.8 16.4 15.4H7.6Z'/%3E%3C/g%3E%3C/svg%3E")
+      12 12,
+    crosshair;
+}
+.lab-viewport.is-snap[data-snap='node'],
+.lab-viewport.is-snap[data-snap='node'] canvas {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cg fill='none' stroke='%23000' stroke-width='3'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7'/%3E%3Ccircle cx='12' cy='12' r='4.2'/%3E%3Cpath d='M9.5 9.5l5 5M14.5 9.5l-5 5'/%3E%3C/g%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.2'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7'/%3E%3Ccircle cx='12' cy='12' r='4.2'/%3E%3Cpath d='M9.5 9.5l5 5M14.5 9.5l-5 5'/%3E%3C/g%3E%3C/svg%3E")
+      12 12,
+    crosshair;
+}
+.lab-viewport.is-snap[data-snap='cloud'],
+.lab-viewport.is-snap[data-snap='cloud'] canvas {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cg fill='none' stroke='%23000' stroke-width='3'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7'/%3E%3C/g%3E%3Ccircle cx='12' cy='9.4' r='2.3' fill='%23000'/%3E%3Ccircle cx='9.4' cy='14' r='2.3' fill='%23000'/%3E%3Ccircle cx='14.6' cy='14' r='2.3' fill='%23000'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.2'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7'/%3E%3C/g%3E%3Ccircle cx='12' cy='9.4' r='1.2' fill='%23fff'/%3E%3Ccircle cx='9.4' cy='14' r='1.2' fill='%23fff'/%3E%3Ccircle cx='14.6' cy='14' r='1.2' fill='%23fff'/%3E%3C/svg%3E")
+      12 12,
+    crosshair;
+}
+.lab-viewport.is-grip,
+.lab-viewport.is-grip canvas {
+  cursor: move;
+}
+
+/* Selection rectangle (2D/2.5D, like RIB): left to right a window (solid, only what lies inside),
+ * right to left a crossing (dashed, what it touches). */
+.lab-select-box {
+  position: absolute;
+  pointer-events: none;
+  border: 1px solid var(--lab-geometry-selection);
+  background: color-mix(in srgb, var(--lab-geometry-selection) 10%, transparent);
+}
+.lab-select-box.is-crossing {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--lab-geometry-selection) 6%, transparent);
+}

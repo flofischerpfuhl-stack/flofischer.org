@@ -1,0 +1,158 @@
+/* The places of the status bar and the console, and the views' grid (the parts are library
+ * components). */
+
+.lab-root {
+  --lab-panel-width: 320px;
+  /* Status bar height: a group pill as tall as the title pills (owner 2026-11-06, a test: „mach
+   * mal testweise die Statusbar auf die gleiche Größe wie die Titlebar-Pillen"). */
+  --lab-dock-h: var(--hc-size-titlebar, 36px);
+  /* A control that is on (the greyscale in lab.css; ui-lib-check parity compares it). */
+  --lab-control-active: var(--lab-bg-thumb);
+}
+.hc-theme-light .lab-root {
+  --lab-control-active: #cdd0d5;
+}
+/* The status bar's place: three rails over the view's foot; its groups are library StatusGroups
+ * (owner 2026-11-06: „doch wieder schwebend, aber nicht jedes Ding einzeln, sondern jede Gruppe
+ * einzeln"). Equal rails keep Console at the window center; the rails hold separate groups. */
+.lab-dock {
+  position: absolute;
+  bottom: var(--lab-gap);
+  left: var(--lab-gap);
+  right: var(--lab-gap);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: 8px;
+  z-index: var(--hc-z-floating);
+  pointer-events: none;
+}
+/* All parts stand on one bottom line (the status bar's edge), not centred in their rail. */
+.lab-dock-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+.lab-dock-right {
+  justify-content: flex-end;
+}
+/* Last collapse stages (BottomBar `fit`): the groups move closer so the narrowest windows still
+ * fit every control. */
+.lab-dock-group.is-tight {
+  gap: 1px;
+}
+/* Touch keeps 44 px targets. */
+@media (pointer: coarse) {
+  .lab-root {
+    --lab-dock-h: 44px;
+  }
+}
+/* Narrower windows: the groups 4 px apart (the grid's next step down). */
+@media (max-width: 1150px) {
+  .lab-dock {
+    gap: 4px;
+  }
+  .lab-dock-group:not(.is-tight) {
+    gap: 4px;
+  }
+}
+.lab-console {
+  position: absolute;
+  /* Like PhotoLab: the console takes exactly the space between the open side panels. */
+  left: var(--lab-gap);
+  right: var(--lab-gap);
+  /* One spacing for everything that floats: window edge, status bar, panels, console (--lab-gap). */
+  bottom: calc(2 * var(--lab-gap) + var(--lab-dock-h));
+  height: min(var(--lab-console-h, 240px), calc(100% - 160px));
+  display: flex;
+  flex-direction: column;
+  z-index: calc(var(--hc-z-floating) - 1);
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity 180ms,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    left 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    right 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 220ms;
+}
+/* Symmetric, as in PhotoLab: both sides keep the larger side's inset, so the console stays centred. */
+.has-side-shown .lab-console {
+  left: calc(2 * var(--lab-gap) + max(var(--lab-left-occupied), var(--lab-right-occupied)));
+  right: calc(2 * var(--lab-gap) + max(var(--lab-left-occupied), var(--lab-right-occupied)));
+}
+.lab-console.is-open {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.lab-views {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  gap: 1px;
+  background: var(--hc-border-default);
+}
+.lab-views.is-tiled {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+}
+.lab-views[data-view-count='3'] {
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+.lab-views[data-view-count='3'] > :first-child {
+  grid-row: span 2;
+}
+.lab-view-tile {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--lab-window-canvas);
+}
+/* Several views: the one under the mouse is active — a neutral inner frame shows which. */
+.lab-views.is-tiled > .lab-view-tile.is-current::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-shadow: inset 0 0 0 1px var(--hc-fg-muted);
+  pointer-events: none;
+}
+.lab-tile-canvas {
+  position: absolute;
+  inset: 0;
+}
+.lab-side {
+  width: var(--lab-side-w, var(--lab-panel-width));
+  /* Below the function bar and above the status bar, both at one --lab-gap. */
+  top: calc(var(--lab-top-bar-bottom, 72px) + var(--lab-gap));
+  bottom: calc(2 * var(--lab-gap) + var(--lab-dock-h));
+  transition:
+    top var(--hc-motion-base),
+    width 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    clip-path var(--hc-motion-slow),
+    opacity var(--hc-motion-base);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lab-console,
+  .lab-views {
+    transition: none;
+  }
+}
+
+/* ---- Side panels: vertical tab bar, pin, resize edge ----------------------- */
+.lab-side {
+  flex-direction: row;
+  overflow: visible;
+}
+.lab-side-right {
+  flex-direction: row-reverse;
+}

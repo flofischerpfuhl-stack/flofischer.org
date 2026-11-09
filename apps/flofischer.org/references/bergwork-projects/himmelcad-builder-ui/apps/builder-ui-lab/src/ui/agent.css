@@ -1,0 +1,743 @@
+/* The agent's own window, round 6 (proposal 2026-11-07, not decided; UI-LIBRARY.md › Proposed:
+ * agent window). Sessions sidebar after t3code's thread rows, settings after its settings pages,
+ * the model picker after its picker — in the library's greys, type and grid. */
+
+/* ---- Sidebar: search and New session on one line, groups, the shelf at the foot -------------- */
+.ui-chat-ws-side .ui-lib-search {
+  flex: 1;
+  min-width: 0;
+}
+.ui-session-top {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  margin-bottom: var(--ui-space-xs);
+}
+.ui-session-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+}
+.ui-session-group + .ui-session-group {
+  margin-top: var(--ui-space-s);
+}
+.ui-session-group-head {
+  padding: var(--ui-space-xs) var(--ui-space-s);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+  font-weight: var(--ui-weight-strong);
+  line-height: var(--ui-session-line-h);
+}
+
+/* ---- A session: two lines in a hover-filled row; its state at the first line's end ---------- */
+.ui-session {
+  position: relative;
+  flex: none;
+  border-radius: var(--ui-radius-field);
+}
+.ui-session:hover {
+  background: var(--ui-state-hover);
+}
+.ui-session.is-active {
+  background: var(--ui-state-selected);
+}
+.ui-session-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-xs);
+  width: 100%;
+  padding: var(--ui-space-s);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-session-main:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-session-line {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: 0;
+  height: var(--ui-session-line-h);
+}
+.ui-session-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--ui-text-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-session.is-archived .ui-session-title {
+  color: var(--ui-fg-secondary);
+}
+.ui-session-line.is-meta {
+  gap: var(--ui-space-xs);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+.ui-session-model-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+}
+.ui-session-model-icon > svg {
+  width: var(--ui-space-m);
+  height: var(--ui-space-m);
+}
+.ui-session-meta {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-session-pin {
+  margin-right: calc(-1 * var(--ui-space-xs));
+  flex: none;
+  color: var(--ui-fg-tertiary);
+}
+.ui-session-state {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+.ui-session-state.is-working {
+  color: var(--ui-fg-secondary);
+}
+.ui-session-state.is-waiting,
+.ui-session-state.is-done {
+  color: var(--ui-fg-primary);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-session-state.is-failed {
+  color: var(--ui-color-red);
+}
+.ui-session.is-attention .ui-session-title {
+  font-weight: var(--ui-weight-strong);
+}
+/* Pin and Archive take the state's place on hover (t3code's row actions). */
+.ui-session-actions {
+  position: absolute;
+  top: var(--ui-space-xs);
+  right: var(--ui-space-xs);
+  display: none;
+  gap: var(--ui-space-2xs);
+  padding-left: var(--ui-space-xs);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-chrome);
+}
+.ui-session:hover .ui-session-actions,
+.ui-session:focus-within .ui-session-actions {
+  display: flex;
+}
+.ui-session:hover .ui-session-line:first-child .ui-session-state,
+.ui-session:focus-within .ui-session-line:first-child .ui-session-state {
+  visibility: hidden;
+}
+.ui-session-action {
+  display: grid;
+  place-items: center;
+  width: var(--ui-chat-action-h);
+  height: var(--ui-chat-action-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+}
+.ui-session-action:hover {
+  background: var(--ui-state-selected);
+  color: var(--ui-fg-primary);
+}
+.ui-session-action:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+}
+.ui-session-rename {
+  display: flex;
+  padding: var(--ui-space-xs);
+}
+.ui-session-rename > input {
+  flex: 1;
+}
+.ui-session-card {
+  position: fixed;
+  z-index: calc(var(--ui-z-popover) + 1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-xs);
+  width: var(--ui-session-card-w);
+  padding: var(--ui-space-m);
+  pointer-events: none;
+}
+.ui-session-card-title {
+  margin-bottom: var(--ui-space-2xs);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-session-card-row {
+  display: grid;
+  grid-template-columns: var(--ui-chat-row-label) minmax(0, 1fr);
+  gap: var(--ui-space-s);
+  font-size: var(--ui-text-dense);
+  line-height: var(--ui-session-line-h);
+}
+.ui-session-card-row > span:first-child {
+  color: var(--ui-fg-tertiary);
+}
+.ui-session-card-row > span:last-child {
+  overflow: hidden;
+  color: var(--ui-fg-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- The shelf of archived sessions, at the sidebar's foot ------------------------------------ */
+.ui-session-shelf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+}
+.ui-session-shelf-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+}
+.ui-session-shelf-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-s);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  cursor: pointer;
+}
+.ui-session-shelf-head > span:first-child {
+  flex: 1;
+  text-align: left;
+}
+.ui-session-shelf-head:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-session-shelf-head:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-session-shelf-count {
+  color: var(--ui-fg-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.ui-chat-ws-side > .ui-session-foot {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  margin: var(--ui-space-s) calc(-1 * var(--ui-space-s)) 0;
+  padding: var(--ui-space-s) var(--ui-space-s) 0;
+  border-top: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-session-empty {
+  padding: var(--ui-space-l) var(--ui-space-s);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+  text-align: center;
+}
+
+/* ---- Settings: a heading per section, its rows in one framed group --------------------------- */
+.ui-settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-s);
+}
+.ui-settings-section + .ui-settings-section {
+  margin-top: var(--ui-space-l);
+}
+.ui-settings-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-height: var(--ui-control-h);
+  padding: 0 var(--ui-space-l);
+}
+.ui-settings-head > h3 {
+  flex: 1;
+  margin: 0;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-settings-head-action {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+}
+.ui-settings-note {
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+.ui-settings-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  height: var(--ui-chat-action-h);
+  padding: 0 var(--ui-space-s);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  cursor: pointer;
+}
+.ui-settings-link > svg {
+  width: var(--ui-space-m);
+  height: var(--ui-space-m);
+  color: var(--ui-fg-secondary);
+}
+.ui-settings-link:hover {
+  background: var(--ui-state-hover);
+}
+.ui-settings-link:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+}
+.ui-settings-group {
+  display: flex;
+  flex-direction: column;
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+}
+/* Inside the group's 1 px frame: the grid step minus the stroke, so names start on the headings'
+ * x (UI-LIBRARY › Spacing: counted from the box's outer edge). */
+.ui-setting {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-m);
+  min-height: var(--ui-section-head-h);
+  padding: var(--ui-space-m) calc(var(--ui-space-l) - var(--ui-stroke));
+}
+.ui-settings-group .ui-meter-track {
+  flex: none;
+  width: var(--ui-meter-w);
+}
+.ui-setting + .ui-setting {
+  border-top: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-setting.is-toggle {
+  cursor: pointer;
+}
+.ui-setting.is-toggle:hover {
+  background: var(--ui-state-hover);
+}
+.ui-setting.is-found {
+  box-shadow: inset 0 0 0 var(--ui-stroke) var(--ui-line-active);
+}
+.ui-setting.is-dim > :not(.ui-setting-control) {
+  opacity: var(--ui-dim);
+}
+.ui-setting-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+  color: var(--ui-fg-secondary);
+}
+.ui-setting-icon > svg {
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+.ui-setting-text-col {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  min-width: 0;
+}
+.ui-setting-name {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  min-height: var(--ui-session-line-h);
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+}
+.ui-setting-hint,
+.ui-setting-status {
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+  line-height: var(--ui-session-line-h);
+}
+.ui-setting-status {
+  color: var(--ui-fg-secondary);
+}
+.ui-setting-status.is-error {
+  color: var(--ui-color-red);
+}
+.ui-setting-status.is-quiet {
+  color: var(--ui-fg-tertiary);
+}
+.ui-setting-reset {
+  display: grid;
+  place-items: center;
+  width: var(--ui-session-line-h);
+  height: var(--ui-session-line-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+  cursor: pointer;
+}
+.ui-setting-reset:hover {
+  background: var(--ui-state-selected);
+  color: var(--ui-fg-primary);
+}
+.ui-setting-reset:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+}
+.ui-setting-control {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: flex-end;
+}
+/* On/off: the library's one framed check, in a 28 px target at the row's end. */
+.ui-setting-check {
+  display: grid;
+  place-items: center;
+  width: var(--ui-control-h);
+  height: var(--ui-control-h);
+  margin-right: calc((var(--ui-menu-check) - var(--ui-control-h)) / 2);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  cursor: pointer;
+}
+.ui-setting-check:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+}
+/* One of several: as wide as its longest value, never across the row. */
+.ui-setting-select {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: var(--ui-setting-select-min);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-m);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ui-setting-select > svg {
+  flex: none;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+  color: var(--ui-fg-tertiary);
+}
+.ui-setting-select > svg:first-child {
+  color: var(--ui-fg-secondary);
+}
+.ui-setting-select:hover,
+.ui-setting-select[aria-expanded='true'] {
+  border-color: var(--ui-line-strong);
+}
+.ui-setting-select:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-line-active);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-setting-select-value {
+  display: grid;
+  flex: 1;
+  text-align: left;
+}
+.ui-setting-select-value > span {
+  grid-area: 1 / 1;
+  visibility: hidden;
+}
+.ui-setting-select-value > span.is-shown {
+  visibility: visible;
+}
+.ui-setting-detail {
+  color: var(--ui-fg-tertiary);
+}
+.ui-setting-text {
+  box-sizing: border-box;
+  width: var(--ui-setting-text-w);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-s);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-field);
+  outline: none;
+  background: var(--ui-bg-control);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+}
+.ui-setting-text::placeholder {
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font);
+}
+.ui-setting-text:hover {
+  border-color: var(--ui-line-strong);
+}
+.ui-setting-text:focus {
+  border-color: var(--ui-line-active);
+}
+.ui-setting-read {
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-body);
+}
+.ui-setting-read.is-mono {
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+}
+
+/* ---- A meter: a limit's share ------------------------------------------------------------------ */
+.ui-meter {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: 0;
+  max-width: calc(var(--ui-meter-w) + var(--ui-space-s) + var(--ui-space-2xl));
+}
+.ui-meter-track {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: var(--ui-meter-h);
+  overflow: hidden;
+  border-radius: var(--ui-radius-dot);
+  background: var(--ui-bg-thumb);
+}
+.ui-meter-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: var(--ui-radius-dot);
+  background: var(--ui-fg-secondary);
+}
+.ui-meter-text {
+  flex: none;
+  min-width: var(--ui-space-2xl);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* ---- The model picker: rail · models · effort, a foot across ----------------------------------- */
+.ui-picker {
+  position: fixed;
+  z-index: calc(var(--ui-z-popover) + 1);
+  display: grid;
+  grid-template-columns: var(--ui-picker-rail-w) var(--ui-picker-models-w) var(
+      --ui-picker-efforts-w
+    );
+  grid-template-rows: auto auto;
+  animation: ui-rise var(--ui-motion-menu) var(--ui-ease);
+}
+.ui-picker-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  padding: var(--ui-space-xs);
+  border-right: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-picker-tab {
+  display: grid;
+  place-items: center;
+  width: calc(var(--ui-picker-rail-w) - 2 * var(--ui-space-xs) - var(--ui-stroke));
+  height: calc(var(--ui-picker-rail-w) - 2 * var(--ui-space-xs) - var(--ui-stroke));
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+}
+.ui-picker-tab > svg {
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+.ui-picker-tab:hover:not(:disabled) {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-picker-tab[aria-selected='true'] {
+  background: var(--ui-bg-on);
+  color: var(--ui-fg-primary);
+}
+.ui-picker-tab:disabled {
+  cursor: default;
+}
+.ui-picker-tab:disabled > * {
+  opacity: var(--ui-dim);
+}
+.ui-picker-tab:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-picker-models {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--ui-menu-pad);
+  border-right: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-picker-list {
+  display: flex;
+  flex-direction: column;
+  height: var(--ui-picker-list-h);
+  overflow-y: auto;
+}
+.ui-picker-empty {
+  padding: var(--ui-space-m) var(--ui-space-s);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+.ui-picker-row-wrap {
+  position: relative;
+  flex: none;
+}
+.ui-picker-row {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-s);
+  width: 100%;
+  height: var(--ui-menu-row-h);
+  padding: 0 var(--ui-menu-item-pad-end) 0 var(--ui-menu-item-pad-start);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ui-picker-row:hover,
+.ui-picker-row-wrap:hover > .ui-picker-row {
+  background: var(--ui-state-hover);
+}
+.ui-picker-row:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-picker-row-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+  color: var(--ui-fg-secondary);
+}
+.ui-picker-row-icon > svg {
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+}
+.ui-picker-row-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ui-picker-star-slot {
+  flex: none;
+  width: var(--ui-icon);
+}
+/* The star sits in its slot left of the check: shown on a favourite, else on hover. */
+.ui-picker-star {
+  position: absolute;
+  top: calc((var(--ui-menu-row-h) - var(--ui-icon)) / 2);
+  right: calc(var(--ui-menu-item-pad-end) + var(--ui-menu-check) + var(--ui-space-s));
+  display: none;
+  place-items: center;
+  width: var(--ui-icon);
+  height: var(--ui-icon);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+  cursor: pointer;
+}
+.ui-picker-star.is-on,
+.ui-picker-row-wrap:hover > .ui-picker-star,
+.ui-picker-star:focus-visible {
+  display: grid;
+}
+.ui-picker-star.is-on {
+  color: var(--ui-fg-primary);
+}
+.ui-picker-star.is-on > svg {
+  fill: currentColor;
+}
+.ui-picker-star:hover {
+  color: var(--ui-fg-primary);
+}
+.ui-picker-efforts {
+  display: flex;
+  flex-direction: column;
+  padding: var(--ui-menu-pad);
+}
+.ui-picker-heading {
+  display: flex;
+  align-items: center;
+  height: var(--ui-control-h);
+  margin-bottom: var(--ui-space-xs);
+  padding: 0 var(--ui-menu-item-pad-start);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-caption);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-picker-foot {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-height: var(--ui-section-head-h);
+  padding: var(--ui-space-xs) var(--ui-space-xs) var(--ui-space-xs) var(--ui-space-m);
+  border-top: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-picker-access {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-s);
+  color: var(--ui-fg-secondary);
+}
+.ui-picker-about {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

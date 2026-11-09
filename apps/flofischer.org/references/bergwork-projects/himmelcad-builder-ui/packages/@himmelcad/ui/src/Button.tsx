@@ -1,0 +1,44 @@
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
+
+import styles from './BaseControls.module.css';
+import { Spinner } from './Spinner.js';
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'quiet' | 'danger';
+  size?: 'small' | 'medium' | 'large';
+  loading?: boolean;
+  loadingLabel?: string;
+  pressed?: boolean;
+  icon?: ReactNode;
+  /** The button element (React 19 passes `ref` as a prop), e.g. a dialog's initial focus. */
+  ref?: Ref<HTMLButtonElement>;
+}
+
+export function Button({
+  variant = 'secondary',
+  size = 'medium',
+  loading = false,
+  loadingLabel = 'Working',
+  pressed,
+  'aria-pressed': ariaPressed,
+  icon,
+  disabled,
+  children,
+  className,
+  ...props
+}: ButtonProps): JSX.Element {
+  return (
+    <button
+      {...props}
+      type={props.type ?? 'button'}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      aria-pressed={pressed ?? ariaPressed}
+      data-size={size}
+      className={`${styles.button} ${styles[`button_${variant}`]} ${styles[`button_${size}`]} ${className ?? ''}`.trim()}
+    >
+      {loading ? <Spinner label={loadingLabel} size="small" /> : icon}
+      <span>{children}</span>
+    </button>
+  );
+}

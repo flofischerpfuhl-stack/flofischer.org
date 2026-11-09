@@ -1,0 +1,144 @@
+/* Layout of the test fixture only (not part of the library). */
+html,
+body {
+  margin: 0;
+  background: var(--ui-bg-view);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+}
+.fx {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--ui-gap);
+  padding: var(--ui-gap);
+}
+.fx-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-gap);
+  width: var(--ui-panel-w);
+}
+.fx-wide {
+  width: auto;
+}
+.fx-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+}
+.fx-panel {
+  height: var(--fx-panel-h, 420px);
+}
+/* Room for the attached menu above its trigger and the tool lists' submenus. */
+.fx-menus-more {
+  align-items: flex-end;
+  min-height: 220px;
+}
+.fx-anchor {
+  position: relative;
+  display: inline-block;
+  min-width: 60px;
+  min-height: 120px;
+}
+.fx-anchor[data-t='attached'] {
+  min-height: 0;
+}
+.fx-trigger {
+  display: inline-block;
+  padding: var(--ui-space-xs) var(--ui-space-s);
+}
+/* Room for the anchor's menu above it; the readout group fills its width. */
+.fx-status-more {
+  align-items: flex-end;
+  min-height: 120px;
+}
+.fx-grow {
+  display: flex;
+  width: 760px;
+}
+.fx-console {
+  display: flex;
+  flex-direction: column;
+  width: 640px;
+}
+/* The tool bars side by side; the placed name tooltip under the first bar. */
+.fx-toolbars {
+  display: flex;
+  gap: var(--ui-gap);
+}
+.fx-toolbars > span {
+  position: relative;
+  display: block;
+}
+/* The library window's cases (library.html): a table at a window's size, the sidebar's width. */
+.fx-lib {
+  display: flex;
+  flex-direction: column;
+  width: 760px;
+  height: 300px;
+  background: var(--ui-bg-chrome);
+}
+.fx-lib.is-short {
+  height: 160px;
+}
+.fx-lib-nav {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  background: var(--ui-bg-chrome);
+}
+.fx-lib-panel {
+  width: var(--ui-panel-w);
+  background: var(--ui-bg-chrome);
+}
+
+/* The manager and work window proposals: a page beside its inspector, a work window. */
+.fx-manager {
+  display: grid;
+  grid-template-columns: 760px var(--ui-manager-inspector-w);
+  height: 980px;
+  border: 1px solid var(--ui-line-control);
+}
+.fx-manager-page {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.fx-manager-inspector {
+  display: flex;
+  border-left: 1px solid var(--ui-line-control);
+}
+.fx-work {
+  position: relative;
+  width: 1360px;
+  height: 680px;
+}
+
+/* The company switcher at the manager sidebar's inner width. */
+.fx-switcher {
+  display: flex;
+  flex-direction: column;
+  width: calc(var(--ui-manager-side-w) - 2 * var(--ui-space-s));
+}
+/* Agent window fixture (agent.tsx): a sidebar's width, a conversation column's width. */
+.fx-agent-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2xs);
+  width: var(--ui-chat-ws-side-w);
+  padding: var(--ui-space-s);
+  background: var(--ui-bg-chrome);
+}
+.fx-agent-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-m);
+  width: var(--ui-chat-ws-column-w);
+  padding: var(--ui-space-l);
+  background: var(--ui-bg-chrome);
+}
+.fx-agent-picker {
+  width: 520px;
+  height: 340px;
+}

@@ -1,0 +1,112 @@
+/* Segmented control (DESIGN-SYSTEM.md "Tool cards"): one track, equal segments, the selected
+   segment filled with a raised neutral surface (not an accent wash). Each segment is as tall as
+   the track (its whole area takes the click: the touch target is the track's height); the filled
+   look is drawn inset by `::before`. */
+.track {
+  --seg-h: var(--hc-segmented-h, var(--hc-size-control-h, 28px));
+  --seg-inset: 2px;
+  --seg-track-bg: var(--hc-bg-island-lo);
+  --seg-selected-bg: color-mix(in srgb, var(--hc-fg-strong) 15%, var(--hc-bg-island));
+  --seg-selected-border: var(--hc-border-strong);
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(max-content, 1fr);
+  align-items: stretch;
+  box-sizing: border-box;
+  height: var(--seg-h);
+  min-width: 0;
+  max-width: 100%;
+  padding: 0;
+  background: var(--seg-track-bg);
+  border: 1px solid var(--hc-border-default);
+  border-radius: var(--hc-radius-md);
+  font-family: var(--hc-font-ui);
+  font-size: var(--hc-segmented-font, 12px);
+  line-height: 1;
+}
+
+:global(.hc-theme-light) .track {
+  --seg-selected-bg: var(--hc-bg-island);
+  --seg-selected-border: var(--hc-border-strong);
+}
+
+/* Equal segments across the container (a card's control column) where the room allows; a
+   segment never gets narrower than its label (a long label takes the room it needs). */
+.fill {
+  display: grid;
+  grid-auto-columns: minmax(max-content, 1fr);
+  width: 100%;
+}
+
+.segment {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 0;
+  height: 100%;
+  padding: 0 calc(var(--hc-segmented-pad-x, 10px) + var(--seg-inset));
+  color: var(--hc-fg-muted);
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--hc-radius-md) - 1px);
+  font: inherit;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--hc-motion-fast);
+}
+
+.segment::before {
+  content: '';
+  position: absolute;
+  inset: var(--seg-inset);
+  border: 1px solid transparent;
+  border-radius: calc(var(--hc-radius-md) - 2px);
+  transition: background var(--hc-motion-fast);
+}
+
+.label {
+  position: relative;
+  overflow: hidden;
+  padding-block: 2px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+}
+
+.segment:hover:not(:disabled):not(.selected) {
+  color: var(--hc-fg-strong);
+}
+
+.segment:hover:not(:disabled):not(.selected)::before {
+  background: var(--hc-hover-bg);
+}
+
+.segment:focus-visible {
+  outline: 2px solid var(--hc-focus-ring, var(--hc-accent-base));
+  outline-offset: -2px;
+}
+
+.selected {
+  color: var(--hc-fg-strong);
+  cursor: default;
+}
+
+.selected::before {
+  background: var(--seg-selected-bg);
+  border-color: var(--seg-selected-border);
+  box-shadow: var(--hc-shadow-chip);
+}
+
+.segment:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment,
+  .segment::before {
+    transition: none;
+  }
+}

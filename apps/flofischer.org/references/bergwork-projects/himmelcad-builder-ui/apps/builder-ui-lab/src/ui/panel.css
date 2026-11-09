@@ -1,0 +1,179 @@
+/* Panel: a side panel — rail (tabs, then the panel's own buttons below a line), an optional
+ * toolbar zone, the content (lab .lab-side, .lab-side-tabs, .lab-layers-tools, .lab-side-body).
+ * Zones are divided by lines (owner 2026-11-06: „ein paar mehr Trennlinien lassen erkennen, dass
+ * da Platz für etwas Spezifisches ist"). */
+.ui-panel {
+  display: flex;
+  flex-direction: row;
+  width: var(--ui-panel-w);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.ui-panel.is-right {
+  flex-direction: row-reverse;
+}
+.ui-panel-rail {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  width: var(--ui-rail-w);
+  padding: var(--ui-rail-pad-y) 0;
+  border-right: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-panel.is-right .ui-panel-rail {
+  border-right: 0;
+  border-left: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-panel-rail-spacer {
+  flex: 1;
+  align-self: stretch;
+  margin: 0 var(--ui-space-s) var(--ui-space-xs);
+  border-bottom: var(--ui-stroke) solid var(--ui-line-control);
+}
+.ui-panel-tab,
+.ui-rail-toggle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--ui-rail-tab);
+  height: var(--ui-rail-tab);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-small);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  cursor: pointer;
+}
+.ui-panel-tab:hover,
+.ui-rail-toggle:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-panel-tab.is-on {
+  background: var(--ui-bg-on);
+  color: var(--ui-fg-primary);
+}
+.ui-panel-tab:focus-visible,
+.ui-rail-toggle:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset);
+}
+/* Running work: a blue dot (the same blue as a selected line). */
+.ui-panel-busy {
+  position: absolute;
+  top: var(--ui-busy-inset);
+  right: var(--ui-busy-inset);
+  width: var(--ui-busy-dot);
+  height: var(--ui-busy-dot);
+  border-radius: var(--ui-radius-dot);
+  background: var(--ui-color-blue);
+}
+/* Waiting for the user (proposal 2026-11-06, design/chats): the same dot, neutral. */
+.ui-panel-busy.is-waiting {
+  background: var(--ui-fg-primary);
+}
+/* The frame convention: no frame off, dashed frame automatic, solid frame on. */
+.ui-rail-frame {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--ui-rail-frame);
+  height: var(--ui-rail-frame);
+  border: var(--ui-rail-frame-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+}
+.ui-rail-frame.is-dashed {
+  border-style: dashed;
+  border-color: currentColor;
+}
+.ui-rail-frame.is-solid {
+  border-color: currentColor;
+  color: var(--ui-fg-primary);
+}
+.ui-panel-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+/* The scrollbar has its lane from the start, so nothing shifts when the content starts to scroll;
+ * the lane takes the place of the right inset. */
+.ui-panel-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: auto;
+  padding: var(--ui-space-s) 0 var(--ui-space-m) var(--ui-space-s);
+  scrollbar-gutter: stable;
+}
+/* A list (ListPane) fills the body: only its list scrolls, its scrollbar a column of its own. */
+.ui-panel-body:has(> .ui-list-pane) {
+  padding: 0;
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+.ui-panel.is-fill {
+  width: 100%;
+}
+/* The inner edge: a 2 px active line on hover or keyboard focus. */
+.ui-panel-resize {
+  position: absolute;
+  top: var(--ui-space-m);
+  bottom: var(--ui-space-m);
+  width: var(--ui-space-s);
+  cursor: col-resize;
+  touch-action: none;
+}
+.ui-panel-resize.is-left {
+  right: calc(-1 * var(--ui-space-xs));
+}
+.ui-panel-resize.is-right {
+  left: calc(-1 * var(--ui-space-xs));
+}
+.ui-panel-resize:hover,
+.ui-panel-resize:focus-visible {
+  background: linear-gradient(var(--ui-line-active), var(--ui-line-active)) center /
+    var(--ui-space-2xs) 100% no-repeat;
+  outline: none;
+}
+/* Along the top (the console): inside the edge, the surface clips what sticks out. */
+.ui-panel-resize.is-top {
+  top: 0;
+  right: var(--ui-space-m);
+  bottom: auto;
+  left: var(--ui-space-m);
+  z-index: 1;
+  width: auto;
+  height: var(--ui-resize-edge);
+  cursor: row-resize;
+}
+.ui-panel-resize.is-top:hover,
+.ui-panel-resize.is-top:focus-visible {
+  background-size: 100% var(--ui-space-2xs);
+}
+/* What a panel says when it has nothing to show. */
+.ui-panel-empty {
+  padding: var(--ui-panel-empty-pad-y) var(--ui-space-s);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-body);
+  text-align: center;
+}
+
+/* Pop-out (proposal 2026-11-06, design/chats). Inside a pop-out window the panel has no surface of
+ * its own; a rail a dragged tab would join is marked like a pressed item. */
+.ui-panel.is-bare {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.ui-panel-rail.is-drop {
+  background: var(--ui-state-selected);
+}
+.ui-panel-tab {
+  touch-action: none;
+}

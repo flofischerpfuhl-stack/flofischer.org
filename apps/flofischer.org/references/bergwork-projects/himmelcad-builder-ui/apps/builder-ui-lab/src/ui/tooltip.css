@@ -1,0 +1,25 @@
+/* Tooltip (lab .lab-tip): the product's one tooltip — a name and its key, never a half-sentence
+ * (owner 2026-11-06). Below its element, above when there is no room. */
+.ui-tip {
+  position: fixed;
+  z-index: calc(var(--ui-z-popover) + 2);
+  max-width: min(var(--ui-tip-max-w), calc(100vw - 2 * var(--ui-window-margin)));
+  padding: var(--ui-tip-pad-y) var(--ui-tip-pad-x);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-bg-popover);
+  box-shadow: var(--ui-shadow-chip);
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  line-height: var(--ui-leading-tip);
+  white-space: pre-line;
+  pointer-events: none;
+}
+/* Placed by its owner under its trigger (the function bar's names), not at the pointer. */
+.ui-tip.is-placed {
+  position: absolute;
+  max-width: none;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}

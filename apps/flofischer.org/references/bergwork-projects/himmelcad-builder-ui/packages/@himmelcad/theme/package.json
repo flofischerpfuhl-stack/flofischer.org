@@ -1,0 +1,24 @@
+{
+  "name": "@himmelcad/theme",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/tokens.css",
+    "./reset.css": "./src/reset.css",
+    "./fonts.css": "./src/fonts.css",
+    "./fonts/*": "./src/fonts/*",
+    "./icons/*": "./src/icons/*"
+  },
+  "scripts": {
+    "lint:tokens": "node scripts/check-status-text-tokens.mjs",
+    "test": "pnpm lint:tokens",
+    "typecheck": "tsc -b"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}

@@ -1,0 +1,68 @@
+/* ---- Console (lab .lab-console; owner 2026-11-06: „warum kann ich die Konsole nicht größer
+ * ziehen?"): a floating surface that fills the app's box — head, log, command line. ----------- */
+.ui-console {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.ui-console-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-console-head-gap);
+  padding: var(--ui-console-head-pad-y) var(--ui-console-head-pad-end) var(--ui-console-head-pad-y)
+    var(--ui-console-head-pad-start);
+  border-bottom: var(--ui-stroke) solid var(--ui-line-separator);
+  font-size: var(--ui-text-body);
+}
+.ui-console-head > span {
+  flex: 1;
+}
+.ui-console-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.ui-console-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--ui-console-log-pad-y) var(--ui-space-l);
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  line-height: var(--ui-leading-console);
+}
+.ui-console-line.is-command {
+  color: var(--ui-fg-primary);
+}
+.ui-console-scroll {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--ui-console-scroll-pad);
+  border-left: var(--ui-stroke) solid var(--ui-line-separator);
+}
+.ui-console-input {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-m);
+  padding: var(--ui-console-log-pad-y) var(--ui-space-l);
+  border-top: var(--ui-stroke) solid var(--ui-line-separator);
+  font-family: var(--ui-font-mono);
+}
+.ui-console-input > span {
+  color: var(--ui-fg-primary);
+}
+.ui-console-input > input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  outline-offset: var(--ui-console-input-focus-offset);
+}

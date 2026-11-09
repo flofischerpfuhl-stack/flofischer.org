@@ -1,0 +1,41 @@
+/* SubsetField (proposal 2026-11-07): groups open in place, their elements indented. Tokens only. */
+.ui-subset-row {
+  display: flex;
+  align-items: center;
+}
+.ui-subset-row > .ui-menu-item {
+  flex: 1;
+  min-width: 0;
+}
+/* The twisty stands where a row's icon would; a child's text starts under the group's text. */
+.ui-subset-twisty {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ui-icon);
+  height: var(--ui-menu-row-h);
+  margin-left: var(--ui-menu-item-pad-start);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-inner);
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+  cursor: pointer;
+}
+.ui-subset-twisty:hover {
+  color: var(--ui-fg-primary);
+}
+.ui-subset-twisty > svg {
+  transition: rotate var(--ui-motion-twisty);
+}
+.ui-subset-twisty > svg.is-open {
+  rotate: 90deg;
+}
+.ui-subset-row:not(.is-child) > .ui-menu-item {
+  padding-left: var(--ui-space-xs);
+}
+.ui-subset-row.is-child > .ui-menu-item {
+  padding-left: calc(
+    var(--ui-menu-item-pad-start) + var(--ui-icon) + var(--ui-space-xs) + var(--ui-space-l)
+  );
+}

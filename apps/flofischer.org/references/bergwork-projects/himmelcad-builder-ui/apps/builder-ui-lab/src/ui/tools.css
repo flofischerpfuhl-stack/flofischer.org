@@ -1,0 +1,167 @@
+/* Tool lists (lab .lab-tools, .lab-tool*, .lab-subfunctions, .lab-mini-list, .lab-mini-sub; owner
+ * 2026-11-06 after Shapr3D): the function bar's method list and the right-click functions are one
+ * pattern. Greys from our scale: column and chips chrome, lines the control line. */
+.ui-tools {
+  --ui-tool-size: var(--ui-tool-bar);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-xs);
+  width: max-content;
+}
+.ui-tools.is-cursor {
+  --ui-tool-size: var(--ui-tool-cursor);
+  --ui-tools-inset: var(--ui-space-xs);
+  position: relative;
+  max-width: var(--ui-menu-max-w);
+  padding: var(--ui-space-xs);
+}
+/* The icon column's surface: exactly on the icons (the list's padding, the title above it). */
+.ui-tools::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--ui-tools-inset, 0px) + var(--ui-tools-top, 0px));
+  bottom: var(--ui-tools-inset, 0px);
+  left: var(--ui-tools-inset, 0px);
+  width: var(--ui-tool-size);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-bg-chrome);
+  pointer-events: none;
+}
+/* The method list: right under its function, the padding bridges bar and list for the pointer. */
+.ui-tools.has-title {
+  --ui-tools-top: calc(var(--ui-space-xs) + var(--ui-tools-title-h) + var(--ui-space-xs));
+  padding-top: var(--ui-space-xs);
+}
+.ui-tools.is-closable,
+.ui-tools.is-open {
+  position: absolute;
+  transition:
+    opacity var(--ui-motion-list) linear,
+    visibility var(--ui-motion-list) linear;
+}
+.ui-tools.is-closable {
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+.ui-tools.is-closable > .ui-tool,
+.ui-tools.is-open > .ui-tool {
+  transition:
+    opacity var(--ui-motion-rows) linear,
+    transform var(--ui-motion-rows-move) var(--ui-ease);
+}
+.ui-tools.is-closable > .ui-tool {
+  opacity: 0;
+  transform: translateY(calc(-1 * var(--ui-rise)));
+}
+.ui-tools.is-open > .ui-tool {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: calc(var(--ui-item-index, 0) * var(--ui-motion-stagger));
+}
+/* The function's name, centred over the icon column (wider names overhang evenly). */
+.ui-tools-title {
+  display: flex;
+  justify-content: center;
+  width: var(--ui-tool-size);
+  height: var(--ui-tools-title-h);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-caption);
+  font-weight: var(--ui-weight-strong);
+  line-height: var(--ui-tools-title-h);
+  white-space: nowrap;
+}
+.ui-tool {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  height: var(--ui-tool-size);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  white-space: pre-line;
+  cursor: pointer;
+}
+/* The row's hover reaches across half the gap above and below: no dead line between rows. */
+.ui-tool::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--ui-space-xs) / -2) 0;
+}
+/* The hover square sits inside the column's frame, not over it. */
+.ui-tool-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--ui-tool-size);
+  height: var(--ui-tool-size);
+  padding: var(--ui-tool-icon-inset);
+  border-radius: var(--ui-radius-small);
+  background-clip: content-box;
+  color: var(--ui-fg-primary);
+}
+.ui-tool-label {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-tool-size);
+  padding: 0 var(--ui-button-pad-x);
+  border: var(--ui-stroke) solid var(--ui-line-control);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-bg-chrome);
+  white-space: nowrap;
+}
+.ui-tool:hover .ui-tool-icon,
+.ui-tool[aria-expanded='true'] .ui-tool-icon {
+  background-color: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-tool:hover .ui-tool-label,
+.ui-tool[aria-expanded='true'] .ui-tool-label {
+  background: linear-gradient(var(--ui-state-hover), var(--ui-state-hover)) var(--ui-bg-chrome);
+  color: var(--ui-fg-primary);
+}
+.ui-tool:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset);
+}
+.ui-tool-more {
+  margin-right: calc(-1 * var(--ui-space-xs));
+  color: var(--ui-fg-tertiary);
+}
+/* A tool group's tools beside the list, its first row level with the group's row; the gap to the
+ * row belongs to it for the pointer (no hover gap, owner 2026-11-06). */
+.ui-tool-sub-anchor {
+  position: relative;
+}
+.ui-tools.ui-tools-sub {
+  position: absolute;
+  top: calc(-1 * var(--ui-space-xs));
+  z-index: 1;
+}
+.ui-tools-sub.is-right {
+  left: calc(100% + var(--ui-sub-gap));
+}
+.ui-tools-sub.is-left {
+  right: calc(100% + var(--ui-sub-gap));
+}
+.ui-tools-sub::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--ui-sub-bridge);
+}
+.ui-tools-sub.is-right::after {
+  right: 100%;
+}
+.ui-tools-sub.is-left::after {
+  left: 100%;
+}

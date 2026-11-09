@@ -1,0 +1,503 @@
+/* Tables (proposal 2026-11-07, attribute system): the compact value in Properties, the table's
+ * window, the grid, keys as items. Tokens only. One rule for the cells: an editable value is a
+ * field (the control fill, the hover frame, the active line while it is current), a read-only one
+ * plain text — as everywhere in Properties. */
+.ui-sheet-value {
+  min-width: 0;
+  cursor: pointer;
+}
+.ui-sheet-value .ui-field-value {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: 0;
+}
+.ui-sheet-count {
+  flex: none;
+}
+.ui-sheet-first {
+  overflow: hidden;
+  min-width: 0;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- The window: a head that moves it, the grid, edges that size it ------------------------- */
+.ui-sheet-window {
+  position: fixed;
+  z-index: var(--ui-z-table-window);
+  display: flex;
+  flex-direction: column;
+  min-width: var(--ui-sheet-window-min);
+  max-width: calc(100vw - 2 * var(--ui-space-2xl));
+  max-height: var(--ui-sheet-window-max-h);
+  overflow: hidden;
+  animation: ui-rise var(--ui-motion-menu) var(--ui-ease);
+}
+.ui-sheet-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-s);
+  height: var(--ui-sheet-head-h);
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-l);
+  border-bottom: var(--ui-stroke) solid var(--ui-line-separator);
+  cursor: grab;
+}
+.ui-sheet-title {
+  flex: none;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-sheet-meta {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+  white-space: nowrap;
+}
+.ui-sheet-head-gap {
+  flex: 1;
+}
+/* A link to an attribute table (its code and name, then ›): the window's head and a group's. */
+.ui-sheet-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  min-width: 0;
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-xs);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-dense);
+  font-weight: var(--ui-weight-strong);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ui-sheet-link:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-sheet-link > svg {
+  flex: none;
+  color: var(--ui-fg-tertiary);
+}
+.ui-sheet-link:hover > svg {
+  color: var(--ui-fg-primary);
+}
+.ui-sheet-link:focus-visible {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}
+.ui-sheet-code {
+  font-family: var(--ui-font-mono);
+  font-weight: var(--ui-weight-regular);
+}
+.ui-sheet-edge {
+  position: absolute;
+}
+.ui-sheet-edge.is-e,
+.ui-sheet-edge.is-w {
+  top: var(--ui-sheet-head-h);
+  bottom: var(--ui-sheet-edge);
+  width: var(--ui-sheet-edge);
+  cursor: ew-resize;
+}
+.ui-sheet-edge.is-e {
+  right: 0;
+}
+.ui-sheet-edge.is-w {
+  left: 0;
+}
+.ui-sheet-edge.is-s {
+  right: var(--ui-sheet-edge);
+  bottom: 0;
+  left: var(--ui-sheet-edge);
+  height: var(--ui-sheet-edge);
+  cursor: ns-resize;
+}
+.ui-sheet-edge.is-se,
+.ui-sheet-edge.is-sw {
+  bottom: 0;
+  width: var(--ui-sheet-edge);
+  height: var(--ui-sheet-edge);
+}
+.ui-sheet-edge.is-se {
+  right: 0;
+  cursor: nwse-resize;
+}
+.ui-sheet-edge.is-sw {
+  left: 0;
+  cursor: nesw-resize;
+}
+
+/* ---- The grid -------------------------------------------------------------------------------- */
+.ui-sheet-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 var(--ui-space-s) var(--ui-space-s);
+  outline: 0;
+}
+.ui-sheet {
+  border-collapse: separate;
+  border-spacing: var(--ui-space-2xs);
+  /* The spacing's outer ring would push the grid off the window's inset. */
+  margin: 0 calc(-1 * var(--ui-space-2xs));
+}
+.ui-sheet thead th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  height: var(--ui-control-h);
+  /* A heading's text on its cells' text x (a cell's frame and padding). */
+  padding: 0 calc(var(--ui-field-pad-x) + var(--ui-stroke));
+  background: var(--ui-bg-chrome);
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+  font-weight: var(--ui-weight-strong);
+  text-align: left;
+  white-space: nowrap;
+  /* The head row's line under the names. */
+  box-shadow: 0 var(--ui-space-2xs) 0 var(--ui-bg-chrome);
+}
+.ui-sheet-columns th {
+  overflow: hidden;
+  max-width: var(--ui-sheet-cell-max);
+  text-overflow: ellipsis;
+}
+.ui-sheet:has(.ui-sheet-groups) .ui-sheet-columns th {
+  top: calc(var(--ui-control-h) + var(--ui-space-2xs));
+}
+.ui-sheet thead th.is-number {
+  text-align: right;
+}
+.ui-sheet-unit {
+  margin-left: var(--ui-space-xs);
+  color: var(--ui-fg-tertiary);
+  font-weight: var(--ui-weight-regular);
+}
+/* A group of columns: the attribute table they come from, a line under its whole span. */
+.ui-sheet .ui-sheet-groups th {
+  padding: 0;
+}
+.ui-sheet-groups th[scope='colgroup'] {
+  box-shadow: inset 0 calc(-1 * var(--ui-stroke)) 0 var(--ui-line-strong);
+}
+.ui-sheet-group {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  min-width: 0;
+  /* The link's own padding brings its text to the cells' text x. */
+  padding-left: calc(var(--ui-field-pad-x) + var(--ui-stroke) - var(--ui-space-xs));
+}
+.ui-sheet-group-name {
+  padding-left: var(--ui-space-xs);
+}
+.ui-sheet-source {
+  overflow: hidden;
+  min-width: 0;
+  color: var(--ui-fg-tertiary);
+  font-weight: var(--ui-weight-regular);
+  text-overflow: ellipsis;
+}
+/* The corner and the head column stay at the left while the grid scrolls sideways. */
+.ui-sheet .ui-sheet-corner {
+  position: sticky;
+  z-index: 2;
+  left: 0;
+}
+.ui-sheet-rowhead {
+  position: sticky;
+  z-index: 1;
+  left: 0;
+  min-width: var(--ui-sheet-rowhead-min);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-space-s) 0 var(--ui-space-xs);
+  border-radius: var(--ui-radius-field);
+  background: var(--ui-bg-chrome);
+  font-weight: var(--ui-weight-regular);
+  text-align: right;
+  cursor: default;
+}
+.ui-sheet-rowhead:hover {
+  box-shadow: var(--ui-sheet-tint-hover);
+}
+.ui-sheet-number {
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+.ui-sheet.is-elements .ui-sheet-rowhead {
+  min-width: var(--ui-sheet-element-min);
+  padding-left: calc(var(--ui-field-pad-x) + var(--ui-stroke));
+  text-align: left;
+}
+.ui-sheet.is-elements .ui-sheet-corner {
+  padding-left: calc(var(--ui-field-pad-x) + var(--ui-stroke));
+}
+/* An element's name: a link that selects it (every row that names an element links to it). */
+.ui-sheet-element {
+  max-width: var(--ui-sheet-cell-max);
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ui-sheet-element:hover {
+  text-decoration: underline;
+}
+/* A selected row: its head and cells tinted over their fill. */
+.ui-sheet tr[aria-selected='true'] > .ui-sheet-rowhead,
+.ui-sheet tr[aria-selected='true'] .ui-sheet-cell {
+  box-shadow: var(--ui-sheet-tint);
+}
+.ui-sheet-td {
+  padding: 0;
+}
+.ui-sheet-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  width: 100%;
+  min-width: var(--ui-sheet-cell-min);
+  max-width: var(--ui-sheet-cell-max);
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-field-pad-x);
+  border: var(--ui-stroke) solid transparent;
+  border-radius: var(--ui-radius-field);
+  outline: 0;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  white-space: nowrap;
+}
+.ui-sheet-cell.is-edit {
+  background: var(--ui-bg-control);
+}
+.ui-sheet-cell.is-edit:hover {
+  border-color: var(--ui-line-control);
+}
+.ui-sheet-cell.is-current,
+.ui-sheet-cell.is-current:hover,
+.ui-sheet-cell.is-editing {
+  border-color: var(--ui-line-active);
+}
+.ui-sheet-cell.is-mono {
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+.ui-sheet-cell.is-number {
+  justify-content: flex-end;
+  min-width: var(--ui-sheet-number-min);
+  text-align: right;
+}
+.ui-sheet-cell.is-inherited {
+  color: var(--ui-fg-secondary);
+}
+.ui-sheet-text {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+.ui-sheet-placeholder {
+  color: var(--ui-fg-tertiary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  font-style: italic;
+}
+.ui-sheet-cell.is-image {
+  min-width: var(--ui-sheet-image-min);
+  padding-left: var(--ui-space-2xs);
+}
+.ui-sheet-thumb {
+  flex: none;
+  width: calc((var(--ui-control-h) - 2 * var(--ui-space-2xs)) * 1.5);
+  height: calc(var(--ui-control-h) - 2 * var(--ui-space-2xs) - 2 * var(--ui-stroke));
+  border-radius: var(--ui-radius-inner);
+}
+.ui-sheet-cell.is-rows {
+  justify-content: space-between;
+  padding-right: 0;
+}
+/* ↗ as the `>` segment of a field: behind a full-height line. */
+.ui-sheet-open {
+  display: grid;
+  flex: none;
+  place-items: center;
+  align-self: stretch;
+  width: var(--ui-field-more-w);
+  padding: 0;
+  border: 0;
+  border-left: var(--ui-stroke) solid var(--ui-line-control);
+  background: transparent;
+  color: var(--ui-fg-tertiary);
+  cursor: pointer;
+}
+.ui-sheet-open:hover {
+  color: var(--ui-fg-primary);
+}
+.ui-sheet-empty {
+  padding: var(--ui-space-m) var(--ui-field-pad-x);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-body);
+}
+.ui-sheet-add {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-s);
+  width: 100%;
+  height: var(--ui-control-h);
+  padding: 0 var(--ui-field-pad-x);
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  cursor: pointer;
+}
+.ui-sheet-add:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-sheet-add > span {
+  text-box: trim-both cap alphabetic;
+}
+
+/* ---- Keys as items: Properties' two columns, the name an object, the type a field ------------- */
+.ui-keys {
+  display: grid;
+  grid-template-columns: subgrid;
+  /* A section body's gap is its row gap both ways; the keys keep Properties' label gap. */
+  column-gap: var(--ui-prop-gap);
+  row-gap: var(--ui-row-gap);
+  outline: 0;
+}
+.ui-keys-head,
+.ui-keys-row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  column-gap: var(--ui-prop-gap);
+  min-height: var(--ui-control-h);
+  padding-left: var(--ui-prop-label-inset);
+}
+.ui-keys-head {
+  min-height: auto;
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+  font-weight: var(--ui-weight-strong);
+}
+.ui-keys-head > span:last-child {
+  padding-left: calc(var(--ui-field-pad-x) + var(--ui-stroke));
+}
+.ui-keys-row {
+  border-radius: var(--ui-radius-field);
+  cursor: default;
+}
+.ui-keys-row:hover {
+  background: var(--ui-state-hover);
+}
+.ui-keys-row[aria-selected='true'] {
+  background: var(--ui-state-selected);
+}
+.ui-keys-row.is-depth-1 {
+  padding-left: calc(var(--ui-prop-label-inset) + var(--ui-prop-indent));
+}
+.ui-keys-name {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  /* The twisty sits in the inset before the name, as a nested section's. */
+  margin-left: calc(-1 * var(--ui-prop-indent));
+}
+.ui-keys-name > .ui-list-twisty,
+.ui-keys-name > .ui-list-twisty button {
+  flex: none;
+  width: var(--ui-prop-indent);
+}
+.ui-keys-label {
+  overflow: hidden;
+  min-width: 0;
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Renaming never widens the name column: the field fills it without asking for room. */
+.ui-keys-name > .ui-list-rename {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  margin-left: 0;
+}
+.ui-keys-type {
+  display: flex;
+  min-width: 0;
+}
+.ui-keys-read {
+  overflow: hidden;
+  padding-left: calc(var(--ui-field-pad-x) + var(--ui-stroke));
+  color: var(--ui-fg-primary);
+  font-size: var(--ui-text-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-keys-empty {
+  grid-column: 1 / -1;
+  padding-left: var(--ui-prop-label-inset);
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-body);
+}
+.ui-keys-add {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  height: var(--ui-control-h);
+  /* The + in the twisty's place, the label where the names start. */
+  padding: 0 0 0 calc(var(--ui-prop-label-inset) - var(--ui-prop-indent) + var(--ui-space-2xs));
+  border: 0;
+  border-radius: var(--ui-radius-field);
+  background: transparent;
+  color: var(--ui-fg-secondary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.ui-keys-add.is-depth-1 {
+  padding-left: calc(var(--ui-prop-label-inset) + var(--ui-space-2xs));
+}
+.ui-keys-add:hover {
+  background: var(--ui-state-hover);
+  color: var(--ui-fg-primary);
+}
+.ui-keys-add > svg {
+  flex: none;
+  width: var(--ui-icon);
+}
+.ui-keys-add > span {
+  text-box: trim-both cap alphabetic;
+}
+.ui-keys:focus-visible .ui-keys-row[aria-selected='true'] {
+  outline: var(--ui-stroke) solid var(--ui-fg-secondary);
+  outline-offset: var(--ui-focus-offset-inset);
+}

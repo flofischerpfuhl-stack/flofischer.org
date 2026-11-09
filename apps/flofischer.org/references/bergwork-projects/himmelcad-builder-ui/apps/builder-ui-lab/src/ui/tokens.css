@@ -1,0 +1,589 @@
+/* Builder UI library — tokens (docs/ui-redesign/UI-LIBRARY.md).
+ *
+ * The only file of the library with literal values. Every component stylesheet in src/ui reads
+ * these `--ui-*` names and nothing else (scripts/ui-lib-check.mjs `css`). The values are copied
+ * 1:1 from the lab as of 1955e069 (lab.css greyscale, type scale, spacing grid; bottom-bar.css
+ * status pills; function-panel.css and properties.css fields) and must stay equal to what the lab
+ * renders until the lab is migrated (ui-lib-check `parity`).
+ *
+ * Roles, not shades (owner 2026-11-06: „eine klare Greyscale-Hierarchie … dass alles schön
+ * einheitlich bleibt"): five surfaces, two white-overlay states (hover, selected), three text
+ * steps and disabled, four lines and three colours with one meaning each (blue selected and
+ * running work, yellow being worked on, red error). UI states are greyscale only. */
+
+:root,
+.hc-theme-dark {
+  /* ---- Surfaces ---------------------------------------------------------------------------- */
+  /* chrome: every floating surface (panels, bars, title pills) */
+  --ui-bg-chrome: #121316;
+  /* control: fields, toggle tracks — one step lighter than the chrome they sit on */
+  --ui-bg-control: #1a1c20;
+  /* view: the viewport only */
+  --ui-bg-view: #1d1f23;
+  /* popover: menus, dropdowns, tooltips — the chrome's grey, lifted by border and shadow */
+  --ui-bg-popover: var(--ui-bg-chrome);
+  /* thumb: the chosen option of a toggle, count boxes */
+  --ui-bg-thumb: #2a2d32;
+  /* on: a status item, rail tab or toolbar button that is on (dark: the thumb) */
+  --ui-bg-on: var(--ui-bg-thumb);
+  /* pill: the status group pills (dark: the chrome) */
+  --ui-bg-pill: var(--ui-bg-chrome);
+  /* button: the neutral button (dark: the control grey) */
+  --ui-bg-button: var(--ui-bg-control);
+
+  /* ---- States: white overlays, the same on every surface ----------------------------------- */
+  --ui-state-hover: rgba(255, 255, 255, 0.045);
+  --ui-state-selected: rgba(255, 255, 255, 0.09);
+
+  /* ---- Text: three steps (contrast on the chrome 16.7 / 9.2 / 5.3 : 1) and disabled ---------- */
+  --ui-fg-primary: #f2f3f5;
+  --ui-fg-secondary: #b3b7be;
+  --ui-fg-tertiary: #858991;
+  /* The text of a disabled field (an input has no child to dim): primary at --ui-dim. */
+  --ui-fg-disabled: rgba(242, 243, 245, 0.45);
+
+  /* ---- Lines ------------------------------------------------------------------------------- */
+  --ui-line-separator: rgba(255, 255, 255, 0.06);
+  --ui-line-control: rgba(255, 255, 255, 0.1);
+  --ui-line-strong: rgba(255, 255, 255, 0.16);
+  /* The field that takes the typing: neutral, never accent. */
+  --ui-line-active: rgba(255, 255, 255, 0.42);
+
+  /* ---- The three colours --------------------------------------------------------------------- */
+  --ui-color-blue: #0000ff;
+  --ui-color-yellow: #ffbe00;
+  --ui-color-red: #f87171;
+
+  /* ---- Shadows ----------------------------------------------------------------------------- */
+  --ui-shadow: 0 10px 30px rgba(0, 0, 0, 0.42), 0 1px 2px rgba(0, 0, 0, 0.5);
+  --ui-shadow-chip: 0 1px 2px rgba(0, 0, 0, 0.45);
+
+  /* ---- Text selection ---------------------------------------------------------------------- */
+  --ui-text-selection: rgba(255, 255, 255, 0.22);
+  /* Files dragged over the window (proposal, design/chats). */
+  --ui-drop-dim: rgba(0, 0, 0, 0.45);
+}
+
+.hc-theme-light {
+  /* Light keeps the lab's current values (owner 2026-11-06 asked for the dark pass only). Every
+   * derived token is restated: a var() resolves where it is declared. */
+  --ui-bg-chrome: #f1f2f5;
+  --ui-bg-control: #e4e6ea;
+  --ui-bg-view: #e2e5ea;
+  --ui-bg-popover: #ffffff;
+  --ui-bg-thumb: #ffffff;
+  --ui-bg-on: #cdd0d5;
+  --ui-bg-pill: #ffffff;
+  --ui-bg-button: #ffffff;
+  --ui-state-hover: rgba(15, 17, 22, 0.04);
+  --ui-state-selected: rgba(15, 17, 22, 0.08);
+  --ui-fg-primary: #0f1115;
+  --ui-fg-secondary: #555c68;
+  --ui-fg-tertiary: #656c77;
+  --ui-fg-disabled: rgba(15, 17, 21, 0.45);
+  --ui-line-separator: rgba(15, 17, 22, 0.06);
+  --ui-line-control: rgba(15, 17, 22, 0.12);
+  --ui-line-strong: rgba(15, 17, 22, 0.2);
+  --ui-line-active: rgba(15, 17, 22, 0.45);
+  --ui-color-red: #d92d20;
+  --ui-shadow: 0 10px 28px rgba(15, 17, 22, 0.14), 0 1px 2px rgba(15, 17, 22, 0.1);
+  --ui-shadow-chip: 0 1px 2px rgba(15, 17, 22, 0.08);
+  --ui-text-selection: rgba(20, 24, 32, 0.16);
+  --ui-drop-dim: rgba(15, 17, 22, 0.25);
+}
+
+:root {
+  /* ---- Type -------------------------------------------------------------------------------- */
+  --ui-font: var(--hc-font-ui);
+  --ui-font-mono: var(--hc-font-mono);
+  --ui-font-display: var(--hc-font-display);
+  /* 11 captions (menu sections, product), 12 dense panel content, 13 menus, list rows, buttons,
+   * panel titles and the status bar, 15 dialog titles, 18 the wordmark (display face only). */
+  --ui-text-caption: 11px;
+  --ui-text-dense: 12px;
+  --ui-text-body: 13px;
+  --ui-text-title: 15px;
+  --ui-text-wordmark: 18px;
+  --ui-weight-regular: 400;
+  --ui-weight-strong: 600;
+  --ui-leading-tip: 16px;
+  --ui-leading-caption: 16px;
+  --ui-leading-count: 21px;
+  --ui-leading-value: 1.35;
+  --ui-tracking-wordmark: 0.06em;
+  --ui-tracking-product: 0.16em;
+
+  /* ---- Spacing grid: 2 / 4 / 8 / 12 / 16 (24, 32 for large gaps) (owner 2026-11-06: „Abstände
+   * aufs Raster 2/4/8/12/16"). Every padding, gap and margin is a step of it, measured from a
+   * box's outer edge: inside a bordered box the step minus the 1 px stroke (status items, fields,
+   * the function panel's labels). Not spacing, so free: sizes of controls, centring in a fixed
+   * box and alignments computed from other tokens (written as calc), places of markers, and the
+   * baseline nudges measured on the owner's window. ------------------------------------------ */
+  --ui-space-2xs: 2px;
+  --ui-space-xs: 4px;
+  --ui-space-s: 8px;
+  --ui-space-m: 12px;
+  --ui-space-l: 16px;
+  --ui-space-xl: 24px;
+  --ui-space-2xl: 32px;
+  /* One spacing between everything that floats; a menu sits half of it (8 px) from its trigger. */
+  --ui-gap: 12px;
+  --ui-control-h: 28px;
+  --ui-row-gap: var(--ui-space-xs);
+  --ui-section-head-h: 32px;
+  --ui-stroke: 1px;
+  --ui-icon: 16px;
+  /* Keyboard focus: a 1 px neutral ring (status pills: outside, menu rows: inside). */
+  --ui-focus-offset: 2px;
+  --ui-focus-offset-inset: -1px;
+
+  /* ---- Radii: surfaces large 16 (function bar, side panels), title 12 (title and status pills),
+   * small 8 (menus, popovers, tooltips, tool chips); controls 11 (function bar, console buttons,
+   * slot tiles), small 8 (36 px rail tabs and list toolbar buttons: one radius per size), field 6
+   * (fields, buttons, menu rows, 28 px buttons, frames, state buttons), inner 4 (parts inside a
+   * field, count boxes, check glyphs). Where an element sits exactly inside another's rounding the
+   * radius is computed, inner = outer minus the inset (title buttons, the status items' ends, the
+   * progress line). Owner 2026-11-06: few steps, but the earlier radii looked better — a radius
+   * only changes where a rule that makes sense needs it. --------------------------------------- */
+  --ui-radius-large: 16px;
+  --ui-radius-title: 12px;
+  --ui-radius-control: 11px;
+  --ui-radius-small: 8px;
+  --ui-radius-field: 6px;
+  --ui-radius-inner: 4px;
+  /* The progress line: round ends (half its height). */
+  --ui-radius-track: calc(var(--ui-job-track) / 2);
+  /* Dots (busy) stay dots in the sharp corner style. */
+  --ui-radius-dot: 50%;
+
+  /* ---- Component sizes (copied from the lab; named by what they are) ------------------------ */
+  /* Surfaces */
+  --ui-panel-w: 320px;
+  --ui-rail-w: 48px;
+  --ui-rail-pad-y: calc((var(--ui-rail-w) - var(--ui-rail-tab)) / 2);
+  --ui-rail-tab: 36px;
+  --ui-rail-frame: 26px;
+  --ui-rail-frame-stroke: 1.5px;
+  --ui-busy-dot: 6px;
+  --ui-busy-inset: 6px;
+  --ui-toolbar-button: 36px;
+  --ui-tool-button: 28px;
+  /* Fields (function panel: label inside) */
+  --ui-field-label-inset: calc(var(--ui-space-l) - var(--ui-stroke));
+  --ui-field-lock-slot: 16px;
+  --ui-field-unit-slot: 30px;
+  --ui-field-more-slot: 25px;
+  --ui-field-more-button: 20px;
+  --ui-field-lock-w: 16px;
+  --ui-field-lock-h: 20px;
+  --ui-fields-inset-left: calc(var(--ui-prop-label-inset) - var(--ui-space-l));
+  --ui-fields-head-inset: 16px;
+  --ui-read-label-inset: var(--ui-prop-label-inset);
+  --ui-read-end-inset: calc(var(--ui-field-more-slot) + var(--ui-stroke) + var(--ui-space-xs));
+  --ui-fields-read-end: calc(
+    var(--ui-field-unit-slot) + var(--ui-field-more-slot) + var(--ui-stroke)
+  );
+  --ui-segmented-row-w: 132px;
+  /* Fields (Properties: label column) */
+  --ui-prop-label-w: 80px;
+  /* What the values keep at least, when a long label widens the label column. */
+  --ui-prop-value-min: 112px;
+  /* The labels' x: the section heading's text (4 + its 14 px twisty + 4). */
+  --ui-prop-label-inset: 22px;
+  --ui-prop-indent: calc(var(--ui-icon) + var(--ui-space-2xs));
+  --ui-prop-gap: var(--ui-space-s);
+  --ui-prop-field-h: var(--ui-control-h);
+  --ui-prop-row-min-h: var(--ui-control-h);
+  --ui-field-pad-x: calc(var(--ui-space-s) - var(--ui-stroke));
+  --ui-field-more-w: 24px;
+  --ui-copy: 22px;
+  --ui-copy-inset: calc(var(--ui-space-xs) + var(--ui-space-2xs));
+  /* Buttons */
+  --ui-button-pad-x: var(--ui-space-m);
+  --ui-button-primary-gap: var(--ui-space-s);
+  /* Menus */
+  --ui-menu-max-w: 280px;
+  --ui-menu-row-h: 28px;
+  --ui-menu-pad: 4px;
+  --ui-menu-item-pad-start: 8px;
+  --ui-menu-item-pad-end: var(--ui-space-s);
+  --ui-menu-check: 16px;
+  --ui-menu-divider-inset: var(--ui-space-s);
+  --ui-menu-compact-rows: 8.5;
+  --ui-menu-offset: 4px;
+  --ui-menu-code-w: 3.5em;
+  /* Lists */
+  --ui-list-row-h: 32px;
+  --ui-list-row-pad: 2px;
+  --ui-list-row-gap: var(--ui-space-s);
+  --ui-list-state: 30px;
+  --ui-list-glyph: 20px;
+  --ui-list-glyph-stroke: 1.5px;
+  /* The state line 34 px from the list's end (the 30 px state column + 2 px inset + 2), the play
+   * line 32 px from its start (8 px inset + 16 px ▶ + 8). */
+  --ui-list-state-line-x: 34px;
+  --ui-list-play-line-x: 32px;
+  --ui-list-play: 16px;
+  --ui-list-play-gap: var(--ui-space-s);
+  --ui-list-play-h: 24px;
+  --ui-list-twisty-h: 20px;
+  --ui-list-icon: 18px;
+  --ui-list-rename-h: 22px;
+  /* Segmented */
+  --ui-segment-pad-x: 4px;
+  /* Title pills */
+  --ui-title-h: 36px;
+  --ui-title-pad: 2px;
+  --ui-title-pad-start: 12px;
+  --ui-title-pad-end: var(--ui-space-m);
+  --ui-title-logo: 20px;
+  --ui-title-button-w: 40px;
+  --ui-title-max-w: 280px;
+  --ui-title-product-gap: var(--ui-space-s);
+  --ui-wordmark-nudge: -1px;
+  /* Status pills */
+  --ui-status-h: 36px;
+  --ui-status-item-pad-x: calc(var(--ui-space-s) - var(--ui-stroke));
+  --ui-status-item-gap: var(--ui-space-xs);
+  --ui-count: 22px;
+  --ui-count-pad-x: var(--ui-space-xs);
+  --ui-count-pad-top: 1px;
+  /* A value item (view, specification) has one width; the narrowest windows' items 26 px; the
+   * icons' line; a short value's width (2D / 2.5D / 3D). */
+  --ui-status-value-w: 154px;
+  --ui-status-item-narrow: 26px;
+  --ui-status-icon-stroke: 1.65;
+  --ui-status-text-min: 2.6em;
+  /* Readouts: a coordinate's width in characters (set from the data), the axis-value gap, the mono
+   * tracking; the snap readout's width in its full and short form. */
+  --ui-coord-ch: 9;
+  --ui-coord-axis-gap: var(--ui-space-xs);
+  --ui-tracking-coord: 0.02em;
+  --ui-snap-w: 26ch;
+  --ui-snap-w-short: 11.5ch;
+  /* Console: the head (9 between its parts, 7 above and below, 15 before the icon, 9 after the
+   * last button), the log's and command line's 10 px, the scroll column's 6, the log's line
+   * height, the command field's focus offset; the 34 px icon buttons of its head and column. */
+  --ui-console-head-gap: var(--ui-space-s);
+  --ui-console-head-pad-y: var(--ui-space-s);
+  --ui-console-head-pad-start: var(--ui-space-l);
+  --ui-console-head-pad-end: var(--ui-space-s);
+  --ui-console-log-pad-y: var(--ui-space-m);
+  --ui-console-scroll-pad: var(--ui-space-s);
+  --ui-leading-console: 1.85;
+  --ui-console-input-focus-offset: 4px;
+  --ui-small-button: 34px;
+  /* A resize edge along a surface's top (the console): 8 px tall, 12 px in from the corners. */
+  --ui-resize-edge: 8px;
+  /* Tool bars: the function bar's 5 px padding, its 44 px buttons (12 px either side of the
+   * icon), the workspace button (10 between icon and name, 13 either side; narrow windows 7 and
+   * 10), the 24 px divider 6 px off its neighbours, the dot of a function with methods (3 px,
+   * 21 px in), the revealed icon's growth and its give on press, the turned chevron; the mini
+   * toolbar's 28 px buttons. */
+  --ui-toolbar-pad-y: calc(var(--ui-space-s) - var(--ui-stroke) - var(--ui-space-2xs));
+  --ui-toolbar-pad-x: calc(var(--ui-space-s) - var(--ui-stroke));
+  --ui-bar-button: 44px;
+  --ui-bar-button-pad-x: 12px;
+  --ui-workspace-gap: var(--ui-space-s);
+  --ui-workspace-pad-x: var(--ui-space-m);
+  --ui-workspace-gap-compact: var(--ui-space-xs);
+  --ui-workspace-pad-x-compact: var(--ui-space-s);
+  --ui-toolbar-divider-h: 24px;
+  --ui-toolbar-divider-gap: var(--ui-space-s);
+  --ui-function-dot: 3px;
+  --ui-function-dot-x: 21px;
+  --ui-function-open-scale: 1.08;
+  --ui-function-press-scale: 0.92;
+  --ui-chevron-turn: 180deg;
+  --ui-strip-shift: -5px;
+  --ui-mini-button: 28px;
+  /* A running job: 10 px between its parts, 6 px above and below, the 6 px progress line, its
+   * 32 px Cancel with 14 px either side. */
+  --ui-job-gap: var(--ui-space-s);
+  --ui-job-pad-y: var(--ui-space-s);
+  --ui-job-track: 6px;
+  --ui-job-cancel-h: 32px;
+  --ui-job-cancel-pad-x: var(--ui-space-m);
+  /* What an empty panel says: 24 px above and below. */
+  --ui-panel-empty-pad-y: 24px;
+  /* Tooltip */
+  /* Menus: the submenu chevron, the gap of an attached menu to its item, submenus 9 px off their
+   * row (menu padding 4 + border 1 + 4) with a 10 px bridge for the pointer, the submenu's last row
+   * level with its row. */
+  --ui-menu-more: 14px;
+  /* The parts' four-level glyph in a menu row; a long menu list (history); the wide menu of the
+   * specification slots and its tiles. */
+  --ui-menu-glyph: 18px;
+  --ui-menu-long-h: 360px;
+  --ui-menu-long-max-h: min(var(--ui-menu-long-h), calc(100dvh - 240px));
+  --ui-menu-wide: 408px;
+  --ui-slot-gap: var(--ui-space-s);
+  --ui-slot-h: 78px;
+  --ui-slot-pad: var(--ui-space-s);
+  --ui-slot-edit: 23px;
+  --ui-slot-edit-inset: var(--ui-space-xs);
+  --ui-slot-assign-pad: var(--ui-space-xs);
+  --ui-menu-attach-gap: 8px;
+  --ui-menu-attached-max-h: calc(100dvh - 190px);
+  --ui-sub-gap: calc(var(--ui-menu-pad) + var(--ui-stroke) + var(--ui-space-xs));
+  --ui-sub-bridge: 10px;
+  --ui-sub-align: calc(-1 * (var(--ui-menu-pad) + var(--ui-stroke)));
+  /* Tool lists: the method list's rows 32, the right-click functions' 28, the hover square 3 px
+   * inside the column's frame, the method list's title 20. */
+  --ui-tool-bar: 32px;
+  --ui-tool-cursor: 28px;
+  --ui-tool-icon-inset: var(--ui-space-xs);
+  --ui-tools-title-h: 20px;
+  /* A tool's place in its list (set on the row): the rows rise in turn. */
+  --ui-item-index: 0;
+  --ui-tip-pad-y: calc((var(--ui-control-h) - var(--ui-leading-tip)) / 2);
+  --ui-tip-pad-x: 12px;
+  --ui-tip-max-w: 360px;
+  --ui-window-margin: 8px;
+
+  /* ---- Chat (proposal 2026-11-06, design/chats; UI-LIBRARY.md › Proposed: chat) ----------------
+   * The agent and import chats in a right-panel tab: messages read at 1.5 leading; a user message
+   * leaves 32 px free on its left; mentions are 20 px chips; the steps' state slot is 16; the
+   * composer holds 2 to 8 lines; the import window stands in for an OS window: 32/24 px from the
+   * edges (on the spacing grid), its chat column 420. */
+  --ui-leading-chat: 1.5;
+  --ui-chat-pad-x: 12px;
+  --ui-chat-indent: 32px;
+  --ui-chat-mention-h: 20px;
+  --ui-chat-mention-icon: 12px;
+  --ui-chat-letter: 18px;
+  --ui-chat-dot: 4px;
+  --ui-chat-input-min: 40px;
+  --ui-chat-input-max: 160px;
+  --ui-chat-action-h: 24px;
+  --ui-chat-row-label: 64px;
+  --ui-chat-avatar: 24px;
+  /* A function panel's text rows: the label column („Transformation“ fits), one x for values. */
+  --ui-inline-row-label-w: 112px;
+  /* The agent's own window: sessions sidebar, the readable column, the details aside (round 6:
+   * the sidebar as wide as t3code's thread list needs for a name and its state on one line). */
+  --ui-chat-ws-side-w: 272px;
+  --ui-chat-ws-column-w: 720px;
+  --ui-chat-ws-aside-w: 288px;
+  /* Agent window, round 6 (proposal 2026-11-07, not decided): a session row's two lines; the
+   * details card beside it; the model picker's three columns and its list's height; a settings
+   * row's dropdown at least this wide, a path field this wide; the meter of a limit; the panel a
+   * question or approval puts on the composer, inset from its sides; an expanded HTML reply's
+   * margin in the window. */
+  --ui-session-line-h: 16px;
+  --ui-session-card-w: 248px;
+  --ui-picker-rail-w: 44px;
+  --ui-picker-models-w: 256px;
+  --ui-picker-efforts-w: 144px;
+  --ui-picker-list-h: 232px;
+  --ui-setting-select-min: 96px;
+  --ui-setting-text-w: 240px;
+  --ui-meter-w: 120px;
+  --ui-meter-h: 4px;
+  --ui-composer-prompt-inset: 16px;
+  --ui-chat-embed-full-inset: 16px;
+  --ui-chat-step-more: 20px;
+  --ui-chat-thumb-w: 120px;
+  --ui-chat-tail: 8px;
+  --ui-window-inset-x: 32px;
+  --ui-window-inset-y: 24px;
+  --ui-window-side-w: 420px;
+  --ui-window-view-head-h: 40px;
+  --ui-window-toggle-w: 168px;
+  --ui-motion-dots: 1100ms;
+
+  /* ---- Start screen (proposal 2026-11-06, round 2 on 2026-11-07; UI-LIBRARY.md › Proposed: start
+   * screen; not decided by the owner). „Minecraft Splash Screen meets himmelcad.com": the
+   * website's palette (cream #f3f0e6, paper #fffdf6, ink #0a0a0a, blue #2e86ff), its hard offset
+   * shadows, 2 px ink borders, heavy uppercase mono labels and its display face; Minecraft's
+   * picture, wordmark, pulsing splash, world list and button row. The wordmark is the screen's
+   * picture, not text: a display size of its own, outside the type scale. Nothing is see-through:
+   * cards and buttons are opaque. -------------------------------------------------------------- */
+  --ui-font-display-3d: var(--hc-font-display-3d);
+  --ui-start-cream: #f3f0e6;
+  --ui-start-paper: #fffdf6;
+  --ui-start-ink: #0a0a0a;
+  --ui-start-blue: #2e86ff;
+  --ui-start-ink-soft: rgba(10, 10, 10, 0.68);
+  --ui-start-cream-shadow: rgba(243, 240, 230, 0.55);
+  --ui-start-paper-hover: #f3f0e6;
+  /* The wordmark grows with the screen (website hero: 14.5vw); the title band below it holds the
+   * product tag and the splash, both in the wordmark's em, so they keep their places at every
+   * size. */
+  --ui-start-wordmark: clamp(64px, 10cqi, 176px);
+  --ui-start-wordmark-leading: 0.86;
+  --ui-start-wordmark-stroke: 0.022em;
+  --ui-start-wordmark-shadow: 0.04em 0.04em 0 var(--ui-start-ink);
+  --ui-start-band: 0.68em;
+  --ui-start-product: 14px;
+  --ui-start-product-turn: -1.5deg;
+  --ui-start-shadow-blue: 5px 5px 0 var(--ui-start-blue);
+  /* The splash: Minecraft's tilted line, in the website's „FREE USE." look (cream, ink outline, a
+   * hard blue shadow); a fifth of the wordmark, starting under its middle and rising right. */
+  --ui-start-splash: 0.18em;
+  --ui-start-splash-stroke: 0.06em;
+  --ui-start-splash-shadow: 0.1em 0.1em 0 var(--ui-start-blue);
+  --ui-start-splash-x: 42%;
+  /* Its foot above the band's floor, room for the shadow (in the splash's em). */
+  --ui-start-splash-lift: 0.16em;
+  --ui-start-splash-turn: -11deg;
+  /* Minecraft's beat: 1.8 − |sin(2πt / 1 s)| · 0.1 — twice a second down to 94.4 % and back. */
+  --ui-start-splash-beat: 0.944;
+  --ui-motion-splash: 500ms;
+  --ui-start-column: 640px;
+  --ui-start-head-pad-top: 24px;
+  /* In narrow screens the wordmark would reach the window buttons: the head starts below them. */
+  --ui-start-head-pad-top-narrow: calc(var(--ui-gap) + var(--ui-title-h) + var(--ui-space-s));
+  --ui-start-head-h: 40px;
+  --ui-start-row-h: 76px;
+  --ui-start-row-pad: 8px;
+  --ui-start-thumb-w: 96px;
+  --ui-start-thumb-h: 60px;
+  --ui-start-play: 24px;
+  --ui-start-button-h: 48px;
+  --ui-start-border: 2px;
+  --ui-start-shadow: 5px 5px 0 var(--ui-start-ink);
+  --ui-start-shadow-hover: 8px 8px 0 var(--ui-start-ink);
+  --ui-start-shadow-dark: 5px 5px 0 var(--ui-start-cream-shadow);
+  --ui-start-shadow-dark-hover: 8px 8px 0 var(--ui-start-cream-shadow);
+  --ui-start-lift: -2px;
+  --ui-start-press: 5px;
+  --ui-start-label: 12px;
+  --ui-start-text: 14px;
+  --ui-start-weight-heavy: 900;
+  --ui-start-weight-bold: 700;
+  --ui-start-tracking: 0.04em;
+  --ui-start-popout-w: 400px;
+  --ui-start-drift-scale: 1.06;
+  --ui-start-drift-x: -2%;
+  --ui-motion-drift: 60s;
+  --ui-motion-start: 180ms;
+
+  /* ---- Manager windows (proposal 2026-11-06, the company manager; UI-LIBRARY.md › Proposed:
+   * company manager; not decided by the owner). Cloudflare's shell: a 248 sidebar (the agent
+   * window's), the Library's 336 inspector, pages at a readable 1040; table rows 36, kind cards
+   * from 180, picture tiles from 152 with a 96 picture; the centred question 360. ------------- */
+  --ui-manager-side-w: 248px;
+  --ui-manager-inspector-w: 336px;
+  --ui-manager-page-max-w: 1040px;
+  --ui-manager-row-h: 36px;
+  --ui-manager-card-min-w: 180px;
+  --ui-manager-tile-w: 152px;
+  --ui-manager-tile-preview-h: 96px;
+  --ui-manager-confirm-w: 360px;
+  --ui-manager-confirm-wide-w: 420px;
+  /* Table columns by what they hold (DataTable `ColumnKind`): digits, a date, a tag, a swatch. */
+  --ui-table-col-number: 96px;
+  --ui-table-col-date: 104px;
+  --ui-table-col-tag: 80px;
+  --ui-table-col-swatch: 40px;
+
+  /* ---- Dimmed content (owner 2026-11-06: „überall Inhalt (Text + Icon) auf 0.45, Fläche und
+   * Rahmen bleiben"): a disabled control keeps its fill and frame, only its text and icon dim; a
+   * dimmed list row (a hidden layer) the same. Pale is something else — a check that is partly
+   * on — and stays 0.4. ------------------------------------------------------------------------ */
+  --ui-dim: 0.45;
+  --ui-dim-pale: 0.4;
+
+  /* ---- Motion ------------------------------------------------------------------------------ */
+  --ui-motion-fast: var(--hc-motion-fast);
+  --ui-motion-twisty: 140ms;
+  --ui-motion-menu: 120ms;
+  --ui-motion-hover: 160ms;
+  --ui-motion-list: 150ms;
+  --ui-motion-rows: 170ms;
+  --ui-motion-rows-move: 220ms;
+  --ui-motion-strip: 200ms;
+  --ui-motion-function: 180ms;
+  --ui-motion-grow: 220ms;
+  --ui-motion-progress: 200ms;
+  --ui-motion-stagger: 35ms;
+  --ui-rise: 6px;
+  --ui-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ---- Layers ------------------------------------------------------------------------------ */
+  --ui-z-floating: var(--hc-z-floating);
+  --ui-z-popover: var(--hc-z-popover);
+  /* A window of its own (the lab's stand-in for an OS window): over panels and bars, under menus. */
+  --ui-z-window: calc(var(--ui-z-floating) + 50);
+
+  /* ---- Library window (proposal 2026-11-06, not approved) ---------------------------------- */
+  /* Between the function bar's row and the status bar, as tall as the side panels. */
+  --ui-library-top: 84px;
+  --ui-library-bottom: calc(2 * var(--ui-gap) + var(--ui-status-h));
+  --ui-library-head-h: 52px;
+  --ui-library-max-w: 1360px;
+  --ui-library-min-w: 880px;
+  --ui-library-min-h: 420px;
+  --ui-library-nav-w: 216px;
+  --ui-library-inspector-w: 336px;
+  /* The table's column kinds; a table sets its own track list, a name cell its depth. */
+  --ui-library-columns: none;
+  --ui-library-depth: 0;
+  --ui-library-col-code: 116px;
+  --ui-library-col-name: 140px;
+  --ui-library-col-look: 36px;
+  --ui-library-col-line: 64px;
+  --ui-library-col-label: 52px;
+  --ui-library-col-text: 96px;
+  --ui-library-col-swatch: 40px;
+  --ui-library-col-short: 80px;
+  /* The preview tile and its art. */
+  --ui-library-preview-h: 128px;
+  --ui-library-art-h: 56px;
+  /* A tag in a field and its ×. */
+  --ui-library-tag-h: 20px;
+  --ui-library-tag-x: 16px;
+  /* Colours (proposal 2026-11-07): swatch, the picker's wheel, ring and marks. */
+  --ui-colour-swatch: 14px;
+  --ui-colour-wheel: 184px;
+  --ui-colour-ring: 18px;
+  --ui-colour-mark: 12px;
+  /* Tables (proposal 2026-11-07, attribute system): the window, its head and edges, the cells'
+   * least and largest widths by what they hold, the head column, a selected row's tint. */
+  --ui-sheet-window-min: 420px;
+  /* Picks by type: four side by side. */
+  --ui-picks-w: 960px;
+  --ui-sheet-window-max-h: calc(100vh - 64px);
+  --ui-sheet-head-h: 48px;
+  --ui-sheet-edge: 6px;
+  --ui-sheet-cell-min: 112px;
+  --ui-sheet-number-min: 72px;
+  --ui-sheet-image-min: 168px;
+  --ui-sheet-cell-max: 240px;
+  --ui-sheet-rowhead-min: 32px;
+  --ui-sheet-element-min: 72px;
+  --ui-sheet-tint: inset 0 0 0 100vmax var(--ui-state-selected);
+  --ui-sheet-tint-hover: inset 0 0 0 100vmax var(--ui-state-hover);
+  /* Over the Library window (also when it is in front), under menus and tooltips. */
+  --ui-z-table-window: calc(var(--ui-z-window) + 30);
+  /* An app window, not a project's (the company manager): over the start screen too. */
+  --ui-z-app-window: calc(var(--ui-z-window) + 20);
+}
+
+/* Touch keeps 44 px targets (lab: menu rows, Properties rows, status pills). */
+@media (pointer: coarse) {
+  :root {
+    --ui-menu-row-h: 44px;
+    --ui-prop-row-min-h: 44px;
+    --ui-prop-field-h: 40px;
+    --ui-status-h: 44px;
+    --ui-mini-button: 44px;
+  }
+}
+
+/* Corner style (owner 2026-10-24: „wir lassen beides als Option"): sharp sets every radius to 0;
+ * dots stay dots. On every element, because the theme classes restate tokens below :root. The start
+ * screen is square whatever the choice (proposal, owner: „gerne eckig"), its menus included. */
+:root[data-corners='sharp'],
+:root[data-corners='sharp'] *,
+:root[data-screen='start'],
+:root[data-screen='start'] * {
+  --ui-radius-large: 0px;
+  --ui-radius-title: 0px;
+  --ui-radius-control: 0px;
+  --ui-radius-small: 0px;
+  --ui-radius-field: 0px;
+  --ui-radius-inner: 0px;
+  --ui-radius-track: 0px;
+}

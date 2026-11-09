@@ -1,0 +1,106 @@
+/* Select by criteria (proposal 2026-11-07, not decided by the owner): condition rows on the function
+ * panel's text-row grid (`.ui-inline-row`): the key in the label column, the value where every
+ * value starts, the `>` slot where every row ends. Tokens only. */
+
+/* A condition is a field: control grey, the frame on hover and while its menu is open. */
+.ui-query-row.is-open {
+  border-color: var(--ui-line-control);
+}
+
+/* The value cell: a button (a set, Saved), an input (a pattern), two inputs (a range). It fills
+ * its column, so a click anywhere on the value opens the values. */
+.ui-query-value {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-xs);
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--ui-space-s) 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+  text-align: left;
+  cursor: pointer;
+}
+/* The row takes the keyboard's frame (the fields' active line), not the value inside it. */
+.ui-query-value:focus-visible {
+  outline: 0;
+}
+.ui-query-row:has(input:focus, .ui-query-value:focus-visible),
+.ui-query-row:has(input:focus, .ui-query-value:focus-visible):hover {
+  border-color: var(--ui-line-active);
+}
+.ui-query-value.is-input,
+.ui-query-value.is-range {
+  cursor: text;
+}
+.ui-query-value.is-picking {
+  color: var(--ui-fg-secondary);
+  cursor: default;
+}
+.ui-query-text {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-query-text.is-placeholder {
+  color: var(--ui-fg-tertiary);
+}
+/* „Is not" before the values (Outside, …), and „Changed" after a saved name: quiet words. */
+.ui-query-not {
+  flex: none;
+  color: var(--ui-fg-secondary);
+  font-size: var(--ui-text-dense);
+}
+.ui-query-changed {
+  flex: none;
+  color: var(--ui-fg-secondary);
+}
+
+.ui-query-input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ui-fg-primary);
+  font-family: var(--ui-font);
+  font-size: var(--ui-text-body);
+}
+.ui-query-input::placeholder {
+  color: var(--ui-fg-tertiary);
+}
+/* A range: two numbers, each starting on the left like every value (owner 2026-11-07, S11). */
+.ui-query-value.is-range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+}
+.ui-query-input.is-number {
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-dense);
+  font-variant-numeric: tabular-nums;
+}
+.ui-query-input.is-number::placeholder {
+  font-family: var(--ui-font);
+}
+.ui-query-dash,
+.ui-query-unit {
+  color: var(--ui-fg-tertiary);
+  font-size: var(--ui-text-dense);
+}
+
+/* Add condition: a neutral button at the values' x (Properties' Add attribute), on the grid. */
+.ui-query-add {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: center;
+}
+.ui-query-add-button {
+  display: flex;
+}

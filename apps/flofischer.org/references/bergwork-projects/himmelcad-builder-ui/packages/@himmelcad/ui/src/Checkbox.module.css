@@ -1,0 +1,108 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--hc-size-control-h);
+  color: var(--hc-fg-default);
+  font-family: var(--hc-font-ui);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.root:has(input:disabled) {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.box {
+  position: relative;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--hc-border-strong);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--hc-bg-input) 92%, var(--hc-fg-default) 8%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--hc-fg-strong) 5%, transparent);
+  transition:
+    border-color var(--hc-motion-fast),
+    background var(--hc-motion-fast);
+}
+
+.box[data-checked='true'] {
+  border-color: var(--hc-accent-base);
+  background: var(--hc-accent-base);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 18%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--hc-accent-base) 14%, transparent);
+}
+
+.box[data-indeterminate='true'] {
+  border-color: var(--hc-border-strong);
+  background: var(--hc-press-bg);
+  box-shadow: none;
+}
+
+.box svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--hc-fg-on-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform: scale(0.72);
+  transition:
+    opacity var(--hc-motion-fast),
+    transform var(--hc-motion-fast);
+}
+
+.box[data-checked='true'] svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.box[data-indeterminate='true'] svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.mixed {
+  display: none;
+}
+
+.box[data-indeterminate='true'] path:not(.mixed) {
+  display: none;
+}
+
+.box[data-indeterminate='true'] .mixed {
+  display: block;
+}
+
+.box[data-indeterminate='true'] svg {
+  stroke: var(--hc-fg-muted);
+}
+
+.root:hover:not(:has(input:disabled)) .box {
+  border-color: color-mix(in srgb, var(--hc-accent-base) 58%, var(--hc-border-strong));
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.root:focus-within .box {
+  outline: 2px solid var(--hc-focus-ring);
+  outline-offset: 1px;
+}
+
+.label {
+  line-height: 1.3;
+}
