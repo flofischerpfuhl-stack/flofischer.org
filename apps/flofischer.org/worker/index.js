@@ -59,6 +59,10 @@ function withSiteHeaders(response, pathname, encodeBody = "automatic", immutable
     // Unlisted mockups (worker/mockups.js): reachable only by link, never indexed.
     // The Fernwork QR reader mockup needs the camera.
     headers.set("X-Robots-Tag", "noindex, nofollow");
+    if (mockup === "projects") {
+      headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+      headers.set("Referrer-Policy", "no-referrer");
+    }
     const camera = mockup === "fernwork" ? "camera=(self)" : "camera=()";
     headers.set("Permissions-Policy", `${camera}, microphone=(), geolocation=()`);
   } else {
