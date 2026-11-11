@@ -1,6 +1,0 @@
-import{c as f}from"./pen-tool-h67MS39G.js";import{bk as y,bl as b,p as d}from"./App-BjCskdlQ.js";import{m as v,x as h,q as m}from"./session-BZJR5Aiu.js";import"./attachments-BJ8TSJ6q.js";/**
- * @license lucide-react v0.468.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */const j=f("Upload",[["path",{d:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",key:"ih7n3h"}],["polyline",{points:"17 8 12 3 7 8",key:"t8dd8p"}],["line",{x1:"12",x2:"12",y1:"3",y2:"15",key:"widbto"}]]);let i=null;function q(o){i=o}function L(){const o=i;return i=null,o}const k=15e3;function R(o,p=k){setTimeout(()=>{var c;const r=m(),n=r.mails.find(t=>t.id===o);if(!n||n.isDraft||n.folderId.endsWith(":trash"))return;const e=y(r,n);if(!e)return;v("Neue Mail",t=>b(t,e),{undoable:!1});const a=m(),s=a.conversations[e.conversationId],u=((c=a.mailboxes.find(t=>t.id===e.mailboxId))==null?void 0:c.kind)==="shared",l=a.projects.find(t=>t.id===s);h(`Neue Mail von ${e.from.name}${l?` · ${l.name}`:""}`,{label:"Öffnen",run:()=>s?d({projectId:s,tab:"mail",item:e.conversationId}):d({scope:u?"company":"personal",tab:"mail",item:e.conversationId})})},p)}export{j as U,q as r,R as s,L as t};
