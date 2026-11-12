@@ -1,0 +1,1 @@
+.app-check.ap-check{color:var(--ui-fg-tertiary);border-style:dashed}.app-check.ap-check:hover{color:var(--ui-fg-secondary)}.app-check.ap-check.is-waiting{border-style:solid;border-color:var(--tc-purple);color:var(--tc-purple);cursor:default}.app-check.ap-check.is-waiting:hover{background:transparent}
