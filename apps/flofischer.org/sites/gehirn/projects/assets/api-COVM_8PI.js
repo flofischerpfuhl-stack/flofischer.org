@@ -1,6 +1,0 @@
-import{c as l}from"./pen-tool-2TscZY7t.js";import{n as p,b as i}from"./index-DvcD0o9_.js";import{l as o}from"./event-6P6cT-6K.js";/**
- * @license lucide-react v0.468.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */const c=l("Plug",[["path",{d:"M12 22v-5",key:"1ega77"}],["path",{d:"M9 8V2",key:"14iosj"}],["path",{d:"M15 8V2",key:"18g5xt"}],["path",{d:"M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z",key:"osxo6l"}]]),d=()=>p(),u={status:()=>i("api_status"),configure:a=>i("api_configure",{enabled:a.enabled??null,port:a.port??null}),attach:a=>i("api_attach",{on:a}),createClient:(a,e,n)=>i("api_client_create",{name:a,scopes:e,confirm:n}),updateClient:(a,e)=>i("api_client_update",{id:a,name:e.name??null,scopes:e.scopes??null,confirm:e.confirm??null}),revokeClient:a=>i("api_client_revoke",{id:a}),log:()=>i("api_log"),clearLog:()=>i("api_log_clear"),respond:(a,e)=>i("api_respond",{id:a,reply:e}),answerPairing:(a,e)=>i("api_pair_answer",{id:a,answer:e}),onRequest:a=>o("api-request",e=>a(e.payload)),onPair:a=>o("api-pair",e=>a(e.payload)),onPairClosed:a=>o("api-pair-closed",e=>a(e.payload.id)),onLog:a=>o("api-log",e=>a(e.payload)),onClients:a=>o("api-clients",()=>a())};export{c as P,d as a,u as n};
