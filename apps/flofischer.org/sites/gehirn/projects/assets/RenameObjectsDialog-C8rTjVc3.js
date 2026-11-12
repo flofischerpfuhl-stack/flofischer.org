@@ -1,1 +1,0 @@
-import{j as r}from"./index-RmpzBpFi.js";import{bS as m}from"./App-C9v9GjQr.js";import"./session-COLavJsa.js";import"./search-_9AcgdxI.js";import"./pen-tool-CDWP7MHL.js";import"./billing-aGSecuaC.js";import"./mail-sCXqZoua.js";import"./timecal-C9qsBF74.js";function f({request:o,onClose:t}){return r.jsx(m,{projectIds:o.projectIds,onClose:t})}export{f as default};
