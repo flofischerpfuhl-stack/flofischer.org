@@ -1,0 +1,1 @@
+import{r as e}from"./index-B5yv3HLB.js";function d(){const[t,r]=e.useState(null),[s,n]=e.useState(()=>typeof window<"u"?window.innerWidth:1200);return e.useLayoutEffect(()=>{if(!t)return;n(t.getBoundingClientRect().width);const i=new ResizeObserver(([o])=>o&&n(o.contentRect.width));return i.observe(t),()=>i.disconnect()},[t]),[r,s]}export{d as u};
