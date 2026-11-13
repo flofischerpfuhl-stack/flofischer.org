@@ -39,8 +39,34 @@
         ? "Rotierendes Gehirn als Punktraster"
         : "Rotating brain drawn as a dot screen");
     }
+    applyMedia(language);
     document.querySelectorAll("[data-video-toggle]").forEach(syncToggleLabel);
     if (persist) window.FFLanguage?.set(language);
+  }
+
+  // Recordings and screenshots that exist per language. Videos get their file from here (WebM, or MP4 where WebM
+  // does not play), so a German visitor never fetches the English recording first. Setting src (instead of calling
+  // load()) keeps preload="none": nothing is downloaded until the video actually plays.
+  const videoExt = document.createElement("video").canPlayType('video/webm; codecs="vp9"') ? "webm" : "mp4";
+
+  function applyMedia(language) {
+    const key = language === "de" ? "De" : "En";
+    document.querySelectorAll("video[data-media-en]").forEach((video) => {
+      const label = video.dataset["label" + key];
+      if (label) video.setAttribute("aria-label", label);
+      const src = `${video.dataset["media" + key]}.${videoExt}`;
+      if (video.getAttribute("src") === src) return;
+      const wasPlaying = !video.paused;
+      video.setAttribute("poster", video.dataset["poster" + key]);
+      video.setAttribute("src", src);
+      if (wasPlaying) play(video);
+    });
+    document.querySelectorAll("img[data-lang-src]").forEach((image) => {
+      const src = image.dataset["src" + key];
+      if (src && image.getAttribute("src") !== src) image.setAttribute("src", src);
+      const alt = image.dataset["alt" + key];
+      if (alt) image.setAttribute("alt", alt);
+    });
   }
 
   document.querySelectorAll("[data-language-button]").forEach((button) => {

@@ -1557,6 +1557,109 @@ html[data-language="de"] p[data-lang-copy="de"] {
   color: var(--fg);
 }
 
+/* two actions on a project card (download + preview) */
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.pill-ghost {
+  border-color: rgba(13, 13, 14, 0.32);
+}
+
+.pill-ghost .pill-icon {
+  background: transparent;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px rgba(13, 13, 14, 0.32);
+}
+
+.pill-ghost:hover .pill-icon {
+  box-shadow: none;
+}
+
+/* primary action on the coloured field */
+.pill-solid {
+  background: var(--fg);
+  color: var(--field);
+}
+
+.pill-solid .pill-icon {
+  background: var(--field);
+  color: var(--fg);
+}
+
+.pill-solid:hover {
+  background: transparent;
+  color: var(--fg);
+}
+
+.pill-solid:hover .pill-icon {
+  background: var(--fg);
+  color: var(--field);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+}
+
+.badges .badge {
+  margin: 0;
+}
+
+.box-label:has(.box-logo) {
+  display: flex;
+  align-items: center;
+}
+
+/* a tall dialog screenshot: show its top in a calm 16:10 frame */
+.box-media-shot img {
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
+}
+
+/* an honest note next to the download (unsigned Windows installer) */
+.notice {
+  display: grid;
+  grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
+  gap: 0.5rem clamp(1rem, 3vw, 2rem);
+  max-width: 62rem;
+  margin-top: clamp(1.25rem, 2.5vw, 1.75rem);
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-left: 3px solid #ffd27a;
+  border-radius: 4px;
+  color: var(--fg-muted);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.notice p {
+  margin: 0;
+}
+
+.notice .notice-label {
+  padding-top: 0.15rem;
+  color: #ffd27a;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.notice strong {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.detail-group-family .group-claim {
+  font-size: clamp(2rem, 4.2vw, 3.8rem);
+}
+
 /* ---------- Footer ---------- */
 
 .foot {
@@ -1895,6 +1998,21 @@ html[data-language="de"] p[data-lang-copy="de"] {
 
   .pill {
     min-height: 3rem;
+  }
+
+  .card-actions .pill {
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding-left: 1.1rem;
+  }
+
+  .card-actions .pill-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .notice {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

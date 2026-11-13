@@ -14,7 +14,7 @@ Persönliche Website von **Florian Fischer** — gesplittet in zwei Subdomains:
 sites/
   root/          → flofischer.org
   seele/         → seele.flofischer.org   (Blog + posts/)
-  gehirn/        → gehirn.flofischer.org  (Fernwork, SupraBench, Paper2Form)
+  gehirn/        → gehirn.flofischer.org  (berg:work, Fernwork, Himmel:CAD, SupraBench)
   shared/        → globale CSS-Tokens
 worker/index.js  → Host-basiertes Routing
 ```
@@ -68,13 +68,16 @@ liegen im selben Cloudflare-Konto.
 
 ## Projekte auf Gehirn
 
-In dieser Reihenfolge:
+In dieser Reihenfolge (Index 01–04 in `sites/gehirn/index.html`):
 
+- berg:work (bergwork.app) – Hauptinhalt ist berg:work Projects (Desktop-App für Büros mit Microsoft 365, Testversion,
+  Download über bergwork.app/download/, Web-Vorschau unter `/projects/`); PDF und Image knapp als weitere Teile der
+  Familie. Clips und Bilder je Sprache in `sites/shared/gehirn/assets/projects/` (`<name>-en|de`), `site.js` setzt
+  Quelle, Standbild, `aria-label` und Alt-Text passend zur Sprache. Der Hero-Clip ist eine eigene Aufnahme der
+  Web-Vorschau mit Beispieldaten (1600 × 1000, WebM + MP4).
 - Fernwork (fernwork.net)
+- Himmel:CAD (himmelcad.com)
 - SupraBench (suprabench.com)
-- Paper2Form (paper2form.com)
-
-HimmelCAD folgt, sobald eine eigene Website online ist.
 
 ## Designs
 

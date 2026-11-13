@@ -7,8 +7,8 @@ self.PWA_CONFIG = {
     "/icons/icon-512.png?v=2",
     "/icons/favicon.svg?v=2",
     "/shared/language.js",
-    "/shared/gehirn/site.css?v=1",
-    "/shared/gehirn/site.js?v=1",
+    "/shared/gehirn/site.css?v=2",
+    "/shared/gehirn/site.js?v=2",
     "/shared/gehirn/assets/brain-frames.webp",
     "/shared/gehirn/assets/geist.woff2",
     "/shared/gehirn/assets/geist-mono.woff2"
