@@ -1,5 +1,5 @@
 {
-  "standVom": "2026-11-15T00:30",
+  "standVom": "2026-11-15T00:40",
   "bereiche": [
     {
       "id": "fernwork",
@@ -413,7 +413,7 @@
       "titel": "Viewer",
       "stand": "laeuft",
       "kurz": "Ziel ist der beste Viewer überhaupt. Bei Punktwolken ist das erste Ziel erreicht.",
-      "blocker": "Fremddaten: Von den öffentlichen Testfällen lädt bisher nur die fremde Punktwolke; Splats, DGM-Import, CAD-Import und 3D Tiles laden noch nicht. Textur-Laufzeitkompression halbiert Speicher, macht Kacheln aber ~0,5 s später fertig – Entscheidung offen.",
+      "blocker": "Import/Export-Modul ist noch kaum gebaut: Von den öffentlichen Testfällen lädt bisher die fremde Punktwolke; Splats, DGM, CAD und 3D Tiles kommen, sobald dort Zeit hineingeht. Textur-Laufzeitkompression: Einbau-Entscheidung offen.",
       "haengtAn": [],
       "teilziele": [
         {
@@ -443,15 +443,18 @@
         },
         {
           "titel": "3D Tiles laden",
-          "stand": "haengt"
+          "stand": "offen",
+          "notiz": "Import/Export-Modul noch nicht ausgebaut"
         },
         {
           "titel": "Gaussian Splats laden",
-          "stand": "haengt"
+          "stand": "offen",
+          "notiz": "Import/Export-Modul noch nicht ausgebaut"
         },
         {
           "titel": "DGM- und CAD-Import laden",
-          "stand": "haengt"
+          "stand": "offen",
+          "notiz": "Import/Export-Modul noch nicht ausgebaut"
         },
         {
           "titel": "Niveau Trimble RealWorks (Punktwolken) und ArcGIS (Meshes)",
