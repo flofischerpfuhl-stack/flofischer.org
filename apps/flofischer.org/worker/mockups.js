@@ -15,6 +15,7 @@ export const MOCKUPS = new Set([
   "fernwork-editor-entwurf-2026-11", // Fernwork PDF editor design drafts, wave 2 (measure bar, properties, selection, stacks, phone drawer)
   "bergwork-web", // bergwork.app website overhaul concepts (Metadannye display font)
   "bergwork-pdf", // berg:work PDF in the Schliff look (three directions) and berg:work icon families
+  "progress", // roadmap visualizer: dependencies and progress up to the Fernwork and HimmelCAD releases (data in roadmap.json)
 ]);
 
 export function mockupName(pathname) {

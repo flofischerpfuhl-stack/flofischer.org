@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="referrer" content="no-referrer" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f6f6f3" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#16181b" media="(prefers-color-scheme: dark)" />
+  <title>Roadmap Fortschritt</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232f6f5e'/%3E%3Cpath d='M7 22h5l4-6h4l5-7' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="kopf">
+    <div class="kopf-innen">
+      <p class="kicker">Roadmap</p>
+      <h1>Fortschritt bis zu den Releases</h1>
+      <p class="stand" id="stand">Lade Daten …</p>
+    </div>
+  </header>
+
+  <main id="inhalt" class="inhalt" aria-live="polite"></main>
+
+  <aside id="detail" class="detail" aria-hidden="true" aria-labelledby="detail-titel" tabindex="-1">
+    <div class="detail-kopf">
+      <h2 id="detail-titel"></h2>
+      <button type="button" class="schliessen" id="detail-zu" aria-label="Details schließen">✕</button>
+    </div>
+    <div class="detail-rumpf" id="detail-rumpf"></div>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>

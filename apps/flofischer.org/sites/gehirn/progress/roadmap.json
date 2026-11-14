@@ -1,0 +1,270 @@
+{
+  "standVom": "2026-11-14T20:00",
+  "bereiche": [
+    { "id": "fernwork", "titel": "Fernwork & berg:work" },
+    { "id": "himmelcad", "titel": "HimmelCAD" }
+  ],
+  "knoten": [
+    {
+      "id": "fernwork-pdf",
+      "bereich": "fernwork",
+      "titel": "Fernwork PDF-Editor",
+      "stand": "laeuft",
+      "kurz": "Live-Bearbeitung so gut wie PDF-XChange: 19 Aufgaben in 4 Sprints, etwa 165 Agent-Stunden, 7–9 Kalendertage.",
+      "blocker": "Sprint 1 läuft seit 14.11., 18:20. Für Sprint 4 braucht es Florians Entscheidungen zur Properties-Leiste und zu Tastenkürzeln.",
+      "haengtAn": [],
+      "teilziele": [
+        { "gruppe": "Schon erreicht", "titel": "Dichte Pläne öffnen so schnell wie PDF-XChange", "stand": "fertig" },
+        { "gruppe": "Schon erreicht", "titel": "Rückgängig auf großen Plänen: 60 s → unter 1 s", "stand": "fertig" },
+        { "gruppe": "Schon erreicht", "titel": "Eigener Text-Renderer als Standard", "stand": "fertig" },
+
+        { "gruppe": "Sprint 1 · tägliche Störer (läuft)", "titel": "XC-1 Fett nach Rückgängig, eingebettete Schriften mit neuen Zeichen", "stand": "offen" },
+        { "gruppe": "Sprint 1 · tägliche Störer (läuft)", "titel": "XC-2 Absturz-Wiederherstellung, Drehen von Pfaden, kurz verschwindendes Rechteck", "stand": "offen" },
+        { "gruppe": "Sprint 1 · tägliche Störer (läuft)", "titel": "XC-3 Wackelnde Tests stabilisieren", "stand": "offen" },
+        { "gruppe": "Sprint 1 · tägliche Störer (läuft)", "titel": "XC-4 Seiten löschen und Rückgängig so schnell wie PDF-XChange", "stand": "offen", "notiz": "Heute 6–8 s statt 0,3 s" },
+        { "gruppe": "Sprint 1 · tägliche Störer (läuft)", "titel": "XC-5 Zoom 400 % in 0,1 s scharf", "stand": "offen", "notiz": "Heute 0,32 s" },
+        { "gruppe": "Sprint 1 · tägliche Störer (läuft)", "titel": "XC-6 Erster Klick auf Text ohne Wartezeit", "stand": "offen", "notiz": "Heute bis 4,6 s auf großen Plänen" },
+        { "gruppe": "Sprint 1 · tägliche Störer (läuft)", "titel": "Zwei kleine Bedienfehler, Safari-Prüfung des PNG-Downloads", "stand": "offen" },
+        { "gruppe": "Sprint 1 · tägliche Störer (läuft)", "titel": "Welche XC-Punkte gerade in Arbeit sind", "stand": "unklar", "notiz": "Kommt mit der nächsten Meldung des Fernwork-Threads" },
+
+        { "gruppe": "Sprint 2 · dichte Pläne flüssig", "titel": "XC-7 Auswahl und Treffer direkt aus PDFium, Strg+A unter 1 s", "stand": "offen", "notiz": "Heute über 60 s; größter Unsicherheitsposten" },
+        { "gruppe": "Sprint 2 · dichte Pläne flüssig", "titel": "XC-8 Speichern auf großen Plänen schnell, Löschen unter 0,3 s", "stand": "offen" },
+        { "gruppe": "Sprint 2 · dichte Pläne flüssig", "titel": "XC-9 Messungen, Stempel, Textboxen über PDFium", "stand": "offen" },
+        { "gruppe": "Sprint 2 · dichte Pläne flüssig", "titel": "XC-10 Formularfelder und Kommentare über PDFium", "stand": "offen" },
+
+        { "gruppe": "Sprint 3 · Auswahl und Text", "titel": "XC-11 „Wählen, was man sieht“: Zeilen, Absätze, Hintergrund nicht anklickbar", "stand": "offen" },
+        { "gruppe": "Sprint 3 · Auswahl und Text", "titel": "XC-12 Rechts-nach-links-Text bearbeiten", "stand": "offen" },
+        { "gruppe": "Sprint 3 · Auswahl und Text", "titel": "XC-13 Zeichen- und Wortabstände erhalten, komplexe Schriften", "stand": "offen" },
+
+        { "gruppe": "Sprint 4 · Funktionen und Bedienung", "titel": "XC-14 Links anlegen und bearbeiten", "stand": "offen" },
+        { "gruppe": "Sprint 4 · Funktionen und Bedienung", "titel": "XC-15 Bild zuschneiden, Ebenen ein/aus", "stand": "offen" },
+        { "gruppe": "Sprint 4 · Funktionen und Bedienung", "titel": "XC-16 Formularberechnungen ohne eval", "stand": "offen" },
+        { "gruppe": "Sprint 4 · Funktionen und Bedienung", "titel": "XC-17 Eigene UI-Bausteine, Sperre gegen rohe Bedienelemente", "stand": "offen" },
+        { "gruppe": "Sprint 4 · Funktionen und Bedienung", "titel": "XC-18 Properties-Leiste, Mini-Toolbar, Optionsleisten", "stand": "offen", "florian": "Properties-Kopf Variante A mit „…“-Menü? B/I/U/S überall als Knöpfe?" },
+        { "gruppe": "Sprint 4 · Funktionen und Bedienung", "titel": "XC-19 Tastenkürzel wie PDF-XChange", "stand": "offen", "florian": "N/Shift+N gegen Tippen auf ausgewähltem Text – wie soll es sein?" },
+
+        { "gruppe": "Umfang", "titel": "Reste der Nicht-PDF-Tools (z. B. Text Encryption)", "stand": "unklar", "florian": "Gehören sie noch zu „Fernwork ist durch“?" }
+      ]
+    },
+    {
+      "id": "fable-pruefung",
+      "bereich": "fernwork",
+      "titel": "Fable-Prüfung",
+      "stand": "offen",
+      "kurz": "Unabhängige Prüfung von Fernwork in etwa drei Verbesserungsrunden, Maßstab sind XC-1 bis XC-19.",
+      "blocker": "Startet, wenn der PDF-Editor durch ist.",
+      "haengtAn": ["fernwork-pdf"],
+      "teilziele": [
+        { "titel": "Runde 1", "stand": "offen" },
+        { "titel": "Runde 2", "stand": "offen" },
+        { "titel": "Runde 3", "stand": "offen" }
+      ]
+    },
+    {
+      "id": "ui-library",
+      "bereich": "fernwork",
+      "titel": "berg:work UI-Library",
+      "stand": "offen",
+      "kurz": "Der Schliff-Look von Projects wird zur gemeinsamen UI-Core für alle berg:work-Apps.",
+      "blocker": "Der Thread baut zuerst die Webseite, die UI-Core danach. Das weicht vom Fahrplan ab, die Rückfrage läuft.",
+      "haengtAn": [],
+      "teilziele": [
+        { "titel": "Schliff-Gestaltung abgenommen (4 Runden)", "stand": "fertig" },
+        { "titel": "Projects 0.1.2 im Schliff-Look veröffentlicht", "stand": "fertig" },
+        { "titel": "Schliff modular zur UI-Core für PDF und Image ausbauen", "stand": "offen" },
+        { "titel": "Projects bleibt pixelgleich (Bildvergleich)", "stand": "offen" },
+        { "titel": "Reihenfolge: Webseite vor UI-Core?", "stand": "unklar", "notiz": "Rückfrage des Leitstands läuft" }
+      ]
+    },
+    {
+      "id": "desktop-apps",
+      "bereich": "fernwork",
+      "titel": "berg:work PDF & Image als Desktop-Apps",
+      "stand": "offen",
+      "kurz": "PDF und Image werden echte Desktop-Apps neben Projects, auf der neuen UI-Core.",
+      "blocker": "Wartet auf die UI-Library.",
+      "haengtAn": ["ui-library"],
+      "teilziele": [
+        { "titel": "Grundgerüst beider Apps (Look und Desktop-Hülle)", "stand": "fertig" },
+        { "titel": "berg:work PDF auf der UI-Core", "stand": "offen" },
+        { "titel": "berg:work Image auf der UI-Core", "stand": "offen" }
+      ]
+    },
+    {
+      "id": "webseiten",
+      "bereich": "fernwork",
+      "titel": "Webseiten",
+      "stand": "laeuft",
+      "kurz": "bergwork.app wird neu aufgebaut, danach gehirn.flofischer.org aktualisiert.",
+      "blocker": "Produktbilder von PDF und Image brauchen die fertigen Desktop-Apps.",
+      "haengtAn": ["desktop-apps"],
+      "teilziele": [
+        { "titel": "bergwork.app: Fundament der neuen Seite", "stand": "laeuft" },
+        { "titel": "bergwork.app: Bilder und Videos von PDF und Image", "stand": "offen" },
+        { "titel": "gehirn.flofischer.org aktualisieren", "stand": "offen" }
+      ]
+    },
+    {
+      "id": "enterprise",
+      "bereich": "fernwork",
+      "titel": "„For Enterprise“-Knopf",
+      "stand": "offen",
+      "kurz": "Auf der Webseite und in den Apps: erklärt die Nutzung und wann man ein Angebot anfragt.",
+      "blocker": "Braucht die neue Webseite und die Desktop-Apps.",
+      "haengtAn": ["webseiten", "desktop-apps"],
+      "teilziele": [
+        { "titel": "Fernwork for Business gebaut", "stand": "fertig" },
+        { "titel": "Enterprise-Dialog in Fernwork", "stand": "fertig" },
+        { "titel": "Knopf auf der Webseite", "stand": "offen" },
+        { "titel": "Knopf in den Apps", "stand": "offen" }
+      ]
+    },
+    {
+      "id": "personendaten",
+      "bereich": "fernwork",
+      "titel": "Repo ohne Personendaten",
+      "stand": "offen",
+      "kurz": "Das Monorepo wird vor der Veröffentlichung von personenbezogenen Daten gesäubert, auch in der Historie.",
+      "blocker": "Noch nicht untersucht. Ob die Historie bereinigt oder frisch begonnen wird, entscheidet Florian.",
+      "florian": "Git-Historie bereinigen oder frisch beginnen?",
+      "haengtAn": [],
+      "teilziele": [
+        { "titel": "Repo und Historie untersuchen", "stand": "offen" },
+        { "titel": "Entscheidung: Historie bereinigen oder neu beginnen", "stand": "offen" },
+        { "titel": "Säubern", "stand": "offen" }
+      ]
+    },
+    {
+      "id": "lizenz",
+      "bereich": "fernwork",
+      "titel": "Veröffentlichung unter modified BSL",
+      "stand": "offen",
+      "kurz": "Das Monorepo wird quelloffen unter der besprochenen Lizenz veröffentlicht.",
+      "blocker": "Wartet auf alles davor: PDF-Editor, Prüfung, Apps, Webseiten, Säubern, Enterprise-Knopf.",
+      "florian": "Gibt die Veröffentlichung frei.",
+      "haengtAn": ["fable-pruefung", "personendaten", "enterprise"],
+      "teilziele": [
+        { "titel": "Lizenz gewählt: modified BSL", "stand": "fertig" },
+        { "titel": "Lizenztexte im Repo", "stand": "unklar" },
+        { "titel": "Freigabe durch Florian", "stand": "offen" }
+      ]
+    },
+    {
+      "id": "bundles",
+      "bereich": "fernwork",
+      "titel": "Bundles mit Updater, GitHub-Link",
+      "stand": "offen",
+      "kurz": "berg:work-Apps als Downloads mit eingebautem Updater (wie Projects) auf der Webseite, GitHub-Link prominent.",
+      "blocker": "Wartet auf die Veröffentlichung.",
+      "haengtAn": ["lizenz"],
+      "teilziele": [
+        { "titel": "Updater in Projects (Vorbild)", "stand": "fertig" },
+        { "titel": "Bundle berg:work PDF", "stand": "offen" },
+        { "titel": "Bundle berg:work Image", "stand": "offen" },
+        { "titel": "GitHub-Link prominent auf den Webseiten", "stand": "offen" }
+      ]
+    },
+    {
+      "id": "fernwork-release",
+      "bereich": "fernwork",
+      "ziel": true,
+      "titel": "Fernwork-Release",
+      "stand": "offen",
+      "kurz": "Das ganze Fernwork-Monorepo samt berg:work quelloffen, beworben und herunterladbar.",
+      "haengtAn": ["bundles"],
+      "teilziele": []
+    },
+
+    {
+      "id": "viewer",
+      "bereich": "himmelcad",
+      "titel": "Viewer",
+      "stand": "laeuft",
+      "kurz": "Ziel ist der beste Viewer überhaupt. Bei Punktwolken ist das erste Ziel erreicht.",
+      "blocker": "Kämpft gerade mit den Kosten des Mauszeigers und am Verfeinern der Kamerafahrt.",
+      "haengtAn": [],
+      "teilziele": [
+        { "titel": "Punktwolken mindestens so gut wie der alte Viewer", "stand": "fertig" },
+        { "titel": "Klick-Abfrage schneller (Mesh 74 → 29 ms, Punktwolke 36 → 21 ms)", "stand": "fertig" },
+        { "titel": "Teurer Mauszeiger", "stand": "laeuft", "notiz": "Korrektur wird gemessen und gelandet" },
+        { "titel": "Kamerafahrt verfeinern", "stand": "laeuft" },
+        { "titel": "Texturierte Meshes flüssig", "stand": "unklar" },
+        { "titel": "Fremddaten (SLPK, 3D Tiles) genauso flüssig", "stand": "unklar" },
+        { "titel": "Gaussian Splats, Apple Silicon", "stand": "offen" },
+        { "titel": "Niveau Trimble RealWorks (Punktwolken) und ArcGIS (Meshes)", "stand": "offen", "notiz": "Langfristiges Ziel" }
+      ]
+    },
+    {
+      "id": "builder-mockui",
+      "bereich": "himmelcad",
+      "titel": "Builder-Mock-UI",
+      "stand": "laeuft",
+      "kurz": "Florian baut mit viel eigenem Input eine umfangreiche Mock-UI; sie gibt vor, wie kritische Funktionen bedient werden.",
+      "blocker": "Florians Zeit. Der Leitstand führt diesen Thread nicht und kennt den Fortschritt nur grob.",
+      "florian": "Mock-UI ist direkte Arbeit mit Florian.",
+      "haengtAn": [],
+      "teilziele": [
+        { "titel": "Mock-UI der kritischen Funktionen", "stand": "laeuft" },
+        { "titel": "Beispiele, damit Agents nicht gezeigte Funktionen in Florians Sinn bauen", "stand": "offen" },
+        { "titel": "Fortschritt im Detail", "stand": "unklar" }
+      ]
+    },
+    {
+      "id": "photolab",
+      "bereich": "himmelcad",
+      "titel": "PhotoLab",
+      "stand": "laeuft",
+      "kurz": "Backend ist weit; der lange Testlauf soll es mit starken Ergebnissen und Laufzeiten bestätigen. Die Oberfläche wird aus dem Builder übernommen.",
+      "blocker": "Vollauf startet heute Nacht. Die Oberfläche wartet auf die Builder-Mock-UI und den Viewer.",
+      "haengtAn": ["builder-mockui", "viewer"],
+      "teilziele": [
+        { "gruppe": "Backend", "titel": "Verbesserungen gebaut", "stand": "fertig" },
+        { "gruppe": "Backend", "titel": "Speicher-Zulassung je Rechner", "stand": "laeuft" },
+        { "gruppe": "Backend", "titel": "Vollauf 1 (Sa 22:00 bis So 10:00)", "stand": "offen", "notiz": "Start oder Absage gegen 21:50" },
+        { "gruppe": "Backend", "titel": "Vollauf 2 (So 19:00 bis Mo 10:00)", "stand": "offen" },
+        { "gruppe": "Backend", "titel": "Ergebnisse im Viewer messen", "stand": "offen" },
+        { "gruppe": "Backend", "titel": "Mesh ohne Kamerapositionen", "stand": "unklar" },
+        { "gruppe": "Backend", "titel": "Orthomosaik mit Quelle Fotos oder Punktwolke", "stand": "unklar" },
+        { "gruppe": "Oberfläche", "titel": "Oberfläche komplett aus der Builder-Mock-UI", "stand": "haengt", "notiz": "Wartet auf die Mock-UI" },
+        { "gruppe": "Oberfläche", "titel": "Punktwolken-Import wie in der Builder-Mock-UI", "stand": "unklar" }
+      ]
+    },
+    {
+      "id": "builder",
+      "bereich": "himmelcad",
+      "titel": "Builder",
+      "stand": "offen",
+      "kurz": "Florians Herzensprodukt. Was wenig Input braucht, soll vorab entstehen; der Rest möglichst autonom, sobald die Mock-UI steht.",
+      "blocker": "Wartet auf die Mock-UI.",
+      "haengtAn": ["builder-mockui", "viewer"],
+      "teilziele": [
+        { "titel": "Teile mit wenig Input vorziehen", "stand": "unklar" },
+        { "titel": "Rest autonom nach der Mock-UI", "stand": "offen" },
+        { "titel": "Gehört der Builder zum ersten HimmelCAD-Release?", "stand": "unklar" }
+      ]
+    },
+    {
+      "id": "assembler",
+      "bereich": "himmelcad",
+      "titel": "Assembler",
+      "stand": "offen",
+      "kurz": "Am weitesten von allen HimmelCAD-Teilen, mit klar definierten Todos. Niedrige Priorität.",
+      "blocker": "Läuft nur, wenn Rechner- und Agent-Kapazität frei ist.",
+      "haengtAn": [],
+      "teilziele": [
+        { "titel": "Klar definierte Todos abarbeiten", "stand": "offen" },
+        { "titel": "Genauer Stand", "stand": "unklar" }
+      ]
+    },
+    {
+      "id": "himmelcad-release",
+      "bereich": "himmelcad",
+      "ziel": true,
+      "titel": "HimmelCAD-Release",
+      "stand": "offen",
+      "kurz": "PhotoLab, Builder und Assembler auf Release-Stand.",
+      "haengtAn": ["photolab", "builder", "assembler"],
+      "teilziele": []
+    }
+  ]
+}
