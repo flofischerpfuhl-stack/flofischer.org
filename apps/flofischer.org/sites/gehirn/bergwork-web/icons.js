@@ -9,7 +9,8 @@ const STONE = '#21201e', INK = '#0a0a0a';
 // 1 „Werkzeichen auf Stein“: Formen aus der Bergschrift (Webseite) auf der Steinkachel von Projects, Hartschatten in Tinte,
 // je App ein Teil in ihrer Datenfarbe.
 const W = {
-  bergwork: (a) => `<text x="128" y="196" text-anchor="middle" font-family="Meta" font-size="200" fill="${CREAM}">b<tspan fill="${a}">:</tspan></text>`,
+  // „b:“ in der Bergschrift wie im freigegebenen Werkzeichen, als Umriss (keine Schrift laden): Größe 150, mittig auf 128, Grundlinie 176.
+  bergwork: (a) => `<g transform="translate(17.7 176) scale(.15 -.15)"><path fill="${CREAM}" d="M0 570V700H375V550L1020 470V0H405L355 50L304 0H125V570ZM375 130H770V375L375 425Z"/><path fill="${a}" transform="translate(1110 0)" d="M50 0V162H311V0ZM50 538V700H311V538Z"/></g>`,
   projects: (a) => `<path fill="${CREAM}" d="M44 52h112l20 20v20H44z"/><path fill="${a}" d="M84 112h128v40H104l-20-20z"/><path fill="${CREAM}" d="M44 172h84l20 20v20H44z"/>`,
   pdf: (a) => `<path fill="${CREAM}" fill-rule="evenodd" d="M60 32h96l44 44v148H60zM88 160v20h56v-20z"/><path fill="${a}" d="M88 116h84v20H88z"/><path d="M156 32v44h44" fill="none" stroke="${STONE}" stroke-width="10"/>`,
   image: (a) => `<path fill="${CREAM}" fill-rule="evenodd" d="M32 56h192v148H32zM56 80v100h144V80z"/><path fill="${a}" d="M56 180l48-48 28 28 28-28 40 40v8z"/><path fill="${CREAM}" d="M160 92h24v24h-24z"/>`,
