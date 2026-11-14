@@ -1,5 +1,5 @@
 {
-  "standVom": "2026-11-14T21:20",
+  "standVom": "2026-11-14T23:10",
   "bereiche": [
     {
       "id": "fernwork",
@@ -186,7 +186,7 @@
       "titel": "berg:work UI-Library",
       "stand": "laeuft",
       "kurz": "Der Schliff-Look von Projects wird zur gemeinsamen UI-Core für alle berg:work-Apps. Etwa 8–11 Tage Agentenzeit.",
-      "blocker": "Seit 14.11. abends in Arbeit (Etappe a). Florian nimmt nach a und d ab und gibt vor e das Image-Mockup frei.",
+      "blocker": "Etappe a (Wortmarke und Werkzeichen) ist abgenommen und auf main. Etappe b startet nach dem Token-Reset am 15.11. Florian nimmt nach d ab und gibt vor e das Image-Mockup frei.",
       "haengtAn": [],
       "teilziele": [
         {
@@ -207,8 +207,7 @@
         {
           "gruppe": "Etappen",
           "titel": "a) Wortmarke und Werkzeichen in Projects (½ Tag)",
-          "stand": "laeuft",
-          "florian": "Abnahme danach"
+          "stand": "fertig"
         },
         {
           "gruppe": "Etappen",
