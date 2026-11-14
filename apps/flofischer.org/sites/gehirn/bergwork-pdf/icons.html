@@ -1,0 +1,52 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow, noarchive" /><title>Icons</title>
+<link rel="stylesheet" href="schliff-pdf.css">
+<style>
+  @font-face { font-family: JBM; src: url(JetBrainsMono-latin.woff2) format('woff2'); }
+  .stage { width: 1440px; height: 900px; background: #0e0e0d; color: #f2f1ed; padding: 40px 56px; display: flex; flex-direction: column; gap: 28px; font: 14px Inter; }
+  .head h1 { font: 400 34px Bergschrift; color: #f3f0e6; letter-spacing: .01em; }
+  .head p { color: #c6c4be; font-size: 16px; margin-top: 6px; }
+  .eyebrow { font: 600 12px JBM; letter-spacing: .1em; text-transform: uppercase; color: #ff5a4f; margin-bottom: 8px; }
+  .big { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .big figure { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .big svg { width: 188px; height: 188px; display: block; filter: drop-shadow(0 10px 22px rgba(0,0,0,.5)); }
+  .big figcaption { font-size: 15px; color: #c6c4be; }
+  .big figcaption b { font: 400 15px Bergschrift; color: #f3f0e6; margin-right: 6px; }
+  .row { display: flex; gap: 28px; align-items: flex-end; }
+  .sizes { display: flex; gap: 14px; align-items: flex-end; padding: 16px 20px; border-radius: 10px; background: #1a1917; }
+  .sizes svg { display: block; }
+  .ctx { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .tb { height: 40px; border-radius: 8px; background: #060605; display: flex; align-items: center; gap: 8px; padding: 0 14px; box-shadow: 0 0 0 1px rgba(255,253,248,.08); }
+  .tb svg { width: 18px; height: 18px; }
+  .tb b { font: 400 14px Bergschrift; color: #fdfcfa; }
+  .tb span { font-size: 13px; color: #95938d; }
+  .tb .gap { width: 28px; }
+  .site { height: 44px; border-radius: 8px; background: #1b2a5e; display: flex; align-items: center; gap: 10px; padding: 0 16px; }
+  .site svg { width: 24px; height: 24px; }
+  .site b { font: 400 18px Bergschrift; color: #f3f0e6; }
+  .site i { font: 600 11px JBM; font-style: normal; letter-spacing: .06em; color: #f3f0e6; margin-left: 18px; }
+  .site .grow { flex: 1; }
+  .tagw, .tagp { font: 600 11px JBM; letter-spacing: .06em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; margin: 0 8px 0 0; }
+  .tagw { background: #c81e1e; color: #f3f0e6; }
+  .tagp { background: color-mix(in oklab, #79a8f5 28%, #0e0e0d); color: color-mix(in oklab, #79a8f5 72%, #fff); margin-left: 22px; }
+</style></head>
+<body>
+<div class="stage" id="stage"></div>
+<script type="module">
+  import { families, apps, load } from './icons.js';
+  await load();
+  const f = families.find((x) => x.key === new URLSearchParams(location.search).get('f'));
+  const i = families.indexOf(f) + 1;
+  const big = apps.map(([id, label]) => `<figure>${f.fn(id)}<figcaption>${id === 'bergwork' ? '<b>berg:work</b>Marke' : `<b>berg:work</b>${label}`}</figcaption></figure>`).join('');
+  const sizes = [64, 32, 16].map((s) => `<div class="sizes">${apps.map(([id]) => f.fn(id).replace('<svg ', `<svg width="${s}" height="${s}" `)).join('')}</div>`).join('');
+  const tb = apps.slice(1).map(([id, label]) => `${f.fn(id, false)}<b>berg:work</b><span>${label}</span><span class="gap"></span>`).join('');
+  document.getElementById('stage').innerHTML = `
+    <div class="head"><div class="eyebrow">Icon-Familie ${i} von 3</div><h1>${f.name}</h1><p><span class="tagw">Webseite</span>${f.web}<span class="tagp">Projects</span>${f.proj}</p></div>
+    <div class="big">${big}</div>
+    <div class="row">${sizes}</div>
+    <div class="ctx">
+      <div class="eyebrow" style="margin:0">In der Titelleiste (Schliff) und in der Kopfzeile der Webseite</div>
+      <div class="tb">${tb}</div>
+      <div class="site">${f.fn('bergwork', false)}<b>berg:work</b><span class="grow"></span>${apps.slice(1).map(([id, l]) => `<i>${l.toUpperCase()}</i>`).join('')}</div>
+    </div>`;
+</script>
+</body></html>

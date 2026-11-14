@@ -1,0 +1,101 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<title>berg:work PDF – Vorschläge</title>
+<style>
+  @font-face { font-family: Inter; src: url(inter.woff2) format('woff2'); font-weight: 100 900; }
+  @font-face { font-family: Bergschrift; src: url(Bergschrift-Regular.woff2) format('woff2'); }
+  :root { --chrome: #060605; --view: #0e0e0d; --control: #252422; --pop: #21201e; --fg: #f2f1ed; --fg2: #c6c4be; --fg3: #95938d;
+          --line: rgba(255,253,248,.1); --accent: #8cb4f5; --accent-soft: rgba(140,180,245,.17); color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body { background: var(--chrome); color: var(--fg); font: 14px/1.4 Inter, system-ui, sans-serif; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+  header { display: flex; align-items: center; gap: 12px 20px; padding: 10px 16px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: baseline; gap: 6px; }
+  .brand b { font: 400 15px Bergschrift; color: #fdfcfa; }
+  .brand span { font-size: 13px; color: var(--fg3); }
+  .groups { display: flex; gap: 8px 20px; flex-wrap: wrap; flex: 1; }
+  .group { display: flex; align-items: center; gap: 8px; }
+  .group > span { font-size: 12px; color: var(--fg3); }
+  .seg { display: flex; padding: 2px; border-radius: 8px; background: var(--control); gap: 2px; }
+  .seg button { all: unset; cursor: pointer; height: 30px; padding: 0 12px; border-radius: 6px; color: var(--fg2); font-size: 14px; white-space: nowrap; display: flex; align-items: center; }
+  .seg button:hover { background: rgba(255,253,248,.06); }
+  .seg button[aria-pressed="true"] { background: var(--pop); color: var(--fg); font-weight: 600; box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgba(0,0,0,.4); }
+  .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .hint { font-size: 12px; color: var(--fg3); }
+  .desc { padding: 0 16px 10px; color: var(--fg2); font-size: 14px; display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .desc b { color: var(--fg); font-weight: 600; }
+  .desc a { color: var(--accent); text-decoration: none; margin-left: auto; font-size: 13px; }
+  main { flex: 1; min-height: 0; position: relative; margin: 0 8px 8px; border-radius: 10px; background: var(--view); box-shadow: 0 0 0 1px var(--line); overflow: auto; }
+  .fit { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  .fit iframe, .fit img { display: block; width: 1440px; height: 900px; border: 0; border-radius: 6px; background: #000; }
+  @media (max-width: 760px) {
+    header { padding: 8px 12px; }
+    .seg button { height: 36px; padding: 0 10px; }
+    .hint { display: none; }
+    .groups { width: 100%; }
+    .group { width: 100%; min-width: 0; }
+    .group > span { width: 44px; flex: none; }
+    .seg { flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+    .seg::-webkit-scrollbar { display: none; }
+    .desc { font-size: 13px; }
+    main { margin: 0 4px 4px; }
+  }
+</style></head>
+<body>
+<header>
+  <div class="brand"><b>berg:work</b><span>Vorschläge · 13.11.2026</span></div>
+  <div class="groups">
+    <div class="group"><span>PDF-UI</span><div class="seg" data-g="pdf"></div></div>
+    <div class="group"><span>Icons</span><div class="seg" data-g="icons"></div></div>
+  </div>
+  <span class="hint">← → wechseln</span>
+</header>
+<div class="desc" id="desc"></div>
+<main id="main"><div class="fit" id="fit"></div></main>
+<script>
+  const V = [
+    { g: 'pdf', id: 'heute', label: 'Heute', src: 'heute.png', img: true, t: 'Heute', d: 'berg:work PDF so wie es jetzt aussieht (dunkel).' },
+    { g: 'pdf', id: 'p1', label: '1 Schliff', src: 'pdf.html?v=1', t: 'Richtung 1 · Schliff', d: 'Fernworks Inseln und Bedienelemente bleiben, Farben, Schrift, Maße und Menüs aus Projects. Hauptaktion in Tinte, Stahlblau für „gewählt“.' },
+    { g: 'pdf', id: 'p2', label: '2 Farbsymbole', src: 'pdf.html?v=2', t: 'Richtung 2 · Farbsymbole', d: 'Wie 1, aber die Werkzeuge tragen Farben wie die Reiter in Projects: Symbol farbig, aktives Werkzeug getönt mit Linie darunter.' },
+    { g: 'pdf', id: 'p3', label: '3 Projects-Rahmen', src: 'pdf.html?v=3', t: 'Richtung 3 · Projects-Rahmen', d: 'Wie 1, dazu der Rahmen von Projects: Suchfeld mittig in der Titelleiste, Arbeitsfläche als abgerundete Seite, Inseln schweben darin.' },
+    { g: 'icons', id: 'i0', label: 'Überblick', src: 'overview.html', t: 'Icons · Überblick', d: 'Oben heute, darunter drei Familien. Jede verbindet Webseite (Bergschrift-Formen, Tinte, Rot) mit Projects (Steingrau, Datenfarben).' },
+    { g: 'icons', id: 'i1', label: '1 Werkzeichen', src: 'icons.html?f=werkzeichen', t: 'Icons 1 · Werkzeichen auf Stein', d: 'Formen aus der Bergschrift mit Hartschatten wie auf der Webseite, auf der Steinkachel von Projects. Marke = „b:“.' },
+    { g: 'icons', id: 'i2', label: '2 Linie, kantig', src: 'icons.html?f=linie', t: 'Icons 2 · Linie, kantig', d: 'Strich wie die UI-Symbole in Projects, aber eckig mit 45°-Fasen der Bergschrift, auf Tinte. Marke = Schlägel und Eisen als Linie.' },
+    { g: 'icons', id: 'i3', label: '3 Granit flach', src: 'icons.html?f=granit', t: 'Icons 3 · Granit flach', d: 'Die freigegebenen Low-Poly-Marken auf drei Steintöne reduziert, Rot als einziger Akzent; Projects bekommt einen Steinmann.' },
+  ];
+  const fit = document.getElementById('fit'), main = document.getElementById('main'), desc = document.getElementById('desc');
+  const frames = {};
+  for (const v of V) {
+    const b = document.createElement('button');
+    b.textContent = v.label; b.dataset.id = v.id; b.onclick = () => show(v.id);
+    document.querySelector(`.seg[data-g="${v.g}"]`).append(b);
+  }
+  function layout() {
+    const r = main.getBoundingClientRect();
+    const s = Math.min((r.width - 16) / 1440, (r.height - 16) / 900);
+    const x = (r.width - 1440 * s) / 2, y = r.width < 760 ? 8 : (r.height - 900 * s) / 2;
+    fit.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  function show(id) {
+    const v = V.find((x) => x.id === id) ?? V[1];
+    for (const b of document.querySelectorAll('.seg button')) b.setAttribute('aria-pressed', String(b.dataset.id === v.id));
+    if (!frames[v.id]) {
+      const el = document.createElement(v.img ? 'img' : 'iframe');
+      el.src = v.src; if (!v.img) el.setAttribute('scrolling', 'no'); el.alt = v.t;
+      frames[v.id] = el; fit.append(el);
+    }
+    for (const [k, el] of Object.entries(frames)) el.style.display = k === v.id ? 'block' : 'none';
+    desc.innerHTML = `<b>${v.t}</b><span>${v.d}</span><a href="${v.src}" target="_blank" rel="noopener">einzeln öffnen ↗</a>`;
+    history.replaceState(null, '', '#' + v.id);
+    document.querySelector(`button[data-id="${v.id}"]`).scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const i = V.findIndex((x) => '#' + x.id === location.hash);
+    show(V[(i + (e.key === 'ArrowRight' ? 1 : V.length - 1)) % V.length].id);
+  });
+  addEventListener('resize', layout);
+  layout(); show(location.hash.slice(1) || 'p1');
+</script>
+</body></html>

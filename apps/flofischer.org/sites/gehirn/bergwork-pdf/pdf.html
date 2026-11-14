@@ -1,0 +1,135 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow, noarchive" /><title>berg:work PDF Richtungen</title>
+<link rel="stylesheet" href="schliff-pdf.css">
+<style>
+  @font-face { font-family: JBM; src: url(JetBrainsMono-latin.woff2) format('woff2'); font-weight: 100 900; }
+  .tmark { width: 20px; height: 20px; flex: none; align-self: center; margin-right: 2px; }
+  .cap, .field2 { white-space: nowrap; }
+  .brand::before { display: none; }
+  .wctl { display: flex; gap: 2px; }
+  .island .btn.has-menu.on { padding-right: 6px; }
+  .split { display: inline-flex; }
+  .split .btn:last-child { width: 22px; padding: 0; justify-content: center; margin-left: -2px; }
+  .pagetools { display: flex; align-items: center; gap: 2px; padding: 2px; border-radius: 8px; background: var(--ui-bg-control); }
+  .pagetools .btn { height: 28px; }
+  .pagetools .btn.icon { width: 28px; }
+  .exportrow { display: flex; gap: 6px; }
+  .field2 { height: 32px; border-radius: 6px; background: var(--ui-bg-control); display: flex; align-items: center; padding: 0 10px; color: var(--ui-fg-tertiary); flex: 1; gap: 6px; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* Richtung 2: Werkzeugsymbole in Bereichsfarbe wie die Reiter in Projects */
+  .v2 .island .btn[data-c] .ic { color: var(--c); }
+  .v2 .island .btn[data-c].on { background: color-mix(in oklab, var(--c) var(--look-tab), transparent); color: var(--ui-fg-primary); font-weight: 600; position: relative; }
+  .v2 .island .btn[data-c].on::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: -4px; height: 2px; border-radius: 2px; background: var(--c); }
+
+  /* Richtung 3: Projects-Rahmen – Titelleiste und gerahmte Arbeitsfläche wie in Projects, Inseln darin */
+  .projsearch { display: none; }
+  .v3 .projsearch { display: flex; }
+  .v3 .doctitle { display: none; }
+  .v3 .desk { inset: 40px 8px 8px 8px; border-radius: 10px; background: var(--ui-bg-view); box-shadow: 0 0 0 1px var(--ui-line-separator); }
+</style></head>
+<body>
+<div class="app dark" id="app">
+  <div class="titlebar">
+    <div class="brand"><img class="tmark" src="bergwork-pdf.svg" alt=""><b>berg:work</b><span>PDF</span></div>
+    <div class="searchfield center projsearch" style="width:440px"><i data-i="search" data-s="15"></i><span>Search in document</span><span class="kbd">Ctrl K</span></div>
+    <div class="crumb center doctitle"><strong>Lageplan_Sonnenhain_Entwurf.pdf</strong><span class="cap">· edited</span></div>
+    <div class="grow"></div>
+    <div class="btn icon dim"><i data-i="sun"></i></div>
+    <div class="wctl"><div class="btn icon dim"><i data-i="minus"></i></div><div class="btn icon dim"><i data-i="square" data-s="13"></i></div><div class="btn icon dim"><i data-i="x"></i></div></div>
+  </div>
+  <div class="desk">
+    <div class="island" style="left:12px;top:12px">
+      <div class="btn"><i data-i="file"></i><b style="font-weight:500">Lageplan_Sonnenhain_Entwurf.pdf</b><i class="chev" data-i="down" data-s="14"></i></div>
+      <div class="sep"></div>
+      <div class="btn" data-c style="--c:var(--tc-grey)"><i data-i="hand"></i>Pan</div>
+      <div class="split"><div class="btn on" data-c style="--c:var(--tc-blue)"><i data-i="edit"></i>Edit PDF</div><div class="btn"><i class="chev" data-i="down" data-s="14"></i></div></div>
+      <div class="btn hover" data-c style="--c:var(--tc-green)"><i data-i="plus"></i>Insert</div>
+      <div class="btn" data-c style="--c:var(--tc-yellow)"><i data-i="highlighter"></i>Markup</div>
+      <div class="btn" data-c style="--c:var(--tc-orange)"><i data-i="ruler"></i>Measure</div>
+      <div class="btn" data-c style="--c:var(--tc-purple)"><i data-i="grid"></i>Guides</div>
+    </div>
+    <div class="island" style="right:12px;top:12px">
+      <div class="split"><div class="btn primary"><i data-i="save"></i>Save</div><div class="btn"><i class="chev" data-i="down" data-s="14"></i></div></div>
+      <div class="sep"></div>
+      <div class="btn icon"><i data-i="undo"></i></div>
+      <div class="btn icon dim"><i data-i="redo"></i></div>
+      <div class="btn icon"><i data-i="print"></i></div>
+      <div class="sep"></div>
+      <div class="btn"><i data-i="scan"></i>Document tools<i class="chev" data-i="down" data-s="14"></i></div>
+      <div class="btn"><i data-i="panelR"></i>Properties</div>
+    </div>
+
+    <div class="menu" style="left:556px;top:60px;width:236px">
+            <div class="mi hover"><i data-i="type"></i>Text<span class="k">T</span></div>
+      <div class="mi"><i data-i="image"></i>Image<span class="k">I</span></div>
+      <div class="mi"><i data-i="square"></i>Shape<span class="k"><i data-i="right" data-s="14"></i></span></div>
+      <div class="mi"><i data-i="sig"></i>Signature<span class="k">S</span></div>
+      <div class="mi"><i data-i="stamp"></i>Stamp</div>
+      <div class="mi"><i data-i="link"></i>Link<span class="k">L</span></div>
+      <div class="hsep"></div>
+      <div class="mi"><i data-i="pages"></i>Pages from file …</div>
+    </div>
+
+    <div class="panel" style="left:12px;top:64px;width:316px;bottom:68px">
+      <div class="rail">
+        <div class="btn on"><i data-i="pages"></i></div><div class="btn"><i data-i="bookmark"></i></div><div class="btn"><i data-i="align"></i></div><div class="btn"><i data-i="stamp"></i></div><div class="btn"><i data-i="crop"></i></div>
+        <div class="hsep"></div>
+        <div class="btn"><i data-i="form"></i></div><div class="btn"><i data-i="comment"></i></div><div class="btn"><i data-i="pen"></i></div><div class="btn"><i data-i="type"></i></div>
+        <div class="hsep"></div>
+        <div class="btn"><i data-i="file"></i></div><div class="btn"><i data-i="scan"></i></div><div class="btn"><i data-i="shield"></i></div>
+        <div class="hsep"></div>
+        <div class="btn"><i data-i="compare"></i></div><div class="btn"><i data-i="layers"></i></div><div class="btn"><i data-i="ruler"></i></div>
+      </div>
+      <div class="pbody">
+        <div class="phead"><h3>Pages</h3><span class="cap num">3 pages · 1 selected</span><div class="btn icon sm dim"><i data-i="x"></i></div></div>
+        <div class="pagetools">
+          <div class="btn sm num">Page 1</div><div class="btn icon dim"><i data-i="left" style="transform:rotate(90deg)"></i></div><div class="btn icon"><i data-i="down"></i></div><div class="btn icon"><i data-i="copy"></i></div><div class="btn icon"><i data-i="trash"></i></div>
+          <div class="grow"></div><div class="btn sm">All</div><div class="btn icon"><i data-i="rotate" style="transform:scaleX(-1)"></i></div><div class="btn icon"><i data-i="rotate"></i></div>
+        </div>
+        <div class="thumbs">
+          <div class="thumb sel"><div class="pg" data-plan></div><span class="num">1</span></div>
+          <div class="thumb"><div class="pg" data-plan style="filter:grayscale(1) opacity(.8)"></div><span class="num">2</span></div>
+          <div class="thumb"><div class="pg" data-plan style="filter:grayscale(1) opacity(.65)"></div><span class="num">3</span></div>
+          <div class="thumb"><div class="pg" style="display:grid;place-items:center;background:transparent;box-shadow:inset 0 0 0 1px var(--ui-line-control);border-radius:6px;color:var(--ui-fg-tertiary)"><i data-i="plus"></i></div>Add pages</div>
+        </div>
+        <div class="hsep" style="margin:6px 0"></div>
+        <div class="sec">Export or split</div>
+        <div class="exportrow"><div class="btn field" style="width:96px;justify-content:space-between">Pages<i class="chev" data-i="down" data-s="14"></i></div><div class="field2 num">1–3, 5</div><div class="btn field"><i data-i="share"></i>Export</div></div>
+      </div>
+    </div>
+
+    <div class="sheet" data-plan style="left:404px;top:72px;width:980px;height:693px"></div>
+    <div class="selbox" style="left:1115px;top:631px;width:126px;height:20px"><i class="h" style="left:-6px;top:-6px"></i><i class="h" style="right:-6px;top:-6px"></i><i class="h" style="left:-6px;bottom:-6px"></i><i class="h" style="right:-6px;bottom:-6px"></i></div>
+    <div class="island" style="left:930px;top:568px">
+      <div class="btn field sm">Inter<i class="chev" data-i="down" data-s="14"></i></div>
+      <div class="btn field sm num">14 pt</div>
+      <div class="sep"></div>
+      <div class="btn icon on"><i data-i="bold"></i></div><div class="btn icon"><i data-i="italic"></i></div><div class="btn icon"><i data-i="align"></i></div>
+      <div class="btn icon"><span class="swatch" style="--c:#222;width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 1px var(--ui-line-strong)"></span></div>
+      <div class="sep"></div>
+      <div class="btn icon"><i data-i="para"></i></div><div class="btn icon"><i data-i="more"></i></div>
+    </div>
+
+    <div class="island" style="left:12px;bottom:12px">
+      <div class="btn field sm num">100 %</div>
+      <div class="btn sm num"><b style="font-weight:600">1</b>&nbsp;<span class="cap">/ 3</span></div>
+    </div>
+    <div class="island center" style="bottom:12px">
+      <div class="btn on" style="height:32px"><i data-i="pages"></i>Pages</div>
+      <div class="btn icon"><i data-i="rotate" style="transform:scaleX(-1)"></i></div>
+      <div class="btn icon"><i data-i="rotate"></i></div>
+    </div>
+    <div class="island" style="right:12px;bottom:12px">
+      <div class="btn icon"><i data-i="search"></i></div>
+      <div class="btn icon"><i data-i="comment"></i></div>
+      <div class="btn icon"><i data-i="link"></i></div>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { mount } from './kit.js';
+  const v = new URLSearchParams(location.search).get('v') || '1';
+  document.getElementById('app').classList.add('v' + v);
+  mount();
+</script>
+</body></html>

@@ -1,0 +1,23 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow, noarchive" /><title>Icons Überblick</title>
+<link rel="stylesheet" href="schliff-pdf.css">
+<style>
+  @font-face { font-family: JBM; src: url(JetBrainsMono-latin.woff2) format('woff2'); }
+  .stage { width: 1440px; height: 900px; background: #0e0e0d; color: #f2f1ed; padding: 40px 56px; display: grid; grid-template-columns: 260px repeat(4, 1fr); align-items: center; row-gap: 18px; font: 14px Inter; }
+  .stage > .h { font: 600 12px JBM; letter-spacing: .1em; text-transform: uppercase; color: #95938d; text-align: center; }
+  .name { font: 400 20px Bergschrift; color: #f3f0e6; }
+  .name small { display: block; font: 13px Inter; color: #95938d; margin-top: 4px; }
+  .cell { display: flex; justify-content: center; }
+  .cell svg { width: 136px; height: 136px; filter: drop-shadow(0 8px 18px rgba(0,0,0,.45)); }
+  .cell img { width: 100px; height: 100px; }
+  .now { width: 136px; height: 136px; border-radius: 30px; background: #0a0a0a; box-shadow: inset 0 0 0 1px rgba(243,240,230,.1); display: grid; place-items: center; color: #6b6964; font-size: 12px; text-align: center; }
+</style></head><body>
+<div class="stage" id="s"></div>
+<script type="module">
+  import { families, apps, load } from './icons.js';
+  await load();
+  const now = { bergwork: 'bergwork.svg', pdf: 'bergwork-pdf.svg', image: 'bergwork-image.svg' };
+  let h = '<div></div>' + apps.map(([, l]) => `<div class="h">${l}</div>`).join('');
+  h += `<div class="name">Heute<small>freigegeben 25.09.2026</small></div>` + apps.map(([id]) => `<div class="cell">${now[id] ? `<div class="now"><img src="${now[id]}"></div>` : '<div class="now">kein eigenes<br>Icon</div>'}</div>`).join('');
+  families.forEach((f, i) => { h += `<div class="name">${i + 1} · ${f.name}</div>` + apps.map(([id]) => `<div class="cell">${f.fn(id)}</div>`).join(''); });
+  document.getElementById('s').innerHTML = h;
+</script></body></html>
