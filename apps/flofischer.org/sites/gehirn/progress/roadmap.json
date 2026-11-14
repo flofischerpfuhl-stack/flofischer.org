@@ -1,5 +1,5 @@
 {
-  "standVom": "2026-11-14T23:10",
+  "standVom": "2026-11-15T00:30",
   "bereiche": [
     {
       "id": "fernwork",
@@ -413,7 +413,7 @@
       "titel": "Viewer",
       "stand": "laeuft",
       "kurz": "Ziel ist der beste Viewer überhaupt. Bei Punktwolken ist das erste Ziel erreicht.",
-      "blocker": "Kämpft gerade mit den Kosten des Mauszeigers und am Verfeinern der Kamerafahrt.",
+      "blocker": "Fremddaten: Von den öffentlichen Testfällen lädt bisher nur die fremde Punktwolke; Splats, DGM-Import, CAD-Import und 3D Tiles laden noch nicht. Textur-Laufzeitkompression halbiert Speicher, macht Kacheln aber ~0,5 s später fertig – Entscheidung offen.",
       "haengtAn": [],
       "teilziele": [
         {
@@ -425,25 +425,33 @@
           "stand": "fertig"
         },
         {
-          "titel": "Teurer Mauszeiger",
+          "titel": "Mauszeiger in der Fahrt günstig (Pick 11,5–18,6 → 7,4–7,7 ms)",
+          "stand": "fertig"
+        },
+        {
+          "titel": "Kamerafahrt verfeinern, schnellerer Ladepfad (Zoomfahrt fertig 2,3–2,6 s statt 2,5–3,7 s)",
+          "stand": "fertig"
+        },
+        {
+          "titel": "Texturierte Meshes: GPU-fertige Texturen (BC1)",
           "stand": "laeuft",
-          "notiz": "Korrektur wird gemessen und gelandet"
+          "notiz": "Encoder fertig und bit-gleich; Einbau-Entscheidung offen"
         },
         {
-          "titel": "Kamerafahrt verfeinern",
-          "stand": "laeuft"
+          "titel": "Fremde Punktwolke lädt",
+          "stand": "fertig"
         },
         {
-          "titel": "Texturierte Meshes flüssig",
-          "stand": "unklar"
+          "titel": "3D Tiles laden",
+          "stand": "haengt"
         },
         {
-          "titel": "Fremddaten (SLPK, 3D Tiles) genauso flüssig",
-          "stand": "unklar"
+          "titel": "Gaussian Splats laden",
+          "stand": "haengt"
         },
         {
-          "titel": "Gaussian Splats, Apple Silicon",
-          "stand": "offen"
+          "titel": "DGM- und CAD-Import laden",
+          "stand": "haengt"
         },
         {
           "titel": "Niveau Trimble RealWorks (Punktwolken) und ArcGIS (Meshes)",
