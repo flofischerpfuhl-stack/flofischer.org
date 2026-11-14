@@ -1,4 +1,4 @@
-// Startseite „Auseinandergenommen“: das Projekt als auseinandergezogener Stapel, die App selbst zum Ausprobieren und die Vorführungen von PDF und Image Pro.
+// Startseite „Auseinandergenommen“: das Projekt als auseinandergezogener Stapel, die App selbst zum Ausprobieren und die Vorführungen von PDF und Image.
 import { rng, ridge, poly } from './scene.js';
 import { ico, TRUST, mount } from './common.js';
 
@@ -14,8 +14,10 @@ const TABS = [
   { id: 'chat', label: 'Chat', ico: 'chat', t: '#b690f2', note: 'The project channel', x: [47.95, 54], cuts: [['talk', 297, 486, 470, 138, 4, 12, 46, 'fade']] },
   { id: 'calendar', label: 'Calendar', ico: 'cal', t: '#f2716b', note: 'Only this project’s dates', x: [54.1, 62.5], cuts: [['week', 476, 262, 245, 205, 58, 8, 30]] },
 ];
+// Unscharfes Vorschaubild (64×40) des Grundfensters, damit bei langsamer Leitung kein schwarzer Kasten steht.
+const LQIP = LIGHT ? 'data:image/webp;base64,UklGRiwBAABXRUJQVlA4ICABAAAQCQCdASpAACgAPtFYpk6oJKMiKBqriQAaCWkADpfggLjvIiP2CdQckCpxR5khVgY5wuUvD90l63Og3R9CcMhfszhwO1F+sfc3PQHMTffpFIAA/u2IWZUmjFie70cp5YcoEbCvtCz5896gM0kDo0D/vgyAsW3SoKWng7k3OeSfDdL4q61eP+27nJUp2SHWjX07G/YcH0arWoUCmX4KPN/oCZ5uPo6ZeSvb8z+kNY/O3fCXR0ZQjMqVx2itHDX4QcDCUjCxhMcXzhK04/ogaZiakAy6+Ob7wyl0ug/OFsDpNTMpKa7P7bxlHKhsjU2Cg5LDrHoR68eHKwYI8HuSuPLeGfzgkxACMEELbOxYGo4UhxT4m17SXjHmAHNZh03qAAA=' : 'data:image/webp;base64,UklGRlIBAABXRUJQVlA4IEYBAADQCACdASpAACgAPtFYo0uoJSMhrVZtsQAaCWkADpxhUf/SKTTl4i3CgFQztVFSclyEoIRxtlmW96QTi0OvKAtgav5ky/x9ce5R7gQxMf0AAP7yvhc6m1PihhATUWeh7lP+ht24E6FT1EkJ9fNci+eCnzPP2xxMngxiJDieQ983uXP1dt3h2k4Rp1fkBwWqgYj4Lnlx1G5F9Azn1EhttDIDbR577/33lCcWEYkeBuuapGDjlQYHXqx+ByWcJms+70haYTp3HXiZ7XRgoCtkpV0vwa1UkFHnOBgSMlYRNsAyIUDuUTYWoamWctyFCRl+8pQPkIVAFHrhSb6sep9cpYa4kVuKk9MBbei17Mw7jnTYNAL8pK9UdjfwL3knjmjcbjTvZe+xdaGmSwI7bMuKobhpsP4x+LcdYaLjWvNDiiM7q/xeXYAAAA==';
 const pct = (v, of) => `${(v / of * 100).toFixed(2)}%`;
-$('#prig').innerHTML = `<div class="pane base" style="--z:0px">${TABS.map((t, i) => `<img src="${IMG}win-${t.id}.webp" alt="berg:work Projects, ${t.label}" data-t="${t.id}"${i ? '' : ' class="on"'}>`).join('')}<div class="cover"></div>${TABS.map((t) => `<button class="hot" data-t="${t.id}" style="left:${t.x[0]}%;width:${(t.x[1] - t.x[0]).toFixed(2)}%" aria-label="${t.label}" tabindex="-1"></button>`).join('')}</div>`
+$('#prig').innerHTML = `<div class="pane base" style="--z:0px;background-image:url(${LQIP});background-size:cover">${TABS.map((t, i) => `<img ${i ? 'data-src' : 'fetchpriority="high" src'}="${IMG.replace('img/', 'img/h-')}win-${t.id}.webp" alt="berg:work Projects, ${t.label}" data-t="${t.id}" decoding="async"${i ? '' : ' class="on"'}>`).join('')}<div class="cover"></div>${TABS.map((t) => `<button class="hot" data-t="${t.id}" style="left:${t.x[0]}%;width:${(t.x[1] - t.x[0]).toFixed(2)}%" aria-label="${t.label}" tabindex="-1"></button>`).join('')}</div>`
   + TABS.map((t, i) => `<div class="pane glass" data-t="${t.id}" style="--t:${t.t};--z:${(TABS.length - i) * 56}px;--tx:${[22, 37, 52, 66.5, 80][i]}%">${t.cuts.map(([n, x, y, w, h, x1, y1, w1, cls = '']) => `<i class="frag ${cls}" style="--x0:${pct(x, 1240)};--y0:${pct(y, 775)};--w0:${pct(w, 1240)};--x1:${x1}%;--y1:${y1}%;--w1:${w1}%;--ar:${w}/${h};background-image:url(${IMG}f-${t.id}-${n}.webp)"></i>`).join('')}<span class="tab">${ico(t.ico, 18)}${t.label}</span></div>`).join('');
 $('#prows').innerHTML = TABS.map((t) => `<button class="lrow" data-t="${t.id}" style="--t:${t.t}"><span class="th">${ico(t.ico, 19)}</span><span><b>${t.label}</b><small>${t.note}</small></span>${ico('arrow', 17).replace('class="ic"', 'class="ic go"')}</button>`).join('');
 $('#pmap').innerHTML = [['folder', 'var(--yellow)', 'Files', 'the project folder in SharePoint or OneDrive'], ['mail', 'var(--blue)', 'Mail', 'sorted into projects, still in Outlook'], ['task', 'var(--green)', 'Tasks', 'one board per project, as Planner tasks'], ['chat', 'var(--purple)', 'Chat', 'the project channel in Teams']]
@@ -29,7 +31,9 @@ mount();
 /* ---- Anfang: das Projekt auseinandernehmen und wieder zusammensetzen ---- */
 {
   const stack = $('#pstack'), rig = $('#prig'), rows = $('#prows'), hint = $('#phint'), flatBtn = $('#pflat'); let flat = true, turn = 0, used = false;
-  const show = (id) => { $$('.base img', rig).forEach((im) => im.classList.toggle('on', im.dataset.t === id)); $$('.lrow', rows).forEach((r) => r.classList.toggle('on', flat && r.dataset.t === id)); stack.dataset.tab = id; };
+  // Bei schlechter Verbindung zuerst nur das sichtbare Fenster laden, die anderen vier danach.
+  const load = (im) => { if (im.dataset.src) { im.src = im.dataset.src; delete im.dataset.src; } };
+  const show = (id) => { $$('.base img', rig).forEach((im) => { if (im.dataset.t === id) load(im); im.classList.toggle('on', im.dataset.t === id); }); $$('.lrow', rows).forEach((r) => r.classList.toggle('on', flat && r.dataset.t === id)); stack.dataset.tab = id; };
   const hl = (id) => { if (flat) id = ''; stack.classList.toggle('dim', !!id); $$('.glass', rig).forEach((s) => s.classList.toggle('hl', s.dataset.t === id)); $$('.lrow', rows).forEach((r) => r.classList.toggle('hl', r.dataset.t === id)); };
   const setFlat = (f, quiet) => { flat = f; hl(''); stack.classList.toggle('flat', f); stack.style.setProperty('--k', f ? 0 : 1); flatBtn.textContent = f ? 'Take apart' : 'Put together'; hint.classList.toggle('off', !f || quiet || used); $$('.hot', rig).forEach((b) => { b.tabIndex = f ? 0 : -1; }); show(stack.dataset.tab || 'files'); };
   rows.addEventListener('pointerover', (e) => { const r = e.target.closest('.lrow'); if (r) hl(r.dataset.t); });
@@ -42,7 +46,10 @@ mount();
   // Der Stapel soll auf den ersten Bildschirm passen: Maßstab aus der freien Höhe und der Spaltenbreite.
   const fit = () => { if (innerWidth < 720) { stack.style.removeProperty('--as'); stack.style.removeProperty('--fs'); return; } const top = stack.getBoundingClientRect().top + scrollY, s = Math.max(.72, Math.min(1.16, innerWidth < 1021 ? 1 : (innerHeight - top - 16) / 620, stack.clientWidth / 740)); stack.style.setProperty('--as', s.toFixed(3)); stack.style.setProperty('--fs', Math.min(1.28, 1.28 * s, stack.clientWidth / 620).toFixed(3)); };
   fit(); addEventListener('resize', fit); document.fonts.ready.then(fit);
-  if (still) setFlat(false); else { setFlat(true, true); document.fonts.ready.then(() => setTimeout(() => { if (flat && !used) setFlat(false); }, 900)); }
+  // Erst auseinanderziehen, wenn Schrift und Grundfenster da sind – sonst fliegen auf langsamen Leitungen leere Scheiben.
+  const first = $('.base img', rig), ready = Promise.all([document.fonts.ready, first.decode().catch(() => {})]);
+  addEventListener('load', () => (window.requestIdleCallback ?? setTimeout)(() => $$('.base img', rig).forEach(load)), { once: true });
+  if (still) setFlat(false); else { setFlat(true, true); ready.then(() => setTimeout(() => { if (flat && !used) setFlat(false); }, 900)); }
 }
 
 /* ---- Rahmen der Vorführungen auf Breite bringen ---- */
@@ -80,7 +87,7 @@ for (const el of $$('.grab')) {
   el.addEventListener('dblclick', () => { x = y = 0; el.style.transform = ''; el.classList.remove('moved'); });
 }
 
-/* ---- Vorführung Image Pro ---- */
+/* ---- Vorführung Image ---- */
 {
   const W = 640, H = 400, R = rng(42), X = (f) => f * W;
   const far = ridge([[-0.05, 210], [0.16, 150], [0.3, 196], [0.47, 120], [0.62, 186], [0.8, 138], [1.05, 200]].map(([x, y]) => [X(x), y]), 0.45, 12, R);
@@ -90,7 +97,7 @@ for (const el of $$('.grab')) {
   $('.s-bg').innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><linearGradient id="isk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b6fb5"/><stop offset=".5" stop-color="#e9a27c"/><stop offset=".72" stop-color="#f6d7a4"/></linearGradient></defs>
     <rect width="${W}" height="${H}" fill="url(#isk)"/><circle cx="452" cy="176" r="46" fill="#fff3d6"/>${fill(far, '#8f7fa6')}${fill(mid, '#4f5a7d')}${fill(hill, '#27402f')}<rect y="352" width="${W}" height="48" fill="#1d3024"/></svg>`;
   $('.s-curve').insertAdjacentHTML('beforeend', `<svg viewBox="0 0 100 100"><rect x="1" y="1" width="98" height="98" rx="6" fill="rgba(6,6,5,.72)" stroke="rgba(255,253,248,.3)"/><path d="M25 1v98M50 1v98M75 1v98M1 25h98M1 50h98M1 75h98" stroke="rgba(255,253,248,.12)"/><path d="M6 94C34 90 40 62 50 50S70 12 94 6" fill="none" stroke="#62c690" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="50" r="4" fill="#62c690"/></svg>`);
-  const L = [['curve', 'Curves', 'Adjustment', '<span data-c></span>'], ['text', 'Into the hills', 'Text · Inter 800', 'T'], ['pack', 'Backpack', 'Cut out on this machine', '<img src="img/backpack.webp" alt="">'], ['bg', 'Mountains', 'Photo', '']];
+  const L = [['curve', 'Curves', 'Adjustment', '<span data-c></span>'], ['text', 'Into the hills', 'Text · Inter 800', 'T'], ['pack', 'Backpack', 'Cut out on this machine', '<img src="img/backpack.webp" alt="" loading="lazy" decoding="async">'], ['bg', 'Mountains', 'Photo', '']];
   const eye = ico('see', 17), rows = $('#lrows'), stack = $('#stack'), rig = $('#rig');
   rows.innerHTML = L.map(([id, n, s, th]) => `<div class="lrow" data-l="${id}" tabindex="0"><span class="th" ${id === 'bg' ? 'style="background:linear-gradient(#3b6fb5,#e9a27c 60%,#27402f 61%)"' : id === 'curve' ? 'style="background:linear-gradient(135deg,#ef955a55,#79a8f555)"' : ''}>${th}</span><span><b>${n}</b><small>${s}</small></span><span class="eye" role="button" aria-label="Show or hide ${n}">${eye}</span></div>`).join('');
   const sheet = (id) => $(`.sheet[data-l="${id}"]`, rig);

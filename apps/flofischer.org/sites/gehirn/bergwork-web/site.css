@@ -171,7 +171,7 @@ button { font: inherit; color: inherit; }
   background: linear-gradient(#3f7fe0, #3f7fe0) 0 0 / 7px 7px no-repeat, linear-gradient(#3f7fe0, #3f7fe0) 100% 0 / 7px 7px no-repeat, linear-gradient(#3f7fe0, #3f7fe0) 0 100% / 7px 7px no-repeat, linear-gradient(#3f7fe0, #3f7fe0) 100% 100% / 7px 7px no-repeat; }
 .grab:hover::after, .grab.held::after, .grab.moved::after { opacity: 1; }
 
-/* Image Pro: Arbeitsfläche und Ebenen wie in der App */
+/* Image: Arbeitsfläche und Ebenen wie in der App */
 #image { --c: var(--green); }
 .appwin { margin-top: 56px; border-radius: 12px; background: #0e0e0d; box-shadow: var(--shadow); padding: 0 18px 0 0; position: relative; }
 .appwin .layers { margin-top: 0; grid-template-columns: 1fr 320px; gap: 12px; }

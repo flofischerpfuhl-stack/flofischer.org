@@ -32,7 +32,7 @@ export const PRODUCTS = [
     text: 'Pick a project on the left, and files, mail, tasks, chat, calendar, contacts and notes show only that project. The data stays in Outlook, OneDrive, SharePoint and Teams.', cta: 'Download' },
   { id: 'pdf', name: 'PDF', c: '#cc3b35', cd: '#f2716b', head: 'Move anything.', status: 'In your browser', where: 'Desktop app coming', with: 'Any PDF',
     text: 'Every line of text, every picture and every drawing is an object you can grab. Retype a word in the document’s own font, then save a normal PDF.', cta: 'Open in browser' },
-  { id: 'image', name: 'Image Pro', c: '#2c8655', cd: '#62c690', head: 'Layers that stay loose.', status: 'In your browser', where: 'Desktop app coming', with: 'PNG, JPEG, WebP, PSD',
+  { id: 'image', name: 'Image', c: '#2c8655', cd: '#62c690', head: 'Layers that stay loose.', status: 'In your browser', where: 'Desktop app coming', with: 'PNG, JPEG, WebP, PSD',
     text: 'Take a product out of its background on your own computer, drop it into a new scene and put text over it. Nothing is final until you export.', cta: 'Open in browser' },
 ];
 

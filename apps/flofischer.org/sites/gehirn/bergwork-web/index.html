@@ -7,7 +7,9 @@
 <meta name="theme-color" content="#f5f3ee">
 <title>berg:work – Entwurf Startseite</title>
 <link rel="preload" href="metadannye.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="site.css">
+<link rel="modulepreload" href="site.js"><link rel="modulepreload" href="common.js"><link rel="modulepreload" href="icons.js"><link rel="modulepreload" href="scene.js">
 <script>document.documentElement.classList.add('js'); if (/[?&]static=1/.test(location.search)) document.documentElement.classList.add('static'); document.documentElement.dataset.app = (location.search.match(/[?&]app=(light|dark)/) || [0, 'dark'])[1];</script>
 </head>
 <body>
@@ -16,12 +18,12 @@
   <span class="sep"></span>
   <a class="l" href="#projects" data-spy="projects" style="--c:var(--blue)">Projects</a>
   <a class="l" href="#pdf" data-spy="pdf" style="--c:var(--red-hi)">PDF</a>
-  <a class="l" href="#image" data-spy="image" style="--c:var(--green)">Image Pro</a>
+  <a class="l" href="#image" data-spy="image" style="--c:var(--green)">Image</a>
   <a class="l hide-m" href="#privacy" data-spy="privacy" style="--c:var(--fg2)">Privacy</a>
   <a class="l hide-m" href="#">Roadmap</a>
   <span class="sep"></span>
   <a class="l" href="#" lang="de">DE</a>
-  <a class="btn ink sm" href="#"><span data-ico="down" data-s="16"></span>Download</a>
+  <a class="btn ink sm" href="#">Download<span data-ico="arrow" data-s="16"></span></a>
 </nav>
 
 <header class="hero" id="top">
@@ -30,7 +32,7 @@
       <h1 class="display">Projects,<br>not <em>programs.</em></h1>
       <div>
         <p class="lead">Office work is sorted by program. A job needs all of them. Pick a project, and mail, files, tasks, chat and calendar show only what belongs to it.</p>
-        <div class="row"><a class="btn ink" href="#"><span data-ico="down" data-s="18"></span>Download Projects</a><a class="btn ghost" href="#projects">Try it in your browser</a></div>
+        <div class="row"><a class="btn ink" href="#">Download Projects<span data-ico="arrow" data-s="18"></span></a><a class="btn ghost" href="#projects">Try it in your browser</a></div>
       </div>
     </div>
     <div class="layers">
@@ -47,7 +49,7 @@
     <div class="products">
       <a href="#projects" style="--c:var(--blue)"><span data-icon="projects"></span><span><b>Projects<span class="tag" style="--c:var(--blue)">Test version 0.1.2</span></b><small>For offices on Microsoft&nbsp;365 · Windows and Linux</small></span></a>
       <a href="#pdf" style="--c:var(--red-hi)"><span data-icon="pdf"></span><span><b>PDF<span class="tag" style="--c:var(--red-hi)">In your browser</span></b><small>Edit what is inside a PDF · desktop app coming</small></span></a>
-      <a href="#image" style="--c:var(--green)"><span data-icon="image"></span><span><b>Image Pro<span class="tag" style="--c:var(--green)">In your browser</span></b><small>Photos in layers · desktop app coming</small></span></a>
+      <a href="#image" style="--c:var(--green)"><span data-icon="image"></span><span><b>Image<span class="tag" style="--c:var(--green)">In your browser</span></b><small>Photos in layers · desktop app coming</small></span></a>
     </div>
   </div>
 </header>
@@ -60,7 +62,7 @@
       <h2 class="display rv">Try it<br><em>right here.</em></h2>
       <div class="rv" style="--d:.1s">
         <p class="lead">This is the app itself, running in your browser with sample data. Pick a project on the left, and every tab shows only what belongs to it.</p>
-        <div class="row"><a class="btn ink sm" href="#"><span data-ico="down" data-s="16"></span>Download</a><a class="link" href="../projects/" target="_blank" rel="noopener">Open it full size <span data-ico="arrow" data-s="16"></span></a></div>
+        <div class="row"><a class="btn ink sm" href="#">Download<span data-ico="arrow" data-s="16"></span></a><a class="link" href="../projects/" target="_blank" rel="noopener">Open it full size <span data-ico="arrow" data-s="16"></span></a></div>
       </div>
     </div>
     <div class="win rv" id="livewin">
@@ -86,7 +88,7 @@
       </div>
     </div>
     <div class="win rv">
-      <div class="frame" id="pdfframe" data-w="1200" data-h="760"><iframe src="pdf/demo.html" title="berg:work PDF, try it" scrolling="no"></iframe></div>
+      <div class="frame" id="pdfframe" data-w="1200" data-h="760"><iframe loading="lazy" src="pdf/demo.html" title="berg:work PDF, try it" scrolling="no"></iframe></div>
       <div class="hint" id="pdfhint">Drag the house. Turn it. Double-click a text.</div>
     </div>
     <div class="tools rv" id="ptools"></div>
@@ -95,7 +97,7 @@
 
 <section class="level alt" id="image">
   <div class="wrap">
-    <div class="gate rv"><span class="ico" data-icon="image"></span><b>Image Pro</b><span class="tag" style="--c:var(--green)">In your browser</span></div>
+    <div class="gate rv"><span class="ico" data-icon="image"></span><b>Image</b><span class="tag" style="--c:var(--green)">In your browser</span></div>
     <div class="head">
       <h2 class="display rv">Layers that<br>stay <em>loose.</em></h2>
       <div class="rv" style="--d:.1s">
