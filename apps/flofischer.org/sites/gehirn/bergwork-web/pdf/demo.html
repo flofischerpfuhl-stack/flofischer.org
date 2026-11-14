@@ -1,0 +1,175 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow, noarchive"><title>berg:work PDF – Vorführung</title>
+<link rel="stylesheet" href="schliff-pdf.css">
+<style>
+  html, body { margin: 0; overflow: hidden; background: #060605; }
+  .app { width: 1200px; height: 760px; user-select: none; -webkit-user-select: none; }
+  .brand::before { display: none; }
+  .brand { align-items: center; }
+  .brand b i { font-style: normal; color: var(--tc-red); }
+  .tmark, .tmark svg { width: 20px; height: 20px; display: block; flex: none; }
+  .wctl { display: flex; gap: 2px; }
+  .split { display: inline-flex; }
+  .split .btn:last-child { width: 22px; padding: 0; justify-content: center; margin-left: -2px; }
+  .num { font-variant-numeric: tabular-nums; }
+  .island, .menu { background: var(--ui-bg-chrome); box-shadow: 0 0 0 1px rgba(255,253,248,.1), 0 4px 16px rgba(0,0,0,.45); }
+  .island .btn[data-c] .ic { color: var(--c); }
+  .island .btn[data-c].on { background: color-mix(in oklab, var(--c) var(--look-tab), transparent); color: var(--ui-fg-primary); font-weight: 600; position: relative; }
+  .island .btn[data-c].on::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: -4px; height: 2px; border-radius: 2px; background: var(--c); }
+  .btn.act { cursor: pointer; } .btn.act:hover { background: var(--ui-state-hover); }
+  .btn.primary.act:hover { background: #fff; }
+  .btn.off { opacity: .4; pointer-events: none; }
+  .sheet svg [data-o] { cursor: grab; touch-action: none; }
+  .sheet svg [data-o]:hover { filter: drop-shadow(0 0 .6px #2b62b8) drop-shadow(0 0 .6px #2b62b8); }
+  .grabbing, .grabbing * { cursor: grabbing !important; }
+  .selbox { pointer-events: none; z-index: 1; transform-origin: 50% 50%; }
+  .selbox i.h { pointer-events: none; }
+  .selbox .rot { position: absolute; left: 50%; top: -34px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: #fff; border: 1.5px solid var(--app-accent); pointer-events: auto; cursor: grab; touch-action: none; }
+  .selbox .rot::after { content: ''; position: absolute; left: 50%; top: 100%; width: 1.5px; height: 17px; margin-left: -.75px; background: var(--app-accent); }
+  #props { z-index: 3; transition: opacity .15s; }
+  #props .cap b { color: var(--ui-fg-primary); font-weight: 500; }
+  .val { font: 500 12.5px JBM, ui-monospace, monospace; color: var(--ui-fg-primary); min-width: 52px; }
+  @font-face { font-family: JBM; src: url(../JetBrainsMono-latin.woff2) format('woff2'); font-weight: 100 900; }
+  #edit { position: absolute; z-index: 4; border: 0; outline: 1.5px solid var(--app-accent); outline-offset: 2px; background: #fff; color: #222; padding: 0; margin: 0; font-family: Inter, sans-serif; text-align: center; display: none; border-radius: 1px; }
+  .toast { position: absolute; z-index: 5; left: 50%; bottom: 62px; transform: translate(-50%, 8px); opacity: 0; transition: .25s; padding: 8px 12px; border-radius: 8px; background: var(--ui-bg-chrome); box-shadow: 0 0 0 1px rgba(255,253,248,.1), 0 4px 16px rgba(0,0,0,.45); font-size: 13px; color: var(--ui-fg-secondary); white-space: nowrap; pointer-events: none; }
+  .toast.on { opacity: 1; transform: translate(-50%, 0); }
+</style></head>
+<body>
+<div class="app dark" id="app">
+<script>if (/[?&]theme=light/.test(location.search)) document.getElementById('app').classList.replace('dark', 'light');</script>
+  <div class="titlebar">
+    <div class="brand"><span class="tmark" id="tmark"></span><b>berg<i>:</i>work</b><span>PDF</span></div>
+    <div class="crumb center"><strong>Lageplan_Sonnenhain_Entwurf.pdf</strong><span class="cap" id="dirty"></span></div>
+    <div class="grow"></div>
+    <div class="wctl"><div class="btn icon dim"><i data-i="minus"></i></div><div class="btn icon dim"><i data-i="square" data-s="13"></i></div><div class="btn icon dim"><i data-i="x"></i></div></div>
+  </div>
+  <div class="desk" id="desk">
+    <div class="island" style="left:12px;top:12px">
+      <div class="btn" data-c style="--c:var(--tc-grey)"><i data-i="hand"></i>Pan</div>
+      <div class="split"><div class="btn on" data-c style="--c:var(--tc-blue)"><i data-i="edit"></i>Edit PDF</div><div class="btn"><i class="chev" data-i="down" data-s="14"></i></div></div>
+      <div class="btn" data-c style="--c:var(--tc-green)"><i data-i="plus"></i>Insert</div>
+      <div class="btn" data-c style="--c:var(--tc-yellow)"><i data-i="highlighter"></i>Markup</div>
+      <div class="btn" data-c style="--c:var(--tc-orange)"><i data-i="ruler"></i>Measure</div>
+      <div class="btn" data-c style="--c:var(--tc-purple)"><i data-i="grid"></i>Guides</div>
+    </div>
+    <div class="island" style="right:12px;top:12px">
+      <div class="btn primary act" id="save"><i data-i="save"></i>Save</div>
+      <div class="sep"></div>
+      <div class="btn icon act off" id="undo" title="Undo"><i data-i="undo"></i></div>
+      <div class="btn icon act off" id="redo" title="Redo"><i data-i="redo"></i></div>
+      <div class="sep"></div>
+      <div class="btn"><i data-i="scan"></i>Document tools<i class="chev" data-i="down" data-s="14"></i></div>
+    </div>
+
+    <div class="sheet" id="sheet" style="left:175px;top:62px;width:850px;height:601px"></div>
+    <div class="selbox" id="sel"><i class="h" style="left:-6px;top:-6px"></i><i class="h" style="right:-6px;top:-6px"></i><i class="h" style="left:-6px;bottom:-6px"></i><i class="h" style="right:-6px;bottom:-6px"></i><span class="rot" id="rot"></span></div>
+    <input id="edit" spellcheck="false">
+
+    <div class="island" id="props" style="left:12px;bottom:12px">
+      <div class="btn sm"><span class="cap"><b id="oname">Building, planned</b></span></div>
+      <div class="sep"></div>
+      <div class="btn sm"><span class="cap">X</span><span class="val" id="vx"></span></div>
+      <div class="btn sm"><span class="cap">Y</span><span class="val" id="vy"></span></div>
+      <div class="btn sm"><span class="cap">Angle</span><span class="val" id="va" style="min-width:40px"></span></div>
+    </div>
+    <div class="island center" style="bottom:12px">
+      <div class="btn sm act" id="reset"><i data-i="rotate" data-s="14" style="transform:scaleX(-1)"></i>Start over</div>
+    </div>
+    <div class="island" style="right:12px;bottom:12px">
+      <div class="btn field sm num">100 %</div>
+      <div class="btn sm num"><b style="font-weight:600">1</b>&nbsp;<span class="cap">/ 3</span></div>
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+<script type="module">
+  import { icons } from './kit.js';
+  import { werkzeichen } from '../icons.js';
+  const $ = (s) => document.querySelector(s);
+  $('#tmark').innerHTML = werkzeichen('pdf', false);
+
+  // Lageplan wie im Mockup, aber jedes Teil ist eine eigene Gruppe, die sich greifen lässt.
+  const t = (x, y, s, txt, extra = '') => `<text x="${x}" y="${y}" font-size="${s}" ${extra}>${txt}</text>`;
+  const o = (name, inner, extra = '') => `<g data-o="${name}" ${extra}>${inner}</g>`;
+  const parcels = ['M24 26 L118 22 L122 104 L26 108 Z', 'M118 22 L196 20 L200 100 L122 104 Z', 'M196 20 L268 18 L262 112 L200 100 Z', 'M268 18 L338 16 L330 116 L262 112 Z', 'M338 16 L396 16 L396 120 L330 116 Z',
+    'M24 168 L96 166 L110 222 L26 224 Z', 'M96 166 L176 164 L164 224 L110 222 Z', 'M176 164 L270 160 L276 226 L164 224 Z', 'M270 160 L344 158 L352 226 L276 226 Z', 'M344 158 L396 158 L396 226 L352 226 Z'].map((d) => `<path d="${d}"/>`).join('');
+  const nums = [[70, 66, '1646'], [160, 54, '1652'], [232, 60, '1658'], [298, 96, '1664'], [364, 70, '1670/2'], [62, 216, '1676'], [136, 196, '1679/3'], [220, 196, '1682'], [312, 218, '1685'], [372, 196, '1688']]
+    .map(([x, y, n]) => o('Parcel number', `<rect x="${x - 9}" y="${y - 5}" width="18" height="7" fill="#fff" fill-opacity="0"/>` + t(x, y, 4.2, n, 'font-style="italic" text-anchor="middle"'), 'data-text')).join('');
+  const marks = [[24, 26], [118, 22], [196, 20], [268, 18], [338, 16], [122, 104], [200, 100], [262, 112], [330, 116], [96, 166], [176, 164], [270, 160], [344, 158]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.4" fill="#fff"/>`).join('');
+  const house = (d) => o('Building', `<path d="${d}" fill="#ddd" stroke="#444" stroke-width=".5"/>`);
+  $('#sheet').innerHTML = `<svg id="plan" viewBox="0 0 420 297" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif" fill="#222">
+    <rect x="10" y="10" width="400" height="277" fill="none" stroke="#222" stroke-width=".6"/>
+    <path d="M14 128 C140 122 280 134 406 130 L406 150 C280 154 140 142 14 148 Z" fill="#f1f0ec" stroke="#555" stroke-width=".5"/>
+    <g fill="none" stroke="#333" stroke-width=".55">${parcels}</g>
+    <g stroke="#333" stroke-width=".5">${marks}</g>
+    ${o('Street name', `<rect x="150" y="136" width="120" height="8" fill="#fff" fill-opacity="0"/>` + t(210, 142, 5, 'S O N N E N H A L D E', 'text-anchor="middle" fill="#666" letter-spacing="1.2"'), 'data-text')}
+    ${house('M150 70 L176 68 L178 88 L152 90 Z')}${house('M60 186 L84 184 L86 204 L62 206 Z')}${house('M300 182 L328 180 L330 204 L302 206 Z')}
+    ${nums}
+    ${o('North arrow', `<g transform="translate(386 34)"><rect x="-6" y="-13" width="12" height="28" fill="#fff" fill-opacity="0"/><path d="M0 -12 L4 6 L0 3 L-4 6 Z" fill="#222"/>${t(0, 13, 4, 'N', 'text-anchor="middle"')}</g>`)}
+    ${o('Scale bar', `<g transform="translate(24 252)"><rect y="-2" width="72" height="13" fill="#fff" fill-opacity="0"/><rect width="20" height="2.4" fill="#222"/><rect x="20" width="20" height="2.4" fill="#fff" stroke="#222" stroke-width=".4"/><rect x="40" width="20" height="2.4" fill="#222"/>${t(0, 9, 3.6, '0')}${t(56, 9, 3.6, '30 m')}</g>`)}
+    ${o('Title block', `<g transform="translate(302 236)"><rect width="104" height="47" fill="#fff" stroke="#222" stroke-width=".5"/><line x1="0" y1="14" x2="104" y2="14" stroke="#222" stroke-width=".4"/>
+      ${t(4, 9.5, 6, 'Lageplan Entwurf', 'font-weight="700"')}${t(4, 21, 3.8, 'Gemarkung Lindach · Flur 7')}${t(4, 27, 3.8, 'Flurstück 1664')}${t(4, 33, 3.8, 'Maßstab 1:500')}${t(4, 43, 3.8, 'Kessler Vermessung · 13.11.2026')}</g>`, 'data-text')}
+    ${o('Building, planned', `<path d="M276 40 L318 36 L322 74 L280 78 Z" fill="rgba(204,59,53,.13)" stroke="#cc3b35" stroke-width=".6"/><path d="M286 48 L310 46 L312 66 L288 68 Z" fill="#e8c9c5" stroke="#9a2c27" stroke-width=".5"/>`, 'id="first"')}
+  </svg>`;
+  icons();
+
+  const plan = $('#plan'), desk = $('#desk'), sel = $('#sel'), edit = $('#edit'), st = new Map();
+  const objs = [...plan.querySelectorAll('[data-o]')];
+  for (const g of objs) { const b = g.getBBox(); st.set(g, { x: 0, y: 0, a: 0, b, cx: b.x + b.width / 2, cy: b.y + b.height / 2 }); }
+  const apply = (g) => { const s = st.get(g); g.setAttribute('transform', `translate(${s.x.toFixed(2)} ${s.y.toFixed(2)}) rotate(${s.a.toFixed(1)} ${s.cx.toFixed(2)} ${s.cy.toFixed(2)})`); };
+  const k = () => plan.getBoundingClientRect().width / 420;
+  let cur = $('#first'), hist = [], fut = [], told = false;
+  function box() {
+    if (!cur) { sel.style.display = 'none'; return; }
+    const s = st.get(cur), q = k(), pr = plan.getBoundingClientRect(), dr = desk.getBoundingClientRect();
+    sel.style.display = ''; sel.style.left = `${pr.left - dr.left + (s.b.x + s.x) * q}px`; sel.style.top = `${pr.top - dr.top + (s.b.y + s.y) * q}px`;
+    sel.style.width = `${s.b.width * q}px`; sel.style.height = `${s.b.height * q}px`; sel.style.transform = `rotate(${s.a}deg)`;
+    $('#oname').textContent = cur.dataset.o; $('#vx').textContent = `${(s.b.x + s.x).toFixed(1)} mm`; $('#vy').textContent = `${(s.b.y + s.y).toFixed(1)} mm`; $('#va').textContent = `${Math.round(s.a)}°`;
+  }
+  const marks2 = () => { $('#undo').classList.toggle('off', !hist.length); $('#redo').classList.toggle('off', !fut.length); $('#dirty').textContent = hist.length ? '· edited' : ''; };
+  const snap = (g) => { const s = st.get(g); return { g, x: s.x, y: s.y, a: s.a, txt: null }; };
+  const put = (r) => { const s = st.get(r.g); s.x = r.x; s.y = r.y; s.a = r.a; if (r.txt) r.txt.el.textContent = r.txt.v; apply(r.g); cur = r.g; box(); };
+  const commit = (before, after) => { hist.push([before, after]); fut = []; marks2(); if (!told) { told = true; parent.postMessage('bergwork-pdf-drag', '*'); } };
+  const toast = (m) => { const el = $('#toast'); el.textContent = m; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2600); };
+  const pt = (e) => { const p = plan.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(plan.getScreenCTM().inverse()); };
+
+  let drag = null;
+  plan.addEventListener('pointerdown', (e) => {
+    const g = e.target.closest('[data-o]'); closeEdit();
+    if (!g) { cur = null; box(); return; }
+    cur = g; plan.append(g); const p = pt(e), s = st.get(g);
+    drag = { g, mode: 'move', p, x: s.x, y: s.y, before: snap(g), moved: false }; plan.setPointerCapture(e.pointerId); document.body.classList.add('grabbing'); box(); e.preventDefault();
+  });
+  $('#rot').addEventListener('pointerdown', (e) => { if (!cur) return; drag = { g: cur, mode: 'turn', before: snap(cur), moved: false }; e.currentTarget.setPointerCapture(e.pointerId); document.body.classList.add('grabbing'); e.preventDefault(); e.stopPropagation(); });
+  addEventListener('pointermove', (e) => {
+    if (!drag) return; const s = st.get(drag.g), p = pt(e);
+    if (drag.mode === 'move') { s.x = drag.x + p.x - drag.p.x; s.y = drag.y + p.y - drag.p.y; s.x = Math.max(-s.b.x + 2, Math.min(418 - s.b.x - s.b.width, s.x)); s.y = Math.max(-s.b.y + 2, Math.min(295 - s.b.y - s.b.height, s.y)); }
+    else { let a = Math.atan2(p.y - (s.cy + s.y), p.x - (s.cx + s.x)) * 180 / Math.PI + 90; if (a > 180) a -= 360; for (const q of [0, 90, -90, 180, -180, 45, -45]) if (Math.abs(a - q) < 4) a = q; s.a = a; }
+    drag.moved = true; apply(drag.g); box();
+  });
+  addEventListener('pointerup', () => { if (!drag) return; document.body.classList.remove('grabbing'); if (drag.moved) commit(drag.before, snap(drag.g)); drag = null; });
+
+  // Doppelklick auf Text: neu tippen, in der Schrift der Zeile.
+  let editing = null;
+  function closeEdit(keep = true) {
+    if (!editing) return; const { el, g, was } = editing; editing = null; edit.style.display = 'none';
+    const v = edit.value.trim(); if (keep && v && v !== was) { const b = snap(g), a = snap(g); b.txt = { el, v: was }; a.txt = { el, v }; el.textContent = v; commit(b, a); }
+    el.style.visibility = ''; box();
+  }
+  plan.addEventListener('dblclick', (e) => {
+    const el = e.target.closest('text') ?? e.target.closest('[data-text]')?.querySelector('text'); const g = el?.closest('[data-o]'); if (!el || !g) return;
+    const r = el.getBoundingClientRect(), dr = desk.getBoundingClientRect(), q = k(), fs = parseFloat(el.getAttribute('font-size')) * q, mid = el.getAttribute('text-anchor') === 'middle';
+    editing = { el, g, was: el.textContent }; el.style.visibility = 'hidden'; sel.style.display = 'none';
+    Object.assign(edit.style, { display: 'block', left: `${r.left - dr.left - (mid ? 20 : 0)}px`, top: `${r.top - dr.top}px`, width: `${r.width + (mid ? 40 : 60)}px`, height: `${r.height}px`, fontSize: `${fs}px`, fontWeight: el.getAttribute('font-weight') || 400, fontStyle: el.getAttribute('font-style') || 'normal', letterSpacing: `${parseFloat(el.getAttribute('letter-spacing') || 0) * q}px`, textAlign: mid ? 'center' : 'left', color: el.getAttribute('fill') || '#222' });
+    edit.value = el.textContent; edit.focus(); edit.select();
+  });
+  edit.addEventListener('keydown', (e) => { if (e.key === 'Enter') closeEdit(); if (e.key === 'Escape') closeEdit(false); });
+  edit.addEventListener('blur', () => closeEdit());
+
+  $('#undo').onclick = () => { const h = hist.pop(); if (!h) return; fut.push(h); put(h[0]); marks2(); };
+  $('#redo').onclick = () => { const h = fut.pop(); if (!h) return; hist.push(h); put(h[1]); marks2(); };
+  $('#reset').onclick = () => { while (hist.length) put(hist.pop()[0]); fut = []; cur = $('#first'); box(); marks2(); };
+  $('#save').onclick = () => toast('This is a demo on the start page. The real editor saves a normal PDF to your disk.');
+  addEventListener('keydown', (e) => { if (editing) return; if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); (e.shiftKey ? $('#redo') : $('#undo')).click(); } });
+  document.fonts.ready.then(box); box();
+</script>
+</body></html>
