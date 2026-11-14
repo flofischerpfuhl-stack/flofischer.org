@@ -1,0 +1,79 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<title>bergwork.app – Konzepte</title>
+<style>
+  @font-face { font-family: Inter; src: url(inter.woff2) format('woff2'); font-weight: 100 900; }
+  @font-face { font-family: Meta; src: url(metadannye.ttf) format('truetype'); }
+  :root { --chrome: #060605; --view: #0e0e0d; --control: #252422; --pop: #21201e; --fg: #f2f1ed; --fg2: #c6c4be; --fg3: #95938d; --line: rgba(255,253,248,.1); --accent: #8cb4f5; color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body { background: var(--chrome); color: var(--fg); font: 14px/1.4 Inter, system-ui, sans-serif; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+  header { display: flex; align-items: center; gap: 10px 20px; padding: 10px 16px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: baseline; gap: 8px; }
+  .brand b { font: 400 22px Meta; color: #fdfcfa; }
+  .brand span { font-size: 13px; color: var(--fg3); }
+  .seg { display: flex; padding: 2px; border-radius: 8px; background: var(--control); gap: 2px; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+  .seg button { all: unset; cursor: pointer; height: 32px; padding: 0 14px; border-radius: 6px; color: var(--fg2); font-size: 14px; white-space: nowrap; display: flex; align-items: center; }
+  .seg button:hover { background: rgba(255,253,248,.06); }
+  .seg button[aria-pressed="true"] { background: var(--pop); color: var(--fg); font-weight: 600; box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgba(0,0,0,.4); }
+  .hint { font-size: 12px; color: var(--fg3); margin-left: auto; }
+  .desc { padding: 0 16px 10px; color: var(--fg2); display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .desc b { color: var(--fg); font-weight: 600; }
+  .desc a { color: var(--accent); text-decoration: none; margin-left: auto; font-size: 13px; }
+  main { flex: 1; min-height: 0; margin: 0 8px 8px; border-radius: 10px; background: var(--view); box-shadow: 0 0 0 1px var(--line); overflow-y: auto; overflow-x: hidden; }
+  .box { position: relative; margin: 0 auto; }
+  .box iframe, .box img { position: absolute; left: 0; top: 0; width: 1440px; border: 0; transform-origin: 0 0; display: block; }
+  @media (max-width: 760px) { .hint { display: none; } header { padding: 8px 10px; } .seg button { height: 38px; } main { margin: 0 4px 4px; } }
+</style></head>
+<body>
+<header>
+  <div class="brand"><b>bergwork.app</b><span>Konzepte · 14.11.2026</span></div>
+  <div class="seg" id="seg"></div>
+  <span class="hint">← → wechseln</span>
+</header>
+<div class="desc" id="desc"></div>
+<main id="main"><div class="box" id="box"></div></main>
+<script>
+  const V = [
+    { id: 'heute', label: 'Heute', src: 'heute.jpg', img: true, t: 'Heute', d: 'bergwork.app wie sie jetzt ist.' },
+    { id: 'a', label: 'A Plakat', src: 'a-plakat.html', t: 'A · Plakat', d: 'Konstruktivistisches Plakat: Papier, roter Kreis, schwarze Balken, riesige Metadannye-Zeilen – sonst ruhig und sachlich.' },
+    { id: 'b', label: 'B Leitstand', src: 'b-leitstand.html', t: 'B · Leitstand', d: 'Die Seite sieht aus wie die App: Schliff dunkel, Inhalt als gerahmte Seite, Produkte als farbige Reiter wie in Projects.' },
+    { id: 'c', label: 'C Werkblatt', src: 'c-werkblatt.html', t: 'C · Werkblatt', d: 'Technische Zeichnung für Ingenieurbüros: Blattrahmen, Höhenlinien mit Bergwerkszeichen, Schriftfelder, Datenblätter, Stückliste.' },
+  ];
+  const box = document.getElementById('box'), main = document.getElementById('main'), desc = document.getElementById('desc'), seg = document.getElementById('seg');
+  const els = {};
+  let cur;
+  for (const v of V) { const b = document.createElement('button'); b.textContent = v.label; b.dataset.id = v.id; b.onclick = () => show(v.id); seg.append(b); }
+  function heightOf(el) {
+    if (el.tagName === 'IMG') return el.naturalHeight * (1440 / el.naturalWidth);
+    try { return el.contentDocument.documentElement.scrollHeight; } catch { return 5000; }
+  }
+  function layout() {
+    const el = els[cur]; if (!el) return;
+    const s = Math.min(1, (main.clientWidth - 0) / 1440), h = heightOf(el);
+    el.style.height = h + 'px'; el.style.transform = `scale(${s})`;
+    box.style.width = 1440 * s + 'px'; box.style.height = h * s + 'px';
+  }
+  function show(id) {
+    const v = V.find((x) => x.id === id) ?? V[1]; cur = v.id;
+    for (const b of seg.children) b.setAttribute('aria-pressed', String(b.dataset.id === v.id));
+    if (!els[v.id]) {
+      const el = document.createElement(v.img ? 'img' : 'iframe');
+      el.src = v.src; if (!v.img) el.setAttribute('scrolling', 'no');
+      el.onload = () => { layout(); setTimeout(layout, 600); };
+      els[v.id] = el; box.append(el);
+    }
+    for (const [k, el] of Object.entries(els)) el.style.display = k === v.id ? 'block' : 'none';
+    desc.innerHTML = `<b>${v.t}</b><span>${v.d}</span><a href="${v.src}" target="_blank" rel="noopener">einzeln öffnen ↗</a>`;
+    history.replaceState(null, '', '#' + v.id); main.scrollTop = 0; layout();
+  }
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const i = V.findIndex((x) => x.id === cur);
+    show(V[(i + (e.key === 'ArrowRight' ? 1 : V.length - 1)) % V.length].id);
+  });
+  addEventListener('resize', layout);
+  show(location.hash.slice(1) || 'a');
+</script>
+</body></html>

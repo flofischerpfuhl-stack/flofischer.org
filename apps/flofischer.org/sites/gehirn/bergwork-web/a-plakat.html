@@ -1,0 +1,123 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow, noarchive" /><title>berg:work – A Plakat</title>
+<link rel="stylesheet" href="web.css">
+<style>
+  :root { --paper: #ecebe7; --white: #fbfaf7; --ink: #1c1b19; --fg2: #4b4945; --fg3: #6b6964; --line: rgba(40,38,34,.14); --red: #c81e1e; }
+  body { background: var(--paper); color: var(--ink); }
+  nav { height: 84px; display: flex; align-items: center; gap: 36px; }
+  nav .links { display: flex; gap: 30px; margin-left: auto; font-size: 15px; font-weight: 500; color: var(--fg2); }
+  nav .lang { font-size: 14px; color: var(--fg3); }
+  .btn.ink { background: var(--ink); color: #fff; }
+  .btn.ghost { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .btn.sm { height: 40px; padding: 0 16px; font-size: 15px; }
+
+  .hero { position: relative; height: 780px; overflow: hidden; }
+  .hero .text { position: relative; z-index: 2; padding-top: 70px; width: 640px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--red); margin-bottom: 26px; }
+  .eyebrow::before { content: ''; width: 28px; height: 4px; background: var(--red); }
+  h1 { font: 400 156px/.86 Meta; text-transform: uppercase; letter-spacing: .005em; }
+  h1 em { font-style: normal; color: var(--red); }
+  .lead { font-size: 21px; line-height: 1.5; color: var(--fg2); margin: 30px 0 34px; max-width: 540px; }
+  .facts { margin-top: 22px; font-size: 14px; color: var(--fg3); display: flex; gap: 18px; }
+  .facts span { display: inline-flex; gap: 6px; align-items: center; }
+  .circle { position: absolute; width: 620px; height: 620px; border-radius: 50%; background: var(--red); right: -150px; top: -70px; }
+  .bar { position: absolute; width: 900px; height: 64px; background: var(--ink); right: -120px; top: 560px; transform: rotate(-14deg); transform-origin: right center; }
+  .bar2 { position: absolute; width: 340px; height: 14px; background: var(--ink); right: 330px; top: 110px; transform: rotate(-14deg); }
+  .shot { position: absolute; z-index: 1; right: 80px; top: 170px; width: 700px; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px rgba(0,0,0,.25), 0 24px 70px rgba(28,27,25,.35); }
+
+  .tools { background: var(--white); padding: 110px 0 120px; }
+  .sec-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 56px; }
+  .sec-head h2 { font: 400 96px/.88 Meta; text-transform: uppercase; }
+  .sec-head p { width: 420px; color: var(--fg2); font-size: 18px; }
+  .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+  .col { border-top: 5px solid var(--ink); padding-top: 26px; display: flex; flex-direction: column; gap: 14px; }
+  .col .top { display: flex; align-items: center; gap: 14px; }
+  .col .top span { width: 60px; height: 60px; }
+  .col .top svg { width: 60px; height: 60px; }
+  .col h3 { font: 400 52px/.9 Meta; text-transform: uppercase; }
+  .col h4 { font-size: 19px; font-weight: 600; }
+  .col p { color: var(--fg2); }
+  .tag { align-self: flex-start; font-size: 13px; font-weight: 600; padding: 3px 9px; border-radius: 4px; background: color-mix(in oklab, var(--c) 14%, #fff); color: color-mix(in oklab, var(--c) 82%, #000); }
+  .more { margin-top: auto; padding-top: 8px; font-weight: 600; display: inline-flex; gap: 8px; align-items: center; }
+
+  .feature { padding: 120px 0; display: grid; grid-template-columns: 470px 1fr; gap: 70px; align-items: center; }
+  .num { font: 400 120px/.8 Meta; color: var(--red); }
+  .feature h2 { font: 400 72px/.9 Meta; text-transform: uppercase; margin: 22px 0 22px; }
+  .feature p { color: var(--fg2); font-size: 18px; }
+  .apps { display: flex; gap: 10px; margin-top: 26px; flex-wrap: wrap; }
+  .apps span { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 6px; background: var(--white); box-shadow: 0 0 0 1px var(--line); font-size: 14px; font-weight: 500; }
+  .feature .pic { border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px var(--line), 0 20px 60px rgba(28,27,25,.18); }
+
+  .trust { background: var(--ink); color: #f2f1ed; padding: 110px 0; position: relative; overflow: hidden; }
+  .trust .wedge { position: absolute; left: -60px; top: 0; width: 0; height: 0; border-top: 420px solid var(--red); border-right: 260px solid transparent; }
+  .trust h2 { font: 400 110px/.86 Meta; text-transform: uppercase; position: relative; }
+  .trust .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 36px; margin-top: 64px; }
+  .trust h3 { font: 400 32px/.95 Meta; text-transform: uppercase; margin: 16px 0 10px; }
+  .trust p { color: #c6c4be; font-size: 16px; }
+  .trust .ic { color: #f2716b; }
+
+  .maker { padding: 100px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: end; }
+  .maker h2 { font: 400 88px/.88 Meta; text-transform: uppercase; }
+  .maker p { color: var(--fg2); font-size: 18px; margin-bottom: 24px; }
+  footer { border-top: 1px solid var(--line); padding: 34px 0 44px; font-size: 14px; color: var(--fg3); }
+  footer .wrap { display: flex; gap: 40px; align-items: center; }
+</style></head>
+<body>
+<div class="wrap"><nav>
+  <a class="logo"><span class="mk" data-icon="bergwork"></span><b>berg:work</b></a>
+  <div class="links"><a>Projects</a><a>PDF</a><a>Image Pro</a><a>Roadmap</a><a>Download</a></div>
+  <span class="lang">Deutsch</span>
+  <a class="btn ink sm">Download Projects</a>
+</nav></div>
+
+<section class="hero">
+  <div class="circle"></div><div class="bar2"></div><div class="bar"></div>
+  <img class="shot" src="shot-projects-dark.png" alt="">
+  <div class="wrap"><div class="text">
+    <div class="eyebrow">For offices on Microsoft 365</div>
+    <h1>Projects,<br>not<br><em>programs.</em></h1>
+    <p class="lead">One desktop app for every job: pick a project, and mail, files, tasks, chat and calendar show only what belongs to it.</p>
+    <div class="row"><a class="btn ink"><span data-ico="down"></span>Download for Windows</a><a class="btn ghost">See it in your browser</a></div>
+    <div class="facts"><span>Test version 0.1.2</span><span>·</span><span>Windows and Linux</span><span>·</span><span>No tracking</span></div>
+  </div></div>
+</section>
+
+<section class="tools"><div class="wrap">
+  <div class="sec-head"><h2>One workshop.<br>Three tools.</h2><p>Made for engineering, surveying and planning offices that would rather work on the job than on their software.</p></div>
+  <div class="cols" id="cols"></div>
+</div></section>
+
+<section class="wrap feature">
+  <div>
+    <div class="num">01</div>
+    <h2>Every program, sorted by project.</h2>
+    <p>Office work is usually sorted by program. A job needs all of them, so berg:work Projects turns it around: click a project, and every tab shows only what belongs to it.</p>
+    <div class="apps"><span data-ico="folder" data-s="16"></span><span>Files</span><span>Mail</span><span>Tasks</span><span>Chat</span><span>Calendar</span><span>Contacts</span><span>Notes</span></div>
+  </div>
+  <div class="pic"><img src="shot-projects-light.png" alt=""></div>
+</section>
+
+<section class="trust"><div class="wedge"></div><div class="wrap">
+  <h2>Your files<br>stay yours.</h2>
+  <div class="grid" id="trust"></div>
+</div></section>
+
+<section class="wrap maker">
+  <h2>One person,<br>in the Allgäu.</h2>
+  <div><p>berg:work is built by Florian Fischer in Grünenbach, Germany – the same workshop that makes Himmel:CAD for land surveyors. Your message goes straight to the person who writes the code.</p>
+  <a class="btn ghost">Send feedback</a></div>
+</section>
+<footer><div class="wrap"><a class="logo"><b style="font-size:22px">berg:work</b></a><span>Legal notice</span><span>Privacy</span><span>Roadmap</span><span style="margin-left:auto">Made in Grünenbach, Allgäu</span></div></footer>
+
+<script type="module">
+  import { mount, PRODUCTS, TRUST, ICON, ico } from './common.js';
+  document.getElementById('cols').innerHTML = PRODUCTS.map((p) => `
+    <div class="col" style="--c:${p.c}">
+      <div class="top"><span>${ICON(p.id)}</span><h3>${p.name}</h3></div>
+      <h4>${p.head}</h4><p>${p.text}</p><span class="tag">${p.status}</span>
+      <a class="more">${p.cta} ${ico('arrow', 18)}</a>
+    </div>`).join('');
+  document.getElementById('trust').innerHTML = TRUST.map(([i, h, t]) => `<div>${ico(i, 28)}<h3>${h}</h3><p>${t}</p></div>`).join('');
+  document.querySelector('.apps').innerHTML = ['folder Files', 'mail Mail', 'task Tasks', 'chat Chat', 'cal Calendar'].map((s) => { const [i, l] = s.split(' '); return `<span>${ico(i, 16)}${l}</span>`; }).join('');
+  mount();
+</script>
+</body></html>

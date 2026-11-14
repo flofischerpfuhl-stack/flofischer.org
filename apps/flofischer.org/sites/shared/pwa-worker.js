@@ -64,7 +64,7 @@ async function networkFirstStatic(request) {
   }
 }
 
-const MOCKUPS = ["projects", "fernwork", "builder", "win", "games", "fernlings", "fernwork-editor-entwurf-2026-11", "bergwork-pdf"]; // keep in sync with worker/mockups.js
+const MOCKUPS = ["projects", "fernwork", "builder", "win", "games", "fernlings", "fernwork-editor-entwurf-2026-11", "bergwork-pdf", "bergwork-web"]; // keep in sync with worker/mockups.js
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;

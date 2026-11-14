@@ -13,6 +13,7 @@ export const MOCKUPS = new Set([
   "win", // one-time Windows PC remote-access setup page (SSH + Tailscale)
   "games", // Fernworld Games test build: Fern Rangers, Pip's Tower, Fernling-Arena and Bounce Brigade
   "fernwork-editor-entwurf-2026-11", // Fernwork PDF editor design drafts, wave 2 (measure bar, properties, selection, stacks, phone drawer)
+  "bergwork-web", // bergwork.app website overhaul concepts (Metadannye display font)
   "bergwork-pdf", // berg:work PDF in the Schliff look (three directions) and berg:work icon families
 ]);
 

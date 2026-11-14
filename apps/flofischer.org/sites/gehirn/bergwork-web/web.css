@@ -1,0 +1,17 @@
+/* Gemeinsame Grundlage der Webseiten-Konzepte: Metadannye als Plakatschrift, Inter wie in der App. */
+@font-face { font-family: Meta; src: url(metadannye.ttf) format('truetype'); font-display: block; }
+@font-face { font-family: Inter; src: url(inter.woff2) format('woff2'); font-weight: 100 900; }
+@font-face { font-family: JBM; src: url(JetBrainsMono-latin.woff2) format('woff2'); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { width: 1440px; font: 17px/1.55 Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; font-feature-settings: 'cv11', 'ss01'; }
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+.wrap { width: 1280px; margin: 0 auto; }
+.meta { font-family: Meta; font-weight: 400; letter-spacing: .01em; line-height: .92; }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo .mk { width: 30px; height: 30px; }
+.logo .mk svg { width: 100%; height: 100%; display: block; }
+.logo b { font: 400 30px/1 Meta; letter-spacing: .01em; }
+.ic svg, svg.ic { display: block; }
+.btn { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 20px; border-radius: 8px; font-weight: 600; font-size: 16px; white-space: nowrap; }
+.row { display: flex; align-items: center; gap: 12px; }

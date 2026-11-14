@@ -1,0 +1,120 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow, noarchive" /><title>berg:work – B Leitstand</title>
+<link rel="stylesheet" href="web.css">
+<style>
+  :root { --chrome: #060605; --view: #0e0e0d; --card: #1a1917; --pop: #21201e; --control: #252422; --fg: #f2f1ed; --fg2: #c6c4be; --fg3: #95938d; --strong: #fdfcfa;
+          --line: rgba(255,253,248,.1); --line2: rgba(255,253,248,.16); --accent: #8cb4f5; --red: #c81e1e; }
+  body { background: var(--chrome); color: var(--fg); }
+  nav { height: 72px; display: flex; align-items: center; gap: 36px; }
+  nav .links { display: flex; gap: 28px; margin: 0 auto; font-size: 15px; color: var(--fg2); }
+  nav .lang { font-size: 14px; color: var(--fg3); }
+  .logo b { color: var(--strong); }
+  .btn.cream { background: #fbfaf7; color: #141312; }
+  .btn.ghost { color: var(--fg); box-shadow: inset 0 0 0 1px var(--line2); }
+  .btn.sm { height: 38px; padding: 0 16px; font-size: 15px; }
+
+  .page { margin: 0 12px; border-radius: 18px; background: var(--view); box-shadow: 0 0 0 1px var(--line); overflow: hidden; }
+  .hero { position: relative; padding: 96px 0 0; text-align: center; }
+  .glow { position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(520px 320px at 26% 72%, rgba(121,168,245,.16), transparent 70%),
+                radial-gradient(460px 300px at 52% 82%, rgba(242,113,107,.13), transparent 70%),
+                radial-gradient(520px 320px at 78% 72%, rgba(98,198,144,.12), transparent 70%); }
+  .pill { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 17px; background: rgba(140,180,245,.14); color: #b9d2fa; font-size: 14px; font-weight: 500; }
+  .pill i { width: 7px; height: 7px; border-radius: 50%; background: #62c690; }
+  h1 { font: 400 150px/.86 Meta; text-transform: uppercase; color: var(--strong); margin: 30px 0 28px; }
+  .lead { font-size: 21px; color: var(--fg2); max-width: 680px; margin: 0 auto 34px; }
+  .hero .row { justify-content: center; }
+  .window { position: relative; width: 1180px; margin: 76px auto 0; border-radius: 12px 12px 0 0; overflow: hidden; box-shadow: 0 0 0 1px var(--line2), 0 -10px 80px rgba(0,0,0,.6); height: 560px; }
+  .window img { width: 100%; }
+
+  .tabsec { padding: 110px 0 120px; border-top: 1px solid var(--line); }
+  .k { font-size: 14px; font-weight: 600; color: var(--fg3); letter-spacing: .02em; margin-bottom: 14px; }
+  h2 { font: 400 92px/.88 Meta; text-transform: uppercase; color: var(--strong); }
+  .tabs { display: flex; gap: 6px; margin: 48px 0 0; border-bottom: 1px solid var(--line); }
+  .tab { --c: #a3a19c; position: relative; display: flex; align-items: center; gap: 12px; height: 60px; padding: 0 22px; border-radius: 10px 10px 0 0; font-size: 18px; font-weight: 500; color: var(--fg2); }
+  .tab span { width: 32px; height: 32px; }
+  .tab span svg { width: 32px; height: 32px; }
+  .tab.on { background: color-mix(in oklab, var(--c) 18%, transparent); color: var(--strong); font-weight: 600; }
+  .tab.on::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 3px; border-radius: 3px; background: var(--c); }
+  .tab small { font-size: 13px; color: var(--fg3); font-weight: 400; }
+  .panel { display: grid; grid-template-columns: 430px 1fr; gap: 64px; padding-top: 54px; align-items: start; }
+  .panel h3 { font: 400 64px/.9 Meta; text-transform: uppercase; color: var(--strong); margin-bottom: 20px; }
+  .panel p { color: var(--fg2); font-size: 18px; }
+  .list { margin: 26px 0 32px; display: flex; flex-direction: column; gap: 12px; font-size: 16px; }
+  .list div { display: flex; gap: 12px; align-items: flex-start; color: var(--fg); }
+  .list .ic { color: #79a8f5; margin-top: 2px; flex: none; }
+  .shot { border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px var(--line2), 0 20px 60px rgba(0,0,0,.5); }
+
+  .trust { padding: 110px 0; border-top: 1px solid var(--line); }
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 50px; }
+  .card { background: var(--card); border-radius: 12px; box-shadow: 0 0 0 1px var(--line); padding: 26px 24px 28px; }
+  .card .ic { color: var(--fg); }
+  .card h3 { font: 400 30px/.95 Meta; text-transform: uppercase; color: var(--strong); margin: 22px 0 10px; }
+  .card p { color: var(--fg2); font-size: 15.5px; }
+
+  .maker { padding: 100px 0 110px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 520px; gap: 80px; align-items: center; }
+  .person { display: flex; gap: 16px; align-items: center; margin-bottom: 22px; }
+  .av { width: 52px; height: 52px; border-radius: 50%; background: color-mix(in oklab, #62c690 58%, #0e0e0d); display: grid; place-items: center; color: #fff; font-weight: 700; }
+  .person b { display: block; color: var(--strong); }
+  .person span { color: var(--fg3); font-size: 14px; }
+  .maker p { color: var(--fg2); font-size: 18px; margin-bottom: 26px; }
+
+  footer { padding: 40px 0 46px; font-size: 14px; color: var(--fg3); }
+  footer .wrap { display: flex; gap: 32px; align-items: center; }
+</style></head>
+<body>
+<div class="wrap"><nav>
+  <a class="logo"><span class="mk" data-icon="bergwork"></span><b>berg:work</b></a>
+  <div class="links"><a>Projects</a><a>PDF</a><a>Image Pro</a><a>Roadmap</a><a>Download</a></div>
+  <span class="lang">Deutsch</span>
+  <a class="btn cream sm">Download</a>
+</nav></div>
+
+<div class="page">
+  <section class="hero"><div class="glow"></div>
+    <span class="pill"><i></i>Test version 0.1.2 for Windows and Linux</span>
+    <h1>Projects,<br>not programs.</h1>
+    <p class="lead">berg:work brings mail, files, tasks, chat and calendar from Microsoft 365 into one project view – plus PDF and image tools that keep your files on your machine.</p>
+    <div class="row"><a class="btn cream"><span data-ico="down"></span>Download Projects</a><a class="btn ghost">See it in your browser</a></div>
+    <div class="window"><img src="shot-projects-dark.png" alt=""></div>
+  </section>
+
+  <section class="tabsec"><div class="wrap">
+    <div class="k">THREE TOOLS, ONE WORKSHOP</div>
+    <h2>Built like the app.</h2>
+    <div class="tabs" id="tabs"></div>
+    <div class="panel">
+      <div>
+        <h3>Every program, sorted by project.</h3>
+        <p>Click a project on the left, and every tab on top shows only what belongs to it. Your mail, files and chats stay where they are, in Microsoft 365.</p>
+        <div class="list" id="list"></div>
+        <div class="row"><a class="btn cream sm">Download</a><a class="btn ghost sm">What it does</a></div>
+      </div>
+      <div class="shot"><img src="shot-projects-light.png" alt=""></div>
+    </div>
+  </div></section>
+
+  <section class="trust"><div class="wrap">
+    <div class="k">HOW IT WORKS</div>
+    <h2>Your files stay yours.</h2>
+    <div class="cards" id="cards"></div>
+  </div></section>
+
+  <section class="wrap maker">
+    <h2>One person,<br>in the Allgäu.</h2>
+    <div>
+      <div class="person"><div class="av">FF</div><div><b>Florian Fischer</b><span>Grünenbach, Germany · also makes Himmel:CAD</span></div></div>
+      <p>Found a bug or missing something? Your message goes straight to the person who writes the code.</p>
+      <a class="btn ghost sm">Send feedback</a>
+    </div>
+  </section>
+</div>
+<footer><div class="wrap"><a class="logo"><b style="font-size:22px;color:#fdfcfa">berg:work</b></a><span>Legal notice</span><span>Privacy</span><span>Roadmap</span><span style="margin-left:auto">No tracking · No cookies</span></div></footer>
+
+<script type="module">
+  import { mount, PRODUCTS, TRUST, ICON, ico } from './common.js';
+  document.getElementById('tabs').innerHTML = PRODUCTS.map((p, i) => `<div class="tab ${i ? '' : 'on'}" style="--c:${p.cd}"><span>${ICON(p.id)}</span>${p.name}<small>${p.status}</small></div>`).join('');
+  document.getElementById('list').innerHTML = [['folder', 'Files: the project folder in SharePoint or OneDrive'], ['mail', 'Mail: sorted into projects, still in Outlook'], ['task', 'Tasks: one board per project, as Planner tasks'], ['chat', 'Chat: the project channel in Teams']].map(([i, t]) => `<div>${ico(i, 18)}<span>${t}</span></div>`).join('');
+  document.getElementById('cards').innerHTML = TRUST.map(([i, h, t]) => `<div class="card">${ico(i, 26)}<h3>${h}</h3><p>${t}</p></div>`).join('');
+  mount();
+</script>
+</body></html>
