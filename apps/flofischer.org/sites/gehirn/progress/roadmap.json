@@ -1,5 +1,5 @@
 {
- "standVom": "2026-11-15T22:25",
+ "standVom": "2026-11-15T23:51",
  "bereiche": [
   {
    "id": "fernwork",
@@ -21,7 +21,7 @@
    "titel": "Umbau: eine Identität, ein Zustand",
    "stand": "laeuft",
    "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist. Der Sprintplan steht seit 15.11. 22:24: sechs Sprints, 8–12 Kalendertage.",
-   "blocker": "Sieben der neun Fehler aus Florians Alltagstest sind seit 15.11. 21:28 behoben. Zwei warten auf den Umbau: Unterstreichen verschiebt die Zeile, und die Leiste baut sich beim Doppelklick neu auf. Einschränkung aus der Planung: Der Test für das Ziehen lief ohne Leiste und Einrasten, und die Farbe kann beim Verschieben mehrerer Objekte weiter verloren gehen. Beides klärt der erste Sprint. Bis Do 19.11. reicht das Budget für U0 bis U2.",
+   "blocker": "Stand der Abläufe aus Florians Alltagstest nach dem ersten Sprint, gemessen mit ausgelieferten Einstellungen: Ziehen ganzer Zeilen und doppelter Wörter, Markieren, Knopfzustände, Undo bis zum Original und Arbeiten nach dem Speichern sind in Ordnung. Offen: Die Leiste verschwindet beim Tippen und Doppelklick zeitweise (U3), die Seitenzahl in der Fußzeile zieht das Wort davor mit (U1), zwei gemeinsam verschobene blaue Zeilen werden heller (U2), der Auswahlrahmen wächst beim Unterstreichen (U4). Bis Do 19.11. reicht das Budget für U0 bis U2.",
    "haengtAn": [],
    "sprints": [
     {
@@ -45,10 +45,11 @@
     {
      "id": "abnahme",
      "titel": "U0 · Florians Alltagsabläufe als Tests",
-     "stand": "laeuft",
+     "stand": "fertig",
      "geplantTage": 0.5,
-     "notiz": "16 Abfolgen mit ausgelieferten Einstellungen und echter Maus auf erzeugten Writer-Dateien. Geplant 6–9 Agentenstunden.",
-     "start": "2026-11-15T22:25"
+     "notiz": "19 Tests mit ausgelieferten Einstellungen und echter Maus, ausgeliefert 23:49. 9 sind grün, 9 zeigen Fehler, die spätere Sprints beheben, 1 ist eine reine Messung. Gebraucht 1,3 Agentenstunden, geplant waren 6–9.",
+     "start": "2026-11-15T22:27",
+     "ende": "2026-11-15T23:45"
     },
     {
      "id": "identitaet",
@@ -58,18 +59,19 @@
       2,
       3
      ],
-     "notiz": "Vier Stufen, 26–39 Agentenstunden. Rund 250 Stellen benutzen heute den alten Schlüssel. Die erste Stufe (zusätzliche Lesedaten) läuft neben U0. Die Code-Prüfungen hatten 1–3 Wochen geschätzt.",
-     "start": "2026-11-15T22:25"
+     "notiz": "Vier Stufen, 26–39 Agentenstunden. Rund 250 Stellen benutzen heute den alten Schlüssel. Stufe 1 (zusätzliche Lesedaten) ist gebaut: 0,5 statt 6–9 Agentenstunden; das Öffnen einer Planseite mit 43 518 Objekten wird dadurch 0,8 % langsamer (2 812 → 2 834 ms). Stufe 2 läuft.",
+     "start": "2026-11-15T22:27"
     },
     {
      "id": "zustand",
      "titel": "U2 · Leiste, Seitenpanel und Seite zeigen dasselbe",
-     "stand": "offen",
+     "stand": "laeuft",
      "geplantTage": [
       2,
       3
      ],
-     "notiz": "Vier Stufen, 24–36 Agentenstunden. Der Zustand liegt heute an 14 Stellen mit rund 75 Schreib- und 250 Lesestellen. Die Code-Prüfungen hatten 1–2 Wochen geschätzt."
+     "notiz": "Vier Stufen, 24–36 Agentenstunden. Der Zustand liegt heute an 14 Stellen mit rund 75 Schreib- und 250 Lesestellen. Stufe 1 (keine erfundenen Werte mehr schreiben) läuft neben U1.",
+     "start": "2026-11-15T23:51"
     },
     {
      "id": "leiste",
@@ -89,7 +91,7 @@
       0.5,
       1
      ],
-     "notiz": "4–14 Agentenstunden. Der Umfang hängt an einer Messung aus U0."
+     "notiz": "4–14 Agentenstunden geplant. Die Messung aus U0 zeigt: Die Schrift bewegt sich beim Unterstreichen nicht, nur der Auswahlrahmen wächst. Damit bleibt es bei Arbeit an der Oberfläche, voraussichtlich 4–8 Agentenstunden."
     },
     {
      "id": "aufteilen",
@@ -136,13 +138,13 @@
     {
      "sprint": "abnahme",
      "titel": "Tests bedienen den Editor mit Leiste und Einrasten, wie ihn der Nutzer bekommt",
-     "stand": "laeuft",
+     "stand": "fertig",
      "notiz": "Die 490 vorhandenen Testdateien laufen fast alle mit abgeschalteter Leiste"
     },
     {
      "sprint": "abnahme",
-     "titel": "16 Abfolgen mit echter Maus auf einer Büro-PDF",
-     "stand": "laeuft"
+     "titel": "19 Abfolgen mit echter Maus auf erzeugten Büro-PDFs",
+     "stand": "fertig"
     },
     {
      "sprint": "identitaet",
