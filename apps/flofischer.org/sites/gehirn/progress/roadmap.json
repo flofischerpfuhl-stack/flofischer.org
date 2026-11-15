@@ -1,5 +1,5 @@
 {
-  "standVom": "2026-11-15T00:40",
+  "standVom": "2026-11-15T04:50",
   "bereiche": [
     {
       "id": "fernwork",
@@ -17,7 +17,7 @@
       "titel": "Fernwork PDF-Editor",
       "stand": "laeuft",
       "kurz": "Live-Bearbeitung so gut wie PDF-XChange: 19 Aufgaben in 4 Sprints, etwa 165 Agent-Stunden, 7–9 Kalendertage.",
-      "blocker": "Sprint 1: XC-1 und XC-2 auf main, XC-3 und XC-6 laufen, XC-4/5 (Zeitmessungen) nach dem PhotoLab-Lauf. Für Sprint 4 braucht es Florians Entscheidungen zur Properties-Leiste und zu Tastenkürzeln.",
+      "blocker": "Sprint 1: XC-1, XC-2, XC-3, XC-6 auf main. XC-4/5 (Zeitmessungen gegen PDF-XChange) ab 15.11. mittags. Für Sprint 4 braucht es Florians Entscheidungen zur Properties-Leiste und zu Tastenkürzeln.",
       "haengtAn": [],
       "teilziele": [
         {
@@ -48,7 +48,7 @@
         {
           "gruppe": "Sprint 1 · tägliche Störer (läuft)",
           "titel": "XC-3 Wackelnde Tests stabilisieren",
-          "stand": "laeuft"
+          "stand": "fertig"
         },
         {
           "gruppe": "Sprint 1 · tägliche Störer (läuft)",
@@ -65,7 +65,7 @@
         {
           "gruppe": "Sprint 1 · tägliche Störer (läuft)",
           "titel": "XC-6 Erster Klick auf Text ohne Wartezeit",
-          "stand": "laeuft",
+          "stand": "fertig",
           "notiz": "Heute bis 4,6 s auf großen Plänen"
         },
         {
