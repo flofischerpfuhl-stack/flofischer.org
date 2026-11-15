@@ -104,6 +104,110 @@ function standText(iso) {
   return teile;
 }
 
+// ---------- Sprints: geplante und gebrauchte Zeit ----------
+
+function zahlText(t) {
+  return String(Math.round(t * 10) / 10).replace(".", ",");
+}
+
+function tageText(t) {
+  if (t < 1) return `${Math.max(1, Math.round(t * 24))} Std.`;
+  return `${zahlText(t)} ${Math.round(t * 10) === 10 ? "Tag" : "Tage"}`;
+}
+
+// geplantTage: Zahl oder [von, bis]
+function geplant(s) {
+  const g = Array.isArray(s.geplantTage) ? s.geplantTage : [s.geplantTage, s.geplantTage];
+  if (!g.every((v) => typeof v === "number" && v > 0)) return null;
+  return { von: Math.min(...g), bis: Math.max(...g) };
+}
+
+function geplantText(p) {
+  if (p.von === p.bis) return tageText(p.bis);
+  if (p.von >= 1) return `${zahlText(p.von)}–${zahlText(p.bis)} Tage`;
+  return `${tageText(p.von)} bis ${tageText(p.bis)}`;
+}
+
+// Gebraucht: gebrauchtTage, sonst Ende minus Start; läuft der Sprint noch, zählt die Zeit bis jetzt.
+function gebraucht(s) {
+  if (typeof s.gebrauchtTage === "number") return s.gebrauchtTage;
+  const start = new Date(s.start).getTime();
+  const ende = s.ende ? new Date(s.ende).getTime() : s.stand === "laeuft" ? Date.now() : NaN;
+  if (Number.isNaN(start) || Number.isNaN(ende) || ende < start) return null;
+  return (ende - start) / 86400000;
+}
+
+function sprintZeit(s) {
+  const p = geplant(s);
+  const g = gebraucht(s);
+  const teile = [el("span", {}, p ? `geplant ${geplantText(p)}` : "ohne Zeitplan")];
+  if (g !== null) {
+    teile.push(el("span", {}, s.stand === "laeuft" ? `läuft seit ${tageText(g)}` : `gebraucht ${tageText(g)}`));
+    if (p && g > p.bis) teile.push(el("span", { class: "sp-ueber" }, s.stand === "laeuft" ? "über Plan" : `${tageText(g - p.bis)} länger`));
+    else if (p && g < p.von && s.stand === "fertig") teile.push(el("span", { class: "sp-unter" }, `${tageText(p.von - g)} schneller`));
+  } else if (s.stand === "fertig") {
+    teile.push(el("span", {}, "gebrauchte Zeit nicht erfasst"));
+  }
+  const zeile = el("div", { class: "sp-zeit" }, teile);
+  if (!p || g === null) return [zeile];
+  const voll = Math.max(p.bis, g);
+  return [
+    zeile,
+    el(
+      "div",
+      { class: "sp-balken", role: "img", "aria-label": `geplant ${geplantText(p)}, gebraucht ${tageText(g)}` },
+      el("span", { class: "sp-ist", style: `width:${(100 * Math.min(g, p.bis)) / voll}%` }),
+      g > p.bis && el("span", { class: "sp-mehr", style: `width:${(100 * (g - p.bis)) / voll}%` }),
+      el("span", { class: "sp-plan", style: `left:${(100 * p.bis) / voll}%` })
+    ),
+  ];
+}
+
+function sprintKopf(s) {
+  return [el("div", { class: "sp-kopf" }, el("span", { class: "sp-titel" }, s.titel), marke(s.stand)), ...sprintZeit(s), s.notiz && el("div", { class: "sp-notiz" }, s.notiz)];
+}
+
+function sprintUebersicht(n) {
+  const sp = n.sprints || [];
+  if (!sp.length) return null;
+  const fertig = sp.filter((s) => s.stand === "fertig").length;
+  const aktiv = sp.find((s) => s.stand === "laeuft");
+  return `Sprints: ${fertig} von ${sp.length} fertig${aktiv ? ` · läuft: ${aktiv.titel}` : ""}`;
+}
+
+function teilzielZeile(t) {
+  return el(
+    "li",
+    { class: t.stand === "fertig" ? "erledigt" : null },
+    el("span", { class: "tz-titel" }, t.titel),
+    marke(t.stand),
+    t.notiz && el("span", { class: "tz-notiz" }, t.notiz),
+    t.florian && el("span", { class: "tz-florian" }, `Florian gefragt: ${t.florian}`)
+  );
+}
+
+// Übersicht über alle Bausteine mit Sprints: Plan und Ist auf einen Blick.
+function sprintListe() {
+  const mit = [...knoten.values()].filter((n) => n.sprints?.length);
+  if (!mit.length) return null;
+  return [
+    el("h2", { class: "abschnitt" }, "Sprints: geplante und gebrauchte Zeit"),
+    el(
+      "div",
+      { class: "sprint-liste" },
+      mit.map((n) =>
+        el(
+          "details",
+          { open: n.stand === "laeuft" },
+          el("summary", {}, el("span", { class: "sl-titel" }, n.titel), el("span", { class: "sl-zahl" }, sprintUebersicht(n).replace("Sprints: ", ""))),
+          n.sprints.map((s) => el("div", { class: `sprint st-${s.stand}` }, sprintKopf(s))),
+          el("button", { type: "button", class: "sl-mehr", onclick: () => oeffne(n.id) }, "Teilziele ansehen")
+        )
+      )
+    ),
+  ];
+}
+
 // ---------- Prüfung der Daten ----------
 
 function pruefe(d) {
@@ -114,8 +218,15 @@ function pruefe(d) {
     if (ids.has(n.id)) probleme.push(`id doppelt: ${n.id}`);
     ids.add(n.id);
     if (!STAENDE[n.stand]) probleme.push(`${n.id}: unbekannter Stand „${n.stand}“`);
+    const sprints = new Set();
+    for (const s of n.sprints || []) {
+      if (!s.id || sprints.has(s.id)) probleme.push(`${n.id}: Sprint ohne oder mit doppelter id („${s.titel}“)`);
+      sprints.add(s.id);
+      if (!STAENDE[s.stand]) probleme.push(`${n.id} › ${s.titel}: unbekannter Stand „${s.stand}“`);
+    }
     for (const t of n.teilziele || []) {
       if (!STAENDE[t.stand]) probleme.push(`${n.id} › ${t.titel}: unbekannter Stand „${t.stand}“`);
+      if (t.sprint && !sprints.has(t.sprint)) probleme.push(`${n.id} › ${t.titel}: unbekannter Sprint „${t.sprint}“`);
     }
   }
   for (const n of d.knoten || []) {
@@ -166,33 +277,29 @@ function detailInhalt(n, { mitVerweisen }) {
               { type: "button", class: "tz-knopf", onclick: () => oeffne(id) },
               el("span", { class: "tz-titel" }, k.titel),
               marke(k.stand),
-              el("span", { class: "tz-notiz" }, z.gesamt ? `${z.fertig} von ${z.gesamt} Teilzielen fertig` : "")
+              el("span", { class: "tz-notiz" }, [z.gesamt ? `${z.fertig} von ${z.gesamt} Teilzielen fertig` : null, sprintUebersicht(k)].filter(Boolean).join(" · "))
             )
           );
         })
       )
     );
   } else {
+    if (n.sprints?.length) teile.push(el("div", { class: "d-gruppe" }, sprintUebersicht(n)));
+    for (const s of n.sprints || []) {
+      const eigene = (n.teilziele || []).filter((t) => t.sprint === s.id);
+      teile.push(el("div", { class: `sprint st-${s.stand}` }, sprintKopf(s), eigene.length ? el("ul", { class: "teilziele" }, eigene.map(teilzielZeile)) : null));
+    }
     let gruppe;
     let liste = null;
-    for (const t of n.teilziele || []) {
+    for (const t of (n.teilziele || []).filter((t) => !t.sprint)) {
       if (!liste || t.gruppe !== gruppe) {
         gruppe = t.gruppe;
         if (gruppe) teile.push(el("div", { class: "d-gruppe" }, gruppe));
-        else if (!liste) teile.push(el("div", { class: "d-gruppe" }, "Teilziele"));
+        else if (!liste) teile.push(el("div", { class: "d-gruppe" }, n.sprints?.length ? "Außerhalb der Sprints" : "Teilziele"));
         liste = el("ul", { class: "teilziele" });
         teile.push(liste);
       }
-      liste.append(
-        el(
-          "li",
-          { class: t.stand === "fertig" ? "erledigt" : null },
-          el("span", { class: "tz-titel" }, t.titel),
-          marke(t.stand),
-          t.notiz && el("span", { class: "tz-notiz" }, t.notiz),
-          t.florian && el("span", { class: "tz-florian" }, `Florian gefragt: ${t.florian}`)
-        )
-      );
+      liste.append(teilzielZeile(t));
     }
   }
 
@@ -333,7 +440,8 @@ function graph(liste) {
         },
         el("span", { class: "titel" }, n.titel),
         el("span", { class: "zeile" }, marke(n.stand), braeuchtFlorian(n) && florianMarke(n.florian)),
-        balken(n)
+        balken(n),
+        sprintUebersicht(n) && el("span", { class: "sprint-zeile" }, sprintUebersicht(n))
       )
     );
   }
@@ -404,7 +512,8 @@ function baumKnoten(n) {
     el("span", { class: "pfeil", "aria-hidden": "true" }, "›"),
     el("span", { class: "zeile" }, marke(n.stand), braeuchtFlorian(n) && florianMarke(n.florian)),
     deps.length ? el("span", { class: "haengt-zeile" }, `hängt an ${deps.join(", ")}`) : null,
-    balken(n)
+    balken(n),
+    sprintUebersicht(n) && el("span", { class: "sprint-zeile" }, sprintUebersicht(n))
   );
   return el("li", {}, el("div", { class: `baum-knoten st-${n.stand}${n.ziel ? " ziel" : ""}`, id: `b-${n.id}` }, kopf, rumpf));
 }
@@ -506,6 +615,7 @@ function zeige(d) {
   const ziele = [...knoten.values()].filter((n) => n.ziel);
   teile.push(el("h2", { class: "abschnitt" }, "Release-Ziele"), el("div", { class: "ziele" }, ziele.map(zielKarte)));
   teile.push(...(fragenListe() || []));
+  teile.push(...(sprintListe() || []));
   teile.push(legende());
   for (const b of d.bereiche || []) {
     const liste = [...knoten.values()].filter((n) => n.bereich === b.id);

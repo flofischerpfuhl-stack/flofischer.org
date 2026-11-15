@@ -1,5 +1,5 @@
 {
-  "standVom": "2026-11-15T18:50",
+  "standVom": "2026-11-15T20:27",
   "bereiche": [
     {
       "id": "fernwork",
@@ -16,13 +16,180 @@
   ],
   "knoten": [
     {
+      "id": "fernwork-umbau",
+      "bereich": "fernwork",
+      "titel": "Umbau: eine Identität, ein Zustand",
+      "stand": "laeuft",
+      "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist.",
+      "blocker": "Heute Abend laufen nur die billigen Fixes. Reihenfolge und Zeiten der Sprints sind vorläufig, geschätzt aus zwei unabhängigen Code-Prüfungen ohne Probelauf. Der endgültige Sprintplan kommt am Mo 16.11.",
+      "haengtAn": [],
+      "sprints": [
+        {
+          "id": "vorab",
+          "titel": "Vorab · billige Fixes für Florians Befunde",
+          "stand": "laeuft",
+          "geplantTage": 0.1,
+          "start": "2026-11-15T19:10",
+          "notiz": "Nur Rücknahmen, Einzeiler und Sicherungen. Was bis 21:30 nicht steht, wartet auf den Umbau."
+        },
+        {
+          "id": "abnahme",
+          "titel": "Abnahme-Tests · der Editor wie ausgeliefert",
+          "stand": "offen",
+          "geplantTage": 1,
+          "notiz": "Kleiner Satz, kein breiter Testausbau: Diese Tests zeigen, ob der Umbau die gefundenen Abläufe behebt."
+        },
+        {
+          "id": "identitaet",
+          "titel": "Eine Identität je Text",
+          "stand": "offen",
+          "geplantTage": [
+            7,
+            21
+          ],
+          "notiz": "Schätzung der beiden Prüfungen: 1–2 und 1–3 Wochen."
+        },
+        {
+          "id": "zustand",
+          "titel": "Ein Zustand je Objekt",
+          "stand": "offen",
+          "geplantTage": [
+            7,
+            14
+          ],
+          "notiz": "Baut auf der Identität auf. Die Zeit steckt im Umhängen von rund 200 Lese- und Schreibstellen, nicht im Entwurf."
+        },
+        {
+          "id": "leiste",
+          "titel": "Leiste am Text als eigener Baustein",
+          "stand": "offen",
+          "geplantTage": [
+            2,
+            5
+          ]
+        },
+        {
+          "id": "stil",
+          "titel": "Stil ändern ohne Versatz",
+          "stand": "offen",
+          "geplantTage": [
+            3,
+            5
+          ]
+        },
+        {
+          "id": "aufteilen",
+          "titel": "Große Datei aufteilen",
+          "stand": "offen",
+          "geplantTage": [
+            14,
+            28
+          ],
+          "notiz": "In Etappen, kein Neubau in einem Zug."
+        }
+      ],
+      "teilziele": [
+        {
+          "sprint": "vorab",
+          "titel": "Verschobener Text bleibt, wo man ihn loslässt",
+          "stand": "laeuft"
+        },
+        {
+          "sprint": "vorab",
+          "titel": "Leiste zeigt nach dem Verschieben die richtige Farbe",
+          "stand": "laeuft"
+        },
+        {
+          "sprint": "vorab",
+          "titel": "Leiste am Text springt und flackert nicht",
+          "stand": "laeuft"
+        },
+        {
+          "sprint": "vorab",
+          "titel": "Markierter Text ist klar erkennbar",
+          "stand": "laeuft",
+          "notiz": "Heute hellgrau auf hellgrau, Kontrast 1,4:1"
+        },
+        {
+          "sprint": "vorab",
+          "titel": "Neues Textfeld ist beim Tippen sichtbar",
+          "stand": "laeuft",
+          "notiz": "Fix gebaut, noch nicht ausgeliefert"
+        },
+        {
+          "sprint": "abnahme",
+          "titel": "Tests bedienen den Editor mit Leiste und Einrasten, wie ihn der Nutzer bekommt",
+          "stand": "offen",
+          "notiz": "Die 490 vorhandenen Testdateien laufen fast alle mit abgeschalteter Leiste"
+        },
+        {
+          "sprint": "abnahme",
+          "titel": "10–15 Abfolgen mit echter Maus auf einer Büro-PDF",
+          "stand": "offen"
+        },
+        {
+          "sprint": "identitaet",
+          "titel": "Jeder Text trägt die feste Kennung der PDF-Bibliothek als einzigen Schlüssel",
+          "stand": "offen"
+        },
+        {
+          "sprint": "identitaet",
+          "titel": "Kein Raten mehr über gleichen Text oder Nähe: Ziehen trifft immer das gegriffene Objekt",
+          "stand": "offen"
+        },
+        {
+          "sprint": "identitaet",
+          "titel": "Nach dem Verschieben gilt die Position, die die PDF-Bibliothek meldet",
+          "stand": "offen"
+        },
+        {
+          "sprint": "zustand",
+          "titel": "Leinwand, Leiste und Seitenpanel lesen denselben Zustand",
+          "stand": "offen",
+          "notiz": "Heute liegt er an etwa 13 Stellen"
+        },
+        {
+          "sprint": "zustand",
+          "titel": "Kein stiller Ersatzwert mehr, z. B. Schwarz statt der echten Farbe",
+          "stand": "offen"
+        },
+        {
+          "sprint": "zustand",
+          "titel": "Geschrieben werden nur die geänderten Eigenschaften",
+          "stand": "offen"
+        },
+        {
+          "sprint": "leiste",
+          "titel": "Leiste bleibt beim Wechsel zwischen Auswählen und Bearbeiten stehen",
+          "stand": "offen"
+        },
+        {
+          "sprint": "leiste",
+          "titel": "Leiste verdeckt keinen greifbaren Text",
+          "stand": "offen"
+        },
+        {
+          "sprint": "stil",
+          "titel": "Unterstreichen, Fett und Größe verschieben den Text nicht",
+          "stand": "offen"
+        },
+        {
+          "sprint": "aufteilen",
+          "titel": "Auswahl, Ziehen und Übernehmen als eigene Bausteine statt einer Datei mit 54.000 Zeilen",
+          "stand": "offen"
+        }
+      ]
+    },
+    {
       "id": "fernwork-pdf",
       "bereich": "fernwork",
       "titel": "Fernwork PDF-Editor",
       "stand": "laeuft",
-      "kurz": "Live-Bearbeitung so gut wie PDF-XChange: 19 Aufgaben in 4 Sprints, etwa 165 Agent-Stunden, 7–9 Kalendertage.",
-      "blocker": "Sprint 1 ist fertig. Sprint 2 (dichte Pläne flüssig) läuft bis etwa Mi 18.11.; die nächste Runde von XC-7 repariert zuerst einen Fehler der letzten Runde (Klick auf eine gespeicherte Messung öffnet ihre Werkzeugleiste nicht). Für Sprint 4 braucht es Florians Entscheidungen zur Properties-Leiste und zu Tastenkürzeln.",
-      "haengtAn": [],
+      "kurz": "Live-Bearbeitung so gut wie PDF-XChange: 19 Aufgaben in 4 Sprints, etwa 165 Agent-Stunden. Seit 15.11. kommt zuerst der Umbau der Textbearbeitung; Sprint 2 bis 4 folgen danach.",
+      "blocker": "Florians Test am 15.11. hat neun Bedienfehler beim Bearbeiten von Text gezeigt, die keiner der Tests bemerkt hat. Zwei unabhängige Code-Prüfungen sehen dieselbe Ursache in der Bedienschicht. Deshalb ist Sprint 2 angehalten, bis der Umbau „eine Identität, ein Zustand“ steht. Für Sprint 4 braucht es Florians Entscheidungen zur Properties-Leiste und zu Tastenkürzeln.",
+      "haengtAn": [
+        "fernwork-umbau"
+      ],
       "teilziele": [
         {
           "gruppe": "Schon erreicht",
@@ -40,116 +207,151 @@
           "stand": "fertig"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-1 Fett nach Rückgängig, eingebettete Schriften mit neuen Zeichen",
-          "stand": "fertig"
+          "stand": "fertig",
+          "sprint": "s1"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-2 Absturz-Wiederherstellung, Drehen von Pfaden, kurz verschwindendes Rechteck",
-          "stand": "fertig"
+          "stand": "fertig",
+          "sprint": "s1"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-3 Wackelnde Tests stabilisieren",
-          "stand": "fertig"
+          "stand": "fertig",
+          "sprint": "s1"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-4 Seiten löschen und Rückgängig so schnell wie PDF-XChange",
           "stand": "fertig",
-          "notiz": "Seite löschen ist nach 0,7 s statt 6,6 s bedienbar"
+          "notiz": "Seite löschen ist nach 0,7 s statt 6,6 s bedienbar",
+          "sprint": "s1"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-5 Zoom 400 % in 0,1 s scharf",
           "stand": "laeuft",
-          "notiz": "Dichte Testseite heute 0,15–0,2 s, Ziel 0,1 s (PDF-XChange 0,08 s); der Rest hängt am Umbau in XC-7"
+          "notiz": "Dichte Testseite heute 0,15–0,2 s, Ziel 0,1 s (PDF-XChange 0,08 s); der Rest hängt am Umbau in XC-7",
+          "sprint": "s1"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-6 Erster Klick auf Text ohne Wartezeit",
           "stand": "fertig",
-          "notiz": "Heute bis 4,6 s auf großen Plänen"
+          "notiz": "Heute bis 4,6 s auf großen Plänen",
+          "sprint": "s1"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "Zwei kleine Bedienfehler, Safari-Prüfung des PNG-Downloads",
-          "stand": "offen"
+          "stand": "offen",
+          "sprint": "s1"
         },
         {
-          "gruppe": "Sprint 2 · dichte Pläne flüssig (läuft)",
           "titel": "XC-7 Auswahl und Treffer direkt aus PDFium, Strg+A unter 1 s",
-          "stand": "laeuft",
-          "notiz": "Objekte liegen als Daten vor; Hover auf dichtem Plan 30 statt 49 ms"
+          "stand": "offen",
+          "notiz": "Begonnen, angehalten bis nach dem Umbau. Objekte liegen als Daten vor; Hover auf dichtem Plan 30 statt 49 ms",
+          "sprint": "s2"
         },
         {
-          "gruppe": "Sprint 2 · dichte Pläne flüssig (läuft)",
           "titel": "XC-8 Speichern auf großen Plänen schnell, Löschen unter 0,3 s",
-          "stand": "offen"
+          "stand": "offen",
+          "sprint": "s2"
         },
         {
-          "gruppe": "Sprint 2 · dichte Pläne flüssig (läuft)",
           "titel": "XC-9 Messungen, Stempel, Textboxen über PDFium",
-          "stand": "offen"
+          "stand": "offen",
+          "sprint": "s2"
         },
         {
-          "gruppe": "Sprint 2 · dichte Pläne flüssig (läuft)",
           "titel": "XC-10 Formularfelder und Kommentare über PDFium",
-          "stand": "offen"
+          "stand": "offen",
+          "sprint": "s2"
         },
         {
-          "gruppe": "Sprint 3 · Auswahl und Text",
           "titel": "XC-11 „Wählen, was man sieht“: Zeilen, Absätze, Hintergrund nicht anklickbar",
-          "stand": "offen"
+          "stand": "offen",
+          "sprint": "s3"
         },
         {
-          "gruppe": "Sprint 3 · Auswahl und Text",
           "titel": "XC-12 Rechts-nach-links-Text bearbeiten",
-          "stand": "offen"
+          "stand": "offen",
+          "sprint": "s3"
         },
         {
-          "gruppe": "Sprint 3 · Auswahl und Text",
           "titel": "XC-13 Zeichen- und Wortabstände erhalten, komplexe Schriften",
-          "stand": "offen"
+          "stand": "offen",
+          "sprint": "s3"
         },
         {
-          "gruppe": "Sprint 4 · Funktionen und Bedienung",
           "titel": "XC-14 Links anlegen und bearbeiten",
-          "stand": "offen"
+          "stand": "offen",
+          "sprint": "s4"
         },
         {
-          "gruppe": "Sprint 4 · Funktionen und Bedienung",
           "titel": "XC-15 Bild zuschneiden, Ebenen ein/aus",
-          "stand": "offen"
+          "stand": "offen",
+          "sprint": "s4"
         },
         {
-          "gruppe": "Sprint 4 · Funktionen und Bedienung",
           "titel": "XC-16 Formularberechnungen ohne eval",
-          "stand": "offen"
+          "stand": "offen",
+          "sprint": "s4"
         },
         {
-          "gruppe": "Sprint 4 · Funktionen und Bedienung",
           "titel": "XC-17 Eigene UI-Bausteine, Sperre gegen rohe Bedienelemente",
-          "stand": "offen"
+          "stand": "offen",
+          "sprint": "s4"
         },
         {
-          "gruppe": "Sprint 4 · Funktionen und Bedienung",
           "titel": "XC-18 Properties-Leiste, Mini-Toolbar, Optionsleisten",
           "stand": "offen",
-          "florian": "Properties-Kopf Variante A mit „…“-Menü? B/I/U/S überall als Knöpfe?"
+          "florian": "Properties-Kopf Variante A mit „…“-Menü? B/I/U/S überall als Knöpfe?",
+          "sprint": "s4"
         },
         {
-          "gruppe": "Sprint 4 · Funktionen und Bedienung",
           "titel": "XC-19 Tastenkürzel wie PDF-XChange",
           "stand": "offen",
-          "florian": "N/Shift+N gegen Tippen auf ausgewähltem Text – wie soll es sein?"
+          "florian": "N/Shift+N gegen Tippen auf ausgewähltem Text – wie soll es sein?",
+          "sprint": "s4"
         },
         {
           "gruppe": "Umfang",
           "titel": "Reste der Nicht-PDF-Tools (z. B. Text Encryption)",
           "stand": "unklar",
           "florian": "Gehören sie noch zu „Fernwork ist durch“?"
+        }
+      ],
+      "sprints": [
+        {
+          "id": "s1",
+          "titel": "Sprint 1 · tägliche Störer",
+          "stand": "fertig",
+          "geplantTage": 1,
+          "start": "2026-11-14T18:58",
+          "ende": "2026-11-15T15:40",
+          "notiz": "Zeiten vom ersten bis zum letzten gelandeten Stand. Zwei Reste wandern mit: Zoom-Ziel 0,1 s und zwei kleine Bedienfehler."
+        },
+        {
+          "id": "s2",
+          "titel": "Sprint 2 · dichte Pläne flüssig",
+          "stand": "offen",
+          "geplantTage": [
+            1.5,
+            2
+          ],
+          "start": "2026-11-15T13:36",
+          "gebrauchtTage": 0.24,
+          "notiz": "Am 15.11. begonnen und nach knapp 6 Stunden angehalten: Der Umbau der Textbearbeitung kommt zuerst."
+        },
+        {
+          "id": "s3",
+          "titel": "Sprint 3 · Auswahl und Text",
+          "stand": "offen",
+          "geplantTage": 1.5
+        },
+        {
+          "id": "s4",
+          "titel": "Sprint 4 · Funktionen und Bedienung",
+          "stand": "offen",
+          "geplantTage": 2
         }
       ]
     },
@@ -158,7 +360,7 @@
       "bereich": "fernwork",
       "titel": "Fable-Prüfung",
       "stand": "offen",
-      "kurz": "Unabhängige Prüfung von Fernwork in etwa drei Verbesserungsrunden, Maßstab sind XC-1 bis XC-19.",
+      "kurz": "Unabhängige Prüfung von Fernwork in etwa drei Verbesserungsrunden, Maßstab sind XC-1 bis XC-19. Eine erste Code-Prüfung durch zwei Modelle lief am 15.11. und hat den Umbau ausgelöst.",
       "blocker": "Startet, wenn der PDF-Editor durch ist.",
       "haengtAn": [
         "fernwork-pdf"
@@ -200,33 +402,47 @@
           "gruppe": "Schon erreicht",
           "titel": "Bildvergleich für Projects: 12 Ansichten in 20 s",
           "stand": "fertig"
-        },
+        }
+      ],
+      "sprints": [
         {
-          "gruppe": "Etappen",
-          "titel": "a) Wortmarke und Werkzeichen in Projects (½ Tag)",
-          "stand": "fertig"
-        },
-        {
-          "gruppe": "Etappen",
-          "titel": "b) Schliff als gemeinsames Paket, Projects bleibt pixelgleich (2–3 Tage)",
-          "stand": "fertig"
-        },
-        {
-          "gruppe": "Etappen",
-          "titel": "c) bisherige berg:work-UI auf die neue Core (1–2 Tage)",
-          "stand": "fertig"
-        },
-        {
-          "gruppe": "Etappen",
-          "titel": "d) berg:work-PDF-Look nach Mockup (2–3 Tage)",
+          "id": "a",
+          "titel": "Etappe a) Wortmarke und Werkzeichen in Projects",
           "stand": "fertig",
-          "florian": "Abnahme danach"
+          "geplantTage": 0.5
         },
         {
-          "gruppe": "Etappen",
-          "titel": "e) berg:work Image auf die Core (2 Tage)",
+          "id": "b",
+          "titel": "Etappe b) Schliff als gemeinsames Paket, Projects bleibt pixelgleich",
           "stand": "fertig",
-          "florian": "Image-Mockup vorher"
+          "geplantTage": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": "c",
+          "titel": "Etappe c) bisherige berg:work-UI auf die neue Core",
+          "stand": "fertig",
+          "geplantTage": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "d",
+          "titel": "Etappe d) berg:work-PDF-Look nach Mockup",
+          "stand": "fertig",
+          "geplantTage": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": "e",
+          "titel": "Etappe e) berg:work Image auf die Core",
+          "stand": "fertig",
+          "geplantTage": 2
         }
       ]
     },
@@ -263,8 +479,8 @@
       "bereich": "fernwork",
       "titel": "Webseiten",
       "stand": "laeuft",
-      "kurz": "bergwork.app wird neu aufgebaut, danach gehirn.flofischer.org aktualisiert. Vorgezogen: die neue Seite soll Mo 16.11. früh live sein.",
-      "blocker": "Livegang in der Nacht auf Mo 16.11., zusammen mit Projects 0.1.3 (neues Icon, neue Wortmarke) als Download.",
+      "kurz": "Die neue bergwork.app ist seit 15.11. 19:52 live. Projects 0.1.3 als Download folgt in der Nacht auf Mo 16.11., danach wird gehirn.flofischer.org aktualisiert.",
+      "blocker": "Die Seite bietet noch Projects 0.1.2 an. Bau und Prüfung von 0.1.3 (neues Icon, neue Wortmarke) laufen ab 20:45.",
       "haengtAn": [
         "desktop-apps"
       ],
@@ -275,8 +491,8 @@
         },
         {
           "titel": "bergwork.app: neue Seite live",
-          "stand": "laeuft",
-          "notiz": "Ziel Mo 16.11. früh"
+          "stand": "fertig",
+          "notiz": "Live seit 15.11. 19:52, alle Seiten deutsch und englisch erreichbar"
         },
         {
           "titel": "Projects 0.1.3 als Download (neues Icon, neue Wortmarke)",
@@ -285,11 +501,13 @@
         },
         {
           "titel": "bergwork.app: Bilder und Videos von PDF und Image",
-          "stand": "laeuft"
+          "stand": "fertig",
+          "notiz": "PDF- und Image-Seite mit echten Aufnahmen; die drei Tour-Clips von Projects zeigen noch das alte Zeichen"
         },
         {
           "titel": "gehirn.flofischer.org aktualisieren",
-          "stand": "offen"
+          "stand": "laeuft",
+          "notiz": "Die Projects-Demo leitet seit 15.11. auf bergwork.app weiter"
         }
       ]
     },
@@ -502,7 +720,7 @@
       "titel": "PhotoLab",
       "stand": "laeuft",
       "kurz": "Backend ist weit; der lange Testlauf soll es mit starken Ergebnissen und Laufzeiten bestätigen. Die Oberfläche wird aus dem Builder übernommen.",
-      "blocker": "Vollauf 1 am PC in 9 h 16 min durch, nur der Splat fehlt; Vollauf 2 am Laptop ab 15.11. 19:00. Engstellen: Tiefe 4 h 45 min auf der GPU, dichte Wolke liest Daten ~4,5× neu. Die Oberfläche wartet auf die Builder-Mock-UI und den Viewer.",
+      "blocker": "Vollauf 1 am PC in 9 h 16 min durch, nur der Splat fehlt. Vollauf 2 am Laptop ist am 15.11. zweimal an der Speicherprüfung gescheitert: Sie plant die Ausrichtung nach dem eingebauten statt nach dem freien Speicher und lehnt ab, statt den Bedarf zu senken. Der Fix wird vor dem Lauf gebaut, Start danach gegen 21:30. Die Oberfläche wartet auf die Builder-Mock-UI und den Viewer.",
       "haengtAn": [
         "builder-mockui",
         "viewer"
@@ -521,13 +739,13 @@
         {
           "gruppe": "Backend",
           "titel": "Vollauf 1 am PC: 8 von 9 Schritten durch (Splat am Speicherdeckel abgebrochen, kommt im Laptop-Lauf)",
-          "stand": "fertig",
-          "notiz": "Start oder Absage gegen 21:50"
+          "stand": "fertig"
         },
         {
           "gruppe": "Backend",
-          "titel": "Vollauf 2 am Laptop (So 19:00 bis Mo früh)",
-          "stand": "offen"
+          "titel": "Vollauf 2 am Laptop",
+          "stand": "laeuft",
+          "notiz": "Wartet auf den Fix der Speicherprüfung, dann 8–10 h"
         },
         {
           "gruppe": "Backend",
