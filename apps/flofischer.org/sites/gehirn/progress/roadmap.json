@@ -1,5 +1,5 @@
 {
-  "standVom": "2026-11-15T04:50",
+  "standVom": "2026-11-15T08:30",
   "bereiche": [
     {
       "id": "fernwork",
@@ -493,7 +493,7 @@
       "titel": "PhotoLab",
       "stand": "laeuft",
       "kurz": "Backend ist weit; der lange Testlauf soll es mit starken Ergebnissen und Laufzeiten bestätigen. Die Oberfläche wird aus dem Builder übernommen.",
-      "blocker": "Vollauf startet heute Nacht. Die Oberfläche wartet auf die Builder-Mock-UI und den Viewer.",
+      "blocker": "Vollauf 1 am PC in 9 h 16 min durch, nur der Splat fehlt; Vollauf 2 am Laptop ab 15.11. 19:00. Engstellen: Tiefe 4 h 45 min auf der GPU, dichte Wolke liest Daten ~4,5× neu. Die Oberfläche wartet auf die Builder-Mock-UI und den Viewer.",
       "haengtAn": [
         "builder-mockui",
         "viewer"
@@ -506,18 +506,18 @@
         },
         {
           "gruppe": "Backend",
-          "titel": "Speicher-Zulassung je Rechner",
-          "stand": "laeuft"
+          "titel": "Speicher-Zulassung nach freiem Speicher (schwere Teile nie überbucht)",
+          "stand": "fertig"
         },
         {
           "gruppe": "Backend",
-          "titel": "Vollauf 1 (Sa 22:00 bis So 10:00)",
-          "stand": "offen",
+          "titel": "Vollauf 1 am PC: 8 von 9 Schritten durch (Splat am Speicherdeckel abgebrochen, kommt im Laptop-Lauf)",
+          "stand": "fertig",
           "notiz": "Start oder Absage gegen 21:50"
         },
         {
           "gruppe": "Backend",
-          "titel": "Vollauf 2 (So 19:00 bis Mo 10:00)",
+          "titel": "Vollauf 2 am Laptop (So 19:00 bis Mo früh)",
           "stand": "offen"
         },
         {
