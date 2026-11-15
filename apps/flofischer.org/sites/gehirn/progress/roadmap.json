@@ -1,5 +1,5 @@
 {
-  "standVom": "2026-11-15T08:30",
+  "standVom": "2026-11-15T18:50",
   "bereiche": [
     {
       "id": "fernwork",
@@ -8,6 +8,10 @@
     {
       "id": "himmelcad",
       "titel": "HimmelCAD"
+    },
+    {
+      "id": "spaeter",
+      "titel": "Später – erst wenn das Jetzige fertig und veröffentlicht ist"
     }
   ],
   "knoten": [
@@ -17,7 +21,7 @@
       "titel": "Fernwork PDF-Editor",
       "stand": "laeuft",
       "kurz": "Live-Bearbeitung so gut wie PDF-XChange: 19 Aufgaben in 4 Sprints, etwa 165 Agent-Stunden, 7–9 Kalendertage.",
-      "blocker": "Sprint 1: XC-1, XC-2, XC-3, XC-6 auf main. XC-4/5 (Zeitmessungen gegen PDF-XChange) ab 15.11. mittags. Für Sprint 4 braucht es Florians Entscheidungen zur Properties-Leiste und zu Tastenkürzeln.",
+      "blocker": "Sprint 1 ist fertig. Sprint 2 (dichte Pläne flüssig) läuft bis etwa Mi 18.11.; die nächste Runde von XC-7 repariert zuerst einen Fehler der letzten Runde (Klick auf eine gespeicherte Messung öffnet ihre Werkzeugleiste nicht). Für Sprint 4 braucht es Florians Entscheidungen zur Properties-Leiste und zu Tastenkürzeln.",
       "haengtAn": [],
       "teilziele": [
         {
@@ -36,67 +40,61 @@
           "stand": "fertig"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer (läuft)",
+          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-1 Fett nach Rückgängig, eingebettete Schriften mit neuen Zeichen",
           "stand": "fertig"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer (läuft)",
+          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-2 Absturz-Wiederherstellung, Drehen von Pfaden, kurz verschwindendes Rechteck",
           "stand": "fertig"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer (läuft)",
+          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-3 Wackelnde Tests stabilisieren",
           "stand": "fertig"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer (läuft)",
+          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-4 Seiten löschen und Rückgängig so schnell wie PDF-XChange",
-          "stand": "offen",
-          "notiz": "Heute 6–8 s statt 0,3 s"
+          "stand": "fertig",
+          "notiz": "Seite löschen ist nach 0,7 s statt 6,6 s bedienbar"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer (läuft)",
+          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-5 Zoom 400 % in 0,1 s scharf",
-          "stand": "offen",
-          "notiz": "Heute 0,32 s"
+          "stand": "laeuft",
+          "notiz": "Dichte Testseite heute 0,15–0,2 s, Ziel 0,1 s (PDF-XChange 0,08 s); der Rest hängt am Umbau in XC-7"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer (läuft)",
+          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "XC-6 Erster Klick auf Text ohne Wartezeit",
           "stand": "fertig",
           "notiz": "Heute bis 4,6 s auf großen Plänen"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer (läuft)",
+          "gruppe": "Sprint 1 · tägliche Störer",
           "titel": "Zwei kleine Bedienfehler, Safari-Prüfung des PNG-Downloads",
           "stand": "offen"
         },
         {
-          "gruppe": "Sprint 1 · tägliche Störer (läuft)",
-          "titel": "Welche XC-Punkte gerade in Arbeit sind",
-          "stand": "unklar",
-          "notiz": "Kommt mit der nächsten Meldung des Fernwork-Threads"
-        },
-        {
-          "gruppe": "Sprint 2 · dichte Pläne flüssig",
+          "gruppe": "Sprint 2 · dichte Pläne flüssig (läuft)",
           "titel": "XC-7 Auswahl und Treffer direkt aus PDFium, Strg+A unter 1 s",
-          "stand": "offen",
-          "notiz": "Heute über 60 s; größter Unsicherheitsposten"
+          "stand": "laeuft",
+          "notiz": "Objekte liegen als Daten vor; Hover auf dichtem Plan 30 statt 49 ms"
         },
         {
-          "gruppe": "Sprint 2 · dichte Pläne flüssig",
+          "gruppe": "Sprint 2 · dichte Pläne flüssig (läuft)",
           "titel": "XC-8 Speichern auf großen Plänen schnell, Löschen unter 0,3 s",
           "stand": "offen"
         },
         {
-          "gruppe": "Sprint 2 · dichte Pläne flüssig",
+          "gruppe": "Sprint 2 · dichte Pläne flüssig (läuft)",
           "titel": "XC-9 Messungen, Stempel, Textboxen über PDFium",
           "stand": "offen"
         },
         {
-          "gruppe": "Sprint 2 · dichte Pläne flüssig",
+          "gruppe": "Sprint 2 · dichte Pläne flüssig (läuft)",
           "titel": "XC-10 Formularfelder und Kommentare über PDFium",
           "stand": "offen"
         },
@@ -184,9 +182,8 @@
       "id": "ui-library",
       "bereich": "fernwork",
       "titel": "berg:work UI-Library",
-      "stand": "laeuft",
-      "kurz": "Der Schliff-Look von Projects wird zur gemeinsamen UI-Core für alle berg:work-Apps. Etwa 8–11 Tage Agentenzeit.",
-      "blocker": "Etappe a (Wortmarke und Werkzeichen) ist abgenommen und auf main. Etappe b startet nach dem Token-Reset am 15.11. Florian nimmt nach d ab und gibt vor e das Image-Mockup frei.",
+      "stand": "fertig",
+      "kurz": "Der Schliff-Look von Projects ist die gemeinsame UI-Core für alle berg:work-Apps; Projects, PDF und Image nutzen sie.",
       "haengtAn": [],
       "teilziele": [
         {
@@ -212,23 +209,23 @@
         {
           "gruppe": "Etappen",
           "titel": "b) Schliff als gemeinsames Paket, Projects bleibt pixelgleich (2–3 Tage)",
-          "stand": "offen"
+          "stand": "fertig"
         },
         {
           "gruppe": "Etappen",
           "titel": "c) bisherige berg:work-UI auf die neue Core (1–2 Tage)",
-          "stand": "offen"
+          "stand": "fertig"
         },
         {
           "gruppe": "Etappen",
           "titel": "d) berg:work-PDF-Look nach Mockup (2–3 Tage)",
-          "stand": "offen",
+          "stand": "fertig",
           "florian": "Abnahme danach"
         },
         {
           "gruppe": "Etappen",
           "titel": "e) berg:work Image auf die Core (2 Tage)",
-          "stand": "offen",
+          "stand": "fertig",
           "florian": "Image-Mockup vorher"
         }
       ]
@@ -237,9 +234,9 @@
       "id": "desktop-apps",
       "bereich": "fernwork",
       "titel": "berg:work PDF & Image als Desktop-Apps",
-      "stand": "offen",
+      "stand": "laeuft",
       "kurz": "PDF und Image werden echte Desktop-Apps neben Projects, auf der neuen UI-Core.",
-      "blocker": "Wartet auf die UI-Library.",
+      "blocker": "PDF: Vorbereitung fertig, Bau und Update-Test ab Mo 16.11. Image: Look ist fertig, Desktop-Bau danach.",
       "haengtAn": [
         "ui-library"
       ],
@@ -250,33 +247,45 @@
         },
         {
           "titel": "berg:work PDF auf der UI-Core",
-          "stand": "offen"
+          "stand": "laeuft",
+          "notiz": "Look auf main, Desktop-Bau ab Mo 16.11."
         },
         {
           "titel": "berg:work Image auf der UI-Core",
-          "stand": "offen"
+          "stand": "laeuft",
+          "notiz": "Look auf main seit 15.11."
         }
-      ]
+      ],
+      "florian": "Startversion für PDF (Vorschlag 0.2.0), eigener Signaturschlüssel, Schlüssel erzeugen und Zugang zum Download-Speicher"
     },
     {
       "id": "webseiten",
       "bereich": "fernwork",
       "titel": "Webseiten",
-      "stand": "offen",
-      "kurz": "bergwork.app wird neu aufgebaut, danach gehirn.flofischer.org aktualisiert.",
-      "blocker": "Neue bergwork.app ist vorbereitet, aber noch nicht live; die volle Umsetzung kommt nach UI-Library und Apps, mit echten Aufnahmen.",
+      "stand": "laeuft",
+      "kurz": "bergwork.app wird neu aufgebaut, danach gehirn.flofischer.org aktualisiert. Vorgezogen: die neue Seite soll Mo 16.11. früh live sein.",
+      "blocker": "Livegang in der Nacht auf Mo 16.11., zusammen mit Projects 0.1.3 (neues Icon, neue Wortmarke) als Download.",
       "haengtAn": [
         "desktop-apps"
       ],
       "teilziele": [
         {
-          "titel": "bergwork.app: neue Seite vorbereitet (noch nicht live)",
-          "stand": "fertig",
-          "florian": "Durchsicht der deutschen Texte"
+          "titel": "bergwork.app: neue Seite gebaut und von Florian freigegeben",
+          "stand": "fertig"
+        },
+        {
+          "titel": "bergwork.app: neue Seite live",
+          "stand": "laeuft",
+          "notiz": "Ziel Mo 16.11. früh"
+        },
+        {
+          "titel": "Projects 0.1.3 als Download (neues Icon, neue Wortmarke)",
+          "stand": "laeuft",
+          "notiz": "Bau und Prüfung in der Nacht auf Mo 16.11."
         },
         {
           "titel": "bergwork.app: Bilder und Videos von PDF und Image",
-          "stand": "offen"
+          "stand": "laeuft"
         },
         {
           "titel": "gehirn.flofischer.org aktualisieren",
@@ -606,6 +615,75 @@
         "assembler"
       ],
       "teilziele": []
+    },
+    {
+      "id": "bergwork-capture",
+      "bereich": "spaeter",
+      "titel": "berg:work Capture",
+      "stand": "offen",
+      "kurz": "Ein Greenshot-Klon für Windows, Linux und Mac in berg:work-Optik, Funktionsweise sonst praktisch gleich.",
+      "blocker": "Ganz niedrige Priorität: kommt erst, wenn die jetzigen Sachen voll fertig und veröffentlicht sind.",
+      "haengtAn": [],
+      "teilziele": [
+        {
+          "titel": "Bildschirmaufnahme wie Greenshot (Bereich, Fenster, ganzer Schirm) auf Windows, Linux, Mac",
+          "stand": "offen"
+        },
+        {
+          "titel": "Eingebauter Editor: Fernwork Image (Standard, nicht Pro) im berg:work-Look statt des Greenshot-Editors",
+          "stand": "offen"
+        },
+        {
+          "titel": "Zusätzlich: Bildschirmvideos",
+          "stand": "offen"
+        }
+      ]
+    },
+    {
+      "id": "bergwork-text",
+      "bereich": "spaeter",
+      "titel": "berg:work Text",
+      "stand": "offen",
+      "kurz": "Ein Notepad++-Klon mit den wichtigsten Funktionen; Aufbau der Oberfläche wie Notepad++, im berg:work-Look.",
+      "blocker": "Ganz niedrige Priorität: kommt erst, wenn die jetzigen Sachen voll fertig und veröffentlicht sind.",
+      "haengtAn": [],
+      "teilziele": [
+        {
+          "titel": "Oberfläche im Aufbau wie Notepad++",
+          "stand": "offen"
+        },
+        {
+          "titel": "Vertikale Textauswahl (Spaltenmodus)",
+          "stand": "offen"
+        },
+        {
+          "titel": "Import von fast allen Formaten",
+          "stand": "offen"
+        },
+        {
+          "titel": "Umfang festlegen: welche tieferen Notepad++-Funktionen gebraucht werden und welche nicht",
+          "stand": "offen"
+        }
+      ]
+    },
+    {
+      "id": "fernbot",
+      "bereich": "spaeter",
+      "titel": "Fernbot",
+      "stand": "offen",
+      "kurz": "Ein Grokbot-Klon, der so viel wie möglich auf T3 Code aufbaut und übernimmt, aber den Grokbot-Aufbau hat: Agents statt Threads.",
+      "blocker": "Ganz niedrige Priorität: kommt erst, wenn die jetzigen Sachen voll fertig und veröffentlicht sind.",
+      "haengtAn": [],
+      "teilziele": [
+        {
+          "titel": "Aufbau wie Grokbot: Agents statt Threads, auf T3 Code als Basis",
+          "stand": "offen"
+        },
+        {
+          "titel": "Mobil: Threads gleichen sich auch im Hintergrund ab, kein Antippen und Warten je Thread",
+          "stand": "offen"
+        }
+      ]
     }
   ]
 }
