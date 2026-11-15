@@ -2,6 +2,8 @@ import { mockupName } from "./mockups.js";
 import { fetchGameModel } from "./game-models.js";
 import { GAME_ASSET_VERSION } from "./game-asset-version.js";
 
+export const PROJECTS_PREVIEW = "https://bergwork.app/demo/projects/";
+
 /**
  * Host-based static routing for flofischer.org
  *
@@ -115,6 +117,19 @@ export default {
     if (prefixMatch) {
       site = prefixMatch[1];
       pathname = prefixMatch[2] || "/";
+    }
+
+    // The berg:work Projects web preview moved to bergwork.app (built there from the Fernwork monorepo). The old copy
+    // stays in sites/gehirn/projects/ but is no longer served: every /projects address leads to the new one, the query
+    // kept (?seed=neu); browsers keep the #route across the redirect.
+    if (site === "gehirn" && /^\/projects(?:\/|$)/.test(pathname)) {
+      const headers = new Headers({
+        Location: `${PROJECTS_PREVIEW}${url.search}`,
+        "Cache-Control": "no-cache",
+        "X-Robots-Tag": "noindex, nofollow",
+        "Referrer-Policy": "no-referrer",
+      });
+      return new Response(null, { status: 302, headers });
     }
 
     // The former separate diorama URL is now only a compatibility alias: the

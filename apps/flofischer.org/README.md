@@ -71,7 +71,7 @@ liegen im selben Cloudflare-Konto.
 In dieser Reihenfolge (Index 01–04 in `sites/gehirn/index.html`):
 
 - berg:work (bergwork.app) – Hauptinhalt ist berg:work Projects (Desktop-App für Büros mit Microsoft 365, Testversion,
-  Download über bergwork.app/download/, Web-Vorschau unter `/projects/`); PDF und Image knapp als weitere Teile der
+  Download über bergwork.app/download/, Web-Vorschau unter https://bergwork.app/demo/projects/; `/projects/` leitet dorthin weiter); PDF und Image knapp als weitere Teile der
   Familie. Clips und Bilder je Sprache in `sites/shared/gehirn/assets/projects/` (`<name>-en|de`), `site.js` setzt
   Quelle, Standbild, `aria-label` und Alt-Text passend zur Sprache. Der Hero-Clip ist eine eigene Aufnahme der
   Web-Vorschau mit Beispieldaten (1600 × 1000, WebM + MP4).

@@ -1,12 +1,12 @@
 /**
  * Unlisted test mockups on gehirn.flofischer.org/<name>/ (files in sites/gehirn/<name>/).
- * Never linked from the site (exception: /projects/, the berg:work Projects web preview, linked from section 01),
+ * Never linked from the site,
  * never in sitemap.xml or robots.txt; served with X-Robots-Tag noindex.
  * When adding one, also add it to MOCKUPS in sites/shared/pwa-worker.js (never cached by the PWA).
  * Agent skill: mockup-hosten.
  */
 export const MOCKUPS = new Set([
-  "projects", // berg:work Projects web preview (demo data only); the one entry linked from the berg:work section, still noindex
+  "projects", // former berg:work Projects web preview: now redirects to https://bergwork.app/demo/projects/ (worker/index.js)
   "fernlings", // Fernworld starter Fernlings as spinnable 3D models
   "fernwork", // Fernwork One redesign mockups
   "builder", // HimmelCAD Builder UI redesign (builder-ui-lab)
