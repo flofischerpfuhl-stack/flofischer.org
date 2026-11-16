@@ -1,5 +1,5 @@
 {
- "standVom": "2026-11-16T04:54",
+ "standVom": "2026-11-16T05:25",
  "bereiche": [
   {
    "id": "fernwork",
@@ -20,8 +20,8 @@
    "bereich": "fernwork",
    "titel": "Umbau: eine Identität, ein Zustand",
    "stand": "laeuft",
-   "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist. Geplant sind sechs Sprints in 15 Stufen, 8–12 Kalendertage. In der ersten Nacht (15./16.11.) sind drei Stufen ausgeliefert worden, eine vierte ist gebaut.",
-   "blocker": "Stand Mo 16.11. 04:30: Zwei gemeinsam verschobene blaue Zeilen bleiben jetzt blau. Eine Sitzung mit Florians Abläufen hat Fehler gefunden, die schon vorher da waren: Klickt man zwei Stilknöpfe direkt nacheinander, geht die zweite Änderung verloren (mit zwei Sekunden Pause nicht; wird in U2 behoben). Nach Fett und Unterstreichen scheitert der Wechsel der Schrift mit einer Fehlermeldung (eigener Fix nach U2). Weiter offen: Die Leiste verschwindet beim Tippen und Doppelklick zeitweise (U3), der Auswahlrahmen wächst beim Unterstreichen (U4). Die dritte Stufe von U1 wird größer als geplant: 17–23 statt 8–12 Agentenstunden. Bis Do 19.11. reicht das Budget für U0 bis U2.",
+   "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist. Geplant sind sechs Sprints in 15 Stufen, 8–12 Kalendertage. In der ersten Nacht (15./16.11.) sind vier Stufen ausgeliefert worden, mit 5,2 statt der geplanten 25–38 Agentenstunden.",
+   "blocker": "Stand Mo 16.11. 05:25: Zwei gemeinsam verschobene blaue Zeilen bleiben jetzt blau. Eine Sitzung mit Florians Abläufen hat Fehler gefunden, die schon vorher da waren: Klickt man zwei Stilknöpfe direkt nacheinander, geht die zweite Änderung verloren (mit zwei Sekunden Pause nicht; wird in U2 behoben). Nach Fett und Unterstreichen scheitert der Wechsel der Schrift mit einer Fehlermeldung (eigener Fix nach U2). Weiter offen: Die Leiste verschwindet beim Tippen und Doppelklick zeitweise (U3), der Auswahlrahmen wächst beim Unterstreichen (U4). Die dritte Stufe von U1 wird größer als geplant: 17–23 statt 8–12 Agentenstunden. Bis Do 19.11. reicht das Budget für U0 bis U2.",
    "haengtAn": [],
    "sprints": [
     {
@@ -59,7 +59,7 @@
       2,
       3
      ],
-     "notiz": "Vier Stufen, 26–39 Agentenstunden geplant. Stufe 1 (zusätzliche Lesedaten) ausgeliefert 16.11. 00:05: 0,5 statt 6–9 Agentenstunden; das Öffnen einer Planseite mit 43 518 Objekten wird 0,8 % langsamer (2 812 → 2 834 ms). Stufe 2 (anklickbare Texte kommen aus der Liste der PDF-Bibliothek, hinter einem Schalter, der aus ist) gebaut 02:25: 2,5 statt 8–12 Agentenstunden, Auslieferung nach einer Prüfung von sechs Tests. Stufe 3 (Leiste, Seitenpanel und Ebenen umstellen, Schalter an) wächst auf 17–23 Agentenstunden, geplant waren 8–12: Dort hängen mehr Stellen am alten Schlüssel als gezählt, und Seiten mit über 50 000 Objekten brauchen einen eigenen Textabruf.",
+     "notiz": "Vier Stufen, 26–39 Agentenstunden geplant. Stufe 1 (zusätzliche Lesedaten) ausgeliefert 16.11. 00:05: 0,5 statt 6–9 Agentenstunden; das Öffnen einer Planseite mit 43 518 Objekten wird 0,8 % langsamer (2 812 → 2 834 ms). Stufe 2 (anklickbare Texte kommen aus der Liste der PDF-Bibliothek, hinter einem Schalter, der aus ist) ausgeliefert 16.11. 05:23: 2,5 statt 8–12 Agentenstunden, am Produkt ändert sich dadurch noch nichts. Stufe 3 läuft seit 05:23 in zwei Teilen und wächst auf 17–23 Agentenstunden, geplant waren 8–12: Leiste, Seitenpanel und Ebenen müssen dieselbe Textliste lesen, bevor der Schalter angeht, und Seiten mit über 50 000 Objekten brauchen einen eigenen Textabruf.",
      "start": "2026-11-15T22:27"
     },
     {
@@ -105,13 +105,9 @@
     },
     {
      "id": "absatz",
-     "titel": "Danach · Absätze aus der Struktur der PDF",
+     "titel": "U6 · Absätze aus der Struktur der PDF",
      "stand": "offen",
-     "geplantTage": [
-      2,
-      3
-     ],
-     "notiz": "Zurückgestellt bis nach dem Umbau, grob 25–40 Agentenstunden, Schätzung noch ungemessen. Entschieden am 16.11.: Absätze werden nicht mehr aus der Lage der Zeilen geraten. Liefert die PDF ihre Struktur mit (Word, LibreOffice), wird sie so gut wie möglich genutzt: Absatz, Überschrift, Liste und Tabellenzelle sind dann je ein Objekt. Umwandeln in einen Textrahmen mit Umbruch nur, wenn dabei kein Pixel wandert. PDFs ohne Struktur behalten Zeilen."
+     "notiz": "Zurückgestellt bis nach dem Umbau, noch nicht in Stunden geplant. Entschieden am 16.11.: Absätze werden nicht aus der Lage der Zeilen geraten. Liefert die PDF ihre Struktur mit (Word, LibreOffice), wird der Absatz als Absatz bearbeitet, mit Umbruch wie ein Textfeld in PowerPoint; die vorhandenen Zeilen werden dabei übernommen, nicht neu gesetzt. Ohne Struktur bleiben es Zeilen. Grundsatz: Reicht die Information aus der PDF nicht, wird eine Stufe tiefer bearbeitet statt geraten."
     }
    ],
    "teilziele": [
