@@ -1,5 +1,5 @@
 {
- "standVom": "2026-11-16T10:35",
+ "standVom": "2026-11-16T13:35",
  "bereiche": [
   {
    "id": "fernwork",
@@ -21,7 +21,7 @@
    "titel": "Umbau: eine Identität, ein Zustand",
    "stand": "laeuft",
    "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist. Geplant sind sechs Sprints in 15 Stufen, 8–12 Kalendertage. In der ersten Nacht (15./16.11.) und am Morgen danach sind fünf Stufen ausgeliefert worden, mit 6,8 statt der geplanten 32–48 Agentenstunden.",
-   "blocker": "Stand Mo 16.11. 10:35: Der erste Teil der dritten U1-Stufe ist seit 07:52 ausgeliefert (1,6 statt 7–10 Agentenstunden). Zehn Messpaare alt gegen neu auf einem großen Plan zeigen keine Verlangsamung. Die erste Stufe von U2 (Leiste und Seitenpanel lesen aus einer gemeinsamen Quelle) ist in 2,3 statt 6–9 Agentenstunden gebaut, aber noch nicht ausgeliefert: Auf sehr großen Seiten konnte eine Aktion endlos warten, der Nachtrag läuft. Sichtbare Wirkung: Unterstreichen direkt nach dem Öffnen einer dichten Seite klappt nach etwa einer Sekunde, statt mit einer Fehlermeldung zu enden; unbekannte Werte bleiben leer statt 12 pt und Fast-Schwarz. Der Rest von U1 (geschätzt 12–18 Agentenstunden) läuft seit 07:52; offen ist dort ein Fall, in dem ein Löschen auf einer dichten Seite nicht im Verlauf ankommt. Aus Florians Sitzung weiter offen: Zwei Stilknöpfe direkt nacheinander verlieren die zweite Änderung (U2), der Schriftwechsel nach Fett und Unterstreichen scheitert (eigener Fix nach U2), die Leiste verschwindet beim Tippen zeitweise (U3), der Auswahlrahmen wächst beim Unterstreichen (U4). Neu eingeplant vor der Veröffentlichung: Textfüllung aus Muster oder Verlauf erkennen. Bis Do 19.11. reicht das Budget für U0 bis U2.",
+   "blocker": "Stand Mo 16.11. 13:35: Der erste Teil der dritten U1-Stufe ist seit 07:52 ausgeliefert (1,6 statt 7–10 Agentenstunden). Zehn Messpaare alt gegen neu auf einem großen Plan zeigen keine Verlangsamung. Die erste Stufe von U2 (Leiste und Seitenpanel lesen aus einer gemeinsamen Quelle) ist in 2,3 statt 6–9 Agentenstunden gebaut, aber noch nicht ausgeliefert: Auf sehr großen Seiten konnte eine Aktion endlos warten; der Nachtrag ist gebaut (Hinweiszeile nach 0,2 s statt 15 s ohne Reaktion), die Abschlussprüfung ist grün bis auf einen Zeitwächter (Fett: 152 ms bei Budget 150), der gerade nachgemessen wird. Sichtbare Wirkung: Unterstreichen direkt nach dem Öffnen einer dichten Seite klappt nach etwa einer Sekunde, statt mit einer Fehlermeldung zu enden; unbekannte Werte bleiben leer statt 12 pt und Fast-Schwarz. Der Rest von U1 (geschätzt 12–18 Agentenstunden) läuft seit 07:52; offen ist dort ein Fall, in dem ein Löschen auf einer dichten Seite nicht im Verlauf ankommt. Aus Florians Sitzung weiter offen: Zwei Stilknöpfe direkt nacheinander verlieren die zweite Änderung (U2), der Schriftwechsel nach Fett und Unterstreichen scheitert (eigener Fix nach U2), die Leiste verschwindet beim Tippen zeitweise (U3), der Auswahlrahmen wächst beim Unterstreichen (U4). Neu eingeplant vor der Veröffentlichung: Textfüllung aus Muster oder Verlauf erkennen. Bis Do 19.11. reicht das Budget für U0 bis U2.",
    "haengtAn": [],
    "sprints": [
     {
@@ -683,7 +683,7 @@
    "titel": "Viewer",
    "stand": "laeuft",
    "kurz": "Ziel ist der beste Viewer überhaupt. Bei Punktwolken ist das erste Ziel erreicht.",
-   "blocker": "Import/Export-Modul ist noch kaum gebaut: Von den öffentlichen Testfällen lädt bisher die fremde Punktwolke; Splats, DGM, CAD und 3D Tiles kommen, sobald dort Zeit hineingeht. Textur-Laufzeitkompression: Einbau-Entscheidung offen.",
+   "blocker": "Stand Mo 16.11. 13:35, gemessen auf einem Laptop mit 4-GB-Grafikkarte am Projekt aus dem PhotoLab-Lauf: Dichte Wolke beim Umkreisen 23 → 32 Bilder/s, importiertes Geländemodell 12 → 35 Bilder/s (beides ausgeliefert). Meshes und Orthomosaik laufen einzeln mit 59 Bildern/s. Schwachstelle: Mit allen Produkten zugleich sichtbar sind es nur 9,5 Bilder/s, weil PhotoLabs Höhenmodelle in voller Auflösung gezeichnet werden (eins allein 15 Bilder/s). Ein Dreiecksbudget dagegen ist gebaut und wird gemessen. Die Splat-Verbesserung wirkt am Bildschirm noch nicht (fremder Splat 8–10 Bilder/s); Nacharbeit offen. Import/Export-Modul ist erst teilweise gebaut. Textur-Laufzeitkompression: Einbau-Entscheidung offen.",
    "haengtAn": [],
    "teilziele": [
     {
@@ -718,13 +718,13 @@
     },
     {
      "titel": "Gaussian Splats laden",
-     "stand": "offen",
-     "notiz": "Import/Export-Modul noch nicht ausgebaut"
+     "stand": "laeuft",
+     "notiz": "Splats laden und zeigen; in der Fahrt noch zu langsam (fremder Splat) oder zu grob (PhotoLab-Splat)"
     },
     {
      "titel": "DGM- und CAD-Import laden",
-     "stand": "offen",
-     "notiz": "Import/Export-Modul noch nicht ausgebaut"
+     "stand": "laeuft",
+     "notiz": "Geländemodell-Import lädt und läuft beim Umkreisen mit 35 statt 12 Bildern/s; CAD offen"
     },
     {
      "titel": "Niveau Trimble RealWorks (Punktwolken) und ArcGIS (Meshes)",
@@ -794,7 +794,7 @@
      "gruppe": "Backend",
      "titel": "Ergebnisse im Viewer messen",
      "stand": "laeuft",
-     "notiz": "Das Projekt aus dem Laptop-Lauf lädt im Viewer mit allen Produkten; die Messung läuft am 16.11."
+     "notiz": "Gemessen am 16.11.: Wolke 32, Meshes und Orthomosaik 59 Bilder/s beim Umkreisen; Höhenmodelle 15–23, alles zugleich 9,5. Splat in der Fahrt nur als grobe Stichprobe."
     },
     {
      "gruppe": "Backend",
