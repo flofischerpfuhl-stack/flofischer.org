@@ -1,5 +1,5 @@
 {
- "standVom": "2026-11-16T04:35",
+ "standVom": "2026-11-16T04:49",
  "bereiche": [
   {
    "id": "fernwork",
@@ -102,6 +102,16 @@
       3
      ],
      "notiz": "Drei Stufen, 20–30 Agentenstunden."
+    },
+    {
+     "id": "absatz",
+     "titel": "Danach · Absätze als ein Objekt",
+     "stand": "offen",
+     "geplantTage": [
+      2,
+      3
+     ],
+     "notiz": "Zurückgestellt bis nach dem Umbau, grob 25–40 Agentenstunden, Schätzung noch ungemessen. Vorgaben: Absätze zuerst aus der Struktur der PDF lesen, wo der Erzeuger sie mitliefert; Umwandeln in einen Textrahmen nur, wenn dabei kein Pixel wandert, bei jedem Erzeuger."
     }
    ],
    "teilziele": [
@@ -204,6 +214,17 @@
      "sprint": "aufteilen",
      "titel": "Auswahl, Ziehen und Übernehmen als eigene Bausteine statt einer Datei mit 54.000 Zeilen",
      "stand": "offen"
+    },
+    {
+     "sprint": "absatz",
+     "titel": "Absatz aus der PDF-Struktur als ein Objekt wählen, ziehen und gestalten",
+     "stand": "offen"
+    },
+    {
+     "sprint": "absatz",
+     "titel": "Umwandeln in einen Textrahmen mit Umbruch ist pixelgleich",
+     "stand": "offen",
+     "notiz": "Heute nur auf Wunsch je Absatz; Ausrichtung wird nicht übernommen, Blocksatz verliert seine Wortabstände"
     }
    ]
   },
