@@ -1,950 +1,951 @@
 {
-  "standVom": "2026-11-16T07:55",
-  "bereiche": [
+ "standVom": "2026-11-16T10:35",
+ "bereiche": [
+  {
+   "id": "fernwork",
+   "titel": "Fernwork & berg:work"
+  },
+  {
+   "id": "himmelcad",
+   "titel": "HimmelCAD"
+  },
+  {
+   "id": "spaeter",
+   "titel": "Später – erst wenn das Jetzige fertig und veröffentlicht ist"
+  }
+ ],
+ "knoten": [
+  {
+   "id": "fernwork-umbau",
+   "bereich": "fernwork",
+   "titel": "Umbau: eine Identität, ein Zustand",
+   "stand": "laeuft",
+   "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist. Geplant sind sechs Sprints in 15 Stufen, 8–12 Kalendertage. In der ersten Nacht (15./16.11.) und am Morgen danach sind fünf Stufen ausgeliefert worden, mit 6,8 statt der geplanten 32–48 Agentenstunden.",
+   "blocker": "Stand Mo 16.11. 10:35: Der erste Teil der dritten U1-Stufe ist seit 07:52 ausgeliefert (1,6 statt 7–10 Agentenstunden). Zehn Messpaare alt gegen neu auf einem großen Plan zeigen keine Verlangsamung. Die erste Stufe von U2 (Leiste und Seitenpanel lesen aus einer gemeinsamen Quelle) ist in 2,3 statt 6–9 Agentenstunden gebaut, aber noch nicht ausgeliefert: Auf sehr großen Seiten konnte eine Aktion endlos warten, der Nachtrag läuft. Sichtbare Wirkung: Unterstreichen direkt nach dem Öffnen einer dichten Seite klappt nach etwa einer Sekunde, statt mit einer Fehlermeldung zu enden; unbekannte Werte bleiben leer statt 12 pt und Fast-Schwarz. Der Rest von U1 (geschätzt 12–18 Agentenstunden) läuft seit 07:52; offen ist dort ein Fall, in dem ein Löschen auf einer dichten Seite nicht im Verlauf ankommt. Aus Florians Sitzung weiter offen: Zwei Stilknöpfe direkt nacheinander verlieren die zweite Änderung (U2), der Schriftwechsel nach Fett und Unterstreichen scheitert (eigener Fix nach U2), die Leiste verschwindet beim Tippen zeitweise (U3), der Auswahlrahmen wächst beim Unterstreichen (U4). Neu eingeplant vor der Veröffentlichung: Textfüllung aus Muster oder Verlauf erkennen. Bis Do 19.11. reicht das Budget für U0 bis U2.",
+   "haengtAn": [],
+   "sprints": [
     {
-      "id": "fernwork",
-      "titel": "Fernwork & berg:work"
+     "id": "vorab",
+     "titel": "Vorab · billige Fixes für Florians Befunde",
+     "stand": "fertig",
+     "geplantTage": 0.1,
+     "start": "2026-11-15T19:10",
+     "notiz": "Sieben von neun Befunden behoben und ausgeliefert. Die zwei übrigen brauchen den Umbau und sind als Abnahme-Tests hinterlegt.",
+     "ende": "2026-11-15T21:28"
     },
     {
-      "id": "himmelcad",
-      "titel": "HimmelCAD"
+     "id": "plan",
+     "titel": "Sprintplan für den Umbau",
+     "stand": "fertig",
+     "geplantTage": 0.27,
+     "start": "2026-11-15T22:05",
+     "ende": "2026-11-15T22:24",
+     "notiz": "Frist war 04:30. Sechs Sprints in 15 Stufen, zusammen 108–163 Agentenstunden und 8–12 Kalendertage. Jede Stufe wird einzeln ausgeliefert."
     },
     {
-      "id": "spaeter",
-      "titel": "Später – erst wenn das Jetzige fertig und veröffentlicht ist"
+     "id": "abnahme",
+     "titel": "U0 · Florians Alltagsabläufe als Tests",
+     "stand": "fertig",
+     "geplantTage": 0.5,
+     "notiz": "19 Tests mit ausgelieferten Einstellungen und echter Maus, ausgeliefert 23:49. 9 sind grün, 9 zeigen Fehler, die spätere Sprints beheben, 1 ist eine reine Messung. Gebraucht 1,3 Agentenstunden, geplant waren 6–9.",
+     "start": "2026-11-15T22:27",
+     "ende": "2026-11-15T23:45"
+    },
+    {
+     "id": "identitaet",
+     "titel": "U1 · Der angeklickte Text ist der geänderte Text",
+     "stand": "laeuft",
+     "geplantTage": [
+      2,
+      3
+     ],
+     "notiz": "Vier Stufen, 26–39 Agentenstunden geplant. Stufe 1 (zusätzliche Lesedaten) ausgeliefert 16.11. 00:05: 0,5 statt 6–9 Agentenstunden; das Öffnen einer Planseite mit 43 518 Objekten wird 0,8 % langsamer (2 812 → 2 834 ms). Stufe 2 (anklickbare Texte kommen aus der Liste der PDF-Bibliothek, hinter einem Schalter, der aus ist) ausgeliefert 16.11. 05:23: 2,5 statt 8–12 Agentenstunden, am Produkt ändert sich dadurch noch nichts. Stufe 3 läuft seit 05:23 in zwei Teilen und wächst auf 17–23 Agentenstunden, geplant waren 8–12: Leiste, Seitenpanel und Ebenen müssen dieselbe Textliste lesen, bevor der Schalter angeht, und Seiten mit über 50 000 Objekten brauchen einen eigenen Textabruf. Teil 1 ausgeliefert 16.11. 07:52 (1,6 statt 7–10 Agentenstunden), der Schalter bleibt aus: Mit dem Schalter ist eine Zeile auf der Seite, in der Leiste, im Seitenpanel und in der Ebenenliste dasselbe Objekt; die Fußzeile „Seite 1“ steht einmal statt zweimal in der Ebenenliste, und das Farbfeld einer blauen Zeile zeigt Blau statt fast Schwarz. Teil 2 (bis zum Einschalten) läuft seit 07:52 und ist auf 12–18 Agentenstunden geschätzt.",
+     "start": "2026-11-15T22:27"
+    },
+    {
+     "id": "zustand",
+     "titel": "U2 · Leiste, Seitenpanel und Seite zeigen dasselbe",
+     "stand": "laeuft",
+     "geplantTage": [
+      2,
+      3
+     ],
+     "notiz": "Vier Stufen, 24–36 Agentenstunden geplant. Der Zustand liegt heute an 14 Stellen mit rund 75 Schreib- und 250 Lesestellen. Stufe 1 (keine erfundenen Werte mehr schreiben) ausgeliefert 16.11. 01:44: 0,9 statt 5–8 Agentenstunden. Zwei gemeinsam verschobene blaue Zeilen bleiben blau; vorher wurden sie heller, weil die Farbe aus dem Bildschirmbild gelesen wurde. Stufe 2 (eine gemeinsame Lesesicht für Leiste und Seitenpanel, dazu die Regel „die Farbe ist immer bestimmt“) läuft seit 16.11. 07:52, geplant 6–9 Agentenstunden.",
+     "start": "2026-11-15T23:51"
+    },
+    {
+     "id": "leiste",
+     "titel": "U3 · Die Leiste bleibt stehen, Doppelklick heißt immer Schreiben",
+     "stand": "offen",
+     "geplantTage": [
+      1,
+      1.5
+     ],
+     "notiz": "Zwei Stufen, 13–20 Agentenstunden."
+    },
+    {
+     "id": "stil",
+     "titel": "U4 · Unterstreichen und Fett verschieben nichts",
+     "stand": "offen",
+     "geplantTage": [
+      0.5,
+      1
+     ],
+     "notiz": "4–14 Agentenstunden geplant. Die Messung aus U0 zeigt: Die Schrift bewegt sich beim Unterstreichen nicht, nur der Auswahlrahmen wächst. Damit bleibt es bei Arbeit an der Oberfläche, voraussichtlich 4–8 Agentenstunden."
+    },
+    {
+     "id": "aufteilen",
+     "titel": "U5 · Der Textpfad zieht aus der großen Datei aus",
+     "stand": "offen",
+     "geplantTage": [
+      2,
+      3
+     ],
+     "notiz": "Drei Stufen, 20–30 Agentenstunden."
+    },
+    {
+     "id": "absatz",
+     "titel": "U6 · Absätze aus der Struktur der PDF",
+     "stand": "offen",
+     "notiz": "Zurückgestellt bis nach dem Umbau, noch nicht in Stunden geplant. Entschieden am 16.11.: Absätze werden nicht aus der Lage der Zeilen geraten. Liefert die PDF ihre Struktur mit (Word, LibreOffice), wird der Absatz als Absatz bearbeitet, mit Umbruch wie ein Textfeld in PowerPoint; die vorhandenen Zeilen werden dabei übernommen, nicht neu gesetzt. Ohne Struktur bleiben es Zeilen. Grundsatz: Reicht die Information aus der PDF nicht, wird eine Stufe tiefer bearbeitet statt geraten."
     }
-  ],
-  "knoten": [
+   ],
+   "teilziele": [
     {
-      "id": "fernwork-umbau",
-      "bereich": "fernwork",
-      "titel": "Umbau: eine Identität, ein Zustand",
-      "stand": "laeuft",
-      "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist. Geplant sind sechs Sprints in 15 Stufen, 8–12 Kalendertage. In der ersten Nacht (15./16.11.) und am Morgen danach sind fünf Stufen ausgeliefert worden, mit 6,8 statt der geplanten 32–48 Agentenstunden.",
-      "blocker": "Stand Mo 16.11. 07:55: Zwei gemeinsam verschobene blaue Zeilen bleiben jetzt blau. Eine Sitzung mit Florians Abläufen hat Fehler gefunden, die schon vorher da waren: Klickt man zwei Stilknöpfe direkt nacheinander, geht die zweite Änderung verloren (mit zwei Sekunden Pause nicht; wird in U2 behoben). Nach Fett und Unterstreichen scheitert der Wechsel der Schrift mit einer Fehlermeldung (eigener Fix nach U2). Weiter offen: Die Leiste verschwindet beim Tippen und Doppelklick zeitweise (U3), der Auswahlrahmen wächst beim Unterstreichen (U4). Die dritte Stufe von U1 wird größer als geplant; ihr erster Teil ist seit 07:52 ausgeliefert (1,6 statt 7–10 Agentenstunden), der Rest läuft und ist auf 12–18 Agentenstunden geschätzt. Bis Do 19.11. reicht das Budget für U0 bis U2.",
-      "haengtAn": [],
-      "sprints": [
-        {
-          "id": "vorab",
-          "titel": "Vorab · billige Fixes für Florians Befunde",
-          "stand": "fertig",
-          "geplantTage": 0.1,
-          "start": "2026-11-15T19:10",
-          "notiz": "Sieben von neun Befunden behoben und ausgeliefert. Die zwei übrigen brauchen den Umbau und sind als Abnahme-Tests hinterlegt.",
-          "ende": "2026-11-15T21:28"
-        },
-        {
-          "id": "plan",
-          "titel": "Sprintplan für den Umbau",
-          "stand": "fertig",
-          "geplantTage": 0.27,
-          "start": "2026-11-15T22:05",
-          "ende": "2026-11-15T22:24",
-          "notiz": "Frist war 04:30. Sechs Sprints in 15 Stufen, zusammen 108–163 Agentenstunden und 8–12 Kalendertage. Jede Stufe wird einzeln ausgeliefert."
-        },
-        {
-          "id": "abnahme",
-          "titel": "U0 · Florians Alltagsabläufe als Tests",
-          "stand": "fertig",
-          "geplantTage": 0.5,
-          "notiz": "19 Tests mit ausgelieferten Einstellungen und echter Maus, ausgeliefert 23:49. 9 sind grün, 9 zeigen Fehler, die spätere Sprints beheben, 1 ist eine reine Messung. Gebraucht 1,3 Agentenstunden, geplant waren 6–9.",
-          "start": "2026-11-15T22:27",
-          "ende": "2026-11-15T23:45"
-        },
-        {
-          "id": "identitaet",
-          "titel": "U1 · Der angeklickte Text ist der geänderte Text",
-          "stand": "laeuft",
-          "geplantTage": [
-            2,
-            3
-          ],
-          "notiz": "Vier Stufen, 26–39 Agentenstunden geplant. Stufe 1 (zusätzliche Lesedaten) ausgeliefert 16.11. 00:05: 0,5 statt 6–9 Agentenstunden; das Öffnen einer Planseite mit 43 518 Objekten wird 0,8 % langsamer (2 812 → 2 834 ms). Stufe 2 (anklickbare Texte kommen aus der Liste der PDF-Bibliothek, hinter einem Schalter, der aus ist) ausgeliefert 16.11. 05:23: 2,5 statt 8–12 Agentenstunden, am Produkt ändert sich dadurch noch nichts. Stufe 3 läuft seit 05:23 in zwei Teilen und wächst auf 17–23 Agentenstunden, geplant waren 8–12: Leiste, Seitenpanel und Ebenen müssen dieselbe Textliste lesen, bevor der Schalter angeht, und Seiten mit über 50 000 Objekten brauchen einen eigenen Textabruf. Teil 1 ausgeliefert 16.11. 07:52 (1,6 statt 7–10 Agentenstunden), der Schalter bleibt aus: Mit dem Schalter ist eine Zeile auf der Seite, in der Leiste, im Seitenpanel und in der Ebenenliste dasselbe Objekt; die Fußzeile „Seite 1“ steht einmal statt zweimal in der Ebenenliste, und das Farbfeld einer blauen Zeile zeigt Blau statt fast Schwarz. Teil 2 (bis zum Einschalten) läuft seit 07:52 und ist auf 12–18 Agentenstunden geschätzt.",
-          "start": "2026-11-15T22:27"
-        },
-        {
-          "id": "zustand",
-          "titel": "U2 · Leiste, Seitenpanel und Seite zeigen dasselbe",
-          "stand": "laeuft",
-          "geplantTage": [
-            2,
-            3
-          ],
-          "notiz": "Vier Stufen, 24–36 Agentenstunden geplant. Der Zustand liegt heute an 14 Stellen mit rund 75 Schreib- und 250 Lesestellen. Stufe 1 (keine erfundenen Werte mehr schreiben) ausgeliefert 16.11. 01:44: 0,9 statt 5–8 Agentenstunden. Zwei gemeinsam verschobene blaue Zeilen bleiben blau; vorher wurden sie heller, weil die Farbe aus dem Bildschirmbild gelesen wurde. Stufe 2 (eine gemeinsame Lesesicht für Leiste und Seitenpanel, dazu die Regel „die Farbe ist immer bestimmt“) läuft seit 16.11. 07:52, geplant 6–9 Agentenstunden.",
-          "start": "2026-11-15T23:51"
-        },
-        {
-          "id": "leiste",
-          "titel": "U3 · Die Leiste bleibt stehen, Doppelklick heißt immer Schreiben",
-          "stand": "offen",
-          "geplantTage": [
-            1,
-            1.5
-          ],
-          "notiz": "Zwei Stufen, 13–20 Agentenstunden."
-        },
-        {
-          "id": "stil",
-          "titel": "U4 · Unterstreichen und Fett verschieben nichts",
-          "stand": "offen",
-          "geplantTage": [
-            0.5,
-            1
-          ],
-          "notiz": "4–14 Agentenstunden geplant. Die Messung aus U0 zeigt: Die Schrift bewegt sich beim Unterstreichen nicht, nur der Auswahlrahmen wächst. Damit bleibt es bei Arbeit an der Oberfläche, voraussichtlich 4–8 Agentenstunden."
-        },
-        {
-          "id": "aufteilen",
-          "titel": "U5 · Der Textpfad zieht aus der großen Datei aus",
-          "stand": "offen",
-          "geplantTage": [
-            2,
-            3
-          ],
-          "notiz": "Drei Stufen, 20–30 Agentenstunden."
-        },
-        {
-          "id": "absatz",
-          "titel": "U6 · Absätze aus der Struktur der PDF",
-          "stand": "offen",
-          "notiz": "Zurückgestellt bis nach dem Umbau, noch nicht in Stunden geplant. Entschieden am 16.11.: Absätze werden nicht aus der Lage der Zeilen geraten. Liefert die PDF ihre Struktur mit (Word, LibreOffice), wird der Absatz als Absatz bearbeitet, mit Umbruch wie ein Textfeld in PowerPoint; die vorhandenen Zeilen werden dabei übernommen, nicht neu gesetzt. Ohne Struktur bleiben es Zeilen. Grundsatz: Reicht die Information aus der PDF nicht, wird eine Stufe tiefer bearbeitet statt geraten."
-        }
-      ],
-      "teilziele": [
-        {
-          "sprint": "vorab",
-          "titel": "Verschobener Text bleibt, wo man ihn loslässt",
-          "stand": "fertig",
-          "notiz": "Der Fehler bestand seit 04.10.: Nach dem Formatieren der Kopfzeile wurde der gezogene Titel an den falschen Rahmen gebunden"
-        },
-        {
-          "sprint": "vorab",
-          "titel": "Leiste zeigt nach dem Verschieben die richtige Farbe",
-          "stand": "fertig",
-          "notiz": "Es wird keine Farbe mehr erfunden; es gilt die Farbe aus der PDF"
-        },
-        {
-          "sprint": "vorab",
-          "titel": "Leiste am Text springt und flackert nicht",
-          "stand": "fertig",
-          "notiz": "Bleibt an ihrem Platz bei Fett, Größe und Klick ins selbe Objekt. Offen: Neuaufbau beim Doppelklick"
-        },
-        {
-          "sprint": "vorab",
-          "titel": "Markierter Text ist klar erkennbar",
-          "stand": "fertig",
-          "notiz": "Auswahl-Blau mit Kontrast 3,2:1, vorher Grau mit 1,16:1"
-        },
-        {
-          "sprint": "vorab",
-          "titel": "Neues Textfeld ist beim Tippen sichtbar",
-          "stand": "fertig",
-          "notiz": "Ausgeliefert seit 15.11. 21:28"
-        },
-        {
-          "sprint": "abnahme",
-          "titel": "Tests bedienen den Editor mit Leiste und Einrasten, wie ihn der Nutzer bekommt",
-          "stand": "fertig",
-          "notiz": "Die 490 vorhandenen Testdateien laufen fast alle mit abgeschalteter Leiste"
-        },
-        {
-          "sprint": "abnahme",
-          "titel": "19 Abfolgen mit echter Maus auf erzeugten Büro-PDFs",
-          "stand": "fertig"
-        },
-        {
-          "sprint": "identitaet",
-          "titel": "Jeder Text trägt die feste Kennung der PDF-Bibliothek als einzigen Schlüssel",
-          "stand": "laeuft",
-          "notiz": "Die Lesedaten sind ausgeliefert, die neue Textliste ist gebaut und noch ausgeschaltet"
-        },
-        {
-          "sprint": "identitaet",
-          "titel": "Kein Raten mehr über gleichen Text oder Nähe: Ziehen trifft immer das gegriffene Objekt",
-          "stand": "offen"
-        },
-        {
-          "sprint": "identitaet",
-          "titel": "Nach dem Verschieben gilt die Position, die die PDF-Bibliothek meldet",
-          "stand": "offen"
-        },
-        {
-          "sprint": "zustand",
-          "titel": "Leinwand, Leiste und Seitenpanel lesen denselben Zustand",
-          "stand": "offen",
-          "notiz": "Heute liegt er an etwa 13 Stellen"
-        },
-        {
-          "sprint": "zustand",
-          "titel": "Kein stiller Ersatzwert mehr, z. B. Schwarz statt der echten Farbe",
-          "stand": "fertig",
-          "notiz": "Ausgeliefert 16.11. 01:44. Liefert die PDF keine Farbe, verweigert Unterstreichen mit Hinweis, statt Schwarz zu schreiben"
-        },
-        {
-          "sprint": "zustand",
-          "titel": "Geschrieben werden nur die geänderten Eigenschaften",
-          "stand": "offen"
-        },
-        {
-          "sprint": "zustand",
-          "titel": "Zwei Stilknöpfe direkt nacheinander: beide Änderungen kommen an",
-          "stand": "offen",
-          "notiz": "Gefunden in der Sitzung vom 16.11.: in 3 von 3 Versuchen geht die zweite Änderung verloren"
-        },
-        {
-          "sprint": "leiste",
-          "titel": "Leiste bleibt beim Wechsel zwischen Auswählen und Bearbeiten stehen",
-          "stand": "offen"
-        },
-        {
-          "sprint": "leiste",
-          "titel": "Leiste verdeckt keinen greifbaren Text",
-          "stand": "offen"
-        },
-        {
-          "sprint": "stil",
-          "titel": "Unterstreichen, Fett und Größe verschieben den Text nicht",
-          "stand": "offen"
-        },
-        {
-          "sprint": "aufteilen",
-          "titel": "Auswahl, Ziehen und Übernehmen als eigene Bausteine statt einer Datei mit 54.000 Zeilen",
-          "stand": "offen"
-        },
-        {
-          "sprint": "absatz",
-          "titel": "Absatz, Überschrift, Liste und Tabellenzelle aus der PDF-Struktur je als ein Objekt",
-          "stand": "offen"
-        },
-        {
-          "sprint": "absatz",
-          "titel": "Umwandeln in einen Textrahmen mit Umbruch ist pixelgleich oder wird abgelehnt",
-          "stand": "offen"
-        }
-      ]
+     "sprint": "vorab",
+     "titel": "Verschobener Text bleibt, wo man ihn loslässt",
+     "stand": "fertig",
+     "notiz": "Der Fehler bestand seit 04.10.: Nach dem Formatieren der Kopfzeile wurde der gezogene Titel an den falschen Rahmen gebunden"
     },
     {
-      "id": "fernwork-pdf",
-      "bereich": "fernwork",
-      "titel": "Fernwork PDF-Editor",
-      "stand": "laeuft",
-      "kurz": "Live-Bearbeitung so gut wie PDF-XChange: 19 Aufgaben in 4 Sprints, etwa 165 Agent-Stunden. Seit 15.11. kommt zuerst der Umbau der Textbearbeitung; Sprint 2 bis 4 folgen danach.",
-      "blocker": "Florians Test am 15.11. hat neun Bedienfehler beim Bearbeiten von Text gezeigt, die keiner der Tests bemerkt hat. Zwei unabhängige Code-Prüfungen sehen dieselbe Ursache in der Bedienschicht. Deshalb ist Sprint 2 angehalten, bis der Umbau „eine Identität, ein Zustand“ steht. Für Sprint 4 braucht es Florians Entscheidungen zur Properties-Leiste und zu Tastenkürzeln.",
-      "haengtAn": [
-        "fernwork-umbau"
-      ],
-      "teilziele": [
-        {
-          "gruppe": "Schon erreicht",
-          "titel": "Dichte Pläne öffnen so schnell wie PDF-XChange",
-          "stand": "fertig"
-        },
-        {
-          "gruppe": "Schon erreicht",
-          "titel": "Rückgängig auf großen Plänen: 60 s → unter 1 s",
-          "stand": "fertig"
-        },
-        {
-          "gruppe": "Schon erreicht",
-          "titel": "Eigener Text-Renderer als Standard",
-          "stand": "fertig"
-        },
-        {
-          "titel": "XC-1 Fett nach Rückgängig, eingebettete Schriften mit neuen Zeichen",
-          "stand": "fertig",
-          "sprint": "s1"
-        },
-        {
-          "titel": "XC-2 Absturz-Wiederherstellung, Drehen von Pfaden, kurz verschwindendes Rechteck",
-          "stand": "fertig",
-          "sprint": "s1"
-        },
-        {
-          "titel": "XC-3 Wackelnde Tests stabilisieren",
-          "stand": "fertig",
-          "sprint": "s1"
-        },
-        {
-          "titel": "XC-4 Seiten löschen und Rückgängig so schnell wie PDF-XChange",
-          "stand": "fertig",
-          "notiz": "Seite löschen ist nach 0,7 s statt 6,6 s bedienbar",
-          "sprint": "s1"
-        },
-        {
-          "titel": "XC-5 Zoom 400 % in 0,1 s scharf",
-          "stand": "laeuft",
-          "notiz": "Dichte Testseite heute 0,15–0,2 s, Ziel 0,1 s (PDF-XChange 0,08 s); der Rest hängt am Umbau in XC-7",
-          "sprint": "s1"
-        },
-        {
-          "titel": "XC-6 Erster Klick auf Text ohne Wartezeit",
-          "stand": "fertig",
-          "notiz": "Heute bis 4,6 s auf großen Plänen",
-          "sprint": "s1"
-        },
-        {
-          "titel": "Zwei kleine Bedienfehler, Safari-Prüfung des PNG-Downloads",
-          "stand": "offen",
-          "sprint": "s1"
-        },
-        {
-          "titel": "XC-7 Auswahl und Treffer direkt aus PDFium, Strg+A unter 1 s",
-          "stand": "offen",
-          "notiz": "Begonnen, angehalten bis nach dem Umbau. Objekte liegen als Daten vor; Hover auf dichtem Plan 30 statt 49 ms",
-          "sprint": "s2"
-        },
-        {
-          "titel": "XC-8 Speichern auf großen Plänen schnell, Löschen unter 0,3 s",
-          "stand": "offen",
-          "sprint": "s2"
-        },
-        {
-          "titel": "XC-9 Messungen, Stempel, Textboxen über PDFium",
-          "stand": "offen",
-          "sprint": "s2"
-        },
-        {
-          "titel": "XC-10 Formularfelder und Kommentare über PDFium",
-          "stand": "offen",
-          "sprint": "s2"
-        },
-        {
-          "titel": "XC-11 „Wählen, was man sieht“: Zeilen, Absätze, Hintergrund nicht anklickbar",
-          "stand": "offen",
-          "sprint": "s3"
-        },
-        {
-          "titel": "XC-12 Rechts-nach-links-Text bearbeiten",
-          "stand": "offen",
-          "sprint": "s3"
-        },
-        {
-          "titel": "XC-13 Zeichen- und Wortabstände erhalten, komplexe Schriften",
-          "stand": "offen",
-          "sprint": "s3"
-        },
-        {
-          "titel": "XC-14 Links anlegen und bearbeiten",
-          "stand": "offen",
-          "sprint": "s4"
-        },
-        {
-          "titel": "XC-15 Bild zuschneiden, Ebenen ein/aus",
-          "stand": "offen",
-          "sprint": "s4"
-        },
-        {
-          "titel": "XC-16 Formularberechnungen ohne eval",
-          "stand": "offen",
-          "sprint": "s4"
-        },
-        {
-          "titel": "XC-17 Eigene UI-Bausteine, Sperre gegen rohe Bedienelemente",
-          "stand": "offen",
-          "sprint": "s4"
-        },
-        {
-          "titel": "XC-18 Properties-Leiste, Mini-Toolbar, Optionsleisten",
-          "stand": "offen",
-          "florian": "Properties-Kopf Variante A mit „…“-Menü? B/I/U/S überall als Knöpfe?",
-          "sprint": "s4"
-        },
-        {
-          "titel": "XC-19 Tastenkürzel wie PDF-XChange",
-          "stand": "offen",
-          "florian": "N/Shift+N gegen Tippen auf ausgewähltem Text – wie soll es sein?",
-          "sprint": "s4"
-        },
-        {
-          "gruppe": "Umfang",
-          "titel": "Reste der Nicht-PDF-Tools (z. B. Text Encryption)",
-          "stand": "unklar",
-          "florian": "Gehören sie noch zu „Fernwork ist durch“?"
-        }
-      ],
-      "sprints": [
-        {
-          "id": "s1",
-          "titel": "Sprint 1 · tägliche Störer",
-          "stand": "fertig",
-          "geplantTage": 1,
-          "start": "2026-11-14T18:58",
-          "ende": "2026-11-15T15:40",
-          "notiz": "Zeiten vom ersten bis zum letzten gelandeten Stand. Zwei Reste wandern mit: Zoom-Ziel 0,1 s und zwei kleine Bedienfehler."
-        },
-        {
-          "id": "s2",
-          "titel": "Sprint 2 · dichte Pläne flüssig",
-          "stand": "offen",
-          "geplantTage": [
-            1.5,
-            2
-          ],
-          "start": "2026-11-15T13:36",
-          "gebrauchtTage": 0.24,
-          "notiz": "Am 15.11. begonnen und nach knapp 6 Stunden angehalten: Der Umbau der Textbearbeitung kommt zuerst."
-        },
-        {
-          "id": "s3",
-          "titel": "Sprint 3 · Auswahl und Text",
-          "stand": "offen",
-          "geplantTage": 1.5
-        },
-        {
-          "id": "s4",
-          "titel": "Sprint 4 · Funktionen und Bedienung",
-          "stand": "offen",
-          "geplantTage": 2
-        }
-      ]
+     "sprint": "vorab",
+     "titel": "Leiste zeigt nach dem Verschieben die richtige Farbe",
+     "stand": "fertig",
+     "notiz": "Es wird keine Farbe mehr erfunden; es gilt die Farbe aus der PDF"
     },
     {
-      "id": "fable-pruefung",
-      "bereich": "fernwork",
-      "titel": "Fable-Prüfung",
-      "stand": "offen",
-      "kurz": "Unabhängige Prüfung von Fernwork in etwa drei Verbesserungsrunden, Maßstab sind XC-1 bis XC-19. Eine erste Code-Prüfung durch zwei Modelle lief am 15.11. und hat den Umbau ausgelöst.",
-      "blocker": "Startet, wenn der PDF-Editor durch ist.",
-      "haengtAn": [
-        "fernwork-pdf"
-      ],
-      "teilziele": [
-        {
-          "titel": "Runde 1",
-          "stand": "offen"
-        },
-        {
-          "titel": "Runde 2",
-          "stand": "offen"
-        },
-        {
-          "titel": "Runde 3",
-          "stand": "offen"
-        }
-      ]
+     "sprint": "vorab",
+     "titel": "Leiste am Text springt und flackert nicht",
+     "stand": "fertig",
+     "notiz": "Bleibt an ihrem Platz bei Fett, Größe und Klick ins selbe Objekt. Offen: Neuaufbau beim Doppelklick"
     },
     {
-      "id": "ui-library",
-      "bereich": "fernwork",
-      "titel": "berg:work UI-Library",
-      "stand": "fertig",
-      "kurz": "Der Schliff-Look von Projects ist die gemeinsame UI-Core für alle berg:work-Apps; Projects, PDF und Image nutzen sie.",
-      "haengtAn": [],
-      "teilziele": [
-        {
-          "gruppe": "Schon erreicht",
-          "titel": "Schliff-Gestaltung abgenommen (4 Runden)",
-          "stand": "fertig"
-        },
-        {
-          "gruppe": "Schon erreicht",
-          "titel": "Projects 0.1.2 im Schliff-Look veröffentlicht",
-          "stand": "fertig"
-        },
-        {
-          "gruppe": "Schon erreicht",
-          "titel": "Bildvergleich für Projects: 12 Ansichten in 20 s",
-          "stand": "fertig"
-        }
-      ],
-      "sprints": [
-        {
-          "id": "a",
-          "titel": "Etappe a) Wortmarke und Werkzeichen in Projects",
-          "stand": "fertig",
-          "geplantTage": 0.5
-        },
-        {
-          "id": "b",
-          "titel": "Etappe b) Schliff als gemeinsames Paket, Projects bleibt pixelgleich",
-          "stand": "fertig",
-          "geplantTage": [
-            2,
-            3
-          ]
-        },
-        {
-          "id": "c",
-          "titel": "Etappe c) bisherige berg:work-UI auf die neue Core",
-          "stand": "fertig",
-          "geplantTage": [
-            1,
-            2
-          ]
-        },
-        {
-          "id": "d",
-          "titel": "Etappe d) berg:work-PDF-Look nach Mockup",
-          "stand": "fertig",
-          "geplantTage": [
-            2,
-            3
-          ]
-        },
-        {
-          "id": "e",
-          "titel": "Etappe e) berg:work Image auf die Core",
-          "stand": "fertig",
-          "geplantTage": 2
-        }
-      ]
+     "sprint": "vorab",
+     "titel": "Markierter Text ist klar erkennbar",
+     "stand": "fertig",
+     "notiz": "Auswahl-Blau mit Kontrast 3,2:1, vorher Grau mit 1,16:1"
     },
     {
-      "id": "desktop-apps",
-      "bereich": "fernwork",
-      "titel": "berg:work PDF & Image als Desktop-Apps",
-      "stand": "laeuft",
-      "kurz": "PDF und Image werden echte Desktop-Apps neben Projects, auf der neuen UI-Core.",
-      "blocker": "PDF: Vorbereitung fertig, Bau und Update-Test ab Mo 16.11. Image: Look ist fertig, Desktop-Bau danach.",
-      "haengtAn": [
-        "ui-library"
-      ],
-      "teilziele": [
-        {
-          "titel": "Grundgerüst beider Apps (Look und Desktop-Hülle)",
-          "stand": "fertig"
-        },
-        {
-          "titel": "berg:work PDF auf der UI-Core",
-          "stand": "laeuft",
-          "notiz": "Look auf main, Desktop-Bau ab Mo 16.11."
-        },
-        {
-          "titel": "berg:work Image auf der UI-Core",
-          "stand": "laeuft",
-          "notiz": "Look auf main seit 15.11."
-        }
-      ],
-      "florian": "Startversion für PDF (Vorschlag 0.2.0), eigener Signaturschlüssel, Schlüssel erzeugen und Zugang zum Download-Speicher"
+     "sprint": "vorab",
+     "titel": "Neues Textfeld ist beim Tippen sichtbar",
+     "stand": "fertig",
+     "notiz": "Ausgeliefert seit 15.11. 21:28"
     },
     {
-      "id": "webseiten",
-      "bereich": "fernwork",
-      "titel": "Webseiten",
-      "stand": "laeuft",
-      "kurz": "Die neue bergwork.app ist seit 15.11. 19:52 live, Projects 0.1.3 steht seit 21:11 zum Download bereit. Als Nächstes wird gehirn.flofischer.org aktualisiert.",
-      "blocker": "Projects 0.1.3 ist für Windows bisher nur in einer Windows-Nachbildung unter Linux geprüft (Installation ohne Adminrechte, Update von 0.1.2, Deinstallation). Der Start auf einem echten Windows-Rechner steht aus. Der Installer ist noch nicht signiert, Windows warnt deshalb beim ersten Start.",
-      "haengtAn": [
-        "desktop-apps"
-      ],
-      "teilziele": [
-        {
-          "titel": "bergwork.app: neue Seite gebaut und von Florian freigegeben",
-          "stand": "fertig"
-        },
-        {
-          "titel": "bergwork.app: neue Seite live",
-          "stand": "fertig",
-          "notiz": "Live seit 15.11. 19:52, alle Seiten deutsch und englisch erreichbar"
-        },
-        {
-          "titel": "Projects 0.1.3 als Download (neues Icon, neue Wortmarke)",
-          "stand": "fertig",
-          "notiz": "Seit 15.11. 21:11 für Windows und Linux; Update von 0.1.2 auf 0.1.3 geprüft"
-        },
-        {
-          "titel": "bergwork.app: Bilder und Videos von PDF und Image",
-          "stand": "fertig",
-          "notiz": "PDF- und Image-Seite mit echten Aufnahmen; die drei Tour-Clips von Projects zeigen noch das alte Zeichen"
-        },
-        {
-          "titel": "gehirn.flofischer.org aktualisieren",
-          "stand": "laeuft",
-          "notiz": "Die Projects-Demo leitet seit 15.11. auf bergwork.app weiter"
-        }
-      ]
+     "sprint": "abnahme",
+     "titel": "Tests bedienen den Editor mit Leiste und Einrasten, wie ihn der Nutzer bekommt",
+     "stand": "fertig",
+     "notiz": "Die 490 vorhandenen Testdateien laufen fast alle mit abgeschalteter Leiste"
     },
     {
-      "id": "enterprise",
-      "bereich": "fernwork",
-      "titel": "„For Enterprise“-Knopf",
-      "stand": "offen",
-      "kurz": "Auf der Webseite und in den Apps: erklärt die Nutzung und wann man ein Angebot anfragt.",
-      "blocker": "Braucht die neue Webseite und die Desktop-Apps.",
-      "haengtAn": [
-        "webseiten",
-        "desktop-apps"
-      ],
-      "teilziele": [
-        {
-          "titel": "Fernwork for Business gebaut",
-          "stand": "fertig"
-        },
-        {
-          "titel": "Enterprise-Dialog in Fernwork",
-          "stand": "fertig"
-        },
-        {
-          "titel": "Knopf auf der Webseite",
-          "stand": "offen"
-        },
-        {
-          "titel": "Knopf in den Apps",
-          "stand": "offen"
-        }
-      ]
+     "sprint": "abnahme",
+     "titel": "19 Abfolgen mit echter Maus auf erzeugten Büro-PDFs",
+     "stand": "fertig"
     },
     {
-      "id": "personendaten",
-      "bereich": "fernwork",
-      "titel": "Repo ohne Personendaten",
-      "stand": "offen",
-      "kurz": "Das Monorepo wird vor der Veröffentlichung von personenbezogenen Daten gesäubert, auch in der Historie.",
-      "blocker": "Noch nicht untersucht. Ob die Historie bereinigt oder frisch begonnen wird, entscheidet Florian.",
-      "florian": "Git-Historie bereinigen oder frisch beginnen?",
-      "haengtAn": [],
-      "teilziele": [
-        {
-          "titel": "Repo und Historie untersuchen",
-          "stand": "offen"
-        },
-        {
-          "titel": "Entscheidung: Historie bereinigen oder neu beginnen",
-          "stand": "offen"
-        },
-        {
-          "titel": "Säubern",
-          "stand": "offen"
-        }
-      ]
+     "sprint": "identitaet",
+     "titel": "Jeder Text trägt die feste Kennung der PDF-Bibliothek als einzigen Schlüssel",
+     "stand": "laeuft",
+     "notiz": "Die Lesedaten sind ausgeliefert, die neue Textliste ist gebaut und noch ausgeschaltet"
     },
     {
-      "id": "lizenz",
-      "bereich": "fernwork",
-      "titel": "Veröffentlichung unter modified BSL",
-      "stand": "offen",
-      "kurz": "Das Monorepo wird quelloffen unter der besprochenen Lizenz veröffentlicht.",
-      "blocker": "Wartet auf alles davor: PDF-Editor, Prüfung, Apps, Webseiten, Säubern, Enterprise-Knopf.",
-      "florian": "Gibt die Veröffentlichung frei.",
-      "haengtAn": [
-        "fable-pruefung",
-        "personendaten",
-        "enterprise"
-      ],
-      "teilziele": [
-        {
-          "titel": "Lizenz gewählt: modified BSL",
-          "stand": "fertig"
-        },
-        {
-          "titel": "Lizenztexte im Repo",
-          "stand": "unklar"
-        },
-        {
-          "titel": "Freigabe durch Florian",
-          "stand": "offen"
-        }
-      ]
+     "sprint": "identitaet",
+     "titel": "Kein Raten mehr über gleichen Text oder Nähe: Ziehen trifft immer das gegriffene Objekt",
+     "stand": "offen"
     },
     {
-      "id": "bundles",
-      "bereich": "fernwork",
-      "titel": "Bundles mit Updater, GitHub-Link",
-      "stand": "offen",
-      "kurz": "berg:work-Apps als Downloads mit eingebautem Updater (wie Projects) auf der Webseite, GitHub-Link prominent.",
-      "blocker": "Wartet auf die Veröffentlichung.",
-      "haengtAn": [
-        "lizenz"
-      ],
-      "teilziele": [
-        {
-          "titel": "Updater in Projects (Vorbild)",
-          "stand": "fertig"
-        },
-        {
-          "titel": "Bundle berg:work PDF",
-          "stand": "offen"
-        },
-        {
-          "titel": "Bundle berg:work Image",
-          "stand": "offen"
-        },
-        {
-          "titel": "GitHub-Link prominent auf den Webseiten",
-          "stand": "offen"
-        }
-      ]
+     "sprint": "identitaet",
+     "titel": "Nach dem Verschieben gilt die Position, die die PDF-Bibliothek meldet",
+     "stand": "offen"
     },
     {
-      "id": "fernwork-release",
-      "bereich": "fernwork",
-      "ziel": true,
-      "titel": "Fernwork-Release",
-      "stand": "offen",
-      "kurz": "Das ganze Fernwork-Monorepo samt berg:work quelloffen, beworben und herunterladbar.",
-      "haengtAn": [
-        "bundles"
-      ],
-      "teilziele": []
+     "sprint": "zustand",
+     "titel": "Leinwand, Leiste und Seitenpanel lesen denselben Zustand",
+     "stand": "offen",
+     "notiz": "Heute liegt er an etwa 13 Stellen"
     },
     {
-      "id": "viewer",
-      "bereich": "himmelcad",
-      "titel": "Viewer",
-      "stand": "laeuft",
-      "kurz": "Ziel ist der beste Viewer überhaupt. Bei Punktwolken ist das erste Ziel erreicht.",
-      "blocker": "Import/Export-Modul ist noch kaum gebaut: Von den öffentlichen Testfällen lädt bisher die fremde Punktwolke; Splats, DGM, CAD und 3D Tiles kommen, sobald dort Zeit hineingeht. Textur-Laufzeitkompression: Einbau-Entscheidung offen.",
-      "haengtAn": [],
-      "teilziele": [
-        {
-          "titel": "Punktwolken mindestens so gut wie der alte Viewer",
-          "stand": "fertig"
-        },
-        {
-          "titel": "Klick-Abfrage schneller (Mesh 74 → 29 ms, Punktwolke 36 → 21 ms)",
-          "stand": "fertig"
-        },
-        {
-          "titel": "Mauszeiger in der Fahrt günstig (Pick 11,5–18,6 → 7,4–7,7 ms)",
-          "stand": "fertig"
-        },
-        {
-          "titel": "Kamerafahrt verfeinern, schnellerer Ladepfad (Zoomfahrt fertig 2,3–2,6 s statt 2,5–3,7 s)",
-          "stand": "fertig"
-        },
-        {
-          "titel": "Texturierte Meshes: GPU-fertige Texturen (BC1)",
-          "stand": "laeuft",
-          "notiz": "Encoder fertig und bit-gleich; Einbau-Entscheidung offen"
-        },
-        {
-          "titel": "Fremde Punktwolke lädt",
-          "stand": "fertig"
-        },
-        {
-          "titel": "3D Tiles laden",
-          "stand": "offen",
-          "notiz": "Import/Export-Modul noch nicht ausgebaut"
-        },
-        {
-          "titel": "Gaussian Splats laden",
-          "stand": "offen",
-          "notiz": "Import/Export-Modul noch nicht ausgebaut"
-        },
-        {
-          "titel": "DGM- und CAD-Import laden",
-          "stand": "offen",
-          "notiz": "Import/Export-Modul noch nicht ausgebaut"
-        },
-        {
-          "titel": "Niveau Trimble RealWorks (Punktwolken) und ArcGIS (Meshes)",
-          "stand": "offen",
-          "notiz": "Langfristiges Ziel"
-        }
-      ]
+     "sprint": "zustand",
+     "titel": "Kein stiller Ersatzwert mehr, z. B. Schwarz statt der echten Farbe",
+     "stand": "fertig",
+     "notiz": "Ausgeliefert 16.11. 01:44. Liefert die PDF keine Farbe, verweigert Unterstreichen mit Hinweis, statt Schwarz zu schreiben"
     },
     {
-      "id": "builder-mockui",
-      "bereich": "himmelcad",
-      "titel": "Builder-Mock-UI",
-      "stand": "laeuft",
-      "kurz": "Florian baut mit viel eigenem Input eine umfangreiche Mock-UI; sie gibt vor, wie kritische Funktionen bedient werden.",
-      "blocker": "Florians Zeit. Der Leitstand führt diesen Thread nicht und kennt den Fortschritt nur grob.",
-      "florian": "Mock-UI ist direkte Arbeit mit Florian.",
-      "haengtAn": [],
-      "teilziele": [
-        {
-          "titel": "Mock-UI der kritischen Funktionen",
-          "stand": "laeuft"
-        },
-        {
-          "titel": "Beispiele, damit Agents nicht gezeigte Funktionen in Florians Sinn bauen",
-          "stand": "offen"
-        },
-        {
-          "titel": "Fortschritt im Detail",
-          "stand": "unklar"
-        }
-      ]
+     "sprint": "zustand",
+     "titel": "Geschrieben werden nur die geänderten Eigenschaften",
+     "stand": "offen"
     },
     {
-      "id": "photolab",
-      "bereich": "himmelcad",
-      "titel": "PhotoLab",
-      "stand": "laeuft",
-      "kurz": "Backend ist weit; der lange Testlauf soll es mit starken Ergebnissen und Laufzeiten bestätigen. Die Oberfläche wird aus dem Builder übernommen.",
-      "blocker": "Vollauf 1 am PC in 9 h 16 min durch, nur der Splat fehlt. Vollauf 2 am Laptop läuft seit 15.11. 20:38: Acht von neun Schritten sind fertig (Ausrichtung 19 min, Tiefenkarten 5 h 22 min, dichte Wolke 49 min, Geländemodelle 9 min, Orthofoto 7 min, Mesh 34 min), der Splat rechnet seit 03:58 und war um 07:25 bei 13 200 von 15 000 Durchgängen (am PC brach er bei etwa 10 000 ab). Auswertung am Mo 16.11. vormittags. Die Oberfläche wartet auf die Builder-Mock-UI und den Viewer.",
-      "haengtAn": [
-        "builder-mockui",
-        "viewer"
-      ],
-      "teilziele": [
-        {
-          "gruppe": "Backend",
-          "titel": "Verbesserungen gebaut",
-          "stand": "fertig"
-        },
-        {
-          "gruppe": "Backend",
-          "titel": "Speicher-Zulassung nach freiem Speicher (schwere Teile nie überbucht)",
-          "stand": "fertig"
-        },
-        {
-          "gruppe": "Backend",
-          "titel": "Vollauf 1 am PC: 8 von 9 Schritten durch (Splat am Speicherdeckel abgebrochen, kommt im Laptop-Lauf)",
-          "stand": "fertig"
-        },
-        {
-          "gruppe": "Backend",
-          "titel": "Vollauf 2 am Laptop",
-          "stand": "laeuft",
-          "notiz": "Läuft seit 15.11. 20:38; acht von neun Schritten fertig, der letzte (Splat) rechnet seit 16.11. 03:58"
-        },
-        {
-          "gruppe": "Backend",
-          "titel": "Ergebnisse im Viewer messen",
-          "stand": "offen"
-        },
-        {
-          "gruppe": "Backend",
-          "titel": "Mesh ohne Kamerapositionen",
-          "stand": "unklar"
-        },
-        {
-          "gruppe": "Backend",
-          "titel": "Orthomosaik mit Quelle Fotos oder Punktwolke",
-          "stand": "unklar"
-        },
-        {
-          "gruppe": "Oberfläche",
-          "titel": "Oberfläche komplett aus der Builder-Mock-UI",
-          "stand": "haengt",
-          "notiz": "Wartet auf die Mock-UI"
-        },
-        {
-          "gruppe": "Oberfläche",
-          "titel": "Punktwolken-Import wie in der Builder-Mock-UI",
-          "stand": "unklar"
-        }
-      ]
+     "sprint": "zustand",
+     "titel": "Zwei Stilknöpfe direkt nacheinander: beide Änderungen kommen an",
+     "stand": "offen",
+     "notiz": "Gefunden in der Sitzung vom 16.11.: in 3 von 3 Versuchen geht die zweite Änderung verloren"
     },
     {
-      "id": "builder",
-      "bereich": "himmelcad",
-      "titel": "Builder",
-      "stand": "offen",
-      "kurz": "Florians Herzensprodukt. Was wenig Input braucht, soll vorab entstehen; der Rest möglichst autonom, sobald die Mock-UI steht.",
-      "blocker": "Wartet auf die Mock-UI.",
-      "haengtAn": [
-        "builder-mockui",
-        "viewer"
-      ],
-      "teilziele": [
-        {
-          "titel": "Teile mit wenig Input vorziehen",
-          "stand": "unklar"
-        },
-        {
-          "titel": "Rest autonom nach der Mock-UI",
-          "stand": "offen"
-        },
-        {
-          "titel": "Gehört der Builder zum ersten HimmelCAD-Release?",
-          "stand": "unklar"
-        }
-      ]
+     "sprint": "leiste",
+     "titel": "Leiste bleibt beim Wechsel zwischen Auswählen und Bearbeiten stehen",
+     "stand": "offen"
     },
     {
-      "id": "assembler",
-      "bereich": "himmelcad",
-      "titel": "Assembler",
-      "stand": "offen",
-      "kurz": "Am weitesten von allen HimmelCAD-Teilen, mit klar definierten Todos. Niedrige Priorität.",
-      "blocker": "Läuft nur, wenn Rechner- und Agent-Kapazität frei ist.",
-      "haengtAn": [],
-      "teilziele": [
-        {
-          "titel": "Klar definierte Todos abarbeiten",
-          "stand": "offen"
-        },
-        {
-          "titel": "Genauer Stand",
-          "stand": "unklar"
-        }
-      ]
+     "sprint": "leiste",
+     "titel": "Leiste verdeckt keinen greifbaren Text",
+     "stand": "offen"
     },
     {
-      "id": "himmelcad-release",
-      "bereich": "himmelcad",
-      "ziel": true,
-      "titel": "HimmelCAD-Release",
-      "stand": "offen",
-      "kurz": "PhotoLab, Builder und Assembler auf Release-Stand.",
-      "haengtAn": [
-        "photolab",
-        "builder",
-        "assembler"
-      ],
-      "teilziele": []
+     "sprint": "stil",
+     "titel": "Unterstreichen, Fett und Größe verschieben den Text nicht",
+     "stand": "offen"
     },
     {
-      "id": "bergwork-capture",
-      "bereich": "spaeter",
-      "titel": "berg:work Capture",
-      "stand": "offen",
-      "kurz": "Ein Greenshot-Klon für Windows, Linux und Mac in berg:work-Optik, Funktionsweise sonst praktisch gleich.",
-      "blocker": "Ganz niedrige Priorität: kommt erst, wenn die jetzigen Sachen voll fertig und veröffentlicht sind.",
-      "haengtAn": [],
-      "teilziele": [
-        {
-          "titel": "Bildschirmaufnahme wie Greenshot (Bereich, Fenster, ganzer Schirm) auf Windows, Linux, Mac",
-          "stand": "offen"
-        },
-        {
-          "titel": "Eingebauter Editor: Fernwork Image (Standard, nicht Pro) im berg:work-Look statt des Greenshot-Editors",
-          "stand": "offen"
-        },
-        {
-          "titel": "Zusätzlich: Bildschirmvideos",
-          "stand": "offen"
-        }
-      ]
+     "sprint": "aufteilen",
+     "titel": "Auswahl, Ziehen und Übernehmen als eigene Bausteine statt einer Datei mit 54.000 Zeilen",
+     "stand": "offen"
     },
     {
-      "id": "bergwork-text",
-      "bereich": "spaeter",
-      "titel": "berg:work Text",
-      "stand": "offen",
-      "kurz": "Ein Notepad++-Klon mit den wichtigsten Funktionen; Aufbau der Oberfläche wie Notepad++, im berg:work-Look.",
-      "blocker": "Ganz niedrige Priorität: kommt erst, wenn die jetzigen Sachen voll fertig und veröffentlicht sind.",
-      "haengtAn": [],
-      "teilziele": [
-        {
-          "titel": "Oberfläche im Aufbau wie Notepad++",
-          "stand": "offen"
-        },
-        {
-          "titel": "Vertikale Textauswahl (Spaltenmodus)",
-          "stand": "offen"
-        },
-        {
-          "titel": "Import von fast allen Formaten",
-          "stand": "offen"
-        },
-        {
-          "titel": "Umfang festlegen: welche tieferen Notepad++-Funktionen gebraucht werden und welche nicht",
-          "stand": "offen"
-        }
-      ]
+     "sprint": "absatz",
+     "titel": "Absatz, Überschrift, Liste und Tabellenzelle aus der PDF-Struktur je als ein Objekt",
+     "stand": "offen"
     },
     {
-      "id": "fernbot",
-      "bereich": "spaeter",
-      "titel": "Fernbot",
-      "stand": "offen",
-      "kurz": "Ein Grokbot-Klon, der so viel wie möglich auf T3 Code aufbaut und übernimmt, aber den Grokbot-Aufbau hat: Agents statt Threads.",
-      "blocker": "Ganz niedrige Priorität: kommt erst, wenn die jetzigen Sachen voll fertig und veröffentlicht sind.",
-      "haengtAn": [],
-      "teilziele": [
-        {
-          "titel": "Aufbau wie Grokbot: Agents statt Threads, auf T3 Code als Basis",
-          "stand": "offen"
-        },
-        {
-          "titel": "Mobil: Threads gleichen sich auch im Hintergrund ab, kein Antippen und Warten je Thread",
-          "stand": "offen"
-        }
-      ]
+     "sprint": "absatz",
+     "titel": "Umwandeln in einen Textrahmen mit Umbruch ist pixelgleich oder wird abgelehnt",
+     "stand": "offen"
     }
-  ]
+   ]
+  },
+  {
+   "id": "fernwork-pdf",
+   "bereich": "fernwork",
+   "titel": "Fernwork PDF-Editor",
+   "stand": "laeuft",
+   "kurz": "Live-Bearbeitung so gut wie PDF-XChange: 19 Aufgaben in 4 Sprints, etwa 165 Agent-Stunden. Seit 15.11. kommt zuerst der Umbau der Textbearbeitung; Sprint 2 bis 4 folgen danach.",
+   "blocker": "Florians Test am 15.11. hat neun Bedienfehler beim Bearbeiten von Text gezeigt, die keiner der Tests bemerkt hat. Zwei unabhängige Code-Prüfungen sehen dieselbe Ursache in der Bedienschicht. Deshalb ist Sprint 2 angehalten, bis der Umbau „eine Identität, ein Zustand“ steht. Für Sprint 4 braucht es Florians Entscheidungen zur Properties-Leiste und zu Tastenkürzeln.",
+   "haengtAn": [
+    "fernwork-umbau"
+   ],
+   "teilziele": [
+    {
+     "gruppe": "Schon erreicht",
+     "titel": "Dichte Pläne öffnen so schnell wie PDF-XChange",
+     "stand": "fertig"
+    },
+    {
+     "gruppe": "Schon erreicht",
+     "titel": "Rückgängig auf großen Plänen: 60 s → unter 1 s",
+     "stand": "fertig"
+    },
+    {
+     "gruppe": "Schon erreicht",
+     "titel": "Eigener Text-Renderer als Standard",
+     "stand": "fertig"
+    },
+    {
+     "titel": "XC-1 Fett nach Rückgängig, eingebettete Schriften mit neuen Zeichen",
+     "stand": "fertig",
+     "sprint": "s1"
+    },
+    {
+     "titel": "XC-2 Absturz-Wiederherstellung, Drehen von Pfaden, kurz verschwindendes Rechteck",
+     "stand": "fertig",
+     "sprint": "s1"
+    },
+    {
+     "titel": "XC-3 Wackelnde Tests stabilisieren",
+     "stand": "fertig",
+     "sprint": "s1"
+    },
+    {
+     "titel": "XC-4 Seiten löschen und Rückgängig so schnell wie PDF-XChange",
+     "stand": "fertig",
+     "notiz": "Seite löschen ist nach 0,7 s statt 6,6 s bedienbar",
+     "sprint": "s1"
+    },
+    {
+     "titel": "XC-5 Zoom 400 % in 0,1 s scharf",
+     "stand": "laeuft",
+     "notiz": "Dichte Testseite heute 0,15–0,2 s, Ziel 0,1 s (PDF-XChange 0,08 s); der Rest hängt am Umbau in XC-7",
+     "sprint": "s1"
+    },
+    {
+     "titel": "XC-6 Erster Klick auf Text ohne Wartezeit",
+     "stand": "fertig",
+     "notiz": "Heute bis 4,6 s auf großen Plänen",
+     "sprint": "s1"
+    },
+    {
+     "titel": "Zwei kleine Bedienfehler, Safari-Prüfung des PNG-Downloads",
+     "stand": "offen",
+     "sprint": "s1"
+    },
+    {
+     "titel": "XC-7 Auswahl und Treffer direkt aus PDFium, Strg+A unter 1 s",
+     "stand": "offen",
+     "notiz": "Begonnen, angehalten bis nach dem Umbau. Objekte liegen als Daten vor; Hover auf dichtem Plan 30 statt 49 ms",
+     "sprint": "s2"
+    },
+    {
+     "titel": "XC-8 Speichern auf großen Plänen schnell, Löschen unter 0,3 s",
+     "stand": "offen",
+     "sprint": "s2"
+    },
+    {
+     "titel": "XC-9 Messungen, Stempel, Textboxen über PDFium",
+     "stand": "offen",
+     "sprint": "s2"
+    },
+    {
+     "titel": "XC-10 Formularfelder und Kommentare über PDFium",
+     "stand": "offen",
+     "sprint": "s2"
+    },
+    {
+     "titel": "XC-11 „Wählen, was man sieht“: Zeilen, Absätze, Hintergrund nicht anklickbar",
+     "stand": "offen",
+     "sprint": "s3"
+    },
+    {
+     "titel": "XC-12 Rechts-nach-links-Text bearbeiten",
+     "stand": "offen",
+     "sprint": "s3"
+    },
+    {
+     "titel": "XC-13 Zeichen- und Wortabstände erhalten, komplexe Schriften",
+     "stand": "offen",
+     "sprint": "s3"
+    },
+    {
+     "titel": "XC-14 Links anlegen und bearbeiten",
+     "stand": "offen",
+     "sprint": "s4"
+    },
+    {
+     "titel": "XC-15 Bild zuschneiden, Ebenen ein/aus",
+     "stand": "offen",
+     "sprint": "s4"
+    },
+    {
+     "titel": "XC-16 Formularberechnungen ohne eval",
+     "stand": "offen",
+     "sprint": "s4"
+    },
+    {
+     "titel": "XC-17 Eigene UI-Bausteine, Sperre gegen rohe Bedienelemente",
+     "stand": "offen",
+     "sprint": "s4"
+    },
+    {
+     "titel": "XC-18 Properties-Leiste, Mini-Toolbar, Optionsleisten",
+     "stand": "offen",
+     "florian": "Properties-Kopf Variante A mit „…“-Menü? B/I/U/S überall als Knöpfe?",
+     "sprint": "s4"
+    },
+    {
+     "titel": "XC-19 Tastenkürzel wie PDF-XChange",
+     "stand": "offen",
+     "florian": "N/Shift+N gegen Tippen auf ausgewähltem Text – wie soll es sein?",
+     "sprint": "s4"
+    },
+    {
+     "gruppe": "Umfang",
+     "titel": "Reste der Nicht-PDF-Tools (z. B. Text Encryption)",
+     "stand": "unklar",
+     "florian": "Gehören sie noch zu „Fernwork ist durch“?"
+    }
+   ],
+   "sprints": [
+    {
+     "id": "s1",
+     "titel": "Sprint 1 · tägliche Störer",
+     "stand": "fertig",
+     "geplantTage": 1,
+     "start": "2026-11-14T18:58",
+     "ende": "2026-11-15T15:40",
+     "notiz": "Zeiten vom ersten bis zum letzten gelandeten Stand. Zwei Reste wandern mit: Zoom-Ziel 0,1 s und zwei kleine Bedienfehler."
+    },
+    {
+     "id": "s2",
+     "titel": "Sprint 2 · dichte Pläne flüssig",
+     "stand": "offen",
+     "geplantTage": [
+      1.5,
+      2
+     ],
+     "start": "2026-11-15T13:36",
+     "gebrauchtTage": 0.24,
+     "notiz": "Am 15.11. begonnen und nach knapp 6 Stunden angehalten: Der Umbau der Textbearbeitung kommt zuerst."
+    },
+    {
+     "id": "s3",
+     "titel": "Sprint 3 · Auswahl und Text",
+     "stand": "offen",
+     "geplantTage": 1.5
+    },
+    {
+     "id": "s4",
+     "titel": "Sprint 4 · Funktionen und Bedienung",
+     "stand": "offen",
+     "geplantTage": 2
+    }
+   ]
+  },
+  {
+   "id": "fable-pruefung",
+   "bereich": "fernwork",
+   "titel": "Fable-Prüfung",
+   "stand": "offen",
+   "kurz": "Unabhängige Prüfung von Fernwork in etwa drei Verbesserungsrunden, Maßstab sind XC-1 bis XC-19. Eine erste Code-Prüfung durch zwei Modelle lief am 15.11. und hat den Umbau ausgelöst.",
+   "blocker": "Startet, wenn der PDF-Editor durch ist.",
+   "haengtAn": [
+    "fernwork-pdf"
+   ],
+   "teilziele": [
+    {
+     "titel": "Runde 1",
+     "stand": "offen"
+    },
+    {
+     "titel": "Runde 2",
+     "stand": "offen"
+    },
+    {
+     "titel": "Runde 3",
+     "stand": "offen"
+    }
+   ]
+  },
+  {
+   "id": "ui-library",
+   "bereich": "fernwork",
+   "titel": "berg:work UI-Library",
+   "stand": "fertig",
+   "kurz": "Der Schliff-Look von Projects ist die gemeinsame UI-Core für alle berg:work-Apps; Projects, PDF und Image nutzen sie.",
+   "haengtAn": [],
+   "teilziele": [
+    {
+     "gruppe": "Schon erreicht",
+     "titel": "Schliff-Gestaltung abgenommen (4 Runden)",
+     "stand": "fertig"
+    },
+    {
+     "gruppe": "Schon erreicht",
+     "titel": "Projects 0.1.2 im Schliff-Look veröffentlicht",
+     "stand": "fertig"
+    },
+    {
+     "gruppe": "Schon erreicht",
+     "titel": "Bildvergleich für Projects: 12 Ansichten in 20 s",
+     "stand": "fertig"
+    }
+   ],
+   "sprints": [
+    {
+     "id": "a",
+     "titel": "Etappe a) Wortmarke und Werkzeichen in Projects",
+     "stand": "fertig",
+     "geplantTage": 0.5
+    },
+    {
+     "id": "b",
+     "titel": "Etappe b) Schliff als gemeinsames Paket, Projects bleibt pixelgleich",
+     "stand": "fertig",
+     "geplantTage": [
+      2,
+      3
+     ]
+    },
+    {
+     "id": "c",
+     "titel": "Etappe c) bisherige berg:work-UI auf die neue Core",
+     "stand": "fertig",
+     "geplantTage": [
+      1,
+      2
+     ]
+    },
+    {
+     "id": "d",
+     "titel": "Etappe d) berg:work-PDF-Look nach Mockup",
+     "stand": "fertig",
+     "geplantTage": [
+      2,
+      3
+     ]
+    },
+    {
+     "id": "e",
+     "titel": "Etappe e) berg:work Image auf die Core",
+     "stand": "fertig",
+     "geplantTage": 2
+    }
+   ]
+  },
+  {
+   "id": "desktop-apps",
+   "bereich": "fernwork",
+   "titel": "berg:work PDF & Image als Desktop-Apps",
+   "stand": "laeuft",
+   "kurz": "PDF und Image werden echte Desktop-Apps neben Projects, auf der neuen UI-Core.",
+   "blocker": "PDF: Vorbereitung fertig, Bau und Update-Test ab Mo 16.11. Image: Look ist fertig, Desktop-Bau danach.",
+   "haengtAn": [
+    "ui-library"
+   ],
+   "teilziele": [
+    {
+     "titel": "Grundgerüst beider Apps (Look und Desktop-Hülle)",
+     "stand": "fertig"
+    },
+    {
+     "titel": "berg:work PDF auf der UI-Core",
+     "stand": "laeuft",
+     "notiz": "Look auf main, Desktop-Bau ab Mo 16.11."
+    },
+    {
+     "titel": "berg:work Image auf der UI-Core",
+     "stand": "laeuft",
+     "notiz": "Look auf main seit 15.11."
+    }
+   ],
+   "florian": "Startversion für PDF (Vorschlag 0.2.0), eigener Signaturschlüssel, Schlüssel erzeugen und Zugang zum Download-Speicher"
+  },
+  {
+   "id": "webseiten",
+   "bereich": "fernwork",
+   "titel": "Webseiten",
+   "stand": "laeuft",
+   "kurz": "Die neue bergwork.app ist seit 15.11. 19:52 live, Projects 0.1.3 steht seit 21:11 zum Download bereit. Als Nächstes wird gehirn.flofischer.org aktualisiert.",
+   "blocker": "Projects 0.1.3 ist für Windows bisher nur in einer Windows-Nachbildung unter Linux geprüft (Installation ohne Adminrechte, Update von 0.1.2, Deinstallation). Der Start auf einem echten Windows-Rechner steht aus. Der Installer ist noch nicht signiert, Windows warnt deshalb beim ersten Start.",
+   "haengtAn": [
+    "desktop-apps"
+   ],
+   "teilziele": [
+    {
+     "titel": "bergwork.app: neue Seite gebaut und von Florian freigegeben",
+     "stand": "fertig"
+    },
+    {
+     "titel": "bergwork.app: neue Seite live",
+     "stand": "fertig",
+     "notiz": "Live seit 15.11. 19:52, alle Seiten deutsch und englisch erreichbar"
+    },
+    {
+     "titel": "Projects 0.1.3 als Download (neues Icon, neue Wortmarke)",
+     "stand": "fertig",
+     "notiz": "Seit 15.11. 21:11 für Windows und Linux; Update von 0.1.2 auf 0.1.3 geprüft"
+    },
+    {
+     "titel": "bergwork.app: Bilder und Videos von PDF und Image",
+     "stand": "fertig",
+     "notiz": "PDF- und Image-Seite mit echten Aufnahmen; die drei Tour-Clips von Projects zeigen noch das alte Zeichen"
+    },
+    {
+     "titel": "gehirn.flofischer.org aktualisieren",
+     "stand": "laeuft",
+     "notiz": "Die Projects-Demo leitet seit 15.11. auf bergwork.app weiter"
+    }
+   ]
+  },
+  {
+   "id": "enterprise",
+   "bereich": "fernwork",
+   "titel": "„For Enterprise“-Knopf",
+   "stand": "offen",
+   "kurz": "Auf der Webseite und in den Apps: erklärt die Nutzung und wann man ein Angebot anfragt.",
+   "blocker": "Braucht die neue Webseite und die Desktop-Apps.",
+   "haengtAn": [
+    "webseiten",
+    "desktop-apps"
+   ],
+   "teilziele": [
+    {
+     "titel": "Fernwork for Business gebaut",
+     "stand": "fertig"
+    },
+    {
+     "titel": "Enterprise-Dialog in Fernwork",
+     "stand": "fertig"
+    },
+    {
+     "titel": "Knopf auf der Webseite",
+     "stand": "offen"
+    },
+    {
+     "titel": "Knopf in den Apps",
+     "stand": "offen"
+    }
+   ]
+  },
+  {
+   "id": "personendaten",
+   "bereich": "fernwork",
+   "titel": "Repo ohne Personendaten",
+   "stand": "offen",
+   "kurz": "Das Monorepo wird vor der Veröffentlichung von personenbezogenen Daten gesäubert, auch in der Historie.",
+   "blocker": "Noch nicht untersucht. Ob die Historie bereinigt oder frisch begonnen wird, entscheidet Florian.",
+   "florian": "Git-Historie bereinigen oder frisch beginnen?",
+   "haengtAn": [],
+   "teilziele": [
+    {
+     "titel": "Repo und Historie untersuchen",
+     "stand": "offen"
+    },
+    {
+     "titel": "Entscheidung: Historie bereinigen oder neu beginnen",
+     "stand": "offen"
+    },
+    {
+     "titel": "Säubern",
+     "stand": "offen"
+    }
+   ]
+  },
+  {
+   "id": "lizenz",
+   "bereich": "fernwork",
+   "titel": "Veröffentlichung unter modified BSL",
+   "stand": "offen",
+   "kurz": "Das Monorepo wird quelloffen unter der besprochenen Lizenz veröffentlicht.",
+   "blocker": "Wartet auf alles davor: PDF-Editor, Prüfung, Apps, Webseiten, Säubern, Enterprise-Knopf.",
+   "florian": "Gibt die Veröffentlichung frei.",
+   "haengtAn": [
+    "fable-pruefung",
+    "personendaten",
+    "enterprise"
+   ],
+   "teilziele": [
+    {
+     "titel": "Lizenz gewählt: modified BSL",
+     "stand": "fertig"
+    },
+    {
+     "titel": "Lizenztexte im Repo",
+     "stand": "unklar"
+    },
+    {
+     "titel": "Freigabe durch Florian",
+     "stand": "offen"
+    }
+   ]
+  },
+  {
+   "id": "bundles",
+   "bereich": "fernwork",
+   "titel": "Bundles mit Updater, GitHub-Link",
+   "stand": "offen",
+   "kurz": "berg:work-Apps als Downloads mit eingebautem Updater (wie Projects) auf der Webseite, GitHub-Link prominent.",
+   "blocker": "Wartet auf die Veröffentlichung.",
+   "haengtAn": [
+    "lizenz"
+   ],
+   "teilziele": [
+    {
+     "titel": "Updater in Projects (Vorbild)",
+     "stand": "fertig"
+    },
+    {
+     "titel": "Bundle berg:work PDF",
+     "stand": "offen"
+    },
+    {
+     "titel": "Bundle berg:work Image",
+     "stand": "offen"
+    },
+    {
+     "titel": "GitHub-Link prominent auf den Webseiten",
+     "stand": "offen"
+    }
+   ]
+  },
+  {
+   "id": "fernwork-release",
+   "bereich": "fernwork",
+   "ziel": true,
+   "titel": "Fernwork-Release",
+   "stand": "offen",
+   "kurz": "Das ganze Fernwork-Monorepo samt berg:work quelloffen, beworben und herunterladbar.",
+   "haengtAn": [
+    "bundles"
+   ],
+   "teilziele": []
+  },
+  {
+   "id": "viewer",
+   "bereich": "himmelcad",
+   "titel": "Viewer",
+   "stand": "laeuft",
+   "kurz": "Ziel ist der beste Viewer überhaupt. Bei Punktwolken ist das erste Ziel erreicht.",
+   "blocker": "Import/Export-Modul ist noch kaum gebaut: Von den öffentlichen Testfällen lädt bisher die fremde Punktwolke; Splats, DGM, CAD und 3D Tiles kommen, sobald dort Zeit hineingeht. Textur-Laufzeitkompression: Einbau-Entscheidung offen.",
+   "haengtAn": [],
+   "teilziele": [
+    {
+     "titel": "Punktwolken mindestens so gut wie der alte Viewer",
+     "stand": "fertig"
+    },
+    {
+     "titel": "Klick-Abfrage schneller (Mesh 74 → 29 ms, Punktwolke 36 → 21 ms)",
+     "stand": "fertig"
+    },
+    {
+     "titel": "Mauszeiger in der Fahrt günstig (Pick 11,5–18,6 → 7,4–7,7 ms)",
+     "stand": "fertig"
+    },
+    {
+     "titel": "Kamerafahrt verfeinern, schnellerer Ladepfad (Zoomfahrt fertig 2,3–2,6 s statt 2,5–3,7 s)",
+     "stand": "fertig"
+    },
+    {
+     "titel": "Texturierte Meshes: GPU-fertige Texturen (BC1)",
+     "stand": "laeuft",
+     "notiz": "Encoder fertig und bit-gleich; Einbau-Entscheidung offen"
+    },
+    {
+     "titel": "Fremde Punktwolke lädt",
+     "stand": "fertig"
+    },
+    {
+     "titel": "3D Tiles laden",
+     "stand": "offen",
+     "notiz": "Import/Export-Modul noch nicht ausgebaut"
+    },
+    {
+     "titel": "Gaussian Splats laden",
+     "stand": "offen",
+     "notiz": "Import/Export-Modul noch nicht ausgebaut"
+    },
+    {
+     "titel": "DGM- und CAD-Import laden",
+     "stand": "offen",
+     "notiz": "Import/Export-Modul noch nicht ausgebaut"
+    },
+    {
+     "titel": "Niveau Trimble RealWorks (Punktwolken) und ArcGIS (Meshes)",
+     "stand": "offen",
+     "notiz": "Langfristiges Ziel"
+    }
+   ]
+  },
+  {
+   "id": "builder-mockui",
+   "bereich": "himmelcad",
+   "titel": "Builder-Mock-UI",
+   "stand": "laeuft",
+   "kurz": "Florian baut mit viel eigenem Input eine umfangreiche Mock-UI; sie gibt vor, wie kritische Funktionen bedient werden.",
+   "blocker": "Florians Zeit. Der Leitstand führt diesen Thread nicht und kennt den Fortschritt nur grob.",
+   "florian": "Mock-UI ist direkte Arbeit mit Florian.",
+   "haengtAn": [],
+   "teilziele": [
+    {
+     "titel": "Mock-UI der kritischen Funktionen",
+     "stand": "laeuft"
+    },
+    {
+     "titel": "Beispiele, damit Agents nicht gezeigte Funktionen in Florians Sinn bauen",
+     "stand": "offen"
+    },
+    {
+     "titel": "Fortschritt im Detail",
+     "stand": "unklar"
+    }
+   ]
+  },
+  {
+   "id": "photolab",
+   "bereich": "himmelcad",
+   "titel": "PhotoLab",
+   "stand": "laeuft",
+   "kurz": "Backend ist weit; der lange Testlauf soll es mit starken Ergebnissen und Laufzeiten bestätigen. Die Oberfläche wird aus dem Builder übernommen.",
+   "blocker": "Vollauf 2 am Laptop ist seit Mo 16.11. 09:08 komplett durch, alle neun Schritte, zum ersten Mal auch der Splat (15 000 Durchgänge, 5,9 Mio. Gaussians, 5 h 05 min). Bis zur dichten Wolke 6 h 30 min, am PC 6 h 18 min. Einzeln: Ausrichtung 19 min, Tiefenkarten 5 h 22 min, dichte Wolke 49 min, Geländemodelle 9 min, Orthofoto 7 min, Mesh 34 min. Die Auswertung zeigt drei Baustellen: Die dichte Wolke liest 34-mal mehr von der Platte als nötig (Umbau ist geschrieben, Beleg in den Nächten bis Mi 18.11.), die Tiefenkarten sind der größte Brocken, und der Splat braucht Arbeitsspeicher, den die Speicherprüfung nicht sah (neue Obergrenze gebaut, Beleg Di 17.11. früh). Die Agentenarbeit an PhotoLab pausiert seit 16.11. 09:16 wegen des Token-Budgets; Rechenläufe gehen weiter. Die Oberfläche wartet auf die Builder-Mock-UI und den Viewer.",
+   "haengtAn": [
+    "builder-mockui",
+    "viewer"
+   ],
+   "teilziele": [
+    {
+     "gruppe": "Backend",
+     "titel": "Verbesserungen gebaut",
+     "stand": "fertig"
+    },
+    {
+     "gruppe": "Backend",
+     "titel": "Speicher-Zulassung nach freiem Speicher (schwere Teile nie überbucht)",
+     "stand": "fertig"
+    },
+    {
+     "gruppe": "Backend",
+     "titel": "Vollauf 1 am PC: 8 von 9 Schritten durch (Splat am Speicherdeckel abgebrochen, kommt im Laptop-Lauf)",
+     "stand": "fertig"
+    },
+    {
+     "gruppe": "Backend",
+     "titel": "Vollauf 2 am Laptop",
+     "stand": "fertig",
+     "notiz": "15.11. 20:38 bis 16.11. 09:08, alle neun Schritte durch, auch der Splat"
+    },
+    {
+     "gruppe": "Backend",
+     "titel": "Ergebnisse im Viewer messen",
+     "stand": "laeuft",
+     "notiz": "Das Projekt aus dem Laptop-Lauf lädt im Viewer mit allen Produkten; die Messung läuft am 16.11."
+    },
+    {
+     "gruppe": "Backend",
+     "titel": "Mesh ohne Kamerapositionen",
+     "stand": "unklar"
+    },
+    {
+     "gruppe": "Backend",
+     "titel": "Orthomosaik mit Quelle Fotos oder Punktwolke",
+     "stand": "unklar"
+    },
+    {
+     "gruppe": "Oberfläche",
+     "titel": "Oberfläche komplett aus der Builder-Mock-UI",
+     "stand": "haengt",
+     "notiz": "Wartet auf die Mock-UI"
+    },
+    {
+     "gruppe": "Oberfläche",
+     "titel": "Punktwolken-Import wie in der Builder-Mock-UI",
+     "stand": "unklar"
+    }
+   ]
+  },
+  {
+   "id": "builder",
+   "bereich": "himmelcad",
+   "titel": "Builder",
+   "stand": "offen",
+   "kurz": "Florians Herzensprodukt. Was wenig Input braucht, soll vorab entstehen; der Rest möglichst autonom, sobald die Mock-UI steht.",
+   "blocker": "Wartet auf die Mock-UI.",
+   "haengtAn": [
+    "builder-mockui",
+    "viewer"
+   ],
+   "teilziele": [
+    {
+     "titel": "Teile mit wenig Input vorziehen",
+     "stand": "unklar"
+    },
+    {
+     "titel": "Rest autonom nach der Mock-UI",
+     "stand": "offen"
+    },
+    {
+     "titel": "Gehört der Builder zum ersten HimmelCAD-Release?",
+     "stand": "unklar"
+    }
+   ]
+  },
+  {
+   "id": "assembler",
+   "bereich": "himmelcad",
+   "titel": "Assembler",
+   "stand": "offen",
+   "kurz": "Am weitesten von allen HimmelCAD-Teilen, mit klar definierten Todos. Niedrige Priorität.",
+   "blocker": "Läuft nur, wenn Rechner- und Agent-Kapazität frei ist.",
+   "haengtAn": [],
+   "teilziele": [
+    {
+     "titel": "Klar definierte Todos abarbeiten",
+     "stand": "offen"
+    },
+    {
+     "titel": "Genauer Stand",
+     "stand": "unklar"
+    }
+   ]
+  },
+  {
+   "id": "himmelcad-release",
+   "bereich": "himmelcad",
+   "ziel": true,
+   "titel": "HimmelCAD-Release",
+   "stand": "offen",
+   "kurz": "PhotoLab, Builder und Assembler auf Release-Stand.",
+   "haengtAn": [
+    "photolab",
+    "builder",
+    "assembler"
+   ],
+   "teilziele": []
+  },
+  {
+   "id": "bergwork-capture",
+   "bereich": "spaeter",
+   "titel": "berg:work Capture",
+   "stand": "offen",
+   "kurz": "Ein Greenshot-Klon für Windows, Linux und Mac in berg:work-Optik, Funktionsweise sonst praktisch gleich.",
+   "blocker": "Ganz niedrige Priorität: kommt erst, wenn die jetzigen Sachen voll fertig und veröffentlicht sind.",
+   "haengtAn": [],
+   "teilziele": [
+    {
+     "titel": "Bildschirmaufnahme wie Greenshot (Bereich, Fenster, ganzer Schirm) auf Windows, Linux, Mac",
+     "stand": "offen"
+    },
+    {
+     "titel": "Eingebauter Editor: Fernwork Image (Standard, nicht Pro) im berg:work-Look statt des Greenshot-Editors",
+     "stand": "offen"
+    },
+    {
+     "titel": "Zusätzlich: Bildschirmvideos",
+     "stand": "offen"
+    }
+   ]
+  },
+  {
+   "id": "bergwork-text",
+   "bereich": "spaeter",
+   "titel": "berg:work Text",
+   "stand": "offen",
+   "kurz": "Ein Notepad++-Klon mit den wichtigsten Funktionen; Aufbau der Oberfläche wie Notepad++, im berg:work-Look.",
+   "blocker": "Ganz niedrige Priorität: kommt erst, wenn die jetzigen Sachen voll fertig und veröffentlicht sind.",
+   "haengtAn": [],
+   "teilziele": [
+    {
+     "titel": "Oberfläche im Aufbau wie Notepad++",
+     "stand": "offen"
+    },
+    {
+     "titel": "Vertikale Textauswahl (Spaltenmodus)",
+     "stand": "offen"
+    },
+    {
+     "titel": "Import von fast allen Formaten",
+     "stand": "offen"
+    },
+    {
+     "titel": "Umfang festlegen: welche tieferen Notepad++-Funktionen gebraucht werden und welche nicht",
+     "stand": "offen"
+    }
+   ]
+  },
+  {
+   "id": "fernbot",
+   "bereich": "spaeter",
+   "titel": "Fernbot",
+   "stand": "offen",
+   "kurz": "Ein Grokbot-Klon, der so viel wie möglich auf T3 Code aufbaut und übernimmt, aber den Grokbot-Aufbau hat: Agents statt Threads.",
+   "blocker": "Ganz niedrige Priorität: kommt erst, wenn die jetzigen Sachen voll fertig und veröffentlicht sind.",
+   "haengtAn": [],
+   "teilziele": [
+    {
+     "titel": "Aufbau wie Grokbot: Agents statt Threads, auf T3 Code als Basis",
+     "stand": "offen"
+    },
+    {
+     "titel": "Mobil: Threads gleichen sich auch im Hintergrund ab, kein Antippen und Warten je Thread",
+     "stand": "offen"
+    }
+   ]
+  }
+ ]
 }
