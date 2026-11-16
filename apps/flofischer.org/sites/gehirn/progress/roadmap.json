@@ -1,5 +1,5 @@
 {
-  "standVom": "2026-11-16T07:30",
+  "standVom": "2026-11-16T07:55",
   "bereiche": [
     {
       "id": "fernwork",
@@ -20,8 +20,8 @@
       "bereich": "fernwork",
       "titel": "Umbau: eine Identität, ein Zustand",
       "stand": "laeuft",
-      "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist. Geplant sind sechs Sprints in 15 Stufen, 8–12 Kalendertage. In der ersten Nacht (15./16.11.) sind vier Stufen ausgeliefert worden, mit 5,2 statt der geplanten 25–38 Agentenstunden.",
-      "blocker": "Stand Mo 16.11. 07:30: Zwei gemeinsam verschobene blaue Zeilen bleiben jetzt blau. Eine Sitzung mit Florians Abläufen hat Fehler gefunden, die schon vorher da waren: Klickt man zwei Stilknöpfe direkt nacheinander, geht die zweite Änderung verloren (mit zwei Sekunden Pause nicht; wird in U2 behoben). Nach Fett und Unterstreichen scheitert der Wechsel der Schrift mit einer Fehlermeldung (eigener Fix nach U2). Weiter offen: Die Leiste verschwindet beim Tippen und Doppelklick zeitweise (U3), der Auswahlrahmen wächst beim Unterstreichen (U4). Die dritte Stufe von U1 wird größer als geplant; ihr erster Teil ist gebaut (1,6 statt 7–10 Agentenstunden) und in der Endprüfung, der Rest ist auf 12–18 Agentenstunden geschätzt. Bis Do 19.11. reicht das Budget für U0 bis U2.",
+      "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist. Geplant sind sechs Sprints in 15 Stufen, 8–12 Kalendertage. In der ersten Nacht (15./16.11.) und am Morgen danach sind fünf Stufen ausgeliefert worden, mit 6,8 statt der geplanten 32–48 Agentenstunden.",
+      "blocker": "Stand Mo 16.11. 07:55: Zwei gemeinsam verschobene blaue Zeilen bleiben jetzt blau. Eine Sitzung mit Florians Abläufen hat Fehler gefunden, die schon vorher da waren: Klickt man zwei Stilknöpfe direkt nacheinander, geht die zweite Änderung verloren (mit zwei Sekunden Pause nicht; wird in U2 behoben). Nach Fett und Unterstreichen scheitert der Wechsel der Schrift mit einer Fehlermeldung (eigener Fix nach U2). Weiter offen: Die Leiste verschwindet beim Tippen und Doppelklick zeitweise (U3), der Auswahlrahmen wächst beim Unterstreichen (U4). Die dritte Stufe von U1 wird größer als geplant; ihr erster Teil ist seit 07:52 ausgeliefert (1,6 statt 7–10 Agentenstunden), der Rest läuft und ist auf 12–18 Agentenstunden geschätzt. Bis Do 19.11. reicht das Budget für U0 bis U2.",
       "haengtAn": [],
       "sprints": [
         {
@@ -59,7 +59,7 @@
             2,
             3
           ],
-          "notiz": "Vier Stufen, 26–39 Agentenstunden geplant. Stufe 1 (zusätzliche Lesedaten) ausgeliefert 16.11. 00:05: 0,5 statt 6–9 Agentenstunden; das Öffnen einer Planseite mit 43 518 Objekten wird 0,8 % langsamer (2 812 → 2 834 ms). Stufe 2 (anklickbare Texte kommen aus der Liste der PDF-Bibliothek, hinter einem Schalter, der aus ist) ausgeliefert 16.11. 05:23: 2,5 statt 8–12 Agentenstunden, am Produkt ändert sich dadurch noch nichts. Stufe 3 läuft seit 05:23 in zwei Teilen und wächst auf 17–23 Agentenstunden, geplant waren 8–12: Leiste, Seitenpanel und Ebenen müssen dieselbe Textliste lesen, bevor der Schalter angeht, und Seiten mit über 50 000 Objekten brauchen einen eigenen Textabruf. Teil 1 ist seit 16.11. 07:00 gebaut (1,6 statt 7–10 Agentenstunden) und in der Endprüfung: Mit dem Schalter ist eine Zeile auf der Seite, in der Leiste, im Seitenpanel und in der Ebenenliste dasselbe Objekt; die Fußzeile „Seite 1“ steht einmal statt zweimal in der Ebenenliste, und das Farbfeld einer blauen Zeile zeigt Blau statt fast Schwarz. Teil 2 (bis zum Einschalten) ist auf 12–18 Agentenstunden geschätzt.",
+          "notiz": "Vier Stufen, 26–39 Agentenstunden geplant. Stufe 1 (zusätzliche Lesedaten) ausgeliefert 16.11. 00:05: 0,5 statt 6–9 Agentenstunden; das Öffnen einer Planseite mit 43 518 Objekten wird 0,8 % langsamer (2 812 → 2 834 ms). Stufe 2 (anklickbare Texte kommen aus der Liste der PDF-Bibliothek, hinter einem Schalter, der aus ist) ausgeliefert 16.11. 05:23: 2,5 statt 8–12 Agentenstunden, am Produkt ändert sich dadurch noch nichts. Stufe 3 läuft seit 05:23 in zwei Teilen und wächst auf 17–23 Agentenstunden, geplant waren 8–12: Leiste, Seitenpanel und Ebenen müssen dieselbe Textliste lesen, bevor der Schalter angeht, und Seiten mit über 50 000 Objekten brauchen einen eigenen Textabruf. Teil 1 ausgeliefert 16.11. 07:52 (1,6 statt 7–10 Agentenstunden), der Schalter bleibt aus: Mit dem Schalter ist eine Zeile auf der Seite, in der Leiste, im Seitenpanel und in der Ebenenliste dasselbe Objekt; die Fußzeile „Seite 1“ steht einmal statt zweimal in der Ebenenliste, und das Farbfeld einer blauen Zeile zeigt Blau statt fast Schwarz. Teil 2 (bis zum Einschalten) läuft seit 07:52 und ist auf 12–18 Agentenstunden geschätzt.",
           "start": "2026-11-15T22:27"
         },
         {
@@ -70,7 +70,7 @@
             2,
             3
           ],
-          "notiz": "Vier Stufen, 24–36 Agentenstunden geplant. Der Zustand liegt heute an 14 Stellen mit rund 75 Schreib- und 250 Lesestellen. Stufe 1 (keine erfundenen Werte mehr schreiben) ausgeliefert 16.11. 01:44: 0,9 statt 5–8 Agentenstunden. Zwei gemeinsam verschobene blaue Zeilen bleiben blau; vorher wurden sie heller, weil die Farbe aus dem Bildschirmbild gelesen wurde. Stufe 2 folgt nach der dritten Stufe von U1, weil beide das Seitenpanel umbauen.",
+          "notiz": "Vier Stufen, 24–36 Agentenstunden geplant. Der Zustand liegt heute an 14 Stellen mit rund 75 Schreib- und 250 Lesestellen. Stufe 1 (keine erfundenen Werte mehr schreiben) ausgeliefert 16.11. 01:44: 0,9 statt 5–8 Agentenstunden. Zwei gemeinsam verschobene blaue Zeilen bleiben blau; vorher wurden sie heller, weil die Farbe aus dem Bildschirmbild gelesen wurde. Stufe 2 (eine gemeinsame Lesesicht für Leiste und Seitenpanel, dazu die Regel „die Farbe ist immer bestimmt“) läuft seit 16.11. 07:52, geplant 6–9 Agentenstunden.",
           "start": "2026-11-15T23:51"
         },
         {
