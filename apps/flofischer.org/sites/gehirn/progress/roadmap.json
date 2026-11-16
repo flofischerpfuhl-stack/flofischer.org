@@ -1,5 +1,5 @@
 {
- "standVom": "2026-11-16T13:35",
+ "standVom": "2026-11-16T16:35",
  "bereiche": [
   {
    "id": "fernwork",
@@ -21,7 +21,7 @@
    "titel": "Umbau: eine Identität, ein Zustand",
    "stand": "laeuft",
    "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist. Geplant sind sechs Sprints in 15 Stufen, 8–12 Kalendertage. In der ersten Nacht (15./16.11.) und am Morgen danach sind fünf Stufen ausgeliefert worden, mit 6,8 statt der geplanten 32–48 Agentenstunden.",
-   "blocker": "Stand Mo 16.11. 13:35: Der erste Teil der dritten U1-Stufe ist seit 07:52 ausgeliefert (1,6 statt 7–10 Agentenstunden). Zehn Messpaare alt gegen neu auf einem großen Plan zeigen keine Verlangsamung. Die erste Stufe von U2 (Leiste und Seitenpanel lesen aus einer gemeinsamen Quelle) ist in 2,3 statt 6–9 Agentenstunden gebaut, aber noch nicht ausgeliefert: Auf sehr großen Seiten konnte eine Aktion endlos warten; der Nachtrag ist gebaut (Hinweiszeile nach 0,2 s statt 15 s ohne Reaktion), die Abschlussprüfung ist grün bis auf einen Zeitwächter (Fett: 152 ms bei Budget 150), der gerade nachgemessen wird. Sichtbare Wirkung: Unterstreichen direkt nach dem Öffnen einer dichten Seite klappt nach etwa einer Sekunde, statt mit einer Fehlermeldung zu enden; unbekannte Werte bleiben leer statt 12 pt und Fast-Schwarz. Der Rest von U1 (geschätzt 12–18 Agentenstunden) läuft seit 07:52; offen ist dort ein Fall, in dem ein Löschen auf einer dichten Seite nicht im Verlauf ankommt. Aus Florians Sitzung weiter offen: Zwei Stilknöpfe direkt nacheinander verlieren die zweite Änderung (U2), der Schriftwechsel nach Fett und Unterstreichen scheitert (eigener Fix nach U2), die Leiste verschwindet beim Tippen zeitweise (U3), der Auswahlrahmen wächst beim Unterstreichen (U4). Neu eingeplant vor der Veröffentlichung: Textfüllung aus Muster oder Verlauf erkennen. Bis Do 19.11. reicht das Budget für U0 bis U2.",
+   "blocker": "Stand Mo 16.11. 16:35: Der erste Teil der dritten U1-Stufe ist seit 07:52 ausgeliefert. Die erste Stufe von U2 (Leiste und Seitenpanel lesen aus einer gemeinsamen Quelle) ist gebaut und nicht langsamer als der ausgelieferte Stand: In sechs weiteren Messpaaren braucht „Fett“ im Median 100 statt 117 ms; die 152 ms vom Mittag waren Streuung. Ausgeliefert ist sie noch nicht, weil eine zweite, unabhängige Code-Prüfung einen Fehler in der neuen Warte-Logik gefunden hat: Eine Stiländerung, die auf das Lesen einer großen Seite wartet, konnte nach einem Klick auf einen anderen Text diesen treffen. Das ist behoben und nachgeprüft. Ein Restpunkt wird gerade nachgebessert (Fett oder Kursiv prüfen nach dem Warten noch nicht, ob der Schriftschnitt verfügbar ist). Auch der zweite Teil der dritten U1-Stufe ist nach seiner Code-Prüfung in der Nachbesserung. Ab jetzt bekommt jede Stufe mit Verhaltensänderung eine zweite Prüfung. Sichtbare Wirkung von U2, sobald ausgeliefert: Unterstreichen direkt nach dem Öffnen einer dichten Seite klappt nach etwa einer Sekunde; auf sehr großen Seiten kommt nach 0,2 s eine Hinweiszeile statt 15 s ohne Reaktion; unbekannte Werte bleiben leer statt 12 pt und Fast-Schwarz. Als Nächstes eingeplant: der Fix für zwei Stilknöpfe direkt nacheinander (die zweite Änderung geht heute verloren), danach die Erkennung von Textfüllung aus Muster oder Verlauf über eine kleine Erweiterung der PDF-Bibliothek. Aus Florians Sitzung weiter offen: Schriftwechsel nach Fett und Unterstreichen scheitert (nach U2), die Leiste verschwindet beim Tippen zeitweise (U3), der Auswahlrahmen wächst beim Unterstreichen (U4).",
    "haengtAn": [],
    "sprints": [
     {
@@ -590,13 +590,13 @@
    "titel": "Repo ohne Personendaten",
    "stand": "offen",
    "kurz": "Das Monorepo wird vor der Veröffentlichung von personenbezogenen Daten gesäubert, auch in der Historie.",
-   "blocker": "Noch nicht untersucht. Ob die Historie bereinigt oder frisch begonnen wird, entscheidet Florian.",
+   "blocker": "Untersucht am 16.11.: Das ganze Repo samt Historie ist durchsucht. Es gibt keine Passwörter, privaten Schlüssel oder Konfigurationsdateien mit Zugangsdaten. Vor einer Veröffentlichung sind aber Aufräumarbeiten nötig, geschätzt 1 bis 1,5 Arbeitstage am heutigen Stand. Empfehlung der Untersuchung: mit frischer Historie veröffentlichen und das alte Repo privat als Archiv behalten; das Repo wäre dann etwa 340 statt 515 MB groß. Die Entscheidung trifft Florian.",
    "florian": "Git-Historie bereinigen oder frisch beginnen?",
    "haengtAn": [],
    "teilziele": [
     {
      "titel": "Repo und Historie untersuchen",
-     "stand": "offen"
+     "stand": "fertig"
     },
     {
      "titel": "Entscheidung: Historie bereinigen oder neu beginnen",
@@ -683,9 +683,19 @@
    "titel": "Viewer",
    "stand": "laeuft",
    "kurz": "Ziel ist der beste Viewer überhaupt. Bei Punktwolken ist das erste Ziel erreicht.",
-   "blocker": "Stand Mo 16.11. 13:35, gemessen auf einem Laptop mit 4-GB-Grafikkarte am Projekt aus dem PhotoLab-Lauf: Dichte Wolke beim Umkreisen 23 → 32 Bilder/s, importiertes Geländemodell 12 → 35 Bilder/s (beides ausgeliefert). Meshes und Orthomosaik laufen einzeln mit 59 Bildern/s. Schwachstelle: Mit allen Produkten zugleich sichtbar sind es nur 9,5 Bilder/s, weil PhotoLabs Höhenmodelle in voller Auflösung gezeichnet werden (eins allein 15 Bilder/s). Ein Dreiecksbudget dagegen ist gebaut und wird gemessen. Die Splat-Verbesserung wirkt am Bildschirm noch nicht (fremder Splat 8–10 Bilder/s); Nacharbeit offen. Import/Export-Modul ist erst teilweise gebaut. Textur-Laufzeitkompression: Einbau-Entscheidung offen.",
+   "blocker": "Stand Mo 16.11. 16:35: Der Viewer wird grundlegend umgebaut. Zwei Punkte sind gesetzt: Erstens wird die Bewegung vom Zeichnen der Szene entkoppelt (die Szene entsteht über mehrere Takte in einem gehaltenen Bild mit Tiefe, jedes Bildschirmbild wird daraus auf die aktuelle Kamera umgerechnet), damit die Bewegung immer im Bildschirmtakt läuft und schwache Hardware ein etwas älteres Bild zeigt, statt zu ruckeln. Zweitens zeichnet der Renderer künftig in ein eigenes natives Fenster statt im Browser-Teil der App; erst damit wird die dedizierte Grafikkarte eines Laptops nutzbar. Der Umbauplan mit Reihenfolge und Messungen wird gerade geschrieben. Letzter Stand der bisherigen Linie, gemessen auf der integrierten Grafik eines Laptops (nicht auf dessen Grafikkarte) am Projekt aus dem PhotoLab-Lauf: Mit allen Produkten zugleich sichtbar 26 statt 9,8 Bilder/s beim Umkreisen (Dreiecksbudget, ausgeliefert), dichte Wolke 32, importiertes Geländemodell 35, Meshes und Orthomosaik einzeln 59 Bilder/s. Fertig, aber nicht ausgeliefert: zweite Splat-Stufe (am Bildschirm ungemessen), 3D-Tiles-Weg, DXF-Import.",
    "haengtAn": [],
    "teilziele": [
+    {
+     "titel": "Umbau: Bewegung vom Zeichnen der Szene entkoppeln",
+     "stand": "offen",
+     "notiz": "Am 16.11. gesetzt; Plan in Arbeit"
+    },
+    {
+     "titel": "Umbau: Renderer als eigenes natives Fenster (Vulkan, D3D12, Metal)",
+     "stand": "offen",
+     "notiz": "Am 16.11. gesetzt; Plan in Arbeit"
+    },
     {
      "titel": "Punktwolken mindestens so gut wie der alte Viewer",
      "stand": "fertig"
@@ -724,7 +734,7 @@
     {
      "titel": "DGM- und CAD-Import laden",
      "stand": "laeuft",
-     "notiz": "Geländemodell-Import lädt und läuft beim Umkreisen mit 35 statt 12 Bildern/s; CAD offen"
+     "notiz": "Geländemodell-Import lädt und läuft beim Umkreisen mit 35 statt 12 Bildern/s; DXF-Import gebaut, noch nicht ausgeliefert"
     },
     {
      "titel": "Niveau Trimble RealWorks (Punktwolken) und ArcGIS (Meshes)",
@@ -763,7 +773,7 @@
    "titel": "PhotoLab",
    "stand": "laeuft",
    "kurz": "Backend ist weit; der lange Testlauf soll es mit starken Ergebnissen und Laufzeiten bestätigen. Die Oberfläche wird aus dem Builder übernommen.",
-   "blocker": "Vollauf 2 am Laptop ist seit Mo 16.11. 09:08 komplett durch, alle neun Schritte, zum ersten Mal auch der Splat (15 000 Durchgänge, 5,9 Mio. Gaussians, 5 h 05 min). Bis zur dichten Wolke 6 h 30 min, am PC 6 h 18 min. Einzeln: Ausrichtung 19 min, Tiefenkarten 5 h 22 min, dichte Wolke 49 min, Geländemodelle 9 min, Orthofoto 7 min, Mesh 34 min. Die Auswertung zeigt drei Baustellen: Die dichte Wolke liest 34-mal mehr von der Platte als nötig (Umbau ist geschrieben, Beleg in den Nächten bis Mi 18.11.), die Tiefenkarten sind der größte Brocken, und der Splat braucht Arbeitsspeicher, den die Speicherprüfung nicht sah (neue Obergrenze gebaut, Beleg Di 17.11. früh). Die Agentenarbeit an PhotoLab pausiert seit 16.11. 09:16 wegen des Token-Budgets; Rechenläufe gehen weiter. Die Oberfläche wartet auf die Builder-Mock-UI und den Viewer.",
+   "blocker": "Stand Mo 16.11. 16:35. Neue Vorgabe: Eine zugelassene Verarbeitung darf nicht abbrechen, auf keiner Hardware. Zwei unabhängige Prüfungen des Hardware-Teils kommen zum selben Ergebnis: Er entscheidet bisher nur vor dem Start; Tiefenkarten, Mesh und Splat laufen ohne Speichergrenze; unter Windows 11 fällt die Speichererkennung aus; Grafikspeicher wird nur bei einem Hersteller erkannt. Der Umbauplan hat elf Schritte, rund 24 Agententage. Für den Splat ist die Kette schon gebaut (Tests grün, am echten Lauf noch ungemessen): Speicher im Lauf zurücknehmen, nach einem Absturz selbst aus dem letzten Zwischenstand fortsetzen, jede Rücknahme sichtbar im Bericht. Die Prüfung auf der Grafikkarte läuft am 16.11. abends, der Beleg für die Speichergrenze am Di 17.11. früh. In Arbeit: Hardware-Erkennung ohne Hilfsprogramme, Sonde für Grafikspeicher, Plattenbedarf aus gezählten Größen. Leistung: Vollauf 2 am Laptop lief am 16.11. komplett durch (alle neun Schritte, Splat 5 h 05 min, bis zur dichten Wolke 6 h 30 min). Gegen das 34-fache Lesen bei der dichten Wolke sind zwei Umbauten gebaut (Ergebnis im Test bytegleich), die Wirkung wird in den Nächten bis Mi 18.11. gemessen. Standard geändert und ausgeliefert: Lücken in Höhenmodell und Mesh werden gefüllt. Die Oberfläche wartet auf die Builder-Mock-UI und den Viewer.",
    "haengtAn": [
     "builder-mockui",
     "viewer"
@@ -789,6 +799,17 @@
      "titel": "Vollauf 2 am Laptop",
      "stand": "fertig",
      "notiz": "15.11. 20:38 bis 16.11. 09:08, alle neun Schritte durch, auch der Splat"
+    },
+    {
+     "gruppe": "Backend",
+     "titel": "Verarbeitung darf nicht abbrechen: Grenzen für alle Stufen, Rücknahme im Lauf, selbst fortsetzen",
+     "stand": "laeuft",
+     "notiz": "Für den Splat gebaut, am echten Lauf ungemessen; übrige Stufen nach Plan (11 Schritte)"
+    },
+    {
+     "gruppe": "Backend",
+     "titel": "Hardware-Erkennung ohne Hilfsprogramme, auch unter Windows",
+     "stand": "laeuft"
     },
     {
      "gruppe": "Backend",
