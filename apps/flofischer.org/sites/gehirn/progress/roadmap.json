@@ -1,5 +1,5 @@
 {
- "standVom": "2026-11-15T23:51",
+ "standVom": "2026-11-16T04:35",
  "bereiche": [
   {
    "id": "fernwork",
@@ -20,8 +20,8 @@
    "bereich": "fernwork",
    "titel": "Umbau: eine Identität, ein Zustand",
    "stand": "laeuft",
-   "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist. Der Sprintplan steht seit 15.11. 22:24: sechs Sprints, 8–12 Kalendertage.",
-   "blocker": "Stand der Abläufe aus Florians Alltagstest nach dem ersten Sprint, gemessen mit ausgelieferten Einstellungen: Ziehen ganzer Zeilen und doppelter Wörter, Markieren, Knopfzustände, Undo bis zum Original und Arbeiten nach dem Speichern sind in Ordnung. Offen: Die Leiste verschwindet beim Tippen und Doppelklick zeitweise (U3), die Seitenzahl in der Fußzeile zieht das Wort davor mit (U1), zwei gemeinsam verschobene blaue Zeilen werden heller (U2), der Auswahlrahmen wächst beim Unterstreichen (U4). Bis Do 19.11. reicht das Budget für U0 bis U2.",
+   "kurz": "Die Textbearbeitung im PDF-Editor bekommt ein festes Fundament: Jeder Text hat genau eine Kennung, und Leinwand, Leiste und Seitenpanel lesen denselben Zustand. Der PDF-Kern (Schreiben, Journal, Speichern) bleibt, wie er ist. Geplant sind sechs Sprints in 15 Stufen, 8–12 Kalendertage. In der ersten Nacht (15./16.11.) sind drei Stufen ausgeliefert worden, eine vierte ist gebaut.",
+   "blocker": "Stand Mo 16.11. 04:30: Zwei gemeinsam verschobene blaue Zeilen bleiben jetzt blau. Eine Sitzung mit Florians Abläufen hat Fehler gefunden, die schon vorher da waren: Klickt man zwei Stilknöpfe direkt nacheinander, geht die zweite Änderung verloren (mit zwei Sekunden Pause nicht; wird in U2 behoben). Nach Fett und Unterstreichen scheitert der Wechsel der Schrift mit einer Fehlermeldung (eigener Fix nach U2). Weiter offen: Die Leiste verschwindet beim Tippen und Doppelklick zeitweise (U3), der Auswahlrahmen wächst beim Unterstreichen (U4). Die dritte Stufe von U1 wird größer als geplant: 17–23 statt 8–12 Agentenstunden. Bis Do 19.11. reicht das Budget für U0 bis U2.",
    "haengtAn": [],
    "sprints": [
     {
@@ -59,7 +59,7 @@
       2,
       3
      ],
-     "notiz": "Vier Stufen, 26–39 Agentenstunden. Rund 250 Stellen benutzen heute den alten Schlüssel. Stufe 1 (zusätzliche Lesedaten) ist gebaut: 0,5 statt 6–9 Agentenstunden; das Öffnen einer Planseite mit 43 518 Objekten wird dadurch 0,8 % langsamer (2 812 → 2 834 ms). Stufe 2 läuft.",
+     "notiz": "Vier Stufen, 26–39 Agentenstunden geplant. Stufe 1 (zusätzliche Lesedaten) ausgeliefert 16.11. 00:05: 0,5 statt 6–9 Agentenstunden; das Öffnen einer Planseite mit 43 518 Objekten wird 0,8 % langsamer (2 812 → 2 834 ms). Stufe 2 (anklickbare Texte kommen aus der Liste der PDF-Bibliothek, hinter einem Schalter, der aus ist) gebaut 02:25: 2,5 statt 8–12 Agentenstunden, Auslieferung nach einer Prüfung von sechs Tests. Stufe 3 (Leiste, Seitenpanel und Ebenen umstellen, Schalter an) wächst auf 17–23 Agentenstunden, geplant waren 8–12: Dort hängen mehr Stellen am alten Schlüssel als gezählt, und Seiten mit über 50 000 Objekten brauchen einen eigenen Textabruf.",
      "start": "2026-11-15T22:27"
     },
     {
@@ -70,7 +70,7 @@
       2,
       3
      ],
-     "notiz": "Vier Stufen, 24–36 Agentenstunden. Der Zustand liegt heute an 14 Stellen mit rund 75 Schreib- und 250 Lesestellen. Stufe 1 (keine erfundenen Werte mehr schreiben) läuft neben U1.",
+     "notiz": "Vier Stufen, 24–36 Agentenstunden geplant. Der Zustand liegt heute an 14 Stellen mit rund 75 Schreib- und 250 Lesestellen. Stufe 1 (keine erfundenen Werte mehr schreiben) ausgeliefert 16.11. 01:44: 0,9 statt 5–8 Agentenstunden. Zwei gemeinsam verschobene blaue Zeilen bleiben blau; vorher wurden sie heller, weil die Farbe aus dem Bildschirmbild gelesen wurde. Stufe 2 folgt nach der dritten Stufe von U1, weil beide das Seitenpanel umbauen.",
      "start": "2026-11-15T23:51"
     },
     {
@@ -149,7 +149,8 @@
     {
      "sprint": "identitaet",
      "titel": "Jeder Text trägt die feste Kennung der PDF-Bibliothek als einzigen Schlüssel",
-     "stand": "offen"
+     "stand": "laeuft",
+     "notiz": "Die Lesedaten sind ausgeliefert, die neue Textliste ist gebaut und noch ausgeschaltet"
     },
     {
      "sprint": "identitaet",
@@ -170,12 +171,19 @@
     {
      "sprint": "zustand",
      "titel": "Kein stiller Ersatzwert mehr, z. B. Schwarz statt der echten Farbe",
-     "stand": "offen"
+     "stand": "fertig",
+     "notiz": "Ausgeliefert 16.11. 01:44. Liefert die PDF keine Farbe, verweigert Unterstreichen mit Hinweis, statt Schwarz zu schreiben"
     },
     {
      "sprint": "zustand",
      "titel": "Geschrieben werden nur die geänderten Eigenschaften",
      "stand": "offen"
+    },
+    {
+     "sprint": "zustand",
+     "titel": "Zwei Stilknöpfe direkt nacheinander: beide Änderungen kommen an",
+     "stand": "offen",
+     "notiz": "Gefunden in der Sitzung vom 16.11.: in 3 von 3 Versuchen geht die zweite Änderung verloren"
     },
     {
      "sprint": "leiste",
@@ -739,7 +747,7 @@
    "titel": "PhotoLab",
    "stand": "laeuft",
    "kurz": "Backend ist weit; der lange Testlauf soll es mit starken Ergebnissen und Laufzeiten bestätigen. Die Oberfläche wird aus dem Builder übernommen.",
-   "blocker": "Vollauf 1 am PC in 9 h 16 min durch, nur der Splat fehlt. Vollauf 2 am Laptop ist am 15.11. zweimal an der Speicherprüfung gescheitert: Sie plante die Ausrichtung nach dem eingebauten statt nach dem freien Speicher und lehnte ab, statt den Bedarf zu senken. Der Fix ist gebaut, der Lauf läuft seit 20:38; die Ausrichtung war nach 19 min fertig. Ende voraussichtlich Mo 16.11. zwischen 05:00 und 07:00. Die Oberfläche wartet auf die Builder-Mock-UI und den Viewer.",
+   "blocker": "Vollauf 1 am PC in 9 h 16 min durch, nur der Splat fehlt. Vollauf 2 am Laptop läuft seit 15.11. 20:38: Acht von neun Schritten sind fertig (Ausrichtung 19 min, Tiefenkarten 5 h 22 min, dichte Wolke 49 min, Geländemodelle 9 min, Orthofoto 7 min, Mesh 34 min), der Splat rechnet seit 03:58. Auswertung am Mo 16.11. vormittags. Die Oberfläche wartet auf die Builder-Mock-UI und den Viewer.",
    "haengtAn": [
     "builder-mockui",
     "viewer"
@@ -764,7 +772,7 @@
      "gruppe": "Backend",
      "titel": "Vollauf 2 am Laptop",
      "stand": "laeuft",
-     "notiz": "Läuft seit 15.11. 20:38, Ende voraussichtlich Mo 16.11. früh"
+     "notiz": "Läuft seit 15.11. 20:38; acht von neun Schritten fertig, der letzte (Splat) rechnet seit 16.11. 03:58"
     },
     {
      "gruppe": "Backend",
