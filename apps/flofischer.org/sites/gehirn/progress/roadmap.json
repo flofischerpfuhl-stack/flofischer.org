@@ -1,5 +1,5 @@
 {
- "standVom": "2026-11-16T04:49",
+ "standVom": "2026-11-16T04:54",
  "bereiche": [
   {
    "id": "fernwork",
@@ -105,13 +105,13 @@
     },
     {
      "id": "absatz",
-     "titel": "Danach · Absätze als ein Objekt",
+     "titel": "Danach · Absätze aus der Struktur der PDF",
      "stand": "offen",
      "geplantTage": [
       2,
       3
      ],
-     "notiz": "Zurückgestellt bis nach dem Umbau, grob 25–40 Agentenstunden, Schätzung noch ungemessen. Vorgaben: Absätze zuerst aus der Struktur der PDF lesen, wo der Erzeuger sie mitliefert; Umwandeln in einen Textrahmen nur, wenn dabei kein Pixel wandert, bei jedem Erzeuger."
+     "notiz": "Zurückgestellt bis nach dem Umbau, grob 25–40 Agentenstunden, Schätzung noch ungemessen. Entschieden am 16.11.: Absätze werden nicht mehr aus der Lage der Zeilen geraten. Liefert die PDF ihre Struktur mit (Word, LibreOffice), wird sie so gut wie möglich genutzt: Absatz, Überschrift, Liste und Tabellenzelle sind dann je ein Objekt. Umwandeln in einen Textrahmen mit Umbruch nur, wenn dabei kein Pixel wandert. PDFs ohne Struktur behalten Zeilen."
     }
    ],
    "teilziele": [
@@ -217,14 +217,13 @@
     },
     {
      "sprint": "absatz",
-     "titel": "Absatz aus der PDF-Struktur als ein Objekt wählen, ziehen und gestalten",
+     "titel": "Absatz, Überschrift, Liste und Tabellenzelle aus der PDF-Struktur je als ein Objekt",
      "stand": "offen"
     },
     {
      "sprint": "absatz",
-     "titel": "Umwandeln in einen Textrahmen mit Umbruch ist pixelgleich",
-     "stand": "offen",
-     "notiz": "Heute nur auf Wunsch je Absatz; Ausrichtung wird nicht übernommen, Blocksatz verliert seine Wortabstände"
+     "titel": "Umwandeln in einen Textrahmen mit Umbruch ist pixelgleich oder wird abgelehnt",
+     "stand": "offen"
     }
    ]
   },
